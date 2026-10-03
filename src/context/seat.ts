@@ -4,38 +4,112 @@
  * Three jobs, three calls, in this order: the intent prepares, the packet
  * focuses, the model picks an id. See AGENTS.md in this directory for why they
  * stay apart.
+ *
+ * This seat is deliberately incapable of most of what a seat may do. It picks
+ * from the list and nothing else: it cannot declare a motion, cannot delegate
+ * and cannot object, because none of those have handlers yet. A person or a
+ * remote agent at the same seat can do all of them. That asymmetry is this
+ * file's limit, not the table's.
  */
 
-import type { Player } from "../core/player.ts";
-import type { DecisionApi } from "./model.ts";
+import type { Answer, Player } from "../core/player.ts";
+import type { Frame } from "../core/types.ts";
+import type { Intent } from "../core/intent.ts";
+import { asState, chose, type DecisionApi, type Question } from "./model.ts";
+import { focus, type Packet } from "./packet.ts";
 
 export type AiSeatOptions = {
 	name: string;
 	api: DecisionApi;
+	/** This seat's plan. Held by the core, filled by whoever holds the seat. */
+	intent: Intent;
 	/** Recorded on the table when an answer comes back unusable. */
 	onGap(note: string): void;
+	/** Called with every request and what came back, for the run report. */
+	onAsk?(packet: Packet, picked: string): void;
 };
 
+/** One question per decision, so the key is fixed and the answer is unambiguous. */
+const KEY = "pick";
+
+/**
+ * The packet as a choice question.
+ *
+ * Equal detail per option. A brilliant line described richly beside a waste of
+ * resources described in three words manufactures a preference without any
+ * analysis, so every criterion is built the same way from the same fields.
+ *
+ * The instructions say what is true and what has to be settled. They do not say
+ * what is good: advice here would make every seat play the same way and would
+ * hide the alternatives the packet just spent its space listing.
+ */
+export function question(packet: Packet): Question {
+	const lines = [
+		packet.obligation,
+		"",
+		...packet.known,
+		...(packet.resources.length ? ["", ...packet.resources] : []),
+		...(packet.priorities.length ? ["", "This seat's priorities, in order:", ...packet.priorities] : []),
+		...(packet.assumed.length ? ["", "Assumed, not known:", ...packet.assumed] : []),
+		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
+		"",
+		"Answer with one of the listed ids. The options are every move the table",
+		"built and checked, and nothing outside the list can be played here.",
+	];
+	return {
+		type: "choice",
+		instructions: lines.join("\n"),
+		criteria: Object.fromEntries(
+			packet.options.map((option) => [
+				option.id,
+				[option.label, option.shows, option.consequence].filter(Boolean).join(". "),
+			]),
+		),
+	};
+}
+
 export function aiSeat(options: AiSeatOptions): Player {
-	/*
-	 * decide(frame):
-	 *   1. Refuse a frame with no decision. That is a loop bug, not a pass.
-	 *   2. Take this seat's intent. Prepare a new one only when the phase moved
-	 *      or its assumptions broke.
-	 *   3. focus(frame, intent) for the packet, using only the seat's projection.
-	 *   4. Ask one choice question: the packet as state, the options as
-	 *      criteria, the decision's question as instructions.
-	 *   5. An option id comes back: return it with a fresh actionId.
-	 *   6. A route id comes back: follow it and ask again, at this same
-	 *      decision. Bound how many times, and record reaching that bound as a
-	 *      gap rather than as a pass.
-	 *   7. Return unlisted ids to the core loop unchanged. It owns the retry and
-	 *      fallback accounting for every kind of player. Never replace an
-	 *      invalid answer with a card selection here.
-	 *
-	 * observe(frame): keep the latest frame so the next intent check can see
-	 * what changed. No model call: watching is free and reacting is not.
-	 */
-	void options;
-	throw new Error("aiSeat is unwritten. Seven steps above.");
+	let latest: Frame | undefined;
+	let asked = 0;
+
+	return {
+		name: options.name,
+
+		async answer(frame) {
+			if (!frame.decision) throw new Error(`${options.name} was asked a frame with no decision`);
+			latest = frame;
+
+			// Planning is unwritten, so the intent arrives whole and is used as
+			// given. A phase change alone is not a reason for a model call.
+			const packet = focus(frame, options.intent);
+			asked += 1;
+			const answers = await options.api.ask({
+				state: asState(packet),
+				questions: { [KEY]: question(packet) },
+			});
+
+			const answer = chose(answers, KEY);
+			if (typeof answer === "string") {
+				// Returned to the loop unchanged. It owns the retry and the
+				// fallback accounting, and replacing this with the first option
+				// would lose the difference between a choice and a fallback.
+				options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
+				return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
+			}
+
+			options.onAsk?.(packet, answer.choice);
+			return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
+		},
+
+		// Watching is free and reacting is not, so nothing is asked here. The
+		// frame is kept because the next intent check reads what changed.
+		observe(frame) {
+			latest = frame;
+		},
+
+		close() {
+			latest = undefined;
+			void latest;
+		},
+	};
 }

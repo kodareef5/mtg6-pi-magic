@@ -1,0 +1,217 @@
+/**
+ * Which model answers which part of a game.
+ *
+ * Inference is Pi's job and stays Pi's job. Pi already holds the providers, the
+ * credentials and the model catalogue, which is most of why this is a Pi package
+ * rather than a program with a config file. So a role here is a Pi model
+ * pattern and nothing else: the same string a person types at `/model`, an id
+ * with an optional thinking level after a colon. No endpoint, no key and no
+ * provider name is written anywhere in this repo.
+ *
+ * Five parts, because they want different models. A pregame plan is read once
+ * and shapes a whole game, so it is worth a slow model. A turn decision happens
+ * hundreds of times. The pick itself is a classifier and is not a chat model at
+ * all. Keeping them apart is what lets a cheap model run the turns while an
+ * expensive one sets the plan, and it is also how two models play each other:
+ * give seat 0 and seat 1 different rosters and the ledger says who chose what.
+ *
+ * Past 150 lines because a reader asking "which model answers the judge" wants
+ * the role list, how a pattern resolves and where the answer is written down in
+ * one place. Splitting them would mean three files to change one default.
+ */
+
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+
+import type { AnyModel, Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
+import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+
+export type Role = "decide" | "pregame" | "strategy" | "judge" | "summary";
+
+export const ROLES: Record<
+	Role,
+	{
+		/** What this model is asked for, in the terms the prompt will use. */
+		does: string;
+		/** A classifier returns one of our ids. A chat model writes prose we then read. */
+		kind: "classifier" | "chat";
+		/** A seat's own, or the table's. A ruling belongs to the table, a plan to a seat. */
+		whose: "seat" | "table";
+		/** The suggested pattern. Every one of these is a suggestion and nothing more. */
+		suggested: string;
+		/** A stronger or cheaper alternative worth knowing about. */
+		instead?: string;
+	}
+> = {
+	// The only role milestone one uses. Jev answers a choice question with one of
+	// the ids we supplied and a probability over all of them, which is why a
+	// model cannot invent a move here even in principle.
+	decide: {
+		does: "pick one of the options the table listed",
+		kind: "classifier",
+		whose: "seat",
+		suggested: "typesafe/jev-latest",
+	},
+	pregame: {
+		does: "read the deck and write the policy and the opening plan",
+		kind: "chat",
+		whose: "seat",
+		suggested: "gpt-6.1-sol:high",
+		instead: "gpt-6-astra:high, which is stronger and dearer",
+	},
+	strategy: {
+		does: "plan the active turn and say what would change the plan",
+		kind: "chat",
+		whose: "seat",
+		suggested: "gpt-5.6-luna:low",
+	},
+	judge: {
+		does: "rule on an objection, citing the rules on disk",
+		kind: "chat",
+		whose: "table",
+		suggested: "gpt-5.6-luna:low",
+	},
+	summary: {
+		does: "say what happened this turn in a few lines",
+		kind: "chat",
+		whose: "seat",
+		suggested: "gpt-5.6-luna",
+	},
+};
+
+/** One pattern per role. Partial anywhere: a missing role takes its suggestion. */
+export type Roster = Partial<Record<Role, string>>;
+
+export const suggested: Roster = Object.fromEntries(
+	Object.entries(ROLES).map(([role, about]) => [role, about.suggested]),
+);
+
+/** A role, the pattern asked for, and what Pi's catalogue made of it. */
+export type Cast = {
+	role: Role;
+	pattern: string;
+	model?: AnyModel;
+	thinkingLevel?: ThinkingLevel;
+	/** Why the pattern did not resolve. The game says so rather than substituting. */
+	problem?: string;
+};
+
+/** What Pi hands us. Available means its provider has working credentials. */
+export type Catalogue = {
+	chat: readonly Model<Api>[];
+	classifiers: readonly ClassifierModel<ClassifierApi>[];
+};
+
+const LEVELS = new Set<string>(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
+
+/**
+ * Resolve one pattern against one list.
+ *
+ * Pi's own order, because a pattern a person reads should mean the same thing
+ * here as at `/model`: try the whole string as an id first, since a real id can
+ * contain a colon, and only then read a trailing thinking level off it.
+ *
+ * A bare id matching two providers is refused rather than guessed. Resolving
+ * against available models usually settles it, and when it does not, the answer
+ * is to say provider/id.
+ */
+function look(pattern: string, models: readonly AnyModel[]): Omit<Cast, "role" | "pattern"> {
+	const canonical = models.find((m) => `${m.provider}/${m.id}` === pattern);
+	if (canonical) return { model: canonical };
+
+	const bare = models.filter((m) => m.id === pattern);
+	if (bare.length === 1) return { model: bare[0]! };
+	if (bare.length > 1) {
+		return { problem: `${pattern} is in ${bare.map((m) => `${m.provider}/${m.id}`).join(", ")}. Name one.` };
+	}
+
+	const at = pattern.lastIndexOf(":");
+	const level = at > 0 ? pattern.slice(at + 1) : "";
+	if (LEVELS.has(level)) {
+		const found = look(pattern.slice(0, at), models);
+		return found.model ? { ...found, thinkingLevel: level as ThinkingLevel } : found;
+	}
+
+	const partial = models.filter((m) => m.id.includes(pattern) || m.name.includes(pattern));
+	if (partial.length === 1) return { model: partial[0]! };
+	if (partial.length > 1) {
+		return { problem: `${pattern} matches ${partial.map((m) => `${m.provider}/${m.id}`).join(", ")}. Name one.` };
+	}
+	return { problem: `No available model matches ${pattern}.` };
+}
+
+/** Resolve every role. A problem on one role is reported, never substituted. */
+export function cast(roster: Roster, catalogue: Catalogue): Cast[] {
+	return (Object.keys(ROLES) as Role[]).map((role) => {
+		const pattern = roster[role] ?? ROLES[role].suggested;
+		const models = ROLES[role].kind === "classifier" ? catalogue.classifiers : catalogue.chat;
+		return { role, pattern, ...look(pattern, models) };
+	});
+}
+
+/** The roster as lines, which is what `/magic models` prints. */
+export const readRoster = (parts: Cast[]): string[] =>
+	parts.map((part) => {
+		const about = ROLES[part.role];
+		const got = part.model
+			? `${part.model.provider}/${part.model.id}${part.thinkingLevel ? ` thinking ${part.thinkingLevel}` : ""}`
+			: (part.problem ?? "unresolved");
+		return `${part.role.padEnd(9)} ${part.pattern.padEnd(22)} ${got}   ${about.does}`;
+	});
+
+/**
+ * The whole arrangement for one game.
+ *
+ * `every` is the roster each seat starts from and the home of the table's own
+ * roles. `seats` overrides one seat, which is the shape that matters: two seats
+ * with different rosters is a model playing another model, and that is what the
+ * bulk runs are for.
+ */
+export type Crew = {
+	every?: Roster;
+	/** By seat id as a string, because this is read from and written to JSON. */
+	seats?: Record<string, Roster>;
+};
+
+/** The roster for one seat, or for the table when no seat is named. */
+export const rosterFor = (crew: Crew, seat?: number): Roster => ({
+	...suggested,
+	...crew.every,
+	...(seat === undefined ? {} : crew.seats?.[String(seat)]),
+});
+
+/**
+ * Where the arrangement is written down.
+ *
+ * A small JSON file, so changing which model judges is an edit with an editor
+ * and no command at all. `/magic models` reads and writes the same file, and a
+ * game may still override it per run without touching it.
+ */
+export function load(path: string): Crew {
+	if (!existsSync(path)) return {};
+	const read = JSON.parse(readFileSync(path, "utf8")) as unknown;
+	if (!read || typeof read !== "object") throw new Error(`${path} is not a roster object`);
+	const crew = read as Crew;
+	for (const [where, roster] of [["every", crew.every] as const, ...Object.entries(crew.seats ?? {})]) {
+		for (const role of Object.keys(roster ?? {})) {
+			if (!(role in ROLES)) {
+				throw new Error(`${path} names a role ${role} under ${where}. The roles are ${Object.keys(ROLES).join(", ")}.`);
+			}
+		}
+	}
+	return crew;
+}
+
+export function save(path: string, crew: Crew): void {
+	mkdirSync(dirname(path), { recursive: true });
+	writeFileSync(path, `${JSON.stringify(crew, null, 2)}\n`);
+}
+
+/** Set one role, for one seat or for every seat. Returns the arrangement to save. */
+export function assign(crew: Crew, role: Role, pattern: string, seat?: number): Crew {
+	if (seat === undefined) return { ...crew, every: { ...crew.every, [role]: pattern } };
+	return {
+		...crew,
+		seats: { ...crew.seats, [String(seat)]: { ...crew.seats?.[String(seat)], [role]: pattern } },
+	};
+}

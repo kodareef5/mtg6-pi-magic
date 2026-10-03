@@ -8,61 +8,104 @@
  * answers with calibrated probabilities. It does not write prose and it does
  * not invent a move: a choice answer is one of the ids we supplied.
  *
- * The request shape here follows Jev, because that is the shape with an
- * implementation today. The field is young and moving quickly, so nothing
- * outside this file names a vendor. Any API with this shape drops in.
+ * The vocabulary below is Pi's, not a copy of Pi's. Pi already carries this
+ * shape as a first-class classifier API, with the Jev wire format as one
+ * implementation of it, so re-declaring the types here would mean a second
+ * definition that drifts. We rename them to this repo's words and nothing else.
+ * Jev's `noul` arrives through Pi as `bool`; that mapping is Pi's and we do not
+ * repeat it.
  */
 
-export type ChoiceQuestion = {
-	type: "choice";
-	instructions: string;
-	/** Option id to a neutral description. Equal detail per option, or the wording picks for us. */
-	criteria: Record<string, string>;
-};
+import type {
+	ClassifierAnswer,
+	ClassifierApi,
+	ClassifierChoiceAnswer,
+	ClassifierContext,
+	ClassifierModel,
+	ClassifierQuestion,
+	ClassifierResult,
+	JsonObject,
+} from "@earendil-works/pi-ai";
 
-export type ScoreQuestion = {
-	type: "score";
-	instructions: string;
-	/** Two to ten ordered levels, worst first. */
-	legend: string[];
-};
-
-export type NoulQuestion = {
-	type: "noul";
-	instructions: string;
-};
-
-export type Question = ChoiceQuestion | ScoreQuestion | NoulQuestion;
-
-export type ChoiceAnswer = {
-	choice: string;
-	probabilities?: Record<string, number>;
-	confidence?: number;
-};
-
-export type ScoreAnswer = {
-	score: number;
-	legend: string[];
-	probabilities?: Record<string, number>;
-	confidence?: number;
-};
-
-export type NoulAnswer = { noul: number };
-
-export type Answer = ChoiceAnswer | ScoreAnswer | NoulAnswer;
+export type Question = ClassifierQuestion;
+export type Answer = ClassifierAnswer;
+export type DecisionRequest = ClassifierContext;
 
 /**
+ * What a seat calls. One method, because every decision is one request.
+ *
  * Questions in one request must be independent: each is answered from the
  * state, never from a sibling's answer. A question that needs an earlier answer
  * goes in a later request.
  */
-export type DecisionRequest = {
-	state: unknown;
-	questions: Record<string, Question>;
-};
-
 export interface DecisionApi {
+	/** Named for the gap text and the run report, not for a decision. */
+	readonly named: string;
 	ask(request: DecisionRequest): Promise<Record<string, Answer>>;
+}
+
+/**
+ * The part of Pi this adapter uses. `ctx.modelRegistry` satisfies it, and so
+ * does a test double, which is how the whole seat path runs offline.
+ */
+export type Classify = (
+	model: ClassifierModel<ClassifierApi>,
+	context: ClassifierContext,
+	options?: { signal?: AbortSignal; temperature?: number },
+) => Promise<ClassifierResult>;
+
+/**
+ * The one adapter.
+ *
+ * It holds no endpoint and no key. Pi resolved the model, Pi authenticates the
+ * request, and this turns a result into either answers or a throw.
+ *
+ * No retry policy here. `src/core/loop.ts` owns the retry and the fallback
+ * accounting for every kind of player, so a failure is reported as a failure
+ * and the loop decides what it means.
+ */
+export function decisionApi(
+	classify: Classify,
+	model: ClassifierModel<ClassifierApi>,
+	options: { signal?: AbortSignal } = {},
+): DecisionApi {
+	return {
+		named: `${model.provider}/${model.id}`,
+		async ask(request) {
+			// classify never rejects, so the stop reason is the error channel.
+			const result = await classify(model, request, options);
+			if (result.stopReason !== "stop") {
+				throw new Error(
+					`${model.provider}/${model.id} ${result.stopReason}: ${result.errorMessage ?? "no reason given"}`,
+				);
+			}
+			return result.answers;
+		},
+	};
+}
+
+/**
+ * Prove the state is JSON rather than asserting it.
+ *
+ * The packet crosses a wire, so a field that cannot be serialised is a request
+ * that fails at the far end with an error about our data. One round trip at the
+ * boundary costs nothing against a network call and drops undefined fields,
+ * which is what a reader of the request would expect anyway.
+ */
+export const asState = (packet: unknown): JsonObject => JSON.parse(JSON.stringify(packet)) as JsonObject;
+
+/**
+ * Read one choice answer, or say what came back instead.
+ *
+ * Returning the id rather than the whole answer is deliberate at the call site:
+ * a seat picks an id. The probabilities are for the record and for calibration,
+ * and nothing in the engine reads them to decide anything.
+ */
+export function chose(answers: Record<string, Answer>, key: string): ClassifierChoiceAnswer | string {
+	const answer = answers[key];
+	if (!answer) return `No answer for ${key}. Answered: ${Object.keys(answers).join(", ") || "nothing"}.`;
+	if (answer.type !== "choice") return `${key} came back as a ${answer.type} answer, not a choice.`;
+	return answer;
 }
 
 /**
@@ -70,19 +113,3 @@ export interface DecisionApi {
  * winning and it is not evidence that the option list was complete. Any
  * threshold needs calibrating against recorded games before it is trusted.
  */
-
-/**
- * The one adapter. It reads where to send a request from Pi's settings, so no
- * endpoint or key is written here.
- *
- * 1. Read the endpoint, the key and the model name from settings, falling back
- *    to the environment.
- * 2. Nothing configured: throw naming the setting to add. The game does not
- *    start half ready.
- * 3. ask(): post the request, parse the typed answers, return them unchanged.
- *    No retry policy here. A player decides what an unusable answer means.
- */
-export function decisionApi(settings: unknown): DecisionApi {
-	void settings;
-	throw new Error("decisionApi is unwritten. Three steps above.");
-}

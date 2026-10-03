@@ -51,6 +51,29 @@ are the rules and happen. A card's instruction belongs to the seat resolving it:
 a seat that forgets to draw did not draw. A seat may hand such steps over in its
 intent, recorded as `delegated`, never as `forced`.
 
+## Which model answers which part
+
+Inference is Pi's. Pi holds the providers, the credentials and the model
+catalogue, which is most of why this is a Pi package and not a program with a
+config file. A role is a Pi model pattern and nothing more: the string a person
+types at `/model`, an id with an optional thinking level after a colon. No
+endpoint, no key and no provider name is written in this repo.
+
+Five roles, because they want different models. `decide` is a classifier and
+answers with one of the ids the table listed, which is why a model cannot invent
+a move here even in principle. `pregame`, `strategy`, `judge` and `summary` are
+chat models. A roster belongs to a seat, so two seats with different rosters is
+one model playing another, and the ledger says who chose what.
+
+`src/context/roles.ts` holds the roles, the suggested patterns and the
+resolution. `/magic models` reads the roster and says what each pattern
+resolved to; `/magic models <role> <pattern> [seat]` changes one. The file
+behind it is small JSON, so an edit needs no command at all.
+
+A pattern that does not resolve is reported, never substituted. A game refuses
+to start rather than discovering at its first decision that a seat has nobody
+to answer it.
+
 ## Build order
 
 Two seats of legal Standard first, and nothing widens until the games are good.
@@ -67,8 +90,10 @@ Within Standard, from `design-ref/CIRCUITRY.md` section 12:
    priority actions have separate handlers. Views identify the current window;
    table talk is offered at actual phase endings. Control transitions move the
    cursor without writing an event, because a replay derives them; opening
-   completion is derived from its obligations. The forced ratio uses scripted
-   seats; the decision-model adapter and the bulk runner are still unwritten.
+   completion is derived from its obligations. **Running against a real decision
+   model:** `/magic play` finishes a game through Pi's classifier API. Measured
+   live at 108 turns, 2357 decisions, 95.4% forced, 109 model calls, 0 gaps.
+   The bulk runner is still unwritten.
 2. **Activated abilities**, by interrogation rather than generation, with oracle
    text from the card list as the source. Measured against the Cavern of Souls
    payment: one legal option, so no model call.
@@ -150,9 +175,16 @@ rather than adding a test for each branch.
   seat at a phase ending, not at every step or bookkeeping transition.
 - **Focused.** A context packet preserves the seat's projected facts and option
   ids. Phase assumptions apply only to their recorded turn and phase.
+- **Answered.** A roster resolves a pattern the way a reader would type it and
+  refuses an ambiguous one. A model-backed seat finishes a game, is asked only
+  what is not forced, reads a refusal in its next request, and never has a wrong
+  answer kind turned into a pick.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
-or the commit is not done. Tests live beside the code and ship with neither:
+or the commit is not done. Neither makes a network call: the decision model is a
+double whose shape is Pi's own `classify`. `npm run smoke` is the live run, opt
+in, and it reports the seed, the outcome, the model calls, the forced ratio and
+the gaps. Tests live beside the code and ship with neither:
 `package.json#files` leaves them out of the package.
 
 ## Writing rules
@@ -181,10 +213,14 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   priority.ts          actions offered to the current priority holder
   decisions.ts         the ordered dispatcher and application of listed picks
 src/context/           questions for a decision model. Its own AGENTS.md
+  roles.ts             which model answers which part, and where that is written
+  model.ts             the one adapter onto Pi's classifier API
+  seat.ts              a seat that picks from the list and nothing else
 src/seating/           a seat over a socket. Parked
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           play games in bulk and print the counters
+tools/smoke.ts         one live game against a real model. Opt in, costs money
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
 docs/COMBAT.md         characteristics, the layer walk, combat, and the seams
@@ -203,8 +239,11 @@ verify every carried field against the source and refuse to pass on a mismatch.
 
 ## Not built yet
 
-- Model planning, model API access and AI seats. Packet assembly works from a
-  filtered frame; it offers no widening routes until their handlers exist.
+- Model planning. `startingIntent` is explicit and minimal and stands in for
+  `preparePhase`, so a seat plays with a plan nobody wrote. Packet assembly
+  offers no widening routes until their handlers exist, and a model-backed seat
+  can only pick from the list: it cannot declare, delegate or object.
+- Every role but `decide`. The other four resolve, report and are not called.
 - Card meaning. `src/core/syntax.ts` holds the five ability shapes, the correct
   layers, and the motions milestone one needs. The rest of the language is
   measured rather than guessed: 31 event kinds, 17 selector properties, 10

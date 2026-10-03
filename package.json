@@ -35,12 +35,14 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "cards": "node tools/cards.ts --format standard --columns lean -o cards/standard.tsv --verify",
     "universe": "node tools/cards.ts --verify",
-    "rules": "node tools/rules.ts --verify -o rules/cr.tsv"
+    "rules": "node tools/rules.ts --verify -o rules/cr.tsv",
+    "smoke": "node tools/smoke.ts"
   },
   "dependencies": {
     "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@earendil-works/pi-ai": "^1.0.1",
     "@earendil-works/pi-coding-agent": "^1.0.1",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.5.0",

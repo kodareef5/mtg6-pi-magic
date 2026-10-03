@@ -11,7 +11,31 @@
  */
 
 import type { Intent } from "../core/intent.ts";
-import type { Frame } from "../core/types.ts";
+import type { Frame, SeatId } from "../core/types.ts";
+
+/**
+ * The intent a seat starts with before anything has been planned.
+ *
+ * Explicit and minimal, not empty. A game of basic lands has one priority worth
+ * naming and no hypotheses, and writing that down is what keeps `focus` from
+ * having to invent a plan when none was prepared. Milestone one uses this for
+ * every phase, because `preparePhase` below is unwritten; a seat whose intent
+ * came from this rather than from a model should read that way.
+ */
+export const startingIntent = (seat: SeatId): Intent => ({
+	seat,
+	version: 0,
+	deck: { seat, winsBy: "nothing yet. This deck is lands.", priorities: ["Play a land every turn."] },
+	turn: { objective: "Play a land and pass.", budget: [], hypotheses: [] },
+	phase: {
+		turn: 0,
+		phase: "precombat-main",
+		order: [],
+		expectedBranches: [],
+		reconsiderWhen: [],
+		assumptions: [],
+	},
+});
 
 /**
  * Prepare the next phase that has a real choice in it.

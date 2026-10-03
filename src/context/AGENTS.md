@@ -21,6 +21,17 @@ Not required. A seat answered over p2p, by a person or through MCP loads none of
 this. That is the test of whether something belongs here: if a human seat would
 still want it, it belongs in the core.
 
+## Inference is Pi's
+
+Pi holds the providers, the credentials and the model catalogue. `roles.ts`
+names five parts and a Pi model pattern for each; `model.ts` is the one adapter
+and holds no endpoint and no key. The classifier vocabulary is Pi's own, not a
+copy of Pi's, because a second definition of the same shape drifts.
+
+A pattern that does not resolve is reported. Do not fall back to another model,
+including Pi's configured default: a game played by a model nobody chose is a
+result that cannot be compared with another.
+
 ## Three jobs, three calls
 
 Collapsing these is how the earlier attempts played plausibly and weakly.
