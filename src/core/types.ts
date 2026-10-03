@@ -79,10 +79,14 @@ export type SeatView = {
 export type Frame = {
 	seat: SeatId;
 	/**
-	 * Decisions answered at this table. A pick carries it back and a host refuses
-	 * one that does not match, so an answer written against an earlier decision
-	 * cannot settle a later one. Not the log length: a pass is a decision and
-	 * moves no cards.
+	 * The table's revision: committed groups so far. A pick carries it back and a
+	 * host refuses one that does not match, so an answer written against an
+	 * earlier state cannot settle a later one.
+	 *
+	 * Not the receipt count, because a pass commits and moves no cards. Not the
+	 * decision count either, because a concession, a declared motion or a judge
+	 * repair changes the table without answering a decision, and a token that
+	 * misses those accepts a pick written before them.
 	 */
 	version: number;
 	view: SeatView;

@@ -145,7 +145,7 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(
 					render({
 						seat,
-						version: open_.ledger.length,
+						version: open_.cursor.clock,
 						view: project(open_, seat),
 						...(decision ? { decision } : {}),
 					}),

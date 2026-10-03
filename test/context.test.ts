@@ -1,10 +1,12 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { focus } from "../src/context/packet.ts";
+import { focus, type Packet } from "../src/context/packet.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import type { Intent } from "../src/core/intent.ts";
+import { play } from "../src/core/loop.ts";
+import type { Player } from "../src/core/player.ts";
 import { start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 
@@ -42,4 +44,40 @@ test("context preserves the seat's options and knowledge and scopes assumptions 
 	assert.deepEqual(focus(frame(), intent).assumed, [...intent.turn.hypotheses, ...intent.phase.assumptions]);
 	assert.deepEqual(focus(frame(), { ...intent, phase: { ...intent.phase, turn: 2 } }).assumed, []);
 	assert.deepEqual(focus(frame(), { ...intent, phase: { ...intent.phase, phase: "ending" } }).assumed, []);
+});
+
+test("a retry packet differs from the first only by the refusal it carries", async () => {
+	const table = start(standard, [
+		{ name: "A", deck: Array(60).fill("Forest") },
+		{ name: "B", deck: Array(60).fill("Swamp") },
+	], "refused");
+	const intent: Intent = {
+		seat: 0, version: 0,
+		deck: { seat: 0, priorities: ["Develop mana"] },
+		turn: { objective: "Keep a playable hand", budget: [], hypotheses: [] },
+		phase: { turn: 1, phase: "beginning", order: [], expectedBranches: [], reconsiderWhen: [], assumptions: [] },
+	};
+
+	// Build the packet from what the loop actually hands a seat, so the test
+	// covers the whole path rather than a packet assembled by hand.
+	const packets: Packet[] = [];
+	const seat = (id: number): Player => ({
+		name: `seat-${id}`,
+		async answer(frame) {
+			if (frame.seat === 0) packets.push(focus(frame, intent));
+			if (packets.length === 1) return { kind: "pick", option: "nope", actionId: "bad" };
+			const options = frame.decision!.options;
+			return { kind: "pick", option: options[0]!.id, actionId: `ok-${packets.length}` };
+		},
+		observe() {}, close() {},
+	});
+	assert.ok(await play(table, { 0: seat(0), 1: seat(1) }, {}));
+
+	const [first, retry] = packets;
+	assert.equal(first!.refused, undefined);
+	assert.equal(retry!.refused?.length, 1);
+	assert.match(retry!.refused![0]!, /No option "nope"/);
+	// The question did not change, so neither did anything a model reasons over.
+	assert.deepEqual({ ...retry, refused: undefined }, { ...first, refused: undefined });
+	assert.equal(table.ledger.filter((r) => r.why === "fallback").length, 0);
 });

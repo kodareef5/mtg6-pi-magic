@@ -31,10 +31,16 @@ logging them made a game of basic lands 754KB instead of 107KB, almost all of it
 clock. The engine still routes them through `commit`, so the cursor keeps one
 writer.
 
-The version is therefore the decisions answered, not the receipts written. That
-is the number a stale answer is caught against, the number a frame carries, and
-the point a rollback names. Two decisions separated by passes get different
-versions even though no card moved.
+The version a frame carries is therefore the table's revision: committed groups
+so far, which is every call through the one door. That is what a stale answer is
+caught against. Not the receipts written, because a pass commits and moves no
+cards; not the decisions answered either, because a concession, a declared
+motion or a judge repair changes the table without answering one.
+
+A rollback point is a different thing and names a decision, because that is what
+a player can ask for: "back to before I was asked that". Those are the ledger
+rows, so `relive` replays them in order with the reason each one carried, and a
+game containing a fallback comes back as a game containing a fallback.
 
 So a game is a header plus an ordered list of entries. Rolling back is reading
 fewer entries. Copying is copying a prefix. Neither needs an undo path in the

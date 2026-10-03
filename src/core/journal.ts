@@ -6,6 +6,7 @@
  * point is copying a prefix. docs/STATE.md says why, and what it is for.
  */
 
+import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Said } from "./say.ts";
 import type { LedgerRow, Receipt, Table } from "./table.ts";
 import type { SeatId } from "./types.ts";
@@ -69,18 +70,67 @@ export function read(path: string): { header: Header; lines: Line[] } {
 /**
  * Rebuild the table as it stood at a version.
  *
- * It needs no model. The ledger carries every pick, so the players are
- * scripted and the only other input is the seed. This is also the replay
- * invariant's test: the same seed and the same picks produce the same log,
- * byte for byte.
+ * It needs no model and no player. `relive` below is the whole of it once the
+ * lines are read, because the ledger carries every decision and the seed
+ * carries the shuffles.
  *
  * It does need the same card text and the same rules the game was played
  * against. The header names both, and a mismatch is reported rather than
  * replayed through.
  */
 export function replay(path: string, upTo?: number): Table {
-	void [path, upTo];
-	throw new Error("replay is unwritten: header, scripted picks, the recorded seed.");
+	/*
+	 * 1. read(path), check the header's cards and rules against what is on disk.
+	 * 2. start() from the header's format, seats and seed.
+	 * 3. relive() with the ledger rows up to the version, then replace `said`
+	 *    from the recorded said lines.
+	 */
+	void [path, upTo, relive];
+	throw new Error("replay is unwritten. Three steps above, and step 3 is relive.");
+}
+
+/**
+ * Apply recorded decisions to a fresh table, in order, with the reason each one
+ * carried.
+ *
+ * Driven by the ledger rather than by scripted players, because a fallback is
+ * the absence of an answer and no player can produce one. Scripting the model
+ * rows alone desynchronises the moment a game contains one: the engine asks a
+ * question the script has no answer for, and every pick after it lands on the
+ * wrong decision. So all five reasons are replayed as recorded, and a replayed
+ * game counts forced, delegated, chosen, declared and fallback exactly as the
+ * original did.
+ *
+ * Two things stay outside it. Table talk changes nothing and is restored from
+ * its own lines. A declared motion is not a listed pick, so `declare` will need
+ * to record what it committed before a replay can carry one; until then a game
+ * with a declaration is not fully reliveable, and that is a gap rather than a
+ * silent approximation.
+ */
+export function relive(table: Table, rows: LedgerRow[]): Table {
+	let next = 0;
+	while (table.outcome === null) {
+		const decision = nextDecision(table);
+		if (decision === null) {
+			advance(table);
+			continue;
+		}
+		const row = rows[next++];
+		if (!row) {
+			throw new Error(
+				`The record holds ${rows.length} decisions and the table still asks seat ` +
+					`${decision.seat} a ${decision.situation} question`,
+			);
+		}
+		if (row.seat !== decision.seat || row.situation !== decision.situation || !row.why) {
+			throw new Error(
+				`Record ${row.seq} is seat ${row.seat} ${row.situation} ${row.why ?? "with no reason"}, ` +
+					`the table asks seat ${decision.seat} ${decision.situation}`,
+			);
+		}
+		apply(table, row.picked, row.by, row.why);
+	}
+	return table;
 }
 
 /**

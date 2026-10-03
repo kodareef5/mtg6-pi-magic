@@ -67,10 +67,13 @@ only moves the cursor writes no receipt: no card watches a priority grant, and
 would make the journal seven times larger to say what a replay already knows.
 A transition caused by an action rides on that action's receipt.
 
-So a frame version is the decisions answered, not the receipt count. That is
-what catches a stale answer: a pass moves the version and moves no cards. Mana
-expiry, damage cleanup and expiring notes happen inside the committed step
-ending. Phase handlers propose transitions; they do not write state themselves.
+So a frame version is the table's revision: committed groups so far, which is
+every call through this door. Not the receipt count, because a pass commits and
+moves no cards. Not the decision count either, because a concession, a declared
+motion or a judge repair changes the table without answering a decision, and a
+token that misses those accepts a pick written before them. Mana expiry, damage
+cleanup and expiring notes happen inside the committed step ending. Phase
+handlers propose transitions; they do not write state themselves.
 
 ## nextDecision is a pure function of the table
 
@@ -203,9 +206,16 @@ less of it, and copying a game copies a prefix, so none of those three needs an
 undo path in the engine.
 
 Two rules follow. Anything that must survive a reload goes through `commit` so
-it lands in the log, because a fact kept anywhere else is a fact a replay
-invents. And the journal is private: it holds every hand and every library, so
-what gets published is a projection of it and never the thing itself.
+it lands in the log or is derivable from a recorded decision, because a fact
+kept anywhere else is a fact a replay invents. And the journal is private: it
+holds every hand and every library, so what gets published is a projection of
+it and never the thing itself.
+
+`relive` is replay: recorded decisions applied in order with the reason each one
+carried. It drives from the ledger and not from scripted players, because a
+fallback is the absence of an answer and no player can produce one. A function
+that replays only the rows a model answered desynchronises on the first
+fallback, which is a game that cannot be forked or frozen as a fixture.
 
 ## No decision site holds state outside the table
 

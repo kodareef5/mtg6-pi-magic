@@ -128,9 +128,12 @@ rather than adding a test for each branch.
 - **No leak.** A view names only cards in a public zone or the viewer's own
   hand, respects face-down identities, and keeps hidden counts. Receipt text
   uses event-time visibility, so a later reveal cannot expose an earlier action.
-- **Replay.** The same seed and the same picks give the same log, change for
-  change, and rebuild the cards, the cursor and the outcome. The log holds
-  events only; a control transition is derived rather than stored.
+- **Replay.** The same seed and the same recorded decisions give the same log,
+  change for change, and rebuild the cards, the cursor, the ledger and the
+  outcome. `relive` drives from the ledger with each row's own reason, so a
+  fallback replays as a fallback. The log holds events only; a control
+  transition is derived rather than stored. A frame's version is the table's
+  revision, so anything that commits moves it.
 - **Forced.** Far more decisions are taken by the table than asked of a seat,
   and no row is a `fallback`.
 - **Idempotent.** The same `actionId` applied twice changes the game once.
@@ -138,9 +141,10 @@ rather than adding a test for each branch.
 - **Simultaneous.** The outcome accounts for every loss in a committed group.
 - **Complete.** Cleanup stays pending until every required discard is made.
 - **Accounted.** Unusable answers retry once, and the retry says why the last
-  one was refused. A terminating keep or pass is recorded as fallback; a
-  mandatory card selection stays pending without moving a card. Resuming uses
-  the same table and decision.
+  one was refused, all the way through to the packet a model reads. A
+  terminating keep or pass is recorded as fallback; a mandatory card selection
+  stays pending without moving a card. Resuming uses the same table and
+  decision.
 - **Scoped.** Listed moves belong to the current opening or turn window;
   advancing cannot skip an unanswered decision. Table talk is offered once per
   seat at a phase ending, not at every step or bookkeeping transition.
@@ -208,7 +212,8 @@ verify every carried field against the source and refuse to pass on a mismatch.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.
-- Export, rollback and copying. `journal.ts` fixes the stored form, which is
-  what those three need. `docs/STATE.md` holds the reasoning.
+- Export, rollback and copying. `journal.ts` fixes the stored form and `relive`
+  replays a recorded ledger; the file functions around it are unwritten.
+  `docs/STATE.md` holds the reasoning.
 - Everything in `src/seating/`, by choice.
 - Any format but Standard, and any seat count but two.

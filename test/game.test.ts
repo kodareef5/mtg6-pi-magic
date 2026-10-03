@@ -13,6 +13,7 @@ import { test } from "node:test";
 
 import { load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
+import { relive } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
 import { scriptedPlayer, type Player } from "../src/core/player.ts";
 import { commit, start } from "../src/core/commit.ts";
@@ -104,15 +105,10 @@ test("replay: the same seed gives the same log, change for change", async () => 
 	);
 	assert.deepEqual(a.ledger.map((r) => r.picked), b.ledger.map((r) => r.picked));
 
-	// The seed and the recorded picks rebuild the whole game: cards, control
+	// The seed and the recorded decisions rebuild the whole game: cards, control
 	// state and outcome. That is what journal.replay does, and it is why a
 	// control transition needs no receipt of its own to be replayable.
-	const restored = table();
-	const scripts = Object.fromEntries(restored.seats.map((s) => [
-		s.id,
-		scriptedPlayer(s.name, a.ledger.filter((r) => r.by === "model" && r.seat === s.id).map((r) => r.picked)),
-	]));
-	await play(restored, scripts, {});
+	const restored = relive(table(), a.ledger);
 	assert.deepEqual(restored.log, a.log);
 	assert.deepEqual(restored.cursor, a.cursor);
 	assert.deepEqual(restored.opening, a.opening);
@@ -125,6 +121,44 @@ test("replay: the same seed gives the same log, change for change", async () => 
 	// stored form is the size of the game rather than of the clock.
 	assert.ok(a.log.length < a.cursor.clock / 10, `${a.log.length} receipts, ${a.cursor.clock} groups`);
 	assert.equal(a.log.some((r) => r.changes.every((c) => c.do === "turn")), false);
+	assert.deepEqual(restored.ledger, a.ledger);
+});
+
+test("replay: a fallback is replayed as a fallback, not as a missing answer", async () => {
+	// A fallback is the absence of an answer, so no scripted player can produce
+	// one. Replay reads the recorded decision instead, which is the only way a
+	// game containing one comes back.
+	const played = table();
+	let refusals = 0;
+	const sabotage = (name: string): Player => ({
+		name,
+		async answer(frame) {
+			if (refusals < 2) { refusals += 1; return { kind: "pick", option: "nope", actionId: "bad" }; }
+			const options = frame.decision!.options;
+			const land = options.find((o) => o.id.startsWith("land:"));
+			return { kind: "pick", option: (land ?? options[0]!).id, actionId: `${name}-${refusals++}` };
+		},
+		observe() {}, close() {},
+	});
+	const outcome = await play(played, { 0: sabotage("a"), 1: sabotage("b") }, {});
+	assert.ok(outcome);
+	assert.equal(played.ledger.filter((r) => r.why === "fallback").length, 1);
+	assert.equal(played.gaps.length, 1);
+
+	const again = relive(table(), played.ledger);
+	assert.deepEqual(again.ledger, played.ledger);
+	assert.deepEqual(again.log, played.log);
+	assert.deepEqual(again.things, played.things);
+	assert.deepEqual(again.outcome?.results, played.outcome?.results);
+
+	// Scripting the model rows alone cannot: the first question has no answer.
+	const scripted = table();
+	const scripts = Object.fromEntries(scripted.seats.map((s) => [
+		s.id,
+		scriptedPlayer(s.name, played.ledger.filter((r) => r.by === "model" && r.seat === s.id).map((r) => r.picked)),
+	]));
+	await play(scripted, scripts, {});
+	assert.notDeepEqual(scripted.ledger.map((r) => r.picked), played.ledger.map((r) => r.picked));
 });
 
 test("a different seed gives a different game", async () => {

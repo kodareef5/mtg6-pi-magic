@@ -5,7 +5,7 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
-import { start } from "../src/core/commit.ts";
+import { commit, start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 
 const table = () => start(standard, [
@@ -49,19 +49,32 @@ test("listed actions stay in their window and a pending choice cannot be skipped
 			}
 			if (o.id.startsWith("discard:")) assert.equal(built.cursor.steps[0], "cleanup");
 		}
-		// A pass is a decision and moves the version, and it moves no cards, so
-		// it is not an event and the log does not grow. Both halves matter: the
-		// first is what catches a stale answer, the second is the stored size.
+		// A pass commits, so it moves the version, and it moves no cards, so it
+		// is not an event. Both halves matter: the first is what catches a stale
+		// answer, the second is the stored size.
 		const events = built.log.length;
-		const answered = built.ledger.length;
-		const clock = built.cursor.clock;
+		const version = built.cursor.clock;
 		const passing = d.options.length === 1 && d.options[0]!.id === "pass";
 		apply(built, d.options[0]!.id, "model", "chosen");
-		assert.ok(built.ledger.length > answered, "an answered decision moves the frame version");
-		assert.ok(built.cursor.clock > clock, "every committed group moves the clock");
+		assert.ok(built.cursor.clock > version, "a committed group moves the frame version");
 		if (passing) assert.equal(built.log.length, events, "a pass is not an event");
 	}
 	assert.ok(built.cursor.steps.includes("draw"));
+});
+
+test("the version moves for anything that commits, not only for an answer", () => {
+	const built = table();
+	advance(built);
+	const asked = built.cursor.clock;
+	const answered = built.ledger.length;
+
+	// A life change settles no decision. A version that missed it would accept
+	// a pick written before it, which is what a concession, a declared motion
+	// or a judge repair will do once they are written.
+	commit(built, [{ do: "change-life", who: 0, amount: -1, reason: "resolve" }], "resolve");
+	assert.ok(built.cursor.clock > asked, "a committed group moves the version");
+	assert.equal(built.ledger.length, answered, "and settles no decision");
+	assert.deepEqual(project(built, 0).window, { kind: "opening", action: "declare" });
 });
 
 test("table talk is offered once per seat at a real phase ending", async () => {

@@ -4,9 +4,9 @@
  * Serial by construction. One decision is outstanding at a time, so there is no
  * lock, no lease and no turn timer anywhere in this repo.
  *
- * The version is the number of decisions answered, which is what a stale pick
- * has to be caught against: a seat answering the third decision must not settle
- * the fourth. How much of the log a seat has read is a different number and is
+ * The version is the table's revision, which is what a stale pick has to be
+ * caught against: anything that commits moves it, whether or not a decision was
+ * answered. How much of the log a seat has read is a different number and is
  * tracked here, because nothing about it bears on an outcome.
  * Past 150 lines to keep answer dispatch and recovery in the same serial loop.
  */
@@ -80,7 +80,7 @@ export async function play(
 			continue;
 		}
 
-		const version = table.ledger.length;
+		const version = table.cursor.clock;
 		const frame = (seat: SeatId): Frame => {
 			const view = project(table, seat, seen[seat] ?? 0);
 			seen[seat] = table.log.length;
@@ -172,7 +172,7 @@ async function atPhaseEnd(
 		if (!player?.interject) continue;
 		const answer = await player.interject({
 			seat: seat.id,
-			version: table.ledger.length,
+			version: table.cursor.clock,
 			view: project(table, seat.id),
 		});
 		if (!answer) continue;

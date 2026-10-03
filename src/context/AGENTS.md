@@ -67,6 +67,11 @@ Return unusable picks unchanged to the core loop. The loop owns retries and
 fallback accounting for every kind of player. Never replace a bad pick with
 the first option here: that loses the distinction between a choice and a fallback.
 
+The loop puts the reason on the retried frame and `focus` carries it into the
+packet, because a model handed the identical packet twice sends the identical
+answer twice. Nothing else about the packet changes: the obligation, the options
+and the priorities are the same question asked again.
+
 A route is a predefined id with a predefined meaning, and it returns to the same
 decision. It does not pass, refund a paid cost, change a locked choice, or
 reveal anything the seat has not earned.

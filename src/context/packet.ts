@@ -19,7 +19,7 @@ export type Packet = {
 	actor: SeatId;
 	/** Opening and turn context are distinct; no phase is inferred from prose. */
 	window: Window;
-	/** The table version this was built from. A later answer against it is stale. */
+	/** The table revision this was built from. A later answer against it is stale. */
 	version: number;
 	/** The remaining obligation in one sentence: what still has to be settled. */
 	obligation: string;
@@ -36,6 +36,13 @@ export type Packet = {
 	assumed: string[];
 	/** Route id to what asking for it does. */
 	routes: Partial<Record<Route, string>>;
+	/**
+	 * Why the answers already sent for this decision were not taken. Present
+	 * only on a retry, and the obligation and the options are unchanged. A model
+	 * handed the identical packet twice sends the identical answer twice, so the
+	 * refusal has to survive the trip from the frame to the request.
+	 */
+	refused?: string[];
 };
 
 /**
@@ -55,7 +62,7 @@ export type Packet = {
  * answer is not a known future event.
  */
 export function focus(frame: Frame, intent: Intent): Packet {
-	const { decision, seat, view, version } = frame;
+	const { decision, seat, view, version, refused } = frame;
 	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) {
 		throw new Error("A packet needs a decision and intent for its own seat");
 	}
@@ -75,6 +82,7 @@ export function focus(frame: Frame, intent: Intent): Packet {
 		assumed: phaseApplies ? [...intent.turn.hypotheses, ...intent.phase.assumptions] : [],
 		// Widening is unwritten. Advertising a route cannot make it executable.
 		routes: {},
+		...(refused?.length ? { refused: [...refused] } : {}),
 	};
 }
 
