@@ -168,7 +168,8 @@ function after(table: Table, p: Pending, move: Move): void {
 	}
 
 	if (p.situation === "turn-based") {
-		cursor.stepDone = true;
+		cursor.stepDone = !id.startsWith("discard:") ||
+			cardsIn(table, "hand", p.seat).length <= table.format.maxHandSize;
 		return;
 	}
 

@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
-import { commit, start } from "../src/core/table.ts";
+import { cardsIn, commit, start } from "../src/core/table.ts";
 
 const table = () => start(standard, [
 	{ name: "A", deck: Array(60).fill("Forest") },
@@ -46,4 +46,27 @@ test("an outcome accounts for every loss in the simultaneous group", () => {
 		assert.equal(built.log.at(-1)!.changes.length, 2);
 		assert.deepEqual(built.outcome?.results, { 0: "draw", 1: "draw" });
 	}
+});
+
+test("cleanup keeps the discard obligation pending until the hand fits", () => {
+	const built = table();
+	advance(built);
+	apply(built, "keep", "model", "chosen");
+	apply(built, "keep", "model", "chosen");
+	advance(built);
+	built.cursor.steps = ["cleanup"];
+	commit(built, cardsIn(built, "library", 0).slice(0, 2).map((card) => ({
+		do: "move", what: card.id, to: "hand", reason: "draw",
+	})), "draw");
+	for (const size of [9, 8]) {
+		assert.equal(cardsIn(built, "hand", 0).length, size);
+		const discard = nextDecision(built)!;
+		assert.equal(discard.situation, "turn-based");
+		assert.match(discard.question, /^Discard /);
+		apply(built, discard.options[0]!.id, "model", "chosen");
+	}
+	assert.equal(cardsIn(built, "hand", 0).length, 7);
+	assert.equal(nextDecision(built), null);
+	advance(built);
+	assert.equal(built.cursor.active, 1);
 });
