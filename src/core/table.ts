@@ -108,7 +108,9 @@ export type Receipt = {
 	changes: Change[];
 	reason: Reason;
 	/** Facts read before the group, because cards watch what a thing looked like. */
-	before: Record<string, unknown>;
+	before: Record<ObjectId, Thing>;
+	/** Event-time visibility must not change when the object is revealed later. */
+	after: Record<ObjectId, Thing>;
 };
 
 /** Every decision and its pick. design-ref/CIRCUITRY.md section 11. */
@@ -315,11 +317,11 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// Read what a watcher may need before anything moves. After the group it
 	// is gone, and a receipt that cannot say what a thing looked like is a
 	// receipt no trigger can read.
-	const before: Record<string, unknown> = {};
+	const before: Receipt["before"] = {};
 	for (const change of changes) {
 		if ("what" in change) {
 			const was = table.things.get(change.what);
-			if (was) before[change.what] = { zone: was.zone, incarnation: was.incarnation, tapped: was.tapped };
+			if (was) before[change.what] = structuredClone(was);
 		}
 	}
 
@@ -408,7 +410,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		}
 	}
 
-	const receipt: Receipt = { seq: table.log.length, changes, reason, before };
+	const after = Object.fromEntries(Object.keys(before).map((id) => [id, structuredClone(thing(table, id))]));
+	const receipt: Receipt = { seq: table.log.length, changes: structuredClone(changes), reason, before, after };
 	table.log.push(receipt);
 	table.cursor.clock += 1;
 	return receipt;

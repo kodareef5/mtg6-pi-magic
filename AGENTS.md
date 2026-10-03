@@ -61,7 +61,10 @@ starting life, hand size, singleton and the command zone are fields in a record.
 Within Standard, from `design-ref/CIRCUITRY.md` section 12:
 
 1. **A game with no cards.** Pass, play a land, untap, draw, mulligan, deck out.
-   **Done:** two seats finish in about 108 turns with 95% of decisions forced.
+   **Implemented for basic-land fixtures:** two seats finish by deck out.
+   Decision discovery is pure, simultaneous losses settle together, and cleanup
+   keeps asking until the hand fits. The forced ratio is measured with scripted
+   seats; the decision-model adapter and the bulk runner are still unwritten.
 2. **Activated abilities**, by interrogation rather than generation, with oracle
    text from the card list as the source. Measured against the Cavern of Souls
    payment: one legal option, so no model call.
@@ -115,16 +118,20 @@ under about 150 lines, and past that say in the file why.
 
 ## Tests state invariants
 
-Four of them, one test each, in `test/`. Add a test when you add an invariant,
-not when you add a branch.
+Keep one test per invariant in `test/`. Extend that test with new positions
+rather than adding a test for each branch.
 
 - **No leak.** A view names only cards in a public zone or the viewer's own
-  hand, and a hidden count keeps its shape.
+  hand, respects face-down identities, and keeps hidden counts. Receipt text
+  uses event-time visibility, so a later reveal cannot expose an earlier action.
 - **Replay.** The same seed and the same picks give the same log, change for
   change.
 - **Forced.** Far more decisions are taken by the table than asked of a seat,
   and no row is a `fallback`.
 - **Idempotent.** The same `actionId` applied twice changes the game once.
+- **Pure.** Listing a decision changes no state, including pending losses.
+- **Simultaneous.** The outcome accounts for every loss in a committed group.
+- **Complete.** Cleanup stays pending until every required discard is made.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Tests live beside the code and ship with neither:

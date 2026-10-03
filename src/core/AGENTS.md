@@ -57,6 +57,9 @@ is not two deaths.
 Every change is therefore recorded, can be undone as a group, and replays from
 the seed.
 
+Losses in one state-based check commit together. The table determines the
+outcome after the whole group, so two simultaneous losses cannot award a win.
+
 ## nextDecision is a pure function of the table
 
 Given a table, every pending decision can be listed without executing anything.
@@ -72,6 +75,10 @@ The checks inside it run in the order the rules fix, not a convenient one.
 State based actions and waiting triggers are handled before anybody receives
 priority. A step that cannot be detected without card meaning is absent rather
 than faked, and that absence is wrong the moment a card has a trigger.
+
+Listing a forced action does not apply it. The loop applies the listed group
+and asks again to discover cascading actions. Cleanup likewise remains pending
+after a discard while the hand still exceeds its limit.
 
 ## A move carries its changes, and a seat never sees them
 
@@ -92,6 +99,10 @@ than sending it and filtering afterwards.
 A seat's own private information goes to that seat. Another seat's private
 information goes nowhere: not to a log, not to a watcher, not to a model acting
 for a third seat.
+
+Public zones do not make face-down identities public. Receipts retain object
+facts before and after their group; narration uses those facts, never a later
+incarnation's visibility. A tap in a library stays unnamed after a later reveal.
 
 ## The engine keeps perfect state
 

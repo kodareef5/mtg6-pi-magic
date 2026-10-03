@@ -4,6 +4,8 @@
  *
  * Three of the four named invariants are here. No leak, replay, and forced.
  * Idempotent lives in test/seating.
+ * The game and projection fixtures stay together past 150 lines because the
+ * visibility checks also observe every decision of a complete game.
  */
 
 import { strict as assert } from "node:assert";
@@ -13,9 +15,9 @@ import { load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
-import { start, type Table } from "../src/core/table.ts";
+import { commit, start, type Table } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
-import { project, render } from "../src/core/view.ts";
+import { describe, project, render } from "../src/core/view.ts";
 
 const universe = load("cards/standard.tsv");
 const deck = (card: string) => Array.from({ length: 60 }, () => card);
@@ -101,6 +103,25 @@ test("a different seed gives a different game", async () => {
 });
 
 test("no leak: a view names only cards in a public zone or this seat's own hand", async () => {
+	// Use a distinct identity so a public copy cannot mask a leak in the test.
+	const hidden = start(standard, [{ deck: ["Secret"] }, { deck: ["Forest"] }], "hidden");
+	const tap = commit(hidden, [{ do: "tap", what: "0-0" }], "game-setup");
+	assert.equal(describe(hidden, tap).includes("Secret"), false);
+	commit(hidden, [{ do: "move", what: "0-0", to: "battlefield", reason: "resolve" }], "resolve");
+	assert.equal(describe(hidden, tap).includes("Secret"), false, "later reveals do not rewrite history");
+	const card = hidden.things.get("0-0")!;
+	card.faceDown = true;
+	const faceDownTap = commit(hidden, [{ do: "tap", what: card.id }], "cost-payment");
+	for (const zone of ["battlefield", "stack", "exile"] as const) {
+		card.zone = zone;
+		for (const viewer of [1, "spectator"] as const) {
+			assert.equal(JSON.stringify(project(hidden, viewer)).includes("Secret"), false);
+		}
+	}
+	card.faceDown = false;
+	assert.equal(describe(hidden, faceDownTap).includes("Secret"), false);
+	assert.ok(JSON.stringify(project(hidden, "spectator")).includes("Secret"));
+
 	const built = table();
 	let checks = 0;
 

@@ -10,10 +10,16 @@
  * The engine writes the words because it is the only thing that knows which
  * facts this seat has earned. The reader only lays them out. That is also why
  * nothing here needs to understand Magic.
+ * The projection and its receipt renderer stay together past 150 lines so
+ * both use the same visibility filter.
  */
 
-import { cardsIn, seat, type Receipt, type Table } from "./table.ts";
+import { cardsIn, seat, type Receipt, type Table, type Thing } from "./table.ts";
 import type { Frame, SeatView, Viewer } from "./types.ts";
+
+const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
+const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
+const publicName = (thing?: Thing) => visible(thing) ? thing.card : "an unknown card";
 
 /**
  * The only way facts leave the engine. Nothing else reads the table on a
@@ -54,11 +60,15 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			...Object.entries(permanent.counters).map(([kind, n]) => `${n} ${kind}`),
 		].filter(Boolean);
 		lines.push(
-			`  ${permanent.card} (${seat(table, permanent.controller).name})` +
+			`  ${publicName(permanent)} (${seat(table, permanent.controller).name})` +
 				(marks.length ? `, ${marks.join(", ")}` : ""),
 		);
 	}
-	for (const item of cardsIn(table, "stack")) lines.push(`  on the stack: ${item.card}`);
+	for (const zone of ["stack", "graveyard", "exile", "command", "dungeon"] as const) {
+		for (const item of cardsIn(table, zone)) {
+			lines.push(`  ${zone}: ${publicName(item)} (${seat(table, item.owner).name})`);
+		}
+	}
 
 	// A spectator has earned nothing private, so it gets the public lines only.
 	const yours: string[] = [];
@@ -90,20 +100,17 @@ export function describe(table: Table, receipt: Receipt): string {
 	for (const change of receipt.changes) {
 		switch (change.do) {
 			case "move": {
-				const moved = table.things.get(change.what);
+				const moved = receipt.after[change.what];
 				if (!moved) break;
 				const who = seat(table, moved.owner).name;
-				const hidden = change.to === "hand" || change.to === "library";
-				parts.push(
-					hidden
-						? `${who} moved a card to their ${change.to} (${change.reason})`
-						: `${who} put ${moved.card} into ${change.to} (${change.reason})`,
-				);
+				const before = receipt.before[change.what];
+				const name = visible(moved) ? moved.card : publicName(before);
+				parts.push(`${who} put ${name} into ${change.to} (${change.reason})`);
 				break;
 			}
 			case "tap":
 			case "untap":
-				parts.push(`${change.do}ped ${table.things.get(change.what)?.card ?? "a permanent"}`);
+				parts.push(`${change.do}ped ${publicName(receipt.before[change.what])}`);
 				break;
 			case "shuffle":
 				parts.push(`${seat(table, change.whose).name} shuffled`);
