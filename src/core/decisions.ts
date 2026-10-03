@@ -5,7 +5,7 @@
  * listed without executing anything, which is what makes a decision testable
  * and a game replayable. An earlier engine found decisions by falling through
  * nested async calls, so a bug in the twentieth branch was unreachable from a
- * test. design-ref/CIRCUITRY.md sections 1 to 4.
+ * test. design-ref/archive/CIRCUITRY.md sections 1 to 4.
  *
  * The ordered checks and application stay together past 150 lines. Pregame,
  * turn obligations and priority actions each own their phase-specific builders.

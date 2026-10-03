@@ -13,7 +13,7 @@
  * The rules are on disk, in rules.ts. A ruling cites the rule it rests on,
  * because a citation is checkable and an assertion is not.
  *
- * design-ref/FIRST-PASS-MODULES.md section 7.
+ * design-ref/archive/FIRST-PASS-MODULES.md section 7.
  */
 
 import type { Receipt, Table } from "./table.ts";

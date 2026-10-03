@@ -73,7 +73,7 @@ export type Note = {
 	source: ObjectId;
 	sourceIncarnation: number;
 	until: "end-of-turn" | "end-of-combat" | "source-leaves" | "indefinite" | string;
-	/** The terms, in the card language. design-ref/SYNTAX.md. */
+	/** The terms, in the card language. design-ref/archive/SYNTAX.md. */
 	terms: unknown;
 	/** Rises with the clock, because "which of these two is newer" must have an answer. */
 	written: number;
@@ -118,7 +118,7 @@ export type Receipt = {
 	after: Record<ObjectId, Thing>;
 };
 
-/** Every decision and its pick. design-ref/CIRCUITRY.md section 11. */
+/** Every decision and its pick. design-ref/archive/CIRCUITRY.md section 11. */
 export type LedgerRow = {
 	seq: number;
 	situation: Decision["situation"];

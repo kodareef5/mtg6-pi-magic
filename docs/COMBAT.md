@@ -30,9 +30,9 @@ toughness last in four sublayers.
 | 7c | Effects **and counters** that modify power or toughness | 613.4c |
 | 7d | Effects that switch power and toughness | 613.4d |
 
-Counters live in 7c with ordinary modifiers. `design-ref/SYNTAX.md` lists them
+Counters live in 7c with ordinary modifiers. `design-ref/archive/SYNTAX.md` lists them
 as a separate sublayer after modifiers, with switching fifth. The rules and
-`design-ref/WORKED-LOOPS.md` section I.4 agree with the table above, so the
+`design-ref/archive/WORKED-LOOPS.md` section I.4 agree with the table above, so the
 syntax document is the odd one out and `src/core/syntax.ts` carries the correct
 set.
 

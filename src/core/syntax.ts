@@ -6,7 +6,7 @@
  * kind of object, differing only in who authorised it and when. A cost is a
  * list of Changes the actor completes before acting, an effect is a list that
  * happens on resolution, and that single idea is why the vocabulary is about 66
- * shapes rather than hundreds. design-ref/SYNTAX.md.
+ * shapes rather than hundreds. design-ref/archive/SYNTAX.md.
  *
  * This is core. A seat played by a person, a remote agent or an MCP client
  * still needs the table to know what a card does.
@@ -64,7 +64,7 @@ export type Reason =
 	| "game-setup";
 
 /**
- * The motions this milestone needs. design-ref/SYNTAX.md section 2 lists all of
+ * The motions this milestone needs. design-ref/archive/SYNTAX.md section 2 lists all of
  * them. A motion arrives here when a milestone needs it, never in advance.
  */
 export type Change =
@@ -114,10 +114,10 @@ export type Ability =
  * it is not the order the effects were written in. A card says only which layer
  * it acts in; the engine walks them once.
  *
- * These are taken from 613.4 in rules/cr.tsv, not from design-ref/SYNTAX.md,
+ * These are taken from 613.4 in rules/cr.tsv, not from design-ref/archive/SYNTAX.md,
  * which lists counters as their own sublayer after modifiers and switching as a
  * fifth. 613.4c puts counters in 7c alongside ordinary modifiers, and 613.4d
- * makes switching the fourth and last. design-ref/WORKED-LOOPS.md section I.4
+ * makes switching the fourth and last. design-ref/archive/WORKED-LOOPS.md section I.4
  * says the same, so the enum in the syntax document is the odd one out.
  *
  * The difference is observable: a flying counter and an ability-removing effect

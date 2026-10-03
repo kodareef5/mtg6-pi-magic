@@ -55,7 +55,7 @@ import { project, render } from "./src/core/view.ts";
 /**
  * Milestone one plays with nothing but lands: pass, play a land, untap, draw,
  * mulligan. It proves the loop and the ledger before a card has an ability.
- * design-ref/CIRCUITRY.md section 12.
+ * design-ref/archive/CIRCUITRY.md section 12.
  *
  * Sixty basics is a legal Standard deck, which is the point: it goes through
  * the same legality check a tournament list will.

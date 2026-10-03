@@ -167,7 +167,7 @@ Then tournament deck lists, then up to eight seats, then Commander, then the
 other formats. `src/core/format.ts` is why that costs little: seat counts,
 starting life, hand size, singleton and the command zone are fields in a record.
 
-Within Standard, from `design-ref/CIRCUITRY.md` section 12:
+Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
 
 1. **A game with no cards.** Pass, play a land, untap, draw, mulligan, deck out.
    **Implemented for basic-land fixtures:** two seats finish by deck out.
@@ -343,13 +343,17 @@ tools/sim.ts           play games in bulk and print the counters
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
+docs/CIRCUITS.md       the toolbox, the circuits built from it, and how a seat
+                       decides. Read it before planning anything past milestone one
 docs/COMBAT.md         characteristics, the layer walk, combat, and the seams
 docs/MULLIGAN.md       the opening: the rules, the three decisions, what a seat knows
 docs/SEATING.md        the wire, for a reader with no code
 docs/STATE.md          export, rollback, copying a game, and hosting options
 docs/ZONES.md          the zones, identity, exile, dungeons, outside the game
-design-ref/            the agreed design of the game. On disk, not in the repo,
-                       not ours to publish. Read it before changing src/core/
+design-ref/            observations about Magic, on disk and not ours to publish.
+                       Its own README says what moved to archive/ and why: the
+                       documents that decided a design have been superseded by
+                       docs/CIRCUITS.md, and the ones that measured the game stand
 ```
 
 `npm run cards` rebuilds the standard list and `npm run universe` writes all

@@ -4,7 +4,7 @@
  * The records themselves are core, in src/core/intent.ts, because a person at a
  * seat wants a turn objective and a phase review too. This file is the model
  * call that writes them, and the mechanical check that says whether the last
- * one still holds. design-ref/CIRCUIT-EXPERIMENTS.md section 11.
+ * one still holds. design-ref/archive/CIRCUIT-EXPERIMENTS.md section 11.
  *
  * This walks alongside the game. It does not drive it. src/core/loop.ts is the
  * only loop, and if anything here starts advancing a phase, stop.
