@@ -15,7 +15,7 @@
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
 
 import type { Universe } from "../core/cards.ts";
-import { append, keep, linesOf, type Journal } from "../core/journal.ts";
+import { keep, save, type Journal } from "../core/journal.ts";
 import type { Intent } from "../core/intent.ts";
 import { play, type Watcher } from "../core/loop.ts";
 import type { Player } from "../core/player.ts";
@@ -121,6 +121,16 @@ export async function seat(
 	// trip of wall time rather than one per question.
 	await Promise.all(
 		table.seats.map(async (at) => {
+			// The carried brief first, before the roster is consulted at all. A
+			// clone owns its preparation: asking this run's roster whether to keep
+			// it let `pregame: "off"`, or losing access to the model that wrote it,
+			// throw away a plan the clone already held and write an empty one over
+			// the top of it.
+			const carried = options.prepared?.find((made) => made.seat === at.id);
+			if (carried) {
+				take(at.id, carried.made as Brief, "carried");
+				return;
+			}
 			const role = pick(parts.get(at.id)!, "pregame");
 			// Off is a decision somebody made, so it is not a gap.
 			if (role?.off) {
@@ -139,11 +149,6 @@ export async function seat(
 				return;
 			}
 			const others = table.seats.filter((other) => other.id !== at.id) as Seat[];
-			const carried = options.prepared?.find((made) => made.seat === at.id);
-			if (carried) {
-				take(at.id, carried.made as Brief, "carried");
-				return;
-			}
 			const written = await brief(
 				at,
 				others,
@@ -252,9 +257,9 @@ export async function run(
 	// not part of the game, so a recap that never answers must not be able to
 	// lose a finished one, which is what appending after the wait allowed.
 	//
-	// From `appended` on, because a resumed game is appended to and the lines
-	// its replay rebuilt are already in the file.
-	if (journal) for (const line of linesOf(table).slice(journal.appended)) append(journal, line);
+	// Only what the file does not hold, because a resumed game is appended to
+	// and the lines its replay rebuilt are already in it.
+	if (journal) save(journal, table);
 
 	// Bounded, so an unanswered recap delays the report rather than holding the
 	// command open. What is still outstanding is said rather than waited for.
@@ -269,15 +274,31 @@ export async function run(
  * Returns how many had not settled. A run that reports its own loose ends is
  * better than one that hangs on them, and better than one that drops them
  * without saying so.
+ *
+ * Exported for one test only. Whether this resolves when nothing else is alive
+ * is a property of the process, not of the call, so stating it needs a child
+ * process rather than an assertion: under a test runner there is always other
+ * machinery keeping the loop awake, which is exactly how an unreferenced timer
+ * here went unnoticed.
  */
-async function settle(flight: Promise<void>[], grace: number): Promise<number> {
+export async function settle(flight: Promise<void>[], grace: number): Promise<number> {
 	if (!flight.length) return 0;
 	let done = 0;
 	const counted = flight.map((one) => one.then(() => void (done += 1)));
-	await Promise.race([
-		Promise.all(counted),
-		new Promise((resolve) => setTimeout(resolve, grace).unref?.()),
-	]);
+	// The timer is referenced while it is awaited. Unreferencing it let Node
+	// decide there was nothing left to do between a stuck recap and the timeout,
+	// so the await never resolved and the process exited instead of reporting its
+	// loose ends. Cleared the moment the commentary lands, so a run that answered
+	// promptly does not sit out the grace.
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	try {
+		await Promise.race([
+			Promise.all(counted),
+			new Promise((resolve) => void (timer = setTimeout(resolve, grace))),
+		]);
+	} finally {
+		clearTimeout(timer);
+	}
 	return flight.length - done;
 }
 

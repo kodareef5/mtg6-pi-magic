@@ -54,7 +54,21 @@ export type Line =
 	| { v: number; said: Said }
 	| { v: number; prepared: { seat: SeatId; made: unknown } };
 
-export type Journal = { path: string; header: Header; appended: number };
+/**
+ * `saved` is a position in `linesOf`, not a count of writes.
+ *
+ * Those are two different numbers and conflating them cost the first gameplay
+ * line per seat: `keep` writes a prepared line, which is in the file and is not
+ * in `linesOf`, so counting it as progress through that list skipped a receipt.
+ * Only `save` moves this.
+ */
+export type Journal = {
+	path: string;
+	header: Header;
+	saved: number;
+	/** What a resume cut off a torn last line, for the caller to report. */
+	repaired?: string;
+};
 
 /**
  * Start a journal.
@@ -69,24 +83,59 @@ export function open(path: string, header: Header): Journal {
 	}
 	mkdirSync(dirname(path), { recursive: true });
 	writeFileSync(path, `${JSON.stringify({ header })}\n`);
-	return { path, header, appended: 0 };
+	return { path, header, saved: 0 };
 }
 
 /**
  * Pick up a journal that already holds a game, to append to it.
  *
  * A resumed game is the same game, so the file is added to rather than
- * replaced. `already` is the table the replay rebuilt, and its lines are
- * counted as appended so the ones written from here on are only the new ones.
+ * replaced. `already` is the table the replay rebuilt, and its lines are the
+ * ones the file holds, so the writes from here on are only the new ones.
+ *
+ * A torn last line is repaired before anything is written. `read` drops those
+ * bytes from what it returns, but they are still in the file, and the next
+ * append fused onto the fragment and made one unreadable line out of two. The
+ * fragment was already not part of the game: dropping it on a read and keeping
+ * it on disk is what turned a recoverable crash into a lost journal.
  */
 export function reopen(path: string, header: Header, already: Table): Journal {
 	if (!existsSync(path)) throw new Error(`No game at ${path} to resume.`);
-	return { path, header, appended: linesOf(already).length };
+	const torn = repair(path);
+	return { path, header, saved: linesOf(already).length, ...(torn ? { repaired: torn } : {}) };
 }
 
 export function append(journal: Journal, line: Line): void {
 	appendFileSync(journal.path, `${JSON.stringify(line)}\n`);
-	journal.appended += 1;
+}
+
+/**
+ * Write the gameplay lines this table has produced that the file does not hold.
+ *
+ * Returns how many went in. The caller does no arithmetic, because the one time
+ * it did the counter it sliced with was counting something else.
+ */
+export function save(journal: Journal, table: Table): number {
+	const lines = linesOf(table);
+	const fresh = lines.slice(journal.saved);
+	for (const line of fresh) append(journal, line);
+	journal.saved = lines.length;
+	return fresh.length;
+}
+
+/**
+ * Cut a torn last line off a journal, so it can be appended to again.
+ *
+ * Returns what was removed, or null for a file that ends cleanly. The bytes it
+ * drops are the ones `read` already refuses to count as part of the game.
+ */
+export function repair(path: string): string | null {
+	const text = readFileSync(path, "utf8");
+	if (!text.length || text.endsWith("\n")) return null;
+	const end = text.lastIndexOf("\n");
+	const torn = text.slice(end + 1);
+	writeFileSync(path, text.slice(0, end + 1));
+	return torn;
 }
 
 /** Every line a table has produced so far, in order, ready to append. */

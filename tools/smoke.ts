@@ -108,6 +108,8 @@ const journal = carried
 			created: new Date().toISOString(),
 		});
 
+if (journal.repaired) console.log(`repaired  dropped a torn last line: ${journal.repaired.slice(0, 80)}`);
+
 const began = Date.now();
 const seated = await seatTable(
 	table,

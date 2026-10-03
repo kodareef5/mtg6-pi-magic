@@ -8,7 +8,7 @@
  */
 
 import { strict as assert } from "node:assert";
-import { mkdtempSync } from "node:fs";
+import { appendFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -25,11 +25,11 @@ import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
 import { worthPlanning } from "../src/context/strategy.ts";
 import { load as loadCards } from "../src/core/cards.ts";
-import { open, preparedIn, read, rowsOf } from "../src/core/journal.ts";
+import { fork, linesOf, open, preparedIn, read, reopen, replay, rowsOf } from "../src/core/journal.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
-import { cardsIn } from "../src/core/table.ts";
+import { cardsIn, type Table } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
 
 const universe = loadCards("cards/standard.tsv");
@@ -441,4 +441,104 @@ test("a carried brief keeps its failures, and a stuck recap cannot lose a saved 
 	assert.deepEqual(rowsOf(back.lines).map((row) => row.picked), built.ledger.map((row) => row.picked));
 	assert.deepEqual(seated.chronicle.recaps, []);
 	assert.match(built.gaps.join(" "), /recaps were still unanswered when the game was saved/);
+});
+
+/**
+ * The whole persistence lifecycle, through the real callers.
+ *
+ * Every earlier journal test built its file by hand, which is how a file saved
+ * by `run` came to be missing its first gameplay line per seat: the branch was
+ * covered and the caller was not. So this one plays a game, clones it, tears the
+ * clone's last line the way a crash would, resumes it, plays on, and clones
+ * again, asserting at each step that the file holds the game the table holds.
+ */
+test("a game saved, cloned, torn, resumed and cloned again is the same game throughout", async () => {
+	const dir = mkdtempSync(join(tmpdir(), "magic-life-"));
+	const jev = { type: "classifier" as const, id: "jev-latest", name: "Jev", api: "typesafe-system-one",
+		provider: "typesafe", baseUrl: "x", input: ["text" as const],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 64000 };
+	const talk = chat(() => "A land, and a pass.");
+	const inference = {
+		classify: (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string> }> }) => {
+			const ids = Object.keys(request.questions.pick!.criteria);
+			const choice = ids.find((id) => id.startsWith("land:")) ?? ids[0]!;
+			return { api: "typesafe-system-one", provider: "typesafe", model: "jev-latest",
+				answers: { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } },
+				stopReason: "stop", timestamp: 0 };
+		}) as never,
+		stream: talk.stream as never,
+	};
+	const parts = [
+		{ role: "decide" as const, pattern: "typesafe/jev-latest", model: jev },
+		{ role: "pregame" as const, pattern: "gpt-6.1-sol:low", model: sol },
+		{ role: "summary" as const, pattern: "off", off: true },
+	];
+	const header = (id: string, built: Table) => ({
+		id, format: standard.name, seed: "life",
+		seats: built.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+		cards: { path: "cards/standard.tsv", generated: universe.generated },
+		rules: { path: "y", effective: "z" },
+		created: "2026-10-03T00:00:00.000Z",
+	});
+	/** Every line the file holds that a table also produces. Briefs are not in it. */
+	const gameplay = (path: string) => read(path).lines.filter((line) => !("prepared" in line));
+
+	// One: a fresh game, played and saved. Its pregame writes two briefs, which
+	// is what used to cost it the first two receipts.
+	const first = start(standard, [{ deck: Array(60).fill("Forest") }, { deck: Array(60).fill("Swamp") }], "life");
+	const parentPath = join(dir, "parent.jsonl");
+	const parentJournal = open(parentPath, header("parent", first));
+	const seated = await seatTable(first, async () => parts, inference, universe, {
+		format: standard.name, journal: parentJournal,
+	});
+	assert.ok(await run(first, seated, inference, parts[2]!, undefined, parentJournal, 50), "finished");
+
+	assert.equal(preparedIn(read(parentPath).lines).length, 2, "both briefs kept");
+	assert.deepEqual(gameplay(parentPath), linesOf(first), "the file holds the whole game");
+
+	// Two: cloned at a version in the middle of it.
+	const at = 20;
+	const childPath = join(dir, "child.jsonl");
+	const forked = fork(parentPath, at, "child", childPath);
+	assert.deepEqual(forked.forkedFrom, { game: "parent", version: at });
+
+	// Three: the clone's last line is torn off mid write, the way a crash leaves
+	// it. It reads with a notice, and resuming repairs the file rather than
+	// leaving the fragment for the next append to fuse onto.
+	appendFileSync(childPath, '{"v":99,"receipt":{"se');
+	assert.match(read(childPath).truncated ?? "", /ends mid line/);
+	const back = replay(childPath, (saved) =>
+		start(standard, saved.seats.map((s) => ({ name: s.name, deck: s.deck })), saved.seed), undefined,
+		{ cards: { generated: universe.generated }, rules: { effective: "z" } });
+	assert.equal(back.table.ledger.length, at, "the clone is the position it was cut at");
+	assert.deepEqual(back.table.seats.map((s) => s.name), first.seats.map((s) => s.name), "the same seats");
+	const childJournal = reopen(childPath, back.header, back.table);
+	assert.match(childJournal.repaired ?? "", /^\{"v":99/);
+
+	// Four: resumed with the pregame switched off. The clone owns its
+	// preparation, so the roster is not asked whether to keep it.
+	const off = [parts[0]!, { role: "pregame" as const, pattern: "off", off: true }, parts[2]!];
+	const again = await seatTable(back.table, async () => off, inference, universe, {
+		format: standard.name, journal: childJournal, prepared: back.prepared,
+	});
+	assert.equal(again.chronicle.briefs[0]!.deck, seated.chronicle.briefs[0]!.deck, "the carried plan survived");
+	assert.equal(again.tally.spent().filter((spend) => spend.role === "pregame").length, 0, "not re-asked");
+	assert.equal(preparedIn(read(childPath).lines).length, 2, "and not written a second time");
+
+	// Five: played on, and the file still readable and still whole.
+	assert.ok(await run(back.table, again, inference, parts[2]!, undefined, childJournal, 50), "finished again");
+	assert.deepEqual(gameplay(childPath), linesOf(back.table), "the file holds the continued game");
+
+	// The shared prefix is shared. Same seeds, same names, same picks up to the
+	// cut, because the clone was dealt the cards the parent was dealt.
+	assert.deepEqual(
+		rowsOf(read(childPath).lines, at).map((row) => [row.seq, row.picked]),
+		rowsOf(read(parentPath).lines, at).map((row) => [row.seq, row.picked]),
+	);
+
+	// Six: a clone of the clone, which is what makes a position a fixture.
+	const grandPath = join(dir, "grand.jsonl");
+	fork(childPath, 10, "grand", grandPath);
+	assert.equal(preparedIn(read(grandPath).lines).length, 2, "the briefs came across again");
+	assert.equal(rowsOf(read(grandPath).lines).length, 10);
 });

@@ -285,6 +285,14 @@ rather than adding a test for each branch.
 - **Ordered.** The stack is one order for the table and a library is one per
   seat, so objects cast by different seats interleave in cast order and the
   whole zone renumbers when one resolves.
+- **Saved.** The file holds the game the table holds, line for line, through a
+  whole lifecycle: played, cloned, torn off mid write, resumed, played on and
+  cloned again. A clone owns its preparation, so this run's roster cannot
+  discard it. A resume repairs a torn last line before it appends, because a
+  fragment dropped on a read and kept on disk is a lost journal one write later.
+- **Alone.** A finished game reports and returns with nothing else keeping the
+  process alive. Stated in a child process, since a test runner keeps the event
+  loop awake and hides it.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a

@@ -153,6 +153,11 @@ export default function (pi: ExtensionAPI) {
 			carried = back.prepared;
 			// Appended to, not replaced. A resumed game is the same game.
 			journal = reopen(path, header, back.table);
+			// The repair is about the file, not about this game, so it is said
+			// once here rather than recorded as a gap in the run.
+			if (journal.repaired) {
+				ctx.ui.notify(`Resumed past a torn last line. Dropped: ${journal.repaired.slice(0, 80)}`, "warning");
+			}
 		} else {
 			const entrants = [{ deck: landDeck("Forest") }, { deck: landDeck("Swamp") }];
 			for (const entrant of entrants) {
