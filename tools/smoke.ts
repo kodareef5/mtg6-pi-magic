@@ -17,7 +17,7 @@ import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 import { cast, readRoster, rosterFor, type Crew, type Role } from "../src/context/roles.ts";
 import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
 import { checkDeck, load as loadCards } from "../src/core/cards.ts";
-import { open, preparedIn, read } from "../src/core/journal.ts";
+import { open, reopen, replay, type Header } from "../src/core/journal.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
@@ -47,8 +47,9 @@ if (a.help) {
   --summary P     the commentator. --summary off skips every recap, which is
                   how to price it against playing with no commentary
   --open-lists    each seat's pregame sees the other decks. Benchmarks only
-  --from F        reuse the briefs in games/F.jsonl rather than paying for a
-                  pregame again. Fork a finished game at version 0 to make one
+  --from F        continue games/F.jsonl, which carries everything it held:
+                  its briefs, its decisions and its position. Clone a finished
+                  game at version 0 to get one with the pregame already paid for
   -o DIR          where the journal lands. Defaults to games/
   --no-brief      skip the pregame pass, to price it against playing without one
   --watch         narrate every committed event and recap as it happens
@@ -85,22 +86,27 @@ const inference = {
 	stream: (model: never, context: never, options: never) => runtime.streamSimple(model, context, options),
 } as never;
 
-const carried = a.from ? read(join(a.out!, `${a.from}.jsonl`)) : null;
-const table = start(
-	standard,
-	(carried?.header.seats ?? decks.map((deck) => ({ deck }))).map((at) => ({ ...at })),
-	carried?.header.seed ?? seed,
-);
-const journal = open(join(a.out!, `${seed}.jsonl`), {
-	id: seed,
-	format: standard.name,
-	seed: carried?.header.seed ?? seed,
-	seats: table.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
-	cards: { path: cards.path, generated: cards.generated },
-	rules: { path: "rules/cr.tsv", effective: loadRules("rules/cr.tsv").effective },
-	created: new Date().toISOString(),
-	...(carried ? { forkedFrom: { game: carried.header.id, version: 0 } } : {}),
-});
+const rules = loadRules("rules/cr.tsv");
+const dealt = (saved: Header) =>
+	start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed);
+
+// --from continues that game. It is the same game, so everything it held comes
+// with it and nothing has to be matched up afterwards.
+const carried = a.from
+	? replay(join(a.out!, `${a.from}.jsonl`), dealt, undefined, { cards, rules })
+	: null;
+const table = carried?.table ?? start(standard, decks.map((deck) => ({ deck })), seed);
+const journal = carried
+	? reopen(join(a.out!, `${a.from}.jsonl`), carried.header, carried.table)
+	: open(join(a.out!, `${seed}.jsonl`), {
+			id: seed,
+			format: standard.name,
+			seed,
+			seats: table.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+			cards: { path: cards.path, generated: cards.generated },
+			rules: { path: "rules/cr.tsv", effective: rules.effective },
+			created: new Date().toISOString(),
+		});
 
 const began = Date.now();
 const seated = await seatTable(
@@ -114,7 +120,7 @@ const seated = await seatTable(
 		format: standard.name,
 		journal,
 		...(a["open-lists"] ? { openLists: true } : {}),
-		...(carried ? { prepared: preparedIn(carried.lines) } : {}),
+		...(carried?.prepared.length ? { prepared: carried.prepared } : {}),
 	},
 );
 
@@ -130,7 +136,7 @@ const outcome = await run(
 
 console.log(`\nseed      ${seed}\n${report(table, seated, outcome, Date.now() - began).join("\n")}`);
 console.log(`journal   ${journal.path}`);
-console.log(`reuse     node tools/smoke.ts --from ${seed}   (the briefs, without paying again)`);
+console.log(`clone     node tools/smoke.ts --from ${seed}   (continues this game)`);
 // Non-zero when the result is not comparable: a game that finished with half its
 // briefs missing finished, and a benchmark that counted it as clean is lying.
 process.exit(outcome && !degraded(table, seated) ? 0 : 1);

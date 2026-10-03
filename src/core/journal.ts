@@ -44,15 +44,15 @@ export type Header = {
  *
  * A `prepared` line is what a model wrote before the game began: a seat's
  * brief, in whatever shape the context layer files it. It is a journal line
- * rather than a cache beside the journal, so copying a prefix copies it too and
- * there is no second format to keep in step. The core does not read it; it
- * carries it, which is why the shape is opaque here.
+ * rather than a cache beside the journal, so a clone carries it and there is no
+ * second format to keep in step. The core does not read it; it carries it, which
+ * is why the shape is opaque here.
  */
 export type Line =
 	| { v: number; receipt: Receipt }
 	| { v: number; row: LedgerRow }
 	| { v: number; said: Said }
-	| { v: number; prepared: { seat: SeatId; of: string; made: unknown } };
+	| { v: number; prepared: { seat: SeatId; made: unknown } };
 
 export type Journal = { path: string; header: Header; appended: number };
 
@@ -70,6 +70,18 @@ export function open(path: string, header: Header): Journal {
 	mkdirSync(dirname(path), { recursive: true });
 	writeFileSync(path, `${JSON.stringify({ header })}\n`);
 	return { path, header, appended: 0 };
+}
+
+/**
+ * Pick up a journal that already holds a game, to append to it.
+ *
+ * A resumed game is the same game, so the file is added to rather than
+ * replaced. `already` is the table the replay rebuilt, and its lines are
+ * counted as appended so the ones written from here on are only the new ones.
+ */
+export function reopen(path: string, header: Header, already: Table): Journal {
+	if (!existsSync(path)) throw new Error(`No game at ${path} to resume.`);
+	return { path, header, appended: linesOf(already).length };
 }
 
 export function append(journal: Journal, line: Line): void {
@@ -136,8 +148,8 @@ export const rowsOf = (lines: Line[], upTo?: number): LedgerRow[] =>
 		.filter((row) => upTo === undefined || row.seq < upTo)
 		.sort((a, b) => a.seq - b.seq);
 
-/** What a model prepared before the game, so a clone does not pay for it twice. */
-export const preparedIn = (lines: Line[]): { seat: SeatId; of: string; made: unknown }[] =>
+/** What a model prepared before the game. A clone carries it, so it is not paid for twice. */
+export const preparedIn = (lines: Line[]): { seat: SeatId; made: unknown }[] =>
 	lines.flatMap((line) => ("prepared" in line ? [line.prepared] : []));
 
 /**
@@ -218,7 +230,7 @@ export function replay(
 	start: (header: Header) => Table,
 	upTo?: number,
 	against?: { cards: { generated: string }; rules: { effective: string } },
-): { table: Table; header: Header; prepared: { seat: SeatId; of: string; made: unknown }[] } {
+): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
 	const { header, lines } = read(path);
 	if (against) {
 		const drift = [
@@ -239,22 +251,25 @@ export function replay(
 }
 
 /**
- * Copy a game from a point so it can be played on differently.
+ * Copy a game up to a point. Everything up to that point, nothing after it.
+ *
+ * A clone is the same game continued, which is what keeps this simple: there is
+ * no question of whether some part of the parent belongs to the child, because
+ * all of it does. The header, the receipts, the decisions, the table talk and
+ * what a model prepared for the seats all come across.
  *
  * This is also how a benchmark fixture is made. An interesting position frozen
- * at its version is a journal prefix, so there is no second format for
- * fixtures and there should never be one.
+ * at its version is a journal prefix, so there is no second format for fixtures
+ * and there should never be one.
  *
- * Two points matter and both are prefixes of the same file. After the opening
- * settled is a position: the cards are where they are and play continues. At
- * version zero is a table that has been dealt nothing and whose seats already
- * hold what a model prepared for them, which is the one to reuse when the thing
- * being tested is the game and not the pregame.
+ * Two points are worth knowing about. Version zero is a table that has been set
+ * up and asked nothing, whose seats already hold what a model prepared for
+ * them: clone there to vary the play without paying for a pregame again. Any
+ * later version is a position: clone there to try a different line from it.
  *
  * The new journal carries `forkedFrom`, so the two share a prefix and the
  * difference between two lines of play is a diff of two files. Playing on needs
- * live players again, because the decisions past the fork belong to the other
- * game.
+ * live players again, because the decisions past the clone belong to the parent.
  */
 export function fork(path: string, at: number, id: string, to: string): Header {
 	const { header, lines } = read(path);
@@ -267,16 +282,13 @@ export function fork(path: string, at: number, id: string, to: string): Header {
 }
 
 /**
- * Keep what a model prepared, so the next game from this point does not pay
- * for it again.
+ * Keep what a model prepared.
  *
  * Written at version zero, before anything is dealt, which is what makes a
- * version zero fork a reusable pregame. `of` names what it was prepared from,
- * so a brief written for one deck and roster is not silently reused for
- * another.
+ * clone at version zero a game with its pregame already paid for.
  */
-export const keep = (journal: Journal, seat: SeatId, of: string, made: unknown): void =>
-	append(journal, { v: 0, prepared: { seat, of, made } });
+export const keep = (journal: Journal, seat: SeatId, made: unknown): void =>
+	append(journal, { v: 0, prepared: { seat, made } });
 
 /**
  * What an export may contain. The journal is private: it holds every hand and

@@ -42,8 +42,9 @@ import {
 	exportGame,
 	fork as forkGame,
 	open as openGame,
-	preparedIn,
-	read as readGame,
+	reopen,
+	replay as replayGame,
+	type Header,
 	type Journal,
 } from "./src/core/journal.ts";
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
@@ -112,39 +113,69 @@ export default function (pi: ExtensionAPI) {
 	 * `src/context/sit.ts` owns the assembly, so this command and `npm run
 	 * smoke` cannot disagree about what a game is made of or what it cost.
 	 */
-	async function open(seed: string, ctx: ExtensionContext): Promise<Table> {
+	/**
+	 * Deal a new table, or pick up a cloned one.
+	 *
+	 * Two things, kept apart, because conflating them was a real bug: a command
+	 * that said "play this clone" started a fresh game carrying another game's
+	 * briefs, which is neither a new game nor that position.
+	 *
+	 * `play` is a new game, with its own journal. `resume` replays a journal and
+	 * plays on from wherever it stops, which for a clone at version zero is a
+	 * game whose pregame is already paid for and whose first decision is still
+	 * ahead of it.
+	 */
+	async function open(
+		ctx: ExtensionContext,
+		from: { seed: string } | { resume: string },
+	): Promise<Table> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
+		const resuming = "resume" in from;
 
-		// A seed naming an existing game forks it at version zero, so the briefs
-		// that game paid for are reused and only the play is new.
-		const existing = join(GAMES, `${seed}.jsonl`);
-		const reuse = existsSync(existing) ? readGame(existing) : null;
-		const entrants = reuse
-			? reuse.header.seats.map((at) => ({ name: at.name, deck: at.deck }))
-			: [{ deck: landDeck("Forest") }, { deck: landDeck("Swamp") }];
-		for (const entrant of entrants) {
-			const problems = checkDeck(cards, entrant.deck, standard);
-			if (problems.length) throw new Error(`Illegal deck: ${problems.join("; ")}`);
+		let opened: Table;
+		let header: Header;
+		let carried: { seat: SeatId; made: unknown }[] = [];
+		let journal: Journal;
+
+		if (resuming) {
+			const path = join(GAMES, `${from.resume}.jsonl`);
+			if (!existsSync(path)) throw new Error(`No game ${from.resume} in ${GAMES}.`);
+			const back = replayGame(
+				path,
+				(saved) => start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed),
+				undefined,
+				{ cards, rules },
+			);
+			if (back.table.outcome) throw new Error(`${from.resume} is finished. Clone it at a version first.`);
+			opened = back.table;
+			header = back.header;
+			carried = back.prepared;
+			// Appended to, not replaced. A resumed game is the same game.
+			journal = reopen(path, header, back.table);
+		} else {
+			const entrants = [{ deck: landDeck("Forest") }, { deck: landDeck("Swamp") }];
+			for (const entrant of entrants) {
+				const problems = checkDeck(cards, entrant.deck, standard);
+				if (problems.length) throw new Error(`Illegal deck: ${problems.join("; ")}`);
+			}
+			opened = start(standard, entrants, from.seed);
+			header = {
+				id: from.seed,
+				format: standard.name,
+				seed: from.seed,
+				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+				cards: { path: cards.path, generated: cards.generated },
+				rules: { path: RULES, effective: rules.effective },
+				created: new Date().toISOString(),
+			};
+			journal = openGame(join(GAMES, `${from.seed}.jsonl`), header);
 		}
-
-		const id = reuse ? `${seed}-${Date.now()}` : seed;
-		const opened = start(standard, entrants, reuse?.header.seed ?? seed);
-		const journal = openGame(join(GAMES, `${id}.jsonl`), {
-			id,
-			format: standard.name,
-			seed: reuse?.header.seed ?? seed,
-			seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
-			cards: { path: cards.path, generated: cards.generated },
-			rules: { path: RULES, effective: rules.effective },
-			created: new Date().toISOString(),
-			...(reuse ? { forkedFrom: { game: reuse.header.id, version: 0 } } : {}),
-		});
 
 		seated = await seatTable(opened, (at) => roster(ctx, at), inference(ctx), cards, {
 			format: standard.name,
 			journal,
-			...(reuse ? { prepared: preparedIn(reuse.lines) } : {}),
+			...(carried.length ? { prepared: carried } : {}),
 		});
 		table = opened;
 		games.set(opened, journal);
@@ -218,7 +249,7 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	pi.registerCommand("magic", {
-		description: "play [seed] | models [why|<role> <pattern> [seat]] | step | log | export | fork | cards | rules",
+		description: "play [seed] | resume <game> | clone <game> <version> <id> | models | step | log | export | cards | rules",
 		handler: async (args, ctx) => {
 			const words = args.trim().split(/\s+/).filter(Boolean);
 			const verb = words[0] ?? "";
@@ -229,8 +260,8 @@ export default function (pi: ExtensionAPI) {
 				return;
 			}
 
-			if (verb === "play") {
-				const opened = await open(seed, ctx);
+			if (verb === "play" || verb === "resume") {
+				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed });
 				const began = Date.now();
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
 				const outcome = await run(
@@ -242,7 +273,8 @@ export default function (pi: ExtensionAPI) {
 					games.get(opened),
 				);
 				ctx.ui.notify(
-					`Seed ${seed}.\n${report(opened, seated!, outcome, Date.now() - began).join("\n")}`,
+					`${verb === "resume" ? "Resumed" : "Seed"} ${seed}.\n` +
+						report(opened, seated!, outcome, Date.now() - began).join("\n"),
 					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
 				return;
@@ -251,7 +283,7 @@ export default function (pi: ExtensionAPI) {
 			// One decision at a time, shown as the seat about to answer it reads
 			// it. The point is to read the rails, not to watch a result.
 			if (verb === "step") {
-				const open_ = table ?? (await open(seed, ctx));
+				const open_ = table ?? (await open(ctx, { seed }));
 				const decision = nextDecision(open_);
 				const seat = decision?.seat ?? open_.cursor.active;
 				ctx.ui.notify(
@@ -308,22 +340,24 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			/**
-			 * Copy a game from a point, which is also how a fixture is made.
+			 * Copy a game up to a point, which is also how a fixture is made. A
+			 * clone is the same game continued, so everything up to that point
+			 * comes across and nothing has to be matched up afterwards.
 			 *
-			 * Version zero is the one to reuse when the thing being tested is the
-			 * game rather than the pregame: nothing has been dealt and the seats
+			 * Version zero is the one to clone when the thing being tested is the
+			 * play rather than the pregame: nothing has been dealt and the seats
 			 * already hold what a model prepared for them.
 			 */
-			if (verb === "fork") {
+			if (verb === "clone") {
 				const [, from, at, id] = words;
 				if (!from || at === undefined || !id) {
-					ctx.ui.notify("Usage: /magic fork <game> <version> <new-id>", "warning");
+					ctx.ui.notify("Usage: /magic clone <game> <version> <new-id>", "warning");
 					return;
 				}
 				const made = forkGame(join(GAMES, `${from}.jsonl`), Number(at), id, join(GAMES, `${id}.jsonl`));
 				ctx.ui.notify(
-					`${id} forked from ${made.forkedFrom!.game} at version ${made.forkedFrom!.version}. ` +
-						`Play it with /magic play ${id}.`,
+					`${id} is ${made.forkedFrom!.game} up to version ${made.forkedFrom!.version}, ` +
+						`everything included. Continue it with /magic resume ${id}.`,
 					"info",
 				);
 				return;
@@ -344,10 +378,11 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			ctx.ui.notify(
-				"Usage: /magic play [seed] | /magic models [why|<role> <pattern> [seat]] | /magic step | " +
-					"/magic log | /magic export <game> [public|full|<seat>] | " +
-					"/magic fork <game> <version> <new-id> | /magic cards [format|universe] | " +
-					"/magic rules <query|build>",
+				"Usage: /magic play [seed] | /magic resume <game> | " +
+					"/magic clone <game> <version> <new-id> | " +
+					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic log | " +
+					"/magic export <game> [public|full|<seat>] | " +
+					"/magic cards [format|universe] | /magic rules <query|build>",
 				"info",
 			);
 		},

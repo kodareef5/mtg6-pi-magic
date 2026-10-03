@@ -27,6 +27,8 @@ import type {
 	JsonObject,
 } from "@earendil-works/pi-ai";
 
+import { CEILING, type Tally } from "./spend.ts";
+
 export type Question = ClassifierQuestion;
 export type Answer = ClassifierAnswer;
 export type DecisionRequest = ClassifierContext;
@@ -63,22 +65,42 @@ export type Classify = (
  * No retry policy here. `src/core/loop.ts` owns the retry and the fallback
  * accounting for every kind of player, so a failure is reported as a failure
  * and the loop decides what it means.
+ *
+ * Every attempt is recorded, including a failed one, which is the whole reason
+ * the tally is passed in. Counting a request only once an answer came back made
+ * an attempted call report as no call at all, so a run that was rate limited for
+ * a minute looked free.
  */
 export function decisionApi(
 	classify: Classify,
 	model: ClassifierModel<ClassifierApi>,
-	options: { signal?: AbortSignal } = {},
+	options: { signal?: AbortSignal; tally?: Tally; about?: string } = {},
 ): DecisionApi {
+	const named = `${model.provider}/${model.id}`;
 	return {
-		named: `${model.provider}/${model.id}`,
+		named,
 		async ask(request) {
-			// classify never rejects, so the stop reason is the error channel.
-			const result = await classify(model, request, options);
-			if (result.stopReason !== "stop") {
-				throw new Error(
-					`${model.provider}/${model.id} ${result.stopReason}: ${result.errorMessage ?? "no reason given"}`,
-				);
+			const began = Date.now();
+			const base = { role: "decide" as const, about: options.about ?? "pick", model: named, ceiling: CEILING.decide };
+			let result: ClassifierResult;
+			try {
+				// classify never rejects, so the stop reason is the error channel.
+				result = await classify(model, request, options);
+			} catch (error) {
+				options.tally?.record({ ...base, ms: Date.now() - began, failed: String(error) });
+				throw error;
 			}
+			const wrong =
+				result.stopReason === "stop"
+					? null
+					: `${named} ${result.stopReason}: ${result.errorMessage ?? "no reason given"}`;
+			options.tally?.record({
+				...base,
+				ms: Date.now() - began,
+				...(result.usage ? { usage: result.usage } : {}),
+				...(wrong ? { failed: wrong } : {}),
+			});
+			if (wrong) throw new Error(wrong);
 			return result.answers;
 		},
 	};

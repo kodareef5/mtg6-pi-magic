@@ -39,19 +39,9 @@ export type Seated = {
 	intents: Record<SeatId, Intent>;
 	chronicle: Chronicle;
 	tally: Tally;
-	/** Decision-model calls. Counted here because the classifier is not metered by Pi. */
+	/** Requests to the decision model, attempts included. Read from the bill. */
 	picks: () => number;
 };
-
-/**
- * What a brief was prepared from.
- *
- * A brief written for sixty Forests under one pregame model is not a brief for
- * another deck or another model, so a reused one carries what it was made from
- * and a mismatch is a miss rather than a quiet substitution.
- */
-export const preparedFrom = (seat: Seat, pattern: string, format: string): string =>
-	`${format}/${pattern}/${[...seat.deck].sort().join(",")}`;
 
 const pick = (parts: Cast[], role: Role) => parts.find((part) => part.role === role);
 
@@ -77,20 +67,35 @@ export async function seat(
 		/** Written to as the game runs, so a clone of this game is a prefix of it. */
 		journal?: Journal;
 		/**
-		 * Briefs a fork already carried. A seat whose brief is here is not asked
-		 * for one again, which is the whole point of forking at version zero.
+		 * Briefs a clone carried. A seat whose brief is here is not asked for one
+		 * again, which is the whole point of cloning at version zero. They are
+		 * used as given: a clone is the same game continued, so there is nothing
+		 * to check them against.
 		 */
-		prepared?: { seat: SeatId; of: string; made: unknown }[];
+		prepared?: { seat: SeatId; made: unknown }[];
 	},
 ): Promise<Seated> {
 	const counted = tally();
 	const chronicle: Chronicle = { briefs: {}, recaps: [] };
 	const players: Record<SeatId, Player> = {};
 	const intents: Record<SeatId, Intent> = {};
-	let picks = 0;
 
 	const parts = new Map<SeatId, Cast[]>();
 	for (const at of table.seats) parts.set(at.id, await rosters(at.id));
+
+	/**
+	 * Take a brief, however it arrived.
+	 *
+	 * A freshly written one is kept in the journal; a carried one is already in
+	 * the journal the clone copied. Either way its failures are reported, which
+	 * the reuse path used to skip, so a carried brief with failed questions read
+	 * as a clean run.
+	 */
+	const take = (at: SeatId, made: Brief, how: "written" | "carried") => {
+		chronicle.briefs[at] = made;
+		if (how === "written" && options.journal) keep(options.journal, at, made);
+		for (const gap of made.gaps) table.gaps.push(`Seat ${at} brief (${how}): ${gap}`);
+	};
 
 	for (const at of table.seats) {
 		const decide = pick(parts.get(at.id)!, "decide");
@@ -104,11 +109,10 @@ export async function seat(
 		intents[at.id] = startingIntent(at.id);
 		players[at.id] = aiSeat({
 			name: at.name,
-			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>),
+			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted }),
 			intent: intents[at.id]!,
 			chronicle,
 			onGap: (note) => void table.gaps.push(note),
-			onAsk: () => void (picks += 1),
 		});
 	}
 
@@ -120,27 +124,27 @@ export async function seat(
 			const role = pick(parts.get(at.id)!, "pregame");
 			// Off is a decision somebody made, so it is not a gap.
 			if (role?.off) {
-				chronicle.briefs[at.id] = emptyBrief(at.id);
+				take(at.id, emptyBrief(at.id), "written");
 				return;
 			}
 			if (!role?.model || role.model.type === "classifier") {
-				chronicle.briefs[at.id] = {
-					...emptyBrief(at.id),
-					gaps: [`No pregame model: ${role?.problem ?? `${role?.pattern} is not a chat model`}`],
-				};
-				table.gaps.push(`Seat ${at.id} played with no brief. ${role?.problem ?? ""}`.trim());
+				take(
+					at.id,
+					{
+						...emptyBrief(at.id),
+						gaps: [`no pregame model: ${role?.problem ?? `${role?.pattern} is not a chat model`}`],
+					},
+					"written",
+				);
 				return;
 			}
 			const others = table.seats.filter((other) => other.id !== at.id) as Seat[];
-			const of = preparedFrom(at, role.pattern, options.format);
-			const already = options.prepared?.find((made) => made.seat === at.id && made.of === of);
-			if (already) {
-				// Reused, not re-asked. The match is on the deck, the format and
-				// the model, so a brief cannot drift onto a game it was not for.
-				chronicle.briefs[at.id] = already.made as Brief;
+			const carried = options.prepared?.find((made) => made.seat === at.id);
+			if (carried) {
+				take(at.id, carried.made as Brief, "carried");
 				return;
 			}
-			chronicle.briefs[at.id] = await brief(
+			const written = await brief(
 				at,
 				others,
 				universe,
@@ -153,14 +157,17 @@ export async function seat(
 				}),
 				options,
 			);
-			for (const gap of chronicle.briefs[at.id]!.gaps) table.gaps.push(`Seat ${at.id} brief: ${gap}`);
-			// Kept at version zero, before anything is dealt, which is what makes
-			// a version zero fork a reusable pregame.
-			if (options.journal) keep(options.journal, at.id, of, chronicle.briefs[at.id]);
+			take(at.id, written, "written");
 		}),
 	);
 
-	return { players, intents, chronicle, tally: counted, picks: () => picks };
+	return {
+		players,
+		intents,
+		chronicle,
+		tally: counted,
+		picks: () => counted.spent().filter((spend) => spend.role === "decide").length,
+	};
 }
 
 /**
@@ -191,6 +198,8 @@ export async function run(
 	commentator: Cast | undefined,
 	watch?: Watcher,
 	journal?: Journal,
+	/** How long to wait for outstanding recaps once the game is saved. */
+	grace = 30_000,
 ): Promise<Outcome | null> {
 	const talking =
 		commentator && !commentator.off && commentator.model && commentator.model.type !== "classifier"
@@ -239,16 +248,37 @@ export async function run(
 		);
 	});
 
-	// Settled before the report, so the bill counts every call and no request
-	// outlives the game that made it.
-	await Promise.all(flight);
+	// The game is saved first and the commentary is waited on after. A recap is
+	// not part of the game, so a recap that never answers must not be able to
+	// lose a finished one, which is what appending after the wait allowed.
+	//
+	// From `appended` on, because a resumed game is appended to and the lines
+	// its replay rebuilt are already in the file.
+	if (journal) for (const line of linesOf(table).slice(journal.appended)) append(journal, line);
 
-	// Appended once at the end rather than per event. The journal is the stored
-	// form and a crash costs at most a partial last line, but a game inside one
-	// Pi session is not the crash case worth optimising, and one pass keeps the
-	// game loop free of file writes.
-	if (journal) for (const line of linesOf(table)) append(journal, line);
+	// Bounded, so an unanswered recap delays the report rather than holding the
+	// command open. What is still outstanding is said rather than waited for.
+	const left = await settle(flight, grace);
+	if (left) table.gaps.push(`${left} recaps were still unanswered when the game was saved.`);
 	return outcome;
+}
+
+/**
+ * Wait for the outstanding work, up to a point.
+ *
+ * Returns how many had not settled. A run that reports its own loose ends is
+ * better than one that hangs on them, and better than one that drops them
+ * without saying so.
+ */
+async function settle(flight: Promise<void>[], grace: number): Promise<number> {
+	if (!flight.length) return 0;
+	let done = 0;
+	const counted = flight.map((one) => one.then(() => void (done += 1)));
+	await Promise.race([
+		Promise.all(counted),
+		new Promise((resolve) => setTimeout(resolve, grace).unref?.()),
+	]);
+	return flight.length - done;
 }
 
 /** What the run cost and what it did, as the lines a report prints. */

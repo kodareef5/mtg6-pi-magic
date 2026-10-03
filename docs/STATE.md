@@ -51,11 +51,16 @@ table's revision and catches a stale answer. The journal version is decisions
 answered and names a rollback or fork point. The receipt count is internal, for
 working out what a seat has not been shown yet.
 
-What a model prepared before the game is a journal line too. A seat's brief
-costs real money and is a function of the deck, the format and the pregame
-model, so it is written at version zero and a fork there carries it. That is why
-there is no brief cache: a cache beside the journal would be a second format to
-keep in step, and a prefix copy already does the job.
+What a model prepared before the game is a journal line too, written at version
+zero before anything is dealt. A clone is the same game continued, so it carries
+the briefs like everything else and there is nothing to match them against. That
+is also why there is no brief cache: a cache beside the journal would be a
+second format to keep in step, and a prefix copy already does the job.
+
+The seat names are in the header, and a game rebuilt from a header supplies them
+rather than generating them. So naming has its own random stream: sharing one
+with the shuffle meant a rebuilt game skipped the naming draws and dealt
+different cards, which made every replay a different game.
 
 So a game is a header plus an ordered list of entries. Rolling back is reading
 fewer entries. Copying is copying a prefix. Neither needs an undo path in the

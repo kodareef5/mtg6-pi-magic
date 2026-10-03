@@ -118,24 +118,27 @@ candidate rules for relevance, then the reasoner rules on the few that survive
 and names the remedy. It stops at the verdict, because carrying a remedy out
 needs rollback and that is unwritten.
 
-### Reusing a pregame
+### Cloning a game
 
-The brief is a journal line, not a cache beside the journal, so copying a prefix
-copies it and there is no second format to keep in step. That makes two fork
-points useful rather than one.
+A clone is the same game continued. That one sentence is what keeps the
+machinery small: copying a prefix copies everything up to that point, so nothing
+has to be matched up afterwards and there is no question of whether some part of
+the parent belongs to the child.
+
+The brief is a journal line rather than a cache beside the journal, so it comes
+across like anything else. Two points are worth knowing about.
 
 **Version zero** is a table that has been set up and asked nothing, whose seats
-already hold what a model prepared for them. Forking there reuses the pregame
-and plays a new game, which is what testing the game rather than the pregame
-needs. `/magic play <id>` on an existing id does this, and `smoke.ts --from <id>`
-does it outside Pi.
+already hold what a model prepared for them. Clone there to vary the play
+without paying for a pregame again.
 
-**Any later version** is a position: fork, replay the prefix, play on. The two
-games then share a prefix, so the difference between two lines of play is a diff
-of two files.
+**Any later version** is a position. Clone there to try a different line from it.
 
-A reused brief names the deck, the format and the pregame model it was written
-for, and a mismatch is a miss rather than a quiet substitution.
+Three commands, kept apart, because conflating two of them was a real bug.
+`/magic play [seed]` is a new game. `/magic clone <game> <version> <id>` copies
+a prefix. `/magic resume <id>` replays a journal and plays on from where it
+stops. A command that claimed to play a clone and instead started a fresh game
+carrying another game's briefs was neither of those things.
 
 ### What a game costs
 
@@ -149,7 +152,9 @@ summary   107 calls  67,187 input tokens     $0.040 at gpt-5.6-luna:low
 
 Every call is recorded in `src/context/spend.ts` with its model, thinking level,
 wall time, tokens in and out, reasoning and cached tokens where the provider
-reports them, and the cost at the catalog price. The output ceiling is there too
+reports them, and the cost at the catalog price. The decision model is in the
+same bill, counted when a request is made rather than when one comes back, so a
+run that was rate limited does not report as free. The output ceiling is there too
 and not in the prompts, because it is a price rather than a style: some routes
 price a request against the maximum output asked for rather than the output
 returned, so every role names a deliberate ceiling and a reply that hits it is
@@ -273,9 +278,13 @@ rather than adding a test for each branch.
   problem and not one per turn. A seat with no brief at all throws rather than
   playing, and `degraded` names why a finished game is not a comparable one.
 - **Cloneable.** A journal round trips, drops a torn last line and refuses a
-  torn middle one. A fork at version zero carries the briefs and no decisions;
-  a fork at version n replays to that position and plays on with a prefix
-  identical to its parent. A replay against different card text is refused.
+  torn middle one. A clone at version zero carries the briefs and no decisions;
+  a clone at version n replays to that position and plays on with a prefix
+  identical to its parent. A replay against different card text is refused. A
+  game rebuilt from its own header deals the cards the original dealt.
+- **Ordered.** The stack is one order for the table and a library is one per
+  seat, so objects cast by different seats interleave in cast order and the
+  whole zone renumbers when one resolves.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -359,8 +368,22 @@ verify every carried field against the source and refuse to pass on a mismatch.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.
-- Rollback. `journal.ts` holds the file, the replay, the fork and the export;
+- Rollback. `journal.ts` holds the file, the replay, the clone and the export;
   `rollback` is the one left, because it needs every remaining seat to agree and
   nothing holds that conversation. `docs/STATE.md` holds the reasoning.
+- A paused resolution. `decisions.ts` step 6 is a placeholder, and when it
+  becomes real the remaining instructions, bindings and locked choices have to
+  live in the table so a clone can resume halfway through an effect. The
+  dispatcher will then need to tell continuing an effect from reaching a
+  checkpoint where state-based actions and waiting triggers are processed.
+- Provenance for card meaning. Interrogation constrains what a model may answer
+  but an allowed answer can still be the wrong reading, so the accepted
+  structured meaning and the compiler that accepted it belong in the journal.
+  Replaying decisions against freshly inferred meaning would undo the point of
+  having a journal.
+- The context a decision actually saw. The forced ratio is evidence about cost
+  and says nothing about decision quality. Comparing two models needs the packet
+  each one was handed, and recap arrival timing changes that, so fixing the
+  recap setting is not enough.
 - Everything in `src/seating/`, by choice.
 - Any format but Standard, and any seat count but two.

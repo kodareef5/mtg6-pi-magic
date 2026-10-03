@@ -294,3 +294,4 @@ export const policyFrom = (brief: Brief): Policy => ({
 	winsBy: brief.deck,
 	priorities: [brief.combos, ...Object.values(brief.against)].filter(Boolean),
 });
+

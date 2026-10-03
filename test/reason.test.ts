@@ -8,6 +8,9 @@
  */
 
 import { strict as assert } from "node:assert";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 
 import type { Api, Model } from "@earendil-works/pi-ai";
@@ -16,12 +19,13 @@ import { asks, brief, needsNote, policyFrom } from "../src/context/brief.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
-import { report, run, seat as seatTable } from "../src/context/sit.ts";
+import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
 import { bill, CEILING, tally } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
 import { worthPlanning } from "../src/context/strategy.ts";
 import { load as loadCards } from "../src/core/cards.ts";
+import { open, preparedIn, read, rowsOf } from "../src/core/journal.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
@@ -333,7 +337,7 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	void ms;
 
 	assert.ok(outcome, "the game finished");
-	assert.equal(seated.picks(), picks);
+	assert.equal(seated.picks(), picks, "every request to the decision model is counted");
 	assert.ok(seated.chronicle.recaps.length > 50, `${seated.chronicle.recaps.length} recaps`);
 	assert.equal(said.length, seated.chronicle.recaps.length);
 
@@ -366,5 +370,75 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	assert.deepEqual(quiet.gaps, []);
 	assert.ok(await run(quiet, seatedQuiet, inference, { role: "summary", pattern: "off", off: true }, undefined));
 	assert.deepEqual(seatedQuiet.chronicle.recaps, []);
-	assert.equal(seatedQuiet.tally.spent().length, 0, "nothing was asked of a model that is off");
+	const asked = seatedQuiet.tally.spent();
+	assert.equal(asked.filter((spend) => spend.role !== "decide").length, 0, "no reasoner answered");
+	// The decision model is in the same bill as the reasoners, so a run shows
+	// every call it made in one place.
+	assert.ok(asked.length > 50, `${asked.length} decision calls recorded`);
+	assert.equal(asked.length, seatedQuiet.picks());
+});
+
+test("a carried brief keeps its failures, and a stuck recap cannot lose a saved game", async () => {
+	const dir = mkdtempSync(join(tmpdir(), "magic-carried-"));
+	const built = table();
+	const jev = { type: "classifier" as const, id: "jev-latest", name: "Jev", api: "typesafe-system-one",
+		provider: "typesafe", baseUrl: "x", input: ["text" as const],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 64000 };
+	const parts = [
+		{ role: "decide" as const, pattern: "typesafe/jev-latest", model: jev },
+		{ role: "pregame" as const, pattern: "gpt-6.1-sol:low", model: sol },
+		{ role: "summary" as const, pattern: "gpt-5.6-luna:low", model: sol },
+	];
+
+	// A recap that never answers. The game must still be saved.
+	const stuck: Stream = () => ({ result: () => new Promise(() => {}) });
+	const inference = {
+		classify: (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string> }> }) => {
+			const criteria = Object.keys(request.questions.pick!.criteria);
+			const choice = criteria.find((id) => id.startsWith("land:")) ?? criteria[0]!;
+			return { api: "typesafe-system-one", provider: "typesafe", model: "jev-latest",
+				answers: { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } },
+				stopReason: "stop", timestamp: 0 };
+		}) as never,
+		stream: stuck as never,
+	};
+
+	// A brief carried from a clone, with a question that had failed in the parent.
+	const scarred = { seat: 0, version: 1, deck: "Sixty Forests.", combos: "None.",
+		opening: "", against: {}, phases: {}, cards: {},
+		gaps: ["mulligan guidance: the model fell over"] };
+
+	const journal = open(join(dir, "child.jsonl"), {
+		id: "child", format: standard.name, seed: "reasoning",
+		seats: built.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+		cards: { path: "x", generated: "2026-10-03" }, rules: { path: "y", effective: "z" },
+		created: "2026-10-03T00:00:00.000Z",
+	});
+
+	const seated = await seatTable(built, async () => parts, inference, universe, {
+		format: standard.name,
+		journal,
+		prepared: [{ seat: 0, made: scarred }, { seat: 1, made: { ...scarred, seat: 1, gaps: [] } }],
+	});
+
+	// Carried as given: a clone is the same game continued, so there is nothing
+	// to check it against. But its failures are still this run's failures.
+	assert.equal(seated.chronicle.briefs[0]!.deck, "Sixty Forests.");
+	assert.equal(seated.tally.spent().filter((spend) => spend.role === "pregame").length, 0, "not re-asked");
+	assert.match(built.gaps.join(" "), /brief \(carried\).*the model fell over/);
+	assert.ok(degraded(built, seated), "a carried failure is not a clean run");
+
+	// The clone already holds the briefs it carried, so they are not written twice.
+	assert.equal(preparedIn(read(journal.path).lines).length, 0);
+
+	const outcome = await run(built, seated, inference, parts[2]!, undefined, journal, 50);
+	assert.ok(outcome, "the game finished");
+
+	// Saved, with every recap still unanswered. Appending after the wait meant a
+	// stuck commentator lost a finished game.
+	const back = read(journal.path);
+	assert.ok(rowsOf(back.lines).length > 50, `${rowsOf(back.lines).length} decisions saved`);
+	assert.deepEqual(rowsOf(back.lines).map((row) => row.picked), built.ledger.map((row) => row.picked));
+	assert.deepEqual(seated.chronicle.recaps, []);
+	assert.match(built.gaps.join(" "), /recaps were still unanswered when the game was saved/);
 });

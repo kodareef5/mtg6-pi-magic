@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { start } from "../src/core/commit.ts";
+import { commit, start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
 import {
 	append,
@@ -31,6 +31,7 @@ import {
 } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
+import { cardsIn } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
 
 const where = () => mkdtempSync(join(tmpdir(), "magic-journal-"));
@@ -69,7 +70,7 @@ async function recorded(dir: string, id = "one", seed = "journal") {
 	const table = dealt(made);
 	const journal = open(join(dir, `${id}.jsonl`), made);
 	for (const at of table.seats) {
-		keep(journal, at.id, `${standard.name}/gpt-6.1-sol:low/${[...at.deck].sort().join(",")}`, {
+		keep(journal, at.id, {
 			seat: at.id, version: 1, deck: `Sixty ${at.deck[0]}s.`, combos: "None.",
 			opening: "Keep any seven.", against: {}, phases: {}, cards: {}, gaps: [],
 		});
@@ -151,10 +152,10 @@ test("forking at version zero reuses the pregame, and later forks carry the posi
 	// The setup shuffle is at version zero too, so the fork is a dealt table.
 	assert.equal(relive(dealt(fresh), rowsOf(zero.lines)).ledger.length, 0);
 
-	// The brief is reusable only where it belongs: it names the deck, the format
-	// and the model it was written for.
-	const of = preparedIn(zero.lines)[0]!.of;
-	assert.match(of, /^standard\/gpt-6\.1-sol:low\/Forest,/);
+	// A clone is the same game continued, so the briefs come across as they are
+	// and there is nothing to match them against.
+	assert.deepEqual(preparedIn(zero.lines).map((made) => made.seat), [0, 1]);
+	assert.match(JSON.stringify(preparedIn(zero.lines)[0]!.made), /Sixty Forests/);
 
 	// A later version is a position. Replaying the prefix puts the cards back
 	// where they were and leaves the game unfinished.
@@ -196,4 +197,68 @@ test("an export names its version, and only full holds a hand", async () => {
 	const everything = exportGame(journal.path, { mode: "full" }, dealt);
 	assert.match(everything, /^\{"header"/);
 	assert.ok(everything.includes('"prepared"'));
+});
+
+test("a game reconstructed from its header deals the cards the original dealt", async () => {
+	// Naming the seats and shuffling the libraries are different sources of
+	// randomness. They shared a counter, so a game rebuilt from a header, which
+	// supplies the names it recorded, never made those draws and every shuffle
+	// after them moved. That path is every replay.
+	const generated = start(standard, [{ deck: deck("Forest") }, { deck: deck("Swamp") }], "streams");
+	const rebuilt = start(
+		standard,
+		generated.seats.map((at) => ({ name: at.name, deck: at.deck })),
+		"streams",
+	);
+
+	assert.deepEqual(rebuilt.seats.map((at) => at.name), generated.seats.map((at) => at.name));
+	assert.ok(generated.rng.calls.names! > 0, "generating names drew from its own stream");
+	assert.equal(rebuilt.rng.calls.names, undefined, "supplied names drew nothing");
+	assert.equal(rebuilt.rng.calls.play, generated.rng.calls.play, "the shuffle drew the same either way");
+
+	const order = (table: ReturnType<typeof start>, seat: number) =>
+		cardsIn(table, "library", seat).map((card) => card.id).join(" ");
+	assert.equal(order(rebuilt, 0), order(generated, 0));
+	assert.equal(order(rebuilt, 1), order(generated, 1));
+
+	// And so a whole game replays from the header, which is what this is for.
+	const dir = where();
+	const made = header("streamed", "streams");
+	const table = dealt(made);
+	const journal = open(join(dir, "streamed.jsonl"), made);
+	await play(table, { 0: seat("A"), 1: seat("B") }, {});
+	for (const line of linesOf(table)) append(journal, line);
+	assert.deepEqual(replay(journal.path, dealt).table.log, table.log);
+});
+
+test("the stack is one order for the table, not one per seat", () => {
+	// A library and a graveyard are each a seat's own, so two seats can both
+	// hold a top card. The stack has a single top, and what is on it resolves in
+	// one sequence whoever cast it.
+	const table = start(standard, [
+		{ name: "A", deck: ["Forest", "Forest", "Forest"] },
+		{ name: "B", deck: ["Swamp", "Swamp", "Swamp"] },
+	], "stack");
+
+	const cast = ["0-0", "1-0", "0-1", "1-1"];
+	for (const what of cast) commit(table, [{ do: "move", what, to: "stack", reason: "cast" }], "cast");
+
+	const on = cardsIn(table, "stack");
+	assert.equal(on.length, 4);
+	assert.deepEqual(on.map((item) => item.position), [0, 1, 2, 3], "one position each");
+	// Top first, so the last cast resolves first.
+	assert.deepEqual(on.map((item) => item.id), [...cast].reverse());
+
+	// Resolving the top renumbers the whole zone, not one seat's part of it.
+	commit(table, [{ do: "move", what: "1-1", to: "graveyard", reason: "resolve" }], "resolve");
+	const after = cardsIn(table, "stack");
+	assert.deepEqual(after.map((item) => item.id), ["0-1", "1-0", "0-0"]);
+	assert.deepEqual(after.map((item) => item.position), [0, 1, 2]);
+
+	// A seat can still ask for its own, and the global order is preserved.
+	assert.deepEqual(cardsIn(table, "stack", 0).map((item) => item.id), ["0-1", "0-0"]);
+
+	// Each seat's own library stays its own order, both starting at the top.
+	assert.equal(cardsIn(table, "library", 0)[0]!.position, 0);
+	assert.equal(cardsIn(table, "library", 1)[0]!.position, 0);
 });

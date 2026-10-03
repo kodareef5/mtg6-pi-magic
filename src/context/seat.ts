@@ -30,8 +30,13 @@ export type AiSeatOptions = {
 	chronicle?: Chronicle;
 	/** Recorded on the table when an answer comes back unusable. */
 	onGap(note: string): void;
-	/** Called with every request and what came back, for the run report. */
-	onAsk?(packet: Packet, picked: string): void;
+	/**
+	 * Called once per request, before it is made.
+	 *
+	 * Before, not after. A request that failed is a request that was made, and
+	 * counting on the way back reported an attempted call as no call at all.
+	 */
+	onAsk?(packet: Packet): void;
 };
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
@@ -99,6 +104,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				...(seated ? { recaps: seated.recaps } : {}),
 			});
 			asked += 1;
+			options.onAsk?.(packet);
 			const answers = await options.api.ask({
 				state: asState(packet),
 				questions: { [KEY]: question(packet) },
@@ -113,7 +119,6 @@ export function aiSeat(options: AiSeatOptions): Player {
 				return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 			}
 
-			options.onAsk?.(packet, answer.choice);
 			return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
 		},
 

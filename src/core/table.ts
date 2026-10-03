@@ -183,8 +183,17 @@ export type Table = {
 	ledger: LedgerRow[];
 	/** Table talk. Beside the log, not in it: a message changes nothing. */
 	said: Said[];
-	/** Recorded, so a game replays from a seed. */
-	rng: { seed: string; calls: number };
+	/**
+	 * Recorded, so a game replays from a seed.
+	 *
+	 * One counter per stream, not one counter. Naming the seats and shuffling the
+	 * libraries both want randomness and are unrelated, so sharing a counter made
+	 * a game with supplied names deal different cards from the same game with
+	 * generated ones: the names were already known, those draws never happened,
+	 * and every shuffle after them moved. A reconstruction from a journal header
+	 * supplies the names, so that path was every replay.
+	 */
+	rng: { seed: string; calls: Record<string, number> };
 	outcome: Outcome | null;
 	/** Clauses the rules could not settle. The game continues. */
 	gaps: string[];
@@ -224,6 +233,20 @@ export function thing(table: Table, id: ObjectId): Thing {
 
 /** The zones with a top and a bottom. A hand and a battlefield must not grow one. */
 export const ORDERED = new Set<Zone>(["library", "graveyard", "stack"]);
+
+/**
+ * Ordered zones with one order for the whole table rather than one per seat.
+ *
+ * The stack is the only one. A library and a graveyard are each a seat's own, so
+ * two seats can both hold a top card; the stack has a single top and whatever is
+ * on it resolves in one sequence whoever cast it. Renumbering a shared zone per
+ * owner gives two objects the same position and loses the order they arrived in.
+ */
+export const SHARED = new Set<Zone>(["stack"]);
+
+/** The scope an ordered zone's positions are numbered within. */
+export const orderedWithin = (zone: Zone, owner: SeatId): SeatId | undefined =>
+	SHARED.has(zone) ? undefined : owner;
 
 /** One zone's contents, in order where the zone has one. */
 export function cardsIn(table: Table, zone: Zone, owner?: SeatId): Thing[] {

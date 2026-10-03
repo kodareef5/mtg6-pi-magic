@@ -17,7 +17,16 @@ import { createHash } from "node:crypto";
 import { firstMulliganFree, type Format } from "./format.ts";
 import { claim } from "./names.ts";
 import type { Change, Reason } from "./syntax.ts";
-import { cardsIn, ORDERED, playing, seat, thing, type Receipt, type Table } from "./table.ts";
+import {
+	cardsIn,
+	ORDERED,
+	orderedWithin,
+	playing,
+	seat,
+	thing,
+	type Receipt,
+	type Table,
+} from "./table.ts";
 
 export type Entrant = {
 	/** Asked for, or absent for a generated one. Letters, digits, hyphen, 20 or fewer. */
@@ -51,7 +60,7 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
 		log: [],
 		ledger: [],
 		said: [],
-		rng: { seed, calls: 0 },
+		rng: { seed, calls: {} },
 		outcome: null,
 		gaps: [],
 		opening: null,
@@ -59,7 +68,8 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
 
 	const taken = new Set<string>();
 	entrants.forEach((entrant, id) => {
-		const name = claim(entrant.name, (bound) => random(table, bound), taken);
+		// Its own stream, so whether a name was supplied cannot move a shuffle.
+		const name = claim(entrant.name, (bound) => random(table, bound, "names"), taken);
 		taken.add(name);
 		table.seats.push({
 			id,
@@ -124,7 +134,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				const moving = thing(table, change.what);
 				const from = moving.zone;
 				if (ORDERED.has(from)) {
-					for (const other of cardsIn(table, from, moving.owner)) {
+					for (const other of cardsIn(table, from, orderedWithin(from, moving.owner))) {
 						if ((other.position ?? 0) > (moving.position ?? 0)) other.position = (other.position ?? 0) - 1;
 					}
 				}
@@ -137,7 +147,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.counters = {};
 				moving.damage = 0;
 				if (ORDERED.has(change.to)) {
-					const zone = cardsIn(table, change.to, moving.owner);
+					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner));
 					if (change.position === "bottom") {
 						moving.position = zone.length;
 					} else {
@@ -321,9 +331,16 @@ function openingTransition(table: Table, change: Extract<Change, { do: "opening"
 	}
 }
 
-/** Deterministic, counter based, so replay needs the seed and nothing else. */
-export function random(table: Table, bound: number): number {
-	const digest = createHash("sha256").update(`${table.rng.seed}:${table.rng.calls}`).digest();
-	table.rng.calls += 1;
+/**
+ * Deterministic, counter based, so replay needs the seed and nothing else.
+ *
+ * One counter per named stream. Draws from one stream cannot move another, which
+ * is what lets a game reconstructed with its recorded seat names deal the cards
+ * the original game dealt.
+ */
+export function random(table: Table, bound: number, stream = "play"): number {
+	const n = table.rng.calls[stream] ?? 0;
+	const digest = createHash("sha256").update(`${table.rng.seed}:${stream}:${n}`).digest();
+	table.rng.calls[stream] = n + 1;
 	return digest.readUInt32BE(0) % bound;
 }
