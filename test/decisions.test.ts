@@ -3,7 +3,8 @@ import { test } from "node:test";
 
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
-import { cardsIn, commit, start } from "../src/core/table.ts";
+import { commit, start } from "../src/core/commit.ts";
+import { cardsIn } from "../src/core/table.ts";
 
 const table = () => start(standard, [
 	{ name: "A", deck: Array(60).fill("Forest") },

@@ -6,7 +6,8 @@
  * left, which is why this is one function rather than a line in the loop.
  */
 
-import { commit, seat as seatOf, type Table } from "./table.ts";
+import { commit } from "./commit.ts";
+import { seat as seatOf, type Table } from "./table.ts";
 import type { SeatId } from "./types.ts";
 
 export function concede(table: Table, seat: SeatId): void {

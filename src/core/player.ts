@@ -55,21 +55,46 @@ export type Answer =
 	 */
 	| { kind: "concede" };
 
-/** Validate the answer envelope; declaration conservation belongs to declare. */
-export function usable(value: unknown, decision: Decision): value is Answer {
-	if (!value || typeof value !== "object" || !("kind" in value)) return false;
+/**
+ * Why this answer cannot be taken, or null when it can.
+ *
+ * The reason is written for whoever sent the answer, because the retry shows it
+ * and a retry that says only "not usable" buys nothing: the same answer comes
+ * back. Declaration conservation belongs to declare, not here.
+ */
+export function refuse(value: unknown, decision: Decision): string | null {
+	const kinds = "pick, declare, delegate, ask, object, say or concede";
+	if (!value || typeof value !== "object" || !("kind" in value)) {
+		return `An answer is an object with a kind: ${kinds}.`;
+	}
 	const text = (key: string) => key in value && typeof (value as Record<string, unknown>)[key] === "string";
+	const needs = (key: string, what: string) => text(key) ? null : `A ${String(value.kind)} needs ${what}.`;
 	switch (value.kind) {
-		case "pick": return text("actionId") && "option" in value && decision.options.some((o) => o.id === value.option);
-		case "declare": return text("actionId") && text("says") && "changes" in value && Array.isArray(value.changes);
-		case "object": return text("claim");
-		case "delegate": return text("instruction");
-		case "ask": return text("route");
-		case "say": return "message" in value && typeof value.message === "string" && Object.hasOwn(MESSAGES, value.message);
-		case "concede": return true;
-		default: return false;
+		case "pick": {
+			if (!text("actionId")) return "A pick needs a string actionId.";
+			const picked = (value as { option?: unknown }).option;
+			if (decision.options.some((o) => o.id === picked)) return null;
+			return `No option ${JSON.stringify(picked)}. Answer with one of: ${decision.options.map((o) => o.id).join(", ")}.`;
+		}
+		case "declare":
+			if (!Array.isArray((value as { changes?: unknown }).changes)) return "A declaration needs a changes array.";
+			return needs("actionId", "a string actionId") ?? needs("says", "a says line another seat could check");
+		case "object": return needs("claim", "a claim");
+		case "delegate": return needs("instruction", "an instruction");
+		case "ask": return needs("route", "a route");
+		case "say": {
+			const message = (value as { message?: unknown }).message;
+			if (typeof message === "string" && Object.hasOwn(MESSAGES, message)) return null;
+			return `No message ${JSON.stringify(message)}. The messages are: ${Object.keys(MESSAGES).join(", ")}.`;
+		}
+		case "concede": return null;
+		default: return `No answer kind ${JSON.stringify(value.kind)}. The kinds are ${kinds}.`;
 	}
 }
+
+/** The narrowing form. It exists because a reason cannot narrow a type. */
+export const usable = (value: unknown, decision: Decision): value is Answer =>
+	refuse(value, decision) === null;
 
 export interface Player {
 	readonly name: string;

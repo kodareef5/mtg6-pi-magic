@@ -49,8 +49,9 @@ it.
 
 ## The table is the only writer
 
-`commit` in table.ts is the one door. Nothing else writes to a thing, a life
-total, a pool or the notepad. One call is one event, because a group of
+`commit` in commit.ts is the one door. Nothing else writes to a thing, a life
+total, a pool, the notepad or the cursor. `table.ts` holds the shapes and the
+readers over them and writes nothing. One call is one event, because a group of
 simultaneous changes is one thing cards watch for: two creatures dying together
 is not two deaths.
 
@@ -60,10 +61,15 @@ the seed.
 Losses in one state-based check commit together. The table determines the
 outcome after the whole group, so two simultaneous losses cannot award a win.
 
-Control transitions use that same door. Passes, opening declarations, priority
-grants and step endings each produce a receipt, even when no card moves. A frame
-version is the receipt count and changes when the pending decision changes.
-Mana expiry, damage cleanup and expiring notes happen inside the committed step
+Control transitions use that same door and do not become events. A group that
+only moves the cursor writes no receipt: no card watches a priority grant, and
+`advance` rebuilds every one of them from the recorded picks, so storing them
+would make the journal seven times larger to say what a replay already knows.
+A transition caused by an action rides on that action's receipt.
+
+So a frame version is the decisions answered, not the receipt count. That is
+what catches a stale answer: a pass moves the version and moves no cards. Mana
+expiry, damage cleanup and expiring notes happen inside the committed step
 ending. Phase handlers propose transitions; they do not write state themselves.
 
 ## nextDecision is a pure function of the table
@@ -156,9 +162,11 @@ changed will get that case wrong.
 
 ## Never decide for a seat by accident
 
-An unusable answer is asked once more, and then the table takes the terminating
-option, records the row as `fallback`, and writes a gap naming what came back. A
-fallback is not a choice and is never counted as one.
+An unusable answer is asked once more, with the reason it was refused on the
+frame, because asking the identical question twice is one question. Then the
+table takes the terminating option, records the row as `fallback`, and writes a
+gap naming what came back. A fallback is not a choice and is never counted as
+one.
 
 The loop owns this for every kind of player. Each decision builder names its
 terminating option, if one exists. A mandatory card selection has none: after

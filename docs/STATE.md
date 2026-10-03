@@ -23,11 +23,18 @@ are for.
   delegated, chosen, declared or fallback.
 - The seed and a call counter are the only randomness, so a shuffle replays.
 
-Receipts include control transitions: declaring a keep, passing priority,
-granting priority and ending a step. The receipt count is therefore also a frame
-version. Two decisions separated by passes cannot share a version just because
-no card moved. Replaying receipts restores the opening and turn cursor as well
-as the cards. The ledger remains a separate account of who answered and why.
+A receipt is written when something happens: a card moves, a life total changes,
+a seat declares a keep, a game ends. A group that only moves the cursor writes
+none. Passing priority, granting it and ending a step are decided by the rules
+from the picks already recorded, so a replay rebuilds every one of them, and
+logging them made a game of basic lands 754KB instead of 107KB, almost all of it
+clock. The engine still routes them through `commit`, so the cursor keeps one
+writer.
+
+The version is therefore the decisions answered, not the receipts written. That
+is the number a stale answer is caught against, the number a frame carries, and
+the point a rollback names. Two decisions separated by passes get different
+versions even though no card moved.
 
 So a game is a header plus an ordered list of entries. Rolling back is reading
 fewer entries. Copying is copying a prefix. Neither needs an undo path in the
@@ -39,9 +46,9 @@ One journal per game, append-only, one JSON object per line.
 
 ```
 {"header": { id, format, seed, seats, cards, rules, created, forkedFrom? }}
-{"v":1,"receipt":{...}}
+{"v":0,"receipt":{...}}
 {"v":1,"row":{...}}
-{"v":2,"receipt":{...}}
+{"v":1,"receipt":{...}}
 ```
 
 Append-only matters more than it sounds. It survives a crash with at most a
@@ -170,9 +177,12 @@ must still be running for the link to work.
 
 **D. Push projections to R2 and serve them with a Worker.** Needs a free
 Cloudflare account. The free tier is 10GB of storage and 1M operations a month,
-so one PUT per version is nothing: a 300 version game is 300 operations. A
-finished game stays viewable with no local process. This is the first option
-that gives a link worth sending to somebody.
+and the cadence is what decides whether that fits. A game of basic lands
+answers 2357 decisions and writes 220 receipts, so a PUT per receipt is about
+4,500 games a month and a PUT per decision is about 420. Publish on an event, or
+on a phase ending, not on every pass. A finished game stays viewable with no
+local process. This is the first option that gives a link worth sending to
+somebody.
 
 Workers KV is the wrong store here. Its free tier allows 1,000 writes a day,
 which is three or four games.

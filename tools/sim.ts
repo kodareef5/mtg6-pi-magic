@@ -12,7 +12,7 @@ import { load as loadCards } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
 import { fork, read } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
-import { start } from "../src/core/table.ts";
+import { start } from "../src/core/commit.ts";
 import type { LedgerRow, Table } from "../src/core/table.ts";
 
 type Run = {

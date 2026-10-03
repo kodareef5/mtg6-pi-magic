@@ -10,6 +10,11 @@
  *
  * This is core. A seat played by a person, a remote agent or an MCP client
  * still needs the table to know what a card does.
+ *
+ * Past 150 lines because it is one vocabulary. Zones, reasons, motions, ability
+ * shapes and layers are the terms a card is written in, and a reader checking
+ * whether a motion carries its reason should not have to find which of five
+ * files holds the answer.
  */
 
 import type { SeatId } from "./types.ts";

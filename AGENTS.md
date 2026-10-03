@@ -65,8 +65,9 @@ Within Standard, from `design-ref/CIRCUITRY.md` section 12:
    Decision discovery is pure, simultaneous losses settle together, and cleanup
    keeps asking until the hand fits. Opening choices, turn obligations and
    priority actions have separate handlers. Views identify the current window;
-   table talk is offered at actual phase endings. Control transitions are logged;
-   opening completion is derived from its obligations. The forced ratio uses scripted
+   table talk is offered at actual phase endings. Control transitions move the
+   cursor without writing an event, because a replay derives them; opening
+   completion is derived from its obligations. The forced ratio uses scripted
    seats; the decision-model adapter and the bulk runner are still unwritten.
 2. **Activated abilities**, by interrogation rather than generation, with oracle
    text from the card list as the source. Measured against the Cavern of Souls
@@ -128,16 +129,18 @@ rather than adding a test for each branch.
   hand, respects face-down identities, and keeps hidden counts. Receipt text
   uses event-time visibility, so a later reveal cannot expose an earlier action.
 - **Replay.** The same seed and the same picks give the same log, change for
-  change. Applying the receipts reconstructs both cards and control state.
+  change, and rebuild the cards, the cursor and the outcome. The log holds
+  events only; a control transition is derived rather than stored.
 - **Forced.** Far more decisions are taken by the table than asked of a seat,
   and no row is a `fallback`.
 - **Idempotent.** The same `actionId` applied twice changes the game once.
 - **Pure.** Listing a decision changes no state, including pending losses.
 - **Simultaneous.** The outcome accounts for every loss in a committed group.
 - **Complete.** Cleanup stays pending until every required discard is made.
-- **Accounted.** Unusable answers retry once. A terminating keep or pass is
-  recorded as fallback; a mandatory card selection stays pending without moving
-  a card. Resuming uses the same table and decision.
+- **Accounted.** Unusable answers retry once, and the retry says why the last
+  one was refused. A terminating keep or pass is recorded as fallback; a
+  mandatory card selection stays pending without moving a card. Resuming uses
+  the same table and decision.
 - **Scoped.** Listed moves belong to the current opening or turn window;
   advancing cannot skip an unanswered decision. Table talk is offered once per
   seat at a phase ending, not at every step or bookkeeping transition.
@@ -168,6 +171,7 @@ call does not promise. Read `skills/AGENTS.md` before writing text a model reads
 ```
 index.ts               the Pi extension: five commands, no game logic
 src/core/              the game. Its own AGENTS.md holds the invariants
+  table.ts, commit.ts  the shapes and their readers, and the one writer over them
   pregame.ts           the opening procedure and its choices
   turn.ts, steps.ts    turn obligations, step order, and phase boundaries
   priority.ts          actions offered to the current priority holder

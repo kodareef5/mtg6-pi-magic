@@ -22,7 +22,8 @@ import { standard } from "./src/core/format.ts";
 import type { Intent } from "./src/core/intent.ts";
 import { play } from "./src/core/loop.ts";
 import type { Player } from "./src/core/player.ts";
-import { start, type Table } from "./src/core/table.ts";
+import { start } from "./src/core/commit.ts";
+import type { Table } from "./src/core/table.ts";
 import type { SeatId } from "./src/core/types.ts";
 import { exportGame } from "./src/core/journal.ts";
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
@@ -144,7 +145,7 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(
 					render({
 						seat,
-						version: open_.log.length,
+						version: open_.ledger.length,
 						view: project(open_, seat),
 						...(decision ? { decision } : {}),
 					}),

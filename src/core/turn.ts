@@ -3,7 +3,8 @@ import { mulligansSettled } from "./pregame.ts";
 import type { Pending } from "./moves.ts";
 import { STEPS } from "./steps.ts";
 import type { Reason } from "./syntax.ts";
-import { cardsIn, commit, playing, seat, type Table } from "./table.ts";
+import { commit } from "./commit.ts";
+import { cardsIn, playing, seat, type Table } from "./table.ts";
 
 /**
  * Situation 2. Untap, draw for the turn, declare attackers and blockers,

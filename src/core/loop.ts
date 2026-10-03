@@ -4,7 +4,10 @@
  * Serial by construction. One decision is outstanding at a time, so there is no
  * lock, no lease and no turn timer anywhere in this repo.
  *
- * The version is the length of the log. One source, nothing to keep in step.
+ * The version is the number of decisions answered, which is what a stale pick
+ * has to be caught against: a seat answering the third decision must not settle
+ * the fourth. How much of the log a seat has read is a different number and is
+ * tracked here, because nothing about it bears on an outcome.
  * Past 150 lines to keep answer dispatch and recovery in the same serial loop.
  */
 
@@ -13,7 +16,7 @@ import { declare } from "./declare.ts";
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Intent } from "./intent.ts";
 import { rule } from "./judge.ts";
-import { usable, type Answer, type Player } from "./player.ts";
+import { refuse, type Answer, type Player } from "./player.ts";
 import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
@@ -77,10 +80,10 @@ export async function play(
 			continue;
 		}
 
-		const version = table.log.length;
+		const version = table.ledger.length;
 		const frame = (seat: SeatId): Frame => {
 			const view = project(table, seat, seen[seat] ?? 0);
-			seen[seat] = version;
+			seen[seat] = table.log.length;
 			return { seat, version, view };
 		};
 
@@ -92,22 +95,24 @@ export async function play(
 		const player = players[decision.seat];
 		if (!player) throw new Error(`Seat ${decision.seat} has nobody to answer it`);
 
-		// Retry the same frame, including the history the seat needs to answer it.
+		// Retry the same decision, and say what was wrong with the last answer.
+		// Asking the identical question twice is one question, not two.
 		const asked = { ...frame(decision.seat), decision };
 		let answer: Answer | undefined;
 		const failures: string[] = [];
 		for (let attempt = 0; attempt < 2; attempt++) {
 			try {
-				const received = await player.answer(asked);
-				if (usable(received, decision)) { answer = received; break; }
-				failures.push(JSON.stringify(received) ?? String(received));
+				const received = await player.answer(failures.length ? { ...asked, refused: [...failures] } : asked);
+				const why = refuse(received, decision);
+				if (why === null) { answer = received as Answer; break; }
+				failures.push(why);
 			} catch (error) {
 				failures.push(String(error));
 			}
 		}
 		if (!answer) {
 			const terminal = decision.options.find((option) => option.id === decision.fallback);
-			table.gaps.push(`Seat ${decision.seat}, ${decision.situation}: unusable answers ${failures.join("; ")}. ` +
+			table.gaps.push(`Seat ${decision.seat}, ${decision.situation}: ${failures.join(" Then: ")} ` +
 				(terminal ? `Fallback: ${terminal.id}.` : "Selection remains pending; no terminating option."));
 			if (!terminal) { report(table, told, watch); return null; }
 			apply(table, terminal.id, "engine", "fallback");
@@ -127,7 +132,7 @@ export async function play(
 				// waits. A ruling is recorded against the case, and the next pass
 				// of the loop reads whatever table the ruling left.
 				rule(table, {
-					id: `case-${table.log.length}`,
+					id: `case-${table.cursor.clock}`,
 					about: { option: decision.options[0]?.id ?? "" },
 					raisedBy: decision.seat,
 					claim: answer.claim,
@@ -167,7 +172,7 @@ async function atPhaseEnd(
 		if (!player?.interject) continue;
 		const answer = await player.interject({
 			seat: seat.id,
-			version: table.log.length,
+			version: table.ledger.length,
 			view: project(table, seat.id),
 		});
 		if (!answer) continue;

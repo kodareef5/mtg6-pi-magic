@@ -16,7 +16,8 @@ import { priorityMoves, legal } from "./priority.ts";
 import { advanceTurn, turnBased } from "./turn.ts";
 import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
-import { commit, playing, type Table } from "./table.ts";
+import { commit } from "./commit.ts";
+import { playing, type Table } from "./table.ts";
 import type { Decision } from "./types.ts";
 
 /**

@@ -6,18 +6,16 @@
  * a seat, and it never asks: a seat is answered by a Player, and whether that
  * is an AI, a person, a remote agent or an MCP client changes nothing here.
  *
- * Long for this repo, and it stays one file: these shapes are the state of the
- * game, and splitting them hides which facts live together.
+ * These shapes and the readers over them, and nothing that writes: `commit.ts`
+ * is the only writer. Past 150 lines because the shapes are the state of the
+ * game and splitting them hides which facts live together.
  *
  * design-ref/HOW-MAGIC-WORKS.md sections 1 to 3. Two guarantees matter more
  * than the shapes below. Every object is in exactly one zone. Identity changes
  * when a zone changes, so a creature that dies and returns inherits nothing.
  */
 
-import { createHash } from "node:crypto";
-
-import { firstMulliganFree, type Format } from "./format.ts";
-import { claim } from "./names.ts";
+import type { Format } from "./format.ts";
 import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
@@ -26,7 +24,6 @@ import type { Decision, Outcome, SeatId } from "./types.ts";
 export type { Change, Reason, Zone } from "./syntax.ts";
 
 export type ObjectId = string;
-
 /**
  * One card or token.
  *
@@ -219,7 +216,7 @@ export function thing(table: Table, id: ObjectId): Thing {
 }
 
 /** The zones with a top and a bottom. A hand and a battlefield must not grow one. */
-const ORDERED = new Set<Zone>(["library", "graveyard", "stack"]);
+export const ORDERED = new Set<Zone>(["library", "graveyard", "stack"]);
 
 /** One zone's contents, in order where the zone has one. */
 export function cardsIn(table: Table, zone: Zone, owner?: SeatId): Thing[] {
@@ -231,275 +228,3 @@ export function cardsIn(table: Table, zone: Zone, owner?: SeatId): Thing[] {
 
 /** Seats still in the game, in turn order. */
 export const playing = (table: Table): Seat[] => table.seats.filter((s) => !s.result);
-
-export type Entrant = {
-	/** Asked for, or absent for a generated one. Letters, digits, hyphen, 20 or fewer. */
-	name?: string;
-	deck: string[];
-};
-
-export function start(format: Format, entrants: Entrant[], seed: string): Table {
-	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
-		throw new Error(
-			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
-		);
-	}
-
-	const table: Table = {
-		format,
-		seats: [],
-		things: new Map(),
-		notes: [],
-		cursor: {
-			active: 0,
-			// 103.8a skips the entire first draw step, including its priority window.
-			steps: format.steps.filter((step) => entrants.length !== 2 || step !== "draw"),
-			priority: null,
-			stepDone: false,
-			turn: 1,
-			passes: 0,
-			clock: 0,
-			began: {},
-		},
-		log: [],
-		ledger: [],
-		said: [],
-		rng: { seed, calls: 0 },
-		outcome: null,
-		gaps: [],
-		opening: null,
-	};
-
-	const taken = new Set<string>();
-	entrants.forEach((entrant, id) => {
-		const name = claim(entrant.name, (bound) => random(table, bound), taken);
-		taken.add(name);
-		table.seats.push({
-			id,
-			name,
-			deck: entrant.deck,
-			life: format.startingLife,
-			pool: [],
-			landsPlayed: 0,
-			marks: {},
-		});
-		entrant.deck.forEach((card, i) => {
-			table.things.set(`${id}-${i}`, {
-				id: `${id}-${i}`,
-				incarnation: 0,
-				card,
-				owner: id,
-				controller: id,
-				zone: "library",
-				position: i,
-				tapped: false,
-				faceDown: false,
-				counters: {},
-				damage: 0,
-			});
-		});
-	});
-	table.cursor.began = Object.fromEntries(table.seats.map((s) => [s.id, 0]));
-
-	// One group: every library shuffled before anything is looked at.
-	commit(table, table.seats.map((s) => ({ do: "shuffle" as const, whose: s.id })), "game-setup");
-	return table;
-}
-
-/**
- * The only way the table changes. Nothing else writes to a thing, a life
- * total, a pool or the notepad.
- *
- * One call is one event, because a group of simultaneous changes is one thing
- * cards watch for. Two creatures dying together is not two deaths.
- */
-export function commit(table: Table, changes: Change[], reason: Reason): Receipt {
-	// Read what a watcher may need before anything moves. After the group it
-	// is gone, and a receipt that cannot say what a thing looked like is a
-	// receipt no trigger can read.
-	const before: Receipt["before"] = {};
-	for (const change of changes) {
-		if ("what" in change) {
-			const was = table.things.get(change.what);
-			if (was) before[change.what] = structuredClone(was);
-		}
-	}
-
-	for (const change of changes) {
-		switch (change.do) {
-			case "turn":
-				turnTransition(table, change);
-				break;
-			case "opening":
-				openingTransition(table, change);
-				break;
-			case "move": {
-				const moving = thing(table, change.what);
-				const from = moving.zone;
-				if (ORDERED.has(from)) {
-					for (const other of cardsIn(table, from, moving.owner)) {
-						if ((other.position ?? 0) > (moving.position ?? 0)) other.position = (other.position ?? 0) - 1;
-					}
-				}
-				moving.zone = change.to;
-				// Identity changes on a zone change, so every note left on the
-				// old incarnation stops applying.
-				moving.incarnation += 1;
-				moving.tapped = false;
-				moving.faceDown = false;
-				moving.counters = {};
-				moving.damage = 0;
-				if (ORDERED.has(change.to)) {
-					const zone = cardsIn(table, change.to, moving.owner);
-					if (change.position === "bottom") {
-						moving.position = zone.length;
-					} else {
-						for (const other of zone) other.position = (other.position ?? 0) + 1;
-						moving.position = 0;
-					}
-				} else {
-					delete moving.position;
-				}
-				table.notes = table.notes.filter(
-					(note) => note.source !== moving.id || note.sourceIncarnation === moving.incarnation,
-				);
-				break;
-			}
-			case "tap":
-				thing(table, change.what).tapped = true;
-				break;
-			case "untap":
-				thing(table, change.what).tapped = false;
-				break;
-			case "shuffle": {
-				// The shuffle is the only randomness in the game. Positions are
-				// swapped so the library stays a list the engine fully knows.
-				const library = cardsIn(table, "library", change.whose);
-				for (let i = library.length - 1; i > 0; i--) {
-					const j = random(table, i + 1);
-					const a = library[i]!;
-					const b = library[j]!;
-					const held = a.position;
-					a.position = b.position;
-					b.position = held;
-				}
-				break;
-			}
-			case "change-life":
-				seat(table, change.who).life += change.amount;
-				break;
-			case "mark-player": {
-				const marked = seat(table, change.who);
-				marked.marks[change.key] = (marked.marks[change.key] ?? 0) + change.add;
-				break;
-			}
-			case "end-game": {
-				seat(table, change.who).result = change.result;
-				break;
-			}
-		}
-	}
-
-	// Determine the outcome after every simultaneous change has happened.
-	if (changes.some((change) => change.do === "end-game")) {
-		const left = playing(table);
-		const winner = table.seats.find((s) => s.result === "win");
-		const draw = table.seats.some((s) => s.result === "draw") || (!winner && !left.length);
-		if (winner) for (const s of left) s.result = "lose";
-		else if (draw) for (const s of table.seats) s.result = "draw";
-		else if (left.length === 1) left[0]!.result = "win";
-		if (table.seats.every((s) => s.result)) {
-			table.outcome = {
-				results: Object.fromEntries(table.seats.map((s) => [s.id, s.result!])),
-				gaps: table.gaps,
-			};
-		}
-	}
-
-	const after = Object.fromEntries(Object.keys(before).map((id) => [id, structuredClone(thing(table, id))]));
-	const receipt: Receipt = { seq: table.log.length, changes: structuredClone(changes), reason, before, after };
-	table.log.push(receipt);
-	table.cursor.clock += 1;
-	return receipt;
-}
-
-/** Bookkeeping shares the commit door with card motion so every frame has a version. */
-function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): void {
-	const cursor = table.cursor;
-	switch (change.action) {
-		case "pass": {
-			cursor.passes += 1;
-			const order = playing(table);
-			const at = order.findIndex((s) => s.id === change.who);
-			cursor.priority = order[(at + 1) % order.length]?.id ?? null;
-			return;
-		}
-		case "act":
-			cursor.passes = 0;
-			cursor.priority = change.who;
-			if (change.land) seat(table, change.who).landsPlayed += 1;
-			return;
-		case "complete":
-			cursor.stepDone = cursor.steps[0] !== "cleanup" ||
-				cardsIn(table, "hand", cursor.active).length <= table.format.maxHandSize;
-			return;
-		case "priority":
-			cursor.priority = cursor.active;
-			cursor.passes = 0;
-			return;
-		case "end": {
-			const step = cursor.steps.shift();
-			for (const s of table.seats) s.pool = s.pool.filter((mana) => mana.persists);
-			if (step === "cleanup") {
-				for (const thing of table.things.values()) thing.damage = 0;
-				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
-			}
-			if (step === "end-of-combat") table.notes = table.notes.filter((note) => note.until !== "end-of-combat");
-			cursor.stepDone = false;
-			cursor.priority = null;
-			cursor.passes = 0;
-			if (!cursor.steps.length) {
-				const order = playing(table);
-				const at = order.findIndex((s) => s.id === cursor.active);
-				cursor.active = order[(at + 1) % order.length]?.id ?? cursor.active;
-				cursor.steps = [...table.format.steps];
-				cursor.turn += 1;
-				cursor.began[cursor.active] = cursor.clock;
-				for (const s of table.seats) s.landsPlayed = 0;
-			}
-		}
-	}
-}
-
-function openingTransition(table: Table, change: Extract<Change, { do: "opening" }>): void {
-	if (change.action === "begin") {
-		table.opening = { declared: {}, taken: {}, kept: [], owed: {} };
-		return;
-	}
-	const opening = table.opening!;
-	if (change.action === "declare") opening.declared[change.who] = change.choice;
-	if (change.action === "bottom") {
-		const owes = opening.owed[change.who]! - 1;
-		if (owes > 0) opening.owed[change.who] = owes;
-		else delete opening.owed[change.who];
-	}
-	if (change.action === "round") {
-		const free = firstMulliganFree(table.format, table.seats.length) ? 1 : 0;
-		for (const s of table.seats) {
-			const declaration = opening.declared[s.id];
-			if (declaration === "mulligan") opening.taken[s.id] = (opening.taken[s.id] ?? 0) + 1;
-			if (declaration === "keep") opening.kept.push(s.id);
-			const owes = Math.max(0, (opening.taken[s.id] ?? 0) - free);
-			const bottomNow = table.format.mulliganBottom === "on-keep" ? declaration === "keep" : declaration === "mulligan";
-			if (bottomNow && owes > 0) opening.owed[s.id] = owes;
-		}
-		opening.declared = {};
-	}
-}
-
-/** Deterministic, counter based, so replay needs the seed and nothing else. */
-export function random(table: Table, bound: number): number {
-	const digest = createHash("sha256").update(`${table.rng.seed}:${table.rng.calls}`).digest();
-	table.rng.calls += 1;
-	return digest.readUInt32BE(0) % bound;
-}

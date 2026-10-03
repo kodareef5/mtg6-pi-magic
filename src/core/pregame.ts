@@ -14,7 +14,8 @@ import { firstMulliganFree, mulliganLimit } from "./format.ts";
 import type { Pending } from "./moves.ts";
 import type { Policy } from "./intent.ts";
 import { compile, type Change, type Compiled, type Reason } from "./syntax.ts";
-import { cardsIn, commit, type Table } from "./table.ts";
+import { commit } from "./commit.ts";
+import { cardsIn, type Table } from "./table.ts";
 import type { Option, SeatId } from "./types.ts";
 
 export type Prepared = {

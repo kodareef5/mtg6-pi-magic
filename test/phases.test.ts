@@ -5,7 +5,7 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
-import { start } from "../src/core/table.ts";
+import { start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 
 const table = () => start(standard, [
@@ -21,7 +21,7 @@ test("listed actions stay in their window and a pending choice cannot be skipped
 	assert.deepEqual(built, before);
 	const version = built.log.length;
 	apply(built, "mulligan", "model", "chosen");
-	assert.ok(built.log.length > version, "a declaration changes the frame version");
+	assert.ok(built.log.length > version, "a declaration is an event other seats read");
 	assert.match(project(built, 1).table.join("\n"), /mulligan/);
 	apply(built, "keep", "model", "chosen");
 	advance(built);
@@ -49,9 +49,17 @@ test("listed actions stay in their window and a pending choice cannot be skipped
 			}
 			if (o.id.startsWith("discard:")) assert.equal(built.cursor.steps[0], "cleanup");
 		}
-		const version = built.log.length;
+		// A pass is a decision and moves the version, and it moves no cards, so
+		// it is not an event and the log does not grow. Both halves matter: the
+		// first is what catches a stale answer, the second is the stored size.
+		const events = built.log.length;
+		const answered = built.ledger.length;
+		const clock = built.cursor.clock;
+		const passing = d.options.length === 1 && d.options[0]!.id === "pass";
 		apply(built, d.options[0]!.id, "model", "chosen");
-		assert.ok(built.log.length > version, "a pass changes the frame version");
+		assert.ok(built.ledger.length > answered, "an answered decision moves the frame version");
+		assert.ok(built.cursor.clock > clock, "every committed group moves the clock");
+		if (passing) assert.equal(built.log.length, events, "a pass is not an event");
 	}
 	assert.ok(built.cursor.steps.includes("draw"));
 });

@@ -14,8 +14,9 @@ import { test } from "node:test";
 import { load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
-import type { Player } from "../src/core/player.ts";
-import { commit, start, type Table } from "../src/core/table.ts";
+import { scriptedPlayer, type Player } from "../src/core/player.ts";
+import { commit, start } from "../src/core/commit.ts";
+import type { Table } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
 import { describe, project, render } from "../src/core/view.ts";
 
@@ -103,9 +104,15 @@ test("replay: the same seed gives the same log, change for change", async () => 
 	);
 	assert.deepEqual(a.ledger.map((r) => r.picked), b.ledger.map((r) => r.picked));
 
-	// Receipts also reconstruct control state, including passes and phase changes.
+	// The seed and the recorded picks rebuild the whole game: cards, control
+	// state and outcome. That is what journal.replay does, and it is why a
+	// control transition needs no receipt of its own to be replayable.
 	const restored = table();
-	for (const r of a.log.slice(restored.log.length)) commit(restored, r.changes, r.reason);
+	const scripts = Object.fromEntries(restored.seats.map((s) => [
+		s.id,
+		scriptedPlayer(s.name, a.ledger.filter((r) => r.by === "model" && r.seat === s.id).map((r) => r.picked)),
+	]));
+	await play(restored, scripts, {});
 	assert.deepEqual(restored.log, a.log);
 	assert.deepEqual(restored.cursor, a.cursor);
 	assert.deepEqual(restored.opening, a.opening);
@@ -113,6 +120,11 @@ test("replay: the same seed gives the same log, change for change", async () => 
 	assert.deepEqual(restored.seats, a.seats);
 	assert.deepEqual(restored.rng, a.rng);
 	assert.deepEqual(restored.outcome, a.outcome);
+
+	// Control transitions move the cursor and stay out of the log, so the
+	// stored form is the size of the game rather than of the clock.
+	assert.ok(a.log.length < a.cursor.clock / 10, `${a.log.length} receipts, ${a.cursor.clock} groups`);
+	assert.equal(a.log.some((r) => r.changes.every((c) => c.do === "turn")), false);
 });
 
 test("a different seed gives a different game", async () => {

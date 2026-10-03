@@ -27,7 +27,12 @@ export type Header = {
 	forkedFrom?: { game: string; version: number };
 };
 
-/** One line after the header. `v` is the log length when it was written. */
+/**
+ * One line after the header. `v` is the decisions answered when it was written,
+ * which is the version a frame carries and the point a rollback names. A group
+ * that only moves the cursor writes no receipt, because `replay` derives every
+ * one of those from the picks.
+ */
 export type Line =
 	| { v: number; receipt: Receipt }
 	| { v: number; row: LedgerRow }

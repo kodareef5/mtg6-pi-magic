@@ -5,7 +5,8 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
 import type { Answer, Player } from "../src/core/player.ts";
-import { cardsIn, commit, start } from "../src/core/table.ts";
+import { commit, start } from "../src/core/commit.ts";
+import { cardsIn } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
 
 const table = () => start(standard, [
@@ -30,7 +31,12 @@ test("unusable answers retry the same decision and never masquerade as choices",
 				return pick(frame);
 			});
 			assert.ok(await play(built, { 0: bad, 1: player(async (frame) => pick(frame)) }, {}));
-			assert.deepEqual(frames[0], frames[1]);
+			// Same decision, same view, same version. The one difference is that
+			// the retry says why the last answer was not taken.
+			assert.deepEqual({ ...frames[1], refused: undefined }, { ...frames[0], refused: undefined });
+			assert.equal(frames[0]!.refused, undefined);
+			assert.equal(frames[1]!.refused?.length, 1);
+			assert.match(frames[1]!.refused![0]!, invalid instanceof Error ? /offline/ : /answer|option/);
 			const fallback = failures === 2;
 			assert.equal(built.ledger[0]!.why, fallback ? "fallback" : "chosen");
 			assert.equal(built.ledger[0]!.picked, "keep");

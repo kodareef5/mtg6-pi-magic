@@ -5,7 +5,7 @@ import { focus } from "../src/context/packet.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import type { Intent } from "../src/core/intent.ts";
-import { start } from "../src/core/table.ts";
+import { start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 
 test("context preserves the seat's options and knowledge and scopes assumptions to a turn and phase", () => {

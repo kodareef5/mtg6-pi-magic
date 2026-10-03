@@ -128,11 +128,13 @@ export function describe(table: Table, receipt: Receipt): string {
 				if (change.action === "declare") parts.push(`${seat(table, change.who).name} declared ${change.choice}`);
 				break;
 			case "move": {
-				const moved = receipt.after[change.what];
+				// A token that left the battlefield has no `after`, so the owner
+				// and the name come from what the table saw before the group.
+				const was = receipt.before[change.what];
+				const moved = receipt.after[change.what] ?? was;
 				if (!moved) break;
 				const who = seat(table, moved.owner).name;
-				const before = receipt.before[change.what];
-				const name = visible(moved) ? moved.card : publicName(before);
+				const name = visible(moved) ? moved.card : publicName(was);
 				parts.push(`${who} put ${name} into ${change.to} (${change.reason})`);
 				break;
 			}
@@ -181,6 +183,11 @@ export function render(frame: Frame): string {
 	if (!frame.decision) {
 		out.push("", "Not your turn to act.");
 		return out.join("\n");
+	}
+
+	if (frame.refused?.length) {
+		out.push("", "This decision is still open. What came back was not taken:");
+		out.push(...frame.refused.map((why) => `  ${why}`));
 	}
 
 	out.push("", frame.decision.question);

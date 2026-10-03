@@ -78,9 +78,21 @@ export type SeatView = {
 /** What a seat is shown at one moment. A decision means it is this seat's turn. */
 export type Frame = {
 	seat: SeatId;
+	/**
+	 * Decisions answered at this table. A pick carries it back and a host refuses
+	 * one that does not match, so an answer written against an earlier decision
+	 * cannot settle a later one. Not the log length: a pass is a decision and
+	 * moves no cards.
+	 */
 	version: number;
 	view: SeatView;
 	decision?: Decision;
+	/**
+	 * Why the answers already sent for this decision were not taken. Present
+	 * only on a retry, and the decision is unchanged: the table is not asking
+	 * something new, it is saying what came back and why.
+	 */
+	refused?: string[];
 };
 
 export type Pick = {
