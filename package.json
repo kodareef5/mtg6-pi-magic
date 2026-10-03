@@ -1,0 +1,53 @@
+{
+  "name": "pi-magic",
+  "version": "0.0.1",
+  "description": "Host or join a game of Magic from Pi. One Pi owns the table and hands out chairs; each guest sees only its own chair.",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "magic",
+    "mtg",
+    "multi-agent",
+    "websocket"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "files": [
+    "index.ts",
+    "src",
+    "skills",
+    "cards",
+    "rules",
+    "tools",
+    "docs",
+    "README.md"
+  ],
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "cards": "node tools/cards.ts --format standard --columns lean -o cards/standard.tsv --verify",
+    "universe": "node tools/cards.ts --verify",
+    "rules": "node tools/rules.ts --verify -o rules/cr.tsv"
+  },
+  "dependencies": {
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^1.0.1",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.0",
+    "typebox": "^1.3.27",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

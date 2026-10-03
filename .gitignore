@@ -1,0 +1,12 @@
+node_modules/
+*.tsbuildinfo
+.DS_Store
+.pi/
+
+# The Scryfall download and the full 32,870 card universe are regenerable:
+# npm run universe. The standard list and the rules are committed.
+.cache/
+cards/universe.tsv
+
+# Reference only, and not ours to publish.
+design-ref/

@@ -1,0 +1,130 @@
+/**
+ * Draw odds, per viewer and per deck owner.
+ *
+ * Long for this repo, and it stays one file: the formulas and the limits on
+ * reading them belong next to each other, because a number used wrongly is
+ * worse than no number.
+ *
+ * Every figure is computed from one viewer's knowledge, never from the true
+ * table. A calculator that reads the real library and reports a probability is
+ * a leak wearing a number.
+ */
+
+import type { Knowledge } from "./knowledge.ts";
+import type { Table } from "./table.ts";
+import type { SeatId } from "./types.ts";
+
+export type NameOdds = {
+	/** Copies not accounted for outside the library, including an opponent's unknown hand. */
+	remaining: number;
+	/** Copies this viewer can name in that seat's current hand. */
+	knownInHand: number;
+	/** Chance that seat's next ordinary draw is this name. */
+	draw: number;
+	/** Chance that seat's current hand holds at least one copy. */
+	inHand: number;
+	/** The visibility and allocation assumptions behind the two numbers. */
+	basis: string;
+};
+
+/**
+ * The pool is the unresolved one, and choosing it wrongly is the usual mistake.
+ *
+ * For the viewer's own seat the pool is its library, because it identified
+ * every card it drew. For another seat the pool is that seat's unknown hand and
+ * library together, because a copy may already be in hand. Dividing four copies
+ * by a 53 card library is wrong for exactly that reason.
+ *
+ * With no retained ordering, where N is the pool, K its copies of this name and
+ * H the unknown hand size:
+ *
+ *   draw   = K / N
+ *   inHand = 1 - C(N-K, H) / C(N, H)
+ *
+ * Four copies in an otherwise unknown 60 card deck with a seven card hand:
+ * 6.67% next draw, 39.95% already held.
+ *
+ * Where a region covers the next library position, the draw chance splits into
+ * the part the region accounts for and the part it does not:
+ *
+ *   draw = known copies in region / region slots
+ *        + (1 - all known in region / region slots) * unassigned copies / unassigned cards
+ *
+ * The holding chance counts, per region, the allocations where no known copy
+ * reaches the hand while tracking how many anonymous hand slots are left, then
+ * applies the miss every copy calculation to the anonymous pool. Those
+ * intermediate weights do not sum to one, and should not: the missing weight is
+ * the allocations where a known copy is already in hand. A copy known to be in
+ * hand makes inHand exactly one.
+ */
+export function odds(
+	table: Table,
+	knowledge: Knowledge,
+	owner: SeatId,
+): Record<string, NameOdds> {
+	/*
+	 * 1. Start from the registered deck list for `owner`, by card name. Tokens,
+	 *    copies and ability objects are not cards and are not counted.
+	 * 2. Subtract every copy this viewer can name outside that library.
+	 * 3. Choose the pool by the rule above, and record which one in `basis`.
+	 * 4. Apply the formulas, taking regions into account where they cover the
+	 *    relevant position.
+	 * 5. Absent beats guessed. If the game type registered no deck lists, or a
+	 *    zone this viewer cannot reason about has entered the pool, return
+	 *    nothing for that name rather than a number from the truth.
+	 */
+	void [table, knowledge, owner];
+	throw new Error("odds is unwritten. Five steps above.");
+}
+
+/**
+ * What a mulligan is worth: the spread of hands this seat would draw instead.
+ *
+ * Sampled from the seat's belief about its own library, never from the real
+ * one. A seat knows its own deck composition, so sampling that composition
+ * reveals nothing and is honest. Reading the shuffled order would be cheating,
+ * and that is the line.
+ *
+ * This is what turns "a credible draw path" from a feeling into a number. It
+ * answers questions of the shape "at six cards, how often do I have two to
+ * four lands and a play on turn two", which is the comparison a mulligan
+ * decision actually needs. docs/MULLIGAN.md.
+ *
+ * 1. Build the multiset this seat believes is in its library.
+ * 2. Deal `size` cards from it, many times, with the recorded random so a
+ *    replay gets the same spread.
+ * 3. Count how many samples satisfy each named condition and return the shares.
+ * 4. Say how many samples it took, because a share without a sample count is
+ *    not a number anybody can weigh.
+ */
+export function atSize(
+	table: Table,
+	knowledge: Knowledge,
+	seat: SeatId,
+	size: number,
+	conditions: Record<string, (hand: string[]) => boolean>,
+): { samples: number; share: Record<string, number> } {
+	void [table, knowledge, seat, size, conditions];
+	throw new Error("atSize is unwritten. Four steps above, and it samples belief.");
+}
+
+/**
+ * How to read these numbers, and three ways to misread them.
+ *
+ * **They are marginals, one name at a time.** They do not answer "a counterspell
+ * and the mana to cast it", or "a land and a threat within two draws". If one
+ * Bolt and one Forest sit across a hand and a library, Bolt in hand and Bolt
+ * next draw are each 50% and both at once is impossible. Multiplying marginals
+ * gives a confident wrong answer. Summing next draw across distinct land names
+ * is fine. Summing holding chances across names generally is not.
+ *
+ * **Uniform allocation is a prior, not hand reading.** A private reorder, a
+ * bottomed card or a kept hand is treated as any arrangement being equally
+ * likely. A mulligan, a scry, a tutor and a declined response all make some
+ * arrangements far more plausible. Reading an opponent that way needs a
+ * separate behavioural model, kept out of this file and out of the table.
+ *
+ * **Three different quantities stay apart.** A draw chance from this file, a
+ * belief about what an opponent is holding, and a decision model's confidence
+ * in its own answer are not the same number and never combine into one.
+ */
