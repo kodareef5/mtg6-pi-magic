@@ -387,16 +387,24 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			}
 			case "end-game": {
 				seat(table, change.who).result = change.result;
-				const left = playing(table);
-				if (left.length === 1) left[0]!.result = "win";
-				if (left.length <= 1) {
-					table.outcome = {
-						results: Object.fromEntries(table.seats.map((s) => [s.id, s.result ?? "draw"])),
-						gaps: table.gaps,
-					};
-				}
 				break;
 			}
+		}
+	}
+
+	// Determine the outcome after every simultaneous change has happened.
+	if (changes.some((change) => change.do === "end-game")) {
+		const left = playing(table);
+		const winner = table.seats.find((s) => s.result === "win");
+		const draw = table.seats.some((s) => s.result === "draw") || (!winner && !left.length);
+		if (winner) for (const s of left) s.result = "lose";
+		else if (draw) for (const s of table.seats) s.result = "draw";
+		else if (left.length === 1) left[0]!.result = "win";
+		if (table.seats.every((s) => s.result)) {
+			table.outcome = {
+				results: Object.fromEntries(table.seats.map((s) => [s.id, s.result!])),
+				gaps: table.gaps,
+			};
 		}
 	}
 

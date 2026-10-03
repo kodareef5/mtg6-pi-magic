@@ -47,19 +47,16 @@ const NO_PRIORITY = new Set(["untap", "cleanup"]);
 function pending(table: Table): Pending | null {
 	if (table.outcome) return null;
 
-	// 3. State based actions, to a fixpoint. They cascade, so this loops.
-	//    None of the ones here has a choice, so none of them is ever asked.
-	const automatic = stateBased(table);
-	if (automatic) {
-		take(table, automatic, automatic.moves[0]!, "engine", "forced");
-		return pending(table);
-	}
-
 	// 2. Pregame: mulligan, then the opening actions a card permits. Situation 7.
 	//    Null before the hands are dealt and between rounds: advance deals and
 	//    applies, because neither is a decision.
 	if (table.opening === null) return null;
 	if (!table.opening.done) return opening(table);
+
+	// 3. The loop applies the whole group, then asks again for cascading actions.
+	//    Listing the group must not execute it.
+	const automatic = stateBased(table);
+	if (automatic) return automatic;
 
 	// 4. A replacement applies to a pending event: which applies first.
 	// 5. Triggers waiting to go on the stack: what order.
@@ -311,30 +308,20 @@ function legal(table: Table, move: Move): boolean {
  * needs cards.
  */
 function stateBased(table: Table): Pending | null {
-	for (const s of playing(table)) {
-		const why =
-			s.life <= 0
-				? "is at zero life or less"
-				: (s.marks["drew-from-empty"] ?? 0) > 0
-					? "tried to draw from an empty library"
-					: (s.marks.poison ?? 0) >= 10
-						? "has ten or more poison counters"
-						: null;
-		if (!why) continue;
-		return {
-			situation: "state-based",
-			seat: s.id,
-			question: `${s.name} ${why}.`,
-			moves: [
-				{
-					option: { id: `lose:${s.id}`, label: `${s.name} loses the game` },
-					changes: [{ do: "end-game", who: s.id, result: "lose" }],
-					reason: "state-based-action",
-				},
-			],
-		};
-	}
-	return null;
+	const losing = playing(table).filter((s) =>
+		s.life <= 0 || (s.marks["drew-from-empty"] ?? 0) > 0 || (s.marks.poison ?? 0) >= 10,
+	);
+	if (!losing.length) return null;
+	return {
+		situation: "state-based",
+		seat: losing[0]!.id,
+		question: "Apply state-based losses together.",
+		moves: [{
+			option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: `Apply losses for ${losing.map((s) => s.name).join(", ")}` },
+			changes: losing.map((s) => ({ do: "end-game", who: s.id, result: "lose" })),
+			reason: "state-based-action",
+		}],
+	};
 }
 
 /**
