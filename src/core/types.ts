@@ -5,7 +5,15 @@
  * State lives in table.ts. Nothing here describes a card, a zone or a motion.
  */
 
+import type { Phase, Step } from "./steps.ts";
+
 export type SeatId = number;
+
+/** Derived from the table when projecting. An opening is not an untap step. */
+export type Window =
+	| { kind: "opening"; action: "deal" | "declare" | "redraw" | "bottom" }
+	| { kind: "turn"; turn: number; active: SeatId; phase: Phase; step: Step }
+	| { kind: "finished" };
 
 /**
  * Who a view is built for. A spectator is entitled to public facts and nothing
@@ -58,6 +66,7 @@ export type Decision = {
  * and never silence.
  */
 export type SeatView = {
+	window: Window;
 	/** Public facts, one line each, same order every time so two frames diff. */
 	table: string[];
 	/** What only this seat knows. */

@@ -15,11 +15,27 @@
  */
 
 import { cardsIn, seat, type Receipt, type Table, type Thing } from "./table.ts";
-import type { Frame, SeatView, Viewer } from "./types.ts";
+import { owedFor } from "./pregame.ts";
+import { STEPS } from "./steps.ts";
+import type { Frame, SeatView, Viewer, Window } from "./types.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
 const publicName = (thing?: Thing) => visible(thing) ? thing.card : "an unknown card";
+
+function window(table: Table): Window {
+	if (table.outcome) return { kind: "finished" };
+	const opening = table.opening;
+	if (!opening) return { kind: "opening", action: "deal" };
+	if (!opening.done) {
+		const action = Object.values(opening.owed).some((n) => n > 0) ? "bottom" :
+			table.seats.some((s) => !opening.kept.includes(s.id) && !opening.declared[s.id]) ? "declare" : "redraw";
+		return { kind: "opening", action };
+	}
+	const { turn, active, steps } = table.cursor;
+	const step = steps[0]!;
+	return { kind: "turn", turn, active, step, phase: STEPS[step].phase };
+}
 
 /**
  * The only way facts leave the engine. Nothing else reads the table on a
@@ -37,12 +53,13 @@ const publicName = (thing?: Thing) => visible(thing) ? thing.card : "an unknown 
  */
 export function project(table: Table, viewer: Viewer, since = table.log.length): SeatView {
 	const cursor = table.cursor;
-	const step = cursor.steps[0] ?? "between turns";
+	const at = window(table);
 	const holder = cursor.priority === null ? "nobody" : seat(table, cursor.priority).name;
 
-	const lines = [
-		`Turn ${cursor.turn}, ${step}. ${seat(table, cursor.active).name} is active, ${holder} has priority.`,
-	];
+	const lines = [at.kind === "turn"
+		? `Turn ${at.turn}, ${at.phase}, ${at.step}. ${seat(table, at.active).name} is active, ${holder} has priority.`
+		: at.kind === "opening" ? `Opening: ${at.action}. ${table.seats[0]!.name} starts. Nobody has priority.`
+		: "Game over."];
 	for (const s of table.seats) {
 		const field = cardsIn(table, "battlefield").filter((t) => t.controller === s.id);
 		lines.push(
@@ -52,6 +69,11 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 				`${field.length} on the battlefield` +
 				(s.result ? `, has ${s.result}` : ""),
 		);
+		if (at.kind === "opening") {
+			const opening = table.opening;
+			lines.push(`  ${opening?.taken[s.id] ?? 0} mulligans; ` +
+				(opening?.kept.includes(s.id) ? "kept" : opening?.declared[s.id] ?? "has not declared"));
+		}
 	}
 	for (const permanent of cardsIn(table, "battlefield")) {
 		const marks = [
@@ -83,9 +105,12 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 		const owed = table.opening?.owed[viewer] ?? 0;
 		if (owed) yours.push(`${owed} card${owed === 1 ? "" : "s"} still owed to the bottom of your library`);
+		else if (at.kind === "opening" && at.action === "declare" && table.format.mulliganBottom === "on-keep") {
+			yours.push(`Keeping this hand puts ${owedFor(table, viewer)} on the bottom.`);
+		}
 	}
 
-	return { table: lines, yours, since: table.log.slice(since).map((r) => describe(table, r)) };
+	return { window: at, table: lines, yours, since: table.log.slice(since).map((r) => describe(table, r)) };
 }
 
 /**

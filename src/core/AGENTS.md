@@ -82,13 +82,30 @@ after a discard while the hand still exceeds its limit.
 
 ## A move carries its changes, and a seat never sees them
 
-Inside decisions.ts a move is an option plus the changes behind it. The changes
-stop at the edge of that module. A seat that can read the changes can read
-another seat's cards.
+The opening, turn and priority handlers build internal moves: an option plus
+its changes. `decisions.ts` strips those changes before returning a decision.
+A seat that can read the changes can read another seat's cards.
 
 Moves are recomputed on apply rather than carried over from the call that built
 them. The loop is serial and the table has not moved, and a stashed plan is a
 stale plan waiting to happen.
+
+## A window owns its listed actions
+
+Pregame offers declarations and bottom choices only while the opening is
+unsettled. Turn obligations belong to their step: untap, draw, and cleanup
+discard. Priority offers land plays only in the active seat's main phase with
+an empty stack. These gates describe the offered list; declarations still use
+their own conservation checks rather than the list's timing rules.
+
+`steps.ts` names the phase and priority behavior of each step. The remaining
+step list stays editable for skipped, repeated and inserted steps. Skipping a
+draw step removes its priority window too. A null decision alone never means a
+phase ended: it also occurs while dealing, applying a round, or granting priority.
+
+The view carries a derived opening or turn window. Opening views name public
+declarations and mulligan counts and the viewer's remaining obligation. They
+do not claim that the first untap step has started.
 
 ## Projection is the only reader
 

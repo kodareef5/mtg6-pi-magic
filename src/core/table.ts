@@ -19,6 +19,7 @@ import { createHash } from "node:crypto";
 import type { Format } from "./format.ts";
 import { claim } from "./names.ts";
 import type { Said } from "./say.ts";
+import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 
@@ -88,7 +89,7 @@ export type Note = {
 export type Cursor = {
 	active: SeatId;
 	/** The remaining steps of the current turn, head first. */
-	steps: string[];
+	steps: Step[];
 	priority: SeatId | null;
 	/** Whether this step's turn-based action has been performed. */
 	stepDone: boolean;
@@ -195,7 +196,7 @@ export type Table = {
 export type Opening = {
 	/** This round's declarations. Cleared when the round is applied. */
 	declared: Record<SeatId, "keep" | "mulligan">;
-	/** Mulligans taken per seat, not counting a free first one. */
+	/** Mulligans taken per seat, including a free first one. owedFor applies the allowance. */
 	taken: Record<SeatId, number>;
 	/** Seats that have kept. 103.5: they are not asked again. */
 	kept: SeatId[];
@@ -253,7 +254,8 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
 		notes: [],
 		cursor: {
 			active: 0,
-			steps: [...format.steps],
+			// 103.8a skips the entire first draw step, including its priority window.
+			steps: format.steps.filter((step) => entrants.length !== 2 || step !== "draw"),
 			priority: null,
 			stepDone: false,
 			turn: 1,

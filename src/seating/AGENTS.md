@@ -13,12 +13,13 @@ short version:
 - An invite is a capability. Whoever presents the secret first claims the seat.
 - A pick carries the version of the frame it answers and a fresh actionId, which
   is what makes a stale pick, a replayed pick and a reused id tell apart.
-- `judgeAct` in host.ts holds all five answers and has the only tests in the
-  repo that pass.
+- `judgeAct` in host.ts distinguishes acceptance, replay, id reuse, staleness
+  and invalid picks. Its tests cover the parked wire; core invariants have
+  their own tests.
 
 ## What wiring it in means
 
-A remote seat is a Player like any other. It answers `decide` from a socket
+A remote seat is a Player like any other. It answers `answer` from a socket
 instead of from a model. So the work is a server, a chair claim, and
 `remotePlayer`. It is not a second game loop, and if it starts to look like one,
 stop.

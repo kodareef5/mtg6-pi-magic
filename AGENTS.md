@@ -63,7 +63,9 @@ Within Standard, from `design-ref/CIRCUITRY.md` section 12:
 1. **A game with no cards.** Pass, play a land, untap, draw, mulligan, deck out.
    **Implemented for basic-land fixtures:** two seats finish by deck out.
    Decision discovery is pure, simultaneous losses settle together, and cleanup
-   keeps asking until the hand fits. The forced ratio is measured with scripted
+   keeps asking until the hand fits. Opening choices, turn obligations and
+   priority actions have separate handlers. Views identify the current window;
+   table talk is offered at actual phase endings. The forced ratio uses scripted
    seats; the decision-model adapter and the bulk runner are still unwritten.
 2. **Activated abilities**, by interrogation rather than generation, with oracle
    text from the card list as the source. Measured against the Cavern of Souls
@@ -135,6 +137,9 @@ rather than adding a test for each branch.
 - **Accounted.** Unusable answers retry once. A terminating keep or pass is
   recorded as fallback; a mandatory card selection stays pending without moving
   a card. Resuming uses the same table and decision.
+- **Scoped.** Listed moves belong to the current opening or turn window;
+  advancing cannot skip an unanswered decision. Table talk is offered once per
+  seat at a phase ending, not at every step or bookkeeping transition.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Tests live beside the code and ship with neither:
@@ -160,6 +165,10 @@ call does not promise. Read `skills/AGENTS.md` before writing text a model reads
 ```
 index.ts               the Pi extension: five commands, no game logic
 src/core/              the game. Its own AGENTS.md holds the invariants
+  pregame.ts           the opening procedure and its choices
+  turn.ts, steps.ts    turn obligations, step order, and phase boundaries
+  priority.ts          actions offered to the current priority holder
+  decisions.ts         the ordered dispatcher and application of listed picks
 src/context/           questions for a decision model. Its own AGENTS.md
 src/seating/           a seat over a socket. Parked
 tools/cards.ts         build a card list from Scryfall, any format or all of it

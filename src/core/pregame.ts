@@ -5,13 +5,15 @@
  * offer a legal move without knowing what the cards do, whoever is sitting
  * there. The policy map is a slot, and the record it holds is in intent.ts.
  *
+ * Past 150 lines because its round procedure and choices share the same state.
  * The mulligan is here too. docs/MULLIGAN.md is the plan, the rule text, and
  * the one place where we read 103.5 differently from its literal wording.
  */
 
 import { firstMulliganFree, mulliganLimit } from "./format.ts";
+import type { Pending } from "./moves.ts";
 import type { Policy } from "./intent.ts";
-import { compile, type Change, type Compiled } from "./syntax.ts";
+import { compile, type Change, type Compiled, type Reason } from "./syntax.ts";
 import { cardsIn, commit, type Table } from "./table.ts";
 import type { Option, SeatId } from "./types.ts";
 
@@ -64,7 +66,7 @@ export function owedFor(table: Table, seat: SeatId): number {
  * opening hand would be zero cards. An opening-hand action a card permits is a
  * third kind of option and is unwritten: a seat holding Serum Powder is a gap.
  */
-export function declareOptions(table: Table, seat: SeatId): Option[] {
+function declareOptions(table: Table, seat: SeatId): Option[] {
 	const options: Option[] = [{ id: "keep", label: "Keep this hand" }];
 	const taken = table.opening?.taken[seat] ?? 0;
 	if (taken < mulliganLimit(table.format, table.seats.length)) {
@@ -90,7 +92,7 @@ export function declareOptions(table: Table, seat: SeatId): Option[] {
  */
 export function applyDeclared(table: Table): void {
 	const opening = table.opening;
-	if (!opening) throw new Error("applyDeclared with no opening round");
+	if (!opening || opening.done || nextOpening(table)) throw new Error("The opening round still has a decision or is already settled");
 
 	const taking = table.seats.filter((s) => opening.declared[s.id] === "mulligan");
 	const changes: Change[] = [];
@@ -114,7 +116,8 @@ export function applyDeclared(table: Table): void {
 	if (draws.length) commit(table, draws, "game-setup");
 
 	for (const s of taking) {
-		if (table.format.mulliganBottom === "per-mulligan") opening.owed[s.id] = owedFor(table, s.id);
+		const owes = owedFor(table, s.id);
+		if (table.format.mulliganBottom === "per-mulligan" && owes > 0) opening.owed[s.id] = owes;
 	}
 
 	for (const s of table.seats) {
@@ -140,7 +143,7 @@ export function applyDeclared(table: Table): void {
  * placed, which matters only when something later reads the bottom of a
  * library, and the rules give the seat that choice so it is recorded.
  */
-export function bottomOptions(table: Table, seat: SeatId): Option[] {
+function bottomOptions(table: Table, seat: SeatId): Option[] {
 	const owes = table.opening?.owed[seat] ?? 0;
 	return cardsIn(table, "hand", seat).map((card) => ({
 		id: `bottom:${card.id}`,
@@ -160,4 +163,78 @@ export function bottomOptions(table: Table, seat: SeatId): Option[] {
 export function openingOptions(table: Table, seat: SeatId): Option[] {
 	void [table, seat];
 	return [];
+}
+
+/**
+ * Situation 7, in this order: put cards on the bottom, declare, then any
+ * opening-hand action. pregame.ts owns the procedure and docs/MULLIGAN.md owns
+ * the reasoning.
+ */
+export function nextOpening(table: Table): Pending | null {
+	const round = table.opening;
+	if (!round || round.done || table.outcome) return null;
+
+	// A seat owing cards to the bottom answers before anything else, because
+	// its hand is not an opening hand until it does.
+	for (const s of table.seats) {
+		if ((round.owed[s.id] ?? 0) > 0) {
+			return {
+				situation: "pregame",
+				seat: s.id,
+				question: `Put ${round.owed[s.id]} card${round.owed[s.id] === 1 ? "" : "s"} on the bottom of your library.`,
+				moves: bottomOptions(table, s.id).map((option) => ({
+					option,
+					changes: [
+						{
+							do: "move",
+							what: option.id.slice("bottom:".length),
+							to: "library",
+							position: "bottom",
+							reason: "game-setup",
+						},
+					],
+					reason: "game-setup" as Reason,
+				})),
+			};
+		}
+	}
+
+	// 103.5: the starting player declares, then each other seat in turn order.
+	for (const s of table.seats) {
+		if (round.kept.includes(s.id)) continue;
+		if (round.declared[s.id]) continue;
+		return {
+			situation: "pregame",
+			seat: s.id,
+			question: `Keep this hand of ${cardsIn(table, "hand", s.id).length}?`,
+			fallback: "keep",
+			moves: declareOptions(table, s.id).map((option) => ({
+				option,
+				changes: [],
+				reason: "game-setup" as Reason,
+			})),
+		};
+	}
+
+	// Every seat has declared. advance applies the round, because taking the
+	// mulligans is not a decision.
+	return null;
+}
+
+
+export function pickedOpening(table: Table, who: SeatId, id: string): void {
+	if (table.opening && !table.opening.done) {
+		if (id === "keep" || id === "mulligan") table.opening.declared[who] = id;
+		if (id.startsWith("bottom:")) {
+			const owes = (table.opening.owed[who] ?? 1) - 1;
+			if (owes > 0) table.opening.owed[who] = owes;
+			else delete table.opening.owed[who];
+			if (
+				table.opening.kept.length === table.seats.length &&
+				Object.keys(table.opening.owed).length === 0
+			) {
+				table.opening.done = true;
+			}
+		}
+	}
 }

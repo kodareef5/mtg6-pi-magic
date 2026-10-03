@@ -65,7 +65,7 @@ test("decode returns a known message", () => {
 		type: "frame" as const,
 		seat: 5,
 		version: 147,
-		view: { table: ["Green at 20 life"], yours: ["Forest"], since: [] },
+		view: { window: { kind: "opening" as const, action: "declare" as const }, table: ["Green at 20 life"], yours: ["Forest"], since: [] },
 	};
 	assert.deepEqual(decode(encode(frame)), frame);
 });

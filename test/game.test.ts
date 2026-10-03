@@ -77,6 +77,18 @@ test("forced: far more decisions are taken by the table than asked of a seat", a
 	assert.ok(by("forced") > by("chosen") * 2, `${by("forced")} forced, ${by("chosen")} chosen`);
 	// Every row names what was offered, so a recorded game is a test corpus.
 	for (const row of built.ledger) assert.ok(row.offered.includes(row.picked));
+
+	// At the mulligan limit, keeping and the last bottom selection are forced too.
+	const limited = table();
+	limited.opening = { declared: {}, taken: { 0: 7 }, kept: [], owed: {}, done: false };
+	commit(limited, [...limited.things.values()].filter((c) => c.owner === 0).slice(0, 7)
+		.map((c) => ({ do: "move", what: c.id, to: "hand", reason: "draw" })), "game-setup");
+	const strict = policy("strict");
+	const answer = strict.answer;
+	strict.answer = (frame) => { assert.ok(frame.decision!.options.length > 1); return answer(frame); };
+	await play(limited, { 0: strict, 1: strict }, {});
+	assert.equal(limited.ledger[0]!.why, "forced");
+	assert.ok(limited.ledger.some((r) => r.picked.startsWith("bottom:") && r.why === "forced"));
 });
 
 test("replay: the same seed gives the same log, change for change", async () => {
@@ -200,5 +212,6 @@ test("a spectator sees the public lines and no hand", () => {
 	const view = project(built, "spectator");
 	assert.equal(view.yours.length, 0);
 	assert.ok(view.table.length >= 3);
-	assert.match(view.table[0]!, /^Turn 1/);
+	assert.deepEqual(view.window, { kind: "opening", action: "deal" });
+	assert.match(view.table[0]!, /^Opening/);
 });

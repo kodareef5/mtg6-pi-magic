@@ -37,6 +37,11 @@ choose it in one judgment is the failure this split exists to prevent.
 
 ## A question the decision model can answer well
 
+Use the projected window to select context. Mulligan questions need counts,
+declarations and bottom obligations; turn questions need their phase and step.
+Do not infer the phase from prose, and do not attach opening instructions to a
+combat or upkeep question. A phase change alone is not a reason for a model call.
+
 Equal detail per option. A brilliant winning line beside waste resources
 manufactures a preference without any analysis.
 

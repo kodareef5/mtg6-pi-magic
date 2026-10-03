@@ -6,6 +6,8 @@
  * differs in these fields and not in the engine.
  */
 
+import { TURN, type Step } from "./steps.ts";
+
 export type Format = {
 	name: string;
 	seats: { min: number; max: number };
@@ -45,23 +47,8 @@ export type Format = {
 	 */
 	mulliganBottom: "on-keep" | "per-mulligan";
 	/** The opening turn's steps. A proposal: an effect may edit it mid walk. */
-	steps: string[];
+	steps: Step[];
 };
-
-const TURN = [
-	"untap",
-	"upkeep",
-	"draw",
-	"precombat-main",
-	"begin-combat",
-	"declare-attackers",
-	"declare-blockers",
-	"combat-damage",
-	"end-of-combat",
-	"postcombat-main",
-	"end",
-	"cleanup",
-];
 
 /** 103.5c. The first mulligan costs no card in a multiplayer or Brawl game. */
 export const firstMulliganFree = (format: Format, seats: number) =>

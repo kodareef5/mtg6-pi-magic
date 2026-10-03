@@ -15,6 +15,7 @@ import type { Intent } from "./intent.ts";
 import { rule } from "./judge.ts";
 import { usable, type Answer, type Player } from "./player.ts";
 import type { Table } from "./table.ts";
+import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
 import { describe, project } from "./view.ts";
 
@@ -39,7 +40,7 @@ export type Watcher = (line: string) => void;
 function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" | null {
 	if (decision.options.length !== 1) return null;
 	const only = decision.options[0]!;
-	if (decision.situation === "turn-based" || decision.situation === "state-based") return "forced";
+	if (["turn-based", "state-based", "pregame"].includes(decision.situation)) return "forced";
 	if (decision.situation === "priority" && only.id === "pass") return "forced";
 	if (intent?.deck.delegates?.includes(decision.situation)) return "delegated";
 	return null;
@@ -64,7 +65,7 @@ export async function play(
 		if (decision === null) {
 			// A phase ending is the one place table talk is offered, which keeps
 			// the log to at most one line per seat per phase.
-			await atPhaseEnd(table, players, watch);
+			if (endingPhase(table)) await atPhaseEnd(table, players, watch);
 			advance(table);
 			continue;
 		}
