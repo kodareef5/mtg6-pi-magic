@@ -9,9 +9,11 @@
  * Nothing here writes to the table.
  */
 
+import type { Rules } from "../core/rules.ts";
 import type { Frame, SeatId, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import type { Brief } from "./brief.ts";
+import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
 
 /**
@@ -22,9 +24,6 @@ import type { Recap } from "./summary.ts";
  * game. The briefs are per seat and a seat reads only its own.
  */
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
-
-/** A predefined route out of this decision. Not prose, and not a new move. */
-export type Route = "more-options" | "better-targets" | "replan";
 
 export type Packet = {
 	actor: SeatId;
@@ -58,8 +57,17 @@ export type Packet = {
 	 * receipts, and the recap is already filtered to what a spectator may read.
 	 */
 	lately: string[];
-	/** Route id to what asking for it does. */
-	routes: Partial<Record<Route, string>>;
+	/**
+	 * The ways out that only change what this seat knows. Empty when nothing is
+	 * answerable, because advertising a route cannot make it executable.
+	 */
+	routes: Route[];
+	/**
+	 * What this seat asked for on this decision and was given. Grows as the seat
+	 * walks the dialer, and the obligation and the options do not change while it
+	 * does: the question is the same question, asked with more in front of it.
+	 */
+	learned?: string[];
 	/**
 	 * Why the answers already sent for this decision were not taken. Present
 	 * only on a retry, and the obligation and the options are unchanged. A model
@@ -92,7 +100,7 @@ export type Packet = {
 export function focus(
 	frame: Frame,
 	intent: Intent,
-	context: { brief?: Brief; recaps?: readonly Recap[] } = {},
+	context: { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[] } = {},
 ): Packet {
 	const { decision, seat, view, version, refused } = frame;
 	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) {
@@ -133,8 +141,10 @@ export function focus(
 		],
 		guidance,
 		lately: [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
-		// Widening is unwritten. Advertising a route cannot make it executable.
-		routes: {},
+		// Only what can be answered. Widening and replanning are still unwritten,
+		// so nothing advertises them; the rules routes are answerable from disk.
+		routes: dial(decision, context.rules),
+		...(context.learned?.length ? { learned: [...context.learned] } : {}),
 		...(refused?.length ? { refused: [...refused] } : {}),
 	};
 }
@@ -159,24 +169,4 @@ export function focus(
 export function offerConcede(packet: Packet): boolean {
 	void packet;
 	throw new Error("offerConcede is unwritten: settled sequence or inescapable loop only.");
-}
-
-/**
- * Follow a route. Every one returns to this same decision.
- *
- * A route does not pass, does not undo a paid cost, does not change a locked
- * choice, and does not reveal anything this seat has not earned.
- *
- * - more-options widens the list mechanically first. The playable space is
- *   larger than the shortlist, and a shortlist of one is not proof that the
- *   choice was forced.
- * - better-targets re-asks the target slot with the candidates spelled out.
- * - replan rewrites the seat's intent, which can change the priorities but
- *   cannot make a legal option disappear.
- *
- * When a widened list still has nothing usable, record the gap and play on.
- */
-export function follow(route: Route, packet: Packet): Packet {
-	void [route, packet];
-	throw new Error("follow is unwritten. Three routes, all returning here.");
 }

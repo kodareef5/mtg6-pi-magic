@@ -10,11 +10,22 @@
  * and cannot object, because none of those have handlers yet. A person or a
  * remote agent at the same seat can do all of them. That asymmetry is this
  * file's limit, not the table's.
+ *
+ * It can walk the dialer, which is the one thing it does beyond picking. A
+ * person at a Pi already has that through `/magic rules`, so this is the same
+ * capability reached a different way rather than a new one.
+ *
+ * Past 150 lines because the question a seat is asked and the loop that asks it
+ * again with more in front of it are one mechanism. Splitting them would put
+ * the reason a route is described as an ask in a different file from the loop
+ * that depends on a route never reading as a move.
  */
 
 import type { Answer, Player } from "../core/player.ts";
+import type { Rules } from "../core/rules.ts";
 import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
+import { follow } from "./dial.ts";
 import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
 
@@ -28,8 +39,20 @@ export type AiSeatOptions = {
 	 * is a seat playing with no plan, which still plays.
 	 */
 	chronicle?: Chronicle;
+	/**
+	 * The rules, so the seat can answer its own route. Absent is a seat with no
+	 * dialer, which still plays: `dial` offers nothing it cannot answer.
+	 */
+	rules?: Rules;
+	/**
+	 * How many routes this seat may follow before it has to answer with a move.
+	 * Each one is a real request, so this is a budget and not a safeguard.
+	 */
+	dials?: number;
 	/** Recorded on the table when an answer comes back unusable. */
 	onGap(note: string): void;
+	/** Called with the route id each time this seat follows one. For the report. */
+	onDial?(route: string): void;
 	/**
 	 * Called once per request, before it is made.
 	 *
@@ -66,22 +89,41 @@ export function question(packet: Packet): Question {
 		...(packet.guidance.length ? ["", "The plan for this seat here:", ...packet.guidance] : []),
 		...(packet.priorities.length ? ["", "This seat's priorities, in order:", ...packet.priorities] : []),
 		...(packet.assumed.length ? ["", "Assumed, not known:", ...packet.assumed] : []),
+		// What the seat asked for, before the refusal, because a rule it pulled up
+		// is a fact about this decision and a refusal is a fact about its answer.
+		...(packet.learned?.length ? ["", "Rules you asked for:", ...packet.learned] : []),
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
 		"",
 		"Answer with one of the listed ids. The options are every move the table",
 		"built and checked, and nothing outside the list can be played here. The plan",
 		"above was written before this board existed: where it does not fit what you",
 		"can see, the listed option that fits is the better answer.",
+		...(packet.routes.length
+			? [
+					"",
+					"Some ids are asks rather than moves. An ask plays nothing, changes nothing,",
+					"and brings this same decision back with what you asked for in front of you.",
+					"What an ask does not promise: it shows the rules it names and no others, so",
+					"the rule that decides this may not be among them.",
+				]
+			: []),
 	];
 	return {
 		type: "choice",
 		instructions: lines.join("\n"),
-		criteria: Object.fromEntries(
-			packet.options.map((option) => [
+		criteria: Object.fromEntries([
+			...packet.options.map((option) => [
 				option.id,
 				[option.label, option.shows, option.consequence].filter(Boolean).join(". "),
 			]),
-		),
+			// Built the same way as a move, so a route is not described more richly
+			// than the moves it sits beside. It says it acts on nothing, because an
+			// id that reads like a move is one a seat will play.
+			...packet.routes.map((route) => [
+				route.id,
+				`Ask to see ${route.does}. Acts on nothing and returns to this decision.`,
+			]),
+		]),
 	};
 }
 
@@ -92,6 +134,19 @@ export function aiSeat(options: AiSeatOptions): Player {
 	return {
 		name: options.name,
 
+		/**
+		 * Walk the dialer, then answer with a move.
+		 *
+		 * The loop is here and not in `src/core/loop.ts` on purpose. Following a
+		 * route moves nothing, so the game must not advance while it happens: the
+		 * table does not know this seat looked a rule up, and the decision it is
+		 * waiting on is the same decision either way. The core's `ask` answer kind
+		 * stays unimplemented because a seat that can answer its own route never
+		 * needs to send one.
+		 *
+		 * It terminates by construction. Past the budget the rules are not passed
+		 * to `focus`, so `dial` offers nothing, so no answer can be a route.
+		 */
 		async answer(frame) {
 			if (!frame.decision) throw new Error(`${options.name} was asked a frame with no decision`);
 			latest = frame;
@@ -99,27 +154,46 @@ export function aiSeat(options: AiSeatOptions): Player {
 			// Planning is unwritten, so the intent arrives whole and is used as
 			// given. A phase change alone is not a reason for a model call.
 			const seated = options.chronicle;
-			const packet = focus(frame, options.intent, {
-				...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
-				...(seated ? { recaps: seated.recaps } : {}),
-			});
-			asked += 1;
-			options.onAsk?.(packet);
-			const answers = await options.api.ask({
-				state: asState(packet),
-				questions: { [KEY]: question(packet) },
-			});
+			const budget = options.dials ?? 2;
+			const learned: string[] = [];
+			const walked: string[] = [];
 
-			const answer = chose(answers, KEY);
-			if (typeof answer === "string") {
-				// Returned to the loop unchanged. It owns the retry and the
-				// fallback accounting, and replacing this with the first option
-				// would lose the difference between a choice and a fallback.
-				options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
-				return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
+			for (let dialled = 0; ; dialled++) {
+				const whole = focus(frame, options.intent, {
+					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
+					...(seated ? { recaps: seated.recaps } : {}),
+					...(options.rules && dialled < budget ? { rules: options.rules } : {}),
+					...(learned.length ? { learned } : {}),
+				});
+				// A route already followed is not offered again. Its answer is
+				// already in front of the seat, and offering it twice spends the
+				// budget on something the seat has read.
+				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
+
+				asked += 1;
+				options.onAsk?.(packet);
+				const answers = await options.api.ask({
+					state: asState(packet),
+					questions: { [KEY]: question(packet) },
+				});
+
+				const answer = chose(answers, KEY);
+				if (typeof answer === "string") {
+					// Returned to the loop unchanged. It owns the retry and the
+					// fallback accounting, and replacing this with the first option
+					// would lose the difference between a choice and a fallback.
+					options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
+					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
+				}
+
+				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
+				if (!route) {
+					return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
+				}
+				walked.push(route.id);
+				learned.push(...follow(route, options.rules!));
+				options.onDial?.(route.id);
 			}
-
-			return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
 		},
 
 		// Watching is free and reacting is not, so nothing is asked here. The

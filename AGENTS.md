@@ -293,6 +293,12 @@ rather than adding a test for each branch.
 - **Alone.** A finished game reports and returns with nothing else keeping the
   process alive. Stated in a child process, since a test runner keeps the event
   loop awake and hides it.
+- **Dialled.** Following a route changes what a seat knows and nothing else:
+  the table is byte for byte unchanged, the obligation and the moves offered are
+  the same, and the rule arrives labelled as something the seat asked for. Every
+  route cites rules that resolve and carries their text. A route id reads as an
+  ask, never as a move, and says what it does not show. A walked route is not
+  offered again and the budget ends the walk.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -334,6 +340,7 @@ src/context/           questions for a decision model. Its own AGENTS.md
   summary.ts           the turn in two sentences, from the spectator view
   strategy.ts          per-phase planning. Pipeline written, leaves unwritten
   ruling.ts            the judge's two calls. Pipeline written, stops at verdict
+  dial.ts              the routes a seat can ask for, answered from the rules
   packet.ts, seat.ts   one decision's context, and the seat that answers it
   sit.ts               seating a whole table, so one command cannot differ
 src/seating/           a seat over a socket. Parked
@@ -371,8 +378,15 @@ verify every carried field against the source and refuse to pass on a mismatch.
   verdict, because rollback is unwritten and a ruling with no remedy changes no
   game. A ruling also makes the phase plan stale, which is a consequence of one
   rather than a step in it.
-- Widening routes. A model-backed seat can only pick from the list: it cannot
-  declare, delegate or object. A person at the same seat can do all three.
+- Widening routes. `more-options`, `better-targets` and `replan` need machinery
+  that does not exist, so nothing advertises them. The rules routes in
+  `src/context/dial.ts` are the ones that work, because the rules are on disk
+  and answering one costs no model call.
+- Declaring, delegating and objecting. A model-backed seat can only pick from
+  the list and walk the dialer. A person at the same seat can do all three, and
+  `declare` and `judge.rule` both throw. docs/CIRCUITS.md names this as the
+  largest open question: with no card structured, conservation and the judge
+  carry the weight that a move list would.
 - Card meaning. `src/core/syntax.ts` holds the five ability shapes, the correct
   layers, and the motions milestone one needs. The rest of the language is
   measured rather than guessed: 31 event kinds, 17 selector properties, 10

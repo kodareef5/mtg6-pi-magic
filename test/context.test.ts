@@ -28,7 +28,9 @@ test("context preserves the seat's options and knowledge and scopes assumptions 
 	const packet = focus(opening, intent);
 	assert.deepEqual(packet.options, opening.decision.options);
 	assert.deepEqual(packet.assumed, []);
-	assert.deepEqual(packet.routes, {});
+	// No rules were handed in, so nothing is advertised. Advertising a route
+	// cannot make it answerable. test/dial.test.ts is the dialer's own test.
+	assert.deepEqual(packet.routes, []);
 	assert.equal(JSON.stringify(packet).includes("Swamp"), false);
 	packet.options[0]!.label = "Changed by a consumer";
 	assert.deepEqual(opening, before);

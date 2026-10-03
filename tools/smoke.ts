@@ -121,6 +121,7 @@ const seated = await seatTable(
 	{
 		format: standard.name,
 		journal,
+		rules,
 		...(a["open-lists"] ? { openLists: true } : {}),
 		...(carried?.prepared.length ? { prepared: carried.prepared } : {}),
 	},

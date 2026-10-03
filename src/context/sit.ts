@@ -15,6 +15,7 @@
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
 
 import type { Universe } from "../core/cards.ts";
+import type { Rules } from "../core/rules.ts";
 import { keep, save, type Journal } from "../core/journal.ts";
 import type { Intent } from "../core/intent.ts";
 import { play, type Watcher } from "../core/loop.ts";
@@ -41,6 +42,8 @@ export type Seated = {
 	tally: Tally;
 	/** Requests to the decision model, attempts included. Read from the bill. */
 	picks: () => number;
+	/** Routes followed, by route id. Beside the bill, because a dial is a request. */
+	dials: Record<string, number>;
 };
 
 const pick = (parts: Cast[], role: Role) => parts.find((part) => part.role === role);
@@ -64,6 +67,13 @@ export async function seat(
 	options: {
 		format: string;
 		openLists?: boolean;
+		/**
+		 * The rules, so a seat can look one up mid decision. Absent is a table
+		 * with no dialer, which still plays.
+		 */
+		rules?: Rules;
+		/** How many routes a seat may follow per decision. */
+		dials?: number;
 		/** Written to as the game runs, so a clone of this game is a prefix of it. */
 		journal?: Journal;
 		/**
@@ -76,6 +86,7 @@ export async function seat(
 	},
 ): Promise<Seated> {
 	const counted = tally();
+	const dialled: Record<string, number> = {};
 	const chronicle: Chronicle = { briefs: {}, recaps: [] };
 	const players: Record<SeatId, Player> = {};
 	const intents: Record<SeatId, Intent> = {};
@@ -112,7 +123,10 @@ export async function seat(
 			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted }),
 			intent: intents[at.id]!,
 			chronicle,
+			...(options.rules ? { rules: options.rules } : {}),
+			...(options.dials === undefined ? {} : { dials: options.dials }),
 			onGap: (note) => void table.gaps.push(note),
+			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
 		});
 	}
 
@@ -172,6 +186,7 @@ export async function seat(
 		chronicle,
 		tally: counted,
 		picks: () => counted.spent().filter((spend) => spend.role === "decide").length,
+		dials: dialled,
 	};
 }
 
@@ -315,6 +330,13 @@ export const report = (table: Table, seated: Seated, outcome: Outcome | null, ms
 		`forced    ${((by("forced") / Math.max(1, table.ledger.length)) * 100).toFixed(1)}%`,
 		`picks     ${seated.picks()} decision-model calls`,
 		`recaps    ${seated.chronicle.recaps.length} of ${table.cursor.turn} turns`,
+		// A route is a request, so it is in the picks count already. Named
+		// separately because "how often did a seat look a rule up" is the question
+		// the dialer exists to answer and a total hides it.
+		`dials     ${Object.values(seated.dials).reduce((n, count) => n + count, 0)}` +
+			(Object.keys(seated.dials).length
+				? `  ${Object.entries(seated.dials).map(([route, count]) => `${route} ${count}`).join(", ")}`
+				: ""),
 		`failed    ${failed} of ${spends.length} reasoning calls`,
 		`elapsed   ${(ms / 1000).toFixed(1)}s`,
 		"",
