@@ -118,6 +118,25 @@ candidate rules for relevance, then the reasoner rules on the few that survive
 and names the remedy. It stops at the verdict, because carrying a remedy out
 needs rollback and that is unwritten.
 
+### Reusing a pregame
+
+The brief is a journal line, not a cache beside the journal, so copying a prefix
+copies it and there is no second format to keep in step. That makes two fork
+points useful rather than one.
+
+**Version zero** is a table that has been set up and asked nothing, whose seats
+already hold what a model prepared for them. Forking there reuses the pregame
+and plays a new game, which is what testing the game rather than the pregame
+needs. `/magic play <id>` on an existing id does this, and `smoke.ts --from <id>`
+does it outside Pi.
+
+**Any later version** is a position: fork, replay the prefix, play on. The two
+games then share a prefix, so the difference between two lines of play is a diff
+of two files.
+
+A reused brief names the deck, the format and the pregame model it was written
+for, and a mismatch is a miss rather than a quiet substitution.
+
 ### What a game costs
 
 Measured on one game of basic lands, 108 turns, with the suggested defaults:
@@ -245,9 +264,18 @@ rather than adding a test for each branch.
   where it is read, and names no card of another seat's deck. A snippet reaches
   the decision for its own window, a card note only while its card is visible,
   and a failed question is a gap the game plays on without.
-- **Beside.** Recaps run beside the game, in turn order however late they land,
-  and a game finishes in less time than awaiting them would take. Every call
-  lands in the bill with its model, ceiling and tokens, failures included.
+- **Beside.** The turn hook is never awaited, so a hook whose promise never
+  settles cannot stop a game and one that throws becomes a gap. Recaps land in
+  turn order however late they arrive. Every call is in the bill with its model,
+  ceiling and tokens, every attempt of a retry included.
+- **Noticed.** A transient failure is retried and a settled one is not. A
+  reasoner that has given up is asked nothing more, so one wrong model is one
+  problem and not one per turn. A seat with no brief at all throws rather than
+  playing, and `degraded` names why a finished game is not a comparable one.
+- **Cloneable.** A journal round trips, drops a torn last line and refuses a
+  torn middle one. A fork at version zero carries the briefs and no decisions;
+  a fork at version n replays to that position and plays on with a prefix
+  identical to its parent. A replay against different card text is refused.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -331,8 +359,8 @@ verify every carried field against the source and refuse to pass on a mismatch.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.
-- Export, rollback and copying. `journal.ts` fixes the stored form and `relive`
-  replays a recorded ledger; the file functions around it are unwritten.
-  `docs/STATE.md` holds the reasoning.
+- Rollback. `journal.ts` holds the file, the replay, the fork and the export;
+  `rollback` is the one left, because it needs every remaining seat to agree and
+  nothing holds that conversation. `docs/STATE.md` holds the reasoning.
 - Everything in `src/seating/`, by choice.
 - Any format but Standard, and any seat count but two.

@@ -9,13 +9,16 @@
 // Credentials are Pi's. This builds the same model runtime Pi uses, so a key
 // already configured in Pi works here with nothing repeated. No endpoint and no
 // key is read in this repo.
+import { join } from "node:path";
 import { parseArgs } from "node:util";
 
 import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 
 import { cast, readRoster, rosterFor, type Crew, type Role } from "../src/context/roles.ts";
-import { report, run, seat as seatTable } from "../src/context/sit.ts";
+import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
 import { checkDeck, load as loadCards } from "../src/core/cards.ts";
+import { open, preparedIn, read } from "../src/core/journal.ts";
+import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
 
@@ -26,6 +29,8 @@ const { values: a } = parseArgs({
 		pregame: { type: "string" },
 		summary: { type: "string" },
 		"open-lists": { type: "boolean" },
+		from: { type: "string" },
+		out: { type: "string", short: "o", default: "games" },
 		"no-brief": { type: "boolean" },
 		watch: { type: "boolean" },
 		help: { type: "boolean", short: "h" },
@@ -42,6 +47,9 @@ if (a.help) {
   --summary P     the commentator. --summary off skips every recap, which is
                   how to price it against playing with no commentary
   --open-lists    each seat's pregame sees the other decks. Benchmarks only
+  --from F        reuse the briefs in games/F.jsonl rather than paying for a
+                  pregame again. Fork a finished game at version 0 to make one
+  -o DIR          where the journal lands. Defaults to games/
   --no-brief      skip the pregame pass, to price it against playing without one
   --watch         narrate every committed event and recap as it happens
 
@@ -77,7 +85,23 @@ const inference = {
 	stream: (model: never, context: never, options: never) => runtime.streamSimple(model, context, options),
 } as never;
 
-const table = start(standard, decks.map((deck) => ({ deck })), seed);
+const carried = a.from ? read(join(a.out!, `${a.from}.jsonl`)) : null;
+const table = start(
+	standard,
+	(carried?.header.seats ?? decks.map((deck) => ({ deck }))).map((at) => ({ ...at })),
+	carried?.header.seed ?? seed,
+);
+const journal = open(join(a.out!, `${seed}.jsonl`), {
+	id: seed,
+	format: standard.name,
+	seed: carried?.header.seed ?? seed,
+	seats: table.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+	cards: { path: cards.path, generated: cards.generated },
+	rules: { path: "rules/cr.tsv", effective: loadRules("rules/cr.tsv").effective },
+	created: new Date().toISOString(),
+	...(carried ? { forkedFrom: { game: carried.header.id, version: 0 } } : {}),
+});
+
 const began = Date.now();
 const seated = await seatTable(
 	table,
@@ -86,11 +110,27 @@ const seated = await seatTable(
 	async (at) => cast(rosterFor({ every }, at), catalogue).filter((part) => !(a["no-brief"] && part.role === "pregame")),
 	inference,
 	cards,
-	{ format: standard.name, ...(a["open-lists"] ? { openLists: true } : {}) },
+	{
+		format: standard.name,
+		journal,
+		...(a["open-lists"] ? { openLists: true } : {}),
+		...(carried ? { prepared: preparedIn(carried.lines) } : {}),
+	},
 );
 
 const commentator = parts.find((part) => part.role === "summary");
-const outcome = await run(table, seated, inference, commentator, a.watch ? (line) => console.log(`  ${line}`) : undefined);
+const outcome = await run(
+	table,
+	seated,
+	inference,
+	commentator,
+	a.watch ? (line) => console.log(`  ${line}`) : undefined,
+	journal,
+);
 
 console.log(`\nseed      ${seed}\n${report(table, seated, outcome, Date.now() - began).join("\n")}`);
-process.exit(outcome ? 0 : 1);
+console.log(`journal   ${journal.path}`);
+console.log(`reuse     node tools/smoke.ts --from ${seed}   (the briefs, without paying again)`);
+// Non-zero when the result is not comparable: a game that finished with half its
+// briefs missing finished, and a benchmark that counted it as clean is lying.
+process.exit(outcome && !degraded(table, seated) ? 0 : 1);

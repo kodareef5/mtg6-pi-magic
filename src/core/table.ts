@@ -103,6 +103,13 @@ export type Cursor = {
 /** One committed group. Richer than a list of property writes on purpose. */
 export type Receipt = {
 	seq: number;
+	/**
+	 * Decisions answered when this group committed, counting the one that caused
+	 * it. The journal's version, so a fork at version zero is a table that has
+	 * been set up and asked nothing, and a fork at version n holds every group
+	 * that decision n or earlier produced.
+	 */
+	at: number;
 	changes: Change[];
 	reason: Reason;
 	/** Facts read before the group, because cards watch what a thing looked like. */

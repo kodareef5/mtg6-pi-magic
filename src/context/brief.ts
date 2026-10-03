@@ -237,9 +237,15 @@ function file(brief: Brief, key: string, answer: string): void {
 /**
  * Run the wave for one seat.
  *
- * A question that fails is a gap and nothing else. The game starts without that
- * snippet rather than not starting, because a missing plan costs a seat some
- * quality and a refused game costs it everything.
+ * A question that fails is a gap and the game starts without that snippet,
+ * because a missing plan costs a seat some quality and a refused game costs it
+ * everything.
+ *
+ * Every question failing is a different claim. A seat briefed on nothing is not
+ * a seat with a thin plan, it is a seat whose model never answered, and a run
+ * that reports that as a finished game is a run that broke without noticing. So
+ * this throws when nothing came back at all, or when the reasoner has given up
+ * because the configuration is wrong.
  */
 export async function brief(
 	seat: Seat,
@@ -259,9 +265,18 @@ export async function brief(
 			}
 		}),
 	);
+	let answered = 0;
 	for (const got of answers) {
 		if (got.failed) built.gaps.push(got.failed);
-		else file(built, got.key, got.answer!);
+		else {
+			answered += 1;
+			file(built, got.key, got.answer!);
+		}
+	}
+	const why = reasoner.broken();
+	if (why) throw new Error(`Seat ${seat.id} has no brief: ${why}`);
+	if (!answered) {
+		throw new Error(`Seat ${seat.id} has no brief: all ${wave.length} questions failed. ${built.gaps[0] ?? ""}`.trim());
 	}
 	return built;
 }

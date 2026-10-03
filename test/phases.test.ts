@@ -5,6 +5,7 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
+import type { Frame } from "../src/core/types.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 
@@ -60,6 +61,36 @@ test("listed actions stay in their window and a pending choice cannot be skipped
 		if (passing) assert.equal(built.log.length, events, "a pass is not an event");
 	}
 	assert.ok(built.cursor.steps.includes("draw"));
+});
+
+test("a turn hook that never answers does not stop the game", async () => {
+	// The hook is presentational and the game is never waiting on it. A
+	// commentator is a model call, so a loop that awaited one would run an order
+	// of magnitude slower for a line no decision is blocked on. A hook whose
+	// promise never settles is the strongest form of that: the game finishes
+	// with every one of them outstanding.
+	const built = table();
+	let turns = 0;
+	const answer = async (frame: Frame) => {
+		const options = frame.decision!.options;
+		const land = options.find((option) => option.id.startsWith("land:"));
+		return { kind: "pick" as const, option: (land ?? options[0]!).id, actionId: `t${turns}` };
+	};
+	const seat = (name: string): Player => ({ name, answer, observe() {}, close() {} });
+	const outcome = await play(built, { 0: seat("A"), 1: seat("B") }, {}, undefined, () => {
+		turns += 1;
+		return new Promise<void>(() => {});
+	});
+	assert.ok(outcome, "the game finished with every hook still outstanding");
+	assert.ok(turns > 50, `${turns} turn endings`);
+
+	// A hook that throws is the hook's bug. It is recorded and the game goes on.
+	const other = table();
+	assert.ok(await play(other, { 0: seat("A"), 1: seat("B") }, {}, undefined, () => {
+		throw new Error("the commentator fell over");
+	}));
+	assert.ok(other.gaps.length > 50);
+	assert.match(other.gaps[0]!, /hook failed: Error: the commentator fell over/);
 });
 
 test("the version moves for anything that commits, not only for an answer", () => {

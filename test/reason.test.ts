@@ -98,7 +98,7 @@ test("the pregame asks several questions at once and files each answer where it 
 
 	const counted = tally();
 	const { stream, sent: prompts } = chat((user) => `answer for ${user.slice(-40)}`);
-	const written = await brief(me!, [them!], universe, reasoner({ role: "pregame", stream, model: sol, thinking: "low", tally: counted }), { format: standard.name });
+	const written = await brief(me!, [them!], universe, reasoner({ role: "pregame", stream, model: sol, thinking: "low", tally: counted, backoffMs: 0 }), { format: standard.name });
 
 	assert.equal(prompts.length, wave.length, "one call per question");
 	assert.ok(written.deck.length > 0);
@@ -134,13 +134,16 @@ test("a failed question is a gap and the game still starts", async () => {
 	const built = table();
 	const counted = tally();
 	const { stream } = chat((user) => (user.includes("keepable seven") ? "" : "fine"));
-	const written = await brief(built.seats[0]!, [built.seats[1]!], universe, reasoner({ role: "pregame", stream, model: sol, tally: counted }), { format: standard.name });
+	const written = await brief(built.seats[0]!, [built.seats[1]!], universe, reasoner({ role: "pregame", stream, model: sol, tally: counted, backoffMs: 0 }), { format: standard.name });
 	assert.equal(written.opening, "", "the snippet is missing");
 	assert.equal(written.gaps.length, 1);
 	assert.match(written.gaps[0]!, /mulligan guidance/);
 	assert.ok(written.deck.length > 0, "the other answers still arrived");
-	// A failed call is in the bill too, or the run understates its own cost.
-	assert.equal(counted.spent().filter((spend) => spend.failed).length, 1);
+	// Tried again before giving up, and every attempt is in the bill, or the run
+	// understates what it was charged for.
+	const failed = counted.spent().filter((spend) => spend.failed);
+	assert.equal(failed.length, 3, "three attempts at the one question");
+	for (const attempt of failed) assert.match(attempt.about, /mulligan guidance/);
 });
 
 test("a brief snippet reaches the decision and a card note only when its card is visible", async () => {
@@ -211,7 +214,7 @@ test("a recap is two sentences of public events and skips a turn where nothing h
 	// Nothing public yet, so no call is made at all.
 	const counted = tally();
 	const { stream, sent } = chat(() => "A played a Forest and passed.");
-	const quiet = await recap(built, reasoner({ role: "summary", stream, model: sol, tally: counted }), { number: 1, active: "A", from: built.log.length });
+	const quiet = await recap(built, reasoner({ role: "summary", stream, model: sol, tally: counted, backoffMs: 0 }), { number: 1, active: "A", from: built.log.length });
 	assert.equal(quiet, null);
 	assert.equal(sent.length, 0, "an empty turn is not sent to a model");
 
@@ -222,7 +225,7 @@ test("a recap is two sentences of public events and skips a turn where nothing h
 		const land = decision.options.find((option) => option.id.startsWith("land:"));
 		apply(built, (land ?? decision.options[0]!).id, "model", "chosen");
 	}
-	const said = await recap(built, reasoner({ role: "summary", stream, model: sol, thinking: "low", tally: counted }), { number: 1, active: "A", from });
+	const said = await recap(built, reasoner({ role: "summary", stream, model: sol, thinking: "low", tally: counted, backoffMs: 0 }), { number: 1, active: "A", from });
 	assert.ok(said);
 	assert.equal(said.line, "A played a Forest and passed.");
 	assert.equal(said.from, from);
@@ -239,7 +242,7 @@ test("a recap is two sentences of public events and skips a turn where nothing h
 	const hidden = cardsIn(built, "hand", 1);
 	assert.ok(hidden.length > 0);
 	commit(built, [{ do: "move", what: hidden[0]!.id, to: "battlefield", reason: "play-land" }], "play-land");
-	const after = await recap(built, reasoner({ role: "summary", stream, model: sol, tally: counted }), { number: 2, active: "B", from: built.log.length - 1 });
+	const after = await recap(built, reasoner({ role: "summary", stream, model: sol, tally: counted, backoffMs: 0 }), { number: 2, active: "B", from: built.log.length - 1 });
 	assert.ok(after);
 	// A Swamp on the battlefield is public and may be named; a count of a hand is
 	// all the request carries about what is still hidden.
@@ -273,13 +276,24 @@ test("a phase is planned only when it has a choice that could be lost", () => {
 test("the whole table is seated, briefed and played, and the recaps do not block it", async () => {
 	const built = table();
 
-	// A commentator that takes a beat to answer. If the loop awaited each recap
-	// the game could not finish in less than one delay per turn.
-	const delay = 25;
+	// A commentator held until released. Nothing in the game may be waiting on
+	// it, so the game runs on and the recaps pile up unanswered. Proving that
+	// with a gate rather than a stopwatch keeps the test off the clock.
+	const HELD = 20;
+	let release = () => {};
+	const gate = new Promise<void>((resolve) => { release = resolve; });
+	let firstResolvedAfter = 0;
 	const { stream: talking, sent: said } = chat(() => "Something happened.");
 	const slow: Stream = (model, context, options) => {
 		const inner = talking(model, context, options);
-		return { result: async () => { await new Promise((r) => setTimeout(r, delay)); return inner.result(); } };
+		return {
+			result: async () => {
+				if (said.length >= HELD) release();
+				await gate;
+				firstResolvedAfter ||= said.length;
+				return inner.result();
+			},
+		};
 	};
 	const { stream: thinking } = chat(() => "Play lands. Nothing else is possible.");
 
@@ -316,6 +330,7 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 
 	const outcome = await run(built, seated, inference, parts[2]!, undefined);
 	const ms = Date.now() - began;
+	void ms;
 
 	assert.ok(outcome, "the game finished");
 	assert.equal(seated.picks(), picks);
@@ -327,9 +342,10 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	const turns = seated.chronicle.recaps.map((r) => r.turn);
 	assert.deepEqual(turns, [...turns].sort((a, b) => a - b));
 
-	// The proof that they ran beside the game: awaiting each one would have cost
-	// at least one delay per recap, and the whole run took far less than that.
-	assert.ok(ms < seated.chronicle.recaps.length * delay, `${ms}ms against ${seated.chronicle.recaps.length} x ${delay}ms`);
+	// The proof that they ran beside the game: at least twenty were dispatched
+	// before any of them answered. A loop that awaited each one could never have
+	// more than a single request outstanding.
+	assert.ok(firstResolvedAfter >= HELD, `${firstResolvedAfter} outstanding when the first answered`);
 
 	// Every role is in one bill, with the decision model counted separately
 	// because Pi does not meter a classifier's tokens.

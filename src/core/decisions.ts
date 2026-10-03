@@ -112,7 +112,9 @@ function take(
 	by: "engine" | "model" | "judge",
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 ): void {
-	commit(table, [...move.changes, ...bookkeeping(p, move)], move.reason);
+	// The row goes in first, so every group this decision commits is stamped with
+	// a version that includes the decision that caused it. Nothing in `commit`
+	// reads the ledger, so the order costs nothing else.
 	table.ledger.push({
 		seq: table.ledger.length,
 		situation: p.situation,
@@ -122,6 +124,7 @@ function take(
 		by,
 		why,
 	});
+	commit(table, [...move.changes, ...bookkeeping(p, move)], move.reason);
 }
 
 /** A listed action and its bookkeeping are one committed event. */

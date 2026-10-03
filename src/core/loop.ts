@@ -30,7 +30,13 @@ export type Watcher = (line: string) => void;
  *
  * Presentational, like `watch`, and for the same reason: the table does not
  * know that anybody summarises a turn, and nothing it returns bears on the
- * game. It is awaited because the thing that reads it makes a model call.
+ * game.
+ *
+ * Not awaited. The thing that reads this makes a model call, and a loop that
+ * waited for one at every turn boundary would run an order of magnitude slower
+ * than the game it is narrating. A hook that wants to do slow work starts it
+ * and returns; whatever it returns is dropped, and a rejection becomes a gap
+ * rather than a crash.
  */
 export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promise<void> | void;
 
@@ -84,7 +90,7 @@ export async function play(
 			const { turn, active } = table.cursor;
 			advance(table);
 			if (table.cursor.turn !== turn) {
-				await onTurn?.(turn, active, began);
+				tell(table, onTurn, turn, active, began);
 				began = table.log.length;
 			}
 			continue;
@@ -156,7 +162,7 @@ export async function play(
 				});
 				break;
 			case "say":
-				table.said.push({ seat: decision.seat, message: answer.message, at: table.log.length });
+				table.said.push({ seat: decision.seat, message: answer.message, at: table.ledger.length });
 				break;
 			case "concede":
 				concede(table, decision.seat);
@@ -194,10 +200,25 @@ async function atPhaseEnd(
 		});
 		if (!answer) continue;
 		if (answer.kind === "say") {
-			table.said.push({ seat: seat.id, message: answer.message, at: table.log.length });
+			table.said.push({ seat: seat.id, message: answer.message, at: table.ledger.length });
 			watch?.(`${seat.name}: ${answer.message}`);
 		}
 		if (answer.kind === "concede") concede(table, seat.id);
+	}
+}
+
+/**
+ * Call the turn hook and keep going. Nothing in the game waits on it, and a
+ * hook that throws is the hook's bug and not the end of the game.
+ */
+function tell(table: Table, onTurn: TurnWatcher | undefined, turn: number, active: SeatId, from: number): void {
+	if (!onTurn) return;
+	try {
+		void Promise.resolve(onTurn(turn, active, from)).catch(
+			(error: unknown) => void table.gaps.push(`Turn ${turn} hook failed: ${String(error)}`),
+		);
+	} catch (error) {
+		table.gaps.push(`Turn ${turn} hook failed: ${String(error)}`);
 	}
 }
 

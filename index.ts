@@ -33,12 +33,19 @@ import {
 	type Cast,
 	type Role,
 } from "./src/context/roles.ts";
-import { report, run, seat as seatTable, type Seated } from "./src/context/sit.ts";
+import { degraded, report, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { checkDeck, load, type Universe } from "./src/core/cards.ts";
 import { start } from "./src/core/commit.ts";
 import { nextDecision } from "./src/core/decisions.ts";
 import { standard } from "./src/core/format.ts";
-import { exportGame } from "./src/core/journal.ts";
+import {
+	exportGame,
+	fork as forkGame,
+	open as openGame,
+	preparedIn,
+	read as readGame,
+	type Journal,
+} from "./src/core/journal.ts";
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
 import type { SeatId } from "./src/core/types.ts";
@@ -61,6 +68,7 @@ const landDeck = (name: string): string[] => Array.from({ length: 60 }, () => na
  */
 const CACHE = join(process.env.PI_CODING_AGENT_DIR ?? join(homedir(), ".pi", "agent"), "magic");
 const ROSTER = join(CACHE, "roster.json");
+const GAMES = join(CACHE, "games");
 
 /** Shipped with the package, so a game runs with nothing downloaded. */
 const SHIPPED = join(import.meta.dirname, "cards", "standard.tsv");
@@ -86,9 +94,17 @@ async function roster(ctx: ExtensionContext, seat?: SeatId): Promise<Cast[]> {
 	});
 }
 
+/** What a game needs from Pi: one classifier call and one chat call. */
+const inference = (ctx: ExtensionContext): Inference => ({
+	classify: (model, request, options) => ctx.modelRegistry.classify(model, request, options),
+	stream: (model, context, options) =>
+		ctx.modelRegistry.streamSimple(model, context as never, options as never) as never,
+});
+
 export default function (pi: ExtensionAPI) {
 	let table: Table | null = null;
 	let seated: Seated | null = null;
+	const games = new WeakMap<Table, Journal>();
 
 	/**
 	 * Deal a table, give every seat a model, and run the pregame.
@@ -98,25 +114,40 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(seed: string, ctx: ExtensionContext): Promise<Table> {
 		const cards = universe(standard.name);
-		const entrants = [{ deck: landDeck("Forest") }, { deck: landDeck("Swamp") }];
+		const rules = loadRules(RULES);
+
+		// A seed naming an existing game forks it at version zero, so the briefs
+		// that game paid for are reused and only the play is new.
+		const existing = join(GAMES, `${seed}.jsonl`);
+		const reuse = existsSync(existing) ? readGame(existing) : null;
+		const entrants = reuse
+			? reuse.header.seats.map((at) => ({ name: at.name, deck: at.deck }))
+			: [{ deck: landDeck("Forest") }, { deck: landDeck("Swamp") }];
 		for (const entrant of entrants) {
 			const problems = checkDeck(cards, entrant.deck, standard);
 			if (problems.length) throw new Error(`Illegal deck: ${problems.join("; ")}`);
 		}
 
-		const opened = start(standard, entrants, seed);
-		seated = await seatTable(
-			opened,
-			(at) => roster(ctx, at),
-			{
-				classify: (model, request, options) => ctx.modelRegistry.classify(model, request, options),
-				stream: (model, context, options) =>
-					ctx.modelRegistry.streamSimple(model, context as never, options as never) as never,
-			},
-			cards,
-			{ format: standard.name },
-		);
+		const id = reuse ? `${seed}-${Date.now()}` : seed;
+		const opened = start(standard, entrants, reuse?.header.seed ?? seed);
+		const journal = openGame(join(GAMES, `${id}.jsonl`), {
+			id,
+			format: standard.name,
+			seed: reuse?.header.seed ?? seed,
+			seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
+			cards: { path: cards.path, generated: cards.generated },
+			rules: { path: RULES, effective: rules.effective },
+			created: new Date().toISOString(),
+			...(reuse ? { forkedFrom: { game: reuse.header.id, version: 0 } } : {}),
+		});
+
+		seated = await seatTable(opened, (at) => roster(ctx, at), inference(ctx), cards, {
+			format: standard.name,
+			journal,
+			...(reuse ? { prepared: preparedIn(reuse.lines) } : {}),
+		});
 		table = opened;
+		games.set(opened, journal);
 		return opened;
 	}
 
@@ -187,7 +218,7 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	pi.registerCommand("magic", {
-		description: "play [seed] | models [why|<role> <pattern> [seat]] | step | log | export | cards | rules",
+		description: "play [seed] | models [why|<role> <pattern> [seat]] | step | log | export | fork | cards | rules",
 		handler: async (args, ctx) => {
 			const words = args.trim().split(/\s+/).filter(Boolean);
 			const verb = words[0] ?? "";
@@ -205,17 +236,14 @@ export default function (pi: ExtensionAPI) {
 				const outcome = await run(
 					opened,
 					seated!,
-					{
-						classify: (model, request, options) => ctx.modelRegistry.classify(model, request, options),
-						stream: (model, context, options) =>
-							ctx.modelRegistry.streamSimple(model, context as never, options as never) as never,
-					},
+					inference(ctx),
 					commentator,
 					(line) => ctx.ui.notify(line, "info"),
+					games.get(opened),
 				);
 				ctx.ui.notify(
 					`Seed ${seed}.\n${report(opened, seated!, outcome, Date.now() - began).join("\n")}`,
-					outcome ? "info" : "warning",
+					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
 				return;
 			}
@@ -263,18 +291,41 @@ export default function (pi: ExtensionAPI) {
 			// full is the journal and holds every hand, so it stays on disk.
 			// public is the only mode safe to send anywhere. docs/STATE.md.
 			if (verb === "export") {
-				if (!table) {
-					ctx.ui.notify("No table. Run /magic play.", "warning");
-					return;
-				}
-				const mode = words[1] ?? "public";
+				const mode = words[2] ?? "public";
 				const how =
 					mode === "full"
 						? ({ mode: "full" } as const)
 						: mode === "public"
 							? ({ mode: "public" } as const)
 							: ({ mode: "seat", seat: Number(mode) } as const);
-				ctx.ui.notify(exportGame(join(CACHE, "games", `${seed}.jsonl`), how), "info");
+				ctx.ui.notify(
+					exportGame(join(GAMES, `${words[1] ?? seed}.jsonl`), how, (header) =>
+						start(standard, header.seats.map((at) => ({ name: at.name, deck: at.deck })), header.seed),
+					),
+					"info",
+				);
+				return;
+			}
+
+			/**
+			 * Copy a game from a point, which is also how a fixture is made.
+			 *
+			 * Version zero is the one to reuse when the thing being tested is the
+			 * game rather than the pregame: nothing has been dealt and the seats
+			 * already hold what a model prepared for them.
+			 */
+			if (verb === "fork") {
+				const [, from, at, id] = words;
+				if (!from || at === undefined || !id) {
+					ctx.ui.notify("Usage: /magic fork <game> <version> <new-id>", "warning");
+					return;
+				}
+				const made = forkGame(join(GAMES, `${from}.jsonl`), Number(at), id, join(GAMES, `${id}.jsonl`));
+				ctx.ui.notify(
+					`${id} forked from ${made.forkedFrom!.game} at version ${made.forkedFrom!.version}. ` +
+						`Play it with /magic play ${id}.`,
+					"info",
+				);
 				return;
 			}
 
@@ -294,7 +345,8 @@ export default function (pi: ExtensionAPI) {
 
 			ctx.ui.notify(
 				"Usage: /magic play [seed] | /magic models [why|<role> <pattern> [seat]] | /magic step | " +
-					"/magic log | /magic export [public|full|<seat>] | /magic cards [format|universe] | " +
+					"/magic log | /magic export <game> [public|full|<seat>] | " +
+					"/magic fork <game> <version> <new-id> | /magic cards [format|universe] | " +
 					"/magic rules <query|build>",
 				"info",
 			);

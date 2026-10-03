@@ -28,7 +28,12 @@ export type Card = {
 	legal: Record<string, string>;
 };
 
-export type Universe = { path: string; cards: Map<string, Card> };
+/**
+ * `generated` is the date the file was built, read from its own header comment.
+ * A journal pins it, because a set release changes oracle text and a replay
+ * against different text is a different game.
+ */
+export type Universe = { path: string; generated: string; cards: Map<string, Card> };
 
 /** Columns that are not a format. Everything else in the header is one. */
 const FIXED = new Set([
@@ -39,6 +44,7 @@ const FIXED = new Set([
 
 export function load(path: string): Universe {
 	const lines = readFileSync(path, "utf8").split("\n");
+	const generated = lines.find((line) => line.startsWith("# Generated:"))?.match(/Generated: (\S+)/)?.[1] ?? "unknown";
 	const rows = lines.filter((line) => line && !line.startsWith("#"));
 	const header = rows.shift()?.split("\t");
 	if (!header?.includes("oracle")) {
@@ -63,7 +69,7 @@ export function load(path: string): Universe {
 			legal: Object.fromEntries(formats.map((f) => [f, field[at(f)] ?? "-"])),
 		});
 	}
-	return { path, cards };
+	return { path, generated, cards };
 }
 
 export function card(universe: Universe, name: string): Card {

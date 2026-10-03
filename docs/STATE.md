@@ -38,9 +38,24 @@ cards; not the decisions answered either, because a concession, a declared
 motion or a judge repair changes the table without answering one.
 
 A rollback point is a different thing and names a decision, because that is what
-a player can ask for: "back to before I was asked that". Those are the ledger
-rows, so `relive` replays them in order with the reason each one carried, and a
-game containing a fallback comes back as a game containing a fallback.
+a player can ask for: "back to before I was asked that". So the journal's `v` is
+decisions answered, counting the one that produced the line. Version zero is a
+game that has been set up and asked nothing. `relive` replays the rows in order
+with the reason each one carried, and a game containing a fallback comes back as
+a game containing a fallback. Running out of rows is the end of a bounded replay
+and not an error: a bounded set of rows is exactly how a fork asks for a
+position.
+
+Three numbers, and they are not interchangeable. The frame version is the
+table's revision and catches a stale answer. The journal version is decisions
+answered and names a rollback or fork point. The receipt count is internal, for
+working out what a seat has not been shown yet.
+
+What a model prepared before the game is a journal line too. A seat's brief
+costs real money and is a function of the deck, the format and the pregame
+model, so it is written at version zero and a fork there carries it. That is why
+there is no brief cache: a cache beside the journal would be a second format to
+keep in step, and a prefix copy already does the job.
 
 So a game is a header plus an ordered list of entries. Rolling back is reading
 fewer entries. Copying is copying a prefix. Neither needs an undo path in the

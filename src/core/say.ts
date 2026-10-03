@@ -26,7 +26,7 @@ export type MessageId = keyof typeof MESSAGES;
 export type Said = {
 	seat: number;
 	message: MessageId;
-	/** The log length when it was said, so a reader can place it. */
+	/** Decisions answered when it was said, which is the version a rollback names. */
 	at: number;
 };
 

@@ -15,12 +15,13 @@
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
 
 import type { Universe } from "../core/cards.ts";
+import { append, keep, linesOf, type Journal } from "../core/journal.ts";
 import type { Intent } from "../core/intent.ts";
 import { play, type Watcher } from "../core/loop.ts";
 import type { Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
 import type { Outcome, SeatId } from "../core/types.ts";
-import { brief, emptyBrief } from "./brief.ts";
+import { brief, emptyBrief, type Brief } from "./brief.ts";
 import { decisionApi, type Classify } from "./model.ts";
 import type { Chronicle } from "./packet.ts";
 import { startingIntent } from "./plan.ts";
@@ -42,6 +43,16 @@ export type Seated = {
 	picks: () => number;
 };
 
+/**
+ * What a brief was prepared from.
+ *
+ * A brief written for sixty Forests under one pregame model is not a brief for
+ * another deck or another model, so a reused one carries what it was made from
+ * and a mismatch is a miss rather than a quiet substitution.
+ */
+export const preparedFrom = (seat: Seat, pattern: string, format: string): string =>
+	`${format}/${pattern}/${[...seat.deck].sort().join(",")}`;
+
 const pick = (parts: Cast[], role: Role) => parts.find((part) => part.role === role);
 
 /**
@@ -60,7 +71,17 @@ export async function seat(
 	rosters: (seat: SeatId) => Promise<Cast[]>,
 	inference: Inference,
 	universe: Universe,
-	options: { format: string; openLists?: boolean } ,
+	options: {
+		format: string;
+		openLists?: boolean;
+		/** Written to as the game runs, so a clone of this game is a prefix of it. */
+		journal?: Journal;
+		/**
+		 * Briefs a fork already carried. A seat whose brief is here is not asked
+		 * for one again, which is the whole point of forking at version zero.
+		 */
+		prepared?: { seat: SeatId; of: string; made: unknown }[];
+	},
 ): Promise<Seated> {
 	const counted = tally();
 	const chronicle: Chronicle = { briefs: {}, recaps: [] };
@@ -111,6 +132,14 @@ export async function seat(
 				return;
 			}
 			const others = table.seats.filter((other) => other.id !== at.id) as Seat[];
+			const of = preparedFrom(at, role.pattern, options.format);
+			const already = options.prepared?.find((made) => made.seat === at.id && made.of === of);
+			if (already) {
+				// Reused, not re-asked. The match is on the deck, the format and
+				// the model, so a brief cannot drift onto a game it was not for.
+				chronicle.briefs[at.id] = already.made as Brief;
+				return;
+			}
 			chronicle.briefs[at.id] = await brief(
 				at,
 				others,
@@ -125,6 +154,9 @@ export async function seat(
 				options,
 			);
 			for (const gap of chronicle.briefs[at.id]!.gaps) table.gaps.push(`Seat ${at.id} brief: ${gap}`);
+			// Kept at version zero, before anything is dealt, which is what makes
+			// a version zero fork a reusable pregame.
+			if (options.journal) keep(options.journal, at.id, of, chronicle.briefs[at.id]);
 		}),
 	);
 
@@ -158,6 +190,7 @@ export async function run(
 	inference: Inference,
 	commentator: Cast | undefined,
 	watch?: Watcher,
+	journal?: Journal,
 ): Promise<Outcome | null> {
 	const talking =
 		commentator && !commentator.off && commentator.model && commentator.model.type !== "classifier"
@@ -179,7 +212,9 @@ export async function run(
 
 	const flight: Promise<void>[] = [];
 	const outcome = await play(table, seated.players, seated.intents, watch, (turn, active, from) => {
-		if (!talking) return;
+		// A reasoner that has given up is one problem, not one per turn. The gap
+		// it wrote on the way down says the rest of the game ran without recaps.
+		if (!talking || talking.broken()) return;
 		flight.push(
 			recap(table, talking, {
 				number: turn,
@@ -193,13 +228,26 @@ export async function run(
 				})
 				// A missing recap costs a later decision some context. It does not
 				// stop a game, and the gap says the game ran without it.
-				.catch((error) => void table.gaps.push(`No recap for turn ${turn}: ${String(error)}`)),
+				.catch((error) => {
+					const why = talking.broken();
+					table.gaps.push(
+						why
+							? `No recaps from turn ${turn} on: ${why}`
+							: `No recap for turn ${turn}: ${String(error)}`,
+					);
+				}),
 		);
 	});
 
 	// Settled before the report, so the bill counts every call and no request
 	// outlives the game that made it.
 	await Promise.all(flight);
+
+	// Appended once at the end rather than per event. The journal is the stored
+	// form and a crash costs at most a partial last line, but a game inside one
+	// Pi session is not the crash case worth optimising, and one pass keeps the
+	// game loop free of file writes.
+	if (journal) for (const line of linesOf(table)) append(journal, line);
 	return outcome;
 }
 
@@ -207,16 +255,38 @@ export async function run(
 export const report = (table: Table, seated: Seated, outcome: Outcome | null, ms: number): string[] => {
 	const by = (why: string) => table.ledger.filter((row) => row.why === why).length;
 	const spends: readonly Spend[] = seated.tally.spent();
+	const failed = spends.filter((spend) => spend.failed).length;
 	return [
+		`state     ${degraded(table, seated) ?? "clean"}`,
 		`outcome   ${outcome ? JSON.stringify(outcome.results) : "unfinished, waiting on a usable answer"}`,
 		`turns     ${table.cursor.turn}`,
 		`decisions ${table.ledger.length}  forced ${by("forced")}  chosen ${by("chosen")}  fallback ${by("fallback")}`,
 		`forced    ${((by("forced") / Math.max(1, table.ledger.length)) * 100).toFixed(1)}%`,
 		`picks     ${seated.picks()} decision-model calls`,
 		`recaps    ${seated.chronicle.recaps.length} of ${table.cursor.turn} turns`,
+		`failed    ${failed} of ${spends.length} reasoning calls`,
 		`elapsed   ${(ms / 1000).toFixed(1)}s`,
 		"",
 		...bill(spends),
 		...(table.gaps.length ? ["", `gaps      ${table.gaps.length}`, ...table.gaps.map((gap) => `  ${gap}`)] : []),
 	];
 };
+
+/**
+ * Did this run give a usable result, or did it degrade?
+ *
+ * The question a benchmark has to be able to ask. A game that finished with half
+ * its briefs missing and no recaps is a finished game and not a comparable one,
+ * so this names the reason rather than leaving a caller to read the gap list and
+ * guess. Null means nothing was lost.
+ */
+export function degraded(table: Table, seated: Seated): string | null {
+	const spends = seated.tally.spent();
+	const failed = spends.filter((spend) => spend.failed).length;
+	if (table.ledger.some((row) => row.why === "fallback")) return "a decision was taken by fallback";
+	if (failed && failed === spends.length) return "every reasoning call failed";
+	if (failed > spends.length / 4) return `${failed} of ${spends.length} reasoning calls failed`;
+	if (spends.some((spend) => spend.truncated)) return "a reply hit its output ceiling";
+	if (table.gaps.length) return `${table.gaps.length} gaps`;
+	return null;
+}

@@ -212,7 +212,14 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		if (now) after[id] = structuredClone(now);
 	}
 
-	const receipt: Receipt = { seq: table.log.length, changes: structuredClone(changes), reason, before, after };
+	const receipt: Receipt = {
+		seq: table.log.length,
+		at: table.ledger.length,
+		changes: structuredClone(changes),
+		reason,
+		before,
+		after,
+	};
 	// The clock moves for every group, logged or not, because a note needs a
 	// stamp and "which of these two is newer" must have an answer.
 	table.cursor.clock += 1;
