@@ -25,6 +25,16 @@ import { describe, project } from "./view.ts";
 export type Watcher = (line: string) => void;
 
 /**
+ * Called when a turn ends, with the turn that ended, the seat that was active,
+ * and the log length it began at.
+ *
+ * Presentational, like `watch`, and for the same reason: the table does not
+ * know that anybody summarises a turn, and nothing it returns bears on the
+ * game. It is awaited because the thing that reads it makes a model call.
+ */
+export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promise<void> | void;
+
+/**
  * When the table may act without asking, and why.
  *
  * The table owns the turn. Untapping, drawing for the turn, state based actions
@@ -55,12 +65,14 @@ export async function play(
 	players: Record<SeatId, Player>,
 	intents: Record<SeatId, Intent>,
 	watch?: Watcher,
+	onTurn?: TurnWatcher,
 ): Promise<Outcome | null> {
 	// What each seat has already been shown, so a frame's "since" is the part it
 	// has not seen. Presentation only: nothing here bears on an outcome, which
 	// is why it may live outside the table.
 	const seen: Record<SeatId, number> = {};
 	let told = 0;
+	let began = table.log.length;
 
 	while (table.outcome === null) {
 		const decision = nextDecision(table);
@@ -69,7 +81,12 @@ export async function play(
 			// A phase ending is the one place table talk is offered, which keeps
 			// the log to at most one line per seat per phase.
 			if (endingPhase(table)) await atPhaseEnd(table, players, watch);
+			const { turn, active } = table.cursor;
 			advance(table);
+			if (table.cursor.turn !== turn) {
+				await onTurn?.(turn, active, began);
+				began = table.log.length;
+			}
 			continue;
 		}
 

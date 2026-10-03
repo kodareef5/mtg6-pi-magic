@@ -39,43 +39,70 @@ export const ROLES: Record<
 		whose: "seat" | "table";
 		/** The suggested pattern. Every one of these is a suggestion and nothing more. */
 		suggested: string;
-		/** A stronger or cheaper alternative worth knowing about. */
+		/** Why this one. A reader overruling a default should know what it was for. */
+		why: string;
+		/** The step up, and what it buys. */
 		instead?: string;
 	}
 > = {
-	// The only role milestone one uses. Jev answers a choice question with one of
-	// the ids we supplied and a probability over all of them, which is why a
-	// model cannot invent a move here even in principle.
+	// Jev answers a choice question with one of the ids we supplied and a
+	// probability over all of them, which is why a model cannot invent a move
+	// here even in principle. Its job is to execute a plan somebody else made
+	// and to notice when the board does not match it.
 	decide: {
 		does: "pick one of the options the table listed",
 		kind: "classifier",
 		whose: "seat",
 		suggested: "typesafe/jev-latest",
+		why:
+			"A classifier, not a chat model. It answers with one of our ids and a distribution " +
+			"over them, so it cannot write a move, and it is called once per asked decision, " +
+			"which is the most frequent call in the game. It executes; it does not strategise.",
 	},
 	pregame: {
-		does: "read the deck and write the policy and the opening plan",
+		does: "read the deck and write the snippets a later decision reads",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6.1-sol:high",
-		instead: "gpt-6-astra:high, which is stronger and dearer",
+		suggested: "gpt-6.1-sol:low",
+		why:
+			"Runs once per game and shapes every turn after it, so it is worth real reasoning. " +
+			"A cheap frontier model on low thinking is the measured default rather than a " +
+			"frontier flagship: this is a deck reading, not a research problem, and the pass " +
+			"is a dozen small concurrent questions rather than one large one.",
+		instead: "gpt-6.1-sol:high, the same model thinking longer. Benchmark it before paying for it",
 	},
 	strategy: {
-		does: "plan the active turn and say what would change the plan",
+		does: "plan the phase about to happen, and say what would change the plan",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-5.6-luna:low",
+		suggested: "gpt-6.1-sol:low",
+		why:
+			"The thinking happens here, because the decision model does not do it. Called only " +
+			"on a phase that has a choice worth planning, which is a small share of phases, so " +
+			"the same reasoner as the pregame costs little across a game.",
+		instead: "gpt-6.1-sol:high, when a phase plan is measurably better for the extra tokens",
 	},
 	judge: {
 		does: "rule on an objection, citing the rules on disk",
 		kind: "chat",
 		whose: "table",
-		suggested: "gpt-5.6-luna:low",
+		suggested: "gpt-6.1-sol:low",
+		why:
+			"Rare: only an objection reaches it. Rarity is why it gets the better reasoner " +
+			"rather than the cheapest one, since a wrong ruling changes a game and the cost " +
+			"across a run is nearly nothing. The decision model narrows the rules first, so " +
+			"this reads a few rules rather than three thousand.",
 	},
 	summary: {
-		does: "say what happened this turn in a few lines",
+		does: "say what happened this turn in two sentences, as the commentator",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-5.6-luna",
+		suggested: "gpt-5.6-luna:low",
+		why:
+			"Called every turn and read by every seat, so it is the one place to be strict " +
+			"about cost. The job is small and bounded: summarise public events in two or three " +
+			"sentences. A cheaper model on low thinking does it, and the output ceiling in " +
+			"spend.ts keeps the bill where the prompt says it should be.",
 	},
 };
 
@@ -94,6 +121,16 @@ export type Cast = {
 	thinkingLevel?: ThinkingLevel;
 	/** Why the pattern did not resolve. The game says so rather than substituting. */
 	problem?: string;
+	/**
+	 * Asked for by name and switched off. Not the same as unresolved: a role that
+	 * is off was a decision, and nothing records a gap for it.
+	 *
+	 * Measured on a game of basic lands, the recaps are 107 calls and about four
+	 * cents, so this is not a cost rescue. It is for a bulk run where nobody
+	 * reads the lines, and for pricing a role against playing without it:
+	 * `summary: "off"` against `summary: "gpt-5.6-luna:low"` is the experiment.
+	 */
+	off?: boolean;
 };
 
 /** What Pi hands us. Available means its provider has working credentials. */
@@ -144,6 +181,7 @@ function look(pattern: string, models: readonly AnyModel[]): Omit<Cast, "role" |
 export function cast(roster: Roster, catalogue: Catalogue): Cast[] {
 	return (Object.keys(ROLES) as Role[]).map((role) => {
 		const pattern = roster[role] ?? ROLES[role].suggested;
+		if (pattern === "off") return { role, pattern, off: true };
 		const models = ROLES[role].kind === "classifier" ? catalogue.classifiers : catalogue.chat;
 		return { role, pattern, ...look(pattern, models) };
 	});
@@ -152,12 +190,28 @@ export function cast(roster: Roster, catalogue: Catalogue): Cast[] {
 /** The roster as lines, which is what `/magic models` prints. */
 export const readRoster = (parts: Cast[]): string[] =>
 	parts.map((part) => {
-		const about = ROLES[part.role];
-		const got = part.model
-			? `${part.model.provider}/${part.model.id}${part.thinkingLevel ? ` thinking ${part.thinkingLevel}` : ""}`
-			: (part.problem ?? "unresolved");
-		return `${part.role.padEnd(9)} ${part.pattern.padEnd(22)} ${got}   ${about.does}`;
+		const got = part.off
+			? "off"
+			: part.model
+				? `${part.model.provider}/${part.model.id}${part.thinkingLevel ? ` thinking ${part.thinkingLevel}` : ""}`
+				: (part.problem ?? "unresolved");
+		return `${part.role.padEnd(9)} ${part.pattern.padEnd(22)} ${got}   ${ROLES[part.role].does}`;
 	});
+
+/**
+ * Why each default is what it is.
+ *
+ * Recorded so a reader changing one knows what it was chosen for. A default
+ * nobody can argue with is a default nobody can improve.
+ */
+export const readWhy = (): string[] =>
+	(Object.keys(ROLES) as Role[]).flatMap((role) => [
+		`${role}  ${ROLES[role].suggested}`,
+		`  ${ROLES[role].does}.`,
+		`  ${ROLES[role].why}`,
+		...(ROLES[role].instead ? [`  Instead: ${ROLES[role].instead}`] : []),
+		"",
+	]);
 
 /**
  * The whole arrangement for one game.

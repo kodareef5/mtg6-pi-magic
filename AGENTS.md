@@ -65,14 +65,76 @@ a move here even in principle. `pregame`, `strategy`, `judge` and `summary` are
 chat models. A roster belongs to a seat, so two seats with different rosters is
 one model playing another, and the ledger says who chose what.
 
-`src/context/roles.ts` holds the roles, the suggested patterns and the
-resolution. `/magic models` reads the roster and says what each pattern
-resolved to; `/magic models <role> <pattern> [seat]` changes one. The file
-behind it is small JSON, so an edit needs no command at all.
+The classifier executes and does not strategise. So the thinking happens in the
+other four roles and what reaches a decision is a short plan plus the facts.
+Handing the classifier everything known about the game is the failure the split
+exists to prevent: it is smart, and it is not going to work out a line.
 
-A pattern that does not resolve is reported, never substituted. A game refuses
-to start rather than discovering at its first decision that a seat has nobody
-to answer it.
+`src/context/roles.ts` holds the roles, the suggested patterns, the resolution
+and why each default is what it is. `/magic models` reads the roster and says
+what each pattern resolved to, `/magic models why` says what each default was
+chosen for, and `/magic models <role> <pattern> [seat]` changes one. The file
+behind it is small JSON, so an edit needs no command at all. A pattern of `off`
+switches a role off, which is a decision and not a gap.
+
+A pattern that does not resolve is reported, never substituted, including when
+Pi has a configured default: a game played by a model nobody chose is a result
+that cannot be compared with another. A seat with no `decide` model refuses to
+start. A seat with no `pregame` model plays with no brief, because a missing
+plan costs some quality and a refused game costs everything.
+
+### What each call is for
+
+**`pregame` runs once, as one concurrent wave per seat.** Not one question. A
+single "tell me your strategy" call produces a paragraph that then gets pasted
+into every decision, and a decision about blocking does not want the mulligan
+reasoning. So the unit of the pass is the unit of injection: every answer is a
+snippet filed under where it will be read. The deck's strengths, the pairs meant
+to combine, the opening with its named edge cases, one per phase with a decision
+window, and one per card that earns a note. Card notes are keyed by name and
+cost nothing on a turn where the card never appears, which is why they are per
+card rather than per group. A card earns a note mechanically before a call is
+spent, so a basic land gets none.
+
+What a seat is told about an opponent is what that seat is entitled to know: the
+format and the seat count, not their cards. `openLists` is for a benchmark where
+both lists are known on purpose and is off unless somebody says so, because a
+leak into a pregame brief cannot be undone by a later ruling.
+
+**`summary` runs once per turn that had something in it, beside the game.** Two
+sentences from the spectator projection, so it can hold nothing private by
+construction. It is what lets a later decision know what has been going on
+without carrying the log. It is never awaited inside the loop: measured on a
+game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
+into minutes of it, so the call is started at the turn boundary and the answer
+lands when it lands.
+
+**`strategy` runs only on a phase worth planning,** which `worthPlanning` decides
+mechanically and free: a phase that grants priority and has more than one option
+pending. On a land deck that is the main phase and nothing else.
+
+**`judge` runs only on an objection,** in two calls. The decision model scores
+candidate rules for relevance, then the reasoner rules on the few that survive
+and names the remedy. It stops at the verdict, because carrying a remedy out
+needs rollback and that is unwritten.
+
+### What a game costs
+
+Measured on one game of basic lands, 108 turns, with the suggested defaults:
+
+```
+decide    109 calls   one per asked decision, 95.4% of decisions are forced
+pregame     9 calls   2,743 input tokens     $0.042 at gpt-6.1-sol:low
+summary   107 calls  67,187 input tokens     $0.040 at gpt-5.6-luna:low
+```
+
+Every call is recorded in `src/context/spend.ts` with its model, thinking level,
+wall time, tokens in and out, reasoning and cached tokens where the provider
+reports them, and the cost at the catalog price. The output ceiling is there too
+and not in the prompts, because it is a price rather than a style: some routes
+price a request against the maximum output asked for rather than the output
+returned, so every role names a deliberate ceiling and a reply that hits it is
+recorded as truncated.
 
 ## Build order
 
@@ -179,6 +241,13 @@ rather than adding a test for each branch.
   refuses an ambiguous one. A model-backed seat finishes a game, is asked only
   what is not forced, reads a refusal in its next request, and never has a wrong
   answer kind turned into a pick.
+- **Briefed.** The pregame asks several questions at once, files each answer
+  where it is read, and names no card of another seat's deck. A snippet reaches
+  the decision for its own window, a card note only while its card is visible,
+  and a failed question is a gap the game plays on without.
+- **Beside.** Recaps run beside the game, in turn order however late they land,
+  and a game finishes in less time than awaiting them would take. Every call
+  lands in the bill with its model, ceiling and tokens, failures included.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -213,9 +282,15 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   priority.ts          actions offered to the current priority holder
   decisions.ts         the ordered dispatcher and application of listed picks
 src/context/           questions for a decision model. Its own AGENTS.md
-  roles.ts             which model answers which part, and where that is written
-  model.ts             the one adapter onto Pi's classifier API
-  seat.ts              a seat that picks from the list and nothing else
+  roles.ts             which model answers which part, and why each default
+  model.ts, reason.ts  the two adapters onto Pi: classifier, and chat
+  spend.ts             what every call cost, and the output ceiling per role
+  brief.ts             the pregame wave, and the snippets it files by use
+  summary.ts           the turn in two sentences, from the spectator view
+  strategy.ts          per-phase planning. Pipeline written, leaves unwritten
+  ruling.ts            the judge's two calls. Pipeline written, stops at verdict
+  packet.ts, seat.ts   one decision's context, and the seat that answers it
+  sit.ts               seating a whole table, so one command cannot differ
 src/seating/           a seat over a socket. Parked
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
@@ -239,11 +314,16 @@ verify every carried field against the source and refuse to pass on a mismatch.
 
 ## Not built yet
 
-- Model planning. `startingIntent` is explicit and minimal and stands in for
-  `preparePhase`, so a seat plays with a plan nobody wrote. Packet assembly
-  offers no widening routes until their handlers exist, and a model-backed seat
-  can only pick from the list: it cannot declare, delegate or object.
-- Every role but `decide`. The other four resolve, report and are not called.
+- Phase planning. `strategy.planPhase` holds the pipeline and the prompt and
+  throws: what makes a phase plan worth its tokens is structured alternatives,
+  and those need cards with abilities to be alternatives at all. Until then
+  `startingIntent` stands in and `worthPlanning` is false on nearly every phase.
+- The judge's remedy. `ruling.rule` holds the two-call pipeline and stops at the
+  verdict, because rollback is unwritten and a ruling with no remedy changes no
+  game. A ruling also makes the phase plan stale, which is a consequence of one
+  rather than a step in it.
+- Widening routes. A model-backed seat can only pick from the list: it cannot
+  declare, delegate or object. A person at the same seat can do all three.
 - Card meaning. `src/core/syntax.ts` holds the five ability shapes, the correct
   layers, and the motions milestone one needs. The rest of the language is
   measured rather than guessed: 31 event kinds, 17 selector properties, 10

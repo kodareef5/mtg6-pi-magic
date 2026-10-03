@@ -17,7 +17,7 @@ import type { Api, ClassifierApi, ClassifierModel, ClassifierResult, Model } fro
 
 import { decisionApi, type Classify } from "../src/context/model.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { assign, cast, load, readRoster, rosterFor, save, suggested } from "../src/context/roles.ts";
+import { assign, cast, load, readRoster, readWhy, rosterFor, save, suggested } from "../src/context/roles.ts";
 import { aiSeat, question } from "../src/context/seat.ts";
 import { focus } from "../src/context/packet.ts";
 import { start } from "../src/core/commit.ts";
@@ -50,12 +50,22 @@ test("a roster resolves patterns the way a reader would type them", () => {
 	// The suggested defaults resolve against a catalogue that has them.
 	assert.equal(of("decide").model?.id, "jev-latest");
 	assert.equal(of("pregame").model?.id, "gpt-6.1-sol");
-	assert.equal(of("pregame").thinkingLevel, "high");
-	assert.equal(of("judge").thinkingLevel, "low");
-	// No level asked for, so none is claimed. Pi uses the model's default.
-	assert.equal(of("summary").thinkingLevel, undefined);
+	assert.equal(of("pregame").thinkingLevel, "low");
+	assert.equal(of("judge").model?.id, "gpt-6.1-sol");
 	assert.equal(of("summary").model?.id, "gpt-5.6-luna");
+	assert.equal(of("summary").thinkingLevel, "low");
 	for (const part of parts) assert.equal(part.problem, undefined, `${part.role}: ${part.problem}`);
+
+	// A level that was not asked for is not claimed. Pi uses the model's default.
+	assert.equal(cast({ summary: "gpt-5.6-luna" }, catalogue).find((p) => p.role === "summary")!.thinkingLevel, undefined);
+
+	// Every default says what it was chosen for, so changing one is an informed
+	// change. A default nobody can argue with is a default nobody can improve.
+	const why = readWhy().join("\n");
+	for (const role of ["decide", "pregame", "strategy", "judge", "summary"]) {
+		assert.match(why, new RegExp(`^${role}  \\S+$`, "m"));
+	}
+	assert.ok(why.length > 600, "the reasoning is articulated, not labelled");
 
 	// A classifier role never resolves to a chat model, whatever is named.
 	assert.match(cast({ decide: "gpt-6.1-sol" }, catalogue)[0]!.problem!, /No available model matches/);

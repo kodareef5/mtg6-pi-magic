@@ -21,28 +21,24 @@ import { join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-import { decisionApi } from "./src/context/model.ts";
-import { startingIntent } from "./src/context/plan.ts";
 import {
 	assign,
 	cast,
 	load as loadCrew,
 	readRoster,
+	readWhy,
 	ROLES,
 	rosterFor,
 	save as saveCrew,
 	type Cast,
 	type Role,
 } from "./src/context/roles.ts";
-import { aiSeat } from "./src/context/seat.ts";
+import { report, run, seat as seatTable, type Seated } from "./src/context/sit.ts";
 import { checkDeck, load, type Universe } from "./src/core/cards.ts";
 import { start } from "./src/core/commit.ts";
 import { nextDecision } from "./src/core/decisions.ts";
 import { standard } from "./src/core/format.ts";
-import type { Intent } from "./src/core/intent.ts";
 import { exportGame } from "./src/core/journal.ts";
-import { play } from "./src/core/loop.ts";
-import type { Player } from "./src/core/player.ts";
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
 import type { SeatId } from "./src/core/types.ts";
@@ -92,16 +88,13 @@ async function roster(ctx: ExtensionContext, seat?: SeatId): Promise<Cast[]> {
 
 export default function (pi: ExtensionAPI) {
 	let table: Table | null = null;
-	const players: Record<SeatId, Player> = {};
-	const intents: Record<SeatId, Intent> = {};
-	let calls = 0;
+	let seated: Seated | null = null;
 
 	/**
-	 * Deal a table and give every seat a model to answer with.
+	 * Deal a table, give every seat a model, and run the pregame.
 	 *
-	 * It refuses rather than starting half ready. A seat whose decide role did
-	 * not resolve has nothing to answer it, and a game that starts anyway spends
-	 * its first decision finding that out.
+	 * `src/context/sit.ts` owns the assembly, so this command and `npm run
+	 * smoke` cannot disagree about what a game is made of or what it cost.
 	 */
 	async function open(seed: string, ctx: ExtensionContext): Promise<Table> {
 		const cards = universe(standard.name);
@@ -112,31 +105,17 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		const opened = start(standard, entrants, seed);
-		calls = 0;
-		for (const seat of opened.seats) {
-			const parts = await roster(ctx, seat.id);
-			const decide = parts.find((part) => part.role === "decide");
-			if (!decide?.model || decide.model.type !== "classifier") {
-				throw new Error(
-					`Seat ${seat.id} has no decision model. ` +
-						`${decide?.problem ?? `${decide?.pattern} is not a classifier.`} ` +
-						`Run /magic models to read the roster, and /magic models decide <pattern> to change it.`,
-				);
-			}
-			const api = decisionApi(
-				(model, request, options) => ctx.modelRegistry.classify(model, request, options),
-				decide.model,
-			);
-			const intent = startingIntent(seat.id);
-			intents[seat.id] = intent;
-			players[seat.id] = aiSeat({
-				name: seat.name,
-				api,
-				intent,
-				onGap: (note) => void opened.gaps.push(note),
-				onAsk: () => void (calls += 1),
-			});
-		}
+		seated = await seatTable(
+			opened,
+			(at) => roster(ctx, at),
+			{
+				classify: (model, request, options) => ctx.modelRegistry.classify(model, request, options),
+				stream: (model, context, options) =>
+					ctx.modelRegistry.streamSimple(model, context as never, options as never) as never,
+			},
+			cards,
+			{ format: standard.name },
+		);
 		table = opened;
 		return opened;
 	}
@@ -174,6 +153,10 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function models(words: string[], ctx: ExtensionContext) {
 		const [, role, pattern, seat] = words;
+		if (role === "why") {
+			ctx.ui.notify(readWhy().join("\n"), "info");
+			return;
+		}
 		if (role && pattern) {
 			if (!(role in ROLES)) {
 				ctx.ui.notify(`No role ${role}. The roles are ${Object.keys(ROLES).join(", ")}.`, "error");
@@ -192,19 +175,19 @@ export default function (pi: ExtensionAPI) {
 		const seats = table?.seats ?? [{ id: 0, name: "unseated" }, { id: 1, name: "unseated" }];
 		const mine = (parts: Cast[], whose: "seat" | "table") =>
 			readRoster(parts.filter((part) => ROLES[part.role].whose === whose));
-		const lines = [`Roster in ${ROSTER}. Edit it there, or with /magic models <role> <pattern> [seat].`];
+		const lines = [
+			`Roster in ${ROSTER}. Edit it there, or with /magic models <role> <pattern> [seat].`,
+			`/magic models why says what each default was chosen for.`,
+		];
 		for (const at of seats) {
 			lines.push("", `Seat ${at.id}, ${at.name}:`, ...mine(await roster(ctx, at.id), "seat"));
 		}
 		lines.push("", "The table:", ...mine(await roster(ctx), "table"));
-		for (const [named, about] of Object.entries(ROLES)) {
-			if (about.instead) lines.push("", `${named} instead: ${about.instead}`);
-		}
 		ctx.ui.notify(lines.join("\n"), "info");
 	}
 
 	pi.registerCommand("magic", {
-		description: "play [seed] | models [role pattern [seat]] | step | log | export | cards | rules",
+		description: "play [seed] | models [why|<role> <pattern> [seat]] | step | log | export | cards | rules",
 		handler: async (args, ctx) => {
 			const words = args.trim().split(/\s+/).filter(Boolean);
 			const verb = words[0] ?? "";
@@ -218,26 +201,21 @@ export default function (pi: ExtensionAPI) {
 			if (verb === "play") {
 				const opened = await open(seed, ctx);
 				const began = Date.now();
-				const outcome = await play(opened, players, intents, (line) => ctx.ui.notify(line, "info"));
-				const forced = opened.ledger.filter((row) => row.why === "forced").length;
-				const report =
-					`${opened.ledger.length} decisions, ${forced} forced ` +
-					`(${((forced / Math.max(1, opened.ledger.length)) * 100).toFixed(1)}%), ` +
-					`${calls} model calls, ${opened.gaps.length} gaps, ` +
-					`${((Date.now() - began) / 1000).toFixed(1)}s.`;
-				if (!outcome) {
-					ctx.ui.notify(
-						`The table is waiting for a usable answer. ${report}\n` +
-							`Run /magic step to read the pending decision.` +
-							(opened.gaps.length ? `\nGaps: ${opened.gaps.join("; ")}` : ""),
-						"warning",
-					);
-					return;
-				}
+				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
+				const outcome = await run(
+					opened,
+					seated!,
+					{
+						classify: (model, request, options) => ctx.modelRegistry.classify(model, request, options),
+						stream: (model, context, options) =>
+							ctx.modelRegistry.streamSimple(model, context as never, options as never) as never,
+					},
+					commentator,
+					(line) => ctx.ui.notify(line, "info"),
+				);
 				ctx.ui.notify(
-					`Game over on seed ${seed}. ${JSON.stringify(outcome.results)}\n${report}` +
-						(outcome.gaps.length ? `\nGaps: ${outcome.gaps.join("; ")}` : ""),
-					"info",
+					`Seed ${seed}.\n${report(opened, seated!, outcome, Date.now() - began).join("\n")}`,
+					outcome ? "info" : "warning",
 				);
 				return;
 			}
@@ -301,24 +279,21 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (verb === "log") {
-				if (!table) {
+				if (!table || !seated) {
 					ctx.ui.notify("No table. Run /magic play.", "warning");
 					return;
 				}
-				const count = (why: string) => table!.ledger.filter((row) => row.why === why).length;
 				ctx.ui.notify(
-					`${table.format.name}, ${table.seats.length} seats. ${table.ledger.length} decisions: ` +
-						`${count("forced")} forced, ${count("delegated")} delegated, ` +
-						`${count("chosen")} chosen, ${count("declared")} declared, ${count("fallback")} fallback. ` +
-						`${table.log.length} committed events, ${calls} model calls, ` +
-						`${table.said.length} things said.`,
+					`${table.format.name}, ${table.seats.length} seats, ` +
+						`${table.log.length} committed events, ${table.said.length} things said.\n` +
+						report(table, seated, table.outcome, 0).join("\n"),
 					"info",
 				);
 				return;
 			}
 
 			ctx.ui.notify(
-				"Usage: /magic play [seed] | /magic models [<role> <pattern> [seat]] | /magic step | " +
+				"Usage: /magic play [seed] | /magic models [why|<role> <pattern> [seat]] | /magic step | " +
 					"/magic log | /magic export [public|full|<seat>] | /magic cards [format|universe] | " +
 					"/magic rules <query|build>",
 				"info",
@@ -327,7 +302,8 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("session_shutdown", async () => {
-		for (const player of Object.values(players)) player.close();
+		for (const player of Object.values(seated?.players ?? {})) player.close();
 		table = null;
+		seated = null;
 	});
 }

@@ -16,13 +16,18 @@ import type { Answer, Player } from "../core/player.ts";
 import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import { asState, chose, type DecisionApi, type Question } from "./model.ts";
-import { focus, type Packet } from "./packet.ts";
+import { focus, type Chronicle, type Packet } from "./packet.ts";
 
 export type AiSeatOptions = {
 	name: string;
 	api: DecisionApi;
 	/** This seat's plan. Held by the core, filled by whoever holds the seat. */
 	intent: Intent;
+	/**
+	 * The brief and the recaps, by reference so the recaps stay current. Absent
+	 * is a seat playing with no plan, which still plays.
+	 */
+	chronicle?: Chronicle;
 	/** Recorded on the table when an answer comes back unusable. */
 	onGap(note: string): void;
 	/** Called with every request and what came back, for the run report. */
@@ -49,12 +54,19 @@ export function question(packet: Packet): Question {
 		"",
 		...packet.known,
 		...(packet.resources.length ? ["", ...packet.resources] : []),
+		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
+		// The plan, then the priorities it serves, then what is only assumed.
+		// Guidance before priorities because a snippet written for this window
+		// is more specific than a deck-level ordering, and more specific wins.
+		...(packet.guidance.length ? ["", "The plan for this seat here:", ...packet.guidance] : []),
 		...(packet.priorities.length ? ["", "This seat's priorities, in order:", ...packet.priorities] : []),
 		...(packet.assumed.length ? ["", "Assumed, not known:", ...packet.assumed] : []),
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
 		"",
 		"Answer with one of the listed ids. The options are every move the table",
-		"built and checked, and nothing outside the list can be played here.",
+		"built and checked, and nothing outside the list can be played here. The plan",
+		"above was written before this board existed: where it does not fit what you",
+		"can see, the listed option that fits is the better answer.",
 	];
 	return {
 		type: "choice",
@@ -81,7 +93,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 
 			// Planning is unwritten, so the intent arrives whole and is used as
 			// given. A phase change alone is not a reason for a model call.
-			const packet = focus(frame, options.intent);
+			const seated = options.chronicle;
+			const packet = focus(frame, options.intent, {
+				...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
+				...(seated ? { recaps: seated.recaps } : {}),
+			});
 			asked += 1;
 			const answers = await options.api.ask({
 				state: asState(packet),

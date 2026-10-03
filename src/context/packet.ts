@@ -11,6 +11,17 @@
 
 import type { Frame, SeatId, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
+import type { Brief } from "./brief.ts";
+import type { Recap } from "./summary.ts";
+
+/**
+ * What the pregame and the commentator left behind, shared by every seat.
+ *
+ * One object for the whole table, held by reference, because the recaps grow as
+ * the game runs and a seat that copied them at the start would read a stale
+ * game. The briefs are per seat and a seat reads only its own.
+ */
+export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
 
 /** A predefined route out of this decision. Not prose, and not a new move. */
 export type Route = "more-options" | "better-targets" | "replan";
@@ -34,6 +45,19 @@ export type Packet = {
 	/** Facts, separated from guesses about what an opponent will do. */
 	known: string[];
 	assumed: string[];
+	/**
+	 * The pregame snippets that apply here: the one written for this window, and
+	 * a note for each card this seat can see that has one. Filed by injection
+	 * site in `brief.ts` precisely so this list is short, and a card note costs
+	 * nothing on a turn where its card never appears.
+	 */
+	guidance: string[];
+	/**
+	 * What has been happening, from the public turn recaps. Not the log: a
+	 * decision wants three sentences about the last three turns, not two hundred
+	 * receipts, and the recap is already filtered to what a spectator may read.
+	 */
+	lately: string[];
 	/** Route id to what asking for it does. */
 	routes: Partial<Record<Route, string>>;
 	/**
@@ -60,8 +84,16 @@ export type Packet = {
  * beside waste resources manufactures a preference without any analysis. A
  * conditional outcome is shown as conditional, because an opponent's unseen
  * answer is not a known future event.
+ *
+ * `context` is what the pregame and the commentator left behind. It is optional
+ * because a seat with no brief still has to be able to play: a missing snippet
+ * costs quality, and refusing to build a packet without one would cost the game.
  */
-export function focus(frame: Frame, intent: Intent): Packet {
+export function focus(
+	frame: Frame,
+	intent: Intent,
+	context: { brief?: Brief; recaps?: readonly Recap[] } = {},
+): Packet {
 	const { decision, seat, view, version, refused } = frame;
 	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) {
 		throw new Error("A packet needs a decision and intent for its own seat");
@@ -69,6 +101,20 @@ export function focus(frame: Frame, intent: Intent): Packet {
 	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
 	const phaseApplies = view.window.kind === "turn" && intent.phase.turn === view.window.turn &&
 		intent.phase.phase === view.window.phase;
+
+	// The snippet written for this window, then a note for every card this seat
+	// can see. Visible rather than only offered: the note on a card is wanted
+	// while holding it, not just on the turn it becomes a legal play.
+	const brief = context.brief;
+	const shown = [...view.table, ...view.yours, ...decision.options.map((o) => `${o.label} ${o.shows ?? ""}`)].join("\n");
+	const guidance = [
+		brief?.deck,
+		view.window.kind === "opening" ? brief?.opening : brief?.phases[view.window.phase],
+		brief?.combos,
+		...Object.entries(brief?.cards ?? {})
+			.filter(([card]) => shown.includes(card))
+			.map(([card, note]) => `${card}: ${note}`),
+	].filter((line): line is string => !!line && line.length > 0);
 	// Matching the window scopes assumptions; it does not prove they still hold.
 	// Richer card facts and locked effect choices await the card language.
 	return {
@@ -79,7 +125,14 @@ export function focus(frame: Frame, intent: Intent): Packet {
 		options: structuredClone(decision.options),
 		priorities: [...(intent.deck.priorities ?? [])],
 		known: [...view.table, ...view.since],
-		assumed: phaseApplies ? [...intent.turn.hypotheses, ...intent.phase.assumptions] : [],
+		// A pregame read on an unseen opponent is an assumption by construction,
+		// so it sits with the assumptions and never with the known facts.
+		assumed: [
+			...Object.values(brief?.against ?? {}),
+			...(phaseApplies ? [...intent.turn.hypotheses, ...intent.phase.assumptions] : []),
+		],
+		guidance,
+		lately: [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
 		// Widening is unwritten. Advertising a route cannot make it executable.
 		routes: {},
 		...(refused?.length ? { refused: [...refused] } : {}),

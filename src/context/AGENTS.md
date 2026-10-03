@@ -32,6 +32,25 @@ A pattern that does not resolve is reported. Do not fall back to another model,
 including Pi's configured default: a game played by a model nobody chose is a
 result that cannot be compared with another.
 
+## Four calls, and what each is for
+
+The classifier executes. The thinking happens in the other four roles, and what
+reaches a decision is a short plan plus the facts.
+
+- **pregame** runs once per seat as one concurrent wave. The unit of the pass is
+  the unit of injection: each answer is filed under where it will be read. Never
+  one question, because one answer gets pasted into every decision.
+- **strategy** runs only where `worthPlanning` is true. A phase boundary is not
+  a reason to spend money.
+- **summary** runs beside the game, never awaited inside the loop, and is built
+  from the spectator projection so it cannot hold a private fact.
+- **judge** runs only on an objection: the classifier narrows the rules, then
+  the reasoner rules on the few that survive.
+
+Every call goes through `spend.ts` and carries an output ceiling. The ceiling is
+a price and not a style, because some routes charge against the maximum asked
+for rather than the reply returned.
+
 ## Three jobs, three calls
 
 Collapsing these is how the earlier attempts played plausibly and weakly.
