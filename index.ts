@@ -124,7 +124,7 @@ export default function (pi: ExtensionAPI) {
 					ctx.ui.notify(line, "info"),
 				);
 				if (!outcome) {
-					ctx.ui.notify("A required card selection is unanswered. The table is waiting at that decision.", "warning");
+					ctx.ui.notify("The table is waiting for a usable answer. Run /magic step to inspect the pending decision.", "warning");
 					return;
 				}
 				ctx.ui.notify(

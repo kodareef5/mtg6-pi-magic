@@ -166,6 +166,9 @@ the retry, record a gap and return from `play` with null, leaving the table
 pending for a player to answer on resume. Do not manufacture a discard, bottom
 choice, or concession to make that case finish.
 
+An ask or delegation whose handler is unwritten also leaves the decision pending
+with a gap. It must not start an unbounded loop of unchanged questions.
+
 Three things that look like helpfulness and are not. Completing an invalid
 selection from whatever is left. Treating a failed operation as the seat's
 decision. A configured cap that stops a seat early and then reads as though the

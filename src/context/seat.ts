@@ -22,7 +22,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	 *   1. Refuse a frame with no decision. That is a loop bug, not a pass.
 	 *   2. Take this seat's intent. Prepare a new one only when the phase moved
 	 *      or its assumptions broke.
-	 *   3. focus(decision, intent, version) for the packet.
+	 *   3. focus(frame, intent) for the packet, using only the seat's projection.
 	 *   4. Ask one choice question: the packet as state, the options as
 	 *      criteria, the decision's question as instructions.
 	 *   5. An option id comes back: return it with a fresh actionId.

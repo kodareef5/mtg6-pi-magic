@@ -42,6 +42,12 @@ declarations and bottom obligations; turn questions need their phase and step.
 Do not infer the phase from prose, and do not attach opening instructions to a
 combat or upkeep question. A phase change alone is not a reason for a model call.
 
+`focus(frame, intent)` assembles the current basic-land packet without a model
+call. It copies offered ids, separates assumptions from projected facts, and
+uses phase assumptions only when both turn and phase match. This scope check
+does not prove an assumption still holds. Planning and validity checks remain
+unwritten and accept filtered frames, never the full table.
+
 Equal detail per option. A brilliant winning line beside waste resources
 manufactures a preference without any analysis.
 
@@ -64,6 +70,10 @@ the first option here: that loses the distinction between a choice and a fallbac
 A route is a predefined id with a predefined meaning, and it returns to the same
 decision. It does not pass, refund a paid cost, change a locked choice, or
 reveal anything the seat has not earned.
+
+The current packet has no routes because widening and replanning are unwritten.
+Do not advertise them. An explicit ask or delegation pauses at the same decision
+with a recorded gap rather than repeatedly calling a player with unchanged options.
 
 Widen mechanically first. The playable space is always larger than the
 shortlist, and a shortlist of one is not proof that a choice was forced. Record

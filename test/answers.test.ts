@@ -65,4 +65,18 @@ test("unusable answers retry the same decision and never masquerade as choices",
 		const good = player(async (frame) => pick(frame));
 		assert.ok(await play(built, { 0: good, 1: good }, {}));
 	}
+
+	for (const request of [{ kind: "ask", route: "more-options" }, { kind: "delegate", instruction: "Play this turn" }] as const) {
+		const built = table();
+		advance(built);
+		const before = structuredClone(built);
+		let calls = 0;
+		const asking = player(async () => { calls++; return request; });
+		assert.equal(await play(built, { 0: asking, 1: asking }, {}), null);
+		assert.equal(calls, 1);
+		assert.deepEqual(built.things, before.things);
+		assert.deepEqual(built.ledger, before.ledger);
+		assert.deepEqual(nextDecision(built), nextDecision(before));
+		assert.match(built.gaps[0]!, /not implemented/);
+	}
 });

@@ -15,6 +15,7 @@
  */
 
 import type { SeatId, Situation } from "./types.ts";
+import type { Phase as TurnPhase } from "./steps.ts";
 
 /** Deck level. Set before the first turn, changed rarely. */
 export type Policy = {
@@ -48,7 +49,8 @@ export type Turn = {
  * Preserving a resource for a later phase is a plan, not an absence of one.
  */
 export type Phase = {
-	phase: string;
+	turn: number;
+	phase: TurnPhase;
 	order: string[];
 	expectedBranches: string[];
 	reconsiderWhen: string[];

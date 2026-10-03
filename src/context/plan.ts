@@ -11,8 +11,7 @@
  */
 
 import type { Intent } from "../core/intent.ts";
-import type { Table } from "../core/table.ts";
-import type { SeatId } from "../core/types.ts";
+import type { Frame } from "../core/types.ts";
 
 /**
  * Prepare the next phase that has a real choice in it.
@@ -30,7 +29,7 @@ import type { SeatId } from "../core/types.ts";
  * assign each role separately cannot resolve that tradeoff, so the review is
  * one call and not four.
  */
-export function preparePhase(table: Table, seat: SeatId, previous?: Intent): Intent {
+export function preparePhase(frame: Frame, previous?: Intent): Intent {
 	/*
 	 * 1. An unchanged plan whose assumptions still hold is returned as is. No
 	 *    fresh call at every phase boundary, and no invented choice in a phase
@@ -45,7 +44,7 @@ export function preparePhase(table: Table, seat: SeatId, previous?: Intent): Int
 	 *    win or loss, a reserved resource becoming unavailable, or a branch that
 	 *    no longer fits.
 	 */
-	void [table, seat, previous];
+	void [frame, previous];
 	throw new Error("preparePhase is unwritten. Four steps above.");
 }
 
@@ -57,7 +56,7 @@ export function preparePhase(table: Table, seat: SeatId, previous?: Intent): Int
  * no model call at all. What is left after those checks is the judgment a
  * decision model is for.
  */
-export function stillValid(intent: Intent, table: Table): boolean {
-	void [intent, table];
+export function stillValid(intent: Intent, frame: Frame): boolean {
+	void [intent, frame];
 	throw new Error("stillValid is unwritten: mechanical checks only, no model call.");
 }

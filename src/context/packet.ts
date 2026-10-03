@@ -9,7 +9,7 @@
  * Nothing here writes to the table.
  */
 
-import type { Decision, SeatId } from "../core/types.ts";
+import type { Frame, SeatId, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 
 /** A predefined route out of this decision. Not prose, and not a new move. */
@@ -17,8 +17,8 @@ export type Route = "more-options" | "better-targets" | "replan";
 
 export type Packet = {
 	actor: SeatId;
-	/** The exact pending step, named, not described. */
-	step: string;
+	/** Opening and turn context are distinct; no phase is inferred from prose. */
+	window: Window;
 	/** The table version this was built from. A later answer against it is stale. */
 	version: number;
 	/** The remaining obligation in one sentence: what still has to be settled. */
@@ -54,21 +54,28 @@ export type Packet = {
  * conditional outcome is shown as conditional, because an opponent's unseen
  * answer is not a known future event.
  */
-export function focus(decision: Decision, intent: Intent, version: number): Packet {
-	/*
-	 * 1. Name the step and the obligation from the decision's own situation.
-	 * 2. Pull the resources and the interacting facts from core derived data,
-	 *    for this seat only.
-	 * 3. Copy the options through unchanged. Ids are never renumbered: a
-	 *    renumbered id is an unplayable answer.
-	 * 4. Take the priorities from the intent, in order. A priority is a
-	 *    proposal about preference, never a condition on legality.
-	 * 5. Offer the routes that apply. More options when the list may be
-	 *    incomplete, better targets when a target slot has many candidates,
-	 *    replan when the plan's assumptions no longer hold.
-	 */
-	void [decision, intent, version];
-	throw new Error("focus is unwritten. Five steps above.");
+export function focus(frame: Frame, intent: Intent): Packet {
+	const { decision, seat, view, version } = frame;
+	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) {
+		throw new Error("A packet needs a decision and intent for its own seat");
+	}
+	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
+	const phaseApplies = view.window.kind === "turn" && intent.phase.turn === view.window.turn &&
+		intent.phase.phase === view.window.phase;
+	// Matching the window scopes assumptions; it does not prove they still hold.
+	// Richer card facts and locked effect choices await the card language.
+	return {
+		actor: seat, window: structuredClone(view.window), version,
+		obligation: decision.question,
+		committed: [],
+		resources: [...view.yours],
+		options: structuredClone(decision.options),
+		priorities: [...(intent.deck.priorities ?? [])],
+		known: [...view.table, ...view.since],
+		assumed: phaseApplies ? [...intent.turn.hypotheses, ...intent.phase.assumptions] : [],
+		// Widening is unwritten. Advertising a route cannot make it executable.
+		routes: {},
+	};
 }
 
 /**

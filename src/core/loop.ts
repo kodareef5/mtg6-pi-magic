@@ -46,7 +46,7 @@ function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" 
 	return null;
 }
 
-/** Null means an unanswered mandatory selection is still pending on the table. */
+/** Null means the table is waiting on an unanswered selection or unavailable route. */
 export async function play(
 	table: Table,
 	players: Record<SeatId, Player>,
@@ -141,12 +141,9 @@ export async function play(
 				break;
 			case "ask":
 			case "delegate":
-				// Both stay at this decision. `ask` is answered by whatever
-				// prepared the question, and `delegate` runs a model that
-				// produces ordinary answers until another seat acts. Neither
-				// passes, and neither changes the table, so the loop comes back
-				// to the same decision with a wider list or a written plan.
-				break;
+				table.gaps.push(`Seat ${decision.seat}: ${answer.kind} is not implemented. The decision remains pending.`);
+				report(table, told, watch);
+				return null;
 		}
 
 		told = report(table, told, watch);

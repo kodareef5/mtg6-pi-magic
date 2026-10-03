@@ -188,8 +188,7 @@ export function render(frame: Frame): string {
 		out.push(`  ${option.id}  ${option.label}`);
 		if (option.shows) out.push(`      ${option.shows}`);
 	}
-	// The one route out. It stays at this decision: it does not pass, undo a
-	// paid cost, change a locked choice, or reveal anything unearned.
-	out.push("", "Answer with one option id, or ask for more options.");
+	out.push("", "Answer with one listed option id. The view may be stale; an accepted pick is not a resolved effect.");
+	out.push("Declarations, objections, delegation and option widening are not implemented yet.");
 	return out.join("\n");
 }

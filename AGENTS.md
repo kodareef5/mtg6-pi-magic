@@ -141,6 +141,8 @@ rather than adding a test for each branch.
 - **Scoped.** Listed moves belong to the current opening or turn window;
   advancing cannot skip an unanswered decision. Table talk is offered once per
   seat at a phase ending, not at every step or bookkeeping transition.
+- **Focused.** A context packet preserves the seat's projected facts and option
+  ids. Phase assumptions apply only to their recorded turn and phase.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Tests live beside the code and ship with neither:
@@ -193,6 +195,8 @@ verify every carried field against the source and refuse to pass on a mismatch.
 
 ## Not built yet
 
+- Model planning, model API access and AI seats. Packet assembly works from a
+  filtered frame; it offers no widening routes until their handlers exist.
 - Card meaning. `src/core/syntax.ts` holds the five ability shapes, the correct
   layers, and the motions milestone one needs. The rest of the language is
   measured rather than guessed: 31 event kinds, 17 selector properties, 10

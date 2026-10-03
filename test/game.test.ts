@@ -2,8 +2,8 @@
  * Milestone one: two seats play a legal Standard deck of basic lands to a
  * recorded end. Pass, play a land, untap, draw, mulligan, deck out.
  *
- * Three of the four named invariants are here. No leak, replay, and forced.
- * Idempotent lives in test/seating.
+ * No leak, replay, and forced live here. Decision and phase invariants have
+ * their own fixtures; idempotency for the parked wire lives in test/seating.
  * The game and projection fixtures stay together past 150 lines because the
  * visibility checks also observe every decision of a complete game.
  */
