@@ -20,8 +20,14 @@ are for.
 - The log is the game. A receipt per committed group, in order, with the reason
   and the facts read before it.
 - The ledger is every decision and its pick, with whether it was forced,
-  delegated, chosen or declared.
+  delegated, chosen, declared or fallback.
 - The seed and a call counter are the only randomness, so a shuffle replays.
+
+Receipts include control transitions: declaring a keep, passing priority,
+granting priority and ending a step. The receipt count is therefore also a frame
+version. Two decisions separated by passes cannot share a version just because
+no card moved. Replaying receipts restores the opening and turn cursor as well
+as the cards. The ledger remains a separate account of who answered and why.
 
 So a game is a header plus an ordered list of entries. Rolling back is reading
 fewer entries. Copying is copying a prefix. Neither needs an undo path in the

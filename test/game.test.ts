@@ -80,7 +80,7 @@ test("forced: far more decisions are taken by the table than asked of a seat", a
 
 	// At the mulligan limit, keeping and the last bottom selection are forced too.
 	const limited = table();
-	limited.opening = { declared: {}, taken: { 0: 7 }, kept: [], owed: {}, done: false };
+	limited.opening = { declared: {}, taken: { 0: 7 }, kept: [], owed: {} };
 	commit(limited, [...limited.things.values()].filter((c) => c.owner === 0).slice(0, 7)
 		.map((c) => ({ do: "move", what: c.id, to: "hand", reason: "draw" })), "game-setup");
 	const strict = policy("strict");
@@ -102,6 +102,17 @@ test("replay: the same seed gives the same log, change for change", async () => 
 		b.log.map((r) => JSON.stringify(r.changes)),
 	);
 	assert.deepEqual(a.ledger.map((r) => r.picked), b.ledger.map((r) => r.picked));
+
+	// Receipts also reconstruct control state, including passes and phase changes.
+	const restored = table();
+	for (const r of a.log.slice(restored.log.length)) commit(restored, r.changes, r.reason);
+	assert.deepEqual(restored.log, a.log);
+	assert.deepEqual(restored.cursor, a.cursor);
+	assert.deepEqual(restored.opening, a.opening);
+	assert.deepEqual(restored.things, a.things);
+	assert.deepEqual(restored.seats, a.seats);
+	assert.deepEqual(restored.rng, a.rng);
+	assert.deepEqual(restored.outcome, a.outcome);
 });
 
 test("a different seed gives a different game", async () => {

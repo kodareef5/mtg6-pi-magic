@@ -15,7 +15,7 @@
  */
 
 import { cardsIn, seat, type Receipt, type Table, type Thing } from "./table.ts";
-import { owedFor } from "./pregame.ts";
+import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
 import type { Frame, SeatView, Viewer, Window } from "./types.ts";
 
@@ -27,7 +27,7 @@ function window(table: Table): Window {
 	if (table.outcome) return { kind: "finished" };
 	const opening = table.opening;
 	if (!opening) return { kind: "opening", action: "deal" };
-	if (!opening.done) {
+	if (!mulligansSettled(table)) {
 		const action = Object.values(opening.owed).some((n) => n > 0) ? "bottom" :
 			table.seats.some((s) => !opening.kept.includes(s.id) && !opening.declared[s.id]) ? "declare" : "redraw";
 		return { kind: "opening", action };
@@ -110,7 +110,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
-	return { window: at, table: lines, yours, since: table.log.slice(since).map((r) => describe(table, r)) };
+	return { window: at, table: lines, yours, since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
 }
 
 /**
@@ -124,6 +124,9 @@ export function describe(table: Table, receipt: Receipt): string {
 	const parts: string[] = [];
 	for (const change of receipt.changes) {
 		switch (change.do) {
+			case "opening":
+				if (change.action === "declare") parts.push(`${seat(table, change.who).name} declared ${change.choice}`);
+				break;
 			case "move": {
 				const moved = receipt.after[change.what];
 				if (!moved) break;

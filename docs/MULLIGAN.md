@@ -105,8 +105,7 @@ possible here, and `format.decksRegistered` is what says it applies.
 
 **Odds, from this seat's own knowledge.** The chance of drawing what the hand
 needs in the next one, two or three draws, computed over the seat's remaining
-library. `odds.ts` already does this and already refuses to read the real
-library.
+library. `odds.ts` specifies this boundary; the arithmetic is still unwritten.
 
 **A distribution over replacement hands.** What a mulligan is actually worth.
 Sampled from the seat's belief about its own library, not from the real one: a
@@ -173,20 +172,21 @@ exactly the region shape in `knowledge.ts`.
 
 ## Resumability
 
-A game does not need to be resumable until it has begun, and it begins when the
-mulligans are done. So the mulligan phase holds its round state in memory and
-nothing has to reconstruct a half-finished round.
+Declarations, mulligan counts, kept seats and outstanding bottom choices live
+in the table. Completion is derived from those obligations, without a separate
+done flag. Every opening transition commits alongside its card motions, so
+replaying receipts reconstructs a half-finished round too.
 
-The journal still records every mulligan as it happens, because that costs
-nothing and makes the opening replayable. A benchmark fixture frozen at "just
-after mulligans" is then an ordinary journal prefix.
+The journal file functions are still unwritten. The in-memory receipts already
+carry the opening, so a future benchmark frozen just after mulligans needs no
+separate fixture format.
 
 ## Where the code goes
 
-- `pregame.ts`: the procedure. The declaration round, the simultaneous apply,
-  the bottoming, the 103.6 actions.
-- `decisions.ts`: `pregameIncomplete` and `mulligan` already stand as the
-  situation 7 leaves and call into pregame.
+- `pregame.ts`: the procedure and listed choices for declaration and bottoming.
+  Card-granted opening actions under 103.6 are still unwritten.
+- `decisions.ts`: routes to pregame until its obligations settle, then routes
+  to turn actions and priority. It never offers an opening choice during a turn.
 - `odds.ts`: the replacement hand distribution, from belief.
 - `intent.ts`: the guidance, prepared once.
 - `knowledge.ts`: the bottomed cards as a known region.

@@ -1,9 +1,9 @@
-/** Turn-based obligations and step boundaries. Kept together past 150 lines
- * so completing an obligation and advancing its step share the same rules. */
+/** Turn-based obligations and step boundaries. All transitions commit through the table. */
+import { mulligansSettled } from "./pregame.ts";
 import type { Pending } from "./moves.ts";
 import { STEPS } from "./steps.ts";
 import type { Reason } from "./syntax.ts";
-import { cardsIn, playing, seat, type Table } from "./table.ts";
+import { cardsIn, commit, playing, seat, type Table } from "./table.ts";
 
 /**
  * Situation 2. Untap, draw for the turn, declare attackers and blockers,
@@ -17,7 +17,7 @@ import { cardsIn, playing, seat, type Table } from "./table.ts";
  */
 export function turnBased(table: Table): Pending | null {
 	const cursor = table.cursor;
-	if (!table.opening?.done || table.outcome || cursor.stepDone) return null;
+	if (!mulligansSettled(table) || table.outcome || cursor.stepDone) return null;
 	const step = cursor.steps[0] ?? "";
 	const active = seat(table, cursor.active);
 
@@ -90,7 +90,7 @@ export function advanceTurn(table: Table): void {
 
 	// A step whose turn-based action had nothing to do.
 	if (!cursor.stepDone) {
-		cursor.stepDone = true;
+		commit(table, [{ do: "turn", action: "complete" }], "state-based-action");
 		return;
 	}
 
@@ -100,8 +100,7 @@ export function advanceTurn(table: Table): void {
 
 	// 117.3a: the active player receives priority after the turn-based actions.
 	if (grants && cursor.priority === null) {
-		cursor.priority = cursor.active;
-		cursor.passes = 0;
+		commit(table, [{ do: "turn", action: "priority" }], "state-based-action");
 		return;
 	}
 
@@ -109,49 +108,14 @@ export function advanceTurn(table: Table): void {
 	// It is consensus, not a clock.
 	if (grants && cursor.passes < playing(table).length) return;
 
-	endStep(table);
-}
-
-function endStep(table: Table): void {
-	const cursor = table.cursor;
-	const step = cursor.steps.shift() ?? "";
-
-	// Pools empty at every step and phase boundary, so a surplus floated in a
-	// main phase does not reach combat. 500.4.
-	for (const s of table.seats) s.pool = [];
-
-	if (step === "cleanup") {
-		// 514.2: marked damage is removed and until-end-of-turn notes end,
-		// simultaneously.
-		for (const t of table.things.values()) t.damage = 0;
-		table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
-	}
-
-	cursor.stepDone = false;
-	cursor.priority = null;
-	cursor.passes = 0;
-
-	if (cursor.steps.length === 0) {
-		const order = playing(table);
-		const at = order.findIndex((s) => s.id === cursor.active);
-		cursor.active = order[(at + 1) % order.length]?.id ?? cursor.active;
-		cursor.steps = [...table.format.steps];
-		cursor.turn += 1;
-		cursor.began[cursor.active] = cursor.clock;
-		for (const s of table.seats) s.landsPlayed = 0;
-	}
+	commit(table, [{ do: "turn", action: "end" }], "state-based-action");
 }
 
 /** A null decision can also mean setup or granting priority, not a phase ending. */
 export function endingPhase(table: Table): boolean {
 	const { steps, stepDone, priority, passes } = table.cursor;
 	const step = steps[0], next = steps[1];
-	if (table.outcome || !table.opening?.done || !step || !stepDone) return false;
+	if (table.outcome || !mulligansSettled(table) || !step || !stepDone) return false;
 	if (STEPS[step].priority && (priority === null || passes < playing(table).length)) return false;
 	return !next || STEPS[step].phase !== STEPS[next].phase;
-}
-
-export function completeTurnAction(table: Table): void {
-	table.cursor.stepDone = table.cursor.steps[0] !== "cleanup" ||
-		cardsIn(table, "hand", table.cursor.active).length <= table.format.maxHandSize;
 }

@@ -65,7 +65,8 @@ Within Standard, from `design-ref/CIRCUITRY.md` section 12:
    Decision discovery is pure, simultaneous losses settle together, and cleanup
    keeps asking until the hand fits. Opening choices, turn obligations and
    priority actions have separate handlers. Views identify the current window;
-   table talk is offered at actual phase endings. The forced ratio uses scripted
+   table talk is offered at actual phase endings. Control transitions are logged;
+   opening completion is derived from its obligations. The forced ratio uses scripted
    seats; the decision-model adapter and the bulk runner are still unwritten.
 2. **Activated abilities**, by interrogation rather than generation, with oracle
    text from the card list as the source. Measured against the Cavern of Souls
@@ -127,7 +128,7 @@ rather than adding a test for each branch.
   hand, respects face-down identities, and keeps hidden counts. Receipt text
   uses event-time visibility, so a later reveal cannot expose an earlier action.
 - **Replay.** The same seed and the same picks give the same log, change for
-  change.
+  change. Applying the receipts reconstructs both cards and control state.
 - **Forced.** Far more decisions are taken by the table than asked of a seat,
   and no row is a `fallback`.
 - **Idempotent.** The same `actionId` applied twice changes the game once.

@@ -16,7 +16,7 @@
 
 import { createHash } from "node:crypto";
 
-import type { Format } from "./format.ts";
+import { firstMulliganFree, type Format } from "./format.ts";
 import { claim } from "./names.ts";
 import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
@@ -202,8 +202,6 @@ export type Opening = {
 	kept: SeatId[];
 	/** Cards still owed to the bottom of a library. */
 	owed: Record<SeatId, number>;
-	/** Mulligans settled. What remains is 103.6. */
-	done: boolean;
 };
 
 /** Every seat by id, because the turn order is an array and lookups are not. */
@@ -329,6 +327,12 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 
 	for (const change of changes) {
 		switch (change.do) {
+			case "turn":
+				turnTransition(table, change);
+				break;
+			case "opening":
+				openingTransition(table, change);
+				break;
 			case "move": {
 				const moving = thing(table, change.what);
 				const from = moving.zone;
@@ -417,6 +421,80 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	table.log.push(receipt);
 	table.cursor.clock += 1;
 	return receipt;
+}
+
+/** Bookkeeping shares the commit door with card motion so every frame has a version. */
+function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): void {
+	const cursor = table.cursor;
+	switch (change.action) {
+		case "pass": {
+			cursor.passes += 1;
+			const order = playing(table);
+			const at = order.findIndex((s) => s.id === change.who);
+			cursor.priority = order[(at + 1) % order.length]?.id ?? null;
+			return;
+		}
+		case "act":
+			cursor.passes = 0;
+			cursor.priority = change.who;
+			if (change.land) seat(table, change.who).landsPlayed += 1;
+			return;
+		case "complete":
+			cursor.stepDone = cursor.steps[0] !== "cleanup" ||
+				cardsIn(table, "hand", cursor.active).length <= table.format.maxHandSize;
+			return;
+		case "priority":
+			cursor.priority = cursor.active;
+			cursor.passes = 0;
+			return;
+		case "end": {
+			const step = cursor.steps.shift();
+			for (const s of table.seats) s.pool = s.pool.filter((mana) => mana.persists);
+			if (step === "cleanup") {
+				for (const thing of table.things.values()) thing.damage = 0;
+				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
+			}
+			if (step === "end-of-combat") table.notes = table.notes.filter((note) => note.until !== "end-of-combat");
+			cursor.stepDone = false;
+			cursor.priority = null;
+			cursor.passes = 0;
+			if (!cursor.steps.length) {
+				const order = playing(table);
+				const at = order.findIndex((s) => s.id === cursor.active);
+				cursor.active = order[(at + 1) % order.length]?.id ?? cursor.active;
+				cursor.steps = [...table.format.steps];
+				cursor.turn += 1;
+				cursor.began[cursor.active] = cursor.clock;
+				for (const s of table.seats) s.landsPlayed = 0;
+			}
+		}
+	}
+}
+
+function openingTransition(table: Table, change: Extract<Change, { do: "opening" }>): void {
+	if (change.action === "begin") {
+		table.opening = { declared: {}, taken: {}, kept: [], owed: {} };
+		return;
+	}
+	const opening = table.opening!;
+	if (change.action === "declare") opening.declared[change.who] = change.choice;
+	if (change.action === "bottom") {
+		const owes = opening.owed[change.who]! - 1;
+		if (owes > 0) opening.owed[change.who] = owes;
+		else delete opening.owed[change.who];
+	}
+	if (change.action === "round") {
+		const free = firstMulliganFree(table.format, table.seats.length) ? 1 : 0;
+		for (const s of table.seats) {
+			const declaration = opening.declared[s.id];
+			if (declaration === "mulligan") opening.taken[s.id] = (opening.taken[s.id] ?? 0) + 1;
+			if (declaration === "keep") opening.kept.push(s.id);
+			const owes = Math.max(0, (opening.taken[s.id] ?? 0) - free);
+			const bottomNow = table.format.mulliganBottom === "on-keep" ? declaration === "keep" : declaration === "mulligan";
+			if (bottomNow && owes > 0) opening.owed[s.id] = owes;
+		}
+		opening.declared = {};
+	}
 }
 
 /** Deterministic, counter based, so replay needs the seed and nothing else. */

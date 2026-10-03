@@ -19,7 +19,9 @@ test("listed actions stay in their window and a pending choice cannot be skipped
 	const before = structuredClone(built);
 	assert.throws(() => advance(built), /pending decision/);
 	assert.deepEqual(built, before);
+	const version = built.log.length;
 	apply(built, "mulligan", "model", "chosen");
+	assert.ok(built.log.length > version, "a declaration changes the frame version");
 	assert.match(project(built, 1).table.join("\n"), /mulligan/);
 	apply(built, "keep", "model", "chosen");
 	advance(built);
@@ -47,7 +49,9 @@ test("listed actions stay in their window and a pending choice cannot be skipped
 			}
 			if (o.id.startsWith("discard:")) assert.equal(built.cursor.steps[0], "cleanup");
 		}
+		const version = built.log.length;
 		apply(built, d.options[0]!.id, "model", "chosen");
+		assert.ok(built.log.length > version, "a pass changes the frame version");
 	}
 	assert.ok(built.cursor.steps.includes("draw"));
 });

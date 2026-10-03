@@ -60,6 +60,12 @@ the seed.
 Losses in one state-based check commit together. The table determines the
 outcome after the whole group, so two simultaneous losses cannot award a win.
 
+Control transitions use that same door. Passes, opening declarations, priority
+grants and step endings each produce a receipt, even when no card moves. A frame
+version is the receipt count and changes when the pending decision changes.
+Mana expiry, damage cleanup and expiring notes happen inside the committed step
+ending. Phase handlers propose transitions; they do not write state themselves.
+
 ## nextDecision is a pure function of the table
 
 Given a table, every pending decision can be listed without executing anything.
@@ -106,6 +112,9 @@ phase ended: it also occurs while dealing, applying a round, or granting priorit
 The view carries a derived opening or turn window. Opening views name public
 declarations and mulligan counts and the viewer's remaining obligation. They
 do not claim that the first untap step has started.
+
+Opening completion is derived from kept seats and outstanding bottom choices.
+There is no second `done` flag to keep in step with those facts.
 
 ## Projection is the only reader
 

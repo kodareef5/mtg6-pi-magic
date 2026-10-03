@@ -11,11 +11,12 @@
  * turn obligations and priority actions each own their phase-specific builders.
  */
 
-import { applyDeclared, begin, nextOpening, pickedOpening } from "./pregame.ts";
+import { applyDeclared, begin, nextOpening, mulligansSettled } from "./pregame.ts";
 import { priorityMoves, legal } from "./priority.ts";
-import { advanceTurn, completeTurnAction, turnBased } from "./turn.ts";
+import { advanceTurn, turnBased } from "./turn.ts";
+import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
-import { commit, playing, seat, type Table } from "./table.ts";
+import { commit, playing, type Table } from "./table.ts";
 import type { Decision } from "./types.ts";
 
 /**
@@ -37,7 +38,7 @@ function pending(table: Table): Pending | null {
 	//    Null before the hands are dealt and between rounds: advance deals and
 	//    applies, because neither is a decision.
 	if (table.opening === null) return null;
-	if (!table.opening.done) return nextOpening(table);
+	if (!mulligansSettled(table)) return nextOpening(table);
 
 	// 3. The loop applies the whole group, then asks again for cascading actions.
 	//    Listing the group must not execute it.
@@ -110,8 +111,7 @@ function take(
 	by: "engine" | "model" | "judge",
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 ): void {
-	if (move.changes.length) commit(table, move.changes, move.reason);
-	after(table, p, move);
+	commit(table, [...move.changes, ...bookkeeping(p, move)], move.reason);
 	table.ledger.push({
 		seq: table.ledger.length,
 		situation: p.situation,
@@ -123,39 +123,16 @@ function take(
 	});
 }
 
-/**
- * The bookkeeping a pick implies that is not a change to the table: whose
- * priority it is next, what a seat declared, how many cards it still owes.
- *
- * Kept apart from `commit` because none of it is a motion. A card never watches
- * for it and a receipt would say nothing useful about it.
- */
-function after(table: Table, p: Pending, move: Move): void {
-	const cursor = table.cursor;
+/** A listed action and its bookkeeping are one committed event. */
+function bookkeeping(p: Pending, move: Move): Change[] {
 	const id = move.option.id;
-
-	if (p.situation === "priority") {
-		if (id === "pass") {
-			cursor.passes += 1;
-			const order = playing(table);
-			const at = order.findIndex((s) => s.id === p.seat);
-			cursor.priority = order[(at + 1) % order.length]?.id ?? null;
-		} else {
-			// A seat that acts receives priority again, 117.3c, and the pass
-			// chain starts over because the table moved.
-			cursor.passes = 0;
-			cursor.priority = p.seat;
-			if (id.startsWith("land:")) seat(table, p.seat).landsPlayed += 1;
-		}
-		return;
+	if (p.situation === "priority") return [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
+	if (p.situation === "turn-based") return [{ do: "turn", action: "complete" }];
+	if (p.situation === "pregame") {
+		if (id === "keep" || id === "mulligan") return [{ do: "opening", action: "declare", who: p.seat, choice: id }];
+		return [{ do: "opening", action: "bottom", who: p.seat }];
 	}
-
-	if (p.situation === "turn-based") {
-		completeTurnAction(table);
-		return;
-	}
-
-	if (p.situation === "pregame") pickedOpening(table, p.seat, id);
+	return [];
 }
 
 /**
@@ -186,6 +163,6 @@ export function advance(table: Table): void {
 	if (table.outcome) return;
 	if (pending(table)) throw new Error("Answer the pending decision before advancing");
 	if (table.opening === null) begin(table);
-	else if (!table.opening.done) applyDeclared(table);
+	else if (!mulligansSettled(table)) applyDeclared(table);
 	else advanceTurn(table);
 }

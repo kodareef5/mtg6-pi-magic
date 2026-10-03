@@ -63,6 +63,12 @@ export type Reason =
  * them. A motion arrives here when a milestone needs it, never in advance.
  */
 export type Change =
+	/** Control transitions are recorded too: a pass changes who can answer next. */
+	| { do: "turn"; action: "pass" | "act"; who: SeatId; land?: boolean }
+	| { do: "turn"; action: "complete" | "priority" | "end" }
+	| { do: "opening"; action: "begin" | "round" }
+	| { do: "opening"; action: "declare"; who: SeatId; choice: "keep" | "mulligan" }
+	| { do: "opening"; action: "bottom"; who: SeatId }
 	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason }
 	| { do: "tap" | "untap"; what: string }
 	| { do: "shuffle"; whose: SeatId }

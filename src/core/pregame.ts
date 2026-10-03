@@ -47,8 +47,7 @@ export function begin(table: Table): void {
 			.slice(0, table.format.startingHand)
 			.map((card) => ({ do: "move" as const, what: card.id, to: "hand" as const, reason: "draw" as const })),
 	);
-	commit(table, hands, "game-setup");
-	table.opening = { declared: {}, taken: {}, kept: [], owed: {}, done: false };
+	commit(table, [...hands, { do: "opening", action: "begin" }], "game-setup");
 }
 
 /** How many cards this seat owes the bottom of its library, 103.5 and 103.5c. */
@@ -92,7 +91,7 @@ function declareOptions(table: Table, seat: SeatId): Option[] {
  */
 export function applyDeclared(table: Table): void {
 	const opening = table.opening;
-	if (!opening || opening.done || nextOpening(table)) throw new Error("The opening round still has a decision or is already settled");
+	if (!opening || mulligansSettled(table) || nextOpening(table)) throw new Error("The opening round still has a decision or is already settled");
 
 	const taking = table.seats.filter((s) => opening.declared[s.id] === "mulligan");
 	const changes: Change[] = [];
@@ -102,9 +101,6 @@ export function applyDeclared(table: Table): void {
 		}
 		changes.push({ do: "shuffle", whose: s.id });
 	}
-	for (const s of taking) {
-		opening.taken[s.id] = (opening.taken[s.id] ?? 0) + 1;
-	}
 	if (changes.length) commit(table, changes, "game-setup");
 
 	// Drawn after the shuffle, so the new hand comes off a shuffled library.
@@ -113,26 +109,7 @@ export function applyDeclared(table: Table): void {
 			.slice(0, table.format.startingHand)
 			.map((card) => ({ do: "move" as const, what: card.id, to: "hand" as const, reason: "draw" as const })),
 	);
-	if (draws.length) commit(table, draws, "game-setup");
-
-	for (const s of taking) {
-		const owes = owedFor(table, s.id);
-		if (table.format.mulliganBottom === "per-mulligan" && owes > 0) opening.owed[s.id] = owes;
-	}
-
-	for (const s of table.seats) {
-		if (opening.declared[s.id] === "keep") {
-			opening.kept.push(s.id);
-			if (table.format.mulliganBottom === "on-keep") {
-				const owes = owedFor(table, s.id);
-				if (owes > 0) opening.owed[s.id] = owes;
-			}
-		}
-	}
-	opening.declared = {};
-	if (opening.kept.length === table.seats.length && Object.keys(opening.owed).length === 0) {
-		opening.done = true;
-	}
+	commit(table, [...draws, { do: "opening", action: "round" }], "game-setup");
 }
 
 /**
@@ -172,7 +149,7 @@ export function openingOptions(table: Table, seat: SeatId): Option[] {
  */
 export function nextOpening(table: Table): Pending | null {
 	const round = table.opening;
-	if (!round || round.done || table.outcome) return null;
+	if (!round || mulligansSettled(table) || table.outcome) return null;
 
 	// A seat owing cards to the bottom answers before anything else, because
 	// its hand is not an opening hand until it does.
@@ -221,20 +198,9 @@ export function nextOpening(table: Table): Pending | null {
 	return null;
 }
 
-
-export function pickedOpening(table: Table, who: SeatId, id: string): void {
-	if (table.opening && !table.opening.done) {
-		if (id === "keep" || id === "mulligan") table.opening.declared[who] = id;
-		if (id.startsWith("bottom:")) {
-			const owes = (table.opening.owed[who] ?? 1) - 1;
-			if (owes > 0) table.opening.owed[who] = owes;
-			else delete table.opening.owed[who];
-			if (
-				table.opening.kept.length === table.seats.length &&
-				Object.keys(table.opening.owed).length === 0
-			) {
-				table.opening.done = true;
-			}
-		}
-	}
+/** Completion follows from the outstanding obligations; it is not another flag. */
+export function mulligansSettled(table: Table): boolean {
+	const opening = table.opening;
+	return !!opening && opening.kept.length === table.seats.length &&
+		!Object.values(opening.owed).some((count) => count > 0);
 }
