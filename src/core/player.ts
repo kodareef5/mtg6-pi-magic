@@ -15,9 +15,9 @@
  * last three load nothing from src/context/.
  */
 
-import type { MessageId } from "./say.ts";
+import { MESSAGES, type MessageId } from "./say.ts";
 import type { Change } from "./syntax.ts";
-import type { Frame } from "./types.ts";
+import type { Decision, Frame } from "./types.ts";
 
 export type Answer =
 	/** Take one of the moves the table listed. The cheap path, and the common one. */
@@ -54,6 +54,22 @@ export type Answer =
 	 * seat can still play badly, and a game given away was not lost.
 	 */
 	| { kind: "concede" };
+
+/** Validate the answer envelope; declaration conservation belongs to declare. */
+export function usable(value: unknown, decision: Decision): value is Answer {
+	if (!value || typeof value !== "object" || !("kind" in value)) return false;
+	const text = (key: string) => key in value && typeof (value as Record<string, unknown>)[key] === "string";
+	switch (value.kind) {
+		case "pick": return text("actionId") && "option" in value && decision.options.some((o) => o.id === value.option);
+		case "declare": return text("actionId") && text("says") && "changes" in value && Array.isArray(value.changes);
+		case "object": return text("claim");
+		case "delegate": return text("instruction");
+		case "ask": return text("route");
+		case "say": return "message" in value && typeof value.message === "string" && Object.hasOwn(MESSAGES, value.message);
+		case "concede": return true;
+		default: return false;
+	}
+}
 
 export interface Player {
 	readonly name: string;

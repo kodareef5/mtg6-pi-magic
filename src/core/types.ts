@@ -47,6 +47,8 @@ export type Decision = {
 	seat: SeatId;
 	question: string;
 	options: Option[];
+	/** An offered option that safely ends this decision after two unusable answers. */
+	fallback?: string;
 };
 
 /**

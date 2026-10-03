@@ -134,6 +134,12 @@ An unusable answer is asked once more, and then the table takes the terminating
 option, records the row as `fallback`, and writes a gap naming what came back. A
 fallback is not a choice and is never counted as one.
 
+The loop owns this for every kind of player. Each decision builder names its
+terminating option, if one exists. A mandatory card selection has none: after
+the retry, record a gap and return from `play` with null, leaving the table
+pending for a player to answer on resume. Do not manufacture a discard, bottom
+choice, or concession to make that case finish.
+
 Three things that look like helpfulness and are not. Completing an invalid
 selection from whatever is left. Treating a failed operation as the seat's
 decision. A configured cap that stops a seat early and then reads as though the

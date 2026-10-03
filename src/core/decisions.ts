@@ -17,17 +17,12 @@
 import { applyDeclared, begin, bottomOptions, declareOptions } from "./pregame.ts";
 import type { Change, Reason } from "./syntax.ts";
 import { cardsIn, commit, playing, seat, type Table } from "./table.ts";
-import type { Decision, Option, SeatId, Situation } from "./types.ts";
+import type { Decision, Option, SeatId } from "./types.ts";
 
 /** An option with the changes behind it. The changes never leave this module. */
 type Move = { option: Option; changes: Change[]; reason: Reason };
 
-type Pending = {
-	situation: Situation;
-	seat: SeatId;
-	question: string;
-	moves: Move[];
-};
+type Pending = Omit<Decision, "options"> & { moves: Move[] };
 
 /** Steps nobody receives priority in. 117.3a and 514.3. */
 const NO_PRIORITY = new Set(["untap", "cleanup"]);
@@ -78,6 +73,7 @@ function pending(table: Table): Pending | null {
 			situation: "priority",
 			seat: holder,
 			question: "You have priority.",
+			fallback: "pass",
 			moves: priorityMoves(table, holder).filter((move) => legal(table, move)),
 		};
 	}
@@ -89,12 +85,8 @@ function pending(table: Table): Pending | null {
 export function nextDecision(table: Table): Decision | null {
 	const p = pending(table);
 	if (p === null) return null;
-	return {
-		situation: p.situation,
-		seat: p.seat,
-		question: p.question,
-		options: p.moves.map((move) => move.option),
-	};
+	const { moves, ...decision } = p;
+	return { ...decision, options: moves.map((move) => move.option) };
 }
 
 /**
@@ -229,7 +221,8 @@ function opening(table: Table): Pending | null {
 		return {
 			situation: "pregame",
 			seat: s.id,
-			question: `Keep this hand of ${cardsIn(table, "hand", s.id).length}?`,
+				question: `Keep this hand of ${cardsIn(table, "hand", s.id).length}?`,
+				fallback: "keep",
 			moves: declareOptions(table, s.id).map((option) => ({
 				option,
 				changes: [],

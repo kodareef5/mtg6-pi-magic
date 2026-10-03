@@ -61,6 +61,7 @@ test("the decks are legal before a card moves", () => {
 test("a game of lands finishes, and somebody decks out", async () => {
 	const built = table();
 	const outcome = await finish(built);
+	assert.ok(outcome);
 	const results = Object.values(outcome.results);
 	assert.equal(results.filter((r) => r === "lose").length, 1);
 	assert.equal(results.filter((r) => r === "win").length, 1);

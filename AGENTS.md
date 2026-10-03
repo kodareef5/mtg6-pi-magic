@@ -132,6 +132,9 @@ rather than adding a test for each branch.
 - **Pure.** Listing a decision changes no state, including pending losses.
 - **Simultaneous.** The outcome accounts for every loss in a committed group.
 - **Complete.** Cleanup stays pending until every required discard is made.
+- **Accounted.** Unusable answers retry once. A terminating keep or pass is
+  recorded as fallback; a mandatory card selection stays pending without moving
+  a card. Resuming uses the same table and decision.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Tests live beside the code and ship with neither:

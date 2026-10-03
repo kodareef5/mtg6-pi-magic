@@ -5,6 +5,7 @@
  * lock, no lease and no turn timer anywhere in this repo.
  *
  * The version is the length of the log. One source, nothing to keep in step.
+ * Past 150 lines to keep answer dispatch and recovery in the same serial loop.
  */
 
 import { concede } from "./concede.ts";
@@ -12,7 +13,7 @@ import { declare } from "./declare.ts";
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Intent } from "./intent.ts";
 import { rule } from "./judge.ts";
-import type { Player } from "./player.ts";
+import { usable, type Answer, type Player } from "./player.ts";
 import type { Table } from "./table.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
 import { describe, project } from "./view.ts";
@@ -44,12 +45,13 @@ function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" 
 	return null;
 }
 
+/** Null means an unanswered mandatory selection is still pending on the table. */
 export async function play(
 	table: Table,
 	players: Record<SeatId, Player>,
 	intents: Record<SeatId, Intent>,
 	watch?: Watcher,
-): Promise<Outcome> {
+): Promise<Outcome | null> {
 	// What each seat has already been shown, so a frame's "since" is the part it
 	// has not seen. Presentation only: nothing here bears on an outcome, which
 	// is why it may live outside the table.
@@ -89,7 +91,28 @@ export async function play(
 		const player = players[decision.seat];
 		if (!player) throw new Error(`Seat ${decision.seat} has nobody to answer it`);
 
-		const answer = await player.answer({ ...frame(decision.seat), decision });
+		// Retry the same frame, including the history the seat needs to answer it.
+		const asked = { ...frame(decision.seat), decision };
+		let answer: Answer | undefined;
+		const failures: string[] = [];
+		for (let attempt = 0; attempt < 2; attempt++) {
+			try {
+				const received = await player.answer(asked);
+				if (usable(received, decision)) { answer = received; break; }
+				failures.push(JSON.stringify(received) ?? String(received));
+			} catch (error) {
+				failures.push(String(error));
+			}
+		}
+		if (!answer) {
+			const terminal = decision.options.find((option) => option.id === decision.fallback);
+			table.gaps.push(`Seat ${decision.seat}, ${decision.situation}: unusable answers ${failures.join("; ")}. ` +
+				(terminal ? `Fallback: ${terminal.id}.` : "Selection remains pending; no terminating option."));
+			if (!terminal) { report(table, told, watch); return null; }
+			apply(table, terminal.id, "engine", "fallback");
+			told = report(table, told, watch);
+			continue;
+		}
 
 		switch (answer.kind) {
 			case "pick":

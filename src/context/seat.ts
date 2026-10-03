@@ -29,9 +29,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 	 *   6. A route id comes back: follow it and ask again, at this same
 	 *      decision. Bound how many times, and record reaching that bound as a
 	 *      gap rather than as a pass.
-	 *   7. An unlisted id: ask once more. Still unusable, take the first option,
-	 *      call onGap with what came back, and carry on. A finished game with a
-	 *      recorded gap beats a dead game at turn four.
+	 *   7. Return unlisted ids to the core loop unchanged. It owns the retry and
+	 *      fallback accounting for every kind of player. Never replace an
+	 *      invalid answer with a card selection here.
 	 *
 	 * observe(frame): keep the latest frame so the next intent check can see
 	 * what changed. No model call: watching is free and reacting is not.

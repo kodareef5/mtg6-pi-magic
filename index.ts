@@ -123,6 +123,10 @@ export default function (pi: ExtensionAPI) {
 				const outcome = await play(open(seed), players, intents, (line) =>
 					ctx.ui.notify(line, "info"),
 				);
+				if (!outcome) {
+					ctx.ui.notify("A required card selection is unanswered. The table is waiting at that decision.", "warning");
+					return;
+				}
 				ctx.ui.notify(
 					`Game over. ${JSON.stringify(outcome.results)}` +
 						(outcome.gaps.length ? `\nGaps: ${outcome.gaps.join("; ")}` : ""),

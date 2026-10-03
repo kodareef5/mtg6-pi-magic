@@ -52,6 +52,10 @@ develop. Each option says which of those it serves.
 
 ## More is a route, not prose
 
+Return unusable picks unchanged to the core loop. The loop owns retries and
+fallback accounting for every kind of player. Never replace a bad pick with
+the first option here: that loses the distinction between a choice and a fallback.
+
 A route is a predefined id with a predefined meaning, and it returns to the same
 decision. It does not pass, refund a paid cost, change a locked choice, or
 reveal anything the seat has not earned.
