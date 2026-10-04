@@ -32,7 +32,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { planWork, syntaxReference } from "../src/context/strategy.ts";
 import { question } from "../src/context/seat.ts";
 import { asState } from "../src/context/model.ts";
-import { announce, establish, example, main, matchup, place, quiet } from "./play.ts";
+import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
 const turn3 = { active: "self" as const, fromTurn: 3, throughTurn: 3 };
@@ -365,4 +365,50 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	assert.match(seen[0]!, /Mana now: Forest \(0-\d+\) makes G; Forest \(0-\d+\) makes G/);
 	assert.match(seen[0]!, /Land plays left this turn: 1\. In hand: .*Forest: enters untapped, makes G/);
 	assert.match(seen[0]!, /Ba Sing Se: no package, so how it enters and what it makes are unknown/, "a land with no package is not guessed at");
+});
+
+test("the plan's arithmetic: costs from what the steps before leave, holds kept, land plays counted with what the plan permits", () => {
+	const turn = (table: Table) => table.cursor.turn;
+	const problems = (table: Table, plan: Omit<Plan, "objective" | "guidance">) => planProblems(workFrame(table, 0), { objective: "o", guidance: "g", ...plan }).join(" | ");
+	const now = (table: Table) => ({ active: "self" as const, step: "precombat-main" as const, fromTurn: turn(table), throughTurn: turn(table) });
+	const cast = (table: Table, card: string, label = `Cast ${card}`) => ({ label, when: now(table), action: { prefix: "cast:", objects: { card, zones: ["hand" as const] } } });
+	const land = (table: Table, card: string) => ({ label: `Play ${card}`, when: now(table), action: { prefix: "land:", objects: { card, zones: ["hand" as const] } } });
+	const veil = (table: Table): Plan["may"] => [{ label: "Veil a targeted creature", when: { active: "opponent" as const, fromTurn: turn(table) + 1, throughTurn: turn(table) + 1 },
+		action: { procedure: { claim: "Cast Snakeskin Veil", basis: "Put a +1/+1 counter on target creature you control. It gains hexproof until end of turn.", source: { zones: ["hand"], controller: "self", card: "Snakeskin Veil" },
+			timing: "spell", targets: [{ object: { types: ["creature"], controller: "you" } }], instructions: [] } } }];
+
+	// Three Forests: Hydra spends them all, so Veil cannot also be kept.
+	const three = matchup("arithmetic");
+	place(three, 0, "battlefield", "Forest", "Forest", "Forest");
+	main(three, 0, 3);
+	place(three, 0, "hand", "Mossborn Hydra", "Snakeskin Veil");
+	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three) }), /may\[0\] \(Veil a targeted creature\): costs \{G\} but the steps before it leave no untapped source/);
+	const forest = cardsIn(three, "battlefield", 0).find((one) => one.card === "Forest")!;
+	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three), holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Veil" }] }),
+		/steps\[\d\] \(Cast Mossborn Hydra\): costs \{2\}\{G\} but the steps before it leave Forest \(G\), Forest \(G\), and the plan holds Forest/);
+
+	// The land first pays for the Hydra; the Hydra first does not.
+	const two = matchup("order");
+	place(two, 0, "battlefield", "Forest", "Forest");
+	main(two, 0, 3);
+	place(two, 0, "hand", "Mossborn Hydra", "Forest");
+	editWork(two, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "forest");
+	assert.match(problems(two, { steps: [cast(two, "Mossborn Hydra"), land(two, "Forest")] }), /Cast Mossborn Hydra\): costs \{2\}\{G\}/);
+	assert.equal(problems(two, { steps: [land(two, "Forest"), cast(two, "Mossborn Hydra")] }), "");
+	// A card the seat does not hold is named, and a window on the wrong seat's turn never opens.
+	assert.match(problems(two, { steps: [cast(two, "Icetill Explorer")] }), /you hold no Icetill Explorer now/);
+	assert.match(problems(two, { steps: [], askWhen: [{ label: "Never", when: { active: "opponent", fromTurn: turn(two), throughTurn: turn(two) }, if: { amount: { life: "you" }, atMost: 5 } }] }), /is your turn, so a window for the opponent's turn on it never opens/);
+
+	// A land that enters tapped makes nothing this turn.
+	editWork(two, 0, [{ do: "package.put", package: { card: "Forest", registers: [{ basis: "This land enters tapped.", kind: "enters", tapped: true }] } }], "tapped");
+	assert.match(problems(two, { steps: [land(two, "Forest"), cast(two, "Mossborn Hydra")] }), /costs \{2\}\{G\}/);
+
+	// Icetill Explorer cast first permits the second land.
+	const icetill = matchup("icetill-plan");
+	place(icetill, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
+	main(icetill, 0, 3);
+	place(icetill, 0, "hand", "Icetill Explorer", "Forest", "Forest");
+	editWork(icetill, 0, [{ do: "package.put", package: { card: "Icetill Explorer", registers: pack("Icetill Explorer") } }, { do: "package.put", package: { card: "Forest", registers: [] } }], "icetill");
+	assert.equal(problems(icetill, { steps: [cast(icetill, "Icetill Explorer"), land(icetill, "Forest"), land(icetill, "Forest")] }), "");
+	assert.match(problems(icetill, { steps: [land(icetill, "Forest"), land(icetill, "Forest")] }), /no land play is left for it this turn/);
 });

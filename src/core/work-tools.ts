@@ -11,7 +11,7 @@ import { checkProcedure } from "./procedures.ts";
 import type { Package, Plan, PlanOption } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
 import { matches } from "./query.ts";
-import { allowance } from "./permits.ts";
+import { budget } from "./budget.ts";
 
 export function workFrame(table: Table, seat: SeatId): Frame {
 	const decision = nextDecision(table);
@@ -49,16 +49,19 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 		}
 	};
 	plan.steps.forEach((step, at) => option(step, `steps[${at}]`));
-	// One land play a turn unless a permanent permits more: more land steps in one turn cannot all be taken.
-	const plays = new Map<string, string[]>();
-	for (const step of plan.steps) {
-		const action = step.action;
-		if ("procedure" in action ? action.procedure.timing !== "land" : !(action.option ?? action.prefix ?? "").startsWith("land:")) continue;
-		const turn = `${step.when.fromTurn ?? "?"}-${step.when.throughTurn ?? "?"}`;
-		plays.set(turn, [...(plays.get(turn) ?? []), step.label]);
+	// Land plays, costs and holds on the seat's next own turn, walked in order.
+	found.push(...budget(frame, plan));
+	// A window for one turn names whose turn it is; the wrong seat's never opens.
+	const at = frame.view.window;
+	const whose = (turn: number) => at.kind === "turn" && (frame.view.players?.length ?? 2) === 2 ? ((turn - at.turn) % 2 === 0 ? at.active : 1 - at.active) : undefined;
+	const named = [...plan.steps.map((one, n) => [`steps[${n}]`, one] as const), ...(plan.may ?? []).map((one, n) => [`may[${n}]`, one] as const),
+		...(plan.askWhen ?? []).flatMap((one, n) => one.when ? [[`askWhen[${n}]`, { label: one.label, when: one.when }] as const] : [])];
+	for (const [where, one] of named) {
+		const { active, fromTurn, throughTurn } = one.when;
+		if (fromTurn === undefined || fromTurn !== throughTurn || (active !== "self" && active !== "opponent")) continue;
+		const owner = whose(fromTurn);
+		if (owner !== undefined && (owner === frame.seat) !== (active === "self")) found.push(`${where} (${one.label}): turn ${fromTurn} is ${owner === frame.seat ? "your" : "the opponent's"} turn, so a window for ${active === "self" ? "your" : "the opponent's"} turn on it never opens`);
 	}
-	const allowed = allowance(viewWorld(frame.view), frame.seat).lands;
-	for (const labels of plays.values()) if (labels.length > allowed) found.push(`${labels.length} land plays in one turn (${labels.join("; ")}), but you have ${allowed}; keep the others for later turns or make them a branch`);
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	for (const stop of plan.askWhen ?? []) {
 		try { holds(scope, stop.if); } catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
