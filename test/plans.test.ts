@@ -186,7 +186,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	main(table, 0);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const frame = workFrame(table, 0);
-	const broken = { ...line, steps: [{ label: "Untap", when: { step: "untap" }, action: { option: "pass" } }, { label: "Nothing", when: {}, action: {} }],
+	const broken = { ...line, steps: [{ label: "Attack in the end step", when: { step: "end" }, action: { prefix: "attack:" } }, { label: "Nothing", when: {}, action: {} }],
 		packages: [{ card: "Hired Claw", registers: [{ basis: "{1}{R}: Put a +1/+1 counter on this creature.", kind: "watch", event: { on: "step", step: "end" },
 			effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } }] }] };
 	const replies = [{ plan: broken }, { plan: line }];
@@ -199,8 +199,22 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const tools = await planWork(frame, {}, writer);
 	assert.deepEqual(tools, [{ do: "plan.put", plan: line }]);
-	assert.match(seen[1]!, /\d problems: steps\[0\] \(Untap\): untap has no priority.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
+	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
+});
+
+test("the writer's habits with one meaning are read as meant: an untap step, an action inside its if, bounds inside an amount", async () => {
+	const table = position();
+	main(table, 0);
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	const habits = { objective: "o", guidance: "g", steps: [{ label: "Untap", when: { step: "untap" }, action: { option: "pass" } }, line.steps[0]],
+		may: [{ label: "Pass while they hold three cards", when: {}, if: { amount: { count: { zones: ["hand"], controller: "opponent" }, atLeast: 3 }, action: { option: "pass" } } }] };
+	const stream: Stream = () => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: structuredClone(habits) } }], stopReason: "toolUse" }) });
+	const [put] = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.ok(put?.do === "plan.put");
+	assert.deepEqual(put.plan.steps.map((step) => step.label), ["Play a Forest"], "the table untaps for the seat");
+	assert.deepEqual(put.plan.may![0], { label: "Pass while they hold three cards", when: {}, action: { option: "pass" },
+		if: { amount: { count: { zones: ["hand"], controller: "opponent" } }, atLeast: 3 } });
 });
 
 test("strategy plans before a seat first acts and at each of its turns after the draw, with one cached prompt", async () => {

@@ -114,6 +114,26 @@ const HINTS: [RegExp, string][] = [
 ];
 const hints = (found: string[]) => HINTS.filter(([pattern]) => found.some((line) => pattern.test(line))).map(([, hint]) => ` ${hint}`).join("");
 
+/**
+ * Habits the first live plans showed that have one meaning, read as meant
+ * rather than refused: steps left out when there are none, bounds inside an
+ * amount, an action written inside its if, and untap or cleanup steps, which the
+ * table performs itself.
+ */
+function tidy(value: unknown): unknown {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+	const plan = lifted({ steps: [], ...(value as object) }) as Record<string, unknown>;
+	const option = (one: unknown) => {
+		const record = one as Record<string, unknown> & { if?: Record<string, unknown> };
+		if (!record || typeof record !== "object" || record.action || !record.if?.action) return one;
+		const { action, ...condition } = record.if;
+		const { if: _, ...rest } = record;
+		return { ...rest, action, ...(Object.keys(condition).length ? { if: condition } : {}) };
+	};
+	const timed = (one: unknown) => !["untap", "cleanup"].includes(((one as { when?: { step?: string } })?.when?.step) ?? "");
+	return { ...plan, steps: (plan.steps as unknown[]).map(option).filter(timed), ...(Array.isArray(plan.may) ? { may: plan.may.map(option).filter(timed) } : {}) };
+}
+
 /** "{1}{R}: ...", "{T}, Sacrifice this: ...": a cost, a colon, an effect. */
 const ACTIVATED = /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/;
 
@@ -170,8 +190,7 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
-		// A plan with nothing to do may leave its steps out.
-		args.plan = lifted({ steps: [], ...(args.plan as object) });
+		args.plan = tidy(args.plan);
 		const shape = problems(PlanSchema, args.plan);
 		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
 		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
