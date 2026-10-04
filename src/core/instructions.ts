@@ -194,8 +194,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "reflect": {
 			// "When you do": a trigger made now, put on the stack at the next priority (603.12).
 			if (instruction.check && !holds(scope, instruction.check)) return one("It does not trigger: its condition is false", []);
+			if (!source) return one("No source for a reflexive trigger", []);
 			const event = scope.event;
-			const trigger: Trigger = { id: `trigger-${table.cursor.clock + 1}-reflexive`, controller, source: source ?? { id: pending.object, incarnation: 0 }, basis: `When you do (${claim})`,
+			const trigger: Trigger = { id: `trigger-${table.cursor.clock + 1}-reflexive`, controller, source, basis: `When you do (${claim})`,
 				effect: structuredClone(instruction.effect), ...(instruction.check ? { check: structuredClone(instruction.check) } : {}), bound: structuredClone(pending.bound),
 				event: { ...(event?.object ? { object: ref(event.object) } : {}), ...(event?.objects ? { objects: event.objects.map(ref) } : {}),
 					...(event?.player !== undefined ? { player: event.player } : {}), ...(event?.source ? { source: ref(event.source) } : {}) },
