@@ -549,3 +549,23 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.match(planProblems(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
 });
+
+test("a challenger's revision is used when it is ready, and the turn never waits for one that is not", async () => {
+	for (const ready of [true, false]) {
+		const table = position();
+		main(table, 0, 3);
+		editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+		main(table, 1, 4);
+		const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
+		const covering = names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self" as const, step: "precombat-main" as const },
+			if: { amount: { count: { zones: ["hand" as const], controller: "you" as const, name } }, atLeast: 1 }, action: { option: "pass" } }));
+		const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: covering }, revised: Plan = { ...prepared, objective: "Revised." };
+		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
+			prepare: async () => prepared, challenge: () => ready ? Promise.resolve(revised) : new Promise<Plan>(() => {}) });
+		seat.observe(workFrame(table, 0));
+		await new Promise((resolve) => setImmediate(resolve));
+		main(table, 0, 5);
+		const answer = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
+		assert.deepEqual(answer.tools, [{ do: "plan.put", plan: ready ? revised : prepared }]);
+	}
+});

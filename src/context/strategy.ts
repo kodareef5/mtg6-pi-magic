@@ -289,6 +289,40 @@ export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick
 	return answer.plan as Plan;
 }
 
+const CHALLENGE = {
+	name: "submit",
+	description: "Submit the plan's real errors, or an empty list when it has none. Call it once.",
+	parameters: { type: "object", additionalProperties: false, required: ["errors"], properties: {
+		errors: { type: "array", items: { type: "string" }, description: "Each a sentence: the step or branch, what is wrong, and why, from the cards' text and the rules." } } },
+};
+
+/**
+ * Challenge a prepared plan against the cards' meaning, and revise it once if
+ * the challenge finds real errors. The code has already checked its arithmetic;
+ * this looks for what code cannot: a trigger expected from a land played before
+ * its source enters, guidance the steps contradict, a missed lethal, the
+ * opponent's best reply left uncovered. Undefined when nothing was found or the
+ * revision failed: the prepared plan stands.
+ */
+export async function challengePlan(frame: Frame, prepared: Plan, context: Context, reasoner: Pick<Reasoner, "work">): Promise<Plan | undefined> {
+	const task = [
+		"YOUR TASK: CHALLENGE THE PREPARED PLAN above, as prepared. Its costs and land plays are already checked; look for what they cannot show:",
+		"- a step that expects a trigger from an event that happens before the trigger's source is on the battlefield, or after it is gone;",
+		"- guidance or phases that the steps contradict;",
+		"- lethal damage available and not taken, or the opponent's lethal not covered;",
+		"- the opponent's best reply to the line, with the mana and cards they can have, left uncovered;",
+		"- a card read wrongly against its text.",
+		"Report only real errors, each in a sentence. An empty list is the right answer for a sound plan.",
+	].join("\n");
+	const found = await reasoner.work("challenge", { system: SYSTEM, user: facts(frame, context, { prepared }), task }, { submit: { ...CHALLENGE, check: (args) =>
+		Array.isArray(args.errors) && args.errors.every((one) => typeof one === "string") ? null : "errors is a list of sentences." } });
+	const errors = (found.errors as string[]).filter((one) => one.trim());
+	if (!errors.length) return undefined;
+	const revise = `YOUR TASK: REVISE THE PREPARED PLAN above, as prepared. A challenge found: ${errors.join(" ")} Fix what is right in it, keep the rest, and submit the whole revised plan.\n${ANSWER}`;
+	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context, { prepared }), task: revise }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args); } } });
+	return answer.plan as Plan;
+}
+
 /** The writer's answer to a review: keep the prepared plan, or a whole revised one, and perhaps an objection. */
 const REVIEW = {
 	name: "submit",

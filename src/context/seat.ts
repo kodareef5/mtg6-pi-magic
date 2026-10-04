@@ -60,6 +60,8 @@ export type AiSeatOptions = {
 	plan?(frame: Frame): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
 	/** Prepares this seat's next turn while the opponent plays. Without it the turn is planned when it begins. */
 	prepare?(frame: Frame): Promise<Plan>;
+	/** Challenges a prepared plan in the background, and revises it once if it found errors. Never waited on. */
+	challenge?(frame: Frame, prepared: Plan): Promise<Plan | undefined>;
 	/** Checks a prepared plan when the turn begins, given what changed since it was prepared. */
 	review?(frame: Frame, prepared: Plan, changed: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
 };
@@ -158,7 +160,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let latest: Frame | undefined;
 	let asked = 0;
 	// The next own turn being prepared, from the frame it was prepared from. A failed preparation is undefined and the turn is planned as usual.
-	let preparation: { turn: number; from: Frame; plan: Promise<Plan | undefined> } | undefined;
+	// A challenger's revision replaces it only if it is already done when the turn begins.
+	let preparation: { turn: number; from: Frame; plan: Promise<Plan | undefined>; revised?: Plan } | undefined;
 	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
 
 	return {
@@ -193,9 +196,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 			// The turn's plan, prepared during the opponent's turn: offered as it is, or after a short review.
 			if (reason && !frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
 				const { from, plan } = preparation;
+				const done = preparation;
 				preparation = undefined;
 				// A preparation from a position a rollback undid is stale.
-				const prepared = from.version <= frame.version ? await plan : undefined;
+				const prepared = from.version <= frame.version ? done.revised ?? await plan : undefined;
 				if (prepared) {
 					const changed = changes(from, frame), id = `${options.name}-${frame.version}-${revision}-prepared-${++asked}`;
 					if (settled(frame, prepared, changed)) return { kind: "work", tools: [{ do: "plan.put", plan: prepared }], revision, actionId: id };
@@ -259,7 +263,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 			// The opponent's turn has begun: prepare ours, once, from what can be seen now.
 			const at = frame.view.window, work = frame.view.work;
 			if (options.prepare && at.kind === "turn" && at.active !== frame.seat && work?.eachTurn && work.accepted !== undefined && preparation?.turn !== at.turn + 1) {
-				preparation = { turn: at.turn + 1, from: frame, plan: options.prepare(frame).catch(() => undefined) };
+				const job: NonNullable<typeof preparation> = { turn: at.turn + 1, from: frame, plan: options.prepare(frame).catch(() => undefined) };
+				preparation = job;
+				const challenge = options.challenge;
+				if (challenge) void job.plan.then((prepared) => prepared && challenge(frame, prepared)).then((revised) => { if (revised) job.revised = revised; }, () => undefined);
 			}
 		},
 
