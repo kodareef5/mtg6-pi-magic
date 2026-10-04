@@ -101,6 +101,12 @@ export async function play(
 			if (table.cursor.turn !== turn) {
 				tell(table, onTurn, turn, active, began);
 				began = table.log.length;
+				// Every seat sees the new turn begin, however its decisions go: forced and delegated play asks nobody.
+				for (const one of table.seats) {
+					const view = project(table, one.id, seen[one.id] ?? 0);
+					seen[one.id] = table.log.length;
+					players[one.id]?.observe({ seat: one.id, version: table.cursor.clock, view });
+				}
 			}
 			continue;
 		}

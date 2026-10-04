@@ -29,8 +29,8 @@ import { seat as seatTable, run } from "../src/context/sit.ts";
 import { CEILING, tally } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { planWork, syntaxReference } from "../src/context/strategy.ts";
-import { question } from "../src/context/seat.ts";
+import { planWork, prepareTurn, reviewPlan, syntaxReference } from "../src/context/strategy.ts";
+import { aiSeat, question } from "../src/context/seat.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -457,4 +457,61 @@ test("the pilot reads the plan's guidance for the window it is in, and no other"
 	const packet = focus(workFrame(table, 0), startingIntent(0));
 	assert.deepEqual(packet.plan!.phase, ["Land first, then the Passage."]);
 	assert.match(question(packet, true).instructions, /Now: Land first, then the Passage\./);
+});
+
+test("the turn before ours prepares our next one; a quiet turn offers it as it is, a changed one asks for a review", async () => {
+	for (const changed of [false, true]) {
+		const table = position();
+		main(table, 0, 3);
+		editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+		main(table, 1, 4);
+		// Every card Green could draw is named by a branch, so any draw is covered.
+		const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
+		const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self", step: "precombat-main" },
+			if: { amount: { count: { zones: ["hand"], controller: "you", name } }, atLeast: 1 }, action: { option: "pass" } })) };
+		const calls = { prepare: 0, review: [] as string[][], plan: 0 };
+		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call expected"); } } as never, intent: startingIntent(0), onGap() {},
+			plan: async () => { calls.plan += 1; return { tools: [] }; },
+			prepare: async () => { calls.prepare += 1; return prepared; },
+			review: async (_frame, plan, lines) => { calls.review.push(lines); return { tools: [{ do: "plan.put", plan }] }; } });
+		seat.observe(workFrame(table, 0));
+		seat.observe(workFrame(table, 0));
+		assert.equal(calls.prepare, 1, "one preparation for the turn ahead");
+		if (changed) commit(table, [{ do: "change-life", who: 0, amount: -3, reason: "resolve" }], "resolve");
+		main(table, 0, 5);
+		const answer = await seat.answer(workFrame(table, 0));
+		assert.equal(answer.kind, "work");
+		assert.deepEqual((answer as Extract<Answer, { kind: "work" }>).tools, [{ do: "plan.put", plan: prepared }]);
+		assert.equal(calls.plan, 0, "no plan written from scratch");
+		if (changed) assert.ok(calls.review.length === 1 && calls.review[0]!.includes("your life went from 20 to 17"), "a change is reviewed, and named");
+		else assert.equal(calls.review.length, 0, "nothing changed but the draw: no call");
+	}
+});
+
+test("every seat sees each turn begin, even a turn of only forced play", async () => {
+	const table = position();
+	const seen: string[] = [];
+	const watcher: Player = { ...pilot([]), observe(frame) { if (frame.view.window.kind === "turn") seen.push(`${frame.view.window.turn}:${frame.view.window.step}`); } };
+	await playUntil(table, { 0: watcher, 1: opponent }, 2);
+	assert.ok(seen.includes("2:untap"), `Green saw Red's turn begin: ${seen.slice(0, 6).join(", ")}`);
+});
+
+test("preparation asks for the next turn window by window, and a review may keep the prepared plan in one short answer", async () => {
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+	main(table, 1, 4);
+	const seen: string[] = [];
+	const replies: Record<string, unknown>[] = [{ plan: { objective: "Next turn.", guidance: "g", steps: [], phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] } }];
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
+	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
+	const prepared = await prepareTurn(workFrame(table, 0), {}, writer);
+	assert.match(seen[0]!, /PREPARE YOUR NEXT TURN\. It is the opponent's turn 4; yours, turn 5/);
+	assert.equal(prepared.objective, "Next turn.");
+
+	main(table, 0, 5);
+	replies.push({ accept: true });
+	const kept = await reviewPlan(workFrame(table, 0), prepared, ["you drew Forest"], {}, writer);
+	assert.match(seen[1]!, /Since you prepared it: you drew Forest/);
+	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: prepared }]);
 });

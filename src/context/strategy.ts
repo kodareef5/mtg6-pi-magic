@@ -209,13 +209,15 @@ function mana(frame: Frame): string {
 	return lines.join(" ");
 }
 
-export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
-	const request = planReason(frame);
-	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
+type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe };
+
+/** What every writer call reads: the seat's position, its mana, its plan, the brief and the cards in play and in both lists. */
+function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}): string {
 	const { work, done, objects: _objects, printed: _printed, ...view } = frame.view;
-	const user = JSON.stringify({
+	return JSON.stringify({
 		seat: frame.seat, mana: mana(frame), view, objects: objects(frame),
 		plan: work?.plan ? { ...work.plan, done: (done ?? []).map((at) => work.plan!.steps[at]?.label) } : null,
+		...more,
 		packages: (work?.packages ?? []).map((pack) => pack.card),
 		options: frame.decision?.options, brief: context.brief,
 		cards: [...new Set([...(frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []),
@@ -223,31 +225,95 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
 		recaps: context.recaps?.slice(-3), refused: frame.refused,
 	});
+}
+
+/** Every problem with a submitted plan and objection against this frame, or null. Tidies the plan in place first. */
+function checked(frame: Frame, args: Record<string, unknown>): string | null {
+	// Fields of the plan written beside it, as when the plan object is closed too early, belong inside it. An objection, and a review's accept, are their own.
+	const { plan: written, objection, accept: _accept, ...beside } = args;
+	args.plan = tidy({ ...beside, ...(written as object) });
+	for (const key of Object.keys(beside)) delete args[key];
+	const shape = problems(PlanSchema, args.plan);
+	if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
+	const plan = args.plan as Plan, at = frame.view.window;
+	const idle = at.kind === "turn" && at.active === frame.seat && !plan.steps.length && !plan.may?.length
+		? ["the plan has no steps and no branches, so the table would pass every window of your turn; if that is what you mean, add a step {\"label\": \"Pass the turn\", \"when\": {\"active\": \"self\"}, \"action\": {\"option\": \"pass\"}}"] : [];
+	const found = [...planProblems(frame, plan), ...misregistered(plan), ...idle, ...(objection === undefined ? [] : objected(objection, frame))];
+	return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.${hints(found)}` : null;
+}
+
+const ANSWER = "Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.";
+
+export async function planWork(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
+	const request = planReason(frame);
+	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
 	const at = frame.view.window;
 	const task = [
 		`YOUR TASK: ${request}`,
 		at.kind === "turn" ? `It is turn ${at.turn}, ${at.step}, seat ${at.active}'s turn. Plan from here through the end of the opponent's next turn.` +
 			(at.active === frame.seat ? " Decide this turn's attacks: write an attack step for each creature that should attack, then attack:done. Without them no creature attacks." : "")
 			: "The mulligan is decided separately, from the brief's opening policy. Plan from your first turn through the opponent's first turn.",
-		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
+		ANSWER,
 	].join("\n");
-	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
-		// Fields of the plan written beside it, as when the plan object is closed too early, belong inside it. An objection is its own.
-		const { plan: written, objection, ...beside } = args;
-		args.plan = tidy({ ...beside, ...(written as object) });
-		for (const key of Object.keys(beside)) delete args[key];
-		const shape = problems(PlanSchema, args.plan);
-		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
-		const plan = args.plan as Plan;
-		const idle = at.kind === "turn" && at.active === frame.seat && !plan.steps.length && !plan.may?.length
-			? ["the plan has no steps and no branches, so the table would pass every window of your turn; if that is what you mean, add a step {\"label\": \"Pass the turn\", \"when\": {\"active\": \"self\"}, \"action\": {\"option\": \"pass\"}}"] : [];
-		const found = [...planProblems(frame, plan), ...misregistered(plan), ...idle, ...(objection === undefined ? [] : objected(objection, frame))];
-		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.${hints(found)}` : null;
-	} };
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
 	const why = !frame.view.work?.request ? "turn plan" : frame.view.work.accepted === undefined ? "opening plan" : request.startsWith("Stop:") ? "plan after a stop"
 		: request.startsWith("The pilot asked") ? "plan after help" : "plan on request";
-	const answer = await reasoner.work(why, { system: SYSTEM, user, task }, { submit });
+	const answer = await reasoner.work(why, { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => checked(frame, args) } });
 	const objection = answer.objection as Objection | undefined;
 	return { tools: [{ do: "plan.put", plan: answer.plan as Plan }], ...(objection ? { objection } : {}) };
+}
+
+/**
+ * Prepare the seat's next turn while the opponent plays theirs. Nothing is
+ * accepted here: the plan comes back to the seat, which offers it when its own
+ * turn begins. The request asks for more than a turn plan, because there is time.
+ */
+export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">): Promise<Plan> {
+	const at = frame.view.window;
+	if (at.kind !== "turn" || at.active === frame.seat) throw new Error("A turn is prepared during the opponent's turn.");
+	const ours = at.turn + 1, theirs = at.turn + 2;
+	const task = [
+		`YOUR TASK: PREPARE YOUR NEXT TURN. It is the opponent's turn ${at.turn}; yours, turn ${ours}, comes next. You have time now: think it through completely, so that on your turn the plan only needs checking.`,
+		"1. Review: what happened since your last plan, whether it worked, and what the opponent has shown.",
+		`2. Plan turn ${ours} window by window, with when.fromTurn and throughTurn ${ours}. In phases, say for each window what to do and why: precombat main, which land and which spells, paid with which sources; combat, which creatures attack and under what condition; postcombat main. Name the sources you keep for a response in holds.`,
+		"3. You draw one card at the start of that turn. Keep the steps to the cards you hold now, and write a may branch for each draw that would change the line, with an if that the card is in your hand: {\"amount\": {\"count\": {\"zones\": [\"hand\"], \"controller\": \"you\", \"name\": \"...\"}}, \"atLeast\": 1}.",
+		"4. Order the steps by priority, and mark essential: true on the steps the line cannot do without.",
+		`5. Cover the opponent's turn ${theirs}: responses and blocks as branches with fromTurn and throughTurn ${theirs}, and the sources they need in holds.`,
+		ANSWER,
+	].join("\n");
+	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args); } } });
+	return answer.plan as Plan;
+}
+
+/** The writer's answer to a review: keep the prepared plan, or a whole revised one, and perhaps an objection. */
+const REVIEW = {
+	name: "submit",
+	description: "Keep your prepared plan with accept: true, or submit a whole revised plan. Call it once; if it reports problems, fix them and call it again.",
+	parameters: (() => {
+		const parameters = structuredClone(SUBMIT.parameters) as { properties: Record<string, unknown>; required: string[] };
+		parameters.properties.accept = { type: "boolean", description: "true keeps the prepared plan as it is." };
+		parameters.required = [];
+		return parameters;
+	})(),
+};
+
+/**
+ * Check a prepared plan at the start of the seat's own turn, after the draw:
+ * keep it, or revise it for what changed. Keeping it is a short answer.
+ */
+export async function reviewPlan(frame: Frame, prepared: Plan, changed: string[], context: Context, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
+	const task = [
+		"YOUR TASK: Your turn has begun and you have drawn. Above is the plan you prepared during the opponent's turn, as prepared.",
+		`Since you prepared it: ${changed.join("; ") || "nothing you can see changed"}.`,
+		"If it still fits, call submit with {\"accept\": true}. If not, submit the whole revised plan. Object to an opponent action only if it broke a rule.",
+	].join("\n");
+	const answer = await reasoner.work("review", { system: SYSTEM, user: facts(frame, context, { prepared }), task }, { submit: { ...REVIEW, check: (args) => {
+		if (args.accept === true && args.plan === undefined) {
+			const found = [...planProblems(frame, prepared), ...misregistered(prepared)];
+			return found.length ? `The prepared plan no longer fits: ${found.join("; ")}. Submit a revised plan.` : null;
+		}
+		return checked(frame, args);
+	} } });
+	const objection = answer.objection as Objection | undefined;
+	return { tools: [{ do: "plan.put", plan: (answer.plan as Plan | undefined) ?? prepared }], ...(objection ? { objection } : {}) };
 }

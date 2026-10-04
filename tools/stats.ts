@@ -48,8 +48,11 @@ for (const run of runs) {
 	console.log(`\n${run.file}`);
 	console.log(`  seed ${run.seed}, ${run.outcome ? "finished" : "stopped"} on turn ${run.turn}, ${seconds(run.elapsedMs)} wall, ` +
 		`replay ${run.replayMatches ? "matched" : "MISMATCH"}, ${run.gaps.length} gaps${failed ? `, ${failed} failed calls` : ""}`);
+	// Preparation runs during the opponent's turn and blocks nothing; every other strategy call is waited on.
+	const strategy = run.calls.filter((call) => call.role === "strategy"), waited = strategy.filter((call) => call.about !== "preparation");
 	console.log(`  pregame ${seconds(pregame)} before the first decision; then ${seconds((run.elapsedMs - pregame) / turns)} a turn, ` +
-		`${seconds(run.calls.filter((call) => call.role === "strategy").reduce((sum, call) => sum + call.ms, 0) / turns)} of it waiting on strategy`);
+		`${seconds(waited.reduce((sum, call) => sum + call.ms, 0) / turns)} of it waiting on strategy` +
+		`${waited.length < strategy.length ? `; ${seconds(strategy.filter((call) => call.about === "preparation").reduce((sum, call) => sum + call.ms, 0) / turns)} a turn preparing in the background` : ""}`);
 	for (const line of table(run.calls, run.elapsedMs)) console.log(`  ${line}`);
 	// What each chat call was for: pregame analysts and synthesis, turn plans and escalations.
 	const kinds = new Map<string, Call[]>();

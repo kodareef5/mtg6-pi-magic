@@ -48,6 +48,30 @@ of that seat's decisions, in this order:
 Blocks, resolution choices and trigger order with a real choice are never
 defaulted; the pilot reads the plan and chooses.
 
+## Preparing the turn before ours
+
+When the opponent's turn begins, every seat is shown it, and a seat with a
+writer starts preparing its own next turn in the background
+(`strategy.prepareTurn`). The request asks for more than a turn plan, because
+there is time:
+- a review of the last turn;
+- the next turn window by window in `phases`, with the mana for each spell and
+  holds for responses;
+- branches for the draws that would change the line;
+- essential steps marked;
+- the opponent's following turn.
+
+Nothing is accepted then. When the seat's own turn begins and it has drawn, the
+prepared plan is offered:
+- as it is, with no call, when nothing changed but the draw, the plan still
+  passes every check, and the drawn card is a land the plan plays or one it
+  names;
+- otherwise after a short review (`strategy.reviewPlan`), which keeps it with
+  `{accept: true}` or revises it.
+
+A failed or stale preparation leaves the ordinary turn plan. The plan goes
+through `plan.put` as always, so the journal and replay are unchanged.
+
 ## Progress
 
 Each action that carries out a step or branch writes `execution: {plan, step}`

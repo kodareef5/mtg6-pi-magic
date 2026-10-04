@@ -4,7 +4,11 @@
  * when the one it has no longer fits. Strategy writes the plan; focus builds
  * the decision packet without inference.
  *
- * Raw declarations, free-form delegation, and objections still lack game handlers.
+ * While the opponent plays, it prepares its own next turn in the background,
+ * and when that turn begins it offers the prepared plan: as it is when nothing
+ * that matters changed, or after a short review.
+ *
+ * Raw declarations and free-form delegation still lack game handlers.
  * Past 150 lines to keep the question beside its navigation and answer handling.
  */
 
@@ -17,6 +21,9 @@ import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
 import type { WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
+import { planProblems } from "../core/work-tools.ts";
+import type { Plan } from "../core/language.ts";
+import type { SeenObject } from "../core/work.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -51,7 +58,46 @@ export type AiSeatOptions = {
 	onAsk?(packet: Packet): void;
 	/** Writes this seat's plan when one is wanted. Without it, the seat cannot ask for help. */
 	plan?(frame: Frame): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
+	/** Prepares this seat's next turn while the opponent plays. Without it the turn is planned when it begins. */
+	prepare?(frame: Frame): Promise<Plan>;
+	/** Checks a prepared plan when the turn begins, given what changed since it was prepared. */
+	review?(frame: Frame, prepared: Plan, changed: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
 };
+
+/**
+ * What changed between the frame a plan was prepared from and the turn it is for,
+ * in this seat's words: permanents either side gained or lost, cards drawn or
+ * lost from hand, life. Untapping and the turn's resets are expected and not
+ * changes. `quiet` is nothing changed but the draw.
+ */
+export function changes(from: Frame, now: Frame): { lines: string[]; drawn: SeenObject[]; quiet: boolean } {
+	const at = (frame: Frame, zone: string, mine: boolean) => (frame.view.objects ?? []).filter((object) => object.zone === zone && (object.controller === frame.seat) === mine);
+	const kept = (object: SeenObject, among: SeenObject[]) => among.some((other) => other.id === object.id && other.incarnation === object.incarnation);
+	const name = (object: SeenObject) => object.card ?? object.token?.name ?? "a card";
+	const gone = (zone: string, mine: boolean) => at(from, zone, mine).filter((object) => !kept(object, at(now, zone, mine)));
+	const added = (zone: string, mine: boolean) => at(now, zone, mine).filter((object) => !kept(object, at(from, zone, mine)));
+	const life = (frame: Frame, mine: boolean) => frame.view.players?.find((one) => (one.id === frame.seat) === mine)?.life;
+	const drawn = added("hand", true);
+	const lines = [
+		...gone("battlefield", true).map((object) => `your ${name(object)} left the battlefield`), ...added("battlefield", true).map((object) => `you now have ${name(object)}`),
+		...gone("battlefield", false).map((object) => `the opponent's ${name(object)} left the battlefield`), ...added("battlefield", false).map((object) => `the opponent now has ${name(object)}`),
+		...gone("hand", true).map((object) => `${name(object)} left your hand`),
+		...[true, false].flatMap((mine) => life(from, mine) !== life(now, mine) ? [`${mine ? "your" : "the opponent's"} life went from ${life(from, mine)} to ${life(now, mine)}`] : []),
+	];
+	return { lines: [...lines, ...drawn.map((object) => `you drew ${name(object)}`)], drawn, quiet: !lines.length };
+}
+
+/**
+ * A prepared plan that needs no review: nothing on the battlefield changed against
+ * the seat, the plan still passes every check, and each card drawn is one the plan
+ * names or a land it has a land step for.
+ */
+export function settled(frame: Frame, prepared: Plan, changed: ReturnType<typeof changes>): boolean {
+	if (!changed.quiet || planProblems(frame, prepared).length) return false;
+	const text = JSON.stringify(prepared);
+	const plays = prepared.steps.some((step) => "procedure" in step.action ? step.action.procedure.timing === "land" : (step.action.option ?? step.action.prefix ?? "").startsWith("land:"));
+	return changed.drawn.every((card) => (card.traits?.types.includes("land") && plays) || (!!card.card && text.includes(JSON.stringify(card.card))));
+}
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
 const KEY = "pick";
@@ -111,6 +157,8 @@ export function question(packet: Packet, help: boolean): Question {
 export function aiSeat(options: AiSeatOptions): Player {
 	let latest: Frame | undefined;
 	let asked = 0;
+	// The next own turn being prepared, from the frame it was prepared from. A failed preparation is undefined and the turn is planned as usual.
+	let preparation: { turn: number; from: Frame; plan: Promise<Plan | undefined> } | undefined;
 	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
 
 	return {
@@ -141,6 +189,22 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const { learned, walked } = navigation;
 			const reason = planReason(frame);
 			const revision = frame.view.work?.revision ?? 0;
+			const at = frame.view.window;
+			// The turn's plan, prepared during the opponent's turn: offered as it is, or after a short review.
+			if (reason && !frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
+				const { from, plan } = preparation;
+				preparation = undefined;
+				// A preparation from a position a rollback undid is stale.
+				const prepared = from.version <= frame.version ? await plan : undefined;
+				if (prepared) {
+					const changed = changes(from, frame), id = `${options.name}-${frame.version}-${revision}-prepared-${++asked}`;
+					if (settled(frame, prepared, changed)) return { kind: "work", tools: [{ do: "plan.put", plan: prepared }], revision, actionId: id };
+					if (options.review) {
+						const { tools, objection } = await options.review(frame, prepared, changed.lines);
+						return { kind: "work", tools, revision, actionId: id, ...(objection ? { objection } : {}) };
+					}
+				}
+			}
 			if (reason) {
 				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
 				const { tools, objection } = await options.plan(frame);
@@ -192,10 +256,16 @@ export function aiSeat(options: AiSeatOptions): Player {
 		// frame is kept because the next intent check reads what changed.
 		observe(frame) {
 			latest = frame;
+			// The opponent's turn has begun: prepare ours, once, from what can be seen now.
+			const at = frame.view.window, work = frame.view.work;
+			if (options.prepare && at.kind === "turn" && at.active !== frame.seat && work?.eachTurn && work.accepted !== undefined && preparation?.turn !== at.turn + 1) {
+				preparation = { turn: at.turn + 1, from: frame, plan: options.prepare(frame).catch(() => undefined) };
+			}
 		},
 
 		close() {
 			latest = undefined;
+			preparation = undefined;
 			void latest;
 		},
 	};

@@ -34,7 +34,7 @@ import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
 import { aiSeat } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
-import { planWork } from "./strategy.ts";
+import { planWork, prepareTurn, reviewPlan } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
@@ -142,7 +142,11 @@ export async function seat(
 			...(options.dials === undefined ? {} : { dials: options.dials }),
 			onGap: (note) => void table.gaps.push(note),
 			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
-			...(planning ? { plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning) } : {}),
+			...(planning ? {
+				plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
+				prepare: (frame) => prepareTurn(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
+				review: (frame, prepared, changed) => reviewPlan(frame, prepared, changed, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
+			} : {}),
 		});
 	}
 
