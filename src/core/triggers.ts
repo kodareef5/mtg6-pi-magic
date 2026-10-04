@@ -237,10 +237,13 @@ export function eventScope(world: World, event: Trigger["event"] | undefined): S
 export function triggerWindow(table: Table): Pending | null {
 	const order = playing(table), at = order.findIndex((one) => one.id === table.cursor.active);
 	const apnap = [...order.slice(at), ...order.slice(0, at)];
-	const seat = apnap.find((one) => table.waiting.some((trigger) => trigger.controller === one.id));
+	// One round at a time: what triggered while this round was put waits for the next (603.3b).
+	const round = Math.min(...table.waiting.map((trigger) => trigger.round ?? 0));
+	const current = table.waiting.filter((trigger) => (trigger.round ?? 0) === round);
+	const seat = apnap.find((one) => current.some((trigger) => trigger.controller === one.id));
 	if (!seat) return null;
 	const world = tableWorld(table);
-	const moves: Move[] = table.waiting.filter((trigger) => trigger.controller === seat.id).flatMap((trigger): Move[] => {
+	const moves: Move[] = current.filter((trigger) => trigger.controller === seat.id).flatMap((trigger): Move[] => {
 		const source = world.lastKnown(trigger.source)?.object;
 		const name = source?.card ?? source?.token?.name ?? trigger.source.id;
 		const slots = trigger.effect.targets ?? [];

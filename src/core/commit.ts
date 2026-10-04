@@ -168,6 +168,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		if (was) before[was.id] = structuredClone(was);
 	}
 	const born = new Set(changes.flatMap((change) => change.do === "token" ? [change.id] : []));
+	// What triggers while a trigger is put on the stack joins the next round (603.3b).
+	const putting = changes.find((change) => change.do === "trigger" && change.action === "put");
+	const round = putting?.do === "trigger" ? (table.waiting.find((trigger) => trigger.id === putting.trigger)?.round ?? 0) + 1 : 0;
 
 	for (const [index, change] of changes.entries()) {
 		switch (change.do) {
@@ -355,7 +358,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	if (detecting) {
 		forget(table);
 		const found = detect(table, changes, { before, known }, prior);
-		table.waiting.push(...found.waiting);
+		table.waiting.push(...found.waiting.map((trigger) => round ? { ...trigger, round } : trigger));
 		if (found.spent.length) table.notes = table.notes.filter((note) => !found.spent.includes(note.id));
 	}
 

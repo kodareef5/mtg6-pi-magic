@@ -400,3 +400,22 @@ test("a once-only delayed trigger fires once though its event happens twice at t
 	assert.equal(table.waiting.length, 1, "two lands entered together, and it triggered once");
 	assert.equal(table.notes.some((note) => note.kind === "delay"), false, "and it is used up");
 });
+
+test("what triggers while triggers are put on the stack waits for that round to finish (603.3b)", () => {
+	// Not printed: Green's creature notices being targeted, and three triggers already wait, two Green's and one Red's.
+	const table = matchup("rounds");
+	const watcher = establish(table, 0, "Sazh's Chocobo", [{ basis: "Whenever this creature becomes the target of an ability, you gain 1 life.", kind: "watch",
+		event: { on: "targeted", of: { is: "this" } }, effect: { instructions: [{ do: "life", who: "you", amount: 1 }] } }]);
+	main(table, 0);
+	const source = { id: watcher.id, incarnation: watcher.incarnation }, gain = { instructions: [{ do: "life" as const, who: "you" as const, amount: 1 }] };
+	commit(table, [
+		{ do: "trigger", action: "wait", trigger: { id: "aimed", controller: 0, source, basis: "Put a +1/+1 counter on target creature.", event: {},
+			effect: { targets: [{ object: { types: ["creature"] } }], instructions: [{ do: "counters", on: "target:0", kind: "+1/+1", amount: 1 }] } } },
+		{ do: "trigger", action: "wait", trigger: { id: "plain", controller: 0, source, basis: "You gain 1 life.", event: {}, effect: gain } },
+		{ do: "trigger", action: "wait", trigger: { id: "theirs", controller: 1, source, basis: "You gain 1 life.", event: {}, effect: gain } },
+	], "resolve");
+	trigger(table, (label) => label.includes("+1/+1 counter"));
+	assert.equal(table.waiting.filter((one) => one.controller === 0).length, 2, "targeting the creature made a new Green trigger");
+	trigger(table, (label) => label.includes("You gain 1 life") && !label.includes("becomes the target"));
+	assert.equal(nextDecision(table)!.seat, 1, "Red puts its trigger from this round before Green's new one");
+});
