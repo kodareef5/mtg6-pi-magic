@@ -324,7 +324,8 @@ export const PlanDefs = { ...Defs,
 		objective: text, guidance: text,
 		steps: Type.Array(Type.Ref("Option")),
 		may: Type.Optional(Type.Array(Type.Ref("Option"))),
-		askWhen: Type.Optional(Type.Array(object({ label: text, if: Type.Ref("Condition") }))),
+		/** A stop, watched at every decision or only in its window. */
+		askWhen: Type.Optional(Type.Array(object({ label: text, when: Type.Optional(WhenSchema), if: Type.Ref("Condition") }))),
 		holds: Type.Optional(Type.Array(object({ objects: QuerySchema, purpose: text, releaseWhen: Type.Optional(Type.Ref("Condition")) }))),
 		packages: Type.Optional(Type.Array(Type.Ref("Package"))),
 	}),
@@ -431,4 +432,21 @@ function branchProblems(schema: TSchema, value: unknown, path: string, key: stri
 	if (branches.length !== 1) return [];
 	const defs = (schema as { $defs?: Record<string, TSchema> }).$defs ?? {};
 	return problems(Type.Cyclic({ ...defs, Picked: branches[0] as TSchema }, "Picked"), here).map((line) => `${path}${line === "/" ? "" : line}`);
+}
+
+/**
+ * Writers often put a condition's bounds inside its amount:
+ * {"amount": {"count": {...}, "atLeast": 1}}. That is unambiguous, so it is
+ * read as {"amount": {"count": {...}}, "atLeast": 1} rather than refused.
+ */
+export function lifted<T>(value: T): T {
+	if (Array.isArray(value)) return value.map(lifted) as T;
+	if (!value || typeof value !== "object") return value;
+	const entries = Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, lifted(inner)]));
+	const amount = entries.amount as Record<string, unknown> | undefined;
+	if (amount && typeof amount === "object" && !Array.isArray(amount) && ("atLeast" in amount || "atMost" in amount)) {
+		const { atLeast, atMost, ...rest } = amount;
+		return { ...entries, amount: rest, ...(atLeast !== undefined && entries.atLeast === undefined ? { atLeast } : {}), ...(atMost !== undefined && entries.atMost === undefined ? { atMost } : {}) } as T;
+	}
+	return entries as T;
 }

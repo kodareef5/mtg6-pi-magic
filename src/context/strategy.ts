@@ -9,7 +9,7 @@ import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
 import type { WorkCommand } from "../core/work-language.ts";
 import { planProblems } from "../core/work-tools.ts";
-import { PlanSchema, problems, type Plan, type Registration } from "../core/language.ts";
+import { lifted, PlanSchema, problems, type Plan, type Registration } from "../core/language.ts";
 import type { Brief } from "./brief.ts";
 import type { Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
@@ -104,7 +104,6 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 /** The shapes the first live plans most often got wrong, and the right one, added to a refusal that shows the mistake. */
 const HINTS: [RegExp, string][] = [
 	[/has no field "at(Least|Most)"/, "atLeast and atMost sit beside amount, not inside it: {\"amount\": {\"count\": {...}}, \"atLeast\": 1}."],
-	[/askWhen\/\d+ has no field "when"/, "A stop has only label and if; it is checked at every decision, so it has no window."],
 	[/when\/step must be equal to one of/, "Leave step out to match every step."],
 ];
 const hints = (found: string[]) => HINTS.filter(([pattern]) => found.some((line) => pattern.test(line))).map(([, hint]) => ` ${hint}`).join("");
@@ -151,6 +150,7 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
+		args.plan = lifted(args.plan);
 		const shape = problems(PlanSchema, args.plan);
 		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
 		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
