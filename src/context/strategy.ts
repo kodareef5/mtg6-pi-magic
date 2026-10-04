@@ -170,7 +170,8 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
-		args.plan = lifted(args.plan);
+		// A plan with nothing to do may leave its steps out.
+		args.plan = lifted({ steps: [], ...(args.plan as object) });
 		const shape = problems(PlanSchema, args.plan);
 		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
 		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
