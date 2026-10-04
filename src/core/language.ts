@@ -79,7 +79,8 @@ const SelectorFields = {
 	linked: Type.Optional(Type.Literal(true)),
 };
 
-const Defs = {
+/** The shared definitions every schema built on this syntax refers to, once. */
+export const Defs = {
 	Selector: object({ ...SelectorFields,
 		not: Type.Optional(object({ types: SelectorFields.types, subtypes: SelectorFields.subtypes, supertypes: SelectorFields.supertypes, words: SelectorFields.words })),
 		/** A stack object whose announced targets include one of these. */
@@ -268,7 +269,7 @@ export const WhenSchema = object({
  * with their own claims; "choose one" is which procedure the seat announces.
  * Instructions on a permanent spell run after it enters, with `this` the permanent.
  */
-export const ProcedureSchema = Type.Cyclic({ ...Defs, Procedure: object({
+export const ProcedureDef = object({
 	source: QuerySchema, claim: text,
 	/** The card text this procedure carries out, quoted. */
 	basis: text,
@@ -282,7 +283,8 @@ export const ProcedureSchema = Type.Cyclic({ ...Defs, Procedure: object({
 	targets: Type.Optional(Type.Array(Type.Ref("Target"))),
 	instructions: Type.Array(Type.Ref("Instruction")),
 	words: Type.Optional(Type.Array(text)),
-}) }, "Procedure");
+});
+export const ProcedureSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef }, "Procedure");
 
 /**
  * A public label a player puts on its own object: "power doubled until end of
@@ -294,7 +296,8 @@ export const LabelSchema = Type.Cyclic({ ...Defs, Label: object({ text, until: D
 export type Label = Static<typeof LabelSchema>;
 
 /** What a seat's permanent registers when it enters, by card name. Private until it is used. */
-export const PackageSchema = Type.Cyclic({ ...Defs, Package: object({ card: text, registers: Type.Array(Type.Ref("Registration")) }) }, "Package");
+export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("Registration")) });
+export const PackageSchema = Type.Cyclic({ ...Defs, Package: PackageDef }, "Package");
 
 /**
  * A seat's plan for a stretch of play: the options jev takes, in order, in their
@@ -311,8 +314,8 @@ const Defs2 = { ...Defs,
 			object({ procedure: Type.Ref("Procedure") }),
 		]),
 	}),
-	Procedure: ProcedureSchema.$defs.Procedure,
-	Package: PackageSchema.$defs.Package,
+	Procedure: ProcedureDef,
+	Package: PackageDef,
 	Plan: object({
 		objective: text, guidance: text,
 		steps: Type.Array(Type.Ref("Option")),

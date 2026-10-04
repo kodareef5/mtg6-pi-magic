@@ -27,7 +27,7 @@ import { load as loadCards } from "../src/core/cards.ts";
 import { CEILING } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { planWork } from "../src/context/strategy.ts";
+import { planWork, syntaxReference } from "../src/context/strategy.ts";
 import { question } from "../src/context/seat.ts";
 
 const make = (steps = standard.steps) => start({ ...standard, steps }, [
@@ -402,7 +402,7 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 		{ role: "pregame" as const, pattern: "off", off: true },
 		{ role: "strategy" as const, pattern: "fixture", model: chat },
 	];
-	const prompts: { user: string; ceiling?: number }[] = [];
+	const prompts: { user: string; system?: string; ceiling?: number }[] = [];
 	const inference = {
 		classify: (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string> }> }) => ({
 			api: "typesafe-system-one", provider: "typesafe", model: "jev-latest", stopReason: "stop", timestamp: 0,
@@ -412,8 +412,8 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 				return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }];
 			})),
 		})) as never,
-		stream: ((_model: unknown, context: { messages: { content: string }[] }, options: { maxTokens?: number }) => {
-			prompts.push({ user: context.messages[0]!.content, ceiling: options.maxTokens });
+		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
+			prompts.push({ user: context.messages[0]!.content, system: context.systemPrompt, ceiling: options.maxTokens });
 			return { result: async () => ({ content: [{ type: "text", text: JSON.stringify([
 				{ do: "task.put", task: { ...task("end-check"), when: { active: "opponent", step: "end", throughTurn: 2 }, scope: { zones: [] }, times: 1 } },
 				{ do: "plan.accept", objective: "Review the next opponent end step, then continue." },
@@ -439,6 +439,8 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 	}
 	assert.equal(sessions.filter((session) => session.view.window.active !== session.seat).length, 1, "the only plan on another seat's turn is the opening request");
 	assert.ok(prompts.every((prompt) => prompt.ceiling === CEILING.strategy));
+	assert.equal(new Set(prompts.map((prompt) => prompt.system)).size, 1, "every call sends the same system prompt, so it can be cached");
+	assert.ok(prompts[0]!.system!.includes(syntaxReference()), "the syntax and its examples are in it");
 	assert.equal(seated.tally.spent().filter((spend) => spend.role === "strategy").length, prompts.length);
 	for (const prompt of prompts) {
 		const sent = JSON.parse(prompt.user);

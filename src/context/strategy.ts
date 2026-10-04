@@ -11,6 +11,8 @@ import type { Recap } from "./summary.ts";
 import { workContext } from "./packet.ts";
 import type { Universe } from "../core/cards.ts";
 import { planReason } from "../core/work-menu.ts";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 /** The old mechanical planning estimate remains useful for comparing call policies. */
 export function worthPlanning(table: Table): boolean {
@@ -18,6 +20,18 @@ export function worthPlanning(table: Table): boolean {
 	if (!step || table.outcome || !STEPS[step].priority) return false;
 	const decision = nextDecision(table);
 	return !!decision && decision.options.length > 1;
+}
+
+/**
+ * The syntax and its worked examples, as strategy reads them: docs/SYNTAX.md,
+ * then each example in the order docs/examples/README.md lists them. These are
+ * the files the examples test parses, so what the model reads cannot drift from
+ * the schema. Read once and identical on every call, so a provider can cache it.
+ */
+export function syntaxReference(): string {
+	const docs = join(import.meta.dirname, "..", "..", "docs");
+	const listed = [...readFileSync(join(docs, "examples", "README.md"), "utf8").matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
+	return [readFileSync(join(docs, "SYNTAX.md"), "utf8"), ...listed.map((file) => readFileSync(join(docs, "examples", file), "utf8"))].join("\n\n").trim();
 }
 
 const SYSTEM = [
@@ -32,7 +46,7 @@ const SYSTEM = [
 	"Recipe steps bind listed options, or prepare an activation from a visible permanent or a spell from hand, with a claim and its basis.",
 	"Listed action.option and action.prefix match option ids, never labels. A land play uses prefix land: and an objects selector for the card.",
 	"A review that should nominate a recipe must include its id in task.recipes. For concept-only reviews use scope {zones: []}; an empty selector matches all visible objects.",
-	"A procedure is one announced action in the syntax of docs/SYNTAX.md, checked against the schema below: source, claim, basis, timing, cost, targets and instructions.",
+	"A procedure is one announced action in the syntax explained in the reference below, checked against the schema at the end: source, claim, basis, timing, cost, targets and instructions.",
 	"Timing spell casts from hand; the table charges the printed cost unless cost.mana states another, and reads the spell's timing from its type line. Claim flash with speed instant.",
 	"Timing stack is an activated ability with its cost: mana, tap, sacrifice, exile, life, discard, counters, and a computed reduce. Timing mana only adds mana of stated colors.",
 	"Targets are slots: an object selector, a player side, or both for any target; count and upTo for how many. A slot can name an earlier one, as attachedTo target:0.",
@@ -51,7 +65,13 @@ const SYSTEM = [
 	"package.put records what a permanent of that name registers when it enters under your control, such as its mana ability. Write one for each permanent your plan puts onto the battlefield.",
 	"You may use task.put, task.cancel, recipe.put, label.put, label.remove, draft.edit, draft.cancel, package.put, and plan.accept.",
 	"Finish with exactly one plan.accept. Do not answer reviews or execute moves for the classifier.",
-	"Return a JSON array of tool commands only, with no markdown. This is the tool schema:",
+	"Return a JSON array of tool commands only, with no markdown.",
+	"",
+	"The syntax reference and its worked examples follow. The examples teach shapes; read your own card and write what it says.",
+	"",
+	syntaxReference(),
+	"",
+	"This is the tool schema:",
 	JSON.stringify(CommandsSchema),
 ].join("\n");
 

@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { check, PackageSchema, PlanSchema, ProcedureSchema, type Package, type Plan, type Procedure } from "../src/core/language.ts";
 import { load } from "../src/core/cards.ts";
 import { decks } from "../tools/matchup-fixture.ts";
+import { syntaxReference } from "../src/context/strategy.ts";
 
 const DIR = join(import.meta.dirname, "..", "docs", "examples");
 const SCHEMAS = { procedure: ProcedureSchema, package: PackageSchema, plan: PlanSchema };
@@ -55,4 +56,12 @@ test("every example block parses and quotes its card", () => {
 	for (const card of inMatchup) assert.ok(rows.has(card), `${card} is missing from the card review`);
 	const outside = [...named].filter((card) => !inMatchup.has(card)).length;
 	assert.ok(outside * 2 >= named.size, `${outside} of ${named.size} example cards come from outside the matchup`);
+});
+
+test("strategy reads the syntax and every example, in the index's order", () => {
+	const listed = [...readFileSync(join(DIR, "README.md"), "utf8").matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
+	assert.deepEqual([...listed].sort(), readdirSync(DIR).filter((file) => file.endsWith(".md") && file !== "README.md").sort(), "the index lists every example file");
+	const reference = syntaxReference();
+	assert.ok(reference.startsWith(readFileSync(join(DIR, "..", "SYNTAX.md"), "utf8").trim().slice(0, 200)));
+	for (const file of listed) assert.ok(reference.includes(readFileSync(join(DIR, file), "utf8").trim()), `${file} is in the reference`);
 });

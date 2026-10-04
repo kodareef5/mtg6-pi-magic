@@ -43,7 +43,11 @@ reaches a decision is a short plan plus the facts.
   one question, because one answer gets pasted into every decision.
 - **strategy** runs once per turn of its own for a seat that plans each turn,
   and on a request recorded in the seat's equipment. A phase boundary is not a
-  reason to spend money.
+  reason to spend money. Its system prompt carries `docs/SYNTAX.md`, every example in
+  `docs/examples/` and the tool schema, about 31K tokens that are identical on
+  every call so a provider caches them. No file tools: the reference is small
+  enough to be in front of the model, and the examples test keeps it true to
+  the schema.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
 - **judge** runs only on an objection: the classifier narrows the rules, then
