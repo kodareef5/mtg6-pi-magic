@@ -100,7 +100,8 @@ export type SeatView = {
 	/** The remaining instruction cursor, without any hidden library identities. */
 	resolution?: Resolution;
 	/** Seats still playing and their life. */
-	players?: { id: SeatId; life: number }[];
+	/** Life, and how many cards each hand and library holds: public, though the cards are not (402.3, 401.2). */
+	players?: { id: SeatId; life: number; hand?: number; library?: number }[];
 	/** The public notepad: labels, registrations added after entry, links, permissions. */
 	notes?: Note[];
 	combat?: Combat | null;

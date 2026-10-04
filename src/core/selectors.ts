@@ -71,13 +71,26 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 	};
 }
 
-/** A seat's world: only what its view holds. */
+/**
+ * A faceless stand-in for each card in a hand or library the view cannot see,
+ * so "cards in an opponent's hand" counts what is public and names nothing.
+ */
+function hidden(view: SeatView): Seen[] {
+	const shown = view.objects ?? [];
+	return (view.players ?? []).flatMap((player) => (["hand", "library"] as const).flatMap((zone) => {
+		const count = (zone === "hand" ? player.hand : player.library) ?? 0, seen = shown.filter((one) => one.zone === zone && one.owner === player.id).length;
+		return Array.from({ length: Math.max(0, count - seen) }, (_, at): Seen => ({ id: `hidden-${zone}-${player.id}-${at}`, incarnation: 0, zone, owner: player.id, controller: player.id,
+			tapped: false, faceDown: true, counters: {}, damage: 0 }));
+	}));
+}
+
+/** A seat's world: only what its view holds, and how many cards it cannot see. */
 export function viewWorld(view: SeatView): World {
-	const objects = view.objects ?? [];
+	const seen = view.objects ?? [], objects = [...seen, ...hidden(view)];
 	return {
 		objects, read: (object) => (object as SeenObject).traits, players: view.players ?? [], notes: view.notes ?? [],
 		combat: view.combat ?? null, history: view.history ?? [],
-		lastKnown(ref) { const object = objects.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
+		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
 	};
 }
 
@@ -149,8 +162,12 @@ const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 const ability = (object: Seen): Traits | undefined => object.ability && !object.card && !object.token
 	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] } : undefined;
 
+const FACELESS: Traits = { name: "", supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] };
 export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object)): boolean {
-	const traits = read ?? ability(object);
+	// A card this seat cannot see matches only a selector that asks nothing about what it is.
+	const blind = !read && !object.ability && object.faceDown && !object.card;
+	if (blind && (selector.name || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness)) return false;
+	const traits = blind ? FACELESS : read ?? ability(object);
 	if (!(selector.zones ?? ["battlefield"]).includes(object.zone as never) || !traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
 	if (!side(scope, selector.controller, holder) || !side(scope, selector.owner, object.owner)) return false;

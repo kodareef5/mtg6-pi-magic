@@ -18,7 +18,7 @@ export function select(query: Query, frame: Frame): SeenObject[] {
 	return (frame.view.objects ?? []).filter((item) =>
 		(!query.zones || query.zones.includes(item.zone)) &&
 		(!query.controller || query.controller === "any" || (query.controller === "self" ? item.controller === frame.seat : item.controller !== frame.seat)) &&
-		(!query.card || query.card === item.card) && (query.tapped === undefined || query.tapped === item.tapped) &&
+		(!query.card || query.card === (item.card ?? item.token?.name)) && (query.tapped === undefined || query.tapped === item.tapped) &&
 		(!query.refs || query.refs.some((ref) => ref.id === item.id && ref.incarnation === item.incarnation)),
 	).sort((a, b) => a.id.localeCompare(b.id));
 }

@@ -11,7 +11,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { start } from "../src/core/commit.ts";
+import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
@@ -279,4 +279,36 @@ test("the pilot's packet stays small: the plan, the options and the public posit
 	assert.ok(size < 9000, `a pilot request is ${size} characters`);
 	assert.equal(packet.plan?.due, "Play a Forest");
 	assert.equal(JSON.stringify(packet).includes("registers"), false);
+});
+
+test("a step means playing what it names: never a discard, a token by its name, and a public hand count", async () => {
+	// A card the step means to cast, still in hand at cleanup with eight cards: the pilot discards, not the table.
+	const table = matchup("discard");
+	main(table, 0, 3);
+	const spell = cardsIn(table, "hand", 0).find((one) => !/Forest|Passage/.test(one.card ?? ""))!;
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [{ label: `Cast ${spell.card} when able`, when: turn3,
+		action: { objects: { zones: ["hand"], refs: [{ id: spell.id, incarnation: spell.incarnation }] } } }] } }], "plan");
+	const asked: Frame[] = [];
+	await playUntil(table, { 0: pilot(asked), 1: opponent }, 3);
+	assert.equal(table.ledger.some((row) => row.seat === 0 && row.picked.startsWith("discard:") && row.why === "delegated"), false, "the table discards nothing for the seat");
+
+	// A token is named as the writer sees it, and its attack is taken.
+	const tokens = matchup("token");
+	commit(tokens, [{ do: "token", id: "soldier", controller: 0, spec: { name: "Soldier", types: ["creature"], subtypes: ["Soldier"], colors: ["white"], power: 2, toughness: 2 } }], "game-setup");
+	main(tokens, 0, 3);
+	editWork(tokens, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [
+		{ label: "Attack with the Soldier", when: { ...turn3, step: "declare-attackers" }, action: { prefix: "attack:", objects: { card: "Soldier" } } },
+		{ label: "Finish attacking", when: { ...turn3, step: "declare-attackers" }, action: { option: "attack:done" } }] } }], "plan");
+	await playUntil(tokens, { 0: pilot([]), 1: opponent }, 3);
+	assert.ok(tokens.ledger.some((row) => row.picked === "attack:soldier"), "the Soldier attacks");
+
+	// Hand sizes are public, so a plan can count the opponent's.
+	const hand = matchup("hand");
+	main(hand, 0, 3);
+	const count = (bound: object) => ({ amount: { count: { zones: ["hand" as const], controller: "opponent" as const } }, ...bound });
+	editWork(hand, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [], may: [{ label: "Pass while they hold three cards", when: {}, if: count({ atLeast: 3 }), action: { option: "pass" } }],
+		askWhen: [{ label: "They are hellbent", if: count({ atMost: 0 }) }] } }], "plan");
+	assert.deepEqual(planState(workFrame(hand, 0))!.branches.map((one) => one.label), ["Pass while they hold three cards"], "Red holds seven");
+	assert.equal(hand.work[0]!.unarmed, undefined, "and is not hellbent, so the stop is armed");
+	assert.equal(JSON.stringify(workFrame(hand, 0).view.objects).includes("hidden-"), false, "nothing stands in for those cards in what the seat is shown");
 });

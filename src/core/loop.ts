@@ -263,14 +263,17 @@ function raiseStop(table: Table, decision: Decision, state: PlanState): boolean 
  * The option the plan settles without asking, if any. Silent at priority:
  * pass. Silent while declaring our own attackers: attack with nothing. The
  * first due step has exactly one fitting option and no branch applies: that
- * option. Blocks, resolution choices and trigger order are never defaulted.
+ * option, at priority or while declaring our own attackers. Blocks, discards,
+ * resolution choices and trigger order are never defaulted.
  */
 function settledBy(table: Table, decision: Decision, state: PlanState): string | undefined {
 	if (state.branches.length) return undefined;
 	const step = state.due.find((one) => one.candidates.length), silent = !step;
 	const listed = (id: string) => decision.options.some((option) => option.id === id);
+	const attacking = decision.situation === "turn-based" && table.cursor.steps[0] === "declare-attackers" && decision.seat === table.cursor.active;
 	if (silent && decision.situation === "priority" && listed("pass")) return "pass";
-	if (silent && decision.situation === "turn-based" && table.cursor.steps[0] === "declare-attackers" && decision.seat === table.cursor.active && listed("attack:done")) return "attack:done";
+	if (silent && attacking && listed("attack:done")) return "attack:done";
+	if (decision.situation !== "priority" && !attacking) return undefined;
 	return step?.candidates.length === 1 ? step.candidates[0]!.id : undefined;
 }
 

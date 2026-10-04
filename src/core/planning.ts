@@ -45,6 +45,8 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 		return { options: procedures.map((choice) => choice.option), procedures };
 	}
 	const objects = action.objects ? select(action.objects, frame) : null;
+	// A step that names only objects means playing them: it is not a discard, a resolution choice or a trigger that happens to name the same card.
+	if (!action.option && !action.prefix && frame.decision?.situation !== "priority") return { procedures: [], options: [] };
 	return { procedures: [], options: (frame.decision?.options ?? []).filter((listed) =>
 		(!action.option || listed.id === action.option) && (!action.prefix || listed.id.startsWith(action.prefix)) &&
 		(!objects || objects.some((object) => listed.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation)))) };

@@ -141,7 +141,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			sideboard: Object.fromEntries(Object.entries(deck.sideboard).sort(([a], [b]) => a.localeCompare(b))),
 		})) } : {}),
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
-		players: playing(table).map((one) => ({ id: one.id, life: one.life })),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
 		...(at.kind === "turn" ? { visit: table.cursor.visit } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
