@@ -183,10 +183,10 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 	const waiting: Trigger[] = [], spent: string[] = [];
 	const stamp = () => `trigger-${table.cursor.clock + 1}-${waiting.length}`;
 
-	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x">): boolean => {
+	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x">, once = false): boolean => {
 		const matched = live.filter((occurrence) => !!occurrence.lookBack === (scope.world !== after)).flatMap((occurrence) => fits(scope, event, occurrence) ?? []);
 		if (!matched.length) return false;
-		// Each occurrence is its own trigger (603.2c), unless the card says "one or more".
+		// Each occurrence is its own trigger (603.2c), unless the card says "one or more"; a once-only delayed trigger fires for the first alone (603.7b).
 		for (const group of event.batch ? [matched] : matched.map((one) => [one])) {
 			const made: Trigger = { id: stamp(), controller, source, basis, ...structuredClone(rest), event: eventOf(group) };
 			const eventScope = { ...scope, event: { ...(group[0]!.object ? { object: group[0]!.object } : {}), ...(made.event.player !== undefined ? { player: made.event.player } : {}),
@@ -194,6 +194,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			if (made.check && !holds(eventScope, made.check)) continue;
 			if (made.limit && triggeredThisTurn(table, source, basis, waiting)) continue;
 			waiting.push(made);
+			if (once) break;
 		}
 		return true;
 	};
@@ -212,7 +213,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			const scope: Scope = { world, controller: note.by, source: world.lastKnown(note.fixed.source)?.object ?? after.lastKnown(note.fixed.source)?.object,
 				targets: note.fixed.targets, bound: note.fixed.bound, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) };
 			const fired = raise(scope, note.by, note.fixed.source, `Delayed: ${note.effect.instructions.map(summary).join(" ")}`, note.event, {
-				effect: note.effect, bound: note.fixed.bound, targets: note.fixed.targets, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) });
+				effect: note.effect, bound: note.fixed.bound, targets: note.fixed.targets, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) }, note.once);
 			if (fired && note.once) spent.push(note.id);
 		}
 	}

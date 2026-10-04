@@ -388,3 +388,15 @@ test("a flash permission reaches a spell without saying it looks at the stack", 
 	main(table, 0, 1, "begin-combat");
 	assert.ok(nextDecision(table)!.options.some((option) => option.label.includes("Llanowar Elves")), "Llanowar Elves can be cast at the beginning of combat");
 });
+
+test("a once-only delayed trigger fires once though its event happens twice at the same time (603.7b)", () => {
+	const table = matchup("once");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", []);
+	// Not printed: "When a land you control next enters this turn, you gain 1 life."
+	commit(table, [{ do: "note", note: { kind: "delay", by: 0, until: "end-of-turn", event: { on: "enters", of: { types: ["land"], controller: "you" } },
+		effect: { instructions: [{ do: "life", who: "you", amount: 1 }] }, fixed: { source: { id: chocobo.id, incarnation: chocobo.incarnation }, targets: [], bound: {} }, once: true } }], "game-setup");
+	const forests = place(table, 0, "hand", "Forest", "Forest");
+	commit(table, forests.map((forest): Change => ({ do: "move", what: forest.id, to: "battlefield", reason: "resolve" })), "resolve");
+	assert.equal(table.waiting.length, 1, "two lands entered together, and it triggered once");
+	assert.equal(table.notes.some((note) => note.kind === "delay"), false, "and it is used up");
+});
