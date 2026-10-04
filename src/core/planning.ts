@@ -26,8 +26,10 @@ export type PlanState = {
 	/** Steps not yet taken and not due now, in plan order. */
 	waiting: { at: number; label: string }[];
 	branches: Fit[];
-	/** `askWhen` labels that hold now, and essential steps that should be taken here and cannot. */
+	/** `askWhen` labels that hold now, and an essential step that should be taken here and cannot. */
 	stops: string[];
+	/** An essential step due before every step that can be taken now: the table does not take a later step for the seat past it. */
+	unmet?: number;
 	/** Unarmed stops that are false now, and so arm. */
 	arming: string[];
 	held: { purpose: string; objects: SeenObject[] }[];
@@ -85,9 +87,12 @@ export function planState(frame: Frame): PlanState | null {
 	const at = frame.view.window;
 	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" &&
 		(step.when.step ? step.when.step === at.step : (at.step === "precombat-main" || at.step === "postcombat-main") && !(frame.view.objects ?? []).some((object) => object.zone === "stack"));
-	const blocked = due.filter((one) => plan.steps[one.at]!.essential && !one.candidates.length && belongs(plan.steps[one.at]!)).map((one) => `Step ${one.at + 1} cannot be taken now: ${one.label}`);
+	// Only the first essential step with nothing listed, and only before any step that can still be taken: a land step first may yet pay for it.
+	const next = due.find((one) => one.candidates.length);
+	const unmet = due.find((one) => plan.steps[one.at]!.essential && !one.candidates.length && (!next || one.at < next.at) && belongs(plan.steps[one.at]!));
+	const blocked = unmet ? [`Step ${unmet.at + 1} cannot be taken now: ${unmet.label}`] : [];
 	return {
-		revision, plan, due, waiting, branches, procedures,
+		revision, plan, due, waiting, branches, procedures, ...(unmet ? { unmet: unmet.at } : {}),
 		stops: [...(plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label), ...blocked],
 		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && ((stop.when && !matches(stop.when, frame)) || !condition(scope, stop.if))).map((stop) => stop.label),
 		held,

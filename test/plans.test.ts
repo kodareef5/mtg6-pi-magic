@@ -515,3 +515,20 @@ test("preparation asks for the next turn window by window, and a review may keep
 	assert.match(seen[1]!, /Since you prepared it: you drew Forest/);
 	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: prepared }]);
 });
+
+test("an essential step waits for the steps before it, and nothing is taken for the seat past it", () => {
+	const table = position();
+	main(table, 0, 3);
+	const passage = cardsIn(table, "battlefield", 0).find((one) => one.card === "Fabled Passage")!;
+	const window = { ...turn3, step: "precombat-main" as const };
+	const blocked = { label: "Cast the Passage", when: window, essential: true as const, action: { prefix: "cast:", objects: { refs: [{ id: passage.id, incarnation: passage.incarnation }] } } };
+	const land = { label: "Play a Forest", when: window, action: { prefix: "land:", objects: { zones: ["hand" as const], card: "Forest" } } };
+	// The land comes first, so it may yet pay: no stop, and the table plays it.
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [land, blocked] } }], "land-first");
+	let state = planState(workFrame(table, 0))!;
+	assert.deepEqual([state.stops, state.unmet], [[], undefined]);
+	// The essential step comes first: it is the stop, and the land is not taken past it.
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [blocked, land] } }], "blocked-first");
+	state = planState(workFrame(table, 0))!;
+	assert.deepEqual([state.stops, state.unmet], [["Step 1 cannot be taken now: Cast the Passage"], 0]);
+});

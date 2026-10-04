@@ -318,6 +318,8 @@ function settledBy(table: Table, decision: Decision, state: PlanState): string |
 	const step = state.due.find((one) => one.candidates.length), silent = !step;
 	const listed = (id: string) => decision.options.some((option) => option.id === id);
 	const attacking = decision.situation === "turn-based" && table.cursor.steps[0] === "declare-attackers" && decision.seat === table.cursor.active;
+	// An essential step comes first and cannot be taken: neither passing nor a later step is the table's to choose. The pilot sees why.
+	if (state.unmet !== undefined) return undefined;
 	if (silent && decision.situation === "priority" && listed("pass")) return "pass";
 	if (silent && attacking && listed("attack:done")) return "attack:done";
 	if (decision.situation !== "priority" && !attacking) return undefined;
