@@ -28,14 +28,14 @@ of that seat's decisions, in this order:
 
 1. **Strategy is wanted.** A request, or the seat's own turn has begun and it
    has drawn. Strategy writes the next plan.
-2. **A stop.** An `askWhen` holds, or the next step's own step window is open
-   with nothing that fits it and an empty stack. The table requests a new plan,
-   once per stop per turn, at most two requests a turn.
+2. **A stop.** An `askWhen` has become true. The table requests a new plan,
+   once per stop per turn, at most two requests a turn. A step that cannot be
+   taken now is passed over rather than a stop: many steps are "if able".
 3. **Forced.** One option, as always. A forced move that is a plan step is
    recorded as that step.
 4. **Settled.** No step or branch fits anything listed: at priority the table
    passes; declaring our own attackers it attacks with nothing. The first due step
-   has exactly one fitting option and no branch applies: the table takes it.
+   with a fitting option has exactly one and no branch applies: the table takes it.
    Both are recorded as `delegated`.
 5. **Asked.** Otherwise the pilot is asked. Its options carry the plan's marks:
    "Plan step", "Plan branch", "Uses X, held: why". Nothing is removed. It may

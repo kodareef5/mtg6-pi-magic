@@ -110,7 +110,7 @@ export function focus(
 	const state = planState(frame);
 	const plan = state && {
 		objective: state.plan.objective, guidance: state.plan.guidance,
-		...(state.due[0] ? { due: state.due[0].label } : {}),
+		...(state.due.find((one) => one.candidates.length) ? { due: state.due.find((one) => one.candidates.length)!.label } : {}),
 		next: state.waiting.slice(0, 2).map((one) => one.label),
 		branches: state.branches.map((one) => one.label),
 		held: state.held.map((hold) => `${hold.objects.map((object) => object.card ?? object.id).join(", ")}: ${hold.purpose}`),

@@ -236,9 +236,10 @@ const escalations = (table: Table, seat: SeatId) => table.workLog.filter((entry)
 	entry.clock > (table.cursor.began[table.cursor.active] ?? 0) && entry.tools?.some((tool) => tool.do === "plan.request")).length;
 
 /**
- * A stop the table raises for the seat: an `askWhen` that holds, or the next
- * step unavailable when a pass could end its window. Each is raised once a
- * turn, within the escalation budget. True when it raised one.
+ * A stop the table raises for the seat: an `askWhen` that has become true.
+ * Each is raised once a turn, within the escalation budget. True when it raised
+ * one. A step that cannot be taken now is passed over, not a stop: many steps
+ * are "if able", and the plan's own stops say when the line is broken.
  */
 function raiseStop(table: Table, decision: Decision, state: PlanState): boolean {
 	// A stop that held when its plan was accepted arms the first time it is false.
@@ -248,12 +249,7 @@ function raiseStop(table: Table, decision: Decision, state: PlanState): boolean 
 		const { unarmed: _, ...rest } = work;
 		recordWork(table, decision.seat, { ...rest, ...(unarmed.length ? { unarmed } : {}) }, `arm-${decision.seat}-${table.cursor.clock}`, `armed: ${state.arming.join("; ")}`);
 	}
-	// Only a step whose window names this step can be missed here; a wider window stays open.
-	const step = state.due[0], named = step && state.plan.steps[step.at]!.when.step === table.cursor.steps[0];
-	const empty = ![...table.things.values()].some((object) => object.zone === "stack");
-	const unavailable = named && !step.candidates.length && decision.situation === "priority" && empty
-		? [`Step ${step.at + 1} is unavailable: no listed option fits "${step.label}".`] : [];
-	for (const reason of [...state.stops.map((label) => `Stop: ${label}`), ...unavailable]) {
+	for (const reason of state.stops.map((label) => `Stop: ${label}`)) {
 		if (escalations(table, decision.seat) >= ESCALATIONS) return false;
 		const actionId = `stop-${decision.seat}-${table.cursor.turn}-${reason}`;
 		if (table.workLog.some((entry) => entry.seat === decision.seat && entry.actionId === actionId)) continue;
@@ -271,7 +267,7 @@ function raiseStop(table: Table, decision: Decision, state: PlanState): boolean 
  */
 function settledBy(table: Table, decision: Decision, state: PlanState): string | undefined {
 	if (state.branches.length) return undefined;
-	const step = state.due[0], silent = !state.due.some((one) => one.candidates.length);
+	const step = state.due.find((one) => one.candidates.length), silent = !step;
 	const listed = (id: string) => decision.options.some((option) => option.id === id);
 	if (silent && decision.situation === "priority" && listed("pass")) return "pass";
 	if (silent && decision.situation === "turn-based" && table.cursor.steps[0] === "declare-attackers" && decision.seat === table.cursor.active && listed("attack:done")) return "attack:done";

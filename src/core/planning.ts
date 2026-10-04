@@ -21,7 +21,7 @@ export type PlanState = {
 	/** The equipment revision that accepted this plan. */
 	revision: number;
 	plan: Plan;
-	/** Steps due now, in plan order: their window is open and their `if` holds. */
+	/** Steps due now, in plan order: their window is open and their `if` holds. The next is the first with a fitting option; one with none is passed over. */
 	due: Fit[];
 	/** Steps not yet taken and not due now, in plan order. */
 	waiting: { at: number; label: string }[];
@@ -98,7 +98,8 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
-		if (step) marks.push(`Plan step ${step.at + 1}${step === state.due[0] ? "" : ", out of order"}: ${step.label}.`);
+		const next = state.due.find((one) => one.candidates.length);
+		if (step) marks.push(`Plan step ${step.at + 1}${step === next ? "" : ", out of order"}: ${step.label}.`);
 		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.`);
 		for (const hold of state.held) {
 			const spent = hold.objects.filter((object) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
