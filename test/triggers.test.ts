@@ -439,3 +439,17 @@ test("one Treasure cannot both be sacrificed as a cost and sacrificed for its ow
 	twice.funding = [{ source: { id: treasure.id, incarnation: treasure.incarnation }, colors: ["R"], claim: "Treasure", sacrifice: true }];
 	assert.throws(() => activationChanges(table, twice), /two parts of a cost/, "an announcement that tries it is refused");
 });
+
+test("a once-each-turn trigger removed for want of a target still used up its turn", () => {
+	// Not printed: "Whenever a land you control enters, this deals 1 damage to target creature an opponent controls. This ability triggers only once each turn."
+	const table = matchup("once-each-turn");
+	establish(table, 0, "Sazh's Chocobo", [{ basis: "Whenever a land you control enters, this deals 1 damage to target creature an opponent controls. This ability triggers only once each turn.",
+		kind: "watch", limit: "once-per-turn", event: { on: "enters", of: { types: ["land"], controller: "you" } },
+		effect: { targets: [{ object: { types: ["creature"], controller: "opponent" } }], instructions: [{ do: "damage", to: "target:0", amount: 1 }] } }]);
+	main(table, 0);
+	const [first, second] = place(table, 0, "hand", "Forest", "Forest");
+	commit(table, [{ do: "move", what: first!.id, to: "battlefield", reason: "resolve" }], "resolve");
+	trigger(table, (label) => label.includes("603.3d"));
+	commit(table, [{ do: "move", what: second!.id, to: "battlefield", reason: "resolve" }], "resolve");
+	assert.equal(table.waiting.length, 0, "it triggered this turn already, though it never reached the stack");
+});

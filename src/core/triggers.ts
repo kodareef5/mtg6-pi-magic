@@ -150,12 +150,17 @@ function eventOf(occurrences: Occurrence[]): Trigger["event"] {
 
 /** Whether this ability already triggered this turn, for "only once each turn". */
 function triggeredThisTurn(table: Table, source: ObjectRef, basis: string, also: Trigger[]): boolean {
-	const same = (trigger: Pick<Trigger, "source" | "basis">) => trigger.source.id === source.id && trigger.source.incarnation === source.incarnation && trigger.basis === basis;
+	// What triggered this turn: still waiting, or put on the stack, or removed from it for want of a target (603.3d).
+	const same = (trigger: Pick<Trigger, "source" | "basis" | "turn">) => trigger.source.id === source.id && trigger.source.incarnation === source.incarnation &&
+		trigger.basis === basis && (trigger.turn ?? table.cursor.turn) === table.cursor.turn;
 	if ([...table.waiting, ...also].some(same)) return true;
 	const began = table.cursor.began[table.cursor.active] ?? 0;
 	return table.log.some((receipt) => (receipt.clock ?? 0) > began && receipt.changes.some((change) => change.do === "trigger" && change.action === "wait" ? same(change.trigger) :
-		change.do === "trigger" && change.action === "put" && !!change.ability && same({ source: change.ability.source, basis: change.ability.basis })));
+		change.do === "trigger" && change.action === "put" && (change.was ? same(change.was) : !!change.ability && same({ source: change.ability.source, basis: change.ability.basis }))));
 }
+
+/** What a put change keeps of the trigger, so a once-each-turn count can read it back. */
+const triggered = (trigger: Trigger): Pick<Trigger, "source" | "basis" | "turn"> => ({ source: trigger.source, basis: trigger.basis, ...(trigger.turn !== undefined ? { turn: trigger.turn } : {}) });
 
 /** A watcher: a permanent's watch or suppression, read on one side of the group. */
 type Watch = { object: Seen; controller: SeatId; registration: Registration; world: World };
@@ -188,7 +193,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 		if (!matched.length) return false;
 		// Each occurrence is its own trigger (603.2c), unless the card says "one or more"; a once-only delayed trigger fires for the first alone (603.7b).
 		for (const group of event.batch ? [matched] : matched.map((one) => [one])) {
-			const made: Trigger = { id: stamp(), controller, source, basis, ...structuredClone(rest), event: eventOf(group) };
+			const made: Trigger = { id: stamp(), controller, source, basis, ...structuredClone(rest), event: eventOf(group), turn: table.cursor.turn };
 			const eventScope = { ...scope, event: { ...(group[0]!.object ? { object: group[0]!.object } : {}), ...(made.event.player !== undefined ? { player: made.event.player } : {}),
 				...(group[0]!.source ? { source: group[0]!.source } : {}) } };
 			if (made.check && !holds(eventScope, made.check)) continue;
@@ -251,7 +256,7 @@ export function triggerWindow(table: Table): Pending | null {
 			...(trigger.bound ? { bound: trigger.bound } : {}), ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 		const aims = slots.length ? targetings(slots, scope) : [trigger.targets ?? []];
 		if (!aims.length) return [{ option: { id: `trigger:${trigger.id}:removed`, label: `${name}: ${trigger.basis}`, shows: "No legal targets: it is removed from the stack (603.3d)." },
-			changes: [{ do: "trigger", action: "put", trigger: trigger.id }], reason: "resolve" }];
+			changes: [{ do: "trigger", action: "put", trigger: trigger.id, was: triggered(trigger) }], reason: "resolve" }];
 		return aims.map((targets): Move => {
 			const id = `ability-${table.cursor.clock + 1}`;
 			const ability: Activation = { source: trigger.source, controller: trigger.controller, claim: `${name}: ${trigger.basis}`, basis: trigger.basis, timing: "stack",
@@ -268,7 +273,7 @@ export function triggerWindow(table: Table): Pending | null {
 				label: `Put on the stack: ${name}: ${trigger.basis}`,
 				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...marks, ...trigger.effect.instructions.map(summary)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])] },
-				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability }], reason: "resolve" };
+				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
 		});
 	});
 	return { situation: "trigger-order", seat: seat.id, question: `Put your triggered abilities on the stack, one at a time; the last one put on resolves first (603.3b).`, moves };

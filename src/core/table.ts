@@ -134,6 +134,8 @@ export type Trigger = {
 	event: { object?: ObjectRef; objects?: ObjectRef[]; player?: SeatId; source?: ObjectRef };
 	/** A delayed or reflexive trigger's refs, fixed when it was created (603.7c). */
 	bound?: Record<string, Bound>;
+	/** The turn it triggered in, which "only once each turn" counts by. */
+	turn?: number;
 	/** Triggered while triggers were being put on the stack: it waits for that round to finish (603.3b). Absent is round 0. */
 	round?: number;
 	targets?: Chosen[][];

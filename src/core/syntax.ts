@@ -95,7 +95,7 @@ export type Change =
 	 * A waiting trigger goes on the stack with its targets as `id`, or, with no
 	 * legal targets, is removed (603.3d).
 	 */
-	| { do: "trigger"; action: "put"; trigger: string; id?: string; ability?: Activation }
+	| { do: "trigger"; action: "put"; trigger: string; id?: string; ability?: Activation; was?: Pick<Trigger, "source" | "basis" | "turn"> }
 	| { do: "shuffle"; whose: SeatId }
 	/** Counters of one kind put on or, negative, removed. */
 	| { do: "counters"; what: string; kind: string; amount: number }
