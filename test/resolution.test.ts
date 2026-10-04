@@ -12,7 +12,7 @@ import { standard } from "../src/core/format.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { procedureOptions, activate, type ProcedureOption } from "../src/core/procedures.ts";
 import { characteristics } from "../src/core/characteristics.ts";
-import { workFrame } from "../src/core/work-tools.ts";
+import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { project } from "../src/core/view.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import type { Procedure } from "../src/core/language.ts";
@@ -121,6 +121,10 @@ test("costs are paid as announced: life, sacrifice, discard, tapping creatures, 
 	const discards = offered(table, authored("Discard to activate", { discard: 1 })).map((option) => option.option.shows!.match(/Discard ([^.]*)\. /)![1]);
 	assert.ok(discards.includes("Sapling Nursery") && discards.includes("Sazh's Chocobo"));
 
+	// One object leaves to pay once; only the source may also be tapped.
+	assert.equal(offered(table, authored("Twice", { sacrifice: "this", exile: "this" })).length, 0, "sacrificing and exiling the same land is not a payment");
+	assert.ok(offered(table, authored("Tap and sacrifice", { tap: true, sacrifice: "this" })).length > 0);
+
 	const passage = cardsIn(table, "battlefield", 0).find((one) => one.card === "Elven Passage")!;
 	announce(table, { ...authored("Crack Elven Passage", { tap: true, life: 1, sacrifice: "this" }, ["battlefield"], "Elven Passage"), basis: "{T}, Pay 1 life, Sacrifice this land" });
 	assert.equal(table.seats[0]!.life, 19);
@@ -130,6 +134,25 @@ test("costs are paid as announced: life, sacrifice, discard, tapping creatures, 
 	main(table, 1, 2);
 	const x = offered(table, authored("Pay X", { mana: "{X}" }, ["battlefield"], "Mountain")).map((option) => option.activation.x);
 	assert.deepEqual([...new Set(x)], [0, 1, 2, 3], "three Mountains pay up to three");
+	const reduced = offered(table, authored("Pay X, reduced", { mana: "{X}{R}", reduce: 2 }, ["battlefield"], "Mountain")).map((option) => option.activation.x);
+	assert.deepEqual([...new Set(reduced)], [0, 1, 2, 3, 4], "a reduction of two lets three Mountains pay {R} and X up to four");
+});
+
+test("mana keeps its stated count and restriction, and restricted mana pays only for what it allows", () => {
+	const table = deal();
+	place(table, 1, "battlefield", "Mountain", "Mountain");
+	place(table, 1, "hand", "Shock", "Hired Claw");
+	main(table, 1, 2);
+	const creatureOnly = { types: ["creature" as const], zones: ["stack" as const] };
+	const ritual: Procedure = { source: { zones: ["battlefield"], controller: "self", card: "Mountain" }, claim: "Restricted mana", basis: "An authored test, not a card ruling.",
+		timing: "mana", cost: { tap: true }, instructions: [{ do: "mana", who: "you", colors: ["R"], times: 3, spendOnly: creatureOnly }] };
+	announce(table, ritual);
+	assert.deepEqual(table.seats[1]!.pool.map((mana) => [mana.color, mana.spendOnly]), [["R", creatureOnly], ["R", creatureOnly], ["R", creatureOnly]], "three, each restricted");
+	const casts = nextDecision(table)!.options.filter((option) => option.id.startsWith("cast:"));
+	assert.ok(casts.some((option) => option.label.includes("Hired Claw") && /restricted/.test(option.shows!)), "a creature spell can spend it");
+	const shock: Procedure = { source: { zones: ["hand"], controller: "self", card: "Shock" }, claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", timing: "spell",
+		targets: [{ object: { types: ["creature", "planeswalker", "battle"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] };
+	assert.ok(offered(table, shock).every((option) => !/restricted/.test(option.option.shows!)), "an instant cannot");
 });
 
 test("targets that partly fail, labels, fight, tokens, each player, and counter unless paid", () => {
@@ -200,4 +223,49 @@ test("targets that partly fail, labels, fight, tokens, each player, and counter 
 	assert.deepEqual(tax.options.map((option) => option.label), ["Pay 2 life. ", "Do not pay; it is countered"]);
 	apply(table, tax.options[1]!.id, "model", "chosen");
 	assert.equal(table.things.get(cub.id)!.zone, "graveyard");
+});
+
+test("a target can depend on an earlier one, a card enters with its new controller's package, a reveal is public, and choosing zero picks nothing", () => {
+	const table = deal();
+	place(table, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
+	const [claw] = place(table, 1, "battlefield", "Hired Claw");
+	commit(table, [{ do: "token", id: "equipment", controller: 1, spec: { name: "Equipment", types: ["artifact"], subtypes: ["Equipment"], colors: [] } },
+		{ do: "attach", what: "equipment", to: { id: claw!.id, incarnation: claw!.incarnation } }], "game-setup");
+	place(table, 0, "hand", "Snakeskin Veil");
+	main(table, 0);
+	const ability = (claim: string, instructions: Procedure["instructions"], targets: Procedure["targets"] = []): Procedure =>
+		({ source: { zones: ["battlefield"], controller: "self", card: "Forest" }, claim, basis: "An authored test, not a card ruling.", timing: "stack", cost: { tap: true }, targets, instructions });
+
+	// Fiery Annihilation's second target is the Equipment attached to the first.
+	const annihilate = ability("Annihilate", [{ do: "damage", to: "target:0", amount: 5 }, { do: "move", what: "target:1", to: "exile", reason: "exile" }],
+		[{ object: { types: ["creature"], controller: "opponent" } }, { object: { subtypes: ["Equipment"], attachedTo: "target:0" }, upTo: true }]);
+	const sets = offered(table, annihilate).map((option) => option.activation.targets.map((slot) => slot.map((one) => "id" in one ? one.id : one.player)));
+	assert.deepEqual(sets, [[[claw!.id], []], [[claw!.id], ["equipment"]]], "the Equipment is offered with the creature it is attached to, or not at all");
+
+	// A card returned under this seat's control registers this seat's package.
+	commit(table, [{ do: "move", what: claw!.id, to: "graveyard", reason: "destroy" }], "destroy");
+	finish(table);
+	assert.equal(table.things.get("equipment")!.attached, undefined, "the Equipment fell off as a state-based action (704.5n)");
+	editWork(table, 0, [{ do: "package.put", package: { card: "Hired Claw", registers: [{ basis: "Green's reading", kind: "continuous", affects: { is: "this" }, change: { words: ["haste"] } }] } }], "package");
+	announce(table, ability("Reanimate", [{ do: "move", what: "target:0", to: "battlefield", controller: "you", reason: "resolve" }], [{ object: { zones: ["graveyard"], types: ["creature"] } }]));
+	passBoth(table);
+	finish(table);
+	const returned = table.things.get(claw!.id)!;
+	assert.equal(returned.controller, 0);
+	assert.deepEqual(returned.registrations?.map((one) => one.basis), ["Green's reading"]);
+
+	// A revealed card is named to every seat.
+	const veil = cardsIn(table, "hand", 0).find((one) => one.card === "Snakeskin Veil")!;
+	announce(table, ability("Show it", [{ do: "choose", who: "you", from: { zones: ["hand"], owner: "you", name: "Snakeskin Veil" }, count: 1, reveal: true, as: "shown" }]));
+	passBoth(table);
+	const from = table.log.length;
+	step(table, (label) => label === "Choose Snakeskin Veil (hand)");
+	assert.ok(project(table, 1, from).since.some((line) => line.includes("revealed Snakeskin Veil from hand")), "the other seat is told");
+	assert.equal(project(table, 1).objects!.some((one) => one.id === veil.id), false, "and the card stays in a hand it cannot see");
+	finish(table);
+
+	// A count of zero is already met.
+	announce(table, ability("Choose none", [{ do: "choose", who: "you", from: { zones: ["hand"], owner: "you" }, count: 0, as: "none" }]));
+	passBoth(table);
+	assert.deepEqual(nextDecision(table)!.options.map((option) => option.label), ["Choose nothing"]);
 });

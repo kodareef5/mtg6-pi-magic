@@ -14,7 +14,8 @@ export function attach(table: Table, changes: Change[], frozen?: Record<ObjectId
 	for (const change of changes) {
 		if (change.do !== "move" || change.to !== "battlefield") continue;
 		const object = thing(table, change.what);
-		const registers = frozen ? frozen[object.id] : object.card ? pack(table, object.controller, object.card) : undefined;
+		// It enters under the move's controller, or its owner's: that seat's package applies.
+		const registers = frozen ? frozen[object.id] : object.card ? pack(table, change.controller ?? object.owner, object.card) : undefined;
 		if (!registers) continue;
 		change.registers = structuredClone(registers);
 		used[object.id] = structuredClone(registers);

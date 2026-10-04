@@ -113,7 +113,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				return !seen.has(key) && !!seen.add(key);
 			});
 			const finish = (more: ObjectRef[]): Partial<Choice> => bind(instruction, { objects: [...picked, ...more], players: [] });
-			const choices: Choice[] = pool.map((object) => {
+			// Once the count is met there is nothing left to pick, even when it is zero.
+			const choices: Choice[] = picked.length >= count ? [] : pool.map((object) => {
 				const last = picked.length + 1 >= count;
 				return { id: object.id, label: `Choose ${name(object)} (${object.zone})`, changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
 					...(last ? finish([ref(object)]) : { pick: ref(object) }) };
@@ -147,7 +148,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "mana": {
 			const times = instruction.times === undefined ? 1 : amount(scope, instruction.times);
 			const who = players(scope, instruction.who);
-			const add = (colors: Mana["color"][]) => who.map((one) => ({ do: "add-mana" as const, who: one, colors: Array.from({ length: times }, () => colors).flat() }));
+			const add = (colors: Mana["color"][]) => who.map((one) => ({ do: "add-mana" as const, who: one, colors: Array.from({ length: times }, () => colors).flat(),
+				...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}) }));
 			if (instruction.colors) return one(`Add ${instruction.colors.join("")}${times > 1 ? ` ${times} times` : ""}`, add(instruction.colors as Mana["color"][]));
 			return { actor: controller, question: `${claim}: choose a color.`, choices: COLORS.map((color) => ({ id: color, label: `Add ${color.repeat(instruction.any ?? 1)}`, changes: add(Array(instruction.any ?? 1).fill(color)) })) };
 		}

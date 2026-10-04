@@ -201,11 +201,12 @@ function stateBased(table: Table): Pending | null {
 	}
 	// 704.5d.
 	for (const object of table.things.values()) if (object.token && object.zone !== "battlefield") changes.push({ do: "cease", what: object.id });
-	// 704.5j: the legend rule, one name at a time.
+	// 704.5j: the legend rule, one name at a time. It is found with the rest of this
+	// check (704.3), so a copy dying to damage still counts, and keeping it loses both.
 	const legends = new Map<string, Thing[]>();
 	for (const object of field) {
 		const traits = characteristics(table, object);
-		if (gone.has(object.id) || !traits?.supertypes.includes("legendary")) continue;
+		if (!traits?.supertypes.includes("legendary")) continue;
 		const key = `${object.controller}|${traits.name}`;
 		legends.set(key, [...(legends.get(key) ?? []), object]);
 	}
@@ -222,7 +223,8 @@ function stateBased(table: Table): Pending | null {
 		question: crowded ? `Choose which ${characteristics(table, crowded[0]!)!.name} to keep; the rest go to the graveyard (704.5j).` : "Apply state-based actions together.",
 		moves: crowded ? crowded.map((keep) => ({
 			option: { id: `keep:${keep.id}`, label: `Keep ${keep.card ?? keep.token?.name} (${keep.id})`, objects: [{ id: keep.id, incarnation: keep.incarnation }] },
-			changes: [...changes, ...crowded.filter((other) => other !== keep).map((other) => ({ do: "move" as const, what: other.id, to: "graveyard" as const, reason: "state-based-action" as const }))],
+			changes: [...changes, ...crowded.filter((other) => other !== keep && !gone.has(other.id))
+				.map((other) => ({ do: "move" as const, what: other.id, to: "graveyard" as const, reason: "state-based-action" as const }))],
 			reason: "state-based-action" as const,
 		})) : [group],
 	};

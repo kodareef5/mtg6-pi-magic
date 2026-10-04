@@ -27,7 +27,7 @@ import type { Workspace, WorkEntry } from "./work.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import type { Bound, Chosen } from "./selectors.ts";
 import type { Traits } from "./characteristics.ts";
-import type { Effect, GameEvent, Modification, Registration, TokenSpec } from "./language.ts";
+import type { Effect, GameEvent, Modification, Registration, Selector, TokenSpec } from "./language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -83,8 +83,8 @@ export type Thing = {
 export type Mana = {
 	id: string;
 	color: "W" | "U" | "B" | "R" | "G" | "C";
-	/** Cavern of Souls: "spend only on a creature spell of the chosen type". */
-	spendOnly?: string;
+	/** "Spend this mana only to cast a creature spell": what it may pay for, as a selector. */
+	spendOnly?: Selector;
 	persists?: boolean;
 };
 

@@ -9,7 +9,7 @@
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
 import { select as query } from "./agenda.ts";
-import { fundings, sameness, sick, type Price } from "./funding.ts";
+import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
@@ -81,13 +81,17 @@ function candidates(slot: Target, scope: Scope): Chosen[] {
 }
 
 /** The extra costs a procedure states, as each way they can be paid. */
-function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): { paid: Omit<Paid, "generic" | "colors">; uses: string[]; shows: string }[] {
+type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string };
+function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
 	const cost = procedure.cost ?? {};
-	let ways: { paid: Omit<Paid, "generic" | "colors">; uses: string[]; shows: string }[] = [{ paid: {}, uses: [], shows: "" }];
-	const add = (options: { paid: Omit<Paid, "generic" | "colors">; uses: string[]; shows: string }[]) => {
-		// One object pays one part, except the source, which can be tapped and sacrificed together.
-		ways = ways.flatMap((way) => options.filter((option) => !option.uses.some((id) => id !== source.id && way.uses.includes(id)))
-			.map((option) => ({ paid: { ...way.paid, ...option.paid }, uses: [...way.uses, ...option.uses], shows: `${way.shows}${option.shows}` })));
+	let ways: Way[] = [{ paid: {}, uses: [], consumes: [], shows: "" }];
+	// One object pays one part. The source alone may be tapped and also leave once:
+	// "{T}, Sacrifice this" is one object paying two parts; sacrificing and exiling it is not.
+	const add = (options: Way[]) => {
+		ways = ways.flatMap((way) => options.filter((option) => !(option.consumes ?? []).some((id) => way.consumes!.includes(id)) &&
+			!option.uses.some((id) => id !== source.id && way.uses.includes(id)))
+			.map((option) => ({ paid: { ...way.paid, ...option.paid }, uses: [...new Set([...way.uses, ...option.uses])], consumes: [...way.consumes!, ...(option.consumes ?? [])],
+				shows: `${way.shows}${option.shows}` })));
 	};
 	if (cost.tap === true) {
 		if (source.zone !== "battlefield" || source.tapped || sick(frame, source)) return [];
@@ -106,14 +110,14 @@ function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: F
 		const chosen = typeof sacrifice === "object" && "choose" in sacrifice ? sacrifice : undefined;
 		const pool = chosen ? query({ zones: ["battlefield"], controller: "self" }, frame).filter((one) => matches(scope, one, chosen.choose))
 			: objects(scope, sacrifice as Exclude<typeof sacrifice, { choose: unknown }>).filter((one) => one.zone === "battlefield" && one.controller === frame.seat);
-		add(subsets(pool, chosen?.count ?? 1).map((set) => ({ paid: { sacrificed: set.map(ref) }, uses: set.map((one) => one.id), shows: `Sacrifice ${set.map(name).join(", ")}. ` })));
+		add(subsets(pool, chosen?.count ?? 1).map((set) => ({ paid: { sacrificed: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Sacrifice ${set.map(name).join(", ")}. ` })));
 	}
-	if (cost.exile) add(objects(scope, cost.exile).map((one) => ({ paid: { exiled: [ref(one)] }, uses: [one.id], shows: `Exile ${name(one)}. ` })));
+	if (cost.exile) add(objects(scope, cost.exile).map((one) => ({ paid: { exiled: [ref(one)] }, uses: [one.id], consumes: [one.id], shows: `Exile ${name(one)}. ` })));
 	if (cost.life !== undefined) add((frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0) >= cost.life ? [{ paid: { life: cost.life }, uses: [], shows: `Pay ${cost.life} life. ` }] : []);
 	if (cost.discard !== undefined) {
 		const hand = query({ zones: ["hand"], controller: "self" }, frame).filter((one) => one.id !== (procedure.timing === "spell" ? source.id : ""));
 		const sets = typeof cost.discard === "number" ? subsets(hand, cost.discard) : [objects(scope, cost.discard).filter((one) => one.zone === "hand")];
-		add(sets.filter((set) => set.length).map((set) => ({ paid: { discarded: set.map(ref) }, uses: set.map((one) => one.id), shows: `Discard ${set.map(name).join(", ")}. ` })));
+		add(sets.filter((set) => set.length).map((set) => ({ paid: { discarded: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Discard ${set.map(name).join(", ")}. ` })));
 	}
 	if (cost.counters) add((source.counters[cost.counters.kind] ?? 0) >= cost.counters.count ? [{ paid: { counters: cost.counters }, uses: [], shows: `Remove ${cost.counters.count} ${cost.counters.kind}. ` }] : []);
 	return ways;
@@ -144,16 +148,19 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		const mana = stated === undefined || stated === "" ? { generic: 0, colors: [], x: 0 } : symbols(stated);
 		if (!mana) continue;
 		const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
-		const available = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).length +
-			(frame.view.pools?.find((pool) => pool.seat === frame.seat)?.mana.length ?? 0);
-		const xs = mana.x ? Array.from({ length: Math.max(0, available - mana.generic - mana.colors.length) + 1 }, (_, at) => at) : [0];
-		const slots = procedure.targets ?? [];
-		const choices = slots.map((slot) => { const pool = candidates(slot, scope); return subsets(pool, slot.count ?? 1, slot.upTo ? 0 : slot.count ?? 1); });
-		const targetings = choices.reduce<Chosen[][][]>((sets, options) => sets.flatMap((set) => options.map((option) => [...set, option])), [[]]);
+		// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
+		const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce - mana.colors.length) + 1 }, (_, at) => at) : [0];
+		// Each slot is chosen with the earlier slots in scope: "Equipment attached to that creature".
+		const targetings = (procedure.targets ?? []).reduce<Chosen[][][]>((sets, slot) => sets.flatMap((set) => {
+			const pool = candidates(slot, { ...scope, targets: set });
+			return subsets(pool, slot.count ?? 1, slot.upTo ? 0 : slot.count ?? 1).map((option) => [...set, option]);
+		}), [[]]);
+		// Mana pays for the spell as it will be on the stack, or for the ability.
+		const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const } : source;
 		for (const x of xs) {
 			const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
 			for (const extra of extras(procedure, scope, source, frame)) {
-				for (const { funding, shows: paying } of fundings(frame, price, new Set(extra.uses))) {
+				for (const { funding, shows: paying } of fundings(frame, price, new Set(extra.uses), spending)) {
 					for (const targets of targetings) {
 						const aimed = targets.flat();
 						const marks = aimed.flatMap((chosen) => {
@@ -178,7 +185,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 								...(procedure.speed ? { speed: procedure.speed } : {}),
 								cost: { generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) }, paid: funding.paid,
 								...(funding.taps.length ? { funding: structuredClone(funding.taps) } : {}),
-								targets, slots: structuredClone(slots), instructions: structuredClone(procedure.instructions),
+								targets, slots: structuredClone(procedure.targets ?? []), instructions: structuredClone(procedure.instructions),
 								...(procedure.words ? { words: [...procedure.words] } : {}), ...(mana.x ? { x } : {}) },
 						});
 					}

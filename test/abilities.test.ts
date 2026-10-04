@@ -113,7 +113,7 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 	assert.deepEqual(table, committed);
 	const payments = (mana: Mana[], cost: { generic: number; colors: Mana["color"][] }) =>
 		fundings({ seat: 0, version: 0, view: { window: { kind: "turn" }, table: [], yours: [], since: [], objects: [], pools: [{ seat: 0, mana }] } } as never, cost);
-	assert.deepEqual(payments([{ id: "a", color: "U", spendOnly: "creatures" }], { generic: 1, colors: [] }), []);
+	assert.deepEqual(payments([{ id: "a", color: "U", spendOnly: { types: ["creature"] } }], { generic: 1, colors: [] }), [], "restricted mana pays for nothing unnamed");
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U" }], { generic: 1, colors: [] }).length, 1, "identical unrestricted units do not multiply a menu");
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", persists: true }], { generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
 

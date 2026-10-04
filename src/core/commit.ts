@@ -207,7 +207,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				thing(table, change.what).tapped = false;
 				break;
 			case "add-mana":
-				seat(table, change.who).pool.push(...change.colors.map((color, unit) => ({ id: `mana-${table.cursor.clock + 1}-${index}-${unit}`, color })));
+				seat(table, change.who).pool.push(...change.colors.map((color, unit) => ({ id: `mana-${table.cursor.clock + 1}-${index}-${unit}`, color,
+					...(change.spendOnly ? { spendOnly: structuredClone(change.spendOnly) } : {}) })));
 				break;
 			case "spend-mana":
 				seat(table, change.who).pool = seat(table, change.who).pool.filter((mana) => !change.ids.includes(mana.id));

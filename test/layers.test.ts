@@ -102,4 +102,13 @@ test("state-based actions read characteristics, and the legend rule asks which t
 	assert.equal(table.things.get(hydra.id)!.zone, "graveyard", "a 0/0 dies in the same group");
 	assert.equal(table.things.get(elves.id)!.zone, "battlefield", "indestructible ignores lethal damage");
 	assert.deepEqual(cardsIn(table, "battlefield").filter((one) => one.card === "Smaug the Magnificent").map((one) => one.id), [smaug[1]!.id]);
+
+	// The legend rule is found with the rest of the check (704.3): a copy dying to damage
+	// is still a choice, and keeping it loses both.
+	const zhao = [enter(table, "Zhao, the Moon Slayer"), enter(table, "Zhao, the Moon Slayer", [], 1)];
+	commit(table, [{ do: "damage", source: hydra.id, target: { id: zhao[0]!.id, incarnation: zhao[0]!.incarnation }, amount: 5 }], "resolve");
+	assert.deepEqual(nextDecision(table)!.options.map((option) => option.id), zhao.map((one) => `keep:${one.id}`));
+	apply(table, `keep:${zhao[0]!.id}`, "model", "chosen");
+	assert.deepEqual(zhao.map((one) => table.things.get(one.id)!.zone), ["graveyard", "graveyard"]);
+	assert.equal(table.log.at(-1)!.changes.filter((change) => change.do === "move" && change.what === zhao[0]!.id).length, 1, "the dying one moves once");
 });

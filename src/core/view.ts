@@ -76,7 +76,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			lines.push(`  ${opening?.taken[s.id] ?? 0} mulligans; ` +
 				(opening?.kept.includes(s.id) ? "kept" : opening?.declared[s.id] ?? "has not declared"));
 		}
-		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${mana.spendOnly})` : ""}${mana.persists ? " (persists)" : ""}`).join(", ")}`);
+		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""}${mana.persists ? " (persists)" : ""}`).join(", ")}`);
 	}
 	for (const permanent of cardsIn(table, "battlefield")) {
 		const marks = [
@@ -105,7 +105,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		);
 		const pool = seat(table, viewer).pool;
 		for (const mana of pool) {
-			yours.push(`Mana: ${mana.color}${mana.spendOnly ? ` (only on ${mana.spendOnly})` : ""}`);
+			yours.push(`Mana: ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""}`);
 		}
 		const owed = table.opening?.owed[viewer] ?? 0;
 		if (owed) yours.push(`${owed} card${owed === 1 ? "" : "s"} still owed to the bottom of your library`);
@@ -194,6 +194,12 @@ export function describe(table: Table, receipt: Receipt): string {
 			case "mark-player":
 				parts.push(`${seat(table, change.who).name}: ${change.key} +${change.add}`);
 				break;
+			case "reveal": {
+				// Revealing is the one motion that names a hidden card to everyone.
+				const shown = receipt.before[change.what];
+				if (shown) parts.push(`${seat(table, shown.owner).name} revealed ${shown.card ?? shown.token?.name ?? "a card"} from ${shown.zone}`);
+				break;
+			}
 			case "counters":
 				parts.push(`${change.amount < 0 ? "removed" : "put"} ${Math.abs(change.amount)} ${change.kind} ${change.amount < 0 ? "from" : "on"} ${publicName(receipt.before[change.what])}`);
 				break;

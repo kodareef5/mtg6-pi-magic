@@ -5,7 +5,7 @@
 import type { ObjectRef, SeatId } from "./types.ts";
 import type { Activation, Combat, Mana, Note, Resolution } from "./table.ts";
 import type { Bound } from "./selectors.ts";
-import type { Registration, TokenSpec } from "./language.ts";
+import type { Registration, Selector, TokenSpec } from "./language.ts";
 
 /**
  * The seven zones, plus two places we track as their own.
@@ -74,7 +74,7 @@ export type Change =
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
 	| { do: "tap" | "untap"; what: string }
-	| { do: "add-mana"; who: SeatId; colors: Mana["color"][] }
+	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }
 	| { do: "activate"; what: string; id: string; ability: Activation }

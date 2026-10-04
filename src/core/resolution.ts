@@ -20,7 +20,7 @@ const PERMANENT = ["artifact", "battle", "creature", "enchantment", "land", "pla
  */
 export function begin(table: Table, object: Thing): Change {
 	const ability = object.ability!;
-	const scope: Scope = { world: tableWorld(table), controller: ability.controller, source: object };
+	const scope: Scope = { world: tableWorld(table), controller: ability.controller, source: object, targets: ability.targets, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const illegal = ability.slots.flatMap((slot, at) => (ability.targets[at] ?? []).filter((chosen) => {
 		if ("player" in chosen) return !table.seats.some((one) => one.id === chosen.player && !one.result) || (slot.player !== "any" && !!slot.player && !players(scope, slot.player).includes(chosen.player));
 		const now = table.things.get(chosen.id);
