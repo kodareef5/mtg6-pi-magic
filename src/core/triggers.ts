@@ -29,8 +29,10 @@ type Occurrence = {
 	found?: ObjectRef;
 	/** `attacked-with`: every attacker. */
 	objects?: { object: Seen; traits?: Traits }[];
-	/** Who cast, attacked, targeted, or was dealt the damage. */
+	/** Who cast, attacked, targeted, or dealt the damage: what `by` reads. */
 	player?: SeatId;
+	/** The player combat damage was dealt to: "that player" on the trigger. */
+	dealt?: SeatId;
 	/** The targeting spell or ability, or the damage source. */
 	source?: Seen;
 	from?: Zone;
@@ -111,8 +113,8 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "damage": {
 				const source = now(change.source);
 				if (!change.combat || !source) break;
-				found.push({ on: "combat-damage", object: source, traits: characteristics(table, source), found: ref(source), source,
-					...("player" in change.target ? { player: change.target.player, toPlayer: true as const } : {}) });
+				found.push({ on: "combat-damage", object: source, traits: characteristics(table, source), found: ref(source), source, player: source.controller,
+					...("player" in change.target ? { dealt: change.target.player, toPlayer: true as const } : {}) });
 				break;
 			}
 			case "turn":
@@ -145,7 +147,7 @@ function eventOf(occurrences: Occurrence[]): Trigger["event"] {
 	const first = occurrences[0]!;
 	const objects = occurrences.flatMap((one) => one.objects ? one.objects.map((each) => ref(each.object)) : one.found ? [one.found] : []);
 	return { ...(first.found ? { object: first.found } : objects[0] ? { object: objects[0] } : {}), ...(objects.length ? { objects } : {}),
-		...(first.player !== undefined ? { player: first.player } : {}), ...(first.source ? { source: ref(first.source) } : {}) };
+		...((first.dealt ?? first.player) !== undefined ? { player: (first.dealt ?? first.player)! } : {}), ...(first.source ? { source: ref(first.source) } : {}) };
 }
 
 /** Whether this ability already triggered this turn, for "only once each turn". */

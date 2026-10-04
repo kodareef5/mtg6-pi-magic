@@ -453,3 +453,13 @@ test("a once-each-turn trigger removed for want of a target still used up its tu
 	commit(table, [{ do: "move", what: second!.id, to: "battlefield", reason: "resolve" }], "resolve");
 	assert.equal(table.waiting.length, 0, "it triggered this turn already, though it never reached the stack");
 });
+
+test("combat damage to a player is dealt by the attacker's controller, and that player is the one dealt it", () => {
+	// Not printed: "Whenever a creature you control deals combat damage to a player, that player loses 1 life."
+	const table = matchup("dealt");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", [{ basis: "Whenever a creature you control deals combat damage to a player, that player loses 1 life.", kind: "watch",
+		event: { on: "combat-damage", of: { types: ["creature"] }, by: "you", player: true }, effect: { instructions: [{ do: "life", who: "event:player", amount: -1 }] } }]);
+	commit(table, [{ do: "damage", source: chocobo.id, target: { player: 1 }, amount: 2, combat: true }], "resolve");
+	assert.equal(table.waiting.length, 1, "Green's creature dealt it, so a watch for damage by Green triggers");
+	assert.equal(table.waiting[0]!.event.player, 1, "and that player is Red");
+});
