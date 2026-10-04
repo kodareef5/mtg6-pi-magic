@@ -20,7 +20,8 @@ import { cardsIn, type Table } from "../src/core/table.ts";
 import type { Procedure, Registration } from "../src/core/language.ts";
 import type { Change } from "../src/core/syntax.ts";
 import type { ProcedureOption } from "../src/core/procedures.ts";
-import { announce, establish, example, finish, main, matchup, pack, passBoth, place, step } from "./play.ts";
+import { announce, establish, example, finish, main, matchup, offered, pack, passBoth, place, step } from "./play.ts";
+import { activationChanges } from "../src/core/procedures.ts";
 
 const CHOCOBO: Registration = { basis: "Landfall — Whenever a land you control enters, put a +1/+1 counter on this creature.", kind: "watch",
 	event: { on: "enters", of: { types: ["land"], controller: "you" } }, effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } };
@@ -418,4 +419,23 @@ test("what triggers while triggers are put on the stack waits for that round to 
 	assert.equal(table.waiting.filter((one) => one.controller === 0).length, 2, "targeting the creature made a new Green trigger");
 	trigger(table, (label) => label.includes("You gain 1 life") && !label.includes("becomes the target"));
 	assert.equal(nextDecision(table)!.seat, 1, "Red puts its trigger from this round before Green's new one");
+});
+
+test("one Treasure cannot both be sacrificed as a cost and sacrificed for its own mana", () => {
+	const table = matchup("one-treasure");
+	establish(table, 1, "Smaug the Magnificent");
+	place(table, 1, "battlefield", "Mountain");
+	main(table, 1, 2, "upkeep");
+	resolveTop(table);
+	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure")!;
+	main(table, 1, 2);
+	// Not printed: an ability that wants an artifact sacrificed and one mana.
+	const options = offered(table, { claim: "Gain 1 life", basis: "{1}, Sacrifice an artifact: You gain 1 life.", source: { zones: ["battlefield"], controller: "self", card: "Smaug the Magnificent" },
+		timing: "stack", cost: { mana: "{1}", sacrifice: { choose: { types: ["artifact"] }, count: 1 } }, instructions: [{ do: "life", who: "you", amount: 1 }] });
+	const fair = options.find((option) => option.activation.cost.sacrificed?.some((ref) => ref.id === treasure.id) && !option.activation.funding?.some((tap) => tap.sacrifice));
+	assert.ok(fair, "sacrificing the Treasure and paying with the Mountain is offered");
+	assert.equal(options.some((option) => option.activation.cost.sacrificed?.some((ref) => ref.id === treasure.id) && option.activation.funding?.some((tap) => tap.sacrifice)), false, "never both");
+	const twice = structuredClone(fair.activation);
+	twice.funding = [{ source: { id: treasure.id, incarnation: treasure.incarnation }, colors: ["R"], claim: "Treasure", sacrifice: true }];
+	assert.throws(() => activationChanges(table, twice), /two parts of a cost/, "an announcement that tries it is refused");
 });

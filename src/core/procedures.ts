@@ -82,8 +82,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	cost.sacrificed?.forEach((ref) => own(ref, "battlefield"));
 	cost.discarded?.forEach((ref) => own(ref, "hand"));
 	cost.exiled?.forEach((ref) => { if (!live(table, ref)) throw new Error("The card to exile is gone."); });
-	// An object leaves to pay a cost once. Only the source may also be tapped.
-	const consumed = [...(cost.sacrificed ?? []), ...(cost.exiled ?? []), ...(cost.discarded ?? [])].map((ref) => ref.id);
+	// An object leaves to pay a cost once, a Treasure sacrificed for its own mana included. Only the source may also be tapped.
+	// Tapping a creature for mana and then sacrificing it to the cost is fine (601.2g): only a mana ability's own sacrifice uses it up.
+	const consumed = [...(cost.sacrificed ?? []), ...(cost.exiled ?? []), ...(cost.discarded ?? []), ...funding.filter((tap) => tap.sacrifice).map((tap) => tap.source)].map((ref) => ref.id);
 	if (new Set(consumed).size !== consumed.length || (cost.tapped ?? []).some((ref) => consumed.includes(ref.id))) throw new Error("One object cannot pay two parts of a cost.");
 	if (cost.life !== undefined && seat(table, controller).life < cost.life) throw new Error("Not enough life to pay.");
 	if (cost.counters && (object.counters[cost.counters.kind] ?? 0) < cost.counters.count) throw new Error("Not enough counters to remove.");
