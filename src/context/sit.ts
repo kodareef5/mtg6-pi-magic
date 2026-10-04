@@ -204,6 +204,19 @@ export async function seat(
 }
 
 /**
+ * The table's judge for `play`, when one was seated. A rollback rebuilds from a
+ * fresh table for the same seats, decks and seed, after saving what the game
+ * has recorded so far.
+ */
+export function judgeFor(table: Table, seated: Seated, journal?: Journal): Judge | undefined {
+	const judging = seated.judge;
+	if (!judging) return undefined;
+	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
+	return { rule: (now, open) => rule(now, open, judging.reasoner, judging), restart: () => start(table.format, entrants, table.rng.seed, judging.universe),
+		flush: () => { if (journal) save(journal, table); } };
+}
+
+/**
  * Play the table out, summarising each turn that had something in it.
  *
  * The recaps run beside the game and not inside it. A recap is written for the
@@ -252,12 +265,7 @@ export async function run(
 		seated.chronicle.recaps.splice(at < 0 ? seated.chronicle.recaps.length : at, 0, said);
 	};
 
-	// A rollback rebuilds from a fresh table for the same seats, decks and seed, after saving what the game has recorded.
-	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
-	const judging = seated.judge;
-	const judge: Judge | undefined = judging && { rule: (now, open) => rule(now, open, judging.reasoner, judging), restart: () => start(table.format, entrants, table.rng.seed, judging.universe),
-		flush: () => { if (journal) save(journal, table); } };
-
+	const judge = judgeFor(table, seated, journal);
 	const flight: Promise<void>[] = [];
 	const outcome = await play(table, seated.players, seated.intents, watch, (turn, active, from) => {
 		// A reasoner that has given up is one problem, not one per turn. The gap

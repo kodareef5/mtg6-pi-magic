@@ -10,7 +10,7 @@ import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { open, save, replay, fork, reopen } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
-import { seat as seatTable } from "../src/context/sit.ts";
+import { judgeFor, seat as seatTable } from "../src/context/sit.ts";
 import { cast, rosterFor } from "../src/context/roles.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { bill } from "../src/context/spend.ts";
@@ -51,7 +51,7 @@ try {
 	await play(table, seated.players, seated.intents, (line) => {
 		console.log(line); save(journal, table);
 		if (table.gaps.length || table.cursor.turn > limit) throw stop;
-	});
+	}, undefined, undefined, judgeFor(table, seated, journal));
 } catch (error) { if (error !== stop) throw error; }
 finally { save(journal, table); }
 // Replay returns at the next decision; reach that same boundary without answering it.
