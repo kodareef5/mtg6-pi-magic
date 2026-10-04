@@ -31,6 +31,7 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
+import { traceInference, type CallTrace } from "../src/context/trace.ts";
 
 const universe = loadCards("cards/standard.tsv");
 
@@ -137,7 +138,18 @@ test("a failed question is a gap and the game still starts", async () => {
 	const built = table();
 	const counted = tally();
 	const { stream } = chat((user) => (user.includes("keepable seven") ? "" : "fine"));
-	const written = await brief(built.seats[0]!, [built.seats[1]!], universe, reasoner({ role: "pregame", stream, model: sol, tally: counted, backoffMs: 0 }), { format: standard.name });
+	const traces: CallTrace[] = [];
+	let dropped = false;
+	const observed = traceInference({ classify: async () => { throw new Error("No classifier in this pass"); },
+		stream: (model, context, options) => {
+			if (!dropped && context.messages[0]!.content.includes("keepable seven")) {
+				dropped = true;
+				return { result: async () => { throw new Error("fixture connection dropped"); } };
+			}
+			return stream(model, context, options);
+		},
+	}, (event) => traces.push(event));
+	const written = await brief(built.seats[0]!, [built.seats[1]!], universe, reasoner({ role: "pregame", stream: observed.stream, model: sol, tally: counted, backoffMs: 0 }), { format: standard.name });
 	assert.equal(written.opening, "", "the snippet is missing");
 	assert.equal(written.gaps.length, 1);
 	assert.match(written.gaps[0]!, /mulligan guidance/);
@@ -147,6 +159,11 @@ test("a failed question is a gap and the game still starts", async () => {
 	const failed = counted.spent().filter((spend) => spend.failed);
 	assert.equal(failed.length, 3, "three attempts at the one question");
 	for (const attempt of failed) assert.match(attempt.about, /mulligan guidance/);
+	const requests = traces.filter((event) => event.event === "request");
+	assert.equal(requests.length, counted.spent().length, "capture includes every retry");
+	const error = traces.find((event) => event.event === "error");
+	assert.ok(error?.event === "error" && error.error.includes("fixture connection dropped"));
+	assert.ok(requests.some((request) => request.id === error!.id), "a thrown call keeps its request correlation");
 });
 
 test("a brief snippet reaches the decision and a card note only when its card is visible", async () => {
@@ -328,11 +345,13 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	];
 
 	const began = Date.now();
-	const seated = await seatTable(built, async () => parts, inference, universe, { format: standard.name });
+	const traces: CallTrace[] = [];
+	const observed = traceInference(inference, (event) => traces.push(event));
+	const seated = await seatTable(built, async () => parts, observed, universe, { format: standard.name });
 	assert.ok(seated.chronicle.briefs[0]?.deck, "seat 0 was briefed");
 	assert.ok(seated.chronicle.briefs[1]?.deck, "seat 1 was briefed");
 
-	const outcome = await run(built, seated, inference, parts[2]!, undefined);
+	const outcome = await run(built, seated, observed, parts[2]!, undefined);
 	const ms = Date.now() - began;
 	void ms;
 
@@ -350,6 +369,19 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	// before any of them answered. A loop that awaited each one could never have
 	// more than a single request outstanding.
 	assert.ok(firstResolvedAfter >= HELD, `${firstResolvedAfter} outstanding when the first answered`);
+	const requests = traces.filter((event) => event.event === "request");
+	assert.equal(requests.length, seated.tally.spent().length, "every model attempt has an exact capture");
+	assert.equal(new Set(requests.map((event) => event.id)).size, requests.length);
+	for (const request of requests) {
+		assert.ok(traces.indexOf(request) < traces.findIndex((event) => event.id === request.id && event.event === "reply"));
+		assert.ok(request.model.includes("/"));
+		assert.equal("baseUrl" in request, false);
+		if (request.kind === "classify") {
+			const sent = request.request as { state: { actor: number; options: { id: string }[] }; questions: { pick: { criteria: Record<string, string> } } };
+			assert.ok([0, 1].includes(sent.state.actor));
+			assert.ok(sent.state.options.every((option) => option.id in sent.questions.pick.criteria));
+		} else assert.ok(request.settings.maxTokens! > 0);
+	}
 
 	// Every role is in one bill, with the decision model counted separately
 	// because Pi does not meter a classifier's tokens.

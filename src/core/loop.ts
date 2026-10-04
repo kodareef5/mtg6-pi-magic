@@ -24,7 +24,6 @@ import { describe, project } from "./view.ts";
 import { needsAttention } from "./work-menu.ts";
 import { completedStep, editWork, prepareWork, workFrame } from "./work-tools.ts";
 import { refuseExecution } from "./draft.ts";
-import { overdue, pendingReviews } from "./agenda.ts";
 import { activate, activationChanges, procedureOptions } from "./procedures.ts";
 
 export type Watcher = (line: string) => void;
@@ -159,8 +158,6 @@ export async function play(
 							why = draft?.id === valid.draft ? refuseExecution(draft, current) : "No current draft with that id.";
 							const procedure = draft && procedureOptions(draft, current).find((choice) => choice.option.id === draft.bound);
 							if (!why && procedure) activationChanges(table, procedure.activation);
-							if (!why && current.view.work?.request) why = "Strategy is still requested for this draft.";
-							if (!why && draft?.bound === "pass" && (pendingReviews(current).length || current.view.work?.suggested.length || current.view.work?.tasks.some((task) => overdue(task, current)))) why = "Other due work remains unconsidered before this pass.";
 						}
 					}
 					if (valid.kind === "pick" && valid.option === "pass" && attention) why = "Due seat work remains unconsidered. Review, defer or cancel it before passing.";

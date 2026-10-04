@@ -95,6 +95,9 @@ function universe(format: string): Universe {
 
 /** Every role resolved for one seat, or for the table when no seat is named. */
 async function roster(ctx: ExtensionContext, seat?: SeatId): Promise<Cast[]> {
+	if (typeof ctx.modelRegistry.getAvailableOfType !== "function") {
+		throw new Error("Magic requires Pi 1.0 or newer for classifier models. This repo's CLI is node node_modules/@earendil-works/pi-coding-agent/dist/cli.js -e ./index.ts.");
+	}
 	return cast(rosterFor(loadCrew(ROSTER), seat), {
 		chat: ctx.modelRegistry.getAvailable(),
 		classifiers: await ctx.modelRegistry.getAvailableOfType("classifier"),

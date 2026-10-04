@@ -47,6 +47,42 @@ For actual Pi models, `/magic play <seed> circuits` or
 make paid calls; the offline experiment does not. Ordinary play retains its
 existing path. A resumed game carries whichever equipment it already owned.
 
+Add `--trace` to the smoke command to capture each model request before dispatch,
+then its reply or error under the same call id. The calls file contains private
+seat data, is created with owner-only permissions, and omits Pi's authentication
+and transport settings. Each request also checkpoints the game journal. This
+preserves accepted progress when an external test limit interrupts a run.
+
+## Live checks
+
+On October 4, 2026, a dedicated tmux session drove Pi 1.0.1 through its command
+input. The classifier was `typesafe/jev-latest`; pregame and strategy used
+`gpt-6.1-sol:low`, and summaries used `gpt-5.6-luna:low`.
+
+`/magic play tmux-live-20261004` finished the basic-land game in 108 turns:
+2248 forced and 109 chosen decisions, no fallbacks or gaps, and an exact journal
+replay. Its 234 model calls cost $0.0704 at the recorded catalog prices.
+
+A fresh established-board Merchant probe completed both activations and their
+resolution with no gaps or fallbacks. Two mana procedures funded the two stack
+abilities; the responding ability resolved first. Both draws were delegated,
+and each seat chose its discard. Replay matched the ledger and objects.
+The exchange used 41 classifier calls and two strategy calls, cost $0.0492, and
+took 76.4 seconds. These are functional checks, not a playing-strength measure
+or a full-deck game; the probe stops after the exchange.
+
+The probes exposed two passes offered despite pending work: an ordinary pass
+while a draft was due, and a prepared pass before a nomination had a disposition.
+The classifier now omits the first, and the prepared menu and execution share
+the second refusal check. Another failure showed the validator reporting an
+unrelated tool's fields for a draft edit missing `steps`. It now reports the
+selected tool's errors. Strategy instructions explain persistent reservations
+and edits containing only remaining instructions. Resumes preserved the paid
+costs and completed steps while these failures were repaired.
+
+A separate basic-land circuit continuation reached turn 63 before an external
+180-second test limit. It remains unfinished and is not counted as a clean game.
+
 ## Two revisions
 
 The physical table has its existing clock. Each seat's equipment has a private
@@ -108,7 +144,8 @@ historical dispositions or executable draft bodies. Step labels and windows,
 guidance, completed progress, bindings, reservations and status remain visible.
 Strategy receives the full edited draft and recipes when asked to reconsider.
 
-Due attention prevents an automatic pass. Other listed plays remain available.
+Due attention prevents a pass. The classifier sees the work's disposition
+choices instead of an ordinary pass that core would refuse. Other listed plays remain available.
 Two unusable answers leave the decision pending with a gap; the table does not
 mark a review complete or silently pass for the player.
 
@@ -143,6 +180,11 @@ reserves and missed execution windows surface for inspection, cancellation,
 deferral, or strategy. Editing replaces only unexecuted steps; completed steps
 stay completed. Parking accounts for this opportunity and does not abandon the
 future sequence.
+
+Reservations apply before every remaining step; execution does not release them.
+An untapped reservation on a source consumed by an earlier step therefore needs
+an explicit edit. `draft.edit` requires the remaining steps even when the edit
+only changes reservations or guidance. Core retains the completed prefix.
 
 ## A prepared procedure
 

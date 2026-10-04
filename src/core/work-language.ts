@@ -87,6 +87,12 @@ export type WorkCommand = Static<typeof CommandSchema>;
 /** Shape checking proves neither card meaning nor strategic quality. */
 export function commands(value: unknown): WorkCommand[] {
 	if (!Check(CommandsSchema, value)) {
+		// A union's first errors can describe an unrelated tool. Report the
+		// selected command so a retry can repair the field that actually failed.
+		const at = Array.isArray(value) ? value.findIndex((tool) => !Check(CommandSchema, tool)) : -1;
+		const tool = at < 0 ? undefined : (value as unknown[])[at];
+		const schema = CommandSchema.anyOf.find((branch) => tool && typeof tool === "object" && "do" in tool && branch.properties.do.const === tool.do);
+		if (schema) throw new Error(`Seat tool ${at}: ${JSON.stringify(Errors(schema, tool).slice(0, 3))}`);
 		throw new Error(`Seat tools: ${JSON.stringify(Errors(CommandsSchema, value).slice(0, 3))}`);
 	}
 	return value as WorkCommand[];

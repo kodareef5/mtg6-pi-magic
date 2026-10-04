@@ -404,9 +404,9 @@ verify every carried field against the source and refuse to pass on a mismatch.
 
 - Strategic quality. `strategy.planWork` prepares checked equipment on request,
   and offline experiments exercise its choreography through authored doubles.
-  Paid models are wired through Pi but have not been evaluated on this new
-  vocabulary. Prepared procedures now support a small set of physical
-  instructions; the experiments establish orchestration, not playing strength.
+  Live Pi probes exercise preparation and execution, but do not measure playing
+  strength. Prepared procedures support a small set of physical instructions;
+  both authored and live probes remain separate from full-deck evaluation.
 - The judge's remedy. `ruling.rule` holds the two-call pipeline and stops at the
   verdict, because rollback is unwritten and a ruling with no remedy changes no
   game. A ruling also makes the phase plan stale, which is a consequence of one
@@ -437,10 +437,10 @@ verify every carried field against the source and refuse to pass on a mismatch.
 - Provenance beyond the accepted claim. The journal now carries each executed
   procedure's basis, instructions, payment and delegation. Replay uses those
   accepted terms. Model and interpreter version attribution still needs work.
-- The context a decision actually saw. The forced ratio is evidence about cost
-  and says nothing about decision quality. Comparing two models needs the packet
-  each one was handed, and recap arrival timing changes that, so fixing the
-  recap setting is not enough.
+- Controlled model comparison. `npm run smoke -- --trace` saves exact requests,
+  replies and errors, including the recaps each call received. The trace is
+  private seat data. The forced ratio is evidence about cost, not decision
+  quality; a comparison harness and version attribution remain unfinished.
 - Socket hosting and joining. The protocol and pick validation exist in
   `src/seating/`; its sockets and pending-player adapter are unfinished.
 - Any format but Standard, and any seat count but two.

@@ -72,15 +72,14 @@ export const ROLES: Record<
 		instead: "gpt-6.1-sol:high, the same model thinking longer. Benchmark it before paying for it",
 	},
 	strategy: {
-		does: "plan the phase about to happen, and say what would change the plan",
+		does: "prepare or revise seat recipes and scheduled reviews on request",
 		kind: "chat",
 		whose: "seat",
 		suggested: "gpt-6.1-sol:low",
 		why:
-			"The thinking happens here, because the decision model does not do it. Called only " +
-			"on a phase that has a choice worth planning, which is a small share of phases, so " +
-			"the same reasoner as the pregame costs little across a game.",
-		instead: "gpt-6.1-sol:high, when a phase plan is measurably better for the extra tokens",
+			"Authors checked preparation tools on an explicit request. A phase change alone " +
+			"makes no call. Its plans still need live evaluation for quality and cost.",
+		instead: "gpt-6.1-sol:high, when prepared plans measure better for the extra tokens",
 	},
 	judge: {
 		does: "rule on an objection, citing the rules on disk",

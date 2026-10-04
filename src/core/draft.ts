@@ -1,5 +1,5 @@
 /** Preparing listed moves. A binding is editable; only execution moves the game. */
-import { matches, occurrence, select, positionStamp } from "./agenda.ts";
+import { matches, occurrence, select, positionStamp, overdue, pendingReviews } from "./agenda.ts";
 import type { Frame, Option } from "./types.ts";
 import type { Draft } from "./work.ts";
 import { procedureOptions } from "./procedures.ts";
@@ -41,5 +41,7 @@ export function refuseExecution(draft: Draft, frame: Frame): string | null {
 	if (draft.boundObjects?.some((ref) => !(frame.view.objects ?? []).some((object) => object.id === ref.id && object.incarnation === ref.incarnation))) return "A bound object changed incarnation; bind this step again.";
 	if (!candidates(draft, frame).some((option) => option.id === draft.bound)) return "The bound move is no longer offered; bind it again.";
 	if (draft.readyStamp !== positionStamp(frame)) return "The position changed; inspect and accept readiness again.";
+	if (frame.view.work?.request) return "Strategy is still requested for this draft.";
+	if (draft.bound === "pass" && (pendingReviews(frame).length || frame.view.work?.suggested.length || frame.view.work?.tasks.some((task) => overdue(task, frame)))) return "Other due work remains unconsidered before this pass.";
 	return null;
 }

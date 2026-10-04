@@ -91,7 +91,8 @@ export function question(packet: Packet): Question {
 			...(packet.work.draft ? [`Draft: ${packet.work.draft.label}; step ${packet.work.draft.next + 1}; ${packet.work.draft.status}.`,
 				...packet.work.draft.reserves.map((reserve) => `Reserve ${reserve.object.id}@${reserve.object.incarnation}: ${reserve.purpose}`)] : []),
 			"Work ids edit or execute the named draft. An edit moves no cards; ready does not mean executed.",
-			"Ordinary listed plays remain available. Due reviews and drafts need a disposition before passing."] : []),
+			"Other listed plays remain available. Due reviews and drafts need a disposition before passing.",
+			...(packet.workOptions?.length ? ["Ordinary pass is unavailable while this work is due. Use its work choices to finish, park, decline or cancel it first."] : [])] : []),
 		"",
 		"Answer with one listed id. These ids include the moves and routes available in this request.",
 		"Prepared procedures check resources against stated costs; they do not certify card meaning or rules legality.",
@@ -111,7 +112,9 @@ export function question(packet: Packet): Question {
 		instructions: lines.join("\n"),
 		criteria: Object.fromEntries([
 			...(packet.workOptions ?? []).map((option) => [option.id, [option.label, option.shows].filter(Boolean).join(". ")]),
-			...packet.options.map((option) => [
+			// Core rejects an ordinary pass until due work has a disposition. Keep
+			// the underlying option in the packet, but never offer that refused pick.
+			...packet.options.filter((option) => option.id !== "pass" || !packet.workOptions?.length).map((option) => [
 				option.id,
 				[option.label, option.shows, option.consequence].filter(Boolean).join(". "),
 			]),

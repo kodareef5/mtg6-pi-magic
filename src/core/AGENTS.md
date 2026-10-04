@@ -26,7 +26,8 @@ The game system. Everything a seat needs no matter who is playing it.
   a record here before it is code anywhere.
 - **The card universe.** Every card's cost, type, oracle text and legality,
   read from the file the generator writes. Strategy receives that text only
-  for visible identities; deck checks use the same source.
+  for visible identities and registered deck composition; deck checks use the
+  same source.
 - **Conceding, and table talk.** One is a recorded event, the other is beside
   the log because it changes nothing.
 

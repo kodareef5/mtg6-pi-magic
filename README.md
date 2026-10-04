@@ -40,6 +40,8 @@ pi install npm:pi-magic
 
 Pi 1.0 or newer. Checked against the extension API in
 `@earendil-works/pi-coding-agent` 1.0.1.
+From a checkout, run `node node_modules/@earendil-works/pi-coding-agent/dist/cli.js -e ./index.ts`
+to use the installed dependency even if the global `pi` is older.
 
 ## Develop
 
@@ -54,6 +56,8 @@ The offline scenarios preserve a reserved card, recover after losing it, and
 exchange two Qiqirn Merchant activations. Open `.pi/circuit-review/index.html`
 for their timelines and public board snapshots. Strategy and classifier calls
 use authored doubles. `npm run smoke` uses real models and costs money.
+Add `-- --trace` to save exact model requests and replies beside the journal.
+These files contain private seat data and are not spectator exports.
 
 [The equipment contract](docs/WORK.md) describes private preparation, physical
 execution, resolution and their current limits. [Game state](docs/STATE.md)
@@ -70,5 +74,6 @@ separate checks. Established-board fixtures and passing over unsupported cards
 do not meet this target.
 
 Casting, targets, combat, triggers, continuous effects, replacements, and
-objections with remedies still need work. Decision-packet capture and model
-evaluation are also needed before comparing playing strength.
+objections with remedies still need work. Smoke runs can capture decision
+requests; controlled model evaluation is still needed before comparing
+playing strength.

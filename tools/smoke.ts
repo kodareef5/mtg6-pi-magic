@@ -9,6 +9,8 @@
 // Credentials are Pi's. This builds the same model runtime Pi uses, so a key
 // already configured in Pi works here with nothing repeated. No endpoint and no
 // key is read in this repo.
+// Past 150 lines so runtime setup, trace capture and journal lifecycle stay together.
+import { appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 
@@ -17,10 +19,11 @@ import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 import { cast, readRoster, rosterFor, type Crew, type Role } from "../src/context/roles.ts";
 import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
 import { checkDeck, load as loadCards } from "../src/core/cards.ts";
-import { open, reopen, replay, type Header } from "../src/core/journal.ts";
+import { open, reopen, replay, save, type Header } from "../src/core/journal.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
+import { traceInference } from "../src/context/trace.ts";
 
 const { values: a } = parseArgs({
 	options: {
@@ -34,13 +37,14 @@ const { values: a } = parseArgs({
 		out: { type: "string", short: "o", default: "games" },
 		"no-brief": { type: "boolean" },
 		watch: { type: "boolean" },
+		trace: { type: "boolean" },
 		help: { type: "boolean", short: "h" },
 	},
 });
 
 if (a.help) {
 	console.log(`usage: smoke.ts [--seed S] [--decide P] [--pregame P] [--summary P]
-                [--circuits] [--strategy P] [--no-brief] [--watch]
+                [--circuits] [--strategy P] [--no-brief] [--watch] [--trace]
 
   --seed S        the game seed. Defaults to the clock, and is printed
   --decide P      the decision model, as a Pi model pattern
@@ -55,6 +59,8 @@ if (a.help) {
   -o DIR          where the journal lands. Defaults to games/
   --no-brief      skip the pregame pass, to price it against playing without one
   --watch         narrate every committed event and recap as it happens
+  --trace         save exact model requests and replies in a private calls file;
+                  checkpoint the journal before each request and print call progress
 
   One game of basic lands between two model-backed seats. It makes real calls
   and costs real money. A forced decision makes no call at all, so the cost is
@@ -112,13 +118,24 @@ const journal = carried
 
 if (journal.repaired) console.log(`repaired  dropped a torn last line: ${journal.repaired.slice(0, 80)}`);
 
+const tracePath = a.trace ? join(a.out!, `${a.from ?? seed}-${Date.now()}.calls.jsonl`) : undefined;
+if (tracePath) {
+	writeFileSync(tracePath, "", { flag: "wx", mode: 0o600 });
+	console.log(`trace     ${tracePath} (private seat data)`);
+}
+const observed = tracePath ? traceInference(inference, (event) => {
+	if (event.event === "request") save(journal, table);
+	appendFileSync(tracePath, JSON.stringify(event) + "\n");
+	console.log(`call      ${event.id} ${event.kind} ${event.event} ${event.model}`);
+}) : inference;
+
 const began = Date.now();
 const seated = await seatTable(
 	table,
 	// --no-brief drops the pregame role rather than faking an empty brief, so the
 	// run reads as a game played without one.
 	async (at) => cast(rosterFor({ every }, at), catalogue).filter((part) => !(a["no-brief"] && part.role === "pregame")),
-	inference,
+	observed,
 	cards,
 	{
 		format: standard.name,
@@ -133,7 +150,7 @@ const commentator = parts.find((part) => part.role === "summary");
 const outcome = await run(
 	table,
 	seated,
-	inference,
+	observed,
 	commentator,
 	a.watch ? (line) => console.log(`  ${line}`) : undefined,
 	journal,

@@ -66,8 +66,9 @@ receives the full recipes and edited draft when reconsidering. Unresolved stack
 instructions remain public facts, including for a seat with no private draft.
 
 Recaps help explain how the current position arose without carrying the entire
-log. Their arrival is asynchronous; exact decision-packet capture is still
-needed before comparing model behavior across runs.
+log. Their arrival is asynchronous. `npm run smoke -- --trace` captures each
+request with the recaps it actually received, plus its reply or error. These
+private traces support inspection; a controlled quality comparison is unwritten.
 
 ## Calls and accounting
 
@@ -88,8 +89,9 @@ readiness and execution so those boundaries can be inspected.
 
 Empty reviews need no call. Independent review concerns can share one request,
 but no answer may assume that a sibling question paid a cost or moved a card.
-Due attention blocks an automatic pass, not other listed plays. A bad review
-batch accounts for nothing.
+Due attention blocks a pass until the seat gives the work a disposition. The
+classifier's choices omit ordinary pass while this work is due; other listed
+plays remain available. A bad review batch accounts for nothing.
 
 The forced ratio counts physical decisions. Private edits can spend classifier
 calls without adding a physical ledger row. Compare total calls, tokens, cost,
@@ -140,8 +142,8 @@ separate from auditing gameplay legality.
   is deliberately broad and can require repeated consideration.
 - How much card meaning is needed to offer useful choices while preserving the
   distinction between accepted claims and rules legality.
-- How to record exact decision packets and model/interpreter versions for
-  reproducible quality comparisons.
+- How to turn captured requests into reproducible quality comparisons, including
+  model and interpreter version attribution.
 
 Keep the vocabulary provisional. Add operations required by the selected decks
 before introducing a compiler, a larger scheduler or a multi-game framework.

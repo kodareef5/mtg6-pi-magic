@@ -27,6 +27,7 @@ import { CEILING } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork } from "../src/context/strategy.ts";
+import { question } from "../src/context/seat.ts";
 
 const make = (steps = standard.steps) => start({ ...standard, steps }, [
 	{ name: "A", deck: Array(60).fill("Forest") }, { name: "B", deck: Array(60).fill("Swamp") },
@@ -64,6 +65,11 @@ test("equipment edits are atomic, idempotent and physically separate", () => {
 	const accepted = structuredClone(table);
 	assert.throws(() => editWork(table, 0, [{ do: "task.cancel", id: "review" }, { do: "draft.start", recipe: "missing" }], "bad"), /No recipe/);
 	assert.deepEqual(table, accepted, "a failed batch did not partly cancel its task");
+	assert.throws(() => editWork(table, 0, [{ do: "task.cancel", id: "review" },
+		{ do: "draft.edit", reserves: [], guidance: "Release the spent source" } as unknown as WorkCommand], "missing-steps"),
+		(error: Error) => /Seat tool 1:/.test(error.message) && /steps/.test(error.message) && !/requiredProperties.*task/.test(error.message),
+		"a refused edit names its missing field, not another union branch's tool");
+	assert.deepEqual(table, accepted, "shape validation leaves the whole batch untouched");
 	assert.throws(() => editWork(table, 0, tools, "stale", 0), /equipment changed/);
 	assert.throws(() => prepareWork(workFrame(table, 0), [{ do: "task.put", task: { ...task(), when: { step: "untap" } } }]), /require a step with priority/);
 });
@@ -208,6 +214,20 @@ test("due attention is consulted before automatic passes and cannot become fallb
 		{ label: "Land", when: { step: "precombat-main" }, action: { option: land.id } },
 		{ label: "Pass", when: { step: "precombat-main" }, action: { option: "pass" } },
 	] } }, { do: "draft.start", recipe: "two" }, { do: "draft.bind", option: land.id }, { do: "draft.ready" }], "ready");
+	const beforeMenu = structuredClone(sequence);
+	const packet = focus(workFrame(sequence, 0), startingIntent(0));
+	const asked = question(packet);
+	assert.equal(asked.type, "choice");
+	if (asked.type !== "choice") throw new Error("Expected choice criteria");
+	assert.deepEqual(packet.options, frame.decision!.options, "the physical options keep their ids and facts");
+	assert.equal(asked.criteria.pass, undefined, "never ask a classifier to choose a pass the core refuses");
+	assert.ok(asked.criteria[land.id], "other physical plays remain available");
+	assert.ok(asked.criteria["work:execute"] && asked.criteria["work:park"] && asked.criteria["work:cancel"]);
+	assert.deepEqual(sequence, beforeMenu, "building the available menu is pure");
+	const parked = workFrame(sequence, 0);
+	parked.view.work = prepareWork(parked, [{ do: "draft.park" }]);
+	const free = question(focus(parked, startingIntent(0)));
+	assert.ok(free.type === "choice" && free.criteria.pass, "an explicit disposition makes pass available again");
 	refusal = undefined;
 	const repeat: Player = { name: "A", observe() {}, close() {}, async answer(frame) {
 		const work = frame.view.work!;
@@ -218,6 +238,23 @@ test("due attention is consulted before automatic passes and cannot become fallb
 	assert.equal(await play(sequence, { 0: repeat, 1: repeat }, {}), null);
 	assert.match((refusal as string[] | undefined)?.join(" ") ?? "", /actionId.*already/);
 	assert.equal(sequence.work[0]!.draft!.next, 1, "a reused execution id cannot settle another step");
+
+	editWork(sequence, 0, [{ do: "task.put", task: { ...task("before-pass"), scope: { zones: [] },
+		concepts: ["line"], concerns: ["continue"], recipes: ["two"] } }], "due-before-pass");
+	let pending = workFrame(sequence, 0);
+	assert.match(refuseExecution(pending.view.work!.draft!, pending)!, /Other due work/);
+	assert.equal(workMenu(pending).some((option) => option.id === "work:execute"), false);
+	const review = pendingReviews(pending)[0]!;
+	editWork(sequence, 0, [{ do: "review.answer", task: review.task, occurrence: review.occurrence, stamp: review.stamp,
+		answers: Object.fromEntries(review.items.map((item) => [item.id, "recipe:two"])) }], "nominate-again");
+	pending = workFrame(sequence, 0);
+	const offered = question(focus(pending, startingIntent(0)));
+	assert.ok(offered.type === "choice" && !offered.criteria["work:execute"] && offered.criteria["work:dismiss:two"],
+		"a prepared pass cannot bypass a nomination either");
+	assert.match(refuseExecution(pending.view.work!.draft!, pending)!, /Other due work/);
+	editWork(sequence, 0, [{ do: "suggestion.dismiss", recipe: "two" }], "decline-repeat");
+	assert.ok(workMenu(workFrame(sequence, 0)).some((option) => option.id === "work:execute"),
+		"the prepared pass returns after the nomination has a disposition");
 });
 
 test("equipment and review queries reveal only the selected seat's earned facts", () => {
