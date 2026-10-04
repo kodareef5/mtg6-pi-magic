@@ -84,21 +84,20 @@ test("the pregame asks several questions at once and files each answer where it 
 	assert.equal(keys.some((key) => key.startsWith("card:")), false, "no card note for basics");
 	assert.equal(new Set(keys).size, keys.length, "no question asked twice");
 
-	// The opponent's cards are never in a question. A pregame leak cannot be
-	// undone by a later ruling, so the closed-list form asks about the format.
+	// Registered composition is public by default, without hands or object ids.
 	const sent = wave.map((ask) => ask.user).join("\n");
-	assert.equal(sent.includes("Swamp"), false);
-	assert.match(sent, /have not seen their cards/);
+	assert.match(sent, /public registered deck/);
+	assert.match(sent, /60 Swamp/);
+	for (const id of built.things.keys()) assert.equal(sent.includes(id), false);
 	// Mulligan guidance is asked with the curve and the seat count in front of it.
 	const opening = wave.find((ask) => ask.key === "opening")!.user;
 	assert.match(opening, /60 cards, 60 lands/);
 	assert.match(opening, /There are 2 seats/);
 	assert.match(opening, /no land/);
 
-	// An open-list benchmark is the only way the other deck appears, and it is off
-	// unless somebody asks for it.
-	const open = asks(me!, [them!], universe, { format: standard.name, openLists: true });
-	assert.match(open.find((ask) => ask.key === "against:1")!.user, /Swamp/);
+	// Retain the existing closed-list branch for a future game setting.
+	const closed = asks(me!, [them!], universe, { format: standard.name, openLists: false });
+	assert.equal(closed.some((ask) => ask.user.includes("Swamp")), false);
 
 	const counted = tally();
 	const { stream, sent: prompts } = chat((user) => `answer for ${user.slice(-40)}`);
@@ -189,12 +188,13 @@ test("a brief snippet reaches the decision and a card note only when its card is
 	assert.deepEqual(packet.lately, ["Turn 1: A played a Forest."]);
 	assert.deepEqual(recent(recaps), ["Turn 1: A played a Forest."]);
 
-	// The question carries the plan and says it was written before this board.
+	// The question carries guidance without claiming it predates this position.
 	const asked = question(packet);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
 	assert.match(asked.instructions, /Sixty Forests/);
-	assert.match(asked.instructions, /written before this board existed/);
+	assert.match(asked.instructions, /may have been revised for this position/);
+	assert.match(asked.instructions, /do not certify card meaning or rules legality/);
 	assert.match(asked.instructions, /Recently:/);
 
 	// A packet with no brief still builds. A missing plan costs quality; refusing

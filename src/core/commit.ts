@@ -5,8 +5,8 @@
  * cursor. One call is one event, because a group of simultaneous changes is one
  * thing cards watch for: two creatures dying together is not two deaths.
  *
- * Past 150 lines because four things are one mechanism: dealing a table out,
- * applying a group, the control transitions a group carries, and the seeded
+ * Past 150 lines because these share one writer: dealing a table out,
+ * applying a group, turn and resolution transitions, and the seeded
  * random the shuffle draws on. Splitting them puts half of `commit` behind an
  * import of the other half, and the phase handlers that propose a transition
  * already import this file to perform it.
@@ -56,6 +56,7 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
 			passes: 0,
 			clock: 0,
 			began: {},
+			visit: 0,
 		},
 		log: [],
 		ledger: [],
@@ -64,6 +65,9 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
 		outcome: null,
 		gaps: [],
 		opening: null,
+		work: {},
+		workLog: [],
+		resolution: null,
 	};
 
 	const taken = new Set<string>();
@@ -111,6 +115,11 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
  * cards watch for. Two creatures dying together is not two deaths.
  */
 export function commit(table: Table, changes: Change[], reason: Reason): Receipt {
+	// Refuse an unavailable or duplicated payment before an earlier tap can commit.
+	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
+	for (const change of changes) if (change.do === "spend-mana") for (const id of change.ids) {
+		if (!available.get(change.who)?.delete(id)) throw new Error(`Mana ${id} is not available to spend.`);
+	}
 	// Read what a watcher may need before anything moves. After the group it
 	// is gone, and a receipt that cannot say what a thing looked like is a
 	// receipt no trigger can read.
@@ -122,7 +131,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		}
 	}
 
-	for (const change of changes) {
+	for (const [index, change] of changes.entries()) {
 		switch (change.do) {
 			case "turn":
 				turnTransition(table, change);
@@ -167,6 +176,22 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				break;
 			case "untap":
 				thing(table, change.what).tapped = false;
+				break;
+			case "add-mana":
+				seat(table, change.who).pool.push(...change.colors.map((color, unit) => ({ id: `mana-${table.cursor.clock + 1}-${index}-${unit}`, color })));
+				break;
+			case "spend-mana":
+				seat(table, change.who).pool = seat(table, change.who).pool.filter((mana) => !change.ids.includes(mana.id));
+				break;
+			case "activate":
+				if (change.ability.timing === "stack") {
+					for (const object of cardsIn(table, "stack")) object.position = (object.position ?? 0) + 1;
+					table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.ability.controller, controller: change.ability.controller,
+						zone: "stack", position: 0, tapped: false, faceDown: false, counters: {}, damage: 0, ability: structuredClone(change.ability) });
+				}
+				break;
+			case "resolution":
+				resolutionTransition(table, change);
 				break;
 			case "shuffle": {
 				// The shuffle is the only randomness in the game. Positions are
@@ -213,9 +238,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		}
 	}
 
-	// What the same objects look like now. A token that ceased to exist has no
-	// after, and that is the fact rather than a crash: narration falls back to
-	// what was seen before the group.
+	// Removed objects, including resolved abilities, have no after snapshot.
+	// Narration can use the event-time facts from before the group.
 	const after: Receipt["after"] = {};
 	for (const id of Object.keys(before)) {
 		const now = table.things.get(id);
@@ -224,6 +248,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 
 	const receipt: Receipt = {
 		seq: table.log.length,
+		clock: table.cursor.clock + 1,
 		at: table.ledger.length,
 		changes: structuredClone(changes),
 		reason,
@@ -236,6 +261,29 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	if (control(changes)) return receipt;
 	table.log.push(receipt);
 	return receipt;
+}
+
+/** Remaining instructions and choices belong to the table throughout resolution. */
+function resolutionTransition(table: Table, change: Extract<Change, { do: "resolution" }>): void {
+	const object = thing(table, change.what);
+	const instructions = object.ability!.instructions;
+	if (change.action === "begin") {
+		const first = instructions[0]!;
+		table.resolution = { object: object.id, instruction: 0, remaining: "count" in first ? first.count : 1 };
+		table.cursor.priority = null;
+		return;
+	}
+	const pending = table.resolution!;
+	if (!change.skip && --pending.remaining > 0) return;
+	pending.instruction += 1;
+	const next = instructions[pending.instruction];
+	if (next) { pending.remaining = "count" in next ? next.count : 1; return; }
+	table.things.delete(object.id);
+	for (const other of cardsIn(table, "stack")) if ((other.position ?? 0) > (object.position ?? 0)) other.position! -= 1;
+	table.resolution = null;
+	// Leave a checkpoint. The dispatcher checks state before advance grants priority.
+	table.cursor.priority = null;
+	table.cursor.passes = 0;
 }
 
 /**
@@ -251,7 +299,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
  * writer. It is the logging that stops, not the discipline.
  */
 const control = (changes: Change[]): boolean =>
-	changes.length > 0 && changes.every((change) => change.do === "turn");
+	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution");
 
 /**
  * Who may act next, and where the turn is. A transition shares the commit door
@@ -283,6 +331,7 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 			return;
 		case "end": {
 			const step = cursor.steps.shift();
+			cursor.visit += 1;
 			for (const s of table.seats) s.pool = s.pool.filter((mana) => mana.persists);
 			if (step === "cleanup") {
 				for (const thing of table.things.values()) thing.damage = 0;

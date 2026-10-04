@@ -125,11 +125,9 @@ const SYSTEM = [
 	"to be short and it has to be about something. Name cards and numbers. Say what",
 	"to do and what would mean doing something else instead.",
 	"",
-	"What your answer does not promise. You have not seen the game. You do not know",
-	"the opponent's cards, and you will not be told them. A plan here is a prior and",
-	"not an instruction: the seat may read your snippet beside a board you did not",
-	"imagine, and a line you did not mention stays legal and may be better. Say so",
-	"where it matters rather than overclaiming.",
+	"Registered deck lists give composition, never the opponent's hand or library order.",
+	"Use only the lists supplied in this question. Your guidance cannot predict the board",
+	"or certify a play's legality. Name the assumptions that would change the plan.",
 	"",
 	"No preamble, no headings, no restating the question. Prose, a few lines.",
 ].join("\n");
@@ -142,17 +140,14 @@ const SYSTEM = [
  * design constraint rather than a convenience: a question that needed an
  * earlier answer would serialise the pass and double its wall time.
  *
- * What a seat is told about an opponent is what a seat is entitled to know. In
- * a real game that is the format and how many seats there are, not their cards.
- * `openLists` is for a benchmark where both lists are known on purpose, and it
- * is off unless somebody says otherwise, because a leak into a pregame brief
- * cannot be undone by a later ruling.
+ * Registered deck composition is public by default. Lists contain names and
+ * counts, never object ids, hands, or library order.
  */
 export function asks(
 	seat: Seat,
 	others: Seat[],
 	universe: Universe,
-	options: { format: string; openLists?: boolean } ,
+	options: { format: string; openLists?: boolean },
 ): Ask[] {
 	const mine = deckLines(seat.deck, universe);
 	const deck = `Your deck, ${options.format}:\n${mine.join("\n")}\n\n${curve(seat.deck, universe)}`;
@@ -187,8 +182,8 @@ export function asks(
 			about: `against seat ${other.id}`,
 			user:
 				`${deck}\n\n` +
-				(options.openLists
-					? `Seat ${other.id} is playing, and this is an open-list benchmark:\n` +
+				(options.openLists !== false
+					? `Seat ${other.id}'s public registered deck:\n` +
 						`${deckLines(other.deck, universe).join("\n")}\n\nWhere is your deck ahead of theirs and where is it behind?`
 					: `You are seated against ${others.length} opponent${others.length === 1 ? "" : "s"} ` +
 						`in ${options.format}, and you have not seen their cards. What should this deck ` +
@@ -294,4 +289,3 @@ export const policyFrom = (brief: Brief): Policy => ({
 	winsBy: brief.deck,
 	priorities: [brief.combos, ...Object.values(brief.against)].filter(Boolean),
 });
-

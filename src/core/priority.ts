@@ -18,7 +18,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 		for (const card of cardsIn(table, "hand", holder)) {
 			if (!isLand(card.card)) continue;
 			moves.push({
-				option: { id: `land:${card.id}`, label: `Play ${card.card}` },
+				option: { id: `land:${card.id}`, label: `Play ${card.card}`, objects: [{ id: card.id, incarnation: card.incarnation }] },
 				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land" }],
 				reason: "play-land",
 			});
@@ -39,7 +39,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 }
 
 /** The engine knows a basic land's mana ability without reading its text. */
-const isLand = (card: string) => card === "Forest" || card === "Swamp" || card === "Island" || card === "Mountain" || card === "Plains";
+const isLand = (card: string | undefined) => card === "Forest" || card === "Swamp" || card === "Island" || card === "Mountain" || card === "Plains";
 
 /**
  * A move is offered only when every one of these holds. This is the whole

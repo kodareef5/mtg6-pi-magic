@@ -31,7 +31,7 @@ export function turnBased(table: Table): Pending | null {
 			question: "Untap.",
 			moves: [
 				{
-					option: { id: "untap", label: `Untap ${tapped.length}` },
+					option: { id: "untap", label: `Untap ${tapped.length}`, objects: tapped.map(({ id, incarnation }) => ({ id, incarnation })) },
 					changes: tapped.map((t) => ({ do: "untap" as const, what: t.id })),
 					reason: "state-based-action",
 				},
@@ -73,6 +73,7 @@ export function turnBased(table: Table): Pending | null {
 				option: {
 					id: `discard:${card.id}`,
 					label: `Discard ${card.card}`,
+					objects: [{ id: card.id, incarnation: card.incarnation }],
 					...(over > 1 ? { shows: `${over} still to go` } : {}),
 				},
 				changes: [{ do: "move" as const, what: card.id, to: "graveyard" as const, reason: "cleanup-discard" as const }],

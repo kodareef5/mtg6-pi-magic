@@ -1,9 +1,9 @@
 /**
  * A game on disk. One file per game, append-only, one JSON object per line.
  *
- * This is the stored form, not a serialisation of something else. Exporting is
- * copying it, rolling back is reading less of it, and copying a game from a
- * point is copying a prefix. docs/STATE.md says why, and what it is for.
+ * Full export copies the journal. A clone copies a prefix and replays it;
+ * public and seat exports use projections. Agreed rollback is unfinished.
+ * docs/STATE.md describes the file and visibility boundaries.
  *
  * Past 150 lines because the file, the replay over it and the two ways to copy
  * one are the same mechanism, and a reader asking "can I clone this game here"
@@ -18,6 +18,9 @@ import type { Said } from "./say.ts";
 import type { LedgerRow, Receipt, Table } from "./table.ts";
 import { project } from "./view.ts";
 import type { SeatId } from "./types.ts";
+import type { WorkEntry } from "./work.ts";
+import { advanceDraft } from "./work-tools.ts";
+import { activate } from "./procedures.ts";
 
 export type Header = {
 	/** The game id. Also the directory a published game lives in. */
@@ -37,10 +40,9 @@ export type Header = {
 };
 
 /**
- * One line after the header. `v` is the decisions answered when it was written,
- * which is the version a frame carries and the point a rollback names. A group
- * that only moves the cursor writes no receipt, because `replay` derives every
- * one of those from the picks.
+ * One line after the header. `v` counts decisions answered and names a clone
+ * point. A frame's version counts table revisions, a different number. Cursor
+ * changes write no receipt because replay derives them from the picks.
  *
  * A `prepared` line is what a model wrote before the game began: a seat's
  * brief, in whatever shape the context layer files it. It is a journal line
@@ -52,6 +54,7 @@ export type Line =
 	| { v: number; receipt: Receipt }
 	| { v: number; row: LedgerRow }
 	| { v: number; said: Said }
+	| { v: number; work: WorkEntry }
 	| { v: number; prepared: { seat: SeatId; made: unknown } };
 
 /**
@@ -102,7 +105,18 @@ export function open(path: string, header: Header): Journal {
 export function reopen(path: string, header: Header, already: Table): Journal {
 	if (!existsSync(path)) throw new Error(`No game at ${path} to resume.`);
 	const torn = repair(path);
-	return { path, header, saved: linesOf(already).length, ...(torn ? { repaired: torn } : {}) };
+	const back = read(path);
+	const rebuilt = linesOf(already);
+	const recorded = back.lines.filter((line) => !("prepared" in line));
+	// A crash inside a decision group can leave a receipt without its row, or
+	// omit a setup group that replay derives. Reconcile to the durable decisions
+	// before appending rather than skipping or duplicating reconstructed entries.
+	const reconciled = back.truncated || recorded.length !== rebuilt.length;
+	if (reconciled) writeFileSync(path, [JSON.stringify({ header }),
+		...back.lines.filter((line) => "prepared" in line).map((line) => JSON.stringify(line)),
+		...rebuilt.map((line) => JSON.stringify(line))].join("\n") + "\n");
+	const repaired = [torn, reconciled ? back.truncated ?? "Reconstructed missing derived journal entries." : null].filter(Boolean).join(" ");
+	return { path, header, saved: rebuilt.length, ...(repaired ? { repaired } : {}) };
 }
 
 export function append(journal: Journal, line: Line): void {
@@ -134,6 +148,11 @@ export function repair(path: string): string | null {
 	if (!text.length || text.endsWith("\n")) return null;
 	const end = text.lastIndexOf("\n");
 	const torn = text.slice(end + 1);
+	try {
+		JSON.parse(torn);
+		writeFileSync(path, `${text}\n`);
+		return null;
+	} catch { /* Only an incomplete JSON value is a torn line. */ }
 	writeFileSync(path, text.slice(0, end + 1));
 	return torn;
 }
@@ -146,7 +165,9 @@ export function linesOf(table: Table): Line[] {
 	for (const receipt of table.log) lines.push({ v: receipt.at, receipt });
 	for (const row of table.ledger) lines.push({ v: row.seq + 1, row });
 	for (const said of table.said) lines.push({ v: said.at, said });
-	return lines.sort((a, b) => a.v - b.v);
+	for (const work of table.workLog) lines.push({ v: work.at, work });
+	const clock = (line: Line): number => "receipt" in line ? line.receipt.clock ?? 0 : "row" in line ? line.row.clock ?? 0 : "work" in line ? line.work.clock : 0;
+	return lines.sort((a, b) => a.v - b.v || clock(a) - clock(b));
 }
 
 /**
@@ -182,7 +203,10 @@ export function read(path: string): { header: Header; lines: Line[]; truncated?:
 			truncated = `${path} ends mid line. The last entry was dropped.`;
 		}
 	}
-	return { header: opening.header, lines, ...(truncated ? { truncated } : {}) };
+	const durable = lines.reduce((last, line) => "row" in line ? Math.max(last, line.row.seq + 1) : last, 0);
+	const complete = lines.filter((line) => line.v <= durable);
+	if (complete.length !== lines.length) truncated = [truncated, `${path} ends before its decision group completed. Uncommitted entries were dropped.`].filter(Boolean).join(" ");
+	return { header: opening.header, lines: complete, ...(truncated ? { truncated } : {}) };
 }
 
 /**
@@ -200,6 +224,22 @@ export const rowsOf = (lines: Line[], upTo?: number): LedgerRow[] =>
 /** What a model prepared before the game. A clone carries it, so it is not paid for twice. */
 export const preparedIn = (lines: Line[]): { seat: SeatId; made: unknown }[] =>
 	lines.flatMap((line) => ("prepared" in line ? [line.prepared] : []));
+
+/** Equipment is private journal state, accepted once and carried through forks. */
+export function restoreWork(table: Table, lines: Line[], upTo?: number): void {
+	table.workLog = lines.flatMap((line) => "work" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.work)] : []);
+	for (const entry of table.workLog) table.work[entry.seat] = structuredClone(entry.workspace);
+	for (const row of table.ledger.filter((row) => row.execution)) {
+		const execution = row.execution!;
+		if (row.clock === undefined) throw new Error(`Executed draft step in ledger row ${row.seq} has no physical clock.`);
+		const current = table.work[row.seat];
+		if (current?.draft?.id !== execution.draft || current.draft.next !== execution.step) continue;
+		const workspace = advanceDraft(current);
+		table.work[row.seat] = workspace;
+		table.workLog.push({ seq: table.workLog.length, at: row.seq + 1, clock: row.clock, seat: row.seat,
+			actionId: execution.actionId, note: `Executed step ${workspace.draft!.next} of ${workspace.draft!.label}`, workspace: structuredClone(workspace) });
+	}
+}
 
 /**
  * Apply recorded decisions to a fresh table, in order, with the reason each one
@@ -241,7 +281,8 @@ export function relive(table: Table, rows: LedgerRow[]): Table {
 					`the table asks seat ${decision.seat} ${decision.situation}`,
 			);
 		}
-		apply(table, row.picked, row.by, row.why);
+		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why, ...(row.execution ? { execution: row.execution } : {}) });
+		else apply(table, row.picked, row.by, row.why, row.execution);
 	}
 	return table;
 }
@@ -292,8 +333,11 @@ export function replay(
 		].filter(Boolean);
 		if (drift.length) throw new Error(`${path} cannot be replayed here: ${drift.join("; ")}`);
 	}
+	const table = relive(start(header), rowsOf(lines, upTo));
+	restoreWork(table, lines, upTo);
+	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
 	return {
-		table: relive(start(header), rowsOf(lines, upTo)),
+		table,
 		header,
 		prepared: preparedIn(lines),
 	};
@@ -356,14 +400,17 @@ export function exportGame(
 	upTo?: number,
 ): string {
 	const { header, lines } = read(path);
-	const at = upTo ?? Math.max(0, ...lines.map((line) => line.v));
+	const at = upTo ?? lines.reduce((last, line) => Math.max(last, line.v), 0);
 	// The version is named in every mode. An export with no version is a claim
 	// about a moment nobody can find again.
 	const stamp = `${header.id} at version ${at}`;
 	if (how.mode === "full") {
-		return [JSON.stringify({ header }), ...lines.filter((line) => line.v <= at).map((line) => JSON.stringify(line))].join("\n");
+		return [JSON.stringify({ header }), ...lines.filter((line) => line.v <= at).map((line) => JSON.stringify(line))].join("\n") + "\n";
 	}
 	const table = relive(start(header), rowsOf(lines, at));
+	restoreWork(table, lines, at);
 	const view = project(table, how.mode === "seat" ? how.seat : "spectator");
-	return [stamp, ...view.table, ...view.yours].join("\n");
+	return [stamp, ...view.table, ...view.yours,
+		...(view.decks ?? []).map((deck) => `Registered deck for seat ${deck.seat}: ${JSON.stringify(deck.cards)}`),
+		...(view.work ? ["Your equipment:", JSON.stringify(view.work, null, 2)] : [])].join("\n");
 }

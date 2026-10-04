@@ -20,6 +20,9 @@ import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
+import type { Workspace, WorkEntry } from "./work.ts";
+import type { Instruction, Procedure } from "./work-language.ts";
+import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
 
@@ -42,7 +45,9 @@ export type ObjectId = string;
 export type Thing = {
 	id: ObjectId;
 	incarnation: number;
-	card: string;
+	/** Cards have a name; a noncard stack object holds its accepted instructions. */
+	card?: string;
+	ability?: Activation;
 	owner: SeatId;
 	controller: SeatId;
 	zone: Zone;
@@ -60,11 +65,27 @@ export type Thing = {
  * in a pool are not always interchangeable. Pools empty at every step boundary.
  */
 export type Mana = {
+	id: string;
 	color: "W" | "U" | "B" | "R" | "G" | "C";
 	/** Cavern of Souls: "spend only on a creature spell of the chosen type". */
 	spendOnly?: string;
 	persists?: boolean;
 };
+
+/** One accepted announcement. Meaning and delegation are frozen at execution. */
+export type Activation = {
+	source: ObjectRef;
+	controller: SeatId;
+	claim: string;
+	basis: string;
+	timing: Procedure["timing"];
+	cost: Procedure["cost"];
+	paid: string[];
+	instructions: Instruction[];
+	delegate: boolean;
+};
+/** A resolution can pause for its controller or another player, with no priority. */
+export type Resolution = { object: ObjectId; instruction: number; remaining: number };
 
 /** The notepad. Expires on its own; nobody has to remember to erase it. */
 export type Note = {
@@ -98,11 +119,15 @@ export type Cursor = {
 	clock: number;
 	/** Which seat's turn began when, because "too new to attack" is not derivable from the turn number. */
 	began: Record<SeatId, number>;
+	/** Identifies an actual step visit, including a repeated step in one turn. */
+	visit: number;
 };
 
 /** One committed group. Richer than a list of property writes on purpose. */
 export type Receipt = {
 	seq: number;
+	/** Absent only in journals written before physical clocks were recorded. */
+	clock?: number;
 	/**
 	 * Decisions answered when this group committed, counting the one that caused
 	 * it. The journal's version, so a fork at version zero is a table that has
@@ -121,6 +146,11 @@ export type Receipt = {
 /** Every decision and its pick. design-ref/archive/CIRCUITRY.md section 11. */
 export type LedgerRow = {
 	seq: number;
+	clock?: number;
+	/** The physical action also settles this draft step, even if a later write tears. */
+	execution?: { draft: string; step: number; actionId: string };
+	/** A prepared physical operation, recorded so replay never infers its meaning again. */
+	activation?: Activation;
 	situation: Decision["situation"];
 	seat: SeatId;
 	offered: string[];
@@ -199,6 +229,10 @@ export type Table = {
 	gaps: string[];
 	/** The mulligan round, until it settles. Null before the hands are dealt. */
 	opening: Opening | null;
+	/** Private seat equipment. Editing it never advances the physical clock. */
+	work: Record<SeatId, Workspace>;
+	workLog: WorkEntry[];
+	resolution: Resolution | null;
 };
 
 /**

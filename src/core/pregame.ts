@@ -1,10 +1,6 @@
 /**
  * Before the first turn. Core, because every kind of seat has a pregame.
  *
- * Compiling the decks is not a favour to one kind of seat: the table cannot
- * offer a legal move without knowing what the cards do, whoever is sitting
- * there. The policy map is a slot, and the record it holds is in intent.ts.
- *
  * Past 150 lines because its round procedure and choices share the same state.
  * The mulligan is here too. docs/MULLIGAN.md is the plan, the rule text, and
  * the one place where we read 103.5 differently from its literal wording.
@@ -12,34 +8,10 @@
 
 import { firstMulliganFree, mulliganLimit } from "./format.ts";
 import type { Pending } from "./moves.ts";
-import type { Policy } from "./intent.ts";
-import { compile, type Change, type Compiled, type Reason } from "./syntax.ts";
+import type { Change, Reason } from "./syntax.ts";
 import { commit } from "./commit.ts";
 import { cardsIn, type Table } from "./table.ts";
 import type { Option, SeatId } from "./types.ts";
-
-export type Prepared = {
-	/** Compiled once per distinct card name, reused all game. */
-	cards: Map<string, Compiled>;
-	/** Empty for a seat that does not want one. */
-	policies: Map<SeatId, Policy>;
-	gaps: string[];
-};
-
-export function prepare(table: Table): Prepared {
-	/*
-	 * 1. Compile every distinct card name across every deck. One pass, cached,
-	 *    because the same card in two decks is the same text.
-	 * 2. Collect the gaps. A deck with an unstructured clause still plays: the
-	 *    gap wakes when that clause would matter.
-	 * 3. Leave the policy map empty. Whoever plays a seat fills it, or does not.
-	 *
-	 * Unwritten: it needs the compiler, which is milestone two. Milestone one
-	 * plays basic lands, whose only ability the engine supplies itself.
-	 */
-	void [table, compile];
-	throw new Error("prepare is unwritten. It needs syntax.compile, at milestone two.");
-}
 
 /** Deal the opening hands and open the first declaration round. */
 export function begin(table: Table): void {
@@ -126,6 +98,7 @@ function bottomOptions(table: Table, seat: SeatId): Option[] {
 	return cardsIn(table, "hand", seat).map((card) => ({
 		id: `bottom:${card.id}`,
 		label: `Put ${card.card} on the bottom`,
+		objects: [{ id: card.id, incarnation: card.incarnation }],
 		shows: owes > 1 ? `${owes} still to go` : "the last one",
 	}));
 }

@@ -1,9 +1,8 @@
 /**
  * The game type a table runs.
  *
- * Here so that a second format is a record rather than a rewrite. Standard with
- * two seats is what the first milestone plays. Commander is next, and it
- * differs in these fields and not in the engine.
+ * Standard with two seats is the current target. These fields describe format
+ * setup; wider formats still need their gameplay rules implemented.
  */
 
 import { TURN, type Step } from "./steps.ts";
@@ -18,8 +17,7 @@ export type Format = {
 	singleton: boolean;
 	/**
 	 * The column in the card universe that decides legality. Every format in
-	 * that file is a candidate, which is why adding one is a record and not
-	 * code.
+	 * that file is a candidate for deck checking, not proof of gameplay support.
 	 */
 	legality: string;
 	deck: { minSize: number; maxCopies: number };
@@ -32,18 +30,17 @@ export type Format = {
 	 */
 	brawl?: boolean;
 	/**
-	 * Every seat hands in a deck list, so composition is public and odds are
-	 * computable. False leaves an opponent's pool unknown and the odds absent.
+	 * Public deck names and counts, without hidden object ids or library order.
+	 * Standard defaults to true. A closed-list game option can wait for v2;
+	 * odds arithmetic is unfinished.
 	 */
 	decksRegistered: boolean;
 	/**
 	 * When a seat that mulliganed puts cards on the bottom.
 	 *
-	 * `on-keep` is how Arena and every player does it: see the full hand,
-	 * decide, then bottom. `per-mulligan` is 103.5 read literally, which bottoms
-	 * as the last step of each mulligan, so the next declaration is made on a
-	 * smaller hand. Both are supported because both are defensible readings and
-	 * the difference is visible to a player. docs/MULLIGAN.md.
+	 * `on-keep` shows the full hand at declaration and bottoms after keeping.
+	 * `per-mulligan` bottoms after each redraw, so the next declaration sees a
+	 * smaller hand. Both paths are tested; see docs/MULLIGAN.md.
 	 */
 	mulliganBottom: "on-keep" | "per-mulligan";
 	/** The opening turn's steps. A proposal: an effect may edit it mid walk. */
@@ -74,7 +71,7 @@ export const standard: Format = {
 };
 
 /**
- * Next, and unwritten. The fields above already carry 40 life, a command zone,
+ * Commander remains unwritten. The fields above already carry 40 life, a command zone,
  * singleton decks, a seat range up to eight and its own legality column. What
  * is missing is engine work: the commander tax, damage counted per commander,
  * and a seat leaving without ending the game. So this stays absent until it is

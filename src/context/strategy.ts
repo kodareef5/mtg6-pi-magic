@@ -1,48 +1,17 @@
-/**
- * Designing the context for one phase.
- *
- * The per-turn calls are mostly this. A classifier executes well and does not
- * strategise, so the thinking happens here and what reaches the decision is a
- * short plan plus the facts. Handing the classifier everything known about the
- * game and hoping for a good answer is the failure mode this file exists to
- * avoid: it is smart, and it is not going to work out a line.
- *
- * What a seat gets is therefore layered, cheapest first:
- *
- *   the brief      written once before the game, injected by window
- *   the recaps     two or three public sentences about recent turns
- *   this file      a plan for the phase about to happen, when one is worth it
- *   the packet     the facts and the options, built by the core
- *
- * A phase plan is worth a call when the phase has a choice that can lose the
- * game. Most phases of most turns do not, which is why `worthPlanning` is
- * mechanical and runs before any money is spent.
- *
- * The classifier is asked to execute and to notice. Its routes out, in
- * `packet.ts`, are how it says the board does not match the plan, which is the
- * one thing it must be able to do that executing cannot cover.
- */
-
-import type { Intent } from "../core/intent.ts";
+/** Expensive thought produces editable recipes and appointments, only on request. */
 import type { Table } from "../core/table.ts";
 import { nextDecision } from "../core/decisions.ts";
 import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
+import { CommandsSchema, commands, type WorkCommand } from "../core/work-language.ts";
+import { prepareWork } from "../core/work-tools.ts";
 import type { Brief } from "./brief.ts";
 import type { Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
+import { workContext } from "./packet.ts";
+import type { Universe } from "../core/cards.ts";
 
-/**
- * Is this phase worth a plan?
- *
- * Mechanical and free. A phase with no priority window, or one whose only
- * pending decision has a single option, is a phase the table will walk through
- * without asking anybody, and a plan for it is a plan nobody reads.
- *
- * This is the lever that decides the cost of a game. At milestone one almost
- * every phase fails it, which is correct: a deck of lands has one decision a
- * turn and it does not need a paragraph.
- */
+/** The old mechanical planning estimate remains useful for comparing call policies. */
 export function worthPlanning(table: Table): boolean {
 	const step = table.cursor.steps[0];
 	if (!step || table.outcome || !STEPS[step].priority) return false;
@@ -51,46 +20,49 @@ export function worthPlanning(table: Table): boolean {
 }
 
 const SYSTEM = [
-	"You are planning one phase for one seat of a game of Magic: The Gathering.",
-	"",
-	"Write the order of operations for this phase, what it keeps available for",
-	"later, and what on the board would mean doing something else. Short. The seat",
-	"reads it next to a list of legal moves and has to act in seconds.",
-	"",
-	"What your answer does not promise. The board can change before the plan is",
-	"used, an opponent holds cards you cannot see, and a move you do not mention",
-	"stays legal. A plan is a prior. Name the one thing that would make you abandon",
-	"it rather than hedging every line.",
-	"",
-	"No preamble, no headings. Prose, three or four lines.",
+	"Prepare a stretch of play for one seat of Magic: The Gathering.",
+	"The classifier executes your guidance and recognizes your prepared branches.",
+	"Give an objective, editable recipes, resource purposes, and scheduled reviews.",
+	"Consider order, plausible opposing responses, and later turns where they matter.",
+	"A check schedules attention, never unconditional execution. A label is a claim about a role.",
+	"Use task.put to schedule checks; times counts distinct actual matching step visits.",
+	"Omitting times repeats indefinitely. after schedules a follow-up after another check's run count.",
+	"fromTurn and throughTurn use the table's global turn numbers, not rounds or your own turns.",
+	"Recipe steps bind listed options, or prepare a procedure from a visible permanent with a claim and its basis.",
+	"A procedure can pay unrestricted colored and generic mana, tap its source, and add mana, draw, change life, or choose one card to move.",
+	"Immediate mana procedures only add mana. Other procedures use the stack and expose each remaining instruction on resolution.",
+	"Set delegate only when this seat authorizes unique resolution continuations to run without another classifier call. It cannot authorize another seat's choice.",
+	"This vocabulary cannot cast spells, recognize triggers, apply replacements, choose targets, or verify that the claimed card meaning is correct.",
+	"Instruction amounts are literals. Values that must be computed later need machinery this vocabulary does not yet have.",
+	"Copy the relevant card instruction or accepted ruling into basis. Accepted meaning remains frozen through replay and cloning.",
+	"Card facts cover visible objects and public registered lists. Deck counts do not identify another hand or the library order.",
+	"Claim, basis, cost and instructions become public when a procedure is executed. Keep private strategic guidance in the recipe.",
+	"A reservation is a preference to preserve a visible object incarnation, not a rules restriction.",
+	"An opponent can invalidate it. Give guidance about what would require reconsideration.",
+	"Tool shape validation proves neither rules legality nor a good plan. Unmentioned plays stay available.",
+	"You may use task.put, task.cancel, recipe.put, label.put, label.remove, draft.edit, draft.cancel, and plan.accept.",
+	"Finish with exactly one plan.accept. Do not answer reviews or execute moves for the classifier.",
+	"Return a JSON array of tool commands only, with no markdown. This is the tool schema:",
+	JSON.stringify(CommandsSchema),
 ].join("\n");
 
-/**
- * Plan the phase about to happen.
- *
- * Unwritten past the prompt, because what makes a phase plan worth its tokens
- * is the structured alternatives in `plan.preparePhase`, and those need cards
- * with abilities to be alternatives at all. Until then `worthPlanning` is false
- * on nearly every phase of a land game and this is not reached.
- *
- * The steps, when it is written:
- *
- * 1. Return the previous intent unchanged when its phase matches and its
- *    recorded assumptions still hold mechanically, with no call at all. A phase
- *    boundary is not a reason to spend money.
- * 2. Ask one question with the brief's snippet for this window, the recaps, and
- *    the projected board. Not the log and not another seat's anything.
- * 3. Read two or three alternatives out of the answer, each with its order and
- *    what it reserves, and record what would reopen the choice. Other legal
- *    lines stay reachable: the plan ranks, it does not restrict.
- * 4. Write it to the seat's `Intent.phase` with the turn and phase stamped, so
- *    `focus` can refuse to apply it to a phase it was not written for.
- */
-export async function planPhase(
-	frame: Frame,
-	context: { brief?: Brief; recaps?: readonly Recap[]; previous?: Intent },
-	reasoner: Reasoner,
-): Promise<Intent> {
-	void [frame, context, reasoner, SYSTEM];
-	throw new Error("planPhase is unwritten. Four steps above, and step 1 is the one that saves money.");
+const ALLOWED = new Set(["task.put", "task.cancel", "recipe.put", "label.put", "label.remove", "draft.edit", "draft.cancel", "plan.accept"]);
+
+export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Reasoner): Promise<WorkCommand[]> {
+	if (!frame.view.work?.request) throw new Error("Strategy needs an explicit request.");
+	const user = JSON.stringify({
+		seat: frame.seat, request: frame.view.work.request,
+		view: { ...frame.view, work: { ...workContext(frame.view.work), recipes: frame.view.work.recipes, draft: frame.view.work.draft } },
+		options: frame.decision?.options, brief: context.brief,
+		cards: [...new Set([...(frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []),
+			...(frame.view.decks ?? []).flatMap((deck) => Object.keys(deck.cards))])]
+			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, oracle: card.oracle }] : []; }),
+		recaps: context.recaps?.slice(-3), refused: frame.refused,
+	});
+	const tools = commands(JSON.parse(await reasoner.think("seat plan", { system: SYSTEM, user })));
+	if (tools.some((tool) => !ALLOWED.has(tool.do)) || tools.filter((tool) => tool.do === "plan.accept").length !== 1 || tools.at(-1)?.do !== "plan.accept") {
+		throw new Error("Strategy must use preparation tools and finish with exactly one plan.accept.");
+	}
+	prepareWork(frame, tools);
+	return tools;
 }

@@ -1,6 +1,9 @@
 # The wire
 
-`pi-magic/0`. Seven messages over one WebSocket per guest, JSON per frame.
+The proposed `pi-magic/0` protocol uses seven messages over one WebSocket per
+guest, JSON per frame. Message types and pick validation exist; socket hosting,
+joining and the pending-player adapter are unfinished. This document describes
+the intended wire behavior, not an available hosting command.
 
 The host owns the game. A guest sends a pick and reads frames. There is no
 negotiation, no state sharing between guests, and no path by which a guest
@@ -19,7 +22,7 @@ for somebody else.
 
 The secret sits after the `#`. A URL fragment is not sent as part of an HTTP
 request, so an invite can travel through a link, a proxy or a log line that
-records request paths without handing over the secret. This version dials a
+records request paths without handing over the secret. The proposed transport dials a
 WebSocket directly, where that does not yet matter. The shape is kept because
 the moment an invite passes through anything HTTP shaped, it does.
 
@@ -76,9 +79,9 @@ and no turn timer.
 
 ## What a frame deliberately does not carry
 
-The changes behind an option. A seat sees a label, and the arithmetic where a
-bare number would not be checkable. It does not see what the move does to the
-state, because a seat that can read the changes can read another seat's cards.
+Hidden identities and executable changes behind an option. A seat sees the
+source, stated costs, effects and arithmetic needed to compare choices.
+Registered deck counts are public; they do not reveal hands or library order.
 
 ## Not in this version
 

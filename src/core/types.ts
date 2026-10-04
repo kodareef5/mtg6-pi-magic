@@ -6,8 +6,11 @@
  */
 
 import type { Phase, Step } from "./steps.ts";
+import type { SeenObject, Workspace } from "./work.ts";
+import type { Mana, Resolution } from "./table.ts";
 
 export type SeatId = number;
+export type ObjectRef = { id: string; incarnation: number };
 
 /** Derived from the table when projecting. An opening is not an untap step. */
 export type Window =
@@ -35,18 +38,17 @@ export type Situation =
 	| "pregame";
 
 /**
- * One move the engine already built and checked. `id` is stable so a pick
- * replays. `shows` carries the arithmetic where a bare number would not be
- * checkable: "four power, the first blocker needs two because it already has
- * one marked, so two and two".
- *
- * What the move changes is not here. A player picks an id and never writes a
- * motion, an amount, a target or a cost.
+ * One offered choice. Stable ids let a pick replay; shows explains the source,
+ * cost and effect without requiring a reader to decode the id. Listing checks
+ * resources and visibility, not whether a card permits a prepared procedure.
+ * Executable changes stay in core, outside the classifier's option list.
  */
 export type Option = {
 	id: string;
 	label: string;
 	shows?: string;
+	/** Visible objects this option binds. Ids are opaque; consumers never parse them. */
+	objects?: ObjectRef[];
 };
 
 /** Options are canonically ordered, so a seed plus the picks replays the game. */
@@ -57,6 +59,8 @@ export type Decision = {
 	options: Option[];
 	/** An offered option that safely ends this decision after two unusable answers. */
 	fallback?: string;
+	/** Accepted permission for a unique effect continuation, never rules force. */
+	delegated?: boolean;
 };
 
 /**
@@ -73,6 +77,18 @@ export type SeatView = {
 	yours: string[];
 	/** What happened since this seat's last frame, as a player would say it. */
 	since: string[];
+	/** Visible objects only; unknown public identities have no card field. */
+	objects?: SeenObject[];
+	/** Registered composition is public. Counts carry no object ids or hidden order. */
+	decks?: { seat: SeatId; cards: Record<string, number> }[];
+	/** Actual step visit. A repeated combat is a new scheduling opportunity. */
+	visit?: number;
+	/** Only this seat's equipment. A spectator receives none. */
+	work?: Workspace;
+	/** Mana is public. Stable ids distinguish individual units in a payment. */
+	pools?: { seat: SeatId; mana: Mana[] }[];
+	/** The remaining instruction cursor, without any hidden library identities. */
+	resolution?: Resolution;
 };
 
 /** What a seat is shown at one moment. A decision means it is this seat's turn. */

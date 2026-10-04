@@ -21,7 +21,7 @@ import type { Frame, SeatView, Viewer, Window } from "./types.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
-const publicName = (thing?: Thing) => visible(thing) ? thing.card : "an unknown card";
+const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.ability?.claim ?? "an unnamed object" : "an unknown card";
 
 function window(table: Table): Window {
 	if (table.outcome) return { kind: "finished" };
@@ -42,9 +42,9 @@ function window(table: Table): Window {
  * seat's behalf.
  *
  * Hidden things keep their shape. Six unknown cards in an opponent's hand are
- * six unknown cards: not nothing, not six names. A seat's knowledge is what it
- * has legitimately seen, minus what has since been hidden, plus what is public.
- * Shuffling a revealed card away leaves the knowledge that it is in there.
+ * six unknown cards. Registered deck counts are public, but carry no object
+ * ids or hidden order. Remembered reveals and known library positions still
+ * need the knowledge transitions in knowledge.ts.
  *
  * A spectator has no private entitlements, so its view is the publishable one.
  * Everything a game puts on a URL comes through here first. Publishing the
@@ -74,6 +74,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			lines.push(`  ${opening?.taken[s.id] ?? 0} mulligans; ` +
 				(opening?.kept.includes(s.id) ? "kept" : opening?.declared[s.id] ?? "has not declared"));
 		}
+		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${mana.spendOnly})` : ""}${mana.persists ? " (persists)" : ""}`).join(", ")}`);
 	}
 	for (const permanent of cardsIn(table, "battlefield")) {
 		const marks = [
@@ -110,7 +111,21 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
-	return { window: at, table: lines, yours, since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
+	const objects = [...table.things.values()]
+		.filter((item) => PUBLIC.has(item.zone) || (viewer !== "spectator" && item.zone === "hand" && item.owner === viewer))
+		.map((item) => {
+			const { card, ...facts } = structuredClone(item);
+			return item.faceDown ? facts : { ...facts, card };
+		});
+	if (table.resolution) lines.push(`Resolving ${table.resolution.object}, instruction ${table.resolution.instruction + 1}. Nobody has priority during this choice.`);
+	return { window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
+		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id,
+			cards: Object.fromEntries([...new Set(deck)].sort().map((name) => [name, deck.filter((card) => card === name).length])),
+		})) } : {}),
+		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
+		...(at.kind === "turn" ? { visit: table.cursor.visit } : {}),
+		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]) } : {}),
+		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
 }
 
 /**
@@ -128,8 +143,8 @@ export function describe(table: Table, receipt: Receipt): string {
 				if (change.action === "declare") parts.push(`${seat(table, change.who).name} declared ${change.choice}`);
 				break;
 			case "move": {
-				// A token that left the battlefield has no `after`, so the owner
-				// and the name come from what the table saw before the group.
+				// Removed objects have no after snapshot. Keep their event-time
+				// identity from before the group.
 				const was = receipt.before[change.what];
 				const moved = receipt.after[change.what] ?? was;
 				if (!moved) break;
@@ -141,6 +156,18 @@ export function describe(table: Table, receipt: Receipt): string {
 			case "tap":
 			case "untap":
 				parts.push(`${change.do}ped ${publicName(receipt.before[change.what])}`);
+				break;
+			case "activate":
+				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : "on the stack"})`);
+				break;
+			case "add-mana":
+				parts.push(`${seat(table, change.who).name} added ${change.colors.join(" ")}`);
+				break;
+			case "spend-mana":
+				parts.push(`${seat(table, change.who).name} spent ${change.ids.join(", ")}`);
+				break;
+			case "resolution":
+				if (change.action === "begin") parts.push(`Begin resolving ${publicName(receipt.before[change.what])}`);
 				break;
 			case "shuffle":
 				parts.push(`${seat(table, change.whose).name} shuffled`);
@@ -178,7 +205,16 @@ export function render(frame: Frame): string {
 		...frame.view.table,
 	];
 	if (frame.view.yours.length) out.push("", ...frame.view.yours);
+	for (const deck of frame.view.decks ?? []) out.push(`Registered deck for seat ${deck.seat}: ${Object.entries(deck.cards).map(([name, count]) => `${count} ${name}`).join(", ")}. Counts do not identify a hand or library order.`);
 	if (frame.view.since.length) out.push("", "Since your last look:", ...frame.view.since.map((l) => `  ${l}`));
+	if (frame.view.work) {
+		const work = frame.view.work;
+		out.push("", `Your equipment, revision ${work.revision}:`,
+			...(work.objective ? [`Objective: ${work.objective}`] : []),
+			...work.tasks.map((task) => `Check ${task.id}: ${task.label}; ${JSON.stringify(task.when)}; ${task.runs.length} assessed${task.cancelled ? "; cancelled" : task.expired ? "; expired" : ""}`),
+			...(work.draft ? [`Draft ${work.draft.label}: ${work.draft.next}/${work.draft.steps.length} executed, ${work.draft.status}${work.draft.bound ? `, bound ${work.draft.bound}` : ""}`] : []),
+			...(work.request ? [`Strategy requested: ${work.request}`] : []));
+	}
 
 	if (!frame.decision) {
 		out.push("", "Not your turn to act.");
@@ -196,6 +232,6 @@ export function render(frame: Frame): string {
 		if (option.shows) out.push(`      ${option.shows}`);
 	}
 	out.push("", "Answer with one listed option id. The view may be stale; an accepted pick is not a resolved effect.");
-	out.push("Declarations, objections, delegation and option widening are not implemented yet.");
+	out.push("Prepared procedures can execute and delegate unique continuations. Raw declarations, objections, free-form delegation and option widening remain unwritten.");
 	return out.join("\n");
 }

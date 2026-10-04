@@ -1,52 +1,36 @@
 # pi-magic
 
-A Pi package that runs a table of Magic.
+A Pi package that runs a table of Magic. Core owns the seats, zones, mana,
+stack, decisions and journal. Decision context gives each model seat the facts
+and guidance for its current choice.
 
-pi-magic owns the table: the game type, the seats in turn order, a deck and
-zones per seat, the mana pools, the stack, the legal moves, and the log. The
-core also works out the facts any seat wants, such as the summary, the mana
-curve and the odds a seat may infer from what it knows.
+Basic-land games finish through ordinary opening and turn procedures. Prepared
+ability experiments add source binding, tap and mana payments, stack responses,
+and draw/discard resolution. Accepted instructions survive replay and cloning.
+These experiments check execution and accounting; they do not certify card
+interpretation or playing strength.
 
-A seat is answered by a player. For a seat answered by a decision model, a
-separate decision context engine chooses which slice of the game that one
-decision needs and carries the guidance that keeps the choice coherent with the
-turn. A seat taken by a person, a remote agent or an MCP client loads none of
-that and plays through the same interface.
+Registered deck lists are public by default. Every seat can read card counts;
+hands and library order remain hidden. Odds and knowledge transitions are
+unfinished. A v2 game option may support closed lists; no new settings interface
+is needed now.
 
-```
-/magic play [seed]       run a game between two AI seats
-/magic step              show the next decision as the seat about to answer it reads it
-/magic log               decisions asked against decisions forced, and events committed
-/magic cards [format]    rebuild a card list, or `universe` for all of them
-```
-
-`cards/standard.tsv` ships with the package: 5164 rows of name, cost, type,
-stats and oracle text, every field checked against Scryfall. A game needs
-nothing downloaded.
-
-## State
-
-Early, and specific. The table, the decision list, the view and the game loop
-exist as running control flow with unwritten leaves. A card is a name and
-nothing else, so the first game is lands, passes, draws and mulligans, which is
-what proves the loop and the ledger. `AGENTS.md` holds the build order and the
-list of what is missing.
-
-Seats over a socket are written and parked in `src/seating/`, waiting on the
-games being good.
-
-`design-ref/` is the design of the game itself, written before this repo and
-unchanged by it.
-
-## Simulation
+## Commands
 
 ```
-node tools/sim.ts -n 100 -j 4
-node tools/sim.ts --from games/1759.jsonl@42 -n 20
+/magic play [seed]           run a basic-land game between two model seats
+/magic play [seed] circuits  enable strategy preparation and scheduled reviews
+/magic step                 show the current seat's next decision
+/magic work [seat]           inspect private drafts and the agenda
+/magic log                   show decision reasons, events and gaps
+/magic clone <game> <v> <id>  copy a journal through decision version v
+/magic resume <id>           replay a journal and continue
+/magic cards [format]        rebuild a card list, or universe for every format
 ```
 
-The core imports nothing from Pi, so games run from a plain script. A frozen
-benchmark setup is a journal prefix, which is what `--from` takes.
+`cards/standard.tsv` ships with 5164 rows of name, cost, type, stats and Oracle
+text, checked against Scryfall when generated. Play needs no card download.
+Socket hosting, joining and the bulk runner in `tools/sim.ts` are unfinished.
 
 ## Install
 
@@ -61,6 +45,30 @@ Pi 1.0 or newer. Checked against the extension API in
 
 ```
 npm install
-npm test      # invariants
-npm run check # types
+npm test
+npm run check
+npm run circuits -- --out .pi/circuit-review --quiet
 ```
+
+The offline scenarios preserve a reserved card, recover after losing it, and
+exchange two Qiqirn Merchant activations. Open `.pi/circuit-review/index.html`
+for their timelines and public board snapshots. Strategy and classifier calls
+use authored doubles. `npm run smoke` uses real models and costs money.
+
+[The equipment contract](docs/WORK.md) describes private preparation, physical
+execution, resolution and their current limits. [Game state](docs/STATE.md)
+describes journals, clones and exports. `AGENTS.md` holds the invariants and
+build order; `design-ref/` retains earlier designs and measurements.
+
+## Next milestone
+
+Play two selected real Standard lists. First pin the lists, legality date,
+card data and rules, then inventory the mechanics those lists require. Games
+must start from ordinary deck setup, reach outcomes without missing-machinery
+gaps, and replay or clone correctly. Deck legality and gameplay legality need
+separate checks. Established-board fixtures and passing over unsupported cards
+do not meet this target.
+
+Casting, targets, combat, triggers, continuous effects, replacements, and
+objections with remedies still need work. Decision-packet capture and model
+evaluation are also needed before comparing playing strength.

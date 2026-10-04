@@ -1,23 +1,9 @@
-/**
- * The card language, and the compiler that fills it in.
- *
- * Everything a card does, it does as a Change. Tapping a land to pay a cost,
- * dealing three damage, drawing a card, putting a counter on a creature: one
- * kind of object, differing only in who authorised it and when. A cost is a
- * list of Changes the actor completes before acting, an effect is a list that
- * happens on resolution, and that single idea is why the vocabulary is about 66
- * shapes rather than hundreds. design-ref/archive/SYNTAX.md.
- *
- * This is core. A seat played by a person, a remote agent or an MCP client
- * still needs the table to know what a card does.
- *
- * Past 150 lines because it is one vocabulary. Zones, reasons, motions, ability
- * shapes and layers are the terms a card is written in, and a reader checking
- * whether a motion carries its reason should not have to find which of five
- * files holds the answer.
+/** Physical changes, their reasons, and the layer vocabulary. Prepared procedures
+ * supply instructions as needed; the table never compiles a deck's card text.
  */
 
 import type { SeatId } from "./types.ts";
+import type { Activation, Mana } from "./table.ts";
 
 /**
  * The seven zones, plus two places we track as their own.
@@ -48,6 +34,7 @@ export type Zone =
  */
 export type Reason =
 	| "cast"
+	| "activate"
 	| "play-land"
 	| "resolve"
 	| "draw"
@@ -76,6 +63,11 @@ export type Change =
 	| { do: "opening"; action: "bottom"; who: SeatId }
 	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason }
 	| { do: "tap" | "untap"; what: string }
+	| { do: "add-mana"; who: SeatId; colors: Mana["color"][] }
+	| { do: "spend-mana"; who: SeatId; ids: string[] }
+	| { do: "activate"; what: string; id: string; ability: Activation }
+	| { do: "resolution"; action: "begin"; what: string }
+	| { do: "resolution"; action: "next"; what: string; skip?: boolean }
 	| { do: "shuffle"; whose: SeatId }
 	/**
 	 * A counter or flag that belongs to a seat rather than a card: poison,
@@ -85,29 +77,6 @@ export type Change =
 	| { do: "mark-player"; who: SeatId; key: string; add: number }
 	| { do: "change-life"; who: SeatId; amount: number; reason: Reason }
 	| { do: "end-game"; who: SeatId; result: "win" | "lose" | "draw" };
-
-/**
- * The five ability shapes. A spell is an activated ability whose cost includes
- * its mana cost; keeping it separate is a convenience, not a distinction. A
- * mana ability is detected structurally rather than guessed: its effect adds
- * mana, it has no target, and it is not a loyalty ability. That detection is
- * one of the concrete things this layer buys, because it decides whether an
- * opponent can respond.
- */
-export type Ability =
-	| { kind: "spell"; cost: unknown; effect: Change[] }
-	| { kind: "activated"; cost: unknown; effect: Change[]; timing?: unknown; limit?: unknown }
-	| { kind: "triggered"; on: unknown; condition?: unknown; effect: Change[]; limit?: unknown }
-	| { kind: "static"; affects: unknown; modification: unknown; condition?: unknown }
-	| { kind: "replacement"; on: unknown; instead: Change[] };
-
-/**
- * The `unknown` fields above are the rest of the language, and its size is
- * measured rather than guessed: 31 event kinds cover 99.19% of every trigger in
- * Standard, with 17 selector properties, 10 operators and 8 amount forms.
- * design-ref/EXPRESSION-COVERAGE.md. They arrive at milestone two, typed, not
- * as a loose bag.
- */
 
 /**
  * Where a continuous effect applies in the layer walk. 613 fixes the order and
@@ -139,41 +108,3 @@ export type Layer =
 	| "7c-modify"
 	/** Effects that switch power and toughness. 613.4d. */
 	| "7d-switch";
-
-export type Compiled = {
-	card: string;
-	abilities: Ability[];
-	/** Spans that could not be structured. The game continues and records them. */
-	gaps: string[];
-};
-
-/**
- * Fill the forms by interrogation, never by generation.
- *
- * A model is asked narrow closed questions whose answers are picks from a list.
- * It is never asked to emit the whole record. That is the difference between a
- * checkable answer and a plausible one, and it is the entire reason this layer
- * exists: a model that would have invented a second green mana cannot, because
- * no question has that in its answer space.
- */
-export function compile(card: string, text: string): Compiled {
-	/*
-	 *  1. Split the text into clauses and inventory them. A clause classified as
-	 *     flavour is still an interpretation and stays attributable.
-	 *  2. Per clause, in order: which shape, which event kind, which event
-	 *     modifiers, which cost components, which effect motions, each motion's
-	 *     selector, each amount's form, timing and limits, any decision points,
-	 *     and for a static ability which layer.
-	 *  3. Check the filled form before anything can move: every enumeration
-	 *     value exists, every binding resolves to one declared earlier in the
-	 *     same effect, every target is reachable from the actor's view, a mana
-	 *     ability has no target and no stack use, costs and effects do not
-	 *     consume the same thing twice, and a static modification names a layer.
-	 *  4. Cache by card name. Reuse accepted facts across incarnations, but
-	 *     rebind anything dynamic, such as a chosen type, for the new object.
-	 *  5. A clause that will not structure is recorded as a gap, not a crash.
-	 *     The gap log is the backlog for the next version of the language.
-	 */
-	void [card, text];
-	throw new Error("compile is unwritten. Five steps above, and it interrogates.");
-}

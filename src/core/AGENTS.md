@@ -2,26 +2,31 @@
 
 The game system. Everything a seat needs no matter who is playing it.
 
-- **The syntax compiler.** A card's structured abilities, filled in by
-  interrogation. A person at a seat needs the table to know what a card does.
+- **The motion vocabulary and circuits.** Generic operations and editable
+  player equipment. Prepared procedures carry accepted instructions as needed;
+  there is no per-card compiler. docs/CIRCUITS.md states the architecture.
 - **The state.** Objects and their incarnations, the seven zones, life, the mana
   pool as a bag of individual mana, stack order, the notepad, the log.
 - **The judge.** Rules questions, repairs, and the ruling of last resort, with
   the Comprehensive Rules on disk so a ruling can cite rather than assert.
 - **The derived facts.** The summary, the mana curve, each seat's knowledge, and
-  the odds it may work out from that knowledge. A person wants these as much as
+  the odds it may work out from that knowledge. Their general readers and
+  knowledge transitions are unfinished. A person wants these as much as
   a model does.
-- **The pregame.** Compiling the decks, the mulligan procedure, and a slot for
+- **The pregame.** The mulligan procedure and a slot for
   each seat's policy. `docs/MULLIGAN.md` is its plan.
 - **The intent.** What a seat means to do at deck, turn and phase level. Held
   here and readable by whoever holds the seat. Never consulted for legality.
+- **The equipment.** Drafts, labels and scheduled reviews, private to a seat.
+  `work-tools.ts` accepts edits atomically, with a revision separate from the
+  physical clock. `docs/WORK.md` states the current tool and timing contract.
 - **The decisions.** What is pending, the option list, legality, the turn.
 - **The format.** Seat counts, starting life, hand size, singleton, the command
   zone, and which legality column decides what may be played. A second format is
   a record here before it is code anywhere.
 - **The card universe.** Every card's cost, type, oracle text and legality,
-  read from the file the generator writes. The compiler's source and the deck
-  check's authority are the same file, so they cannot disagree.
+  read from the file the generator writes. Strategy receives that text only
+  for visible identities; deck checks use the same source.
 - **Conceding, and table talk.** One is a recorded event, the other is beside
   the log because it changes nothing.
 
@@ -29,8 +34,8 @@ Read the root `AGENTS.md` first. These are the invariants code here must not
 break, and the reason each one exists.
 
 Two directories sit outside the core and nothing here imports from them.
-`src/context/` prepares questions for a decision model. `src/seating/` carries
-a seat over a socket.
+`src/context/` prepares questions for a decision model. `src/seating/` defines
+the remote protocol; its socket host and client remain unfinished.
 
 ## Enforce conservation, not rules
 
@@ -91,6 +96,12 @@ State based actions and waiting triggers are handled before anybody receives
 priority. A step that cannot be detected without card meaning is absent rather
 than faked, and that absence is wrong the moment a card has a trigger.
 
+A resolving effect continues before those checkpoints. Its remaining
+instructions and locked terms live in the table, and a choice can pause it
+without giving anyone priority. Only completion returns to state-based checks
+and then the active player's priority. One continuation is delegated only when
+the accepted procedure explicitly says so; it is never forced by a shortlist.
+
 Listing a forced action does not apply it. The loop applies the listed group
 and asks again to discover cascading actions. Cleanup likewise remains pending
 after a discard while the hand still exceeds its limit.
@@ -130,6 +141,10 @@ There is no second `done` flag to keep in step with those facts.
 `project` in view.ts is the only thing that reads the table on a seat's behalf.
 If a fact is hard to project safely, leave it out and let the seat ask, rather
 than sending it and filtering afterwards.
+
+Registered deck names and counts are public by default. This does not expose
+hidden object identities or library order. Future odds read the viewer's earned
+knowledge, not the actual hidden arrangement.
 
 A seat's own private information goes to that seat. Another seat's private
 information goes nowhere: not to a log, not to a watcher, not to a model acting
@@ -180,6 +195,11 @@ choice, or concession to make that case finish.
 An ask or delegation whose handler is unwritten also leaves the decision pending
 with a gap. It must not start an unbounded loop of unchanged questions.
 
+Accepted equipment edits have a per-version budget too. Exhaustion leaves the
+decision pending with an explicit budget gap. It never turns navigation into a
+pass, an approved review, or an abandoned draft. Accepted edits survive resume
+and count toward the same budget.
+
 Three things that look like helpfulness and are not. Completing an invalid
 selection from whatever is left. Treating a failed operation as the seat's
 decision. A configured cap that stops a seat early and then reads as though the
@@ -210,6 +230,12 @@ it lands in the log or is derivable from a recorded decision, because a fact
 kept anywhere else is a fact a replay invents. And the journal is private: it
 holds every hand and every library, so what gets published is a projection of
 it and never the thing itself.
+
+Private equipment has a separate commit boundary in `work-tools.ts` and its own
+journal entries. Those edits cannot write a physical fact or advance priority.
+An executing ledger row identifies the draft step it settles, so recovery can
+finish the equipment update if its later snapshot was torn. Never restore
+readiness as though it were execution.
 
 `relive` is replay: recorded decisions applied in order with the reason each one
 carried. It drives from the ledger and not from scripted players, because a

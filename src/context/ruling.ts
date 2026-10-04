@@ -24,7 +24,7 @@
  * verdict rather than inventing a repair.
  *
  * After a ruling the phase plan is stale by construction: it was written for a
- * board that the ruling just changed. `strategy.planPhase` runs again, and that
+ * board that the ruling just changed. `strategy.planWork` is requested, and that
  * is a consequence of a ruling rather than a step in it.
  */
 

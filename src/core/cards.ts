@@ -6,8 +6,9 @@
  * when a set releases. `tools/cards.ts` rebuilds it and can write any format or
  * the whole 32,870 card universe. Nothing here downloads anything.
  *
- * Two things read it. Deck legality, which is the whole reason a format names a
- * column. And the syntax compiler, which needs the oracle text as its source.
+ * Deck checks read legality, which is why a format names a column. Strategy
+ * receives oracle text for identities in its seat's view as the source for
+ * prepared instructions.
  *
  * A file filtered to one format is that format's legality set by construction:
  * a card missing from it is not legal, and checkDeck says so by name.

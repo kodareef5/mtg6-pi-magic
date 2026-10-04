@@ -1,7 +1,9 @@
-# Zones, identity, and the funny corners
+# Zones and identity
 
-What the engine knows about where things are, and the places that do not behave
-like the other five. Rule numbers point at `rules/cr.tsv`.
+The table stores zones, order and object incarnations. These notes also cover
+rules still awaiting implementation: exile piles and permissions, characteristic
+layers, dungeons and general knowledge transitions. Rule numbers refer to
+`rules/cr.tsv`.
 
 ## The engine knows everything, and a seat does not
 
@@ -103,11 +105,10 @@ fit any of the usual shapes.
   removes the dungeon from the game, 309.5b, and that is what completing a
   dungeon means, 309.7.
 
-We give dungeons their own zone rather than a flag on the command zone, and
-`outside` likewise. Two extra members on one type, no new mechanism, and every
-other rule stays simple. The venture marker is an ordinary notepad marker, the
-same one a monstrous creature uses, so a dungeon needs nothing built for it
-beyond being allowed to exist.
+`syntax.ts` currently names `dungeon` and `outside` separately. Dungeon play is
+unimplemented; before using that shape, reconcile it with the command-zone rules,
+room triggers and completion procedure. A zone member alone supplies none of
+those behaviors.
 
 Expect carve-outs. Some cards will not fit the bucket, and the answer is to
 carve one out and record it in the gap log rather than to grow a third
@@ -115,9 +116,10 @@ mechanism.
 
 ## Other corners, briefly
 
-**Tokens**, 111. A token exists only on the battlefield. One that leaves ceases
-to exist, which is not exile: nothing returns it and nothing sees it elsewhere.
-It is still a zone change, so leave-the-battlefield triggers fire.
+**Tokens**, 111.7-8. A token that leaves reaches its destination, cannot move
+again, and ceases to exist at the next state-based check. Triggers can see the
+zone change. Token lifecycle and zone-change trigger handling remain
+unfinished.
 
 **The stack is a zone**, 405, and the things on it are objects. A copy of a
 spell exists there and never existed as a card. A spell that resolves leaves the
@@ -125,9 +127,10 @@ stack, which is a zone change, which is why a permanent entering the battlefield
 is a new object from the spell that made it.
 
 **Face-down permanents**, 708. The physical stats of a face-down permanent are
-public; its identity is not. A face-down creature is a 2/2 with no name, no
-types beyond creature, and no abilities, and that is its actual characteristics
-rather than a mask over them.
+public; its identity is not. The rule or effect that turns it face down defines
+its characteristics. The default is a 2/2 creature with no other characteristics
+unless the ability or rules specify otherwise. Characteristic derivation remains
+unfinished.
 
 **Double-faced cards**, 712, have a front and a back face, and which face is up
 decides the characteristics. In a library or a hand it is the front face.
@@ -135,14 +138,16 @@ decides the characteristics. In a library or a hand it is the front face.
 ## What this means for the three readers
 
 **Projection**, `view.ts`. Exile is public except for face-down piles, so a seat
-sees pile sizes and how they were made. A library is a count. A hand is a count
-for everyone but its owner.
+must eventually see pile sizes and permitted identities. The current projection
+hides every face-down identity and does not yet implement examination
+permissions. A library is a count. A hand is a count for everyone but its owner.
+Registered deck composition is public independently of those hidden objects.
 
 **Knowledge**, `knowledge.ts`. The bottom of a library after a mulligan, a
 scried card, a revealed hand: all of them are known contents at known or
-unknown positions, which is what a region is for. Exile needs nothing here,
-because face-up exile is public and face-down exile has no characteristics to
-know.
+unknown positions, which is what a region is for. A player allowed to examine
+face-down exile keeps that permission until the card leaves or its pile is
+shuffled, per 406.3. These knowledge transitions remain unfinished.
 
 **The journal**, `journal.ts`. It holds the real order of every zone, so it
 replays exactly and so a fixture can set one. That is also why it is private: it

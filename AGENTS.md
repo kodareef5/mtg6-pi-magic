@@ -3,13 +3,13 @@
 A Pi package that owns a table of Magic.
 
 The table has a game type, seats in turn order, and a deck and zones per seat.
-It knows the rules, builds every legal move, and logs everything that happened.
+It carries the rules, offers moves and physical operations, and logs what happened.
 It does not know who answers a seat.
 
 Three directories, and the line between them is one question: would a person
 sitting at that seat still want it?
 
-- **`src/core/`** is the game. The syntax compiler, the state, the judge, the
+- **`src/core/`** is the game. The motion vocabulary, the state, the judge, the
   mana pool, stack order, the pregame, each seat's knowledge and intent, and the
   facts a seat works out from what it knows. A person wants all of it, so all of
   it is core.
@@ -18,17 +18,17 @@ sitting at that seat still want it?
   everything. This picks the slice that matters for one decision and carries the
   guidance that keeps a choice coherent with the turn. It never writes to the
   table and never advances a phase.
-- **`src/seating/`** carries a seat over a socket. Written, parked.
+- **`src/seating/`** defines the wire protocol and validates remote picks.
+  Socket hosting, joining and the pending-player adapter are unfinished.
 
-A seat is answered by a player: a decision model through `src/context/`, a
-remote agent through `src/seating/`, a person at this Pi, or an MCP client. The
-last three load nothing from `src/context/`.
+The current player adapter uses a decision model through `src/context/`.
+Future remote, human and MCP adapters use the same core interface without
+loading decision-model context.
 
-Every kind of player is equally capable. It can take a listed move, move
-specific cards itself, hand its turn to a model in English, ask for more
-options, say one of eight fixed things, concede, or object and call the judge.
-The context exists so a player sees the game and misses nothing. It does not
-decide for them, and a player may choose to play badly.
+The player interface is intended to offer the same capabilities to every seat.
+Listed picks, table talk and prepared procedures work today. Raw declarations,
+free-form delegation, concession handling and objections still need handlers.
+Context supplies decision facts and guidance; the player chooses.
 
 ## What the table enforces, and what it only offers
 
@@ -42,9 +42,9 @@ nothing spent that does not exist. The table can check that a stated cost was
 paid from resources that existed. It cannot know what the cost was.
 
 **Rules legality is offered.** The move list is help, so a player need not know
-the rules and misses nothing. It is not a cage: a seat may move cards itself and
-the table records the motion and the claim and asks nobody whether a judge would
-allow it. Another seat objects, and the judge settles it.
+the rules and misses nothing. Prepared procedures record the motion and the accepted claim without certifying
+that a card permits it. Raw declarations and objections with remedies remain
+part of the intended interface, not working alternatives yet.
 
 **Nothing is done for a player.** Untap, the draw step and state-based actions
 are the rules and happen. A card's instruction belongs to the seat resolving it:
@@ -96,10 +96,12 @@ cost nothing on a turn where the card never appears, which is why they are per
 card rather than per group. A card earns a note mechanically before a call is
 spent, so a basic land gets none.
 
-What a seat is told about an opponent is what that seat is entitled to know: the
-format and the seat count, not their cards. `openLists` is for a benchmark where
-both lists are known on purpose and is off unless somebody says so, because a
-leak into a pregame brief cannot be undone by a later ruling.
+Registered deck lists are public. Every seat and spectator receives names and
+counts, never the assignment of those names to hidden objects or library order.
+Standard already sets `format.decksRegistered`; pregame and decision context
+use that setting. Future odds must use these counts and the viewer's earned
+knowledge, never the real hidden position. Closed-list games can be a v2 option;
+do not build a settings interface or odds engine in this cleanup.
 
 **`summary` runs once per turn that had something in it, beside the game.** Two
 sentences from the spectator projection, so it can hold nothing private by
@@ -109,9 +111,11 @@ game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
 into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
-**`strategy` runs only on a phase worth planning,** which `worthPlanning` decides
-mechanically and free: a phase that grants priority and has more than one option
-pending. On a land deck that is the main phase and nothing else.
+**`strategy` runs on an explicit request for preparation or reconsideration.**
+Experimental circuits ask it to author recipes, scheduled checks, labels and
+guidance through a checked tool batch. A phase change alone spends nothing.
+`worthPlanning` retains the old mechanical estimate for comparison, but does
+not initiate calls. `/magic play <seed> circuits` opts into this path.
 
 **`judge` runs only on an objection,** in two calls. The decision model scores
 candidate rules for relevance, then the reasoner rules on the few that survive
@@ -162,9 +166,15 @@ recorded as truncated.
 
 ## Build order
 
-Two seats of legal Standard first, and nothing widens until the games are good.
-Then tournament deck lists, then up to eight seats, then Commander, then the
-other formats. `src/core/format.ts` is why that costs little: seat counts,
+Two selected real Standard lists first. Pin the lists, their legality date, and
+the card and rules data, then inventory the mechanics they need. Completion
+means ordinary deck setup, supported relevant actions and interactions, outcomes
+without missing-machinery gaps, and replay and clone parity. An established
+board fixture or passing over unsupported cards does not meet that target.
+Deck-list validation and gameplay legality audits are separate checks.
+
+After those games work, widen the deck coverage, then seat counts, Commander,
+and other formats. `src/core/format.ts` is why that costs little: seat counts,
 starting life, hand size, singleton and the command zone are fields in a record.
 
 Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
@@ -180,9 +190,11 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    model:** `/magic play` finishes a game through Pi's classifier API. Measured
    live at 108 turns, 2357 decisions, 95.4% forced, 109 model calls, 0 gaps.
    The bulk runner is still unwritten.
-2. **Activated abilities**, by interrogation rather than generation, with oracle
-   text from the card list as the source. Measured against the Cavern of Souls
-   payment: one legal option, so no model call.
+2. **Activated abilities through prepared procedures.** The first experiment
+   binds visible sources, pays tap and unrestricted mana costs, resolves two
+   draw/discard abilities in stack order, and clones during a pending discard.
+   Accepted claims and instructions are journaled. Card interpretation and
+   rules legality are not certified by this experiment.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard.
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
@@ -190,7 +202,7 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
 5. **Replacements**, including the ones on `enters`.
 
 The engine's main job is bulk one on one games, so that interesting positions
-can be frozen as benchmarks. `tools/sim.ts` is that run, and a fixture is a
+can be frozen as benchmarks. `tools/sim.ts` is still a stub. A fixture is a
 journal prefix rather than a format of its own. Two consequences: the core
 imports nothing from Pi and that has to stay true, and the ledger's five reasons
 never merge into one count.
@@ -217,8 +229,10 @@ The table never reads printed card text. Meaning arrives as structured terms,
 checked against an enumeration before anything moves.
 
 A decision with one legal option is not a decision. Take it, record it as
-forced, ask nobody. That ratio is the difference between a game costing cents
-and one costing dollars, and it decays every time a safeguard adds a question.
+forced, ask nobody. This saves calls on physical decisions. Circuit navigation
+and review can spend calls without adding a physical decision, so the forced
+ratio must be read beside total calls, tokens, cost, and elapsed time. A unique
+continuation authorized by the seat's plan is delegated, not forced.
 
 Never decide for a seat by accident. An unusable answer is asked once more, then
 the table takes the terminating option, records `fallback`, and writes a gap. A
@@ -236,9 +250,10 @@ under about 150 lines, and past that say in the file why.
 Keep one test per invariant in `test/`. Extend that test with new positions
 rather than adding a test for each branch.
 
-- **No leak.** A view names only cards in a public zone or the viewer's own
-  hand, respects face-down identities, and keeps hidden counts. Receipt text
-  uses event-time visibility, so a later reveal cannot expose an earlier action.
+- **No leak.** Registered deck names and counts are public. A view associates
+  names with objects only in public zones or the viewer's own hand, respects
+  face-down identities, and keeps hidden counts. Receipt text uses event-time
+  visibility, so a later reveal cannot expose an earlier action.
 - **Replay.** The same seed and the same recorded decisions give the same log,
   change for change, and rebuild the cards, the cursor, the ledger and the
   outcome. `relive` drives from the ledger with each row's own reason, so a
@@ -266,8 +281,8 @@ rather than adding a test for each branch.
   what is not forced, reads a refusal in its next request, and never has a wrong
   answer kind turned into a pick.
 - **Briefed.** The pregame asks several questions at once, files each answer
-  where it is read, and names no card of another seat's deck. A snippet reaches
-  the decision for its own window, a card note only while its card is visible,
+  where it is read, and uses public registered lists without hidden arrangements.
+  A snippet reaches the decision for its own window, a card note only while its card is visible,
   and a failed question is a gap the game plays on without.
 - **Beside.** The turn hook is never awaited, so a hook whose promise never
   settles cannot stop a game and one that throws becomes a gap. Recaps land in
@@ -299,6 +314,14 @@ rather than adding a test for each branch.
   route cites rules that resolve and carries their text. A route id reads as an
   ask, never as a move, and says what it does not show. A walked route is not
   offered again and the budget ends the walk.
+- **Equipped.** Private drafts and agenda edits have their own revision and
+  journal history. A tool batch either applies whole or changes nothing. A
+  review accounts for every scoped object, concept and label, and changed facts
+  reopen it without turning passes into fresh questions. Scheduled attention
+  is consulted before an automatic pass. Readiness moves no cards; execution
+  advances one draft step through the ordinary writer. A changed position,
+  missing reservation or stale incarnation requires inspection. A clone carries
+  unfinished work, and a torn equipment write cannot repeat an executed step.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -325,9 +348,16 @@ call does not promise. Read `skills/AGENTS.md` before writing text a model reads
 ## Where things live
 
 ```
-index.ts               the Pi extension: five commands, no game logic
+index.ts               the Pi extension: commands and tools, no game logic
 src/core/              the game. Its own AGENTS.md holds the invariants
   table.ts, commit.ts  the shapes and their readers, and the one writer over them
+  work.ts, agenda.ts  private equipment and scheduled consideration
+  draft.ts           prepared sequences, bindings, reserves and readiness
+  work-language.ts   the checked JSON tool vocabulary, not model-written code
+  work-tools.ts      atomic equipment edits, separate from physical motion
+  work-menu.ts       the draft and agenda menus any player can use
+  procedures.ts      source and payment menus, accepted activation terms
+  resolution.ts      remaining instructions and choices before a checkpoint
   pregame.ts           the opening procedure and its choices
   turn.ts, steps.ts    turn obligations, step order, and phase boundaries
   priority.ts          actions offered to the current priority holder
@@ -338,20 +368,22 @@ src/context/           questions for a decision model. Its own AGENTS.md
   spend.ts             what every call cost, and the output ceiling per role
   brief.ts             the pregame wave, and the snippets it files by use
   summary.ts           the turn in two sentences, from the spectator view
-  strategy.ts          per-phase planning. Pipeline written, leaves unwritten
+  strategy.ts          preparation and reconsideration on an explicit request
   ruling.ts            the judge's two calls. Pipeline written, stops at verdict
   dial.ts              the routes a seat can ask for, answered from the rules
   packet.ts, seat.ts   one decision's context, and the seat that answers it
   sit.ts               seating a whole table, so one command cannot differ
-src/seating/           a seat over a socket. Parked
+src/seating/           protocol and validation; sockets unfinished
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
-tools/sim.ts           play games in bulk and print the counters
+tools/sim.ts           stub for bulk games and counters
 tools/smoke.ts         one live game against a real model. Opt in, costs money
+tools/circuits.ts      offline circuit experiments and a local timeline inspector
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
 docs/CIRCUITS.md       the toolbox, the circuits built from it, and how a seat
                        decides. Read it before planning anything past milestone one
+docs/WORK.md           the working draft, agenda, review and tool contract
 docs/COMBAT.md         characteristics, the layer walk, combat, and the seams
 docs/MULLIGAN.md       the opening: the rules, the three decisions, what a seat knows
 docs/SEATING.md        the wire, for a reader with no code
@@ -370,10 +402,11 @@ verify every carried field against the source and refuse to pass on a mismatch.
 
 ## Not built yet
 
-- Phase planning. `strategy.planPhase` holds the pipeline and the prompt and
-  throws: what makes a phase plan worth its tokens is structured alternatives,
-  and those need cards with abilities to be alternatives at all. Until then
-  `startingIntent` stands in and `worthPlanning` is false on nearly every phase.
+- Strategic quality. `strategy.planWork` prepares checked equipment on request,
+  and offline experiments exercise its choreography through authored doubles.
+  Paid models are wired through Pi but have not been evaluated on this new
+  vocabulary. Prepared procedures now support a small set of physical
+  instructions; the experiments establish orchestration, not playing strength.
 - The judge's remedy. `ruling.rule` holds the two-call pipeline and stops at the
   verdict, because rollback is unwritten and a ruling with no remedy changes no
   game. A ruling also makes the phase plan stale, which is a consequence of one
@@ -382,34 +415,32 @@ verify every carried field against the source and refuse to pass on a mismatch.
   that does not exist, so nothing advertises them. The rules routes in
   `src/context/dial.ts` are the ones that work, because the rules are on disk
   and answering one costs no model call.
-- Declaring, delegating and objecting. A model-backed seat can only pick from
-  the list and walk the dialer. A person at the same seat can do all three, and
-  `declare` and `judge.rule` both throw. docs/CIRCUITS.md names this as the
-  largest open question: with no card structured, conservation and the judge
-  carry the weight that a move list would.
-- Card meaning. `src/core/syntax.ts` holds the five ability shapes, the correct
-  layers, and the motions milestone one needs. The rest of the language is
-  measured rather than guessed: 31 event kinds, 17 selector properties, 10
-  operators, 8 amount forms.
+- General declaring, delegating and objecting. A model-backed seat can execute
+  prepared procedures and delegate unique continuations for its own seat. Raw
+  `declare`, free-form delegation, and `judge.rule` still throw or leave the
+  decision pending. Conservation and the judge must carry the weight that a
+  fully informed move list would.
+- The rest of card meaning. `syntax.ts` holds physical changes and layers;
+  `work-language.ts` holds the first prepared instruction vocabulary. Casting,
+  targets, triggers, replacements, restricted mana and complex costs remain
+  unwritten. The archived measurements remain an inventory to draw from.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.
 - Rollback. `journal.ts` holds the file, the replay, the clone and the export;
   `rollback` is the one left, because it needs every remaining seat to agree and
   nothing holds that conversation. `docs/STATE.md` holds the reasoning.
-- A paused resolution. `decisions.ts` step 6 is a placeholder, and when it
-  becomes real the remaining instructions, bindings and locked choices have to
-  live in the table so a clone can resume halfway through an effect. The
-  dispatcher will then need to tell continuing an effect from reaching a
-  checkpoint where state-based actions and waiting triggers are processed.
-- Provenance for card meaning. Interrogation constrains what a model may answer
-  but an allowed answer can still be the wrong reading, so the accepted
-  structured meaning and the compiler that accepted it belong in the journal.
-  Replaying decisions against freshly inferred meaning would undo the point of
-  having a journal.
+- More resolution choices. The table now holds the remaining instruction and
+  count while a choice is pending, and distinguishes continuation from a
+  state-based checkpoint. Targets, bindings between instructions and
+  simultaneous multi-card choices still need machinery.
+- Provenance beyond the accepted claim. The journal now carries each executed
+  procedure's basis, instructions, payment and delegation. Replay uses those
+  accepted terms. Model and interpreter version attribution still needs work.
 - The context a decision actually saw. The forced ratio is evidence about cost
   and says nothing about decision quality. Comparing two models needs the packet
   each one was handed, and recap arrival timing changes that, so fixing the
   recap setting is not enough.
-- Everything in `src/seating/`, by choice.
+- Socket hosting and joining. The protocol and pick validation exist in
+  `src/seating/`; its sockets and pending-player adapter are unfinished.
 - Any format but Standard, and any seat count but two.

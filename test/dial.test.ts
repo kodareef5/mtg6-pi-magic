@@ -136,6 +136,18 @@ test("following a route changes what the seat knows and nothing else", async () 
 	// A route already followed is not offered again.
 	assert.equal(asked.sent[1]!.ids.includes("rules:land"), false);
 	assert.ok(asked.sent[0]!.ids.includes("rules:land"));
+
+	// A refused pick retries this same decision. It must retain the fetched
+	// facts and the spent route budget rather than dialling the same rule again.
+	const retrying = classifier((_ids, nth) => nth === 0 ? "rules:land" : nth === 1 ? "not-offered" : land.id);
+	const retrySeat = aiSeat({ name: "A", api: decisionApi(retrying.classify, jev), intent: startingIntent(decision.seat), rules, dials: 1, onGap: (note) => assert.fail(note) });
+	await retrySeat.answer(frame);
+	await retrySeat.answer({ ...frame, refused: ["not-offered was not a move"] });
+	assert.equal(retrying.sent.length, 3);
+	assert.equal(retrying.sent[2]!.ids.some((id) => id.startsWith("rules:")), false);
+	assert.match(retrying.sent[2]!.instructions, /305\.2/);
+	assert.match(retrying.sent[2]!.instructions, /not-offered was not a move/);
+	assert.deepEqual(built, before);
 });
 
 test("a route reads as an ask and never as a move, and the budget ends the walk", async () => {

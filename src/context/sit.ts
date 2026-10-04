@@ -7,9 +7,9 @@
  *
  * The order is the cost order. The pregame runs once, concurrently across every
  * seat and every question. The decision model runs per asked decision. The
- * commentator runs once per turn that had anything in it. Nothing else runs
- * yet: `strategy.planPhase` and `ruling.rule` are written as pipelines and have
- * no caller until the pieces under them exist.
+ * commentator runs once per turn that had anything in it. Experimental circuits
+ * request strategy to prepare or revise private equipment. The judge still
+ * stops at a verdict because its remedy is unwritten.
  */
 
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
@@ -31,6 +31,8 @@ import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
 import { aiSeat } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
+import { planWork } from "./strategy.ts";
+import { editWork } from "../core/work-tools.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
 export type Inference = { classify: Classify; stream: Stream };
@@ -66,7 +68,6 @@ export async function seat(
 	universe: Universe,
 	options: {
 		format: string;
-		openLists?: boolean;
 		/**
 		 * The rules, so a seat can look one up mid decision. Absent is a table
 		 * with no dialer, which still plays.
@@ -74,6 +75,8 @@ export async function seat(
 		rules?: Rules;
 		/** How many routes a seat may follow per decision. */
 		dials?: number;
+		/** Experimental recipes and scheduled reviews. One strategy request to begin. */
+		circuits?: boolean;
 		/** Written to as the game runs, so a clone of this game is a prefix of it. */
 		journal?: Journal;
 		/**
@@ -118,6 +121,14 @@ export async function seat(
 			);
 		}
 		intents[at.id] = startingIntent(at.id);
+		const strategy = pick(parts.get(at.id)!, "strategy");
+		const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
+			? reasoner({ role: "strategy", stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
+				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
+		if (options.circuits && !table.work[at.id]) {
+			if (!planning) throw new Error(`Seat ${at.id} needs a strategy model to begin circuits.`);
+			editWork(table, at.id, [{ do: "plan.request", reason: "Prepare the opening stretch of play, with recipes and scheduled checks for threats, opportunities and maintenance. Begin at the first priority opportunity." }], `circuits-${at.id}`);
+		}
 		players[at.id] = aiSeat({
 			name: at.name,
 			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted }),
@@ -127,6 +138,7 @@ export async function seat(
 			...(options.dials === undefined ? {} : { dials: options.dials }),
 			onGap: (note) => void table.gaps.push(note),
 			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
+			...(planning ? { plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning) } : {}),
 		});
 	}
 
@@ -174,7 +186,7 @@ export async function seat(
 					...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
 					tally: counted,
 				}),
-				options,
+				{ ...options, openLists: table.format.decksRegistered },
 			);
 			take(at.id, written, "written");
 		}),
@@ -326,9 +338,10 @@ export const report = (table: Table, seated: Seated, outcome: Outcome | null, ms
 		`state     ${degraded(table, seated) ?? "clean"}`,
 		`outcome   ${outcome ? JSON.stringify(outcome.results) : "unfinished, waiting on a usable answer"}`,
 		`turns     ${table.cursor.turn}`,
-		`decisions ${table.ledger.length}  forced ${by("forced")}  chosen ${by("chosen")}  fallback ${by("fallback")}`,
+		`decisions ${table.ledger.length}  forced ${by("forced")}  delegated ${by("delegated")}  chosen ${by("chosen")}  declared ${by("declared")}  fallback ${by("fallback")}`,
 		`forced    ${((by("forced") / Math.max(1, table.ledger.length)) * 100).toFixed(1)}%`,
 		`picks     ${seated.picks()} decision-model calls`,
+		`work      ${table.workLog.filter((entry) => entry.tools).length} equipment batches  ${table.workLog.filter((entry) => entry.note.startsWith("Executed step")).length} draft steps executed`,
 		`recaps    ${seated.chronicle.recaps.length} of ${table.cursor.turn} turns`,
 		// A route is a request, so it is in the picks count already. Named
 		// separately because "how often did a seat look a rule up" is the question
@@ -337,7 +350,7 @@ export const report = (table: Table, seated: Seated, outcome: Outcome | null, ms
 			(Object.keys(seated.dials).length
 				? `  ${Object.entries(seated.dials).map(([route, count]) => `${route} ${count}`).join(", ")}`
 				: ""),
-		`failed    ${failed} of ${spends.length} reasoning calls`,
+		`failed    ${failed} of ${spends.length} model calls`,
 		`elapsed   ${(ms / 1000).toFixed(1)}s`,
 		"",
 		...bill(spends),

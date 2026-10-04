@@ -1,20 +1,38 @@
 /**
  * What a decision model is shown for one decision.
  *
- * The core knows everything. A decision model answers one narrow question well
- * and badly when it is handed everything, so something has to choose which
- * slice of the core matters here. That choosing is this file, and it is why the
- * decision context engine is separate from the game engine.
- *
  * Nothing here writes to the table.
+ * Past 150 lines to keep the packet contract beside the projection that fills it.
  */
 
 import type { Rules } from "../core/rules.ts";
-import type { Frame, SeatId, Window } from "../core/types.ts";
+import type { Frame, SeatId, SeatView, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import type { Brief } from "./brief.ts";
 import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
+import { pendingReviews, type Review } from "../core/agenda.ts";
+import { workMenu } from "../core/work-menu.ts";
+import type { Workspace, SeenObject, Draft } from "../core/work.ts";
+import type { Option } from "../core/types.ts";
+
+export type DraftContext = Pick<Draft, "id" | "recipe" | "label" | "guidance" | "next" | "reserves" | "bound" | "boundObjects" | "status" | "parked"> & {
+	steps: Pick<Draft["steps"][number], "label" | "when">[];
+};
+export type WorkContext = Omit<Workspace, "tasks" | "recipes" | "draft"> & {
+	draft?: DraftContext;
+	tasks: { id: string; label: string; when: Workspace["tasks"][number]["when"]; assessed: number; times?: number; cancelled?: boolean; expired?: boolean }[];
+};
+/** A decision reads current work, not its complete review history or tool bodies. */
+export const workContext = (work: Workspace): WorkContext => {
+	const { tasks, recipes: _recipes, draft, ...current } = work;
+	return structuredClone({ ...current, ...(draft ? { draft: {
+		id: draft.id, recipe: draft.recipe, label: draft.label, guidance: draft.guidance,
+		next: draft.next, reserves: draft.reserves, bound: draft.bound, boundObjects: draft.boundObjects,
+		status: draft.status, parked: draft.parked, steps: draft.steps.map(({ label, when }) => ({ label, when })),
+	} } : {}), tasks: tasks.map(({ id, label, when, runs, times, cancelled, expired }) =>
+		({ id, label, when, assessed: runs.length, times, cancelled, expired })) });
+};
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -75,6 +93,13 @@ export type Packet = {
 	 * refusal has to survive the trip from the frame to the request.
 	 */
 	refused?: string[];
+	/** Private equipment and visible bindings for the current execution circuit. */
+	work?: WorkContext;
+	objects?: SeenObject[];
+	decks?: SeatView["decks"];
+	reviews?: Omit<Review, "stamp">[];
+	workOptions?: Option[];
+	resolution?: SeatView["resolution"];
 };
 
 /**
@@ -124,28 +149,34 @@ export function focus(
 			.map(([card, note]) => `${card}: ${note}`),
 	].filter((line): line is string => !!line && line.length > 0);
 	// Matching the window scopes assumptions; it does not prove they still hold.
-	// Richer card facts and locked effect choices await the card language.
 	return {
 		actor: seat, window: structuredClone(view.window), version,
+		...(view.decks ? { decks: structuredClone(view.decks) } : {}),
+		// Stack terms stay public even when this seat has prepared no private work.
+		objects: structuredClone(view.objects?.filter((object) => view.work || object.zone === "stack") ?? []),
+		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		obligation: decision.question,
-		committed: [],
+		committed: frame.view.work?.draft?.steps.slice(0, frame.view.work.draft.next).map((step) => step.label) ?? [],
 		resources: [...view.yours],
 		options: structuredClone(decision.options),
 		priorities: [...(intent.deck.priorities ?? [])],
 		known: [...view.table, ...view.since],
-		// A pregame read on an unseen opponent is an assumption by construction,
-		// so it sits with the assumptions and never with the known facts.
+		// Matchup guidance is an assumption even when deck composition is public.
 		assumed: [
 			...Object.values(brief?.against ?? {}),
 			...(phaseApplies ? [...intent.turn.hypotheses, ...intent.phase.assumptions] : []),
 		],
-		guidance,
+		guidance: [...guidance,
+			...(frame.view.work?.objective ? [`Objective: ${frame.view.work.objective}`] : []),
+			...(frame.view.work?.draft ? [frame.view.work.draft.guidance] : [])],
 		lately: [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
-		// Only what can be answered. Widening and replanning are still unwritten,
-		// so nothing advertises them; the rules routes are answerable from disk.
+		// Rules are answered from disk. Equipment carries its own preparation menus.
 		routes: dial(decision, context.rules),
 		...(context.learned?.length ? { learned: [...context.learned] } : {}),
 		...(refused?.length ? { refused: [...refused] } : {}),
+		...(frame.view.work ? { work: workContext(frame.view.work),
+			reviews: pendingReviews(frame).map(({ stamp: _stamp, ...review }) => review),
+			workOptions: workMenu(frame).map(({ id, label, shows }) => ({ id, label, shows })) } : {}),
 	};
 }
 

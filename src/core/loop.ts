@@ -21,6 +21,11 @@ import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
 import { describe, project } from "./view.ts";
+import { needsAttention } from "./work-menu.ts";
+import { completedStep, editWork, prepareWork, workFrame } from "./work-tools.ts";
+import { refuseExecution } from "./draft.ts";
+import { overdue, pendingReviews } from "./agenda.ts";
+import { activate, activationChanges, procedureOptions } from "./procedures.ts";
 
 export type Watcher = (line: string) => void;
 
@@ -58,6 +63,7 @@ export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promis
  */
 function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" | null {
 	if (decision.options.length !== 1) return null;
+	if (decision.delegated) return "delegated";
 	const only = decision.options[0]!;
 	if (["turn-based", "state-based", "pregame"].includes(decision.situation)) return "forced";
 	if (decision.situation === "priority" && only.id === "pass") return "forced";
@@ -72,13 +78,16 @@ export async function play(
 	intents: Record<SeatId, Intent>,
 	watch?: Watcher,
 	onTurn?: TurnWatcher,
+	workBudget = 32,
 ): Promise<Outcome | null> {
+	if (!Number.isSafeInteger(workBudget) || workBudget < 1) throw new Error("The work edit budget must be a positive integer.");
 	// What each seat has already been shown, so a frame's "since" is the part it
 	// has not seen. Presentation only: nothing here bears on an outcome, which
 	// is why it may live outside the table.
 	const seen: Record<SeatId, number> = {};
 	let told = 0;
 	let began = table.log.length;
+	let walk: { version: number; edits: number } | undefined;
 
 	while (table.outcome === null) {
 		const decision = nextDecision(table);
@@ -96,7 +105,8 @@ export async function play(
 			continue;
 		}
 
-		const why = automatic(decision, intents[decision.seat]);
+		const attention = !!table.work[decision.seat] && decision.situation === "priority" && needsAttention(workFrame(table, decision.seat));
+		const why = attention ? null : automatic(decision, intents[decision.seat]);
 		if (why) {
 			apply(table, decision.options[0]!.id, "engine", why);
 			told = report(table, told, watch);
@@ -104,6 +114,13 @@ export async function play(
 		}
 
 		const version = table.cursor.clock;
+		if (walk?.version !== version) walk = { version, edits: table.workLog.filter((entry) => entry.clock === version && entry.seat === decision.seat && entry.tools).length };
+		if (walk.edits >= workBudget) {
+			const gap = `Seat ${decision.seat}: work edit budget ${workBudget} exhausted at version ${version}; decision remains pending. No pass or completion was chosen.`;
+			if (table.gaps.at(-1) !== gap) table.gaps.push(gap);
+			report(table, told, watch);
+			return null;
+		}
 		const frame = (seat: SeatId): Frame => {
 			const view = project(table, seat, seen[seat] ?? 0);
 			seen[seat] = table.log.length;
@@ -126,7 +143,28 @@ export async function play(
 		for (let attempt = 0; attempt < 2; attempt++) {
 			try {
 				const received = await player.answer(failures.length ? { ...asked, refused: [...failures] } : asked);
-				const why = refuse(received, decision);
+				let why = refuse(received, decision);
+				if (why === null) {
+					const valid = received as Answer;
+					const current = workFrame(table, decision.seat);
+					if (valid.kind === "work" || valid.kind === "execute") {
+						const delivered = table.workLog.find((entry) => entry.seat === decision.seat && entry.actionId === valid.actionId);
+						if (delivered) {
+							if (valid.kind === "execute") why = "This actionId already names accepted seat work or execution.";
+							else if (JSON.stringify(delivered.tools) !== JSON.stringify(valid.tools)) why = "This actionId already names different seat tools.";
+						} else if (valid.revision !== (table.work[decision.seat]?.revision ?? 0)) why = "The seat equipment changed; inspect it again.";
+						else if (valid.kind === "work") prepareWork(current, valid.tools);
+						else {
+							const draft = current.view.work?.draft;
+							why = draft?.id === valid.draft ? refuseExecution(draft, current) : "No current draft with that id.";
+							const procedure = draft && procedureOptions(draft, current).find((choice) => choice.option.id === draft.bound);
+							if (!why && procedure) activationChanges(table, procedure.activation);
+							if (!why && current.view.work?.request) why = "Strategy is still requested for this draft.";
+							if (!why && draft?.bound === "pass" && (pendingReviews(current).length || current.view.work?.suggested.length || current.view.work?.tasks.some((task) => overdue(task, current)))) why = "Other due work remains unconsidered before this pass.";
+						}
+					}
+					if (valid.kind === "pick" && valid.option === "pass" && attention) why = "Due seat work remains unconsidered. Review, defer or cancel it before passing.";
+				}
 				if (why === null) { answer = received as Answer; break; }
 				failures.push(why);
 			} catch (error) {
@@ -134,7 +172,7 @@ export async function play(
 			}
 		}
 		if (!answer) {
-			const terminal = decision.options.find((option) => option.id === decision.fallback);
+			const terminal = attention ? undefined : decision.options.find((option) => option.id === decision.fallback);
 			table.gaps.push(`Seat ${decision.seat}, ${decision.situation}: ${failures.join(" Then: ")} ` +
 				(terminal ? `Fallback: ${terminal.id}.` : "Selection remains pending; no terminating option."));
 			if (!terminal) { report(table, told, watch); return null; }
@@ -144,6 +182,19 @@ export async function play(
 		}
 
 		switch (answer.kind) {
+			case "work":
+				editWork(table, decision.seat, answer.tools, answer.actionId, answer.revision);
+				break;
+			case "execute": {
+				const draft = table.work[decision.seat]!.draft!;
+				const procedures = procedureOptions(draft, workFrame(table, decision.seat));
+				const prepared = procedures.find((choice) => choice.option.id === draft.bound);
+				const execution = { draft: draft.id, step: draft.next, actionId: answer.actionId };
+				if (prepared) activate(table, prepared.activation, { picked: draft.bound!, offered: procedures.map((choice) => choice.option.id), by: "model", why: "declared", execution });
+				else apply(table, draft.bound!, "model", "chosen", execution);
+				completedStep(table, decision.seat, answer.actionId);
+				break;
+			}
 			case "pick":
 				apply(table, answer.option, "model", "chosen");
 				break;
@@ -174,6 +225,7 @@ export async function play(
 				return null;
 		}
 
+		if (table.cursor.clock === version) walk.edits += 1;
 		told = report(table, told, watch);
 	}
 

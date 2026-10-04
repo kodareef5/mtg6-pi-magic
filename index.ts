@@ -11,8 +11,8 @@
  * catalogue, so nothing here names an endpoint or reads a key. Declaring a game
  * means naming a model per part, and src/context/roles.ts is the whole of that.
  *
- * Past 150 lines because it is one command with eight verbs. Splitting a
- * command handler by verb means reading five files to learn what /magic does.
+ * Commands and tool registrations stay together past 150 lines so their
+ * shared game, roster and journal lifecycle can be read in one file.
  */
 
 import { existsSync, mkdirSync } from "node:fs";
@@ -20,6 +20,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { Type } from "typebox";
 
 import {
 	assign,
@@ -46,11 +47,16 @@ import {
 	replay as replayGame,
 	type Header,
 	type Journal,
+	save as saveGame,
 } from "./src/core/journal.ts";
 import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
 import type { SeatId } from "./src/core/types.ts";
 import { project, render } from "./src/core/view.ts";
+import { CommandsSchema } from "./src/core/work-language.ts";
+import { editWork, workFrame } from "./src/core/work-tools.ts";
+import { pendingReviews } from "./src/core/agenda.ts";
+import { workMenu } from "./src/core/work-menu.ts";
 
 /**
  * Milestone one plays with nothing but lands: pass, play a land, untap, draw,
@@ -105,6 +111,7 @@ const inference = (ctx: ExtensionContext): Inference => ({
 export default function (pi: ExtensionAPI) {
 	let table: Table | null = null;
 	let seated: Seated | null = null;
+	let running = false;
 	const games = new WeakMap<Table, Journal>();
 
 	/**
@@ -127,7 +134,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string } | { resume: string },
+		from: { seed: string; circuits?: boolean } | { resume: string },
 	): Promise<Table> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -183,12 +190,35 @@ export default function (pi: ExtensionAPI) {
 			// The rules are already loaded for the replay check, so the dialer costs
 			// nothing to switch on: a seat may look a rule up mid decision.
 			rules,
+			...(!resuming && from.circuits ? { circuits: true } : {}),
 			...(carried.length ? { prepared: carried } : {}),
 		});
 		table = opened;
 		games.set(opened, journal);
 		return opened;
 	}
+
+	pi.registerTool({
+		name: "magic_work",
+		label: "Magic seat equipment",
+		description: "Read one seat's visible objects, agenda, drafts, reviews and tool menus. Supply commands and the equipment revision to edit that seat's equipment atomically. Edits move no cards and advance no phase. Acceptance proves neither card meaning nor strategic quality; scheduled work requests attention rather than guaranteeing execution. The tool is available while the game is waiting, and cannot edit during an active play loop.",
+		parameters: Type.Object({ seat: Type.Integer({ minimum: 0 }), revision: Type.Optional(Type.Integer({ minimum: 0 })), commands: Type.Optional(CommandsSchema) }),
+		async execute(actionId, params) {
+			if (!table) throw new Error("No table. /magic step opens one for inspection.");
+			if (!table.seats.some((seat) => seat.id === params.seat)) throw new Error(`No seat ${params.seat}.`);
+			if (params.commands) {
+				if (running) throw new Error("The play loop is active. Edit equipment when the game is waiting.");
+				if (table.outcome) throw new Error("The game is finished. Clone an unfinished position to continue working on it.");
+				if (params.revision === undefined) throw new Error("Read the equipment first and supply its revision.");
+				editWork(table, params.seat, params.commands, actionId, params.revision);
+				const journal = games.get(table);
+				if (journal) saveGame(journal, table);
+			}
+			const frame = workFrame(table, params.seat);
+			const details = { frame, reviews: pendingReviews(frame), menu: workMenu(frame) };
+			return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+		},
+	});
 
 	/**
 	 * The util, run as a tool. It downloads the Scryfall bulk file once into the
@@ -257,11 +287,12 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	pi.registerCommand("magic", {
-		description: "play [seed] | resume <game> | clone <game> <version> <id> | models | step | log | export | cards | rules",
+		description: "play [seed] [circuits] | resume <game> | clone <game> <version> <id> | work [seat] | models | step | log | export | cards | rules",
 		handler: async (args, ctx) => {
 			const words = args.trim().split(/\s+/).filter(Boolean);
 			const verb = words[0] ?? "";
-			const seed = words[1] ?? String(table?.log.length ?? 0);
+			const circuits = verb === "play" && (words[1] === "circuits" || words[2] === "circuits");
+			const seed = (verb === "play" && words[1] === "circuits" ? undefined : words[1]) ?? String(table?.log.length ?? 0);
 
 			if (verb === "models") {
 				await models(words, ctx);
@@ -269,22 +300,32 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (verb === "play" || verb === "resume") {
-				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed });
+				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed, circuits });
 				const began = Date.now();
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
-				const outcome = await run(
+				running = true;
+				let outcome;
+				try { outcome = await run(
 					opened,
 					seated!,
 					inference(ctx),
 					commentator,
 					(line) => ctx.ui.notify(line, "info"),
 					games.get(opened),
-				);
+				); } finally { running = false; }
 				ctx.ui.notify(
 					`${verb === "resume" ? "Resumed" : "Seed"} ${seed}.\n` +
 						report(opened, seated!, outcome, Date.now() - began).join("\n"),
 					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
+				return;
+			}
+
+			if (verb === "work") {
+				if (!table) { ctx.ui.notify("No table. /magic step opens one.", "warning"); return; }
+				const id = Number(words[1] ?? 0);
+				const frame = workFrame(table, id);
+				ctx.ui.notify(JSON.stringify({ equipment: frame.view.work ?? { revision: 0 }, reviews: pendingReviews(frame), menu: workMenu(frame) }, null, 2), "info");
 				return;
 			}
 
@@ -386,9 +427,9 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			ctx.ui.notify(
-				"Usage: /magic play [seed] | /magic resume <game> | " +
+				"Usage: /magic play [seed] [circuits] | /magic resume <game> | " +
 					"/magic clone <game> <version> <new-id> | " +
-					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic log | " +
+					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic work [seat] | /magic log | " +
 					"/magic export <game> [public|full|<seat>] | " +
 					"/magic cards [format|universe] | /magic rules <query|build>",
 				"info",

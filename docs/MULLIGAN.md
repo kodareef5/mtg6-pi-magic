@@ -1,8 +1,8 @@
 # The mulligan
 
-The plan for the opening. It is the first thing a game asks anybody, it is the
-one decision every seat makes before a card is ever played, and it is where the
-shape of a good decision gets set.
+The opening implements declarations, redraws, ordered bottom selections and
+replay. Card-granted opening actions, computed odds and replacement-hand
+comparisons remain unfinished.
 
 Rule text is quoted from `rules/cr.tsv`, which is the official Comprehensive
 Rules of September 25, 2026. Read 103.5 and 103.6 there rather than trusting the
@@ -30,30 +30,19 @@ cards, so seven in a seven card format. And 103.5c: in a multiplayer game and in
 any Brawl game, the first mulligan does not count toward the cards to bottom or
 toward the number of mulligans allowed.
 
-### One stated reading
+### Bottoming timing
 
-The sentence in 103.5 reads "To take a mulligan, a player shuffles the cards in
-their hand back into their library, draws a new hand of cards equal to their
-starting hand size, then puts a number of those cards equal to the number of
-times that player has taken a mulligan on the bottom of their library."
+The implementation retains two format settings:
 
-Taken literally, that bottoms cards as the last step of each mulligan, so a seat
-would declare its next mulligan while looking at six cards rather than seven.
-Every secondary source, and Arena, do it the other way: see the full hand, keep,
-then bottom.
+- `mulliganBottom: "on-keep"` is the default. Inspect the full hand, decide, then
+  bottom after keeping.
+- `mulliganBottom: "per-mulligan"` bottoms at the end of each redraw. The next
+  declaration sees the smaller hand. This follows the ordering in the stored
+  103.5 text.
 
-Both readings are supported, as a format option, because both are defensible
-and the difference is visible to a player.
-
-- `mulliganBottom: "on-keep"` is the default and is how Arena and every player
-  does it. See the full hand, decide, then bottom on a keep.
-- `mulliganBottom: "per-mulligan"` is 103.5 read literally. Bottoming is the
-  last step of taking a mulligan, so the next declaration is made on a smaller
-  hand.
-
-The hand sizes come out the same either way. What differs is how much a seat
-sees when it declares, which is why this is a game option rather than a quiet
-choice. `judge.ts` can cite 103.5 either way.
+Both paths have invariant tests. They expose different information at a
+declaration; this cleanup does not change the setting or settle that rules
+interpretation.
 
 ### What 103.5b allows
 
@@ -64,7 +53,8 @@ a seat holding such a card is a gap until it is.
 
 ## The decisions
 
-Three, and only the first happens more than once.
+Declaration and bottom selections work. Card-granted opening actions remain a
+gap; the current opening completes without interpreting them.
 
 **Declare.** Situation `pregame`, one per seat per round, collected in turn
 order before anything shuffles. Options: `keep`, `mulligan` when the opening
@@ -86,10 +76,8 @@ such card the only option is to do nothing, so nobody is asked.
 
 ## What a seat knows when it decides
 
-This is the part the last implementation got thin, and it is most of what makes
-the decision good.
-
-**The hand**, exactly: names and oracle text.
+**The hand**, exactly by card identity. Card data is available to pregame and
+strategy; the classifier receives projected objects and relevant guidance.
 
 **The count**: mulligans taken, and how many cards leave if this hand is kept.
 
@@ -111,7 +99,7 @@ library. `odds.ts` specifies this boundary; the arithmetic is still unwritten.
 Sampled from the seat's belief about its own library, not from the real one: a
 seat knows its own deck composition, so sampling from that composition reveals
 nothing and is honest. Reading the shuffled order would be cheating and is the
-line to hold. This makes "a credible draw path" a number instead of a feeling.
+line to hold. This calculation is not implemented yet.
 
 **Strategy guidance**, from `intent.ts`: how this deck wins, what it needs to
 function, what it is willing to give up, and what the opponent's registered deck
@@ -125,13 +113,10 @@ Every kind of seat, through the same options.
 A person picks `keep` or `mulligan`, then picks cards to bottom one at a time.
 Nothing about that path is special.
 
-A seat answered by a decision model gets the same options through the context
-engine. The important discipline, and the thing the last implementation got
-wrong: the expert does not own the choice. It prepares the complete retained
-hands worth comparing, each with what it keeps and what it gives up, and the
-decision model picks one of those or another mulligan. There is a route to more
-options. An expert that returns a single recommendation has not made a decision,
-it has made a shortlist of one, and a shortlist of one is not proof of force.
+A model seat receives the same declaration and single-card bottom options through
+`focus`. Pregame guidance supplies assumptions, not a mandatory keep decision.
+A future retained-hand comparison must expose alternatives; neither the expert
+menu nor ordinary option widening is implemented yet.
 
 ## Failure, and what must never happen quietly
 
@@ -158,8 +143,8 @@ The rules here:
 Public: each declaration, each seat's mulligan count, and each resulting hand
 size. An opponent always knows you mulliganed and to how many.
 
-Private: every identity. The hand, the cards bottomed, and the reasoning behind
-the decision.
+Public also: registered deck names and counts. Private: which cards are in a
+hand or bottom position, and the reasoning behind the decision.
 
 That last one is a leak the last implementation had: a debug log printed the
 keep reasoning, and the reasoning names cards. A seat's private information goes
@@ -168,7 +153,8 @@ nowhere, and a log is somewhere.
 One thing a seat gains and keeps: the cards it put on the bottom are known
 library positions for that seat afterwards. Its own draw odds must exclude them
 from the top of the library until an order change says otherwise, which is
-exactly the region shape in `knowledge.ts`.
+the intended region shape in `knowledge.ts`. Recording and updating that
+knowledge remains unfinished.
 
 ## Resumability
 
@@ -177,9 +163,9 @@ in the table. Completion is derived from those obligations, without a separate
 done flag. Every opening transition commits alongside its card motions, so
 replaying receipts reconstructs a half-finished round too.
 
-The journal file functions are still unwritten. The in-memory receipts already
-carry the opening, so a future benchmark frozen just after mulligans needs no
-separate fixture format.
+Journal replay and cloning preserve opening decisions and pending bottom
+obligations. A prefix can freeze a position after mulligans without a separate
+fixture format.
 
 ## Where the code goes
 

@@ -17,16 +17,17 @@ import { advanceTurn, turnBased } from "./turn.ts";
 import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
 import { commit } from "./commit.ts";
-import { playing, type Table } from "./table.ts";
+import { cardsIn, playing, type Table, type LedgerRow } from "./table.ts";
 import type { Decision } from "./types.ts";
+import { resolving } from "./resolution.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
  * waiting triggers are handled before anybody receives priority. CR 117.5.
  *
- * Steps 4, 5 and 6 cannot be detected without structured card abilities, so
- * they are absent rather than faked. Their absence is wrong the moment a card
- * has a trigger, which is why the next milestone is cards and not combat.
+ * Replacements and waiting triggers still require meaning the table does not
+ * have. A prepared stack ability does carry its accepted instructions, and
+ * continuing that resolution comes before the next state-based checkpoint.
  *
  * A state condition is not an event. It has no triggering moment, so it belongs
  * in step 3 and is never matched against the log. Treating it as an event makes
@@ -41,6 +42,10 @@ function pending(table: Table): Pending | null {
 	if (table.opening === null) return null;
 	if (!mulligansSettled(table)) return nextOpening(table);
 
+	// Once resolution begins, its remaining instructions finish before another
+	// state-based check or priority grant, even across an unanswered choice.
+	if (table.resolution) return resolving(table);
+
 	// 3. The loop applies the whole group, then asks again for cascading actions.
 	//    Listing the group must not execute it.
 	const automatic = stateBased(table);
@@ -48,8 +53,7 @@ function pending(table: Table): Pending | null {
 
 	// 4. A replacement applies to a pending event: which applies first.
 	// 5. Triggers waiting to go on the stack: what order.
-	// 6. A resolution paused on a choice: that choice.
-	//    All three need cards. Absent until then.
+	//    Trigger and replacement discovery remain unwritten.
 
 	// 7. A turn based action is due: untap, draw, declare, discard to hand size.
 	const due = turnBased(table);
@@ -92,6 +96,7 @@ export function apply(
 	optionId: string,
 	by: "engine" | "model" | "judge",
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
+	execution?: LedgerRow["execution"],
 ): void {
 	const p = pending(table);
 	if (p === null) throw new Error("apply was called with nothing pending");
@@ -101,7 +106,7 @@ export function apply(
 			`No option ${optionId}. Offered: ${p.moves.map((m) => m.option.id).join(", ")}`,
 		);
 	}
-	take(table, p, move, by, why);
+	take(table, p, move, by, why, execution);
 }
 
 /** Commit one move and write its ledger row. The only path from a pick to the table. */
@@ -111,12 +116,15 @@ function take(
 	move: Move,
 	by: "engine" | "model" | "judge",
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
+	execution?: LedgerRow["execution"],
 ): void {
 	// The row goes in first, so every group this decision commits is stamped with
 	// a version that includes the decision that caused it. Nothing in `commit`
 	// reads the ledger, so the order costs nothing else.
 	table.ledger.push({
 		seq: table.ledger.length,
+		clock: table.cursor.clock + 1,
+		...(execution ? { execution } : {}),
 		situation: p.situation,
 		seat: p.seat,
 		offered: p.moves.map((candidate) => candidate.option.id),
@@ -124,13 +132,18 @@ function take(
 		by,
 		why,
 	});
-	commit(table, [...move.changes, ...bookkeeping(p, move)], move.reason);
+	commit(table, [...move.changes, ...bookkeeping(table, p, move)], move.reason);
 }
 
 /** A listed action and its bookkeeping are one committed event. */
-function bookkeeping(p: Pending, move: Move): Change[] {
+function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 	const id = move.option.id;
-	if (p.situation === "priority") return [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
+	if (p.situation === "priority") {
+		const changes: Change[] = [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
+		const top = cardsIn(table, "stack")[0];
+		if (id === "pass" && table.cursor.passes + 1 === playing(table).length && top?.ability) changes.push({ do: "resolution", action: "begin", what: top.id });
+		return changes;
+	}
 	if (p.situation === "turn-based") return [{ do: "turn", action: "complete" }];
 	if (p.situation === "pregame") {
 		if (id === "keep" || id === "mulligan") return [{ do: "opening", action: "declare", who: p.seat, choice: id }];

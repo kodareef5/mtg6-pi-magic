@@ -172,7 +172,7 @@ test("a different seed gives a different game", async () => {
 	);
 });
 
-test("no leak: a view names only cards in a public zone or this seat's own hand", async () => {
+test("no leak: public deck counts never identify hidden objects", async () => {
 	// Use a distinct identity so a public copy cannot mask a leak in the test.
 	const hidden = start(standard, [{ deck: ["Secret"] }, { deck: ["Forest"] }], "hidden");
 	const tap = commit(hidden, [{ do: "tap", what: "0-0" }], "game-setup");
@@ -185,20 +185,27 @@ test("no leak: a view names only cards in a public zone or this seat's own hand"
 	for (const zone of ["battlefield", "stack", "exile"] as const) {
 		card.zone = zone;
 		for (const viewer of [1, "spectator"] as const) {
-			assert.equal(JSON.stringify(project(hidden, viewer)).includes("Secret"), false);
+			const { decks, ...position } = project(hidden, viewer);
+			assert.equal(JSON.stringify(position).includes("Secret"), false);
+			assert.deepEqual(decks, [{ seat: 0, cards: { Secret: 1 } }, { seat: 1, cards: { Forest: 1 } }]);
 		}
 	}
 	card.faceDown = false;
 	assert.equal(describe(hidden, faceDownTap).includes("Secret"), false);
-	assert.ok(JSON.stringify(project(hidden, "spectator")).includes("Secret"));
+	assert.ok(project(hidden, "spectator").objects!.some((object) => object.card === "Secret"));
 
 	const built = table();
 	let checks = 0;
 
-	// Which names a seat may legitimately read: anything in a public zone, plus
-	// its own hand. A card that has only ever been in another seat's hand or
-	// library must not appear anywhere in the view, and the count it belongs to
-	// still has to.
+	const registered = project(built, "spectator").decks;
+	assert.deepEqual(registered, [{ seat: 0, cards: { Forest: 60 } }, { seat: 1, cards: { Swamp: 60 } }]);
+	const edited = project(built, 0);
+	edited.decks![1]!.cards.Swamp = 0;
+	assert.deepEqual(project(built, 0).decks, registered, "projection owns its deck counts");
+	assert.equal(project({ ...built, format: { ...standard, decksRegistered: false } }, 0).decks, undefined);
+
+	// Registered names do not associate a hidden object with a card name. The
+	// position shows public identities, this seat's hand, and hidden counts.
 	const allowed = (self: number) =>
 		new Set(
 			[...built.things.values()]
@@ -222,7 +229,14 @@ test("no leak: a view names only cards in a public zone or this seat's own hand"
 					name: s.name,
 					async answer(frame: Frame) {
 						const may = allowed(self);
-						const text = render(frame);
+						const { decks, ...position } = frame.view;
+						assert.deepEqual(decks, registered, "registration does not change with the position");
+						const text = render({ ...frame, view: position });
+						for (const object of built.things.values()) {
+							if (object.zone === "library" || (object.zone === "hand" && object.owner !== self)) {
+								assert.ok(!frame.view.objects!.some((visible) => visible.id === object.id));
+							}
+						}
 						for (const other of built.seats) {
 							if (other.id === self) continue;
 							for (const name of new Set(other.deck)) {

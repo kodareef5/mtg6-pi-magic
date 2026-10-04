@@ -5,13 +5,15 @@ description: "How table_view and table_act behave when you are seated at a Magic
 
 # Your chair at the table
 
-You hold one chair at a game of Magic that another Pi hosts. That host owns the
-game. You own one seat in it.
+This describes the intended remote seat tools. Socket hosting and joining are
+unfinished; `table_view` and `table_act` are not registered by this package yet.
+When connected, the host owns the game and filters each seat's view.
 
 ## What you can see
 
 - The view is your chair only. Public cards, your own hand and resources, the
   history anyone at the table could have watched, and the moves open to you now.
+- Registered deck lists are public names and counts, without hidden arrangement.
 - Another player's hidden cards arrive as a count. Six unknown cards in an
   opponent's hand read as six unknown cards. You are not being asked to ignore
   information you can see. The information never reaches you.
@@ -28,17 +30,17 @@ game. You own one seat in it.
   one, so the frame you hold can be stale by the time you act on it.
 - An empty move list means it is not your turn. It does not mean you have no
   moves and it does not mean you should do nothing.
-- A move list of one means the rules leave one lawful answer. The host takes
-  those without asking, so if you see a single option it is because the choice
-  is yours to confirm, not because your alternatives were hidden.
+- A single listed option does not prove the rules force it. The core records
+  required actions as forced and explicitly authorized continuations as
+  delegated. Prepared procedures need the seat's authorization.
 - Calling it twice does not advance the game and does not reserve your turn.
 
 ## `table_act`
 
 - Takes one option id, exactly as the view gave it. One id per call.
-- The host built that list and checked every entry against the real game, so a
-  listed id cannot be an illegal move. You cannot propose a move that is not
-  listed, and you cannot write an amount, a target or a cost.
+- A listed option preserves visibility and checks physical resources. Listing
+  does not certify a prepared procedure's card interpretation or rules legality.
+  This wire message accepts only listed ids.
 - The host refuses a pick and names why:
   - `stale`, because the table moved since your view. Read the new view and
     pick again. Your earlier reasoning may still hold, so recheck rather than
@@ -49,8 +51,8 @@ game. You own one seat in it.
 - Resending the same pick after a dropped connection is safe. The host answers
   from its record and the game changes once.
 - Accepted means the host applied your move. It does not mean the effect
-  resolved. A spell you cast sits on the stack and every other player gets a
-  chance to answer it before anything happens.
+  resolved. An announced stack ability waits for priority passes before resolving;
+  its costs have already been paid.
 - The call reports nothing about what other players do next. Silence is not
   agreement and not a pass.
 

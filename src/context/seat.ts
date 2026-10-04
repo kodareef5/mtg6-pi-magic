@@ -1,24 +1,11 @@
 /**
- * A seat answered by a decision model.
+ * A classifier seat answers listed choices, follows rule routes, and prepares
+ * or executes private equipment. Strategy supplies recipes on request; focus
+ * builds the decision packet without inference.
  *
- * Three jobs, three calls, in this order: the intent prepares, the packet
- * focuses, the model picks an id. See AGENTS.md in this directory for why they
- * stay apart.
- *
- * This seat is deliberately incapable of most of what a seat may do. It picks
- * from the list and nothing else: it cannot declare a motion, cannot delegate
- * and cannot object, because none of those have handlers yet. A person or a
- * remote agent at the same seat can do all of them. That asymmetry is this
- * file's limit, not the table's.
- *
- * It can walk the dialer, which is the one thing it does beyond picking. A
- * person at a Pi already has that through `/magic rules`, so this is the same
- * capability reached a different way rather than a new one.
- *
- * Past 150 lines because the question a seat is asked and the loop that asks it
- * again with more in front of it are one mechanism. Splitting them would put
- * the reason a route is described as an ask in a different file from the loop
- * that depends on a route never reading as a move.
+ * Prepared procedures support declarations and delegated continuations. Raw
+ * declarations, free-form delegation, and objections still lack game handlers.
+ * Past 150 lines to keep the question beside its navigation and answer handling.
  */
 
 import type { Answer, Player } from "../core/player.ts";
@@ -28,6 +15,10 @@ import type { Intent } from "../core/intent.ts";
 import { follow } from "./dial.ts";
 import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
+import { answerReview } from "./review.ts";
+import type { WorkCommand } from "../core/work-language.ts";
+import { pendingReviews } from "../core/agenda.ts";
+import { workMenu } from "../core/work-menu.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -60,6 +51,8 @@ export type AiSeatOptions = {
 	 * counting on the way back reported an attempted call as no call at all.
 	 */
 	onAsk?(packet: Packet): void;
+	/** Called only when private equipment explicitly requests fresh thought. */
+	plan?(frame: Frame): Promise<WorkCommand[]>;
 };
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
@@ -93,11 +86,16 @@ export function question(packet: Packet): Question {
 		// is a fact about this decision and a refusal is a fact about its answer.
 		...(packet.learned?.length ? ["", "Rules you asked for:", ...packet.learned] : []),
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
+		...(packet.work ? ["", `Equipment revision ${packet.work.revision}.`,
+			...packet.committed.map((step) => `Already executed: ${step}`),
+			...(packet.work.draft ? [`Draft: ${packet.work.draft.label}; step ${packet.work.draft.next + 1}; ${packet.work.draft.status}.`,
+				...packet.work.draft.reserves.map((reserve) => `Reserve ${reserve.object.id}@${reserve.object.incarnation}: ${reserve.purpose}`)] : []),
+			"Work ids edit or execute the named draft. An edit moves no cards; ready does not mean executed.",
+			"Ordinary listed plays remain available. Due reviews and drafts need a disposition before passing."] : []),
 		"",
-		"Answer with one of the listed ids. The options are every move the table",
-		"built and checked, and nothing outside the list can be played here. The plan",
-		"above was written before this board existed: where it does not fit what you",
-		"can see, the listed option that fits is the better answer.",
+		"Answer with one listed id. These ids include the moves and routes available in this request.",
+		"Prepared procedures check resources against stated costs; they do not certify card meaning or rules legality.",
+		"Guidance may have been revised for this position. It remains a plan, not a guarantee that its assumptions hold.",
 		...(packet.routes.length
 			? [
 					"",
@@ -112,6 +110,7 @@ export function question(packet: Packet): Question {
 		type: "choice",
 		instructions: lines.join("\n"),
 		criteria: Object.fromEntries([
+			...(packet.workOptions ?? []).map((option) => [option.id, [option.label, option.shows].filter(Boolean).join(". ")]),
 			...packet.options.map((option) => [
 				option.id,
 				[option.label, option.shows, option.consequence].filter(Boolean).join(". "),
@@ -130,6 +129,7 @@ export function question(packet: Packet): Question {
 export function aiSeat(options: AiSeatOptions): Player {
 	let latest: Frame | undefined;
 	let asked = 0;
+	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
 
 	return {
 		name: options.name,
@@ -151,24 +151,33 @@ export function aiSeat(options: AiSeatOptions): Player {
 			if (!frame.decision) throw new Error(`${options.name} was asked a frame with no decision`);
 			latest = frame;
 
-			// Planning is unwritten, so the intent arrives whole and is used as
-			// given. A phase change alone is not a reason for a model call.
+			// Preparation changes only on a recorded request. A phase change
+			// alone is not a reason for a model call.
 			const seated = options.chronicle;
 			const budget = options.dials ?? 2;
-			const learned: string[] = [];
-			const walked: string[] = [];
+			if (navigation?.version !== frame.version) navigation = { version: frame.version, learned: [], walked: [] };
+			const { learned, walked } = navigation;
+			if (frame.view.work?.request && frame.decision.situation === "priority") {
+				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${frame.view.work.request}`);
+				return { kind: "work", tools: await options.plan(frame), revision: frame.view.work.revision, actionId: `${options.name}-${frame.version}-${frame.view.work.revision}-plan-${++asked}` };
+			}
 
-			for (let dialled = 0; ; dialled++) {
+			for (;;) {
 				const whole = focus(frame, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
 					...(seated ? { recaps: seated.recaps } : {}),
-					...(options.rules && dialled < budget ? { rules: options.rules } : {}),
+					...(options.rules && walked.length < budget ? { rules: options.rules } : {}),
 					...(learned.length ? { learned } : {}),
 				});
 				// A route already followed is not offered again. Its answer is
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
+				const due = pendingReviews(frame)[0];
+				if (due) {
+					if (due.items.length) { asked += 1; options.onAsk?.(packet); }
+					return answerReview(options.api, packet, due, frame, `${options.name}-${frame.version}-${frame.view.work!.revision}-review-${asked}`);
+				}
 
 				asked += 1;
 				options.onAsk?.(packet);
@@ -188,6 +197,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 
 				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
 				if (!route) {
+					const work = workMenu(frame).find((option) => option.id === answer.choice);
+					const actionId = `${options.name}-${frame.version}-${frame.view.work?.revision ?? 0}-${asked}`;
+					if (work?.tools) return { kind: "work", tools: work.tools, revision: frame.view.work!.revision, actionId };
+					if (work?.execute) return { kind: "execute", draft: work.execute, revision: frame.view.work!.revision, actionId };
 					return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
 				}
 				walked.push(route.id);
