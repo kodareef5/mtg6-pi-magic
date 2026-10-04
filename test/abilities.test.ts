@@ -128,7 +128,9 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 		const question = request.questions.pick!;
 		if (question.type !== "choice") throw new Error("Expected a choice");
 		const packet = request.state as unknown as Packet;
-		assert.deepEqual(packet.options.map((option) => option.id), frame.decision!.options.map((option) => option.id));
+		// Every option, the plan's step first.
+		assert.deepEqual(packet.options.map((option) => option.id).sort(), frame.decision!.options.map((option) => option.id).sort());
+		assert.match(packet.options[0]!.id, /^plan:/);
 		const steps = Object.entries(question.criteria).filter(([, text]) => text.includes("Plan step 1: Loot with a Merchant"));
 		assert.equal(steps.length, 2, "two payments for one source: identical Merchants are one choice");
 		assert.equal(new Set(steps.map(([, text]) => text)).size, 2);

@@ -76,6 +76,15 @@ const seen = (object: SeenObject): Seen => {
 		...(traits?.words.length ? { words: [...traits.words] } : {}) };
 };
 
+/** The due step's options first, then the live branches', then the rest: every option, in the order the plan wants them. */
+function inPlanOrder<T extends { id: string }>(options: readonly T[], state: ReturnType<typeof planState>): T[] {
+	if (!state) return [...options];
+	const rank = new Map<string, number>();
+	state.due.find((one) => one.candidates.length)?.candidates.forEach((option) => rank.set(option.id, 0));
+	for (const branch of state.branches) for (const option of branch.candidates) if (!rank.has(option.id)) rank.set(option.id, 1);
+	return [...options].sort((a, b) => (rank.get(a.id) ?? 2) - (rank.get(b.id) ?? 2));
+}
+
 /**
  * Build the packet.
  *
@@ -121,7 +130,7 @@ export function focus(
 		actor: seat, window: structuredClone(view.window), version,
 		obligation: decision.question,
 		...(plan ? { plan } : {}),
-		options: decision.options.map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),
+		options: inPlanOrder(decision.options, state).map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),
 		resources: [...view.yours],
 		known: [...view.table, ...view.since],
 		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),

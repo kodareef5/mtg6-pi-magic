@@ -431,3 +431,19 @@ test("an essential step that cannot be taken where it belongs asks for a new pla
 		assert.deepEqual(requests, essential ? ["Stop: Step 1 cannot be taken now: Cast the Passage"] : []);
 	}
 });
+
+test("a step is carried out with a payment that spares what the plan holds, and the table takes it", async () => {
+	const table = matchup("sparing");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Forest", "Forest");
+	place(table, 0, "hand", "Llanowar Elves");
+	const [kept] = cardsIn(table, "battlefield", 0).filter((one) => one.card === "Forest");
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", holds: [{ objects: { refs: [{ id: kept!.id, incarnation: kept!.incarnation }] }, purpose: "Snakeskin Veil" }],
+		steps: [{ label: "Cast Llanowar Elves", when: { ...turn3, step: "precombat-main" }, action: { prefix: "cast:", objects: { card: "Llanowar Elves" } } }] } }], "plan");
+	const due = planState(workFrame(table, 0))!.due[0]!;
+	assert.equal(due.candidates.length, 1, "of the two Forests, only the free one fits the step");
+	assert.ok(!due.candidates[0]!.objects!.some((ref) => ref.id === kept!.id));
+	await playUntil(table, { 0: pilot([]), 1: opponent }, 3);
+	assert.equal(table.things.get(kept!.id)!.tapped, false, "the held Forest is still untapped");
+	assert.ok(table.ledger.some((row) => row.picked.startsWith("cast:") && row.why === "delegated"), "and the table took the cast itself");
+});

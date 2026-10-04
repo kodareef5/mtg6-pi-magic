@@ -27,9 +27,11 @@ const COLORS: Color[] = ["W", "U", "B", "R", "G"];
 /** 302.6, read from what the seat sees: a creature that is not yet its controller's since its turn began, without haste. */
 export const sick = (frame: Frame, object: SeenObject) => !!object.traits?.types.includes("creature") && !object.traits.words.includes("haste") &&
 	(object.entered ?? 0) >= (frame.view.began ?? 0);
-/** Two objects are interchangeable only when every fact this seat can see about them matches. */
+/** What the seat's plan holds: a held source is not interchangeable with a free one, so a payment can spare it. */
+const heldBy = (frame: Frame): Set<string> => new Set((frame.view.work?.plan?.holds ?? []).flatMap((hold) => select(hold.objects, frame).map((object) => object.id)));
+/** Two objects are interchangeable only when every fact this seat can see about them matches, and the plan holds both or neither. */
 export const sameness = (frame: Frame, object: SeenObject): string => [
-	object.card, object.zone, object.tapped, JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
+	object.card, object.zone, object.tapped, heldBy(frame).has(object.id), JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
 	...(frame.view.notes ?? []).filter((note) => "on" in note && note.on.id === object.id && note.on.incarnation === object.incarnation).map((note) => JSON.stringify(note)).sort(),
 ].join("|");
 

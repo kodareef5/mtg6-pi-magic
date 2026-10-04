@@ -61,10 +61,18 @@ export function planState(frame: Frame): PlanState | null {
 	const done = new Set(frame.view.done ?? []);
 	const open = (option: PlanOption) => matches(option.when, frame) && (!option.if || condition(scope, option.if));
 	const procedures: ProcedureOption[] = [];
+	const held = (plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
+		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
+	// Where some ways of carrying a step out spare what the plan holds, only those fit it.
+	const keeps = new Set(held.flatMap((hold) => hold.objects.map((object) => object.id)));
+	const spare = (options: Option[]) => {
+		const sparing = options.filter((option) => !option.objects?.some((ref) => keeps.has(ref.id)));
+		return sparing.length ? sparing : options;
+	};
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
 		procedures.push(...found.procedures);
-		return { at, label: option.label, candidates: found.options };
+		return { at, label: option.label, candidates: spare(found.options) };
 	};
 	const due: Fit[] = [], waiting: PlanState["waiting"] = [];
 	plan.steps.forEach((step, at) => {
@@ -82,8 +90,7 @@ export function planState(frame: Frame): PlanState | null {
 		revision, plan, due, waiting, branches, procedures,
 		stops: [...(plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label), ...blocked],
 		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && ((stop.when && !matches(stop.when, frame)) || !condition(scope, stop.if))).map((stop) => stop.label),
-		held: (plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
-			.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length),
+		held,
 	};
 }
 
