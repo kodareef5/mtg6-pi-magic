@@ -2,11 +2,14 @@
  * The plan's arithmetic, read before it is accepted: the seat's next own turn
  * walked step by step, with what it has to spend.
  *
- * Land steps use the land plays left, and a land joins the sources unless its
- * package says it enters tapped. A cast or an announcement must be payable from
- * the sources the steps before it left untapped and the plan does not hold. A
- * permanent the plan casts adds its package's extra land plays from then on. A
- * branch must be payable from what the steps leave.
+ * Land steps use the land plays left, and a land joins the sources unless it
+ * enters tapped, by its package or another permanent's term. A cast or an
+ * announcement must be payable from the sources the steps before it left and
+ * the plan does not hold, floating mana spent as it goes. A permanent the plan
+ * casts adds its package's extra land plays from then on. A branch must be
+ * payable from what the steps leave, held sources included. Payments are tried
+ * together: the first that fits one step may starve a later one, so another is
+ * tried before a conflict is named.
  *
  * Nothing is tapped and nothing is promised: every spell is assumed to resolve.
  * Where the arithmetic cannot be done honestly, an X cost, a reduction, mana a
@@ -15,10 +18,11 @@
  */
 import { symbols } from "./announce.ts";
 import { fundings, sources, type Price } from "./funding.ts";
-import type { Plan, PlanOption } from "./language.ts";
+import type { Plan, PlanOption, Registration } from "./language.ts";
 import { allowance } from "./permits.ts";
 import { select } from "./query.ts";
-import { viewWorld } from "./selectors.ts";
+import { matches, viewWorld } from "./selectors.ts";
+import { intrinsic } from "./characteristics.ts";
 import type { Frame } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
@@ -38,7 +42,6 @@ export function budget(frame: Frame, plan: Plan): string[] {
 		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield" ? { ...object, tapped: false } : object) } };
 	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
 	const held = new Set((plan.holds ?? []).flatMap((hold) => select(hold.objects, frame).map((object) => object.id)));
-	const spent = new Set<string>();
 	let plays = allowance(viewWorld(hypothetical.view), frame.seat).lands - (now ? frame.view.landsPlayed ?? 0 : 0);
 	let honest = true;
 	// A step that resolves instructions may put cards in hand: after it, a missing card is not a mistake.
@@ -72,14 +75,9 @@ export function budget(frame: Frame, plan: Plan): string[] {
 		const mana = source?.card ? symbols(frame.view.printed?.[source.card]?.mana ?? "") : undefined;
 		return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }) };
 	};
-	const left = () => {
-		const free = sources(hypothetical).filter(({ object }) => !spent.has(object.id) && !held.has(object.id));
-		const kept = sources(hypothetical).filter(({ object }) => held.has(object.id) && !spent.has(object.id));
-		return `${free.length ? `the steps before it leave ${free.map(({ object, yields }) => `${object.card ?? object.token?.name} (${[...new Set(yields.map((one) => one.colors.join("")))].join("/")})`).join(", ")}` : "the steps before it leave no untapped source"}` +
-			`${kept.length ? `, and the plan holds ${kept.map(({ object }) => object.card ?? object.token?.name).join(", ")}` : ""}`;
-	};
-	const payable = (act: Act, except: Set<string>) => !act.price || fundings(hypothetical, act.price, except, act.source && { ...act.source, zone: "stack" }).length > 0;
-
+	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
+	type Item = { at: string; kind: "land"; land: SeenObject } | { at: string; kind: "cast"; source: SeenObject; price: Price; label: string };
+	const items: Item[] = [];
 	for (const [at, step] of plan.steps.entries()) {
 		if (!ours(step)) continue;
 		const act = read(step);
@@ -96,30 +94,65 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			if (plays <= 0) { found.push(`${where}: no land play is left for it this turn`); continue; }
 			plays -= 1;
 			const registers = act.source.card ? packages.get(act.source.card) : undefined;
-			const enters = registers?.find((one) => one.kind === "enters" && !one.affects && one.tapped);
-			if (!registers && !act.source.traits?.types.includes("land")) honest = false;
-			if (enters && "if" in enters && enters.if) honest = false;
-			const land = { ...act.source, zone: "battlefield" as const, tapped: !!enters, controller: frame.seat,
-				...(act.source.traits && registers ? { traits: { ...act.source.traits, registrations: registers } } : {}) };
-			hypothetical = { ...hypothetical, view: { ...hypothetical.view, objects: (hypothetical.view.objects ?? []).map((object) => object.id === land.id ? land : object) } };
+			const entry = entersTapped(hypothetical, act.source, registers);
+			if (entry === "conditional" || entry === "unknown") honest = false;
+			items.push({ at: where, kind: "land", land: { ...act.source, zone: "battlefield", tapped: entry === "tapped", controller: frame.seat,
+				...(act.source.traits && registers ? { traits: { ...act.source.traits, registrations: registers } } : {}) } });
 			continue;
 		}
 		if (act.unknown) { honest = false; continue; }
-		if (!honest) continue;
-		const ways = fundings(hypothetical, act.price!, new Set([...spent, ...held]), { ...act.source, zone: "stack" });
-		if (!ways.length) { found.push(`${where}: costs ${stated(act.price!)} but ${left()}; reorder the steps, drop one, or release the hold`); honest = false; continue; }
-		for (const tap of ways[0]!.funding.taps) spent.add(tap.source.id);
+		items.push({ at: where, kind: "cast", source: act.source, price: act.price!, label: step.label });
 		// A permanent cast now permits more land plays from then on.
 		for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
 	}
 	if (!honest) return found;
-	for (const [at, branch] of (plan.may ?? []).entries()) {
-		const act = read(branch);
-		if (!act || act.kind !== "cast" || !act.source || act.unknown) continue;
-		// A branch may be what a hold is for, so held sources pay for it.
-		if (!payable(act, spent)) found.push(`may[${at}] (${branch.label}): costs ${stated(act.price!)} but ${left()}; keep a source for it with holds, or drop the branch`);
-	}
+
+	// Then the payments: each cast from what the earlier ones left, trying other payments when a later step or a branch cannot be paid.
+	const branches = (plan.may ?? []).flatMap((branch, at) => { const act = read(branch); return act?.kind === "cast" && act.source && !act.unknown ? [{ at: `may[${at}] (${branch.label})`, act }] : []; });
+	let deepest: { depth: number; message: string } | undefined;
+	const fail = (depth: number, message: string) => { if (!deepest || depth > deepest.depth) deepest = { depth, message }; return false; };
+	const left = (position: Frame, spent: ReadonlySet<string>) => {
+		const all = sources(position);
+		const free = all.filter(({ object }) => !spent.has(object.id) && !held.has(object.id)), kept = all.filter(({ object }) => held.has(object.id) && !spent.has(object.id));
+		return `${free.length ? `the steps before it leave ${free.map(({ object, yields }) => `${object.card ?? object.token?.name} (${[...new Set(yields.map((one) => one.colors.join("")))].join("/")})`).join(", ")}` : "the steps before it leave no untapped source"}` +
+			`${kept.length ? `, and the plan holds ${kept.map(({ object }) => object.card ?? object.token?.name).join(", ")}` : ""}`;
+	};
+	const go = (index: number, position: Frame, spent: ReadonlySet<string>): boolean => {
+		const item = items[index];
+		if (!item) {
+			// A branch may be what a hold is for, so held sources pay for it.
+			for (const { at, act } of branches) if (!fundings(position, act.price!, spent, { ...act.source!, zone: "stack" }).length)
+				return fail(index, `${at}: costs ${stated(act.price!)} but ${left(position, spent)}; keep a source for it with holds, or drop the branch`);
+			return true;
+		}
+		if (item.kind === "land") return go(index + 1, { ...position, view: { ...position.view, objects: (position.view.objects ?? []).map((object) => object.id === item.land.id ? item.land : object) } }, spent);
+		const ways = fundings(position, item.price, new Set([...spent, ...held]), { ...item.source, zone: "stack" });
+		if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent)}; reorder the steps, drop one, or release the hold`);
+		return ways.slice(0, 6).some(({ funding }) => {
+			const paid = new Set(funding.paid);
+			const after = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => !paid.has(mana.id)) })) } };
+			return go(index + 1, after, new Set([...spent, ...funding.taps.map((tap) => tap.source.id)]));
+		});
+	};
+	if (!go(0, hypothetical, new Set()) && deepest) found.push(deepest.message);
 	return found;
+}
+
+/**
+ * How a land would enter for this seat now: its own package's term, and every
+ * permanent's on the battlefield that reaches it (Zhao's "nonbasic lands enter
+ * tapped"). A land with no package and no basic land type is unknown.
+ */
+export function entersTapped(frame: Frame, land: SeenObject, registers?: Registration[]): "tapped" | "untapped" | "conditional" | "unknown" {
+	const own = registers?.find((one): one is Extract<Registration, { kind: "enters" }> => one.kind === "enters" && !one.affects && !!one.tapped);
+	const world = viewWorld(frame.view), entering = { ...land, zone: "battlefield" as const, controller: frame.seat };
+	const others = (frame.view.objects ?? []).filter((holder) => holder.zone === "battlefield").flatMap((holder) =>
+		(world.read(holder)?.registrations ?? []).filter((one): one is Extract<Registration, { kind: "enters" }> => one.kind === "enters" && !!one.affects && !!one.tapped &&
+			matches({ world, controller: holder.controller, source: holder }, entering, one.affects, land.traits)));
+	const terms = [...(own ? [own] : []), ...others];
+	if (terms.some((one) => !one.if)) return "tapped";
+	if (terms.length) return "conditional";
+	return registers || intrinsic(land.traits).length ? "untapped" : "unknown";
 }
 
 const stated = (price: Price) => `${price.generic ? `{${price.generic}}` : ""}${price.colors.map((color) => `{${color}}`).join("")}` || "{0}";

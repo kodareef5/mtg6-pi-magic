@@ -532,3 +532,20 @@ test("an essential step waits for the steps before it, and nothing is taken for 
 	state = planState(workFrame(table, 0))!;
 	assert.deepEqual([state.stops, state.unmet], [["Step 1 cannot be taken now: Cast the Passage"], 0]);
 });
+
+test("payments are tried together: the creature takes the Village's red so a Mountain stays free for Shock", () => {
+	const table = matchup("village");
+	main(table, 1, 2);
+	establish(table, 1, "Rockface Village", pack("Rockface Village"));
+	place(table, 1, "battlefield", "Mountain", "Mountain");
+	place(table, 1, "hand", "Emberheart Challenger", "Shock");
+	const now = { active: "self" as const, step: "precombat-main" as const, fromTurn: 2, throughTurn: 2 };
+	const plan: Plan = { objective: "o", guidance: "g",
+		steps: [{ label: "Cast Emberheart Challenger", when: now, action: { prefix: "cast:", objects: { zones: ["hand"], card: "Emberheart Challenger" } } }],
+		may: [{ label: "Shock a blocker", when: { active: "any" }, action: { procedure: { claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", source: { zones: ["hand"], controller: "self", card: "Shock" },
+			timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] } } }] };
+	assert.deepEqual(planProblems(workFrame(table, 1), plan), []);
+	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
+	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
+	assert.match(planProblems(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
+});
