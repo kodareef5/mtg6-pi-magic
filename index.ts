@@ -56,8 +56,7 @@ import type { SeatId } from "./src/core/types.ts";
 import { project, render } from "./src/core/view.ts";
 import { CommandsSchema, commands } from "./src/core/work-language.ts";
 import { editWork, workFrame } from "./src/core/work-tools.ts";
-import { pendingReviews } from "./src/core/agenda.ts";
-import { workMenu } from "./src/core/work-menu.ts";
+import { planState } from "./src/core/planning.ts";
 
 /**
  * A new game seats two practice decks from decks/collection. Setup registers
@@ -134,7 +133,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string; circuits?: boolean } | { resume: string },
+		from: { seed: string } | { resume: string },
 	): Promise<Table> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -185,7 +184,6 @@ export default function (pi: ExtensionAPI) {
 			// The rules are already loaded for the replay check, so the dialer costs
 			// nothing to switch on: a seat may look a rule up mid decision.
 			rules,
-			...(!resuming && from.circuits ? { circuits: true } : {}),
 			...(carried.length ? { prepared: carried } : {}),
 		});
 		table = opened;
@@ -196,7 +194,7 @@ export default function (pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "magic_work",
 		label: "Magic seat equipment",
-		description: "Read one seat's visible objects, agenda, drafts, reviews and tool menus. Supply commands and the equipment revision to edit that seat's equipment atomically. Edits move no cards and advance no phase. Acceptance proves neither card meaning nor strategic quality; scheduled work requests attention rather than guaranteeing execution. The tool is available while the game is waiting, and cannot edit during an active play loop.",
+		description: "Read one seat's visible objects, its plan and where it stands in it. Supply commands and the equipment revision to edit that seat's equipment atomically: put a plan, request one, or put a package. Edits move no cards and advance no phase. Acceptance proves neither card meaning nor strategic quality. The tool is available while the game is waiting, and cannot edit during an active play loop.",
 		parameters: Type.Object({ seat: Type.Integer({ minimum: 0 }), revision: Type.Optional(Type.Integer({ minimum: 0 })), commands: Type.Optional(CommandsSchema) }),
 		async execute(actionId, params) {
 			if (!table) throw new Error("No table. /magic step opens one for inspection.");
@@ -210,7 +208,7 @@ export default function (pi: ExtensionAPI) {
 				if (journal) saveGame(journal, table);
 			}
 			const frame = workFrame(table, params.seat);
-			const details = { frame, reviews: pendingReviews(frame), menu: workMenu(frame) };
+			const details = { frame, plan: planState(frame) };
 			return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
 		},
 	});
@@ -282,12 +280,11 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	pi.registerCommand("magic", {
-		description: "play [seed] [circuits] | resume <game> | clone <game> <version> <id> | work [seat] | models | step | log | export | cards | rules",
+		description: "play [seed] | resume <game> | clone <game> <version> <id> | work [seat] | models | step | log | export | cards | rules",
 		handler: async (args, ctx) => {
 			const words = args.trim().split(/\s+/).filter(Boolean);
 			const verb = words[0] ?? "";
-			const circuits = verb === "play" && (words[1] === "circuits" || words[2] === "circuits");
-			const seed = (verb === "play" && words[1] === "circuits" ? undefined : words[1]) ?? String(table?.log.length ?? 0);
+			const seed = words[1] ?? String(table?.log.length ?? 0);
 
 			if (verb === "models") {
 				await models(words, ctx);
@@ -295,7 +292,7 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (verb === "play" || verb === "resume") {
-				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed, circuits });
+				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed });
 				const began = Date.now();
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
 				running = true;
@@ -320,7 +317,7 @@ export default function (pi: ExtensionAPI) {
 				if (!table) { ctx.ui.notify("No table. /magic step opens one.", "warning"); return; }
 				const id = Number(words[1] ?? 0);
 				const frame = workFrame(table, id);
-				ctx.ui.notify(JSON.stringify({ equipment: frame.view.work ?? { revision: 0 }, reviews: pendingReviews(frame), menu: workMenu(frame) }, null, 2), "info");
+				ctx.ui.notify(JSON.stringify({ equipment: frame.view.work ?? { revision: 0 }, plan: planState(frame) }, null, 2), "info");
 				return;
 			}
 
@@ -422,7 +419,7 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			ctx.ui.notify(
-				"Usage: /magic play [seed] [circuits] | /magic resume <game> | " +
+				"Usage: /magic play [seed] | /magic resume <game> | " +
 					"/magic clone <game> <version> <new-id> | " +
 					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic work [seat] | /magic log | " +
 					"/magic export <game> [public|full|<seat>] | " +

@@ -21,10 +21,9 @@ import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
 import { describe, project } from "./view.ts";
-import { needsAttention } from "./work-menu.ts";
-import { completedStep, editWork, prepareWork, workFrame } from "./work-tools.ts";
-import { refuseExecution } from "./draft.ts";
-import { activate, activationChanges, procedureOptions } from "./procedures.ts";
+import { annotate, execution, planReason, planState, type PlanState } from "./planning.ts";
+import { editWork, prepareWork, workFrame } from "./work-tools.ts";
+import { activate } from "./procedures.ts";
 
 export type Watcher = (line: string) => void;
 
@@ -104,10 +103,26 @@ export async function play(
 			continue;
 		}
 
-		const attention = !!table.work[decision.seat] && decision.situation === "priority" && needsAttention(workFrame(table, decision.seat));
-		const why = attention ? null : automatic(decision, intents[decision.seat]);
+		// A seat with a plan: strategy when it is wanted, a stop when the plan no
+		// longer fits, the table's own move when the plan settles it, else ask.
+		const current = table.work[decision.seat] ? workFrame(table, decision.seat) : undefined;
+		const attention = !!current && planReason(current) !== undefined;
+		const state = current && !attention ? planState(current) : null;
+		if (state && raiseStop(table, decision, state)) continue;
+		// A lone pass is not forced while the plan offers an announcement beside it.
+		const why = attention || state?.procedures.length ? null : automatic(decision, intents[decision.seat]);
 		if (why) {
-			apply(table, decision.options[0]!.id, "engine", why);
+			// A forced move can still be the step the plan named; the row says so.
+			apply(table, decision.options[0]!.id, "engine", why, state ? execution(state, decision.options[0]!.id) : undefined);
+			told = report(table, told, watch);
+			continue;
+		}
+		const settled = state && settledBy(table, decision, state);
+		if (settled) {
+			const procedure = state.procedures.find((choice) => choice.option.id === settled);
+			const carried = execution(state, settled);
+			if (procedure) activate(table, procedure.activation, { picked: settled, offered: [settled], by: "engine", why: "delegated", ...(carried ? { execution: carried } : {}) });
+			else apply(table, settled, "engine", "delegated", carried);
 			told = report(table, told, watch);
 			continue;
 		}
@@ -135,32 +150,23 @@ export async function play(
 		if (!player) throw new Error(`Seat ${decision.seat} has nobody to answer it`);
 
 		// Retry the same decision, and say what was wrong with the last answer.
-		// Asking the identical question twice is one question, not two.
-		const asked = { ...frame(decision.seat), decision };
+		// Asking the identical question twice is one question, not two. A plan's
+		// announcements join the listed options, each marked with what the plan says.
+		const offered: Decision = state ? { ...decision, options: annotate(decision.options, state) } : decision;
+		const asked = { ...frame(decision.seat), decision: offered };
 		let answer: Answer | undefined;
 		const failures: string[] = [];
 		for (let attempt = 0; attempt < 2; attempt++) {
 			try {
 				const received = await player.answer(failures.length ? { ...asked, refused: [...failures] } : asked);
-				let why = refuse(received, decision);
-				if (why === null) {
-					const valid = received as Answer;
-					const current = workFrame(table, decision.seat);
-					if (valid.kind === "work" || valid.kind === "execute") {
-						const delivered = table.workLog.find((entry) => entry.seat === decision.seat && entry.actionId === valid.actionId);
-						if (delivered) {
-							if (valid.kind === "execute") why = "This actionId already names accepted seat work or execution.";
-							else if (JSON.stringify(delivered.tools) !== JSON.stringify(valid.tools)) why = "This actionId already names different seat tools.";
-						} else if (valid.revision !== (table.work[decision.seat]?.revision ?? 0)) why = "The seat equipment changed; inspect it again.";
-						else if (valid.kind === "work") prepareWork(current, valid.tools);
-						else {
-							const draft = current.view.work?.draft;
-							why = draft?.id === valid.draft ? refuseExecution(draft, current) : "No current draft with that id.";
-							const procedure = draft && procedureOptions(draft, current).find((choice) => choice.option.id === draft.bound);
-							if (!why && procedure) activationChanges(table, procedure.activation);
-						}
-					}
-					if (valid.kind === "pick" && valid.option === "pass" && attention) why = "Due seat work remains unconsidered. Review, defer or cancel it before passing.";
+				let why = refuse(received, offered);
+				if (why === null && (received as Answer).kind === "work") {
+					const valid = received as Extract<Answer, { kind: "work" }>;
+					const delivered = table.workLog.find((entry) => entry.seat === decision.seat && entry.actionId === valid.actionId);
+					if (delivered) why = JSON.stringify(delivered.tools) === JSON.stringify(valid.tools) ? null : "This actionId already names different seat tools.";
+					else if (valid.revision !== (table.work[decision.seat]?.revision ?? 0)) why = "The seat equipment changed; inspect it again.";
+					else if (!attention && valid.tools.every((tool) => tool.do === "plan.request") && escalations(table, decision.seat) >= ESCALATIONS) why = `This turn's ${ESCALATIONS} requests for a new plan are spent. Choose a listed option.`;
+					else prepareWork(workFrame(table, decision.seat), valid.tools);
 				}
 				if (why === null) { answer = received as Answer; break; }
 				failures.push(why);
@@ -182,19 +188,13 @@ export async function play(
 			case "work":
 				editWork(table, decision.seat, answer.tools, answer.actionId, answer.revision);
 				break;
-			case "execute": {
-				const draft = table.work[decision.seat]!.draft!;
-				const procedures = procedureOptions(draft, workFrame(table, decision.seat));
-				const prepared = procedures.find((choice) => choice.option.id === draft.bound);
-				const execution = { draft: draft.id, step: draft.next, actionId: answer.actionId };
-				if (prepared) activate(table, prepared.activation, { picked: draft.bound!, offered: procedures.map((choice) => choice.option.id), by: "model", why: "declared", execution });
-				else apply(table, draft.bound!, "model", "chosen", execution);
-				completedStep(table, decision.seat, answer.actionId);
+			case "pick": {
+				const procedure = state?.procedures.find((choice) => choice.option.id === answer.option);
+				const carried = state ? execution(state, answer.option) : undefined;
+				if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: offered.options.map((option) => option.id), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
+				else apply(table, answer.option, "model", "chosen", carried);
 				break;
 			}
-			case "pick":
-				apply(table, answer.option, "model", "chosen");
-				break;
 			case "declare":
 				declare(table, decision.seat, answer.changes, answer.says);
 				break;
@@ -228,6 +228,47 @@ export async function play(
 
 	told = report(table, told, watch);
 	return table.outcome;
+}
+
+/** Requests for a new plan a seat may make in one turn, by stops or by asking for help. Past it, the pilot decides. */
+const ESCALATIONS = 2;
+const escalations = (table: Table, seat: SeatId) => table.workLog.filter((entry) => entry.seat === seat &&
+	entry.clock > (table.cursor.began[table.cursor.active] ?? 0) && entry.tools?.some((tool) => tool.do === "plan.request")).length;
+
+/**
+ * A stop the table raises for the seat: an `askWhen` that holds, or the next
+ * step unavailable when a pass could end its window. Each is raised once a
+ * turn, within the escalation budget. True when it raised one.
+ */
+function raiseStop(table: Table, decision: Decision, state: PlanState): boolean {
+	// Only a step whose window names this step can be missed here; a wider window stays open.
+	const step = state.due[0], named = step && state.plan.steps[step.at]!.when.step === table.cursor.steps[0];
+	const empty = ![...table.things.values()].some((object) => object.zone === "stack");
+	const unavailable = named && !step.candidates.length && decision.situation === "priority" && empty
+		? [`Step ${step.at + 1} is unavailable: no listed option fits "${step.label}".`] : [];
+	for (const reason of [...state.stops.map((label) => `Stop: ${label}`), ...unavailable]) {
+		if (escalations(table, decision.seat) >= ESCALATIONS) return false;
+		const actionId = `stop-${decision.seat}-${table.cursor.turn}-${reason}`;
+		if (table.workLog.some((entry) => entry.seat === decision.seat && entry.actionId === actionId)) continue;
+		editWork(table, decision.seat, [{ do: "plan.request", reason }], actionId);
+		return true;
+	}
+	return false;
+}
+
+/**
+ * The option the plan settles without asking, if any. Silent at priority:
+ * pass. Silent while declaring our own attackers: attack with nothing. The
+ * first due step has exactly one fitting option and no branch applies: that
+ * option. Blocks, resolution choices and trigger order are never defaulted.
+ */
+function settledBy(table: Table, decision: Decision, state: PlanState): string | undefined {
+	if (state.branches.length) return undefined;
+	const step = state.due[0], silent = !state.due.some((one) => one.candidates.length);
+	const listed = (id: string) => decision.options.some((option) => option.id === id);
+	if (silent && decision.situation === "priority" && listed("pass")) return "pass";
+	if (silent && decision.situation === "turn-based" && table.cursor.steps[0] === "declare-attackers" && decision.seat === table.cursor.active && listed("attack:done")) return "attack:done";
+	return step?.candidates.length === 1 ? step.candidates[0]!.id : undefined;
 }
 
 /**

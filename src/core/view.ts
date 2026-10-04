@@ -144,7 +144,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		players: playing(table).map((one) => ({ id: one.id, life: one.life })),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
 		...(at.kind === "turn" ? { visit: table.cursor.visit } : {}),
-		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]) } : {}),
+		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
+			row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
 }
 
@@ -262,10 +263,10 @@ export function render(frame: Frame): string {
 	if (frame.view.since.length) out.push("", "Since your last look:", ...frame.view.since.map((l) => `  ${l}`));
 	if (frame.view.work) {
 		const work = frame.view.work;
+		const done = new Set(frame.view.done ?? []);
 		out.push("", `Your equipment, revision ${work.revision}:`,
-			...(work.objective ? [`Objective: ${work.objective}`] : []),
-			...work.tasks.map((task) => `Check ${task.id}: ${task.label}; ${JSON.stringify(task.when)}; ${task.runs.length} assessed${task.cancelled ? "; cancelled" : task.expired ? "; expired" : ""}`),
-			...(work.draft ? [`Draft ${work.draft.label}: ${work.draft.next}/${work.draft.steps.length} executed, ${work.draft.status}${work.draft.bound ? `, bound ${work.draft.bound}` : ""}`] : []),
+			...(work.plan ? [`Objective: ${work.plan.objective}`, ...work.plan.steps.map((step, at) => `${done.has(at) ? "Done" : "Step"} ${at + 1}: ${step.label}`),
+				...(work.plan.may ?? []).map((branch) => `Branch: ${branch.label}`)] : ["No plan accepted."]),
 			...(work.request ? [`Strategy requested: ${work.request}`] : []));
 	}
 

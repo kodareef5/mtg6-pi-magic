@@ -4,7 +4,7 @@
  * leave mana floating is not used. Keeping floating mana and tapping instead is
  * a different payment and is offered too.
  */
-import { select } from "./agenda.ts";
+import { select } from "./query.ts";
 import { intrinsic } from "./characteristics.ts";
 import type { Mana } from "./table.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
@@ -30,8 +30,7 @@ export const sick = (frame: Frame, object: SeenObject) => !!object.traits?.types
 /** Two objects are interchangeable only when every fact this seat can see about them matches. */
 export const sameness = (frame: Frame, object: SeenObject): string => [
 	object.card, object.zone, object.tapped, JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
-	...(frame.view.work?.labels ?? []).filter((label) => label.object.id === object.id && label.object.incarnation === object.incarnation).map((label) => label.role).sort(),
-	...(frame.view.work?.draft?.reserves ?? []).some((reserve) => reserve.object.id === object.id && reserve.object.incarnation === object.incarnation) ? ["reserved"] : [],
+	...(frame.view.notes ?? []).filter((note) => "on" in note && note.on.id === object.id && note.on.incarnation === object.incarnation).map((note) => JSON.stringify(note)).sort(),
 ].join("|");
 
 /**

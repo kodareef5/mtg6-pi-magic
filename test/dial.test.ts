@@ -1,11 +1,8 @@
 /**
  * The dialer. A route changes what a seat knows and nothing else.
  *
- * This is the first circuit, so the test states the property the whole concept
- * rests on: following a route does not move the table, does not change the
- * question, and cannot be mistaken for a move. docs/CIRCUITS.md calls that the
- * two commit boundaries, and if it does not hold the rest of the design is not
- * safe to build.
+ * The property it rests on: following a route does not move the table, does
+ * not change the question, and cannot be mistaken for a move.
  */
 
 import { deck } from "../src/core/decks.ts";
@@ -188,11 +185,11 @@ test("a route reads as an ask and never as a move, and the budget ends the walk"
 		startingIntent(decision.seat),
 		{ rules },
 	);
-	const asked = question(packet);
+	const asked = question(packet, false);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
 	assert.match(asked.criteria["rules:priority"]!, /Acts on nothing/);
-	assert.match(asked.instructions, /An ask plays nothing, changes nothing/);
+	assert.match(asked.instructions, /an ask shows the rules it names, changes nothing/);
 	assert.match(asked.instructions, /may not be among them/);
 	// And it still never says what is good.
 	for (const word of ["should", "best", "recommend"]) {

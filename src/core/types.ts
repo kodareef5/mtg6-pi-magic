@@ -93,6 +93,8 @@ export type SeatView = {
 	visit?: number;
 	/** Only this seat's equipment. A spectator receives none. */
 	work?: Workspace;
+	/** The steps of this seat's current plan its actions have carried out, read from the ledger. */
+	done?: number[];
 	/** Mana is public. Stable ids distinguish individual units in a payment. */
 	pools?: { seat: SeatId; mana: Mana[] }[];
 	/** The remaining instruction cursor, without any hidden library identities. */

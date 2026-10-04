@@ -33,7 +33,6 @@ const { values: a } = parseArgs({
 		pregame: { type: "string" },
 		summary: { type: "string" },
 		strategy: { type: "string" },
-		circuits: { type: "boolean" },
 		from: { type: "string" },
 		out: { type: "string", short: "o", default: "games" },
 		"no-brief": { type: "boolean" },
@@ -45,15 +44,15 @@ const { values: a } = parseArgs({
 
 if (a.help) {
 	console.log(`usage: smoke.ts [--seed S] [--decide P] [--pregame P] [--summary P]
-                [--circuits] [--strategy P] [--no-brief] [--watch] [--trace]
+                [--strategy P] [--no-brief] [--watch] [--trace]
 
   --seed S        the game seed. Defaults to the clock, and is printed
   --decide P      the decision model, as a Pi model pattern
   --pregame P     the reasoner that writes the brief
   --summary P     the commentator. --summary off skips every recap, which is
                   how to price it against playing with no commentary
-  --circuits      ask strategy to prepare recipes and scheduled reviews
-  --strategy P    the reasoner that prepares and revises the seat equipment
+  --strategy P    the reasoner that writes each seat's plan. --strategy off
+                  plays without plans: the decision model reads the options alone
   --from F        continue games/F.jsonl, which carries everything it held:
                   its briefs, its decisions and its position. Clone a finished
                   game at version 0 to get one with the pregame already paid for
@@ -140,7 +139,6 @@ const seated = await seatTable(
 		format: standard.name,
 		journal,
 		rules,
-		...(a.circuits ? { circuits: true } : {}),
 		...(carried?.prepared.length ? { prepared: carried.prepared } : {}),
 	},
 );

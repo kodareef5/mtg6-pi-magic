@@ -260,8 +260,8 @@ export type Receipt = {
 export type LedgerRow = {
 	seq: number;
 	clock?: number;
-	/** The physical action also settles this draft step, even if a later write tears. */
-	execution?: { draft: string; step: number; actionId: string };
+	/** The plan step or standing branch this action carried out, by the plan's equipment revision. Plan progress is read from these. */
+	execution?: { plan: number; step?: number; branch?: number };
 	/** A prepared physical operation, recorded so replay never infers its meaning again. */
 	activation?: Activation;
 	/** What each permanent entering through this decision registered, by object id. Frozen so replay never reads private work. */

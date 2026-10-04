@@ -1,8 +1,7 @@
 # Game state, replay, and export
 
 `src/core/journal.ts` writes, replays, clones and exports games. Agreed rollback,
-remote hosting and bulk simulation are unfinished. The offline circuit
-inspector reads local experiment output; it is not a live spectator server.
+remote hosting and bulk simulation are unfinished.
 
 ## The file
 
@@ -23,7 +22,7 @@ names does not change the shuffle draws.
 
 Receipts record committed changes. Ledger rows record decisions and whether
 they were forced, delegated, chosen, declared or fallback. Prepared briefs and
-private equipment edits are journal entries too. Executed procedures carry
+private equipment edits, such as an accepted plan, are journal entries too. Executed procedures carry
 their accepted basis, costs, payment, instructions and delegation, so replay
 uses those terms without another interpretation call.
 
@@ -56,8 +55,8 @@ zero carries preparation before any decision; later versions select positions.
 The prefix includes private equipment and accepted instructions.
 
 `relive` applies each ledger row with its recorded reason. A fallback remains a
-fallback. Execution rows also name the draft step they completed, so a torn
-following equipment write cannot make replay execute that step twice.
+fallback. A row that carried out a plan step names it, so plan progress is
+read from the ledger and a torn equipment write cannot lose or repeat it.
 
 The commands have separate meanings:
 

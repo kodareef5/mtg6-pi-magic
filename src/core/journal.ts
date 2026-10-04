@@ -19,7 +19,6 @@ import type { LedgerRow, Receipt, Table } from "./table.ts";
 import { project } from "./view.ts";
 import type { SeatId } from "./types.ts";
 import type { WorkEntry } from "./work.ts";
-import { advanceDraft } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
 import type { Deck } from "./decks.ts";
 
@@ -227,20 +226,10 @@ export const rowsOf = (lines: Line[], upTo?: number): LedgerRow[] =>
 export const preparedIn = (lines: Line[]): { seat: SeatId; made: unknown }[] =>
 	lines.flatMap((line) => ("prepared" in line ? [line.prepared] : []));
 
-/** Equipment is private journal state, accepted once and carried through forks. */
+/** Equipment is private journal state, accepted once and carried through forks. Plan progress lives in the ledger. */
 export function restoreWork(table: Table, lines: Line[], upTo?: number): void {
 	table.workLog = lines.flatMap((line) => "work" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.work)] : []);
 	for (const entry of table.workLog) table.work[entry.seat] = structuredClone(entry.workspace);
-	for (const row of table.ledger.filter((row) => row.execution)) {
-		const execution = row.execution!;
-		if (row.clock === undefined) throw new Error(`Executed draft step in ledger row ${row.seq} has no physical clock.`);
-		const current = table.work[row.seat];
-		if (current?.draft?.id !== execution.draft || current.draft.next !== execution.step) continue;
-		const workspace = advanceDraft(current);
-		table.work[row.seat] = workspace;
-		table.workLog.push({ seq: table.workLog.length, at: row.seq + 1, clock: row.clock, seat: row.seat,
-			actionId: execution.actionId, note: `Executed step ${workspace.draft!.next} of ${workspace.draft!.label}`, workspace: structuredClone(workspace) });
-	}
 }
 
 /**

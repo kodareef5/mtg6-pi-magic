@@ -9,7 +9,8 @@ it means to do now: the procedure it announces, and what its permanent registers
 when it enters. The table checks the shape, conservation and visibility. It does
 not check that the card says so. Another seat can object, and a judge rules.
 
-Status: a design under review. The schemas parse; no engine code uses them yet.
+The schemas parse, the table runs procedures, registrations and plans, and
+`test/examples.test.ts` checks every example against them.
 
 ## The table's line
 

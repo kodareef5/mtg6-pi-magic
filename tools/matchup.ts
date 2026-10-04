@@ -39,7 +39,7 @@ const observed = traceInference(inference as never, (event) => {
 	if (event.event === "request") save(journal, table);
 	appendFileSync(calls, JSON.stringify(event) + "\n");
 });
-const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, circuits: true, ...(carried ? { prepared: carried.prepared } : {}) });
+const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, ...(carried ? { prepared: carried.prepared } : {}) });
 const stop = new Error("Monitor stop");
 const began = Date.now(), limit = Number(values.turns);
 try {

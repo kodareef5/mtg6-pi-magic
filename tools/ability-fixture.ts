@@ -1,20 +1,19 @@
-/** Two established Merchants activate across one priority exchange. Authored models,
- * real circuits, payments, stack, resolution and game loop. Setup is a fixture,
- * not a claim that these permanents were cast during this game.
+/** Two established Merchants activate across one priority exchange. Authored models
+ * writing real plans; real payments, stack, resolution and game loop. Setup is a
+ * fixture, not a claim that these permanents were cast during this game.
  */
 import { commit, start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
 import { card, load } from "../src/core/cards.ts";
 import { deck } from "../src/core/decks.ts";
 import { cardsIn, type Mana } from "../src/core/table.ts";
-import { project } from "../src/core/view.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { play } from "../src/core/loop.ts";
 import type { Frame } from "../src/core/types.ts";
-import type { Procedure, WorkCommand } from "../src/core/work-language.ts";
+import type { Procedure } from "../src/core/work-language.ts";
+import type { Plan } from "../src/core/language.ts";
 import { aiSeat } from "../src/context/seat.ts";
 import { decisionApi, type Classify } from "../src/context/model.ts";
-import type { Packet } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork } from "../src/context/strategy.ts";
 import type { Reasoner } from "../src/context/reason.ts";
@@ -42,47 +41,39 @@ export function lootProcedure(basis = "{1}, {T}: Draw a card, then discard a car
 		] };
 }
 
+/**
+ * A loots on its third-turn upkeep as a plan step; B answers with its own loot
+ * from a standing branch while A's ability is on the stack. Each discard is
+ * the seat's own choice.
+ */
 export async function abilityExercise() {
 	const table = abilityTable(), universe = load("cards/standard.tsv"), counted = tally();
 	const basis = card(universe, "Qiqirn Merchant").oracle.split("\n")[0]!;
-	let plans = 0, batches = 0, concernQuestions = 0, exchangeCalls = 0;
+	let plans = 0, exchangeCalls = 0;
 	const paused: { version: number; seat: number; frame: Frame }[] = [];
-	const history: unknown[] = [], trace: { clock: number; turn: number; step: string; event: string }[] = [];
-	const checkpoint = (event: string, seat = table.cursor.active) => {
-		if (table.cursor.turn > 3 || exchangeCalls) return;
-		trace.push({ clock: table.cursor.clock, turn: table.cursor.turn, step: table.cursor.steps[0]!, event });
-		history.push({ clock: table.cursor.clock, seat, note: event, workspace: structuredClone(table.work[seat]), table: project(table, "spectator").table });
-		if (table.work[0]?.draft?.next === 2 && table.work[1]?.draft?.next === 2 && !cardsIn(table, "stack").length) exchangeCalls = counted.spent().length;
-	};
+	const upkeep = (active: "self" | "opponent") => ({ active, step: "upkeep" as const, fromTurn: 3, throughTurn: 3 });
 	const thinking: Pick<Reasoner, "work"> = { async work(_about, prompt, { submit }) {
 		plans += 1;
 		const { seat } = JSON.parse(prompt.user) as { seat: number };
-		const tools: WorkCommand[] = [
-			{ do: "recipe.put", recipe: { id: "loot", label: "Fund and activate the Merchant", guidance: "Make one mana, then pay and tap the Merchant. The draw is delegated; choose the discard after seeing it.", reserves: [], steps: [
-				{ label: "Make one mana", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, action: { procedure: manaProcedure("Island", "U") } },
-				{ label: "Pay and announce the draw/discard ability", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, action: { procedure: lootProcedure(basis) } },
-			] } },
-			{ do: "task.put", task: { id: "opening-exchange", label: "Consider the prepared activation", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, times: 1,
-				scope: { zones: [] }, concepts: ["prepared activation"], concerns: ["opportunity"], guidance: "Adopt loot once. B responds while A's ability is on the stack. Once the draft is adopted, finish it and pass.", recipes: ["loot"] } },
-			{ do: "plan.accept", objective: seat === 0 ? "Activate, then allow the opponent to respond." : "Respond with our own activation before theirs resolves." },
-		];
-		const problem = submit.check({ commands: tools });
+		const plan: Plan = seat === 0
+			? { objective: "Loot at the third upkeep, then let the opponent respond.", guidance: "Pay with the Island; choose the discard after seeing the draw.",
+				steps: [{ label: "Loot with the Merchant", when: upkeep("self"), action: { procedure: lootProcedure(basis) } }] }
+			: { objective: "Answer the opponent's loot with our own before theirs resolves.", guidance: "Respond only while their ability is on the stack.", steps: [],
+				may: [{ label: "Loot in response", when: upkeep("opponent"), if: { amount: { count: { zones: ["stack"], controller: "opponent" } }, atLeast: 1 },
+					action: { procedure: lootProcedure(basis) } }] };
+		const problem = submit.check({ plan });
 		if (problem) throw new Error(problem);
-		return { commands: tools };
+		return { plan };
 	} };
 	const classify: Classify = async (_model, request) => {
-		const packet = request.state as unknown as Packet;
 		const answers = Object.fromEntries(Object.entries(request.questions).map(([key, question]) => {
 			if (question.type !== "choice") throw new Error("The fixture expects choices.");
-			const ids = Object.keys(question.criteria);
-			let choice: string;
-			if (key.startsWith("concern-")) { concernQuestions += 1; choice = packet.work?.draft ? "no-action" : "recipe:loot"; }
-			else choice = ids.find((id) => id === "work:execute") ?? ids.find((id) => id === "work:ready") ?? ids.find((id) => id.startsWith("work:bind:")) ?? ids.find((id) => id.startsWith("work:adopt:")) ?? ids.find((id) => id.startsWith("land:")) ??
-				ids.find((id) => id === "attack:done" || id === "block:done") ?? ids[0]!;
+			const entries = Object.entries(question.criteria);
+			// Take what the plan marks, else pass, else the first real option.
+			const choice = entries.find(([, text]) => /Plan (step|branch)/.test(text))?.[0] ?? entries.find(([id]) => id === "pass")?.[0] ?? entries.find(([id]) => id !== "ask:help")![0];
 			return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }];
 		}));
-		if (packet.reviews?.length) batches += 1;
-		checkpoint(`Seat ${packet.actor}: ${Object.values(answers).map((answer) => answer.choice).join(", ")}`, packet.actor);
+		if (!exchangeCalls && table.ledger.filter((row) => row.activation?.timing === "stack").length === 2 && !cardsIn(table, "stack").length) exchangeCalls = counted.spent().length;
 		return { api: "typesafe-system-one", provider: "typesafe", model: "jev-latest", answers, stopReason: "stop", timestamp: 0 } as never;
 	};
 	const model = { type: "classifier", id: "jev-latest", provider: "typesafe", api: "typesafe-system-one" } as never;
@@ -95,6 +86,6 @@ export async function abilityExercise() {
 			return player.answer(frame);
 		} }];
 	}));
-	const outcome = await play(table, players, Object.fromEntries(table.seats.map((seat) => [seat.id, startingIntent(seat.id)])), (event) => checkpoint(event));
-	return { table, outcome, paused, plans, batches, concernQuestions, exchangeCalls, calls: counted.spent().length, history, trace };
+	const outcome = await play(table, players, Object.fromEntries(table.seats.map((seat) => [seat.id, startingIntent(seat.id)])));
+	return { table, outcome, paused, plans, exchangeCalls, calls: counted.spent().length };
 }

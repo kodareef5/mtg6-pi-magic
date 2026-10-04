@@ -15,7 +15,7 @@ legality. `src/core/loop.ts` is the only loop. If anything here starts stepping
 the game forward, stop and move it.
 
 Not the rules. The core owns the motion vocabulary and accepted card meaning.
-There is no per-card compilation. Read `docs/CIRCUITS.md` and `docs/WORK.md`
+There is no per-card compilation. Read `docs/SYNTAX.md` and `docs/PLANS.md`
 for the current direction.
 
 Not required. A seat answered over p2p, by a person or through MCP loads none of
@@ -41,13 +41,15 @@ reaches a decision is a short plan plus the facts.
 - **pregame** runs once per seat as one concurrent wave. The unit of the pass is
   the unit of injection: each answer is filed under where it will be read. Never
   one question, because one answer gets pasted into every decision.
-- **strategy** runs once per turn of its own for a seat that plans each turn,
-  and on a request recorded in the seat's equipment. A phase boundary is not a
-  reason to spend money. Its system prompt carries `docs/SYNTAX.md`, every example in
-  `docs/examples/` and the tool schema, about 31K tokens that are identical on
-  every call so a provider caches them. No file tools: the reference is small
-  enough to be in front of the model, and the examples test keeps it true to
-  the schema.
+- **strategy** writes the seat's plan before it first acts, once per turn of its
+  own after it draws, and on a request: a stop the plan named or jev's
+  `ask:help`. A phase boundary is not a reason to spend money. Its system prompt
+  carries the planning checklist, `docs/SYNTAX.md` and every example in
+  `docs/examples/`, and its submit tool carries the plan schema; both are
+  identical on every call so a provider caches them, and the call sends a cache
+  key so it does. It answers only through `submit`, and a refused plan comes back
+  with every problem named. No file tools: the reference is small enough to be
+  in front of the model, and the examples test keeps it true to the schema.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
 - **judge** runs only on an objection: the classifier narrows the rules, then
@@ -59,10 +61,11 @@ for rather than the reply returned.
 
 ## Preparation, projection, and selection
 
-- **Plan** uses strategy to prepare alternatives and conditions for revisiting
-  them. It proposes equipment edits, never physical actions.
-- **Focus** builds the packet for one decision: the obligation, the resources,
-  the options at equal detail, the ordered priorities, and the routes out.
+- **Plan** uses strategy to write the seat's plan: its line, branches, stops and
+  holds. It proposes equipment edits, never physical actions.
+- **Focus** builds the packet for one decision: the obligation, the part of the
+  plan this window needs, the options at equal detail with the plan's marks, the
+  public position, and the routes out.
 - **Pick** returns one id from the prepared list. It never plans, never widens
   the list and never writes a move.
 
@@ -111,7 +114,7 @@ A route is a predefined id with a predefined meaning, and it returns to the same
 decision. It does not pass, refund a paid cost, change a locked choice, or
 reveal anything the seat has not earned.
 
-The packet offers exact rule routes from disk and private equipment menus.
+The packet offers exact rule routes from disk, and `ask:help` when the seat has a planner.
 Ordinary option widening, raw declarations, and free-form delegation remain unwritten. Do not
 advertise an executable route whose handler does not exist.
 
@@ -131,17 +134,14 @@ calibrating against recorded games.
 Count strategy and classifier calls separately, alongside forced and delegated
 steps, routes, gaps, tokens, cost and elapsed time. Focus makes no model call.
 
-## Equipment and review
+## The plan
 
 `aiSeat` returns equipment commands to the core loop. It never writes the table.
-One classifier request can assess independent concerns about several scoped
-objects and concepts. None of those answers may assume a sibling paid a cost or
-completed an action. Invalid batches account for nothing.
 
-The packet carries current preparation and progress counts. Historical review
-answers, assessment signatures and executable tool bodies stay out of its
-state. Core retains those for validation and continuation. Strategy receives the
-full current draft and recipes so it can revise unfinished instructions. Both
-roles see public registered deck counts, without hidden arrangements or another
-seat's equipment. Shape checking proves neither the rules nor the
-quality of the plan.
+The pilot's packet carries the plan's objective, the due step, the next two,
+live branches, holds and stops, and what is done. It does not carry the deck
+lists, card registrations, procedure bodies or the brief's matchup reading;
+those are strategy's. Strategy receives the whole current plan with its
+progress, the visible objects with what they registered, the public registered
+lists and their card text. Neither sees hidden arrangements or another seat's
+equipment. Shape checking proves neither the rules nor the quality of the plan.

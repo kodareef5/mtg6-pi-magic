@@ -67,8 +67,7 @@ Order is a real choice the rules give the player, so it is recorded, even though
 it matters only when something later looks at the bottom of a library. The
 option space is too large to list: three cards from seven is 210 ordered
 choices. So it is collected one card at a time, with the remaining obligation
-shown at every step, which is the staged selection the circuitry already
-describes. Seven options, then six, then five.
+shown at every step, the same one-at-a-time selection combat declarations use. Seven options, then six, then five.
 
 **Opening-hand actions.** 103.6, in turn order. Options come from cards in hand
 that grant a pregame permission, which needs card structure to detect. With no

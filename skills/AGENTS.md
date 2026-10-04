@@ -34,7 +34,7 @@ Keep every fact needed for the decision, including restrictions and unresolved
 public stack instructions. Registered deck counts are public; hidden object
 identities and library order are not.
 
-The classifier receives guidance, current progress, step labels and windows,
-reservations, bindings and status. Executable draft bodies and assessment
-history stay in core. Strategy receives the full recipes and edited draft when
-asked to revise unfinished work.
+The classifier receives the plan's objective, the due step, the next two, live
+branches, holds and stops, and the options marked with the plan. Procedure
+bodies and card registrations stay with strategy, which receives the whole plan
+and its progress when it writes the next one.

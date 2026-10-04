@@ -25,8 +25,6 @@ export type Answer =
 	| { kind: "pick"; option: string; actionId: string }
 	/** Edit private equipment atomically. It neither answers priority nor moves cards. */
 	| { kind: "work"; tools: WorkCommand[]; revision: number; actionId: string }
-	/** Execute the current ready step against the live table, then record progress. */
-	| { kind: "execute"; draft: string; revision: number; actionId: string }
 	/**
 	 * Move specific cards. `says` is the announcement: what this seat claims it
 	 * is doing, in enough detail that another seat could check it. The table
@@ -68,19 +66,17 @@ export type Answer =
  * back. Declaration conservation belongs to declare, not here.
  */
 export function refuse(value: unknown, decision: Decision): string | null {
-	const kinds = "pick, work, execute, declare, delegate, ask, object, say or concede";
+	const kinds = "pick, work, declare, delegate, ask, object, say or concede";
 	if (!value || typeof value !== "object" || !("kind" in value)) {
 		return `An answer is an object with a kind: ${kinds}.`;
 	}
 	const text = (key: string) => key in value && typeof (value as Record<string, unknown>)[key] === "string";
 	const needs = (key: string, what: string) => text(key) ? null : `A ${String(value.kind)} needs ${what}.`;
 	switch (value.kind) {
-		case "work":
-		case "execute": {
+		case "work": {
 			if (!text("actionId")) return "A seat tool needs a string actionId.";
 			const revision = (value as { revision?: unknown }).revision;
 			if (!Number.isInteger(revision) || (revision as number) < 0) return "A seat tool needs its equipment revision.";
-			if (value.kind === "execute") return needs("draft", "a draft id");
 			try { commands((value as { tools?: unknown }).tools); return null; }
 			catch (error) { return String(error); }
 		}

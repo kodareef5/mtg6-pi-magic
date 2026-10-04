@@ -200,7 +200,7 @@ test("the question says what is true and never what is good", () => {
 	advance(built);
 	const decision = nextDecision(built)!;
 	const intent = startingIntent(0);
-	const asked = question(focus({ seat: 0, version: 0, view: project(built, 0), decision }, intent));
+	const asked = question(focus({ seat: 0, version: 0, view: project(built, 0), decision }, intent), false);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
 
@@ -211,8 +211,6 @@ test("the question says what is true and never what is good", () => {
 		assert.equal(asked.instructions.toLowerCase().includes(word), false, word);
 	}
 
-	// The seat's own priorities are carried, labelled as the seat's.
-	assert.match(asked.instructions, /Play a land every turn/);
 	// Nothing of the other seat's hand crosses into the request.
 	assert.equal(JSON.stringify(asked).includes("Swamp"), false);
 });

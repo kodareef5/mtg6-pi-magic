@@ -121,13 +121,13 @@ game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
 into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
-**`strategy` runs once per turn of its own seat, and on an escalation.** A seat
-that opts in with `plan.each-turn` is asked for its plan after it draws, before
-any automatic pass, and that plan covers the opponent's next turn too. Between
-sessions jev does the work; when the plan stops fitting, jev escalates and that
-is a request. A phase change alone spends nothing.
+**`strategy` writes each seat's plan: before it first acts, once per turn of its
+own after it draws, and when the plan stops fitting.** The plan covers the
+opponent's next turn too. Between sessions jev flies it and the table takes what
+it settles (`docs/PLANS.md`). A stop the plan named, or jev's `ask:help`, is a
+request, at most two a turn. A phase change alone spends nothing.
 `worthPlanning` retains the old mechanical estimate for comparison, but does
-not initiate calls. `/magic play <seed> circuits` opts into this path.
+not initiate calls.
 
 **`judge` runs only on an objection,** in two calls. The decision model scores
 candidate rules for relevance, then the reasoner rules on the few that survive
@@ -265,10 +265,10 @@ cost and power/toughness are structured fields, not text, so the table reads
 those from the pinned card file rather than trusting a claim.
 
 A decision with one legal option is not a decision. Take it, record it as
-forced, ask nobody. This saves calls on physical decisions. Circuit navigation
-and review can spend calls without adding a physical decision, so the forced
-ratio must be read beside total calls, tokens, cost, and elapsed time. A unique
-continuation authorized by the seat's plan is delegated, not forced.
+forced, ask nobody. This saves calls on physical decisions. Strategy calls and
+escalations add no physical decision, so the forced ratio must be read beside
+total calls, tokens, cost, and elapsed time. A unique continuation authorized by
+the seat's plan, or a pass where the plan is silent, is delegated, not forced.
 
 Never decide for a seat by accident. An unusable answer is asked once more, then
 the table takes the terminating option, records `fallback`, and writes a gap. A
@@ -350,14 +350,12 @@ rather than adding a test for each branch.
   route cites rules that resolve and carries their text. A route id reads as an
   ask, never as a move, and says what it does not show. A walked route is not
   offered again and the budget ends the walk.
-- **Equipped.** Private drafts and agenda edits have their own revision and
-  journal history. A tool batch either applies whole or changes nothing. A
-  review accounts for every scoped object, concept and label, and changed facts
-  reopen it without turning passes into fresh questions. Scheduled attention
-  is consulted before an automatic pass. Readiness moves no cards; execution
-  advances one draft step through the ordinary writer. A changed position,
-  missing reservation or stale incarnation requires inspection. A clone carries
-  unfinished work, and a torn equipment write cannot repeat an executed step.
+- **Planned.** A plan is accepted whole or refused whole with every problem
+  named, and accepting it moves nothing. The table takes a step only one option
+  fits, passes where the plan is silent, raises a stop once a turn within the
+  budget, and marks options with the plan without removing any. Progress is
+  read from the ledger rows that carried each step out, so replay and clones
+  hold exactly the progress of their prefix.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -387,12 +385,12 @@ call does not promise. Read `skills/AGENTS.md` before writing text a model reads
 index.ts               the Pi extension: commands and tools, no game logic
 src/core/              the game. Its own AGENTS.md holds the invariants
   table.ts, commit.ts  the shapes and their readers, and the one writer over them
-  work.ts, agenda.ts  private equipment and scheduled consideration
-  draft.ts           prepared sequences, bindings, reserves and readiness
+  work.ts            a seat's private equipment: its accepted plan and packages
   language.ts        the syntax a seat writes: procedures, registrations, plans
   work-language.ts   the checked JSON tool vocabulary, not model-written code
-  work-tools.ts      atomic equipment edits, separate from physical motion
-  work-menu.ts       the draft and agenda menus any player can use
+  work-tools.ts      atomic equipment edits and plan checks, separate from motion
+  planning.ts        where a seat is in its plan: due steps, branches, stops, holds
+  query.ts           whether a window is now, and which projected objects a query names
   printed.ts         type line, mana cost and power/toughness from the card file
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
@@ -400,7 +398,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   combat.ts          declaring attackers and blockers, dividing and dealing combat damage
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
-  procedures.ts      one offer path for drafts and default casts, activation terms
+  procedures.ts      one offer path for plans and default casts, activation terms
   characteristics.ts the layer walk: what an object is now, never stored
   selectors.ts       refs, selectors, amounts and conditions read against the table
   resolution.ts      remaining instructions and choices before a checkpoint
@@ -424,7 +422,6 @@ tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           stub for bulk games and counters
 tools/smoke.ts         one live game against a real model. Opt in, costs money
-tools/circuits.ts      offline circuit experiments and a local timeline inspector
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
 docs/SYNTAX.md         the syntax, the table's line, and execution semantics
@@ -434,9 +431,7 @@ decks/standard-matchup.json  the pinned matchup: its two lists, legality date, c
 docs/STANDARD.md       first real opening, observed failures and mechanics inventory
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
-docs/CIRCUITS.md       the toolbox, the circuits built from it, and how a seat
-                       decides. Read it before planning anything past milestone one
-docs/WORK.md           the working draft, agenda, review and tool contract
+docs/PLANS.md          the plan a seat flies: what it holds, how the table flies it
 docs/COMBAT.md         characteristics, the layer walk, combat, and the seams
 docs/MULLIGAN.md       the opening: the rules, the three decisions, what a seat knows
 docs/SEATING.md        the wire, for a reader with no code
@@ -445,7 +440,7 @@ docs/ZONES.md          the zones, identity, exile, dungeons, outside the game
 design-ref/            observations about Magic, on disk and not ours to publish.
                        Its own README says what moved to archive/ and why: the
                        documents that decided a design have been superseded by
-                       docs/CIRCUITS.md, and the ones that measured the game stand
+                       docs/PLANS.md and docs/SYNTAX.md, and the ones that measured the game stand
 ```
 
 `npm run cards` rebuilds the standard list and `npm run universe` writes all
@@ -455,11 +450,10 @@ verify every carried field against the source and refuse to pass on a mismatch.
 
 ## Not built yet
 
-- Strategic quality. `strategy.planWork` prepares checked equipment on request,
-  and offline experiments exercise its choreography through authored doubles.
-  Live Pi probes exercise preparation and execution, but do not measure playing
-  strength. Prepared procedures support a small set of physical instructions;
-  both authored and live probes remain separate from full-deck evaluation.
+- Strategic quality. `strategy.planWork` writes a checked plan, and offline
+  doubles exercise how the table and jev fly it. No live run has yet measured
+  playing strength; the pregame wave and the turn analysts are planned in the
+  prompting overhaul.
 - The judge's remedy. `ruling.rule` holds the two-call pipeline and stops at the
   verdict, because rollback is unwritten and a ruling with no remedy changes no
   game. A ruling also makes the phase plan stale, which is a consequence of one
@@ -478,7 +472,7 @@ verify every carried field against the source and refuse to pass on a mismatch.
   other creatures' damage in the same step toward trample's lethal (702.19b).
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
-- The judge, review rounds, and declaring. A game finishes without them.
+- The judge and declaring. A game finishes without them.
 - Rollback. `journal.ts` holds the file, the replay, the clone and the export;
   `rollback` is the one left, because it needs every remaining seat to agree and
   nothing holds that conversation. `docs/STATE.md` holds the reasoning.

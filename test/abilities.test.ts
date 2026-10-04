@@ -17,18 +17,16 @@ import { standard } from "../src/core/format.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
 import { editWork, prepareWork, workFrame } from "../src/core/work-tools.ts";
-import { workMenu } from "../src/core/work-menu.ts";
-import { refuseExecution } from "../src/core/draft.ts";
+import { annotate, planState } from "../src/core/planning.ts";
 import { fork, open, read, relive, replay, save, linesOf, type Header } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
 import type { Procedure } from "../src/core/work-language.ts";
 import type { Mana } from "../src/core/table.ts";
-import type { Draft } from "../src/core/work.ts";
 import type { Player } from "../src/core/player.ts";
 import { aiSeat } from "../src/context/seat.ts";
 import { decisionApi, type Classify } from "../src/context/model.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { focus, type Packet } from "../src/context/packet.ts";
+import type { Packet } from "../src/context/packet.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
 
 const elf: Procedure = { source: { zones: ["hand"], controller: "self", card: "Llanowar Elves" }, claim: "Cast Llanowar Elves", basis: "Creature — Elf Druid 1/1.",
@@ -46,10 +44,8 @@ function position(table = abilityTable()) {
 		else apply(table, quiet(decision.options).id, "engine", "forced");
 	}
 }
-const draft = (procedure: Procedure): Draft => ({ id: "test", recipe: "test", label: "Test", guidance: "Test", next: 0, status: "editing", reserves: [],
-	steps: [{ label: "Activate", when: {}, action: { procedure } }] });
 function proposed(table: Table, procedure: Procedure) {
-	return procedureOptions(draft(procedure), workFrame(table, table.cursor.priority!))[0]!;
+	return procedureOptions(procedure, workFrame(table, table.cursor.priority!), "procedure")[0]!;
 }
 function fire(table: Table, procedure: Procedure) {
 	const choice = proposed(table, procedure);
@@ -118,59 +114,40 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U" }], { generic: 1, colors: [] }).length, 1, "identical unrestricted units do not multiply a menu");
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", persists: true }], { generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
 
-	// The actual classifier request must distinguish both sources and payments.
+	// The actual classifier request must distinguish the payments, each marked as the plan's step.
 	const twins = start(standard, [{ name: "A", deck: deck("Dimir Control") }, { name: "B", deck: deck("Dimir Control") }], "payment-descriptions");
 	const [first, second] = cardsIn(twins, "library", 0).filter((one) => one.card === "Qiqirn Merchant");
 	commit(twins, [first!.id, second!.id].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
 	const frame = workFrame(position(twins), 0);
 	frame.view.pools = [{ seat: 0, mana: [{ id: "green", color: "G", persists: true }, { id: "blue", color: "U" }] }];
-	// Label one Merchant so the two are distinct sources.
-	const held = frame.view.objects!.find((object) => object.id === first!.id)!;
-	frame.view.work = prepareWork(frame, [{ do: "recipe.put", recipe: { id: "payments", label: "Choose payment", guidance: "Preserve green mana.", reserves: [], steps: draft(lootProcedure()).steps } }, { do: "draft.start", recipe: "payments" },
-		{ do: "label.put", object: { id: held.id, incarnation: held.incarnation }, role: "blocker", purpose: "Hold back to block." }]);
-	const source = frame.view.objects!.find((object) => object.id === second!.id)!;
-	const sourceText = `Source: Qiqirn Merchant (${source.id}@${source.incarnation})`;
-	let calls = 0, description = "";
+	frame.view.work = prepareWork(frame, [{ do: "plan.put", plan: { objective: "Loot.", guidance: "Preserve green mana.",
+		steps: [{ label: "Loot with a Merchant", when: {}, action: { procedure: lootProcedure() } }] } }]);
+	frame.decision = { ...frame.decision!, options: annotate(frame.decision!.options, planState(frame)!) };
+	let calls = 0;
 	const classify: Classify = async (model, request) => {
 		const question = request.questions.pick!;
-		assert.equal(question.type, "choice");
 		if (question.type !== "choice") throw new Error("Expected a choice");
 		const packet = request.state as unknown as Packet;
-		assert.deepEqual(packet.options, frame.decision!.options);
-		const bindings = Object.entries(question.criteria).filter(([id]) => id.startsWith("work:bind:"));
-		if (calls === 0) {
-			assert.equal(bindings.length, 4);
-			assert.equal(new Set(bindings.map(([, text]) => text)).size, 4);
-			assert.ok(bindings.some(([, text]) => text.includes("{G} (green, persists)")));
-		}
-		const chosen = calls === 0 ? bindings.find(([, text]) => text.includes(sourceText) && text.includes("{U} (blue, expires at step end)"))![0]
-			: calls === 1 ? "work:ready" : "work:execute";
-		const shown = packet.workOptions!.find((option) => option.id === chosen)!.shows!;
-		if (calls === 0) description = shown;
-		assert.equal(shown, description, "binding, readiness and execution carry the same terms");
-		assert.ok(question.criteria[chosen]!.includes(description));
+		assert.deepEqual(packet.options.map((option) => option.id), frame.decision!.options.map((option) => option.id));
+		const steps = Object.entries(question.criteria).filter(([, text]) => text.includes("Plan step 1: Loot with a Merchant"));
+		assert.equal(steps.length, 2, "two payments for one source: identical Merchants are one choice");
+		assert.equal(new Set(steps.map(([, text]) => text)).size, 2);
+		assert.ok(steps.some(([, text]) => text.includes("{G} (green, persists)")));
+		const [chosen, description] = steps.find(([, text]) => text.includes("{U} (blue, expires at step end)"))!;
 		assert.match(description, /Cost: 1 generic\. Tap the source\./);
 		assert.match(description, /Put the ability on the stack/);
 		assert.match(description, /you draws 1\./);
 		assert.match(description, /you chooses 1 of \{"zones":\["hand"\],"owner":"you"\} as discard\. Put bound:discard into graveyard \(discard\)\./);
-		assert.equal(JSON.stringify(packet.work).includes('"action"'), false);
+		assert.equal(packet.plan?.due, "Loot with a Merchant");
 		calls += 1;
 		return { api: model.api, provider: model.provider, model: model.id, stopReason: "stop", timestamp: 0,
 			answers: { pick: { type: "choice", choice: chosen, probabilities: { [chosen]: 1 }, confidence: 1 } } };
 	};
 	const player = aiSeat({ name: "A", api: decisionApi(classify, { id: "fixture", provider: "offline", api: "typesafe-system-one" } as never), intent: startingIntent(0), onGap: assert.fail });
-	for (let step = 0; step < 3; step++) {
-		const answer = await player.answer(frame);
-		if (step < 2) {
-			assert.equal(answer.kind, "work");
-			if (answer.kind === "work") frame.view.work = prepareWork(frame, answer.tools);
-		} else assert.equal(answer.kind, "execute");
-	}
-	assert.equal(calls, 3);
-	const projected = focus(frame, startingIntent(0));
-	assert.equal(projected.work!.draft!.bound, frame.view.work!.draft!.bound);
-	assert.deepEqual(projected.work!.draft!.boundObjects, frame.view.work!.draft!.boundObjects);
-	assert.deepEqual(workMenu(frame).find((option) => option.id === "work:execute")!.objects, [{ id: source.id, incarnation: source.incarnation }]);
+	const answer = await player.answer(frame);
+	assert.equal(answer.kind, "pick");
+	assert.equal(calls, 1);
+	assert.ok(answer.kind === "pick" && answer.option.startsWith(`plan:${frame.view.work!.planned}:s0:`), "the pick names the plan's step");
 });
 
 test("responses resolve newest first and a pending choice closes priority without revealing a hidden card", () => {
@@ -227,7 +204,7 @@ test("responses resolve newest first and a pending choice closes priority withou
 	mainFor(real, 1);
 	apply(real, nextDecision(real)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
 	fire(real, manaProcedure("Mountain", "R"));
-	const choices = procedureOptions(draft(shock), workFrame(real, 1));
+	const choices = procedureOptions(shock, workFrame(real, 1), "procedure");
 	assert.equal(choices.length, 3, "one creature and either player are different announced targets");
 	assert.equal(new Set(choices.map((choice) => choice.option.shows)).size, 3);
 	const playerHit = structuredClone(real), playerTarget = choices.find((choice) => choice.activation.targets[0]!.some((one) => "player" in one && one.player === 0))!;
@@ -251,7 +228,7 @@ test("responses resolve newest first and a pending choice closes priority withou
 	const allInstructions = structuredClone(snapshot);
 	// An authored multi-instruction spell checks cancellation of the whole effect,
 	// not a claim that Shock also draws cards.
-	const rebound = procedureOptions(draft({ ...shock, instructions: [...shock.instructions, { do: "draw", who: "you", count: 2 }] }), workFrame(allInstructions, 1))
+	const rebound = procedureOptions({ ...shock, instructions: [...shock.instructions, { do: "draw", who: "you", count: 2 }] }, workFrame(allInstructions, 1), "procedure")
 		.find((choice) => choice.activation.targets[0]!.some((one) => "id" in one))!;
 	activate(allInstructions, rebound.activation, { picked: rebound.option.id, offered: [rebound.option.id], by: "model", why: "declared" });
 	commit(allInstructions, [{ do: "move", what: creature.id, to: "hand", reason: "bounce" }], "bounce");
@@ -300,8 +277,10 @@ test("the real seat loop delegates a unique effect continuation and asks for eac
 	assert.ok(run.outcome);
 	assert.deepEqual(run.table.gaps, []);
 	assert.equal(run.plans, 2);
-	assert.equal(run.table.ledger.filter((row) => row.activation?.timing === "mana").length, 2);
-	assert.equal(run.table.ledger.filter((row) => row.activation?.timing === "stack").length, 2);
+	const loots = run.table.ledger.filter((row) => row.activation?.timing === "stack");
+	assert.equal(loots.length, 2);
+	assert.deepEqual(loots.map((row) => [row.seat, row.execution]), [[0, { plan: run.table.work[0]!.planned, step: 0 }], [1, { plan: run.table.work[1]!.planned, branch: 0 }]], "a step and a branch, each recorded");
+	assert.deepEqual(loots.map((row) => row.by), ["engine", "model"], "a step only one option fits is taken by the table; the branch is the pilot's");
 	assert.deepEqual(run.paused.map((pause) => pause.seat), [1, 0]);
 	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "delegated").length, 4, "each draw and each move of the chosen card");
 	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "chosen").length, 2);
@@ -368,7 +347,6 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 	assert.equal(asked, 2);
 	assert.equal(cardsIn(manual, "hand", 0).length, before);
 	assert.equal(manual.resolution?.program.length, 3, "nothing resolved without the seat");
-	assert.equal(refuseExecution(draft(lootProcedure()), workFrame(manual, 0)) !== null, true);
 
 });
 

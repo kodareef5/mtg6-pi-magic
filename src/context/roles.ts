@@ -71,7 +71,7 @@ export const ROLES: Record<
 		instead: "gpt-6.1-sol:low or gpt-6-astra:low, slower and stronger. Benchmark it before paying for it",
 	},
 	strategy: {
-		does: "prepare or revise seat recipes and scheduled reviews on request",
+		does: "write each seat's plan: at the opening, at each of its turns, and when the plan stops fitting",
 		kind: "chat",
 		whose: "seat",
 		suggested: "gpt-6-luna:low",

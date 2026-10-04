@@ -1,46 +1,24 @@
-/** Private equipment for a seat. Its revision and history are separate from card motion. */
+/** Private equipment for a seat: its accepted plan. Its revision and history are separate from card motion. */
 import type { Thing } from "./table.ts";
 import type { Traits } from "./characteristics.ts";
-import type { Recipe, TaskSpec, ObjectRef, DraftStep, WorkCommand } from "./work-language.ts";
-import type { Package } from "./language.ts";
+import type { WorkCommand } from "./work-language.ts";
+import type { Package, Plan } from "./language.ts";
 
 /** A projected object, with its characteristics as they are now. A face-down object has none. */
 export type SeenObject = Omit<Thing, "card"> & { card?: string; traits?: Traits };
-export type ReviewRun = {
-	occurrence: string;
-	stamp: string;
-	answers: Record<string, string>;
-};
-export type Task = TaskSpec & { runs: ReviewRun[]; cancelled?: boolean; expired?: boolean };
-export type Draft = {
-	id: string;
-	recipe: string;
-	label: string;
-	guidance: string;
-	steps: DraftStep[];
-	reserves: Recipe["reserves"];
-	/** Completed steps stay here, and edits only replace the remainder. */
-	next: number;
-	bound?: string;
-	boundObjects?: ObjectRef[];
-	status: "editing" | "ready";
-	readyStamp?: string;
-	parked?: string;
-};
 export type Workspace = {
 	revision: number;
-	objective?: string;
-	tasks: Task[];
-	recipes: Recipe[];
-	labels: { object: ObjectRef; role: string; purpose: string }[];
-	suggested: string[];
-	/** What this seat's permanents register when they enter, by card name. Private until one is used. */
+	/** The plan the seat flies. Its progress is read from the ledger, never stored here. */
+	plan?: Plan;
+	/** The revision that accepted the plan: ledger rows name it, so a later request does not reset progress. */
+	planned?: number;
+	/** What this seat's permanents register when they enter, by card name, kept across plans. Private until one is used. */
 	packages?: Package[];
 	/** The clock when this seat last accepted a plan. */
 	accepted?: number;
-	/** This seat plans each of its own turns, so a pass waits for that plan. */
+	/** This seat plans each of its own turns, so its turn waits for that plan. */
 	eachTurn?: true;
-	draft?: Draft;
+	/** Why strategy is wanted now: a request, a stop the table raised, or the pilot asking for help. */
 	request?: string;
 };
 export type WorkEntry = {
@@ -54,4 +32,4 @@ export type WorkEntry = {
 	/** An accepted workspace, so replay never needs to ask strategy again. */
 	workspace: Workspace;
 };
-export const emptyWork = (): Workspace => ({ revision: 0, tasks: [], recipes: [], labels: [], suggested: [] });
+export const emptyWork = (): Workspace => ({ revision: 0 });

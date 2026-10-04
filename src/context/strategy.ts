@@ -1,16 +1,20 @@
-/** Expensive thought produces editable recipes and appointments, only on request. */
+/**
+ * The writer: one strategy call that reads the position and writes the seat's
+ * whole plan, which the pilot then flies. It runs at the seat's turn, when a
+ * stop the plan named holds, or when the pilot asks for help.
+ */
 import type { Table } from "../core/table.ts";
 import { nextDecision } from "../core/decisions.ts";
 import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
-import { CommandsSchema, commands, type WorkCommand } from "../core/work-language.ts";
-import { prepareWork } from "../core/work-tools.ts";
+import type { WorkCommand } from "../core/work-language.ts";
+import { planProblems } from "../core/work-tools.ts";
+import { PlanSchema, problems, type Plan } from "../core/language.ts";
 import type { Brief } from "./brief.ts";
 import type { Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
-import { workContext } from "./packet.ts";
 import type { Universe } from "../core/cards.ts";
-import { planReason } from "../core/work-menu.ts";
+import { planReason } from "../core/planning.ts";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -35,89 +39,93 @@ export function syntaxReference(): string {
 }
 
 /**
- * How strategy answers: one call to `submit` whose `commands` are the whole
- * answer. The schema's refs are rewritten as JSON pointers so a provider reads
- * them, and the tool is identical on every call so it stays in the cached prefix.
+ * How strategy answers: one call to `submit` whose `plan` is the whole answer.
+ * The schema's refs are rewritten as JSON pointers so a provider reads them, and
+ * the tool is identical on every call so it stays in the cached prefix.
  */
 const SUBMIT = {
 	name: "submit",
-	description: "Submit your whole answer: the work commands for this seat, in order, ending with exactly one plan.accept. Call it once.",
-	parameters: JSON.parse(JSON.stringify({ type: "object", properties: { commands: { $ref: "Commands" } }, required: ["commands"], additionalProperties: false,
-		$defs: (CommandsSchema as unknown as { $defs: object }).$defs }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
+	description: "Submit your whole plan for this seat. Call it once; if it reports problems, fix them and call it again with the whole corrected plan.",
+	parameters: JSON.parse(JSON.stringify({ type: "object", properties: { plan: { $ref: "Plan" } }, required: ["plan"], additionalProperties: false,
+		$defs: (PlanSchema as unknown as { $defs: object }).$defs }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
 };
 
 const SYSTEM = [
-	"Prepare a stretch of play for one seat of Magic: The Gathering.",
-	"The classifier executes your guidance and recognizes your prepared branches.",
-	"Give an objective, editable recipes, resource purposes, and scheduled reviews.",
-	"Consider order, plausible opposing responses, and later turns where they matter.",
-	"A check schedules attention, never unconditional execution. A label is a claim about a role.",
-	"Use task.put to schedule checks; times counts distinct actual matching step visits.",
-	"Omitting times repeats indefinitely. after schedules a follow-up after another check's run count.",
-	"fromTurn and throughTurn use the table's global turn numbers, not rounds or your own turns.",
-	"Recipe steps bind listed options, or prepare an activation from a visible permanent or a spell from hand, with a claim and its basis.",
-	"Listed action.option and action.prefix match option ids, never labels. A land play uses prefix land: and an objects selector for the card.",
-	"A review that should nominate a recipe must include its id in task.recipes. For concept-only reviews use scope {zones: []}; an empty selector matches all visible objects.",
-	"A procedure is one announced action in the syntax explained in the reference below, checked against the schema at the end: source, claim, basis, timing, cost, targets and instructions.",
-	"Timing spell casts from hand; the table charges the printed cost unless cost.mana states another, and reads the spell's timing from its type line. Claim flash with speed instant.",
-	"Timing stack is an activated ability with its cost: mana, tap, sacrifice, exile, life, discard, counters, and a computed reduce. Timing mana only adds mana of stated colors.",
-	"Targets are slots: an object selector, a player side, or both for any target; count and upTo for how many. A slot can name an earlier one, as attachedTo target:0.",
-	"Instructions run in order as it resolves. A choose pauses for its chooser; as binds a result that later instructions name as bound:name; if gates one; may makes it optional.",
-	"Modes and kicker are separate procedures with their own claims. Amounts can count, read power, counters, life, X, or what happened this turn.",
-	"Delegation is a seat setting, not a procedure field: a seat whose intent delegates resolution lets its single continuations run without a call.",
-	"The table runs what permanents register: entering terms as they enter, and triggers, which it puts in front of their controller before the next priority. Do not replace card text with an invented simpler effect.",
-	"Combat is declared one creature at a time with attack: and block: options, then finished with attack:done or block:done. Every physical block is listed; one that breaks a word such as flying or menace is marked, and you should not take it.",
-	"Copy the relevant card instruction or accepted ruling into basis. Accepted meaning remains frozen through replay and cloning.",
-	"Card facts cover visible objects and public registered lists. Deck counts do not identify another hand or the library order.",
-	"Claim, basis, cost and instructions become public when a procedure is executed. Keep private strategic guidance in the recipe.",
-	"A reservation is a preference to preserve a visible object incarnation, not a rules restriction.",
-	"Reservations apply before every remaining draft step and are not automatically released. Do not reserve an untapped state that your earlier step consumes.",
-	"An opponent can invalidate it. Give guidance about what would require reconsideration.",
-	"draft.edit requires steps containing only the remaining instructions, even when changing only reserves or guidance. Completed steps are retained by core; never include them again.",
-	"Tool shape validation proves neither rules legality nor a good plan. Unmentioned plays stay available.",
-	"package.put records what a permanent of that name registers when it enters under your control, such as its mana ability. Write one for each permanent your plan puts onto the battlefield.",
-	"You may use task.put, task.cancel, recipe.put, label.put, label.remove, draft.edit, draft.cancel, package.put, and plan.accept.",
-	"Finish with exactly one plan.accept. Do not answer reviews or execute moves for the classifier.",
+	"You plan one seat's play in a game of Magic: The Gathering. You write a plan; a fast pilot flies it.",
 	"",
-	"HOW TO ANSWER. You answer by calling the submit tool once. Its commands argument is your whole answer: an array of work commands ending with exactly one plan.accept.",
-	"Nothing you write as text is read. Do not explain your plan in text; put reasons in recipe guidance and the plan.accept objective.",
-	"If submit reports a problem, fix exactly that and call submit again with the whole corrected array.",
+	"HOW YOUR PLAN IS FLOWN",
+	"- The pilot recognizes your steps and branches among the options the table lists. It does not work out a line, so what you leave out does not happen.",
+	"- steps is your line, in the order the table will ask for it. Each step has a window (when) and the option it takes: an option id, an id prefix with an objects query, or a procedure to announce.",
+	"- A step is due when its window is open and its if holds. The pilot takes the first due step. When exactly one listed option fits it, the table takes it for you.",
+	"- When no step or branch fits anything listed, the table passes priority for you, and on your turn declares no attackers. Write every land play, spell, attack, block and response you want.",
+	"- may holds standing branches for what may happen: a response on the opponent's turn (if they target my creature, protect it), a block, another way if the first is unavailable. Give each a window and an if.",
+	"- askWhen names visible facts that mean this plan no longer fits, such as a creature the line depends on dying, or lethal damage on the opponent's board. When one holds you are asked again.",
+	"- holds names resources the plan keeps, such as mana for a response, with the condition that releases them. An option that spends one is marked for the pilot.",
+	"- packages says what each permanent registers as it enters. Write one for every permanent your plan may put onto the battlefield. Without one it enters with nothing registered: no trigger, no mana ability, no keyword.",
+	"- Cover this turn and the opponent's next turn. You plan again at your next turn, or sooner when a stop holds or the pilot asks for help.",
+	"- Triggers you cause come back to you before priority; name the target you want in the step or branch label.",
 	"",
-	"The syntax reference and its worked examples follow. The examples teach shapes; read your own card and write what it says.",
+	"HOW TO THINK. Settle these before writing, and put the conclusions in objective and guidance:",
+	"1. Role and clock: who must force the exchange now, and how many turns each side needs to win, under which blocks and burn.",
+	"2. Threats: which opposing cards or attacks beat this plan before it pays off, the last window to answer each, and what answering costs.",
+	"3. Act or wait: compare the main line with waiting, such as holding a land, a removal spell, or mana for a response. Name what waiting costs.",
+	"4. The opponent's best reply to your line, not the most convenient one.",
+	"5. Resources: what the line spends and keeps, and why.",
+	"6. The exact sequence in table order, including the triggers you cause and their targets.",
+	"7. What would make the plan wrong: those are your askWhen.",
+	"",
+	"THE SYNTAX, briefly. The full reference and worked examples follow.",
+	"- A procedure is one announced action: source, claim, basis (the quoted card text), timing, cost, targets and instructions.",
+	"- Timing spell casts a card; the table charges its printed cost unless cost.mana says otherwise and reads its timing from the type line. Claim flash with speed instant.",
+	"- Timing stack is an activated ability with its cost: mana, tap, sacrifice, exile, life, discard, counters, and a computed reduce. Timing mana only adds mana of stated colors.",
+	"- Targets are slots: an object selector, a player side, or both for any target; count and upTo for how many. A slot can name an earlier one, as attachedTo target:0.",
+	"- Instructions run in order as it resolves. choose pauses for its chooser; as binds a result that later instructions name as bound:name; if gates one; may makes it optional.",
+	"- Modes and kicker are separate procedures. A permanent spell with nothing to do on resolution needs no procedure: the table offers it for its printed cost as cast:.",
+	"- The table runs what permanents register: entering terms as they enter, and triggers, which it puts in front of their controller before the next priority.",
+	"- Combat is declared one creature at a time with attack: and block: options, then finished with attack:done or block:done. A block that breaks a word such as flying or menace is marked; do not plan one.",
+	"- Option ids are matched by option or prefix and objects, never by label. Turn numbers in when are the table's global turns.",
+	"- Copy the card's own words into basis. Do not replace card text with an invented simpler effect.",
+	"",
+	"HOW TO ANSWER. Call the submit tool once with your whole plan. Nothing you write as text is read.",
+	"If submit reports problems, fix every one of them and call submit again with the whole corrected plan.",
 	"",
 	syntaxReference(),
 ].join("\n");
 
-const ALLOWED = new Set(["task.put", "task.cancel", "recipe.put", "label.put", "label.remove", "draft.edit", "draft.cancel", "package.put", "plan.accept"]);
+/** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
+const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => object.zone !== "library").map((object) => ({
+	id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim, zone: object.zone, controller: object.controller,
+	...(object.tapped ? { tapped: true } : {}), ...(object.traits?.power !== undefined ? { body: `${object.traits.power}/${object.traits.toughness}` } : {}),
+	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
+	...(object.traits?.words.length ? { words: object.traits.words } : {}), ...(object.registrations?.length ? { registers: object.registrations.map((one) => one.basis) } : {}),
+}));
 
 export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<WorkCommand[]> {
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
+	const { work, done, objects: _objects, printed: _printed, ...view } = frame.view;
 	const user = JSON.stringify({
-		seat: frame.seat, request,
-		view: { ...frame.view, work: { ...workContext(frame.view.work!), recipes: frame.view.work!.recipes, draft: frame.view.work!.draft } },
+		seat: frame.seat, view, objects: objects(frame),
+		plan: work?.plan ? { ...work.plan, done: (done ?? []).map((at) => work.plan!.steps[at]?.label) } : null,
+		packages: (work?.packages ?? []).map((pack) => pack.card),
 		options: frame.decision?.options, brief: context.brief,
 		cards: [...new Set([...(frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []),
 			...(frame.view.decks ?? []).flatMap((deck) => Object.keys(deck.cards))])]
 			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
 		recaps: context.recaps?.slice(-3), refused: frame.refused,
 	});
+	const at = frame.view.window;
 	const task = [
 		`YOUR TASK: ${request}`,
-		"Answer now by calling submit once. Its commands are an array that ends with exactly one plan.accept.",
-		`Use only these commands: ${[...ALLOWED].join(", ")}.`,
-		"Keep it compact: at most twelve commands, and one or two sentences in each guidance, purpose and objective.",
+		at.kind === "turn" ? `It is turn ${at.turn}, ${at.step}, seat ${at.active}'s turn. Plan from here through the end of the opponent's next turn.` : "Plan the opening turns.",
+		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
-		try {
-			const tools = commands(args.commands);
-			const banned = tools.filter((tool) => !ALLOWED.has(tool.do)).map((tool) => tool.do);
-			if (banned.length) return `These commands are not yours to use here: ${[...new Set(banned)].join(", ")}. Use only ${[...ALLOWED].join(", ")}.`;
-			if (tools.filter((tool) => tool.do === "plan.accept").length !== 1 || tools.at(-1)?.do !== "plan.accept") return "The commands must end with exactly one plan.accept, and contain no other.";
-			prepareWork(frame, tools);
-			return null;
-		} catch (error) { return String(error instanceof Error ? error.message : error); }
+		const shape = problems(PlanSchema, args.plan);
+		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.`;
+		const found = planProblems(frame, args.plan as Plan);
+		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.` : null;
 	} };
 	const answer = await reasoner.work("seat plan", { system: SYSTEM, user, task }, { submit });
-	return commands(answer.commands);
+	return [{ do: "plan.put", plan: answer.plan as Plan }];
 }

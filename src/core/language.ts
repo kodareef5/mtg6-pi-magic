@@ -300,12 +300,16 @@ export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("R
 export const PackageSchema = Type.Cyclic({ ...Defs, Package: PackageDef }, "Package");
 
 /**
- * A seat's plan for a stretch of play: the options jev takes, in order, in their
- * windows. `steps` is the line. `may` holds standing alternatives jev may take
- * without asking when their window and `if` hold. `askWhen` names visible facts
- * that mean the plan no longer fits, so jev asks instead of improvising.
+ * A seat's plan for a stretch of play, and the only thing strategy writes.
+ * `steps` is the line, in the order the table will ask; the pilot takes the
+ * step that is due and the table takes a step that only one option fits.
+ * `may` holds standing branches, such as reactions and blocks, taken when
+ * their window and `if` hold. `askWhen` names visible facts that mean the plan
+ * no longer fits, so the seat asks for a new one instead of improvising.
+ * `holds` names resources kept for a purpose; an option that spends one is
+ * marked, never removed. `packages` is what each permanent registers as it enters.
  */
-const Defs2 = { ...Defs,
+export const PlanDefs = { ...Defs,
 	Option: object({
 		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")),
 		/** A listed table option by id or prefix and objects, or a procedure to announce. */
@@ -319,13 +323,16 @@ const Defs2 = { ...Defs,
 	Plan: object({
 		objective: text, guidance: text,
 		steps: Type.Array(Type.Ref("Option")),
-		may: Type.Array(Type.Ref("Option")),
-		askWhen: Type.Array(object({ label: text, if: Type.Ref("Condition") })),
-		packages: Type.Array(Type.Ref("Package")),
+		may: Type.Optional(Type.Array(Type.Ref("Option"))),
+		askWhen: Type.Optional(Type.Array(object({ label: text, if: Type.Ref("Condition") }))),
+		holds: Type.Optional(Type.Array(object({ objects: QuerySchema, purpose: text, releaseWhen: Type.Optional(Type.Ref("Condition")) }))),
+		packages: Type.Optional(Type.Array(Type.Ref("Package"))),
 	}),
 };
-export const PlanSchema = Type.Cyclic(Defs2, "Plan");
+export const PlanSchema = Type.Cyclic(PlanDefs, "Plan");
+export const PlanOptionSchema = Type.Cyclic(PlanDefs, "Option");
 export type Plan = Static<typeof PlanSchema>;
+export type PlanOption = Static<typeof PlanOptionSchema>;
 
 export type Selector = Static<typeof SelectorSchema>;
 export type Amount = Static<typeof AmountSchema>;
@@ -349,4 +356,24 @@ export function check<T extends TSchema>(schema: T, value: unknown, what: string
 	if (Check(schema, value)) return value as Static<T>;
 	const deepest = [...Errors(schema, value)].sort((a, b) => b.instancePath.length - a.instancePath.length)[0];
 	throw new Error(`${what}: ${deepest ? `${deepest.instancePath || "/"} ${deepest.message}` : "does not match the syntax"}.`);
+}
+
+/**
+ * Every place a value is wrong, for a writer that can fix them all in one
+ * answer: the deepest error under each item of each list, with the values or
+ * fields the schema expected. Empty when the value matches.
+ */
+export function problems<T extends TSchema>(schema: T, value: unknown, limit = 12): string[] {
+	if (Check(schema, value)) return [];
+	const deepest = new Map<string, { path: string; text: string; depth: number }>();
+	for (const error of Errors(schema, value)) {
+		const path = error.instancePath || "/";
+		const group = path.split("/").slice(0, 3).join("/") || "/";
+		const params = error.params as Record<string, unknown>;
+		const detail = Array.isArray(params.allowedValues) ? ` (${params.allowedValues.join(", ")})` : Array.isArray(params.requiredProperties) ? ` (${params.requiredProperties.join(", ")})`
+			: typeof params.additionalProperty === "string" ? ` (${params.additionalProperty})` : "";
+		const depth = path.split("/").length;
+		if ((deepest.get(group)?.depth ?? -1) < depth) deepest.set(group, { path, text: `${path} ${error.message}${detail}`, depth });
+	}
+	return [...deepest.values()].slice(0, limit).map((one) => one.text);
 }

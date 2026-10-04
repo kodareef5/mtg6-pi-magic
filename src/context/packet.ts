@@ -11,28 +11,8 @@ import type { Intent } from "../core/intent.ts";
 import type { Brief } from "./brief.ts";
 import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
-import { pendingReviews, type Review } from "../core/agenda.ts";
-import { workMenu } from "../core/work-menu.ts";
-import type { Workspace, SeenObject, Draft } from "../core/work.ts";
-import type { Option } from "../core/types.ts";
-
-export type DraftContext = Pick<Draft, "id" | "recipe" | "label" | "guidance" | "next" | "reserves" | "bound" | "boundObjects" | "status" | "parked"> & {
-	steps: Pick<Draft["steps"][number], "label" | "when">[];
-};
-export type WorkContext = Omit<Workspace, "tasks" | "recipes" | "draft"> & {
-	draft?: DraftContext;
-	tasks: { id: string; label: string; when: Workspace["tasks"][number]["when"]; assessed: number; times?: number; cancelled?: boolean; expired?: boolean }[];
-};
-/** A decision reads current work, not its complete review history or tool bodies. */
-export const workContext = (work: Workspace): WorkContext => {
-	const { tasks, recipes: _recipes, draft, ...current } = work;
-	return structuredClone({ ...current, ...(draft ? { draft: {
-		id: draft.id, recipe: draft.recipe, label: draft.label, guidance: draft.guidance,
-		next: draft.next, reserves: draft.reserves, bound: draft.bound, boundObjects: draft.boundObjects,
-		status: draft.status, parked: draft.parked, steps: draft.steps.map(({ label, when }) => ({ label, when })),
-	} } : {}), tasks: tasks.map(({ id, label, when, runs, times, cancelled, expired }) =>
-		({ id, label, when, assessed: runs.length, times, cancelled, expired })) });
-};
+import { planState } from "../core/planning.ts";
+import type { SeenObject } from "../core/work.ts";
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -43,6 +23,23 @@ export const workContext = (work: Workspace): WorkContext => {
  */
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
 
+/** The part of the seat's plan this decision needs: what it is for, what is due, and what would make it wrong. */
+export type PlanSlice = {
+	objective: string;
+	guidance: string;
+	/** The step due now, if any, then the next two waiting. */
+	due?: string;
+	next: string[];
+	branches: string[];
+	held: string[];
+	/** Facts the plan named as reasons to stop, holding now. */
+	stops: string[];
+	done: string[];
+};
+
+/** An object as a pilot reads it: what it is and its state, without its registrations. */
+export type Seen = { id: string; name: string; controller: SeatId; zone: string; tapped?: true; body?: string; counters?: Record<string, number>; damage?: number; words?: string[] };
+
 export type Packet = {
 	actor: SeatId;
 	/** Opening and turn context are distinct; no phase is inferred from prose. */
@@ -51,76 +48,44 @@ export type Packet = {
 	version: number;
 	/** The remaining obligation in one sentence: what still has to be settled. */
 	obligation: string;
-	/** Choices already locked in this action, so the model does not relitigate them. */
-	committed: string[];
+	plan?: PlanSlice;
+	/** Every option, at equal detail, already marked with what the plan says about it. */
+	options: { id: string; label: string; shows?: string }[];
 	/** What is available to spend, with each source's own restrictions kept. */
 	resources: string[];
-	/** Every option, at equal detail, with its consequence where one is known. */
-	options: { id: string; label: string; shows?: string; consequence?: string }[];
-	/** Ordered, from the seat's intent. First one that applies wins. */
-	priorities: string[];
-	/** Facts, separated from guesses about what an opponent will do. */
 	known: string[];
-	assumed: string[];
-	/**
-	 * The pregame snippets that apply here: the one written for this window, and
-	 * a note for each card this seat can see that has one. Filed by injection
-	 * site in `brief.ts` precisely so this list is short, and a card note costs
-	 * nothing on a turn where its card never appears.
-	 */
+	objects: Seen[];
+	/** The pregame snippets that apply here: this window's, and a note for each card an option names. */
 	guidance: string[];
-	/**
-	 * What has been happening, from the public turn recaps. Not the log: a
-	 * decision wants three sentences about the last three turns, not two hundred
-	 * receipts, and the recap is already filtered to what a spectator may read.
-	 */
+	/** The public turn recaps: three sentences about the last three turns, not two hundred receipts. */
 	lately: string[];
-	/**
-	 * The ways out that only change what this seat knows. Empty when nothing is
-	 * answerable, because advertising a route cannot make it executable.
-	 */
+	/** The ways out that only change what this seat knows. Empty when nothing is answerable. */
 	routes: Route[];
-	/**
-	 * What this seat asked for on this decision and was given. Grows as the seat
-	 * walks the dialer, and the obligation and the options do not change while it
-	 * does: the question is the same question, asked with more in front of it.
-	 */
+	/** What this seat asked for on this decision and was given. */
 	learned?: string[];
-	/**
-	 * Why the answers already sent for this decision were not taken. Present
-	 * only on a retry, and the obligation and the options are unchanged. A model
-	 * handed the identical packet twice sends the identical answer twice, so the
-	 * refusal has to survive the trip from the frame to the request.
-	 */
+	/** Why the answers already sent for this decision were not taken. Present only on a retry. */
 	refused?: string[];
-	/** Private equipment and visible bindings for the current execution circuit. */
-	work?: WorkContext;
-	objects?: SeenObject[];
-	decks?: SeatView["decks"];
-	reviews?: Omit<Review, "stamp">[];
-	workOptions?: Option[];
 	resolution?: SeatView["resolution"];
+};
+
+const seen = (object: SeenObject): Seen => {
+	const traits = object.traits;
+	return { id: object.id, name: object.card ?? object.token?.name ?? object.ability?.claim ?? "unknown", controller: object.controller, zone: object.zone,
+		...(object.tapped ? { tapped: true as const } : {}), ...(traits?.power !== undefined ? { body: `${traits.power}/${traits.toughness}` } : {}),
+		...(Object.keys(object.counters).length ? { counters: { ...object.counters } } : {}), ...(object.damage ? { damage: object.damage } : {}),
+		...(traits?.words.length ? { words: [...traits.words] } : {}) };
 };
 
 /**
  * Build the packet.
  *
- * What goes in: every fact that changes what is legal, the terms that interact
- * with this decision, and any unresolved clause that could bear on it. Small is
- * a retrieval discipline, not permission to drop an inconvenient rule. A packet
- * that omits a standing restriction is wrong, not compact.
+ * What goes in: the obligation, the options marked with the plan, the part of
+ * the plan this window needs, and the public facts. What stays out: the deck
+ * lists, card registrations, analysis the plan already settled, and anything
+ * this seat has not earned. Equal detail per option, so a preference is never
+ * manufactured by how an option is described.
  *
- * What stays out: history nobody will use, the changes behind an option, and
- * anything this seat has not earned.
- *
- * How it reads: equal detail per option, because a brilliant winning line
- * beside waste resources manufactures a preference without any analysis. A
- * conditional outcome is shown as conditional, because an opponent's unseen
- * answer is not a known future event.
- *
- * `context` is what the pregame and the commentator left behind. It is optional
- * because a seat with no brief still has to be able to play: a missing snippet
- * costs quality, and refusing to build a packet without one would cost the game.
+ * `context` is optional because a seat with no brief still has to be able to play.
  */
 export function focus(
 	frame: Frame,
@@ -132,51 +97,39 @@ export function focus(
 		throw new Error("A packet needs a decision and intent for its own seat");
 	}
 	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
-	const phaseApplies = view.window.kind === "turn" && intent.phase.turn === view.window.turn &&
-		intent.phase.phase === view.window.phase;
 
-	// The snippet written for this window, then a note for every card this seat
-	// can see. Visible rather than only offered: the note on a card is wanted
-	// while holding it, not just on the turn it becomes a legal play.
+	// This window's snippet, and a note for each card an option names: the note is wanted where the card is a choice.
 	const brief = context.brief;
-	const shown = [...view.table, ...view.yours, ...decision.options.map((o) => `${o.label} ${o.shows ?? ""}`)].join("\n");
+	const named = decision.options.map((option) => `${option.label} ${option.shows ?? ""}`).join("\n");
 	const guidance = [
-		brief?.deck,
-		view.window.kind === "opening" ? brief?.opening : brief?.phases[view.window.phase],
-		brief?.combos,
-		...Object.entries(brief?.cards ?? {})
-			.filter(([card]) => shown.includes(card))
-			.map(([card, note]) => `${card}: ${note}`),
+		view.window.kind === "opening" ? brief?.opening : brief?.phases?.[view.window.phase],
+		...Object.entries(brief?.cards ?? {}).filter(([card]) => named.includes(card)).map(([card, note]) => `${card}: ${note}`),
 	].filter((line): line is string => !!line && line.length > 0);
-	// Matching the window scopes assumptions; it does not prove they still hold.
+
+	const state = planState(frame);
+	const plan = state && {
+		objective: state.plan.objective, guidance: state.plan.guidance,
+		...(state.due[0] ? { due: state.due[0].label } : {}),
+		next: state.waiting.slice(0, 2).map((one) => one.label),
+		branches: state.branches.map((one) => one.label),
+		held: state.held.map((hold) => `${hold.objects.map((object) => object.card ?? object.id).join(", ")}: ${hold.purpose}`),
+		stops: state.stops,
+		done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
+	};
 	return {
 		actor: seat, window: structuredClone(view.window), version,
-		...(view.decks ? { decks: structuredClone(view.decks) } : {}),
-		// Stack terms stay public even when this seat has prepared no private work.
-		objects: structuredClone(view.objects?.filter((object) => view.work || object.zone === "stack") ?? []),
-		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		obligation: decision.question,
-		committed: frame.view.work?.draft?.steps.slice(0, frame.view.work.draft.next).map((step) => step.label) ?? [],
+		...(plan ? { plan } : {}),
+		options: decision.options.map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),
 		resources: [...view.yours],
-		options: structuredClone(decision.options),
-		priorities: [...(intent.deck.priorities ?? [])],
 		known: [...view.table, ...view.since],
-		// Matchup guidance is an assumption even when deck composition is public.
-		assumed: [
-			...Object.values(brief?.against ?? {}),
-			...(phaseApplies ? [...intent.turn.hypotheses, ...intent.phase.assumptions] : []),
-		],
-		guidance: [...guidance,
-			...(frame.view.work?.objective ? [`Objective: ${frame.view.work.objective}`] : []),
-			...(frame.view.work?.draft ? [frame.view.work.draft.guidance] : [])],
+		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),
+		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
+		guidance,
 		lately: [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
-		// Rules are answered from disk. Equipment carries its own preparation menus.
 		routes: dial(decision, context.rules),
 		...(context.learned?.length ? { learned: [...context.learned] } : {}),
 		...(refused?.length ? { refused: [...refused] } : {}),
-		...(frame.view.work ? { work: workContext(frame.view.work),
-			reviews: pendingReviews(frame).map(({ stamp: _stamp, ...review }) => review),
-			workOptions: workMenu(frame).map(({ id, label, shows }) => ({ id, label, shows })) } : {}),
 	};
 }
 

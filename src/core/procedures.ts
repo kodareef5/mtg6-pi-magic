@@ -14,7 +14,6 @@ import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts
 import { allowance, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
-import type { Draft } from "./work.ts";
 import type { Change } from "./syntax.ts";
 
 export type { ProcedureOption } from "./announce.ts";
@@ -40,11 +39,9 @@ export function checkProcedure(value: unknown): Procedure {
 	return procedure;
 }
 
-/** The current draft step's announcements, while this seat holds priority. */
-export function procedureOptions(draft: Draft, frame: Frame): ProcedureOption[] {
-	const action = draft.steps[draft.next]?.action;
-	if (!action || !("procedure" in action) || frame.decision?.situation !== "priority") return [];
-	return offers(action.procedure as Procedure, frame, `procedure:${draft.id}:${draft.next}`);
+/** A procedure's announcements, while this seat holds priority. */
+export function procedureOptions(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
+	return frame.decision?.situation === "priority" ? offers(procedure, frame, prefix) : [];
 }
 
 const MAIN = ["precombat-main", "postcombat-main"];

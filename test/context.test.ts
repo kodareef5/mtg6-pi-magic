@@ -3,7 +3,7 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
 import { focus, type Packet } from "../src/context/packet.ts";
-import { advance, apply, nextDecision } from "../src/core/decisions.ts";
+import { advance, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import type { Intent } from "../src/core/intent.ts";
 import { play } from "../src/core/loop.ts";
@@ -13,68 +13,41 @@ import { project } from "../src/core/view.ts";
 import { abilityExercise } from "../tools/ability-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
 
-test("context preserves the seat's options and knowledge and scopes assumptions to a turn and phase", async () => {
+test("context preserves the seat's options, shows the plan the seat flies, and carries neither deck lists nor registrations", async () => {
 	const table = start(standard, [
 		{ name: "A", deck: deck("Green Stompy") },
 		{ name: "B", deck: deck("Dimir Control") },
 	], "context");
-	const intent: Intent = {
-		seat: 0, version: 0,
-		deck: { seat: 0, priorities: ["Develop mana"] },
-		turn: { objective: "Evaluate combat", budget: [], hypotheses: ["Opponent may hold removal"] },
-		phase: { turn: 1, phase: "combat", order: [], expectedBranches: [], reconsiderWhen: [], assumptions: ["The attack may be profitable"] },
-	};
+	const intent: Intent = startingIntent(0);
 	const frame = () => ({ seat: 0, version: table.log.length, view: project(table, 0), decision: nextDecision(table)! });
 	advance(table);
 	const opening = frame();
 	const before = structuredClone(opening);
 	const packet = focus(opening, intent);
 	assert.deepEqual(packet.options, opening.decision.options);
-	assert.deepEqual(packet.assumed, []);
 	// No rules were handed in, so nothing is advertised. Advertising a route
 	// cannot make it answerable. test/dial.test.ts is the dialer's own test.
 	assert.deepEqual(packet.routes, []);
-	assert.deepEqual(packet.decks?.map((one) => [one.seat, one.name, one.cards["Qiqirn Merchant"]]), [[0, "Green Stompy", undefined], [1, "Dimir Control", 4]]);
-	const { decks: _decks, ...position } = packet;
-	assert.equal(JSON.stringify(position).includes("Qiqirn Merchant"), false, "registered counts do not identify hidden objects");
+	assert.equal(JSON.stringify(packet).includes("Qiqirn Merchant"), false, "no deck lists, so nothing names a card this seat has not seen");
 	packet.options[0]!.label = "Changed by a consumer";
 	assert.deepEqual(opening, before);
 	assert.throws(() => focus(opening, { ...intent, seat: 1 }), /own seat/);
-	apply(table, "keep", "model", "chosen");
-	apply(table, "keep", "model", "chosen");
-	advance(table);
-	while (table.cursor.steps[0] !== "begin-combat" || table.cursor.priority !== 0) {
-		const decision = nextDecision(table);
-		if (decision) apply(table, decision.options[0]!.id, "model", "chosen");
-		else advance(table);
-	}
-	assert.deepEqual(focus(frame(), intent).assumed, [...intent.turn.hypotheses, ...intent.phase.assumptions]);
-	assert.deepEqual(focus(frame(), { ...intent, phase: { ...intent.phase, turn: 2 } }).assumed, []);
-	assert.deepEqual(focus(frame(), { ...intent, phase: { ...intent.phase, phase: "ending" } }).assumed, []);
 
 	const exchange = await abilityExercise();
 	const paused = exchange.paused[0]!.frame;
 	const original = structuredClone(paused);
 	const compact = focus(paused, startingIntent(paused.seat));
-	const work = paused.view.work!;
-	assert.deepEqual(compact.options, paused.decision!.options);
-	assert.deepEqual(compact.objects, paused.view.objects, "public stack instructions remain visible during resolution");
+	assert.deepEqual(compact.options.map((option) => option.id), paused.decision!.options.map((option) => option.id));
 	assert.deepEqual(compact.resolution, paused.view.resolution);
+	assert.deepEqual(compact.objects.map((object) => object.id).sort(),
+		paused.view.objects!.filter((object) => object.zone === "battlefield" || object.zone === "stack").map((object) => object.id).sort(), "public objects, with or without a plan");
+	assert.equal(JSON.stringify(compact.objects).includes("registrations"), false, "registrations stay with strategy");
+	assert.equal(compact.plan?.objective, paused.view.work!.plan!.objective);
 	const withoutWork = focus({ ...paused, view: { ...paused.view, work: undefined } }, startingIntent(paused.seat));
-	assert.deepEqual(withoutWork.objects, paused.view.objects!.filter((object) => object.zone === "stack"));
-	assert.deepEqual(withoutWork.resolution, paused.view.resolution);
-	assert.deepEqual(compact.committed, work.draft!.steps.slice(0, work.draft!.next).map((step) => step.label));
-	assert.equal(compact.work!.draft!.next, work.draft!.next);
-	assert.equal(compact.work!.draft!.status, work.draft!.status);
-	assert.deepEqual(compact.work!.draft!.reserves, work.draft!.reserves);
-	assert.deepEqual(compact.work!.draft!.steps, work.draft!.steps.map(({ label, when }) => ({ label, when })));
-	assert.ok(compact.guidance.includes(work.draft!.guidance));
-	assert.deepEqual(compact.work!.tasks.map((task) => task.assessed), work.tasks.map((task) => task.runs.length));
-	for (const field of ["action", "instructions", "recipes", "readyStamp", "stamp", "answers", "runs"]) {
-		assert.equal(JSON.stringify(compact.work).includes(`"${field}"`), false, `${field} stays out of classifier equipment`);
-	}
-	compact.work!.draft!.steps[0]!.label = "Consumer edit";
-	assert.deepEqual(paused, original, "the compact packet does not share mutable preparation");
+	assert.equal(withoutWork.plan, undefined);
+	assert.deepEqual(withoutWork.objects, compact.objects);
+	compact.objects[0]!.name = "Consumer edit";
+	assert.deepEqual(paused, original, "the compact packet does not share mutable state");
 });
 
 test("a retry packet differs from the first only by the refusal it carries", async () => {

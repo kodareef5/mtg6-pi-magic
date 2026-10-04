@@ -16,7 +16,6 @@ import { workFrame } from "../src/core/work-tools.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import type { Package, Procedure, Registration } from "../src/core/language.ts";
 import type { Zone } from "../src/core/syntax.ts";
-import type { Draft } from "../src/core/work.ts";
 
 /** Green plays Mono-Green Landfall, Red plays Mono-Red Aggro. */
 export const matchup = (seed: string) => start(standard, [{ name: "Green", deck: deck("Mono-Green Landfall") }, { name: "Red", deck: deck("Mono-Red Aggro") }], seed);
@@ -64,9 +63,7 @@ export function main(table: Table, seat: number, turn = seat + 1, step = "precom
 	}
 	throw new Error("Never reached the main phase.");
 }
-const draft = (procedure: Procedure): Draft => ({ id: "test", recipe: "test", label: "Test", guidance: "Test", next: 0, status: "editing", reserves: [],
-	steps: [{ label: "Do it", when: {}, action: { procedure } }] });
-export const offered = (table: Table, procedure: Procedure) => procedureOptions(draft(procedure), workFrame(table, table.cursor.priority!));
+export const offered = (table: Table, procedure: Procedure) => procedureOptions(procedure, workFrame(table, table.cursor.priority!), "procedure");
 export function announce(table: Table, procedure: Procedure, which: (option: ProcedureOption) => boolean = () => true) {
 	const choice = offered(table, procedure).find(which);
 	assert.ok(choice, `${procedure.claim} is offered`);

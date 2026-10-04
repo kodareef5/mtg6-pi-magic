@@ -3,8 +3,7 @@
  *
  * A route is not a move. Following one puts rules in front of the seat and
  * touches nothing else: no card moves, no cost is paid, and the table's
- * revision does not advance. docs/CIRCUITS.md calls this the other half of the
- * draft, and the two commit boundaries are what makes it safe.
+ * revision does not advance, so the seat answers the same decision afterwards.
  *
  * Answering a route costs no model call. The rules are on disk in rules/cr.tsv,
  * and a route names the rules it cites, so following one is a file read. What

@@ -145,7 +145,12 @@ export function players(scope: Scope, ref: string): SeatId[] {
 const side = (scope: Scope, ref: string | undefined, seatId: SeatId) => ref === undefined || ref === "any" || players(scope, ref).includes(seatId);
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
-export function matches(scope: Scope, object: Seen, selector: Selector, traits = traitsOf(scope, object)): boolean {
+/** An ability on the stack is an object (113.1c) but not a card: it has no types, words or abilities to match. */
+const ability = (object: Seen): Traits | undefined => object.ability && !object.card && !object.token
+	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] } : undefined;
+
+export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object)): boolean {
+	const traits = read ?? ability(object);
 	if (!(selector.zones ?? ["battlefield"]).includes(object.zone as never) || !traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
 	if (!side(scope, selector.controller, holder) || !side(scope, selector.owner, object.owner)) return false;

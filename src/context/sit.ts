@@ -7,9 +7,10 @@
  *
  * The order is the cost order. The pregame runs once, concurrently across every
  * seat and every question. The decision model runs per asked decision. The
- * commentator runs once per turn that had anything in it. Experimental circuits
- * request strategy to prepare or revise private equipment. The judge still
- * stops at a verdict because its remedy is unwritten.
+ * commentator runs once per turn that had anything in it. A seat with a
+ * strategist plans before it first acts and at each of its turns, and again
+ * when its plan stops fitting. The judge still stops at a verdict because its
+ * remedy is unwritten.
  */
 
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
@@ -75,8 +76,6 @@ export async function seat(
 		rules?: Rules;
 		/** How many routes a seat may follow per decision. */
 		dials?: number;
-		/** Experimental recipes and scheduled reviews. One strategy request to begin. */
-		circuits?: boolean;
 		/** Written to as the game runs, so a clone of this game is a prefix of it. */
 		journal?: Journal;
 		/**
@@ -125,10 +124,10 @@ export async function seat(
 		const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
 			? reasoner({ role: "strategy", stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
 				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
-		if (options.circuits && !table.work[at.id]) {
-			if (!planning) throw new Error(`Seat ${at.id} needs a strategy model to begin circuits.`);
-			editWork(table, at.id, [{ do: "plan.request", reason: "Prepare the opening stretch of play, with recipes and scheduled checks for threats, opportunities and maintenance. Begin at the first priority opportunity." },
-				{ do: "plan.each-turn" }], `circuits-${at.id}`);
+		// A seat with a strategist plans: once before it first acts, then each of its turns.
+		if (planning && !table.work[at.id]) {
+			editWork(table, at.id, [{ do: "plan.request", reason: "Plan the opening: your first turn and the opponent's first turn." },
+				{ do: "plan.each-turn" }], `planning-${at.id}`);
 		}
 		players[at.id] = aiSeat({
 			name: at.name,
@@ -342,7 +341,7 @@ export const report = (table: Table, seated: Seated, outcome: Outcome | null, ms
 		`decisions ${table.ledger.length}  forced ${by("forced")}  delegated ${by("delegated")}  chosen ${by("chosen")}  declared ${by("declared")}  fallback ${by("fallback")}`,
 		`forced    ${((by("forced") / Math.max(1, table.ledger.length)) * 100).toFixed(1)}%`,
 		`picks     ${seated.picks()} decision-model calls`,
-		`work      ${table.workLog.filter((entry) => entry.tools).length} equipment batches  ${table.workLog.filter((entry) => entry.note.startsWith("Executed step")).length} draft steps executed`,
+		`plans     ${table.workLog.filter((entry) => entry.tools?.some((tool) => tool.do === "plan.put")).length} accepted  ${table.workLog.filter((entry) => entry.tools?.some((tool) => tool.do === "plan.request")).length} requested  ${table.ledger.filter((row) => row.execution?.step !== undefined).length} steps and ${table.ledger.filter((row) => row.execution?.branch !== undefined).length} branches carried out`,
 		`recaps    ${seated.chronicle.recaps.length} of ${table.cursor.turn} turns`,
 		// A route is a request, so it is in the picks count already. Named
 		// separately because "how often did a seat look a rule up" is the question

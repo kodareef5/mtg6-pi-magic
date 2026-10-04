@@ -201,21 +201,20 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		{ brief: written, recaps },
 	);
 
-	assert.ok(packet.guidance.includes("Green Stompy curves out and pumps its biggest creature."));
-	assert.ok(packet.guidance.some((line) => line.startsWith("Forest:")), "the visible card's note is in");
+	assert.ok(packet.guidance.includes("Play a land. There is nothing else."), "this window's note is in");
+	assert.ok(packet.guidance.some((line) => line.startsWith("Forest:")), "the note for a card an option names is in");
 	assert.equal(packet.guidance.some((line) => line.startsWith("Cavern")), false, "an absent card costs nothing");
-	assert.deepEqual(packet.assumed, ["Expect to be behind on everything."]);
+	assert.equal(JSON.stringify(packet).includes("Green Stompy curves out"), false, "the deck reading is strategy's, not the pilot's");
+	assert.equal(JSON.stringify(packet).includes("behind on everything"), false, "so is the matchup");
 	assert.deepEqual(packet.lately, ["Turn 1: A played a Forest."]);
 	assert.deepEqual(recent(recaps), ["Turn 1: A played a Forest."]);
 
-	// The question carries guidance without claiming it predates this position.
-	const asked = question(packet);
+	const asked = question(packet, false);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
-	assert.match(asked.instructions, /Green Stompy curves out/);
-	assert.match(asked.instructions, /may have been revised for this position/);
-	assert.match(asked.instructions, /do not certify card meaning or rules legality/);
+	assert.match(asked.instructions, /Notes for this window:/);
 	assert.match(asked.instructions, /Recently:/);
+	assert.equal("ask:help" in asked.criteria, false, "no planner, no help to ask for");
 
 	// A packet with no brief still builds. A missing plan costs quality; refusing
 	// to build one would cost the game.

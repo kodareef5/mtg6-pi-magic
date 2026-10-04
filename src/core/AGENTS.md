@@ -2,9 +2,9 @@
 
 The game system. Everything a seat needs no matter who is playing it.
 
-- **The motion vocabulary and circuits.** Generic operations and editable
-  player equipment. Prepared procedures carry accepted instructions as needed;
-  there is no per-card compiler. docs/CIRCUITS.md states the architecture.
+- **The motion vocabulary and plans.** Generic operations, and the plan a seat
+  flies. Procedures carry accepted instructions as needed; there is no per-card
+  compiler. docs/SYNTAX.md and docs/PLANS.md state the architecture.
 - **The state.** Objects and their incarnations, the seven zones, life, the mana
   pool as a bag of individual mana, stack order, the notepad, the log.
 - **The judge.** Rules questions, repairs, and the ruling of last resort, with
@@ -17,9 +17,9 @@ The game system. Everything a seat needs no matter who is playing it.
   each seat's policy. `docs/MULLIGAN.md` is its plan.
 - **The intent.** What a seat means to do at deck, turn and phase level. Held
   here and readable by whoever holds the seat. Never consulted for legality.
-- **The equipment.** Drafts, labels and scheduled reviews, private to a seat.
+- **The equipment.** A seat's accepted plan and its packages, private to it.
   `work-tools.ts` accepts edits atomically, with a revision separate from the
-  physical clock. `docs/WORK.md` states the current tool and timing contract.
+  physical clock. `planning.ts` reads where the seat stands in its plan.
 - **The decisions.** What is pending, the option list, legality, the turn.
 - **The format.** Seat counts, starting life, hand size, singleton, the command
   zone, and which legality column decides what may be played. A second format is
@@ -208,9 +208,8 @@ An ask or delegation whose handler is unwritten also leaves the decision pending
 with a gap. It must not start an unbounded loop of unchanged questions.
 
 Accepted equipment edits have a per-version budget too. Exhaustion leaves the
-decision pending with an explicit budget gap. It never turns navigation into a
-pass, an approved review, or an abandoned draft. Accepted edits survive resume
-and count toward the same budget.
+decision pending with an explicit budget gap. It never turns a request into a
+pass. Accepted edits survive resume and count toward the same budget.
 
 Three things that look like helpfulness and are not. Completing an invalid
 selection from whatever is left. Treating a failed operation as the seat's
@@ -245,9 +244,8 @@ it and never the thing itself.
 
 Private equipment has a separate commit boundary in `work-tools.ts` and its own
 journal entries. Those edits cannot write a physical fact or advance priority.
-An executing ledger row identifies the draft step it settles, so recovery can
-finish the equipment update if its later snapshot was torn. Never restore
-readiness as though it were execution.
+Plan progress is not equipment: the ledger row that carried out a step names
+it, so a torn equipment write cannot lose or repeat a step.
 
 `relive` is replay: recorded decisions applied in order with the reason each one
 carried. It drives from the ledger and not from scripted players, because a

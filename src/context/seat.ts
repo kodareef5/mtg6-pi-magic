@@ -1,10 +1,10 @@
 /**
- * A classifier seat answers listed choices, follows rule routes, and prepares
- * or executes private equipment. Strategy supplies recipes on request; focus
- * builds the decision packet without inference.
+ * A classifier seat flies its plan: it takes the step that is due, takes a
+ * branch when its situation comes, follows rule routes, and asks for a new plan
+ * when the one it has no longer fits. Strategy writes the plan; focus builds
+ * the decision packet without inference.
  *
- * Prepared procedures support declarations and delegated continuations. Raw
- * declarations, free-form delegation, and objections still lack game handlers.
+ * Raw declarations, free-form delegation, and objections still lack game handlers.
  * Past 150 lines to keep the question beside its navigation and answer handling.
  */
 
@@ -15,10 +15,8 @@ import type { Intent } from "../core/intent.ts";
 import { follow } from "./dial.ts";
 import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
-import { answerReview } from "./review.ts";
 import type { WorkCommand } from "../core/work-language.ts";
-import { pendingReviews } from "../core/agenda.ts";
-import { workMenu, planReason } from "../core/work-menu.ts";
+import { planReason } from "../core/planning.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -51,12 +49,14 @@ export type AiSeatOptions = {
 	 * counting on the way back reported an attempted call as no call at all.
 	 */
 	onAsk?(packet: Packet): void;
-	/** Called only when private equipment explicitly requests fresh thought. */
+	/** Writes this seat's plan when one is wanted. Without it, the seat cannot ask for help. */
 	plan?(frame: Frame): Promise<WorkCommand[]>;
 };
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
 const KEY = "pick";
+/** The pilot's way to say the plan no longer fits. */
+export const HELP = "ask:help";
 
 /**
  * The packet as a choice question.
@@ -69,63 +69,41 @@ const KEY = "pick";
  * what is good: advice here would make every seat play the same way and would
  * hide the alternatives the packet just spent its space listing.
  */
-export function question(packet: Packet): Question {
+export function question(packet: Packet, help: boolean): Question {
+	const plan = packet.plan;
 	const lines = [
 		packet.obligation,
 		"",
 		...packet.known,
 		...(packet.resources.length ? ["", ...packet.resources] : []),
 		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
-		// The plan, then the priorities it serves, then what is only assumed.
-		// Guidance before priorities because a snippet written for this window
-		// is more specific than a deck-level ordering, and more specific wins.
-		...(packet.guidance.length ? ["", "The plan for this seat here:", ...packet.guidance] : []),
-		...(packet.priorities.length ? ["", "This seat's priorities, in order:", ...packet.priorities] : []),
-		...(packet.assumed.length ? ["", "Assumed, not known:", ...packet.assumed] : []),
-		// What the seat asked for, before the refusal, because a rule it pulled up
-		// is a fact about this decision and a refusal is a fact about its answer.
+		...(plan ? ["", `Your plan: ${plan.objective}`, plan.guidance,
+			...(plan.done.length ? [`Done: ${plan.done.join("; ")}.`] : []),
+			plan.due ? `Due now: ${plan.due}.` : "No step is due now.",
+			...(plan.next.length ? [`Later: ${plan.next.join("; ")}.`] : []),
+			...(plan.branches.length ? [`Branches that apply now: ${plan.branches.join("; ")}.`] : []),
+			...plan.held.map((hold) => `Held: ${hold}.`),
+			...(plan.stops.length ? [`The plan said to stop if: ${plan.stops.join("; ")}.`] : [])] : []),
+		...(packet.guidance.length ? ["", "Notes for this window:", ...packet.guidance] : []),
 		...(packet.learned?.length ? ["", "Rules you asked for:", ...packet.learned] : []),
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
-		...(packet.work ? ["", `Equipment revision ${packet.work.revision}.`,
-			...packet.committed.map((step) => `Already executed: ${step}`),
-			...(packet.work.draft ? [`Draft: ${packet.work.draft.label}; step ${packet.work.draft.next + 1}; ${packet.work.draft.status}.`,
-				...packet.work.draft.reserves.map((reserve) => `Reserve ${reserve.object.id}@${reserve.object.incarnation}: ${reserve.purpose}`)] : []),
-			"Work ids edit or execute the named draft. An edit moves no cards; ready does not mean executed.",
-			...(packet.work.draft ? ["To follow the current draft, bind its step, accept readiness, then choose work:execute. Only work:execute advances draft progress. An ordinary play acts outside the draft and can make its remaining steps unavailable."] : []),
-			"Other listed plays remain available. Due reviews and drafts need a disposition before passing.",
-			...(packet.workOptions?.length ? ["Ordinary pass is unavailable while this work is due. Use its work choices to finish, park, decline or cancel it first."] : [])] : []),
 		"",
-		"Answer with one listed id. These ids include the moves and routes available in this request.",
-		"Prepared procedures check resources against stated costs; they do not certify card meaning or rules legality.",
-		"Guidance may have been revised for this position. It remains a plan, not a guarantee that its assumptions hold.",
-		...(packet.routes.length
-			? [
-					"",
-					"Some ids are asks rather than moves. An ask plays nothing, changes nothing,",
-					"and brings this same decision back with what you asked for in front of you.",
-					"What an ask does not promise: it shows the rules it names and no others, so",
-					"the rule that decides this may not be among them.",
-				]
-			: []),
+		"Answer with one listed id.",
+		...(plan ? [
+			"Take the option marked as the due plan step. Take an option marked as a plan branch when its situation is in front of you.",
+			"An option that uses a held resource spends what the plan is keeping; take it only when the plan says so.",
+			...(help ? [`If no option carries out the plan, or the position no longer fits it, choose ${HELP}. Do not invent a new line.`] : []),
+		] : []),
+		...(packet.routes.length ? ["Some ids are asks rather than moves: an ask shows the rules it names, changes nothing, and brings this decision back.",
+			"The rule that decides this may not be among them."] : []),
 	];
 	return {
 		type: "choice",
 		instructions: lines.join("\n"),
 		criteria: Object.fromEntries([
-			...(packet.workOptions ?? []).map((option) => [option.id, [option.label, option.shows].filter(Boolean).join(". ")]),
-			// Core rejects an ordinary pass until due work has a disposition. Keep
-			// the underlying option in the packet, but never offer that refused pick.
-			...packet.options.filter((option) => option.id !== "pass" || !packet.workOptions?.length).map((option) => [
-				option.id,
-				[option.label, option.shows, option.consequence, ...(packet.work && (packet.work.suggested.length || packet.work.draft && packet.work.draft.next < packet.work.draft.steps.length) ? ["Direct play: does not adopt or advance a prepared draft."] : [])].filter(Boolean).join(". "),
-			]),
-			// Built the same way as a move, so a route is not described more richly
-			// than the moves it sits beside. It says it acts on nothing, because an
-			// id that reads like a move is one a seat will play.
-			...packet.routes.map((route) => [
-				route.id,
-				`Ask to see ${route.does}. Acts on nothing and returns to this decision.`,
-			]),
+			...packet.options.map((option) => [option.id, [option.label, option.shows].filter(Boolean).join(". ")]),
+			...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing and returns to this decision.`]),
+			...(help ? [[HELP, "The plan does not fit this position: ask strategy for a new plan. Moves nothing."]] : []),
 		]),
 	};
 }
@@ -161,11 +139,14 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const budget = options.dials ?? 2;
 			if (navigation?.version !== frame.version) navigation = { version: frame.version, learned: [], walked: [] };
 			const { learned, walked } = navigation;
-			const reason = frame.decision.situation === "priority" ? planReason(frame) : undefined;
+			const reason = planReason(frame);
+			const revision = frame.view.work?.revision ?? 0;
 			if (reason) {
 				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
-				return { kind: "work", tools: await options.plan(frame), revision: frame.view.work!.revision, actionId: `${options.name}-${frame.version}-${frame.view.work!.revision}-plan-${++asked}` };
+				return { kind: "work", tools: await options.plan(frame), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}` };
 			}
+			// Help is offered while a planner exists and this decision has not already been refused a new plan.
+			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
 			for (;;) {
 				const whole = focus(frame, options.intent, {
@@ -178,17 +159,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
-				const due = pendingReviews(frame)[0];
-				if (due) {
-					if (due.items.length) { asked += 1; options.onAsk?.(packet); }
-					return answerReview(options.api, packet, due, frame, `${options.name}-${frame.version}-${frame.view.work!.revision}-review-${asked}`);
-				}
-
 				asked += 1;
 				options.onAsk?.(packet);
 				const answers = await options.api.ask({
 					state: asState(packet),
-					questions: { [KEY]: question(packet) },
+					questions: { [KEY]: question(packet, help) },
 				});
 
 				const answer = chose(answers, KEY);
@@ -199,15 +174,13 @@ export function aiSeat(options: AiSeatOptions): Player {
 					options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
 					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 				}
-
-				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
-				if (!route) {
-					const work = workMenu(frame).find((option) => option.id === answer.choice);
-					const actionId = `${options.name}-${frame.version}-${frame.view.work?.revision ?? 0}-${asked}`;
-					if (work?.tools) return { kind: "work", tools: work.tools, revision: frame.view.work!.revision, actionId };
-					if (work?.execute) return { kind: "execute", draft: work.execute, revision: frame.view.work!.revision, actionId };
-					return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
+				if (answer.choice === HELP && help) {
+					const due = packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";
+					return { kind: "work", tools: [{ do: "plan.request", reason: `The pilot asked for help: ${frame.decision.question}${due} No listed option fit the plan.` }],
+						revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
 				}
+				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
+				if (!route) return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
 				walked.push(route.id);
 				learned.push(...follow(route, options.rules!));
 				options.onDial?.(route.id);

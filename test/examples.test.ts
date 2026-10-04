@@ -46,8 +46,8 @@ test("every example block parses and quotes its card", () => {
 			if (kind === "package") pack(value as Package, where);
 			if (kind === "plan") {
 				const plan = value as Plan;
-				for (const option of [...plan.steps, ...plan.may]) if ("procedure" in option.action) procedure(option.action.procedure, where);
-				plan.packages.forEach((one) => pack(one, where));
+				for (const option of [...plan.steps, ...plan.may ?? []]) if ("procedure" in option.action) procedure(option.action.procedure, where);
+				(plan.packages ?? []).forEach((one) => pack(one, where));
 			}
 		});
 	}

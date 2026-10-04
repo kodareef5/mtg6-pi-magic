@@ -64,6 +64,8 @@ ordinary plays say that they do not adopt or advance a draft. The alternatives
 remain selectable. Executable recipes stay out of the classifier packet.
 
 Continuing a prefix with both live-authored plans then completed the exchange.
+Recipes, drafts and reviews were later replaced by one plan per seat
+(`docs/PLANS.md`); these observations describe the earlier machinery.
 The final verification used 31 additional classifier calls, no fresh strategy
 calls, 7.1 seconds and $0.0045 at recorded catalog prices. These figures cover
 the continuation, not preparation or the failed attempts. Its full ledger has

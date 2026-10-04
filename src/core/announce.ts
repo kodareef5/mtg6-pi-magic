@@ -8,7 +8,7 @@
  * option, never removed: the table guides and does not restrain.
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
-import { select as query } from "./agenda.ts";
+import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
