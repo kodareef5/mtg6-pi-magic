@@ -14,6 +14,7 @@ it; the table takes what the plan already settles. The shape is `PlanSchema` in
 | `may` | Standing branches: a response, a block, another way if the first is unavailable. Taken when their window and `if` hold. |
 | `askWhen` | Visible facts that mean the plan no longer fits. |
 | `holds` | Resources kept for a purpose, and what releases them. |
+| `phases` | Guidance window by window: what to do and why while that window is open. The pilot reads the entries that match now. |
 | `packages` | What each permanent registers as it enters. They join the seat's packages and outlive the plan. |
 
 The plan is accepted whole with `plan.put`, or refused whole with every problem

@@ -447,3 +447,14 @@ test("a step is carried out with a payment that spares what the plan holds, and 
 	assert.equal(table.things.get(kept!.id)!.tapped, false, "the held Forest is still untapped");
 	assert.ok(table.ledger.some((row) => row.picked.startsWith("cast:") && row.why === "delegated"), "and the table took the cast itself");
 });
+
+test("the pilot reads the plan's guidance for the window it is in, and no other", () => {
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.put", plan: { ...line, phases: [
+		{ when: { active: "self", step: "precombat-main" }, guidance: "Land first, then the Passage." },
+		{ when: { active: "self", step: "declare-attackers" }, guidance: "Attack with the Chocobo." }] } }], "plan");
+	const packet = focus(workFrame(table, 0), startingIntent(0));
+	assert.deepEqual(packet.plan!.phase, ["Land first, then the Passage."]);
+	assert.match(question(packet, true).instructions, /Now: Land first, then the Passage\./);
+});

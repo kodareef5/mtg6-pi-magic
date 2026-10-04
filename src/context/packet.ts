@@ -12,6 +12,7 @@ import { say, type Brief } from "./brief.ts";
 import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
 import { planState } from "../core/planning.ts";
+import { matches } from "../core/query.ts";
 import type { SeenObject } from "../core/work.ts";
 
 /**
@@ -34,6 +35,8 @@ export type PlanSlice = {
 	held: string[];
 	/** Facts the plan named as reasons to stop, holding now. */
 	stops: string[];
+	/** The plan's guidance for this window. */
+	phase: string[];
 	done: string[];
 };
 
@@ -124,6 +127,7 @@ export function focus(
 		branches: state.branches.map((one) => one.label),
 		held: state.held.map((hold) => `${hold.objects.map((object) => object.card ?? object.id).join(", ")}: ${hold.purpose}`),
 		stops: state.stops,
+		phase: (state.plan.phases ?? []).filter((one) => matches(one.when, frame)).map((one) => one.guidance),
 		done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
 	};
 	return {

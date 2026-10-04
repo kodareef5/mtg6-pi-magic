@@ -77,7 +77,7 @@ export function question(packet: Packet, help: boolean): Question {
 		...packet.known,
 		...(packet.resources.length ? ["", ...packet.resources] : []),
 		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
-		...(plan ? ["", `Your plan: ${plan.objective}`, plan.guidance,
+		...(plan ? ["", `Your plan: ${plan.objective}`, plan.guidance, ...plan.phase.map((line) => `Now: ${line}`),
 			...(plan.done.length ? [`Done: ${plan.done.join("; ")}.`] : []),
 			plan.due ? `Due now: ${plan.due}.` : "No step is due now.",
 			...(plan.next.length ? [`Later: ${plan.next.join("; ")}.`] : []),

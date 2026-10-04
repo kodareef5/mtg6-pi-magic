@@ -60,6 +60,11 @@ the Passage, attack with the Chocobo, and keep the new Forest open for Veil.
     { "label": "The Hydra is gone before combat", "if": { "not": { "amount": { "count": { "subtypes": ["Hydra"], "controller": "you" } }, "atLeast": 1 } } },
     { "label": "Red has three or more untapped lands", "if": { "amount": { "count": { "types": ["land"], "controller": "opponent", "tapped": false } }, "atLeast": 3 } }
   ],
+  "phases": [
+    { "when": { "active": "self", "step": "precombat-main" }, "guidance": "Hydra first with both Forests and the Elves, then the land, then the Passage: each land doubles the Hydra. Leave the new Forest untapped for Veil." },
+    { "when": { "active": "self", "step": "declare-attackers" }, "guidance": "Attack with the Chocobo only. The Hydra entered this turn and stays home." },
+    { "when": { "active": "opponent" }, "guidance": "Hold the Forest for Veil. Spend it only to answer a spell aimed at the Hydra." }
+  ],
   "packages": [
     { "card": "Mossborn Hydra", "registers": [
       { "basis": "Trample", "kind": "continuous", "affects": { "is": "this" }, "change": { "words": ["trample"] } },
