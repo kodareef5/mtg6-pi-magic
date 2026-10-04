@@ -101,6 +101,8 @@ const textOf = (content: unknown[]): string =>
 		.trim();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** How long one request may take before it is abandoned and tried again. Generous: thinking takes time. */
+const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 240_000, strategy: 150_000, judge: 150_000, summary: 60_000 };
 
 export function reasoner(options: {
 	role: Role;
@@ -137,8 +139,13 @@ export function reasoner(options: {
 			...(options.thinking ? { thinking: options.thinking } : {}),
 		};
 		let reply: Awaited<ReturnType<ReturnType<Stream>["result"]>>;
+		// A reply that never comes would stall the game forever: past the limit it is abandoned and tried again.
+		const limit = new AbortController();
+		const timer = setTimeout(() => limit.abort(new Error(`timed out after ${TIMEOUT[options.role] / 1000}s`)), TIMEOUT[options.role]);
+		timer.unref();
+		const signal = options.signal ? AbortSignal.any([options.signal, limit.signal]) : limit.signal;
 		try {
-			reply = await options
+			const pending = options
 				.stream(
 					options.model,
 					{ systemPrompt: system, messages, ...(tools ? { tools } : {}) },
@@ -149,13 +156,16 @@ export function reasoner(options: {
 						sessionId: `pi-magic-${options.role}-${prompt}`,
 						// "off" is the absence of thinking, not a level to ask for.
 						...(options.thinking && options.thinking !== "off" ? { reasoning: options.thinking } : {}),
-						...(options.signal ? { signal: options.signal } : {}),
+						signal,
 					},
 				)
 				.result();
+			reply = await Promise.race([pending, new Promise<never>((_, reject) => signal.addEventListener("abort", () => reject(signal.reason), { once: true }))]);
 		} catch (error) {
 			options.tally.record({ ...base, ms: Date.now() - began, failed: String(error) });
 			throw error;
+		} finally {
+			clearTimeout(timer);
 		}
 
 		const usage = reply.usage as { input: number } | undefined;
