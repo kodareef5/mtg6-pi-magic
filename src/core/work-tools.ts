@@ -8,6 +8,7 @@ import { emptyWork, type Workspace } from "./work.ts";
 import { commands, type WorkCommand, type When } from "./work-language.ts";
 import { checkProcedure } from "./procedures.ts";
 import type { Package, Plan, PlanOption } from "./language.ts";
+import { holds, viewWorld } from "./selectors.ts";
 
 export function workFrame(table: Table, seat: SeatId): Frame {
 	const decision = nextDecision(table);
@@ -36,13 +37,45 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 			for (const ref of action.procedure.source.refs ?? []) if (!visible(ref)) found.push(`${where} (${one.label}): object ${ref.id}@${ref.incarnation} is not in your view.`);
 		} else {
 			if (!action.option && !action.prefix && !action.objects) found.push(`${where} (${one.label}): name an option id, a prefix, or objects.`);
+			const misplaced = placement(action.option ?? action.prefix ?? "", one.when);
+			if (misplaced) found.push(`${where} (${one.label}): ${misplaced}`);
 			for (const ref of action.objects?.refs ?? []) if (!visible(ref)) found.push(`${where} (${one.label}): object ${ref.id}@${ref.incarnation} is not in your view.`);
 		}
 	};
 	plan.steps.forEach((step, at) => option(step, `steps[${at}]`));
+	// A stop names a change. One that already holds would fire the moment the plan is accepted.
+	const scope = { world: viewWorld(frame.view), controller: frame.seat };
+	for (const stop of plan.askWhen ?? []) {
+		try { if (holds(scope, stop.if)) found.push(`askWhen "${stop.label}" already holds now, so it would stop the plan at once; name a fact that becomes true only if the position changes`); }
+		catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
+	}
 	(plan.may ?? []).forEach((branch, at) => option(branch, `may[${at}]`));
 	for (const pack of plan.packages ?? []) { const wrong = packageProblem(frame, pack); if (wrong) found.push(wrong); }
 	return found;
+}
+
+/**
+ * Where the table lists each kind of option, so a step cannot wait for an
+ * option its window never offers. Mulligan choices are never part of a plan.
+ */
+const PLACES: { prefix: string; steps?: string[]; active?: "self" | "opponent"; never?: string }[] = [
+	{ prefix: "keep", never: "the mulligan is decided before any plan, from the brief's opening policy" },
+	{ prefix: "mulligan", never: "the mulligan is decided before any plan, from the brief's opening policy" },
+	{ prefix: "bottom", never: "the mulligan is decided before any plan, from the brief's opening policy" },
+	{ prefix: "discard:", never: "discarding to hand size happens in cleanup, which has no priority" },
+	{ prefix: "attack:", steps: ["declare-attackers"], active: "self" },
+	{ prefix: "block:", steps: ["declare-blockers"], active: "opponent" },
+	{ prefix: "assign:", steps: ["combat-damage"] },
+	{ prefix: "land:", steps: ["precombat-main", "postcombat-main"], active: "self" },
+	{ prefix: "cast:", steps: ["precombat-main", "postcombat-main"], active: "self" },
+];
+function placement(id: string, when: When): string | null {
+	const place = PLACES.find((one) => id.startsWith(one.prefix));
+	if (!place) return null;
+	if (place.never) return `${id} is never a plan step: ${place.never}.`;
+	if (!when.step || !place.steps!.includes(when.step)) return `${place.prefix} options are listed only in ${place.steps!.join(" or ")}; give the step that window.`;
+	if (place.active && when.active !== place.active) return `${place.prefix} options are listed only on ${place.active === "self" ? "your own" : "the opponent's"} turn; set when.active to "${place.active}".`;
+	return null;
 }
 
 const packageProblem = (frame: Frame, pack: Package) => !frame.view.decks?.find((deck) => deck.seat === frame.seat)?.cards[pack.card] && !frame.view.printed?.[pack.card]

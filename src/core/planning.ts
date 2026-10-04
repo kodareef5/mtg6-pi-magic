@@ -116,6 +116,9 @@ export function planDue(frame: Frame): boolean {
 		work.accepted < (frame.view.began ?? 0);
 }
 
-/** Why strategy is being asked now, if it is. */
-export const planReason = (frame: Frame): string | undefined =>
+/**
+ * Why strategy is being asked now, if it is. Only in a turn window: the opening
+ * plan waits until the mulligans are done, so it is written for the hand kept.
+ */
+export const planReason = (frame: Frame): string | undefined => frame.view.window.kind !== "turn" ? undefined :
 	frame.view.work?.request ?? (planDue(frame) ? "Your turn has begun and you have drawn. Plan this turn and the opponent's next turn." : undefined);

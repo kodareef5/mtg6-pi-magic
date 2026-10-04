@@ -117,7 +117,8 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 	const at = frame.view.window;
 	const task = [
 		`YOUR TASK: ${request}`,
-		at.kind === "turn" ? `It is turn ${at.turn}, ${at.step}, seat ${at.active}'s turn. Plan from here through the end of the opponent's next turn.` : "Plan the opening turns.",
+		at.kind === "turn" ? `It is turn ${at.turn}, ${at.step}, seat ${at.active}'s turn. Plan from here through the end of the opponent's next turn.`
+			: "The mulligan is decided separately, from the brief's opening policy. Plan from your first turn through the opponent's first turn.",
 		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {

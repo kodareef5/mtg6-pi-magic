@@ -128,25 +128,28 @@ test("the table flies the plan: one fitting option is taken, silence passes, and
 	assert.deepEqual(workFrame(replay(childPath, () => position()).table, 0).view.done, [0, 1], "a clone holds exactly the progress of its prefix");
 });
 
-test("a stop the plan names asks for a new plan once, within the turn's budget, and help past it is refused", async () => {
+test("a stop asks for a new plan once, a stop that already holds is refused, and help past the turn's budget is refused", async () => {
 	const table = position();
-	const always = { amount: 0, atLeast: 0 };
-	const stops: Plan = { objective: "Hold.", guidance: "Pass.", steps: [], askWhen: [{ label: "first", if: always }, { label: "second", if: always }, { label: "third", if: always }] };
-	editWork(table, 0, [{ do: "plan.put", plan: stops }], "plan");
+	const lands = (atLeast: number) => ({ amount: { count: { types: ["land" as const], controller: "you" } }, atLeast });
+	const already: Plan = { objective: "Hold.", guidance: "Pass.", steps: [], askWhen: [{ label: "three lands", if: lands(3) }] };
+	assert.throws(() => editWork(table, 0, [{ do: "plan.put", plan: already }], "already"), /"three lands" already holds now/);
+	const growing: Plan = { objective: "Play the Forest.", guidance: "Then reconsider.", askWhen: [{ label: "four lands", if: lands(4) }],
+		steps: [{ label: "Play a Forest", when: { ...turn3, step: "precombat-main" }, action: { prefix: "land:", objects: { zones: ["hand"], card: "Forest" } } }] };
+	// A standing branch keeps the pilot consulted, so it can ask for help.
+	const quiet_: Plan = { objective: "Hold.", guidance: "Pass.", steps: [], may: [{ label: "Consider passing", when: { active: "self" }, action: { option: "pass" } }] };
+	editWork(table, 0, [{ do: "plan.put", plan: growing }], "plan");
 	main(table, 0, 3);
 	const requests: string[] = [];
 	let refusal = "";
 	const planner: Player = { name: "Green", observe() {}, close() {}, async answer(frame): Promise<Answer> {
 		const work = frame.view.work!;
-		if (work.request) { requests.push(work.request); return { kind: "work", tools: [{ do: "plan.put", plan: stops }], revision: work.revision, actionId: `plan-${requests.length}` }; }
-		if (!refusal && frame.refused?.length) refusal = frame.refused[0]!;
-		if (!frame.refused?.length) return { kind: "work", tools: [{ do: "plan.request", reason: "The pilot asked for help." }], revision: work.revision, actionId: `help-${frame.version}` };
-		return { kind: "pick", option: quiet(frame.decision!.options).id, actionId: `pick-${frame.version}` };
+		if (work.request) { requests.push(work.request); return { kind: "work", tools: [{ do: "plan.put", plan: quiet_ }], revision: work.revision, actionId: `plan-${requests.length}` }; }
+		if (frame.refused?.length) { refusal ||= frame.refused[0]!; return { kind: "pick", option: quiet(frame.decision!.options).id, actionId: `pick-${frame.version}` }; }
+		return { kind: "work", tools: [{ do: "plan.request", reason: "The pilot asked for help." }], revision: work.revision, actionId: `help-${frame.version}-${work.revision}` };
 	} };
 	await playUntil(table, { 0: planner, 1: opponent }, 3);
-	assert.deepEqual(requests.slice(0, 2), ["Stop: first", "Stop: second"], "two stops in turn 3");
-	assert.equal(requests.includes("Stop: third"), false, "the third is past the turn's budget");
-	assert.match(refusal, /requests for a new plan are spent/);
+	assert.deepEqual(requests.slice(0, 2), ["Stop: four lands", "The pilot asked for help."], "the stop once its land arrives, then the pilot's request");
+	assert.match(refusal, /requests for a new plan are spent/, "a third request in the turn is refused");
 });
 
 test("a branch and a held resource are marked on the options they touch, and nothing is removed", () => {
@@ -229,9 +232,10 @@ test("strategy plans before a seat first acts and at each of its turns after the
 	for (const seat of [0, 1]) {
 		const own = sessions.filter((session) => session.seat === seat && session.view.window.kind === "turn" && session.view.window.active === seat);
 		assert.deepEqual(own.map((session) => session.view.window.turn), [...new Set(own.map((session) => session.view.window.turn))], "at most one plan per own turn");
-		assert.ok(own.every((session) => session.view.window.step !== "upkeep"), "a turn's plan waits for the draw");
+		assert.ok(own.every((session) => session.view.window.step !== "upkeep" || session.view.window.turn === 1), "a turn's plan waits for the draw; the first turn has none");
 	}
-	assert.equal(sessions.filter((session) => session.view.window.kind === "opening").length, 2, "each seat plans its opening before it first acts");
+	assert.equal(sessions.filter((session) => session.view.window.kind === "opening").length, 0, "no plan during the mulligan: the brief's opening policy decides it");
+	for (const seat of [0, 1]) assert.ok(sessions.find((session) => session.seat === seat), `seat ${seat} planned once the game began`);
 	assert.ok(prompts.every((prompt) => prompt.ceiling === CEILING.strategy));
 	assert.equal(new Set(prompts.map((prompt) => prompt.system)).size, 1, "every call sends the same system prompt, so it can be cached");
 	assert.ok(prompts[0]!.system!.includes(syntaxReference()), "the syntax and its examples are in it");
