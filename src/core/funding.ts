@@ -107,6 +107,22 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 	});
 }
 
+/**
+ * Each untapped source this seat could tap now and the ways it makes mana: the
+ * same reading a payment uses, for a planner to count with. A mana ability with
+ * a cost beyond tapping and sacrificing the source is not read here, as it is
+ * not read when paying.
+ */
+export function sources(frame: Frame): { object: SeenObject; yields: Omit<Yield, "claim" | "intrinsic">[] }[] {
+	const found = new Map<string, { object: SeenObject; yields: Omit<Yield, "claim" | "intrinsic">[] }>();
+	for (const unit of manaSources(frame, new Set())) {
+		const entry = found.get(unit.id) ?? { object: unit.source!, yields: [] };
+		entry.yields.push(...unit.yields.map(({ colors, spendOnly, sacrifice }) => ({ colors, ...(spendOnly ? { spendOnly } : {}), ...(sacrifice ? { sacrifice } : {}) })));
+		found.set(unit.id, entry);
+	}
+	return [...found.values()];
+}
+
 /** The most mana this seat could make now, floating and from untapped sources: an upper bound for X. */
 export function capacity(frame: Frame): number {
 	const pool = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana.length ?? 0;

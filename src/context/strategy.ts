@@ -17,7 +17,7 @@ import type { Recap } from "./summary.ts";
 import type { Universe } from "../core/cards.ts";
 import { planReason } from "../core/planning.ts";
 import { intrinsic } from "../core/characteristics.ts";
-import { sick } from "../core/funding.ts";
+import { sources } from "../core/funding.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { readFileSync } from "node:fs";
@@ -180,17 +180,31 @@ function objected(objection: unknown, frame: Frame): string[] {
 }
 
 /**
- * What the seat can spend this turn, worked out rather than left to the writer:
- * its untapped mana sources and whether a land play and a land remain.
+ * What the seat can spend, worked out rather than left to the writer. Mana
+ * available now, source by source, and what a land play could add, read from
+ * the land's own type line and its package. A land with no package is said to
+ * be unknown rather than guessed.
  */
 function mana(frame: Frame): string {
-	const mine = (frame.view.objects ?? []).filter((object) => object.controller === frame.seat);
-	const sources = mine.filter((object) => object.zone === "battlefield" && !object.tapped && !sick(frame, object) &&
-		(intrinsic(object.traits).length > 0 || (object.traits?.registrations ?? []).some((one) => one.kind === "mana")));
-	const lands = mine.filter((object) => object.zone === "hand" && object.traits?.types.includes("land"));
-	const play = (frame.view.landsPlayed ?? 0) < allowance(viewWorld(frame.view), frame.seat).lands && lands.length > 0;
-	return `You can make ${sources.length + (play ? 1 : 0)} mana this turn: ${sources.length} untapped source${sources.length === 1 ? "" : "s"} (${sources.map((one) => one.card ?? one.token?.name).join(", ") || "none"})` +
-		`${play ? `, plus a land from hand (${[...new Set(lands.map((one) => one.card))].join(", ")})` : lands.length ? "; your land play is used" : "; no land in hand"}. A spell must be paid with this; check each step's cost against it.`;
+	const describe = (yields: ReturnType<typeof sources>[number]["yields"]) => [...new Set(yields.map((one) =>
+		`${one.colors.join("")}${one.spendOnly ? " (restricted)" : ""}${one.sacrifice ? " (sacrificed)" : ""}`))].join(" or ");
+	const now = sources(frame);
+	const floating = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? [];
+	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
+		`${floating.length ? `; floating ${floating.map((one) => one.color).join("")}` : ""}.`];
+	const left = Math.max(0, allowance(viewWorld(frame.view), frame.seat).lands - (frame.view.landsPlayed ?? 0));
+	const lands = (frame.view.objects ?? []).filter((object) => object.controller === frame.seat && object.zone === "hand" && object.traits?.types.includes("land"));
+	const land = (card: string, colors: string[]) => {
+		const registers = frame.view.work?.packages?.find((pack) => pack.card === card)?.registers;
+		if (!registers) return `${card}: no package, so how it enters and what it makes are unknown until you write one${colors.length ? ` (its basic type makes ${colors.join("")})` : ""}`;
+		const enters = registers.find((one): one is Extract<typeof one, { kind: "enters" }> => one.kind === "enters" && !one.affects && !!one.tapped);
+		const makes = [...colors, ...registers.flatMap((one) => one.kind === "mana" ? [one.colors?.join("") ?? `any ${one.any ?? 1}`] : [])];
+		return `${card}: ${enters ? enters.if ? "enters tapped under a condition" : "enters tapped" : "enters untapped"}, ${makes.length ? `makes ${makes.join(" or ")}` : "makes no mana itself"}`;
+	};
+	lines.push(left ? `Land plays left this turn: ${left}. In hand: ${[...new Map(lands.map((one) => [one.card, one])).values()].map((one) => land(one.card!, intrinsic(one.traits))).join("; ") || "no land"}.`
+		: "No land play left this turn.");
+	lines.push("Each step's cost is paid from these; a source you hold for a response is not spent before it. A land that enters tapped makes nothing this turn.");
+	return lines.join(" ");
 }
 
 export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
