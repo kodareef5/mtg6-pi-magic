@@ -366,27 +366,28 @@ export function check<T extends TSchema>(schema: T, value: unknown, what: string
  */
 export function problems<T extends TSchema>(schema: T, value: unknown, limit = 12): string[] {
 	if (Check(schema, value)) return [];
-	const deepest = new Map<string, { path: string; text: string; depth: number }>();
+	const found: { path: string; text: string; branch?: string }[] = [];
 	for (const error of Errors(schema, value)) {
 		const path = error.instancePath || "/";
-		const group = path.split("/").slice(0, 3).join("/") || "/";
 		const params = error.params as Record<string, unknown>;
 		const detail = Array.isArray(params.allowedValues) ? ` (${params.allowedValues.join(", ")})` : Array.isArray(params.requiredProperties) ? ` (${params.requiredProperties.join(", ")})`
 			: typeof params.additionalProperty === "string" ? ` (${params.additionalProperty})` : "";
 		// A key no field allows: say so, and name the fields that do belong there.
 		const parent = path.slice(0, path.lastIndexOf("/")) || "/", key = path.slice(path.lastIndexOf("/") + 1);
 		const allowed = error.message === "schema is false" ? fieldsAt(schema, parent) : [];
-		// On a union, "no such field" is usually another branch talking: ask the branch that has the field.
+		// On a union, "no such field" is usually another branch talking: ask the branch the value means.
 		const inner = error.message === "schema is false" && !allowed.length ? branchProblems(schema, value, parent, key) : [];
-		const text = inner.length ? inner.join("; ") : error.message === "schema is false" ? `${parent} has no field "${key}"${allowed.length ? `; its fields are ${allowed.join(", ")}` : ""}`
-			: `${path} ${error.message}${detail}`;
-		const depth = path.split("/").length;
-		if ((deepest.get(group)?.depth ?? -1) < depth) deepest.set(group, { path, text, depth });
+		if (inner.length) { for (const line of inner) found.push({ path: line.split(" ")[0]!, text: line, branch: parent }); continue; }
+		found.push({ path, text: error.message === "schema is false" ? `${parent} has no field "${key}"${allowed.length ? `; its fields are ${allowed.join(", ")}` : ""}` : `${path} ${error.message}${detail}` });
 	}
-	const found = [...deepest.values()];
-	// "Must not have additional properties" says less than the line naming the field.
-	return found.filter((one) => !(one.text.endsWith("must not have additional properties") && found.some((other) => other !== one && other.path.startsWith(one.path))))
-		.slice(0, limit).map((one) => one.text);
+	// Where a branch was chosen, the other branches' complaints there are noise.
+	const chosen = [...new Set(found.flatMap((one) => one.branch ? [one.branch] : []))];
+	const noise = (one: { path: string; text: string; branch?: string }) => !one.branch && chosen.some((at) => one.path === at || one.path.startsWith(`${at}/`)) ||
+		one.text.endsWith("must be equal to constant") && found.some((other) => !other.text.endsWith("must be equal to constant") && one.path.startsWith(other.path));
+	const meant = found.filter((one) => !noise(one));
+	// Keep the most specific: drop a line whose place another line explains more deeply, and repeats.
+	const deepest = meant.filter((one) => !meant.some((other) => other.path !== one.path && other.path.startsWith(one.path === "/" ? "/" : `${one.path}/`)));
+	return [...new Set(deepest.map((one) => one.text))].slice(0, limit);
 }
 
 type Node = Record<string, unknown> | undefined;
@@ -410,10 +411,19 @@ function nodeAt(schema: TSchema, value: unknown, path: string): { node: Node; va
 	}
 	return { node, value: at };
 }
-/** The branch of a union whose fields cover the value's keys, if exactly one does. */
+/**
+ * The branch of a union the value means: the one whose constant field it
+ * matches (an instruction's "do", a registration's "kind"), else the one whose
+ * fields cover all of the value's keys.
+ */
 function pick(branches: unknown[], value: unknown, resolve: (node: unknown) => Node): Node {
-	const keys = value && typeof value === "object" && !Array.isArray(value) ? Object.keys(value) : [];
-	const fits = branches.map(resolve).filter((branch) => keys.length && keys.every((key) => key in ((branch?.properties as object | undefined) ?? {})));
+	if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+	const record = value as Record<string, unknown>, resolved = branches.map(resolve);
+	const named = resolved.filter((branch) => Object.entries((branch?.properties as Record<string, { const?: unknown }> | undefined) ?? {})
+		.some(([key, field]) => field?.const !== undefined && record[key] === field.const));
+	if (named.length === 1) return named[0];
+	const keys = Object.keys(record);
+	const fits = resolved.filter((branch) => keys.length && keys.every((key) => key in ((branch?.properties as object | undefined) ?? {})));
 	return fits.length === 1 ? fits[0] : undefined;
 }
 
@@ -423,15 +433,16 @@ function fieldsAt(schema: TSchema, path: string): string[] {
 	return node && !("anyOf" in node) ? Object.keys((node.properties as Record<string, unknown> | undefined) ?? {}) : [];
 }
 
-/** At a union, the problems of the one branch that has this field, with full paths. */
+/** At a union, the problems of the branch the value means, or the one branch that has this field, with full paths. */
 function branchProblems(schema: TSchema, value: unknown, path: string, key: string): string[] {
 	const resolve = resolver(schema);
 	const { node, value: here } = nodeAt(schema, value, path);
 	if (!node?.anyOf) return [];
-	const branches = (node.anyOf as unknown[]).map(resolve).filter((branch) => key in ((branch?.properties as object | undefined) ?? {}));
-	if (branches.length !== 1) return [];
+	const having = (node.anyOf as unknown[]).map(resolve).filter((branch) => key in ((branch?.properties as object | undefined) ?? {}));
+	const branch = pick(node.anyOf as unknown[], here, resolve) ?? (having.length === 1 ? having[0] : undefined);
+	if (!branch) return [];
 	const defs = (schema as { $defs?: Record<string, TSchema> }).$defs ?? {};
-	return problems(Type.Cyclic({ ...defs, Picked: branches[0] as TSchema }, "Picked"), here).map((line) => `${path}${line === "/" ? "" : line}`);
+	return problems(Type.Cyclic({ ...defs, Picked: branch as TSchema }, "Picked"), here).map((line) => line.startsWith("/ ") ? `${path}${line.slice(1)}` : `${path}${line}`);
 }
 
 /**

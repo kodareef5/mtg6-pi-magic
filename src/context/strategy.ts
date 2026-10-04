@@ -105,6 +105,7 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 const HINTS: [RegExp, string][] = [
 	[/has no field "at(Least|Most)"/, "atLeast and atMost sit beside amount, not inside it: {\"amount\": {\"count\": {...}}, \"atLeast\": 1}."],
 	[/when\/step must be equal to one of/, "Leave step out to match every step."],
+	[/\/if has no field "action"/, "A step or branch is {\"label\", \"when\", \"if\", \"action\"}: action sits beside if, not inside it."],
 	[/has no priority, so nothing can be done in it/, "The table untaps, draws and discards to hand size for you; plan only what you choose."],
 ];
 const hints = (found: string[]) => HINTS.filter(([pattern]) => found.some((line) => pattern.test(line))).map(([, hint]) => ` ${hint}`).join("");
