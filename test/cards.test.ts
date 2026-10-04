@@ -96,3 +96,8 @@ test("every problem is named, not just the first", () => {
 	assert.match(problems.join("; "), /Ancient Tomb is not legal in standard/);
 	assert.match(problems.join("; "), /no card named Black Lotus/);
 });
+
+test("a card that reaches outside the game is refused, because no game here holds a sideboard it can reach", () => {
+	const deck = [...Array.from({ length: 56 }, () => "Island"), ...Array.from({ length: 4 }, () => "North Wind Avatar")];
+	assert.match(checkDeck(universe, deck, standard).join("; "), /North Wind Avatar/);
+});

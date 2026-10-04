@@ -1,1 +1,5 @@
 # Legal cards this engine cannot play yet, one name per line. A deck containing one is refused.
+# They reach outside the game, which no single game here holds: a sideboard is never brought in.
+Extrapolate the Impossible
+North Wind Avatar
+Turtles Forever
