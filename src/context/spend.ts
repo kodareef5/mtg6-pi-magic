@@ -54,7 +54,11 @@ export type Spend = {
 	/** provider/id of the model that answered, which is not always the one asked for. */
 	model: string;
 	thinking?: ThinkingLevel;
+	/** When the request started, in epoch milliseconds, so overlapping calls are not summed as waiting. */
+	at?: number;
 	ms: number;
+	/** A hash of the system prompt and tools: two calls with the same one share a cacheable prefix and a prompt version. */
+	prompt?: string;
 	/** The output ceiling asked for. Some routes price against this, not the reply. */
 	ceiling: number;
 	usage?: Usage;

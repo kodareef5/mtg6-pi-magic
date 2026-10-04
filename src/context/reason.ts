@@ -126,11 +126,14 @@ export function reasoner(options: {
 	/** One request. Recorded whether it worked, because a failed call still costs. */
 	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[]): Promise<Reply> {
 		const began = Date.now();
+		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
 		const base = {
 			role: options.role,
 			about,
 			model: named,
 			ceiling,
+			at: began,
+			prompt,
 			...(options.thinking ? { thinking: options.thinking } : {}),
 		};
 		let reply: Awaited<ReturnType<ReturnType<Stream>["result"]>>;
@@ -143,7 +146,7 @@ export function reasoner(options: {
 						maxTokens: ceiling,
 						// The cache key: calls with the same system prompt share a prefix, and a
 						// provider that keys its prompt cache on the session reuses it only when told.
-						sessionId: `pi-magic-${options.role}-${createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16)}`,
+						sessionId: `pi-magic-${options.role}-${prompt}`,
 						// "off" is the absence of thinking, not a level to ask for.
 						...(options.thinking && options.thinking !== "off" ? { reasoning: options.thinking } : {}),
 						...(options.signal ? { signal: options.signal } : {}),

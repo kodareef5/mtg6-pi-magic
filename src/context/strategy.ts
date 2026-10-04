@@ -126,6 +126,9 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		const found = planProblems(frame, args.plan as Plan);
 		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.` : null;
 	} };
-	const answer = await reasoner.work("seat plan", { system: SYSTEM, user, task }, { submit });
+	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
+	const why = !frame.view.work?.request ? "turn plan" : request.startsWith("Stop:") || request.startsWith("Step ") ? "plan after a stop"
+		: request.startsWith("The pilot asked") ? "plan after help" : "plan on request";
+	const answer = await reasoner.work(why, { system: SYSTEM, user, task }, { submit });
 	return [{ do: "plan.put", plan: answer.plan as Plan }];
 }

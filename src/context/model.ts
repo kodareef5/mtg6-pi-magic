@@ -81,7 +81,7 @@ export function decisionApi(
 		named,
 		async ask(request) {
 			const began = Date.now();
-			const base = { role: "decide" as const, about: options.about ?? "pick", model: named, ceiling: CEILING.decide };
+			const base = { role: "decide" as const, about: options.about ?? "pick", model: named, ceiling: CEILING.decide, at: began };
 			let result: ClassifierResult;
 			try {
 				// classify never rejects, so the stop reason is the error channel.

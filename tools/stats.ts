@@ -10,7 +10,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-type Call = { role: string; ms: number; failed?: string; usage?: { input: number; output: number; cacheRead?: number; reasoning?: number; cost?: { total: number } } };
+type Call = { role: string; about?: string; at?: number; ms: number; failed?: string; usage?: { input: number; output: number; cacheRead?: number; reasoning?: number; cost?: { total: number } } };
 type Result = { seed: string; turn: number; outcome: unknown; elapsedMs: number; replayMatches: boolean; gaps: string[]; calls: Call[] };
 
 const DIR = ".pi/real-standard";
@@ -38,13 +38,23 @@ function table(calls: Call[], wallMs: number): string[] {
 	return [pad(HEAD, WIDTHS), ...roles.map((role) => row(role, calls.filter((call) => call.role === role))), row("total", calls)];
 }
 
+/** The wall time a group of calls spanned: from the first start to the last end. Overlapping calls are not summed. */
+const span = (calls: Call[]) => { const timed = calls.filter((call) => call.at !== undefined); return timed.length ? Math.max(...timed.map((call) => call.at! + call.ms)) - Math.min(...timed.map((call) => call.at!)) : 0; };
+
 for (const run of runs) {
 	const turns = Math.max(1, run.turn - 1);
 	const failed = run.calls.filter((call) => call.failed).length;
+	const pregame = span(run.calls.filter((call) => call.role === "pregame"));
 	console.log(`\n${run.file}`);
-	console.log(`  seed ${run.seed}, ${run.outcome ? "finished" : "stopped"} on turn ${run.turn}, ${seconds(run.elapsedMs)} wall, ${seconds(run.elapsedMs / turns)} a turn, ` +
+	console.log(`  seed ${run.seed}, ${run.outcome ? "finished" : "stopped"} on turn ${run.turn}, ${seconds(run.elapsedMs)} wall, ` +
 		`replay ${run.replayMatches ? "matched" : "MISMATCH"}, ${run.gaps.length} gaps${failed ? `, ${failed} failed calls` : ""}`);
+	console.log(`  pregame ${seconds(pregame)} before the first decision; then ${seconds((run.elapsedMs - pregame) / turns)} a turn, ` +
+		`${seconds(run.calls.filter((call) => call.role === "strategy").reduce((sum, call) => sum + call.ms, 0) / turns)} of it waiting on strategy`);
 	for (const line of table(run.calls, run.elapsedMs)) console.log(`  ${line}`);
+	// What each chat call was for: pregame analysts and synthesis, turn plans and escalations.
+	const kinds = new Map<string, Call[]>();
+	for (const call of run.calls.filter((call) => call.role !== "decide")) kinds.set(`${call.role}: ${call.about ?? "?"}`, [...(kinds.get(`${call.role}: ${call.about ?? "?"}`) ?? []), call]);
+	for (const [kind, calls] of [...kinds].sort()) console.log(`  ${kind.padEnd(34)} ${String(calls.length).padStart(4)} calls, median ${seconds(quantile(calls.map((call) => call.ms), 0.5))}`);
 }
 if (runs.length > 1) {
 	const wall = runs.reduce((total, run) => total + run.elapsedMs, 0), turns = runs.reduce((total, run) => total + Math.max(1, run.turn - 1), 0);

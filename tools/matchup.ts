@@ -39,9 +39,11 @@ const observed = traceInference(inference as never, (event) => {
 	if (event.event === "request") save(journal, table);
 	appendFileSync(calls, JSON.stringify(event) + "\n");
 });
+// The clock starts before seating, so the elapsed time includes the pregame.
+const began = Date.now();
 const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, ...(carried ? { prepared: carried.prepared } : {}) });
 const stop = new Error("Monitor stop");
-const began = Date.now(), limit = Number(values.turns);
+const limit = Number(values.turns);
 try {
 	await play(table, seated.players, seated.intents, (line) => {
 		console.log(line); save(journal, table);
