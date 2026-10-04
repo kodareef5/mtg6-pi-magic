@@ -57,7 +57,8 @@ try {
 finally { save(journal, table); }
 // Replay returns at the next decision; reach that same boundary without answering it.
 while (!table.outcome && !nextDecision(table)) advance(table);
-const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome });
+// The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
+const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome?.results });
 const result = { seed: table.rng.seed, outcome: table.outcome, turn: table.cursor.turn, gaps: table.gaps,
 	replayMatches: state(replay(path, (header) => matchTable(header.seed)).table) === state(table),
 	reasons: Object.fromEntries(["forced", "delegated", "chosen", "declared", "fallback"].map((why) => [why, table.ledger.filter((row) => row.why === why).length])),
