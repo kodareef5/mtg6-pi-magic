@@ -362,6 +362,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   table.ts, commit.ts  the shapes and their readers, and the one writer over them
   work.ts, agenda.ts  private equipment and scheduled consideration
   draft.ts           prepared sequences, bindings, reserves and readiness
+  language.ts        the syntax a seat writes: procedures, registrations, plans
   work-language.ts   the checked JSON tool vocabulary, not model-written code
   work-tools.ts      atomic equipment edits, separate from physical motion
   work-menu.ts       the draft and agenda menus any player can use
@@ -394,6 +395,8 @@ tools/circuits.ts      offline circuit experiments and a local timeline inspecto
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
 cards/examples.jsonl   accepted interpretations shown to strategy as reference
+docs/SYNTAX.md         the syntax, the table's line, and execution semantics
+docs/examples/         worked uses of the syntax by shape, checked against card text
 decks/standard-matchup.json  source lists, legality date, card and rules hashes
 docs/STANDARD.md       first real opening, observed failures and mechanics inventory
 cards/standard.tsv     5164 cards, committed, every field checked against source

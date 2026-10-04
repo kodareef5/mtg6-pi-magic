@@ -79,45 +79,66 @@ The failures and successful continuations remain separate local journals and
 call traces. This is evidence that the prescribed exchange executes, and also
 evidence that navigating preparation needs further evaluation.
 
-## The next interactions
+## Card review
 
-Use these same lists and preserve the position when an instruction needs
-machinery. The next useful branches are Sazh's Chocobo followed by a land;
-Shock answered by Snakeskin Veil with green mana available; and Hired Claw
-attacking into a creature. They require counters and landfall, a temporary
-target restriction, then combat and an attack trigger. Each branch needs its
-own response opportunities, state checks and replay, not just a final board.
+Every card in both lists, checked against `docs/SYNTAX.md`. "Uses" are the ways a
+player actually plays the card; each needs only the shapes listed. Nothing here
+is a per-card handler: these are the procedures and packages a seat writes when
+it plans to use the card. Examples are in `docs/examples/`.
 
-The inventory below covers the unique main-deck and sideboard cards. Names
-identify examples to exercise; they are not per-card switches in core.
+A card no shape could express would grow the syntax, or go on
+`cards/unsupported.txt`. None does.
 
-| Cards | Machinery still needed beyond the opening |
-|---|---|
-| Forest, Mountain, Llanowar Elves, Shock | Reviewed opening terms exist. Ordinary action discovery and wider damage targets remain. |
-| Sazh's Chocobo, Mossborn Hydra | Landfall triggers, counters, entry replacement, counter doubling, trample. |
-| Fabled Passage, Escape Tunnel, Elven Passage, Promising Vein | Sacrifice and life costs, library search and shuffle, tapped entry, conditions and reveal choices; Escape Tunnel also grants an evasion effect. |
-| Ba Sing Se | Conditional tapped entry, earthbend, land animation, counters, haste and a return effect. |
-| Earthbender Ascension | Entry and landfall triggers, search, earthbend, quest counters and a conditional follow-up trigger. |
-| Glimpse the Core | Modes, search, tapped entry and graveyard land targets. |
-| Icetill Explorer | Extra land plays, permission to play lands from the graveyard, landfall mill. |
-| Mightform Harmonizer | Landfall target, power doubling until end of turn, warp and its delayed exile/play permission. |
-| Sapling Nursery | Affinity for Forests, landfall tokens, exile cost and temporary indestructible. |
-| Keen-Eyed Curator, Soul-Guide Lantern, Ghost Vacuum | Graveyard targeting, exile, linked card identities and card-type counts; Vacuum also returns creatures with changed characteristics. |
-| Surrak, Elusive Hunter, Hexing Squelcher | Uncounterability, ward, trample and becoming-target triggers, including a spell on the stack. |
-| Meltstrider's Resolve | Aura targets and attachment, entry trigger, fight, toughness modification and blocking restriction. |
-| Snakeskin Veil, Warg Tactics, Origin of Metalbending | Own-creature targets, counters, temporary hexproof/indestructible/trample, modes and restricted destruction targets. |
-| Torpor Orb | Suppression of creature-entry triggers. |
-| Hired Claw | Lizard attack trigger, opponent damage, counters, life-loss condition and once-per-turn activation. |
-| Emberheart Challenger | Haste, prowess, once-per-turn targeting trigger and exile/play permission. |
-| Kellan, Planar Trailblazer | Persistent type and ability changes, combat-damage trigger, exile/play permission, double strike. |
-| Lightning Strike, Burst Lightning, Abrade, Witchstalker Frenzy | Wider damage targets, kicker, modes, destruction and costs reduced by attackers this turn. |
-| Nova Hellkite, Smaug the Magnificent | Flying, haste, entry/attack/upkeep triggers, warp, Treasure tokens and damage calculated on resolution. |
-| Rockface Village, Soulstone Sanctuary | Restricted mana, conditional haste and power modification, land animation with vigilance and every creature type. |
-| Zhao, the Moon Slayer | Menace, tapped-entry replacement for nonbasics, activation counter and a continuous type/ability change. |
-| Fiery Annihilation | Creature damage, attached Equipment selection, exile and a dies-to-exile replacement. |
-| Magebane Lizard, Sunspine Lynx | Spell-history and entry triggers, calculated player damage, life-gain and damage-prevention restrictions. |
+### Mono-Green Landfall
 
-Full games still require the shared combat, trigger, replacement and continuous
-effect machinery, plus unsupported costs, choices and judge remedies. Completion
-means these lists reach outcomes from ordinary setup without missing-machinery
-gaps and preserve their interactions through replay and cloning.
+| Card | Uses | Shapes | Example |
+|---|---|---|---|
+| Forest | land drop, mana | basic land type (305.6) | |
+| Llanowar Elves | turn-one mana | default cast; `mana` package | `mana.md` |
+| Fabled Passage | fetch a basic for landfall, at four lands untapped | cost `tap`, `sacrifice`; `choose` library, `move` tapped, `shuffle`, `untap` with `if` | `search.md` |
+| Escape Tunnel | fetch; or make a small creature unblockable | the same; `modify` with "can't be blocked", target with `power` atMost 2 | `search.md`, `until-end-of-turn.md` |
+| Elven Passage | fetch, untap it by beholding an Elf | cost `life`; `choose` with `reveal` and `may`, `untap` with `if: bound` | `costs.md` |
+| Promising Vein | colorless mana; fetch for {1}; a Cave for Glimpse | `mana`; cost with `mana` and `sacrifice` | `mana.md`, `search.md` |
+| Ba Sing Se | mana; earthbend a land as a sorcery | `enters` tapped with `if`; `mana`; earthbend as `modify`, `counters`, `delay` | `entering.md`, `animation.md` |
+| Earthbender Ascension | enters: earthbend and fetch; landfall quest counters | enters `watch`; landfall `watch` with `reflect` and `check` | `triggers.md`, `animation.md` |
+| Glimpse the Core | fetch a Forest; or return a Cave | two mode procedures; `supertypes` basic with `subtypes` Forest; graveyard target, `move` tapped | `spells.md`, `search.md` |
+| Icetill Explorer | extra land, lands from graveyard, landfall mill | `permit` lands and landsFrom; landfall `mill` | `baseline-overrides.md` |
+| Keen-Eyed Curator | exile graveyard cards, grow at four card types | activation with `link`; `continuous` with `distinct` | `statics.md` |
+| Meltstrider's Resolve | fight on entry, toughness and a blocking word | Aura cast with `attach`; enters `watch` with `fight`; `continuous` on `attached` | `statics.md` |
+| Mightform Harmonizer | landfall doubles power; warp for a turn | landfall `watch` with captured `power`; warp procedure | `until-end-of-turn.md`, `warp.md` |
+| Mossborn Hydra | enters with a counter, doubles on landfall, trample | `enters` counters; landfall `counters` by `counters`; words | `entering.md` |
+| Sapling Nursery | cheap with Forests; landfall Treefolk; exile for indestructible | `reduce` by `count`; landfall `token`; cost `exile`; `modify` every | `costs.md`, `triggers.md` |
+| Sazh's Chocobo | landfall growth | landfall `counters` | `turn-plan.md` |
+| Snakeskin Veil | save a creature from removal | target your creature; `counters`, `modify` hexproof | `until-end-of-turn.md`, `reactions.md` |
+| Surrak, Elusive Hunter | trample; draw when targeted | spell `words` "can't be countered"; `targeted` watch over battlefield and stack | `triggers.md`, `stack-and-replacements.md` |
+| Origin of Metalbending (side) | destroy an artifact or enchantment; or save a creature | two mode procedures; `destroy`; `counters`, `modify` indestructible | `spells.md`, `until-end-of-turn.md` |
+| Soul-Guide Lantern (side) | graveyard hate on entry or on demand; cycle | enters `watch` with graveyard target; `move` every; cost `sacrifice`; `draw` | `statics.md`, `costs.md` |
+| Torpor Orb (side) | stop enters triggers | `suppress` | `stack-and-replacements.md` |
+| Warg Tactics (side) | kill a flier; or protect and push damage | mode procedures; target with `words` flying | `spells.md`, `until-end-of-turn.md` |
+
+### Mono-Red Aggro
+
+| Card | Uses | Shapes | Example |
+|---|---|---|---|
+| Mountain | land drop, mana | basic land type | |
+| Abrade | 3 to a creature; or destroy an artifact | two mode procedures | `spells.md` |
+| Burst Lightning | 2 to anything; kicked, 4 | any target; kicked variant | `spells.md` |
+| Emberheart Challenger | haste attacker; prowess; valiant card advantage | words; `cast` watch; `targeted` watch `limit` once; `move` top, `permit` | `until-end-of-turn.md` |
+| Hired Claw | ping when Lizards attack; grow once a turn | `attacked-with` watch with a player target; activation with `if` and `limit` | `triggers.md`, `until-end-of-turn.md` |
+| Kellan, Planar Trailblazer | level up to Detective, then Rogue with double strike | `modify` indefinite with subtypes `set`, `base`, words, granted `watch` | `animation.md` |
+| Lightning Strike | 3 to anything | any target | `reactions.md` |
+| Nova Hellkite | enters ping; warp for a hasty swing | enters `watch` with opponent's creature target; words; warp | `triggers.md`, `warp.md` |
+| Rockface Village | mana, creature-only red; pump and haste a Lizard | two `mana`, one with `spendOnly`; sorcery activation | `mana.md` |
+| Shock | 2 to anything | any target | `spells.md` |
+| Smaug the Magnificent | Treasure each upkeep; attack for damage per Treasure | upkeep `watch` with `token`; `attacks` watch with `count` | `mana.md` |
+| Soulstone Sanctuary | colorless mana; becomes a 3/3 for good | `mana`; `modify` indefinite with `allCreatureTypes` | `animation.md` |
+| Witchstalker Frenzy | 5 to a creature, cheaper after attacks | `reduce` by `history` attacked | `costs.md` |
+| Zhao, the Moon Slayer | menace; nonbasics enter tapped; make them Mountains | words; `enters` with `affects`; conditional `continuous` setting land subtypes | `entering.md` |
+| Fiery Annihilation (side) | 5 to a creature, exile its Equipment, no dying | dependent second target; `register` a `replace` | `stack-and-replacements.md` |
+| Ghost Vacuum (side) | exile graveyard cards; later return the creatures | `move` with `link`; `move` every linked under your control with flying counters, then `modify` | `statics.md`, `animation.md` |
+| Hexing Squelcher (side) | ward for itself and your creatures | words; ward `watch` with `counter` unless; `continuous` granting a registration | `stack-and-replacements.md` |
+| Magebane Lizard (side) | punish noncreature spells | `cast` watch by any player; `event:player`; `history` cast | `triggers.md` |
+| Sunspine Lynx (side) | punish nonbasic lands | words; enters `watch` with `each` and `count` | `stack-and-replacements.md` |
+
+Both sideboards are a zone: their cards start outside the game. No card in either
+list reaches outside the game, so a single game never moves them.

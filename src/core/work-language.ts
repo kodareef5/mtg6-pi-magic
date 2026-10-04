@@ -1,24 +1,14 @@
 /** The seat's tool vocabulary. JSON data, never executable model-written code. */
 import { Type, type Static } from "typebox";
 import { Check, Errors } from "typebox/value";
-import { STEPS } from "./steps.ts";
+import { RefSchema, QuerySchema, WhenSchema } from "./language.ts";
+
+export { RefSchema, QuerySchema, WhenSchema };
 
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
 const natural = Type.Integer({ minimum: 0 });
-const side = Type.Union([Type.Literal("self"), Type.Literal("opponent"), Type.Literal("any")]);
 const enumeration = (values: string[]) => Type.String({ enum: values });
-export const RefSchema = object({ id: text, incarnation: natural });
-export const QuerySchema = object({
-	zones: Type.Optional(Type.Array(enumeration(["hand", "battlefield", "stack", "graveyard", "exile", "command", "dungeon"]))),
-	controller: Type.Optional(side), card: Type.Optional(text), tapped: Type.Optional(Type.Boolean()),
-	refs: Type.Optional(Type.Array(RefSchema)),
-});
-export const WhenSchema = object({
-	active: Type.Optional(side), step: Type.Optional(enumeration(Object.keys(STEPS))),
-	phase: Type.Optional(enumeration([...new Set(Object.values(STEPS).map((step) => step.phase))])),
-	fromTurn: Type.Optional(Type.Integer({ minimum: 1 })), throughTurn: Type.Optional(Type.Integer({ minimum: 1 })),
-});
 export const TaskSchema = object({
 	id: text, label: text, when: WhenSchema,
 	times: Type.Optional(Type.Integer({ minimum: 1 })),
