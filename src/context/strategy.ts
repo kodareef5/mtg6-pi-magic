@@ -66,6 +66,7 @@ const SYSTEM = [
 	"- askWhen names visible facts that mean this plan no longer fits, such as a creature the line depends on dying, or lethal damage on the opponent's board. When one becomes true you are asked again, which costs a whole planning session: name only changes that break the line before your next turn, never routine events such as a trigger resolving or an expected attack. Cover expected events with branches instead.",
 	"- holds names resources the plan keeps, such as mana for a response, with the condition that releases them. An option that spends one is marked for the pilot.",
 	"- packages says what each permanent registers as it enters. Write one for every permanent your plan may put onto the battlefield. Without one it enters with nothing registered: no trigger, no mana ability, no keyword.",
+	"- A package holds only what happens without you choosing: keywords and other statics, triggers (When, Whenever, At), how it enters, and mana abilities. An activated ability, a cost then a colon such as \"{1}{R}: Put a +1/+1 counter\", is never registered: when you want it, write a step or branch whose action is a procedure with timing stack and that cost.",
 	"- Cover this turn and the opponent's next turn. You plan again at your next turn, or sooner when a stop holds or the pilot asks for help.",
 	"- Triggers you cause come back to you before priority; name the target you want in the step or branch label.",
 	"",
