@@ -11,7 +11,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 type Call = { role: string; about?: string; at?: number; ms: number; failed?: string; usage?: { input: number; output: number; cacheRead?: number; reasoning?: number; cost?: { total: number } } };
-type Result = { seed: string; turn: number; outcome: unknown; elapsedMs: number; replayMatches: boolean; gaps: string[]; calls: Call[] };
+type Planned = { seat: number; turn: number; how: string; waitedMs: number; ready?: boolean };
+type Result = { seed: string; turn: number; outcome: unknown; elapsedMs: number; replayMatches: boolean; gaps: string[]; calls: Call[]; planned?: Planned[] };
 
 const DIR = ".pi/real-standard";
 const named = process.argv.slice(2);
@@ -48,11 +49,16 @@ for (const run of runs) {
 	console.log(`\n${run.file}`);
 	console.log(`  seed ${run.seed}, ${run.outcome ? "finished" : "stopped"} on turn ${run.turn}, ${seconds(run.elapsedMs)} wall, ` +
 		`replay ${run.replayMatches ? "matched" : "MISMATCH"}, ${run.gaps.length} gaps${failed ? `, ${failed} failed calls` : ""}`);
-	// Preparation runs during the opponent's turn and blocks nothing; every other strategy call is waited on.
-	const strategy = run.calls.filter((call) => call.role === "strategy"), waited = strategy.filter((call) => call.about !== "preparation");
-	console.log(`  pregame ${seconds(pregame)} before the first decision; then ${seconds((run.elapsedMs - pregame) / turns)} a turn, ` +
-		`${seconds(waited.reduce((sum, call) => sum + call.ms, 0) / turns)} of it waiting on strategy` +
-		`${waited.length < strategy.length ? `; ${seconds(strategy.filter((call) => call.about === "preparation").reduce((sum, call) => sum + call.ms, 0) / turns)} a turn preparing in the background` : ""}`);
+	// The table's own wait for each plan, as the seats measured it: calls overlap once preparation runs, so their durations are not summed.
+	const planned = run.planned ?? [];
+	console.log(`  pregame ${seconds(pregame)} before the first decision; then ${seconds((run.elapsedMs - pregame) / turns)} a turn` +
+		(planned.length ? `, ${seconds(planned.reduce((sum, one) => sum + one.waitedMs, 0) / turns)} of it waiting on strategy` : ""));
+	const hows = [...new Set(planned.map((one) => one.how))].sort();
+	for (const how of hows) {
+		const group = planned.filter((one) => one.how === how), ready = group.filter((one) => one.ready).length;
+		console.log(`  plans ${how.padEnd(10)} ${String(group.length).padStart(4)}, waited median ${seconds(quantile(group.map((one) => one.waitedMs), 0.5))}, total ${seconds(group.reduce((sum, one) => sum + one.waitedMs, 0))}` +
+			(group.some((one) => one.ready !== undefined) ? `; preparation ready at the turn ${ready} of ${group.length}` : ""));
+	}
 	for (const line of table(run.calls, run.elapsedMs)) console.log(`  ${line}`);
 	// What each chat call was for: pregame analysts and synthesis, turn plans and escalations.
 	const kinds = new Map<string, Call[]>();

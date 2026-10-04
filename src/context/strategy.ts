@@ -18,7 +18,7 @@ import type { Universe } from "../core/cards.ts";
 import { planReason } from "../core/planning.ts";
 import { intrinsic } from "../core/characteristics.ts";
 import { sources } from "../core/funding.ts";
-import { entersTapped } from "../core/budget.ts";
+import { budget, entersTapped } from "../core/budget.ts";
 import type { SeenObject } from "../core/work.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
@@ -233,9 +233,10 @@ function facts(frame: Frame, context: Context, more: Record<string, unknown> = {
 
 /**
  * Every problem with a submitted plan and objection against this frame, or null. Tidies the plan in place first.
- * The arithmetic is refused once; a writer that still disagrees is let through, and the pilot passes over what cannot be paid.
+ * The arithmetic is a forecast, refused once in a session: a writer that still disagrees is let through, and the table's payment decides.
  */
-function checked(frame: Frame, args: Record<string, unknown>, again = false): string | null {
+type Told = { arithmetic?: true };
+function checked(frame: Frame, args: Record<string, unknown>, told: Told): string | null {
 	// Fields of the plan written beside it, as when the plan object is closed too early, belong inside it. An objection, and a review's accept, are their own.
 	const { plan: written, objection, accept: _accept, ...beside } = args;
 	args.plan = tidy({ ...beside, ...(written as object) });
@@ -245,8 +246,16 @@ function checked(frame: Frame, args: Record<string, unknown>, again = false): st
 	const plan = args.plan as Plan, at = frame.view.window;
 	const idle = at.kind === "turn" && at.active === frame.seat && !plan.steps.length && !plan.may?.length
 		? ["the plan has no steps and no branches, so the table would pass every window of your turn; if that is what you mean, add a step {\"label\": \"Pass the turn\", \"when\": {\"active\": \"self\"}, \"action\": {\"option\": \"pass\"}}"] : [];
-	const found = [...planProblems(frame, plan, { arithmetic: !again }), ...misregistered(plan), ...idle, ...(objection === undefined ? [] : objected(objection, frame))];
+	const found = [...planProblems(frame, plan), ...forecast(frame, plan, told), ...misregistered(plan), ...idle, ...(objection === undefined ? [] : objected(objection, frame))];
 	return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.${hints(found)}` : null;
+}
+
+/** The arithmetic's conflicts, the first time it finds any in this session; after that, none. */
+function forecast(frame: Frame, plan: Plan, told: Told): string[] {
+	if (told.arithmetic) return [];
+	const found = budget(frame, plan);
+	if (found.length) told.arithmetic = true;
+	return found;
 }
 
 const ANSWER = "Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.";
@@ -265,8 +274,8 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
 	const why = !frame.view.work?.request ? "turn plan" : frame.view.work.accepted === undefined ? "opening plan" : request.startsWith("Stop:") ? "plan after a stop"
 		: request.startsWith("The pilot asked") ? "plan after help" : "plan on request";
-	let tries = 0;
-	const answer = await reasoner.work(why, { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => checked(frame, args, tries++ > 0) } });
+	const told: Told = {};
+	const answer = await reasoner.work(why, { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => checked(frame, args, told) } });
 	const objection = answer.objection as Objection | undefined;
 	return { tools: [{ do: "plan.put", plan: answer.plan as Plan }], ...(objection ? { objection } : {}) };
 }
@@ -289,8 +298,8 @@ export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick
 		`5. Cover the opponent's turn ${theirs}: responses and blocks as branches with fromTurn and throughTurn ${theirs}, and the sources they need in holds.`,
 		ANSWER,
 	].join("\n");
-	let tries = 0;
-	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, tries++ > 0); } } });
+	const told: Told = {};
+	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, told); } } });
 	return answer.plan as Plan;
 }
 
@@ -303,15 +312,15 @@ const CHALLENGE = {
 
 /**
  * Challenge a prepared plan against the cards' meaning, and revise it once if
- * the challenge finds real errors. The code has already checked its arithmetic;
+ * the challenge finds real errors. Code checks what it can of costs and land plays;
  * this looks for what code cannot: a trigger expected from a land played before
  * its source enters, guidance the steps contradict, a missed lethal, the
  * opponent's best reply left uncovered. Undefined when nothing was found or the
- * revision failed: the prepared plan stands.
+ * revision failed; the errors reach the seat through `criticized` either way.
  */
-export async function challengePlan(frame: Frame, prepared: Plan, context: Context, reasoner: Pick<Reasoner, "work">): Promise<Plan | undefined> {
+export async function challengePlan(frame: Frame, prepared: Plan, context: Context, reasoner: Pick<Reasoner, "work">, criticized: (errors: string[]) => boolean = () => true): Promise<Plan | undefined> {
 	const task = [
-		"YOUR TASK: CHALLENGE THE PREPARED PLAN above, as prepared. Its costs and land plays are already checked; look for what they cannot show:",
+		"YOUR TASK: CHALLENGE THE PREPARED PLAN above, as prepared. Look for what code cannot check:",
 		"- a step that expects a trigger from an event that happens before the trigger's source is on the battlefield, or after it is gone;",
 		"- guidance or phases that the steps contradict;",
 		"- lethal damage available and not taken, or the opponent's lethal not covered;",
@@ -322,10 +331,11 @@ export async function challengePlan(frame: Frame, prepared: Plan, context: Conte
 	const found = await reasoner.work("challenge", { system: SYSTEM, user: facts(frame, context, { prepared }), task }, { submit: { ...CHALLENGE, check: (args) =>
 		Array.isArray(args.errors) && args.errors.every((one) => typeof one === "string") ? null : "errors is a list of sentences." } });
 	const errors = (found.errors as string[]).filter((one) => one.trim());
-	if (!errors.length) return undefined;
+	// The errors go to the seat before the revision is asked for, so they stand against the plan even if it fails; a job no longer wanted asks for nothing more.
+	if (!errors.length || !criticized(errors)) return undefined;
 	const revise = `YOUR TASK: REVISE THE PREPARED PLAN above, as prepared. A challenge found: ${errors.join(" ")} Fix what is right in it, keep the rest, and submit the whole revised plan.\n${ANSWER}`;
-	let tries = 0;
-	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context, { prepared }), task: revise }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, tries++ > 0); } } });
+	const told: Told = {};
+	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context, { prepared }), task: revise }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, told); } } });
 	return answer.plan as Plan;
 }
 
@@ -351,13 +361,13 @@ export async function reviewPlan(frame: Frame, prepared: Plan, changed: string[]
 		`Since you prepared it: ${changed.join("; ") || "nothing you can see changed"}.`,
 		"If it still fits, call submit with {\"accept\": true}. If not, submit the whole revised plan. Object to an opponent action only if it broke a rule.",
 	].join("\n");
-	let tries = 0;
+	const told: Told = {};
 	const answer = await reasoner.work("review", { system: SYSTEM, user: facts(frame, context, { prepared }), task }, { submit: { ...REVIEW, check: (args) => {
 		if (args.accept === true && args.plan === undefined) {
-			const found = [...planProblems(frame, prepared, { arithmetic: tries++ === 0 }), ...misregistered(prepared)];
+			const found = [...planProblems(frame, prepared), ...forecast(frame, prepared, told), ...misregistered(prepared)];
 			return found.length ? `The prepared plan no longer fits: ${found.join("; ")}. Submit a revised plan.` : null;
 		}
-		return checked(frame, args, tries++ > 0);
+		return checked(frame, args, told);
 	} } });
 	const objection = answer.objection as Objection | undefined;
 	return { tools: [{ do: "plan.put", plan: (answer.plan as Plan | undefined) ?? prepared }], ...(objection ? { objection } : {}) };

@@ -120,6 +120,9 @@ export async function play(
 		// A lone pass is not forced while the plan offers an announcement beside it.
 		const why = attention || state?.procedures.length ? null : automatic(decision, intents[decision.seat]);
 		if (why) {
+			// A pass forced past an essential step the plan could not take: the stop was spent, and the record says the line failed.
+			const passed = state?.unmet !== undefined ? `Seat ${decision.seat}, turn ${table.cursor.turn}: ${state.stops.at(-1)}, and the table passed. Play goes on.` : undefined;
+			if (passed && !table.gaps.includes(passed)) table.gaps.push(passed);
 			// A forced move can still be the step the plan named; the row says so.
 			apply(table, decision.options[0]!.id, "engine", why, state ? execution(state, decision.options[0]!.id) : undefined);
 			told = report(table, told, watch);
@@ -184,7 +187,7 @@ export async function play(
 		}
 		if (!answer && attention) {
 			// Strategy gave nothing usable: the game goes on under the plan already standing, and the gap says so.
-			table.gaps.push(`Seat ${decision.seat}, strategy: ${failures.join(" Then: ")} The standing plan is kept.`);
+			table.gaps.push(`Seat ${decision.seat}, strategy: ${failures.join(" Then: ")} The standing plan is kept. Play goes on.`);
 			editWork(table, decision.seat, [{ do: "plan.keep", reason: failures.at(-1) ?? "no plan" }], `keep-${version}`);
 			continue;
 		}

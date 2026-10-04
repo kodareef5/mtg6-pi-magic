@@ -32,7 +32,7 @@ import { reasoner, type Reasoner, type Stream } from "./reason.ts";
 import { rule } from "./ruling.ts";
 import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
-import { aiSeat } from "./seat.ts";
+import { aiSeat, type Planned } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
 import { challengePlan, planWork, prepareTurn, reviewPlan } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
@@ -49,6 +49,8 @@ export type Seated = {
 	picks: () => number;
 	/** Routes followed, by route id. Beside the bill, because a dial is a request. */
 	dials: Record<string, number>;
+	/** Each time a seat waited on strategy for its plan, and how the plan came. */
+	planned: Planned[];
 	/** The table's judge, when a judge role resolved and the rules are on disk to cite. */
 	judge?: { reasoner: Reasoner; rules: Rules; universe: Universe };
 };
@@ -93,6 +95,7 @@ export async function seat(
 ): Promise<Seated> {
 	const counted = tally();
 	const dialled: Record<string, number> = {};
+	const planned: Planned[] = [];
 	const chronicle: Chronicle = { briefs: {}, recaps: [] };
 	const players: Record<SeatId, Player> = {};
 	const intents: Record<SeatId, Intent> = {};
@@ -142,10 +145,11 @@ export async function seat(
 			...(options.dials === undefined ? {} : { dials: options.dials }),
 			onGap: (note) => void table.gaps.push(note),
 			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
+			onPlanned: (one) => void planned.push(one),
 			...(planning ? {
 				plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
 				prepare: (frame) => prepareTurn(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
-				challenge: (frame, prepared) => challengePlan(frame, prepared, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
+				challenge: (frame, prepared, criticized) => challengePlan(frame, prepared, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning, criticized),
 				review: (frame, prepared, changed) => reviewPlan(frame, prepared, changed, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
 			} : {}),
 		});
@@ -203,6 +207,7 @@ export async function seat(
 		tally: counted,
 		picks: () => counted.spent().filter((spend) => spend.role === "decide").length,
 		dials: dialled,
+		planned,
 		...(judging && options.rules ? { judge: { reasoner: reasoner({ role: "judge", stream: inference.stream, model: judging.model as Model<Api>, tally: counted,
 			...(judging.thinkingLevel ? { thinking: judging.thinkingLevel } : {}) }), rules: options.rules, universe } } : {}),
 	};

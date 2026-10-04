@@ -50,8 +50,8 @@ const limit = Number(values.turns);
 try {
 	await play(table, seated.players, seated.intents, (line) => {
 		console.log(line); save(journal, table);
-		// A strategy session that failed leaves the standing plan and play goes on; any other gap stops the run.
-		if (table.gaps.some((gap) => !gap.endsWith("The standing plan is kept.")) || table.cursor.turn > limit) throw stop;
+		// A gap the game plays on through, a failed strategy session or an essential step passed, is recorded; any other stops the run.
+		if (table.gaps.some((gap) => !gap.endsWith("Play goes on.")) || table.cursor.turn > limit) throw stop;
 	}, undefined, undefined, judgeFor(table, seated, journal));
 } catch (error) { if (error !== stop) throw error; }
 finally { save(journal, table); }
@@ -61,7 +61,7 @@ const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log:
 const result = { seed: table.rng.seed, outcome: table.outcome, turn: table.cursor.turn, gaps: table.gaps,
 	replayMatches: state(replay(path, (header) => matchTable(header.seed)).table) === state(table),
 	reasons: Object.fromEntries(["forced", "delegated", "chosen", "declared", "fallback"].map((why) => [why, table.ledger.filter((row) => row.why === why).length])),
-	calls: seated.tally.spent(), elapsedMs: Date.now() - began, journal: path, trace: calls };
+	calls: seated.tally.spent(), planned: seated.planned, elapsedMs: Date.now() - began, journal: path, trace: calls };
 writeFileSync(join(values.out!, `${id}.result.json`), JSON.stringify(result, null, 2) + "\n");
 console.log(`${table.outcome ? "Finished" : "Stopped"} on turn ${table.cursor.turn}; replay ${result.replayMatches ? "matched" : "mismatch"}; ${table.gaps.length} gaps.`);
 for (const gap of table.gaps) console.log(`Gap: ${gap}`);

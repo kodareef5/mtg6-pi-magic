@@ -83,10 +83,11 @@ export function planState(frame: Frame): PlanState | null {
 		else waiting.push({ at, label: step.label });
 	});
 	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length);
-	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase with an empty stack.
+	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase.
+	// Only with an empty stack: while a spell waits to resolve, passing so it can is the procedure, not a failed line.
 	const at = frame.view.window;
-	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" &&
-		(step.when.step ? step.when.step === at.step : (at.step === "precombat-main" || at.step === "postcombat-main") && !(frame.view.objects ?? []).some((object) => object.zone === "stack"));
+	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" && !(frame.view.objects ?? []).some((object) => object.zone === "stack") &&
+		(step.when.step ? step.when.step === at.step : at.step === "precombat-main" || at.step === "postcombat-main");
 	// Only the first essential step with nothing listed, and only before any step that can still be taken: a land step first may yet pay for it.
 	const next = due.find((one) => one.candidates.length);
 	const unmet = due.find((one) => plan.steps[one.at]!.essential && !one.candidates.length && (!next || one.at < next.at) && belongs(plan.steps[one.at]!));

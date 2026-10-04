@@ -33,10 +33,11 @@ of that seat's decisions, in this order:
    once per stop per turn, at most two requests a turn. A step that cannot be
    taken now is passed over rather than a stop: many steps are "if able". A
    step marked `essential` is the exception: where it belongs (its own step, or
-   a main phase with an empty stack) and nothing listed carries it out, it is a
-   stop.
+   a main phase) with an empty stack and nothing listed carries it out, it is a
+   stop. While a spell waits to resolve, passing is the procedure, not a stop.
 3. **Forced.** One option, as always. A forced move that is a plan step is
-   recorded as that step.
+   recorded as that step. A pass forced past an essential step whose stop was
+   already spent is recorded as a gap, and play goes on.
 4. **Settled.** No step or branch fits anything listed: at priority the table
    passes; declaring our own attackers it attacks with nothing. The first due step
    with a fitting option has exactly one and no branch applies: the table takes it.
@@ -64,19 +65,39 @@ there is time:
 Nothing is accepted then. When the seat's own turn begins and it has drawn, the
 prepared plan is offered:
 - as it is, with no call, when nothing changed but the draw, the plan still
-  passes every check, and the drawn card is a land the plan plays or one it
-  names;
+  passes every check and the arithmetic, and a step or a branch whose
+  condition holds takes the drawn card;
 - otherwise after a short review (`strategy.reviewPlan`), which keeps it with
   `{accept: true}` or revises it.
+
+"Changed" is read from the permanents themselves, not only which ones there
+are: counters, characteristics, registrations, attachments, the opponent's
+tapped permanents, the table's notes, life, and a plan accepted in between (a
+stop, a request for help, a judge's rollback). Our own untap is expected.
 
 Once the preparation passes the code's checks, a challenger
 (`strategy.challengePlan`) looks for what code cannot see: a trigger expected
 before its source enters, guidance the steps contradict, a missed lethal, the
-opponent's best reply uncovered. Real errors get one revision, used only if it
-is ready when the turn begins.
+opponent's best reply uncovered. Its errors reach the seat as soon as they are
+found and get one revision, used only if it is ready when the turn begins.
+Errors with no finished revision go to the review; they never let the plan
+through as it is.
 
-A failed or stale preparation leaves the ordinary turn plan. The plan goes
-through `plan.put` as always, so the journal and replay are unchanged.
+A preparation belongs to the seat while it is the current one: once it is
+taken, replaced or the seat closes, it starts no further call and is never
+used. A failed preparation leaves the ordinary turn plan. The plan goes through
+`plan.put` as always, so the journal and replay are unchanged.
+
+## The arithmetic
+
+`src/core/budget.ts` walks the seat's next own turn: land plays, each step's
+card taken once, costs paid from what the steps before leave and the plan does
+not hold, floating mana gone once a step is in a later window, branches on the
+opponent's turn paid from what is left. Every different payment is tried before
+a conflict is named; a search too large to finish names none. It is a forecast:
+the writer is told once a session, and a writer that disagrees is let through.
+The table does not run it when it accepts a plan; the payment at the time
+decides.
 
 ## Progress
 

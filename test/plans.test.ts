@@ -20,6 +20,7 @@ import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { annotate, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
+import { budget } from "../src/core/budget.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
 import type { Frame } from "../src/core/types.ts";
@@ -30,7 +31,7 @@ import { CEILING, tally } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, reviewPlan, syntaxReference } from "../src/context/strategy.ts";
-import { aiSeat, question } from "../src/context/seat.ts";
+import { aiSeat, changes, question, settled } from "../src/context/seat.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -328,7 +329,7 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "unplanned");
 	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
 	assert.ok(outcome, "the game reaches an outcome");
-	assert.ok(table.gaps.some((gap) => gap.includes("/steps must be array") && gap.endsWith("The standing plan is kept.")), "each failed session is a gap that names why");
+	assert.ok(table.gaps.some((gap) => gap.includes("/steps must be array") && gap.endsWith("The standing plan is kept. Play goes on.")), "each failed session is a gap that names why");
 });
 
 test("a stop is watched in its window, and its window and bounds are read as written", async () => {
@@ -369,7 +370,7 @@ test("the writer is told its mana source by source, and what a land in hand woul
 
 test("the plan's arithmetic: costs from what the steps before leave, holds kept, land plays counted with what the plan permits", () => {
 	const turn = (table: Table) => table.cursor.turn;
-	const problems = (table: Table, plan: Omit<Plan, "objective" | "guidance">) => planProblems(workFrame(table, 0), { objective: "o", guidance: "g", ...plan }).join(" | ");
+	const problems = (table: Table, plan: Omit<Plan, "objective" | "guidance">) => { const whole = { objective: "o", guidance: "g", ...plan }; return [...planProblems(workFrame(table, 0), whole), ...budget(workFrame(table, 0), whole)].join(" | "); };
 	const now = (table: Table) => ({ active: "self" as const, step: "precombat-main" as const, fromTurn: turn(table), throughTurn: turn(table) });
 	const cast = (table: Table, card: string, label = `Cast ${card}`) => ({ label, when: now(table), action: { prefix: "cast:", objects: { card, zones: ["hand" as const] } } });
 	const land = (table: Table, card: string) => ({ label: `Play ${card}`, when: now(table), action: { prefix: "land:", objects: { card, zones: ["hand" as const] } } });
@@ -468,7 +469,7 @@ test("the turn before ours prepares our next one; a quiet turn offers it as it i
 		// Every card Green could draw is named by a branch, so any draw is covered.
 		const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
 		const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self", step: "precombat-main" },
-			if: { amount: { count: { zones: ["hand"], controller: "you", name } }, atLeast: 1 }, action: { option: "pass" } })) };
+			if: { amount: { count: { zones: ["hand"], controller: "you", name } }, atLeast: 1 }, action: { objects: { zones: ["hand"], card: name } } })) };
 		const calls = { prepare: 0, review: [] as string[][], plan: 0 };
 		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call expected"); } } as never, intent: startingIntent(0), onGap() {},
 			plan: async () => { calls.plan += 1; return { tools: [] }; },
@@ -544,10 +545,10 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 		steps: [{ label: "Cast Emberheart Challenger", when: now, action: { prefix: "cast:", objects: { zones: ["hand"], card: "Emberheart Challenger" } } }],
 		may: [{ label: "Shock a blocker", when: { active: "any" }, action: { procedure: { claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", source: { zones: ["hand"], controller: "self", card: "Shock" },
 			timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] } } }] };
-	assert.deepEqual(planProblems(workFrame(table, 1), plan), []);
+	assert.deepEqual(budget(workFrame(table, 1), plan), []);
 	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
-	assert.match(planProblems(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
+	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
 });
 
 test("a challenger's revision is used when it is ready, and the turn never waits for one that is not", async () => {
@@ -558,7 +559,7 @@ test("a challenger's revision is used when it is ready, and the turn never waits
 		main(table, 1, 4);
 		const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
 		const covering = names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self" as const, step: "precombat-main" as const },
-			if: { amount: { count: { zones: ["hand" as const], controller: "you" as const, name } }, atLeast: 1 }, action: { option: "pass" } }));
+			if: { amount: { count: { zones: ["hand" as const], controller: "you" as const, name } }, atLeast: 1 }, action: { objects: { zones: ["hand" as const], card: name } } }));
 		const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: covering }, revised: Plan = { ...prepared, objective: "Revised." };
 		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
 			prepare: async () => prepared, challenge: () => ready ? Promise.resolve(revised) : new Promise<Plan>(() => {}) });
@@ -579,7 +580,7 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	const window = { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 };
 	const hydra = { label: "Cast Mossborn Hydra", when: window, action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } };
 	const conditional = { ...hydra, label: "Cast Mossborn Hydra if a third land arrives", if: { amount: { count: { types: ["land" as const], controller: "you" as const } }, atLeast: 3 } };
-	assert.deepEqual(planProblems(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
+	assert.deepEqual(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
 	const seen: string[] = [];
 	const plan = { objective: "o", guidance: "g", steps: [hydra] };
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { plan } }], stopReason: "toolUse" }) }; };
@@ -587,4 +588,156 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	assert.equal(seen.length, 2, "refused once, then accepted");
 	assert.match(seen[1]!, /costs \{2\}\{G\}/);
 	assert.deepEqual(tools, [{ do: "plan.put", plan }]);
+});
+
+test("the arithmetic counts each card once, lets floating mana go when its step ends, and tries every payment", () => {
+	const refs = (...things: { id: string; incarnation: number }[]) => ({ refs: things.map(({ id, incarnation }) => ({ id, incarnation })) });
+	const at = (step: "precombat-main" | "postcombat-main") => ({ active: "self" as const, step, fromTurn: 3, throughTurn: 3 });
+	const cast = (label: string, objects: object, step: "precombat-main" | "postcombat-main" = "precombat-main") => ({ label, when: at(step), action: { prefix: "cast:", objects } });
+	// Icetill Explorer's second land: two Forests are two cards, each paying for its own Elves.
+	const two = matchup("distinct");
+	main(two, 0, 3);
+	establish(two, 0, "Icetill Explorer");
+	const [first, second, elf, other] = place(two, 0, "hand", "Forest", "Forest", "Llanowar Elves", "Llanowar Elves");
+	editWork(two, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "forest");
+	const forests = [first!, second!].map((forest, n) => ({ label: `Play Forest ${n + 1}`, when: at("precombat-main"), action: { prefix: "land:", objects: { zones: ["hand" as const], card: "Forest" } } }));
+	assert.deepEqual(budget(workFrame(two, 0), { objective: "o", guidance: "g", steps: [...forests, cast("Cast an Elf", { zones: ["hand"], card: "Llanowar Elves" }), cast("Cast another Elf", { zones: ["hand"], card: "Llanowar Elves" })] }), []);
+	// One Elf is not cast twice.
+	assert.match(budget(workFrame(two, 0), { objective: "o", guidance: "g", steps: [...forests, cast("Cast the Elf", refs(elf!)), cast("Cast the Elf again", refs(elf!))] }).join(" "),
+		/steps\[3\] \(Cast the Elf again\): every card it names is already taken by an earlier step/);
+	void other;
+
+	// Green mana floating in the first main phase is gone by the second.
+	const floating = matchup("floating");
+	main(floating, 0, 3);
+	const [lone] = place(floating, 0, "hand", "Llanowar Elves");
+	commit(floating, [{ do: "add-mana", who: 0, colors: ["G"] }], "resolve");
+	assert.deepEqual(budget(workFrame(floating, 0), { objective: "o", guidance: "g", steps: [cast("Cast the Elf now", refs(lone!))] }), []);
+	assert.match(budget(workFrame(floating, 0), { objective: "o", guidance: "g", steps: [cast("Cast the Elf after combat", refs(lone!), "postcombat-main")] }).join(" "), /costs \{G\}/);
+
+	// Smaug takes the Villages' creature-only red and the Sanctuaries' colorless, so the Mountain stays for Shock; without it, Shock is named.
+	const red = matchup("smaug");
+	main(red, 1, 2);
+	const colorless: Plan["packages"] = [{ card: "Soulstone Sanctuary", registers: [{ basis: "{T}: Add {C}.", kind: "mana", cost: { tap: true }, colors: ["C"] }] }];
+	for (const card of ["Rockface Village", "Rockface Village"]) establish(red, 1, card);
+	for (const card of ["Soulstone Sanctuary", "Soulstone Sanctuary"]) establish(red, 1, card, colorless![0]!.registers);
+	const [mountain] = place(red, 1, "battlefield", "Mountain");
+	const [smaug, shock] = place(red, 1, "hand", "Smaug the Magnificent", "Shock");
+	const now = { active: "self" as const, step: "precombat-main" as const, fromTurn: 2, throughTurn: 2 };
+	const plan: Plan = { objective: "o", guidance: "g", steps: [{ label: "Cast Smaug", when: now, action: { prefix: "cast:", objects: refs(smaug!) } }],
+		may: [{ label: "Shock a blocker", when: { active: "any" }, action: { procedure: { claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", source: { zones: ["hand"], controller: "self", card: "Shock", refs: refs(shock!).refs },
+			timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] } } }] };
+	assert.deepEqual(budget(workFrame(red, 1), plan), []);
+	commit(red, [{ do: "move", what: mountain!.id, to: "graveyard", reason: "resolve" }], "resolve");
+	assert.match(budget(workFrame(red, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\}/);
+});
+
+test("a plan the writer was told about once goes through the table, and a schema refusal does not use up the arithmetic's", async () => {
+	const table = matchup("through");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Forest");
+	place(table, 0, "hand", "Mossborn Hydra");
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	const plan = { objective: "o", guidance: "g", steps: [{ label: "Cast Mossborn Hydra", when: { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 },
+		action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } }] };
+	const replies: Record<string, unknown>[] = [{ plan: { objective: "o" } }, { plan }, { plan }];
+	const seen: string[] = [];
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
+	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.equal(seen.length, 3, "the schema refused, then the arithmetic once, then accepted");
+	assert.match(seen[2]!, /costs \{2\}\{G\}/);
+	assert.doesNotThrow(() => prepareWork(workFrame(table, 0), tools), "the table takes what the writer let through");
+});
+
+test("an essential step waits while a spell resolves, and a pass forced past it is recorded", async () => {
+	const table = matchup("waiting");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
+	place(table, 0, "hand", "Llanowar Elves", "Mossborn Hydra");
+	// The table lists one option for identical cards, so the plan names the Elf the option names.
+	const cast = nextDecision(table)!.options.find((option) => option.id.startsWith("cast:") && table.things.get(option.objects![0]!.id)!.card === "Llanowar Elves")!;
+	const elf = table.things.get(cast.objects![0]!.id), hydra = cardsIn(table, "hand", 0).find((one) => one.card === "Mossborn Hydra");
+	const window = { ...turn3, step: "precombat-main" as const };
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [
+		{ label: "Cast the Elf", when: window, action: { prefix: "cast:", objects: { refs: [{ id: elf!.id, incarnation: elf!.incarnation }] } } },
+		{ label: "Cast the Hydra", when: window, essential: true, action: { prefix: "cast:", objects: { refs: [{ id: hydra!.id, incarnation: hydra!.incarnation }] } } }] } }], "plan");
+	apply(table, cast.id, "model", "chosen");
+	assert.ok(cardsIn(table, "stack").length, "the Elf is on the stack");
+	const state = planState(workFrame(table, 0))!;
+	assert.deepEqual([state.stops, state.unmet], [[], undefined], "passing so the Elf resolves is the procedure, not a failed line");
+
+	// Nothing in hand and nothing in play: pass is the only option, and the replanned line still needs a card Green does not hold.
+	const bare = matchup("forced");
+	main(bare, 0, 3);
+	for (const card of cardsIn(bare, "hand", 0)) commit(bare, [{ do: "move", what: card.id, to: "library", reason: "game-setup" }], "game-setup");
+	const impossible: Plan = { objective: "o", guidance: "g", steps: [{ label: "Cast the Hydra", when: window, essential: true, action: { prefix: "cast:", objects: { zones: ["hand"], card: "Mossborn Hydra" } } }] };
+	editWork(bare, 0, [{ do: "plan.put", plan: impossible }], "plan");
+	let asked = 0;
+	const writer: Player = { name: "Green", observe() {}, close() {}, async answer(frame): Promise<Answer> {
+		const work = frame.view.work!;
+		if (work.request) return { kind: "work", tools: [{ do: "plan.put", plan: impossible }], revision: work.revision, actionId: `again-${++asked}` };
+		return { kind: "pick", option: quiet(frame.decision!.options).id, actionId: `g-${frame.version}` };
+	} };
+	await playUntil(bare, { 0: writer, 1: opponent }, 3);
+	assert.equal(asked, 1, "the stop is raised once");
+	assert.ok(bare.gaps.some((gap) => /turn 3: Step 1 cannot be taken now: Cast the Hydra, and the table passed\. Play goes on\./.test(gap)), bare.gaps.join(" | "));
+});
+
+test("a counter on a permanent is a change, and a draw is covered only by a step or branch that takes it", () => {
+	const table = matchup("zhao");
+	main(table, 1, 2);
+	const zhao = establish(table, 1, "Zhao, the Moon Slayer");
+	const from = workFrame(table, 1);
+	commit(table, [{ do: "counters", what: zhao.id, kind: "conqueror", amount: 1 }], "resolve");
+	const changed = changes(from, workFrame(table, 1));
+	assert.equal(changed.quiet, false);
+	assert.ok(changed.lines.includes("your Zhao, the Moon Slayer changed"), changed.lines.join("; "));
+
+	const [drawn] = place(table, 1, "hand", "Shock");
+	const frame = workFrame(table, 1), draw = { lines: [], drawn: [frame.view.objects!.find((one) => one.id === drawn!.id)!], quiet: true };
+	const named: Plan = { objective: "o", guidance: "g", steps: [], packages: [{ card: "Shock", registers: [] }] };
+	assert.equal(settled(frame, named, draw), false, "a package that names the card does not handle drawing it");
+	const taken: Plan = { ...named, may: [{ label: "Shock a blocker", when: { active: "self", step: "declare-blockers" }, if: { amount: { count: { zones: ["hand"], controller: "you", name: "Shock" } }, atLeast: 1 },
+		action: { objects: { zones: ["hand"], card: "Shock" } } }] };
+	assert.equal(settled(frame, taken, draw), true, "a branch that takes it does");
+});
+
+test("a preparation closed or taken starts nothing more, and a challenge's errors outlive a failed revision", async () => {
+	// Closed while preparing: the challenger is never asked.
+	{
+		const table = position();
+		main(table, 0, 3);
+		editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+		main(table, 1, 4);
+		let finish: (plan: Plan) => void = () => {};
+		let challenged = 0;
+		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
+			prepare: () => new Promise<Plan>((resolve) => { finish = resolve; }), challenge: async () => { challenged += 1; return undefined; } });
+		seat.observe(workFrame(table, 0));
+		seat.close();
+		finish({ objective: "late", guidance: "g", steps: [] });
+		await new Promise((resolve) => setImmediate(resolve));
+		assert.equal(challenged, 0);
+	}
+	// The challenge found an error and its revision failed: the turn reviews the plan with the error, and does not take it as it is.
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+	main(table, 1, 4);
+	const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
+	const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self" as const, step: "precombat-main" as const },
+		if: { amount: { count: { zones: ["hand" as const], controller: "you" as const, name } }, atLeast: 1 }, action: { objects: { zones: ["hand" as const], card: name } } })) };
+	const reviewed: string[][] = [];
+	const planned: string[] = [];
+	const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
+		prepare: async () => prepared,
+		challenge: async (_frame, _plan, criticized) => { criticized(["The Chocobo attacks into an untapped blocker."]); throw new Error("revision failed"); },
+		review: async (_frame, plan, lines) => { reviewed.push(lines); return { tools: [{ do: "plan.put", plan }] }; },
+		onPlanned: (one) => void planned.push(`${one.how}:${one.ready}`) });
+	seat.observe(workFrame(table, 0));
+	await new Promise((resolve) => setImmediate(resolve));
+	main(table, 0, 5);
+	await seat.answer(workFrame(table, 0));
+	assert.ok(reviewed.length === 1 && reviewed[0]!.includes("a challenge of the prepared plan found: The Chocobo attacks into an untapped blocker."), JSON.stringify(reviewed));
+	assert.deepEqual(planned, ["reviewed:true"], "the table waited on a review of a plan that was ready");
 });
