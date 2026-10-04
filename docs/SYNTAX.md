@@ -238,9 +238,14 @@ A **plan** is what jev flies.
   or a procedure to announce.
 - `may`: standing alternatives jev may take without asking when their window and
   `if` hold. "If they Shock my Chocobo, Veil it."
-- `askWhen`: visible facts that mean the plan no longer fits, as conditions.
-  Jev asks instead of improvising.
+- `askWhen`: visible facts that mean the plan no longer fits, as conditions,
+  each with an optional `when` window. A stop fires when its fact becomes true;
+  the table then asks strategy for a new plan, at most twice a turn.
+- `holds`: resources kept for a purpose (`objects`, `purpose`, an optional
+  `releaseWhen`). An option that spends one is marked, never removed.
 - `packages`: what this plan's permanents register when they enter.
+
+`docs/PLANS.md` says how the table flies a plan.
 
 ## Options the table lists
 

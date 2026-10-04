@@ -23,4 +23,4 @@ schemas, and every `basis` is checked against the card's text.
 | `turn-plan.md` | a whole turn as a plan, with a reaction, asks and packages |
 | `reactions.md` | plans for the opponent's turn |
 | `combat.md` | attack and block plans, marked options, damage |
-| `asking.md` | when jev asks for a new plan, and when to object |
+| `asking.md` | when the plan asks for a new one: stops, their windows, the budget |

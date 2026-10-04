@@ -1,32 +1,45 @@
-# When jev asks, and when it objects
+# When the plan asks for a new one
 
 Jev flies the plan. It does not work out a new line when the plan stops fitting.
-It asks, and strategy writes the next plan. Asking costs one strategy call;
-improvising costs the game. Tell jev when to ask.
+Strategy writes the next plan, and each new plan costs a whole planning
+session. So name the few facts that really break the line, and no others.
 
 `askWhen` lists visible facts, written as conditions, that mean the plan no
-longer fits. The table checks them and offers jev the ask. Good ones are about
-the position, not about how jev feels:
+longer fits. Good ones are about the position:
 
 - the creature the plan protects is gone;
 - the opponent has more untapped mana than the plan assumed;
 - a card the plan relies on was countered, discarded or exiled;
 - the opponent has a blocker the plan did not expect.
 
-The table also raises two asks itself, with no jev call:
+How the table treats them:
 
-- **Unavailable.** The due step has nothing to pick: its card is gone or its
-  window has passed.
-- **Refused.** The step was offered but could not be paid or targeted.
+- **A stop fires when its fact becomes true.** A fact that already holds when
+  the plan is accepted waits until it has been false, so a stop never fires on
+  the position it was written for.
+- **A stop with a `when` is watched only in that window.** It fires there when
+  its fact holds, at most once a turn.
+- **Two new plans a turn, at most,** from stops and jev's `ask:help` together.
+  Past that, jev decides with the plan as it stands.
+- **A step that cannot be taken now is passed over,** not a stop. Many steps
+  are "if able". If a missing step really breaks the line, say so in `askWhen`.
 
-Jev can always raise three more: the options are bad, something unexpected
-happened, or it needs help with one decision.
+Jev can also choose `ask:help` on any decision the plan does not cover well,
+with a reason. It counts against the same two.
+
+Red racing Green, with its attacks written out and three stops:
 
 ```json plan
 {
   "objective": "Race: Green's life to zero before Hydra takes over.",
-  "guidance": "Attack with everything every turn. Burn blockers only when that lets two or more damage through; otherwise burn face at Green's end step.",
-  "steps": [],
+  "guidance": "Attack with both creatures every turn. Burn a blocker only when that lets two or more damage through; otherwise burn face at Green's end step.",
+  "steps": [
+    { "label": "Attack with Zhao", "when": { "active": "self", "step": "declare-attackers" },
+      "action": { "prefix": "attack:", "objects": { "card": "Zhao, the Moon Slayer" } } },
+    { "label": "Attack with Kellan", "when": { "active": "self", "step": "declare-attackers" },
+      "action": { "prefix": "attack:", "objects": { "card": "Kellan, Planar Trailblazer" } } },
+    { "label": "Finish attacking", "when": { "active": "self", "step": "declare-attackers" }, "action": { "option": "attack:done" } }
+  ],
   "may": [],
   "askWhen": [
     { "label": "Green gained life this turn", "if": { "amount": { "history": "life-gained", "by": "opponent" }, "atLeast": 1 } },
@@ -38,17 +51,5 @@ happened, or it needs help with one decision.
 ```
 
 Every `askWhen` must be a fact the syntax can test. If you cannot write one as a
-condition, put it in the guidance as prose, and jev raises "something
-unexpected" when it sees it.
-
-## Objecting
-
-Another seat's action may break a rule or misread a card: a blocker without
-flying on a flier, a land entering untapped that says it enters tapped, a trigger
-the card does not have. The table does not stop these. Your jev is offered an
-objection to each action since its last decision, and a judge rules.
-
-Object when an action contradicts a printed card or a rule you can cite. Do not
-object to play you merely dislike. When the judge agrees, the game rolls back to
-just before the action, and the offending seat's strategy proposes how play goes
-on from there. Every seat and the judge must agree to that plan.
+condition, put it in the guidance as prose; jev reads the guidance and can ask
+for help when it sees it.

@@ -36,8 +36,8 @@ import type { Role } from "./roles.ts";
 export const CEILING: Record<Role, number> = {
 	/** A classifier returns a choice and a distribution. We do not size its output. */
 	decide: 0,
-	/** One brief snippet. Several are asked at once and each is a few lines. */
-	pregame: 500,
+	/** One analyst's findings; the brief asks for more where the synthesis writes every field. */
+	pregame: 2000,
 	/** One plan: its steps, branches, stops, holds and packages. Thinking counts against it too. */
 	strategy: 4000,
 	/** A verdict, the rule it rests on, and the remedy. */

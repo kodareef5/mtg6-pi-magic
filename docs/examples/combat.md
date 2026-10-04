@@ -7,7 +7,7 @@ and block triggers fire (508.1, 509.1).
 The table lists every creature that can physically attack or block. It does not
 hide a block because of flying or menace. It marks a choice that conflicts with
 a registered word, such as "conflicts with menace: needs two or more blockers".
-Your plan should not take a marked option. If the opponent does, you can object.
+Your plan should not take a marked option.
 
 Plan steps point at combat options by prefix and objects, so they never need an
 object id. Red, attacking with Zhao and Kellan into one untapped Green creature:
