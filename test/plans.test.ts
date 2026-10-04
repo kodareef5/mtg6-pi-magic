@@ -569,3 +569,22 @@ test("a challenger's revision is used when it is ready, and the turn never waits
 		assert.deepEqual(answer.tools, [{ do: "plan.put", plan: ready ? revised : prepared }]);
 	}
 });
+
+test("the arithmetic is refused once and then left to the pilot, and a conditional step is not counted", async () => {
+	const table = matchup("once");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Forest");
+	place(table, 0, "hand", "Mossborn Hydra");
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	const window = { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 };
+	const hydra = { label: "Cast Mossborn Hydra", when: window, action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } };
+	const conditional = { ...hydra, label: "Cast Mossborn Hydra if a third land arrives", if: { amount: { count: { types: ["land" as const], controller: "you" as const } }, atLeast: 3 } };
+	assert.deepEqual(planProblems(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
+	const seen: string[] = [];
+	const plan = { objective: "o", guidance: "g", steps: [hydra] };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { plan } }], stopReason: "toolUse" }) }; };
+	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.equal(seen.length, 2, "refused once, then accepted");
+	assert.match(seen[1]!, /costs \{2\}\{G\}/);
+	assert.deepEqual(tools, [{ do: "plan.put", plan }]);
+});

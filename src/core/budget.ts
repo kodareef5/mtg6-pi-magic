@@ -35,7 +35,8 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	// Only two seats make "our next turn" one turn away.
 	if (!now && (frame.view.players?.length ?? 2) !== 2) return [];
 	const turn = now ? at.turn : at.turn + 1;
-	const ours = (one: PlanOption) => one.when.active !== "opponent" && (one.when.fromTurn ?? 0) <= turn && turn <= (one.when.throughTurn ?? Infinity);
+	// Conditional steps, such as "if I drew a land", are not counted: they may not happen.
+	const ours = (one: PlanOption) => !one.if && one.when.active !== "opponent" && (one.when.fromTurn ?? 0) <= turn && turn <= (one.when.throughTurn ?? Infinity);
 
 	// On a later turn every permanent of ours has untapped and none is new.
 	let hypothetical: Frame = now ? frame : { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER,
@@ -108,7 +109,9 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	if (!honest) return found;
 
 	// Then the payments: each cast from what the earlier ones left, trying other payments when a later step or a branch cannot be paid.
-	const branches = (plan.may ?? []).flatMap((branch, at) => { const act = read(branch); return act?.kind === "cast" && act.source && !act.unknown ? [{ at: `may[${at}] (${branch.label})`, act }] : []; });
+	// Responses on the opponent's turn must be paid from what the turn leaves; a branch on our own turn is an alternative, not an addition.
+	const branches = (plan.may ?? []).flatMap((branch, at) => { const act = branch.when.active === "self" ? undefined : read(branch);
+		return act?.kind === "cast" && act.source && !act.unknown ? [{ at: `may[${at}] (${branch.label})`, act }] : []; });
 	let deepest: { depth: number; message: string } | undefined;
 	const fail = (depth: number, message: string) => { if (!deepest || depth > deepest.depth) deepest = { depth, message }; return false; };
 	const left = (position: Frame, spent: ReadonlySet<string>) => {

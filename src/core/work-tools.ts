@@ -28,7 +28,7 @@ export function checkWhen(when: When): string | null {
 }
 
 /** Every problem with a plan against this seat's frame, so one answer can fix them all. Empty means it can be accepted. */
-export function planProblems(frame: Frame, plan: Plan): string[] {
+export function planProblems(frame: Frame, plan: Plan, options: { arithmetic?: boolean } = {}): string[] {
 	const found: string[] = [];
 	const visible = (ref: { id: string; incarnation: number }) => (frame.view.objects ?? []).some((object) => object.id === ref.id && object.incarnation === ref.incarnation);
 	const option = (one: PlanOption, where: string) => {
@@ -50,7 +50,7 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 	};
 	plan.steps.forEach((step, at) => option(step, `steps[${at}]`));
 	// Land plays, costs and holds on the seat's next own turn, walked in order.
-	found.push(...budget(frame, plan));
+	if (options.arithmetic !== false) found.push(...budget(frame, plan));
 	// A window for one turn names whose turn it is; the wrong seat's never opens.
 	const at = frame.view.window;
 	const whose = (turn: number) => at.kind === "turn" && (frame.view.players?.length ?? 2) === 2 ? ((turn - at.turn) % 2 === 0 ? at.active : 1 - at.active) : undefined;

@@ -50,7 +50,8 @@ const limit = Number(values.turns);
 try {
 	await play(table, seated.players, seated.intents, (line) => {
 		console.log(line); save(journal, table);
-		if (table.gaps.length || table.cursor.turn > limit) throw stop;
+		// A strategy session that failed leaves the standing plan and play goes on; any other gap stops the run.
+		if (table.gaps.some((gap) => !gap.endsWith("The standing plan is kept.")) || table.cursor.turn > limit) throw stop;
 	}, undefined, undefined, judgeFor(table, seated, journal));
 } catch (error) { if (error !== stop) throw error; }
 finally { save(journal, table); }
