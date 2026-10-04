@@ -114,11 +114,11 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const objects = [...table.things.values()]
 		.filter((item) => PUBLIC.has(item.zone) || (viewer !== "spectator" && item.zone === "hand" && item.owner === viewer))
 		.map((item) => {
-			const { card, ...facts } = structuredClone(item);
-			return item.faceDown ? facts : { ...facts, card };
+			const { card, creature, ...facts } = structuredClone(item);
+			return item.faceDown ? facts : { ...facts, card, ...(creature ? { creature } : {}) };
 		});
 	if (table.resolution) lines.push(`Resolving ${table.resolution.object}, instruction ${table.resolution.instruction + 1}. Nobody has priority during this choice.`);
-	return { window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
+	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer] } : {}), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
 		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id,
 			cards: Object.fromEntries([...new Set(deck)].sort().map((name) => [name, deck.filter((card) => card === name).length])),
 		})) } : {}),
@@ -157,8 +157,11 @@ export function describe(table: Table, receipt: Receipt): string {
 			case "untap":
 				parts.push(`${change.do}ped ${publicName(receipt.before[change.what])}`);
 				break;
+			case "damage":
+				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount} damage`);
+				break;
 			case "activate":
-				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : "on the stack"})`);
+				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : change.ability.timing === "spell" ? "spell on the stack" : "on the stack"})`);
 				break;
 			case "add-mana":
 				parts.push(`${seat(table, change.who).name} added ${change.colors.join(" ")}`);

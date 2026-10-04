@@ -15,8 +15,10 @@ export function workMenu(frame: Frame): WorkOption[] {
 	}
 	if (work.request || pendingReviews(frame).length) return menu;
 	for (const recipe of work.suggested) {
-		if (!work.draft || work.draft.next === work.draft.steps.length) menu.push({ id: `work:adopt:${recipe}`, label: `Prepare recipe ${recipe}. Nothing executes.`, tools: [{ do: "draft.start", recipe }] });
-		menu.push({ id: `work:dismiss:${recipe}`, label: `Considered; decline nominated recipe ${recipe}.`, tools: [{ do: "suggestion.dismiss", recipe }] });
+		const prepared = work.recipes.find((entry) => entry.id === recipe)!;
+		const shows = `${prepared.guidance} Sequence: ${prepared.steps.map((step) => step.label).join("; ")}. Adoption opens the draft; bind, ready and execute advance it one step at a time.`;
+		if (!work.draft || work.draft.next === work.draft.steps.length) menu.push({ id: `work:adopt:${recipe}`, label: `Open draft: ${prepared.label}. No card moves yet.`, shows, tools: [{ do: "draft.start", recipe }] });
+		menu.push({ id: `work:dismiss:${recipe}`, label: `Considered; decline nominated recipe ${recipe}.`, shows, tools: [{ do: "suggestion.dismiss", recipe }] });
 	}
 	const draft = work.draft;
 	if (!draft || draft.next === draft.steps.length || draft.parked === occurrence(frame)) return menu;

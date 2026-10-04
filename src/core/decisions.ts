@@ -161,14 +161,17 @@ function stateBased(table: Table): Pending | null {
 	const losing = playing(table).filter((s) =>
 		s.life <= 0 || (s.marks["drew-from-empty"] ?? 0) > 0 || (s.marks.poison ?? 0) >= 10,
 	);
-	if (!losing.length) return null;
+	const dead = cardsIn(table, "battlefield").filter((object) => object.creature &&
+		(object.creature.toughness <= 0 || object.damage >= object.creature.toughness));
+	if (!losing.length && !dead.length) return null;
 	return {
 		situation: "state-based",
-		seat: losing[0]!.id,
-		question: "Apply state-based losses together.",
+		seat: losing[0]?.id ?? table.cursor.active,
+		question: "Apply state-based losses and creature deaths together.",
 		moves: [{
-			option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: `Apply losses for ${losing.map((s) => s.name).join(", ")}` },
-			changes: losing.map((s) => ({ do: "end-game", who: s.id, result: "lose" })),
+			option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: "Apply state-based losses and creature deaths" },
+			changes: [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const })),
+				...dead.map((object) => ({ do: "move" as const, what: object.id, to: "graveyard" as const, reason: object.creature!.toughness <= 0 ? "state-based-action" as const : "destroy" as const }))],
 			reason: "state-based-action",
 		}],
 	};

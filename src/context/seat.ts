@@ -91,6 +91,7 @@ export function question(packet: Packet): Question {
 			...(packet.work.draft ? [`Draft: ${packet.work.draft.label}; step ${packet.work.draft.next + 1}; ${packet.work.draft.status}.`,
 				...packet.work.draft.reserves.map((reserve) => `Reserve ${reserve.object.id}@${reserve.object.incarnation}: ${reserve.purpose}`)] : []),
 			"Work ids edit or execute the named draft. An edit moves no cards; ready does not mean executed.",
+			...(packet.work.draft ? ["To follow the current draft, bind its step, accept readiness, then choose work:execute. Only work:execute advances draft progress. An ordinary play acts outside the draft and can make its remaining steps unavailable."] : []),
 			"Other listed plays remain available. Due reviews and drafts need a disposition before passing.",
 			...(packet.workOptions?.length ? ["Ordinary pass is unavailable while this work is due. Use its work choices to finish, park, decline or cancel it first."] : [])] : []),
 		"",
@@ -116,7 +117,7 @@ export function question(packet: Packet): Question {
 			// the underlying option in the packet, but never offer that refused pick.
 			...packet.options.filter((option) => option.id !== "pass" || !packet.workOptions?.length).map((option) => [
 				option.id,
-				[option.label, option.shows, option.consequence].filter(Boolean).join(". "),
+				[option.label, option.shows, option.consequence, ...(packet.work && (packet.work.suggested.length || packet.work.draft && packet.work.draft.next < packet.work.draft.steps.length) ? ["Direct play: does not adopt or advance a prepared draft."] : [])].filter(Boolean).join(". "),
 			]),
 			// Built the same way as a move, so a route is not described more richly
 			// than the moves it sits beside. It says it acts on nothing, because an

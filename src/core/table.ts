@@ -45,9 +45,12 @@ export type ObjectId = string;
 export type Thing = {
 	id: ObjectId;
 	incarnation: number;
-	/** Cards have a name; a noncard stack object holds its accepted instructions. */
+	/** Cards have a name. Spells and noncard stack objects hold accepted instructions. */
 	card?: string;
 	ability?: Activation;
+	/** Accepted base characteristics, not a cached layer result. */
+	creature?: { power: number; toughness: number };
+	entered?: number;
 	owner: SeatId;
 	controller: SeatId;
 	zone: Zone;
@@ -79,6 +82,9 @@ export type Activation = {
 	claim: string;
 	basis: string;
 	timing: Procedure["timing"];
+	spell?: Procedure["spell"];
+	targetRule?: Procedure["target"];
+	target?: ObjectRef | { player: SeatId };
 	cost: Procedure["cost"];
 	paid: string[];
 	instructions: Instruction[];

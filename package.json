@@ -25,6 +25,7 @@
     "src",
     "skills",
     "cards",
+    "decks",
     "rules",
     "tools",
     "docs",
@@ -37,7 +38,8 @@
     "universe": "node tools/cards.ts --verify",
     "rules": "node tools/rules.ts --verify -o rules/cr.tsv",
     "smoke": "node tools/smoke.ts",
-    "circuits": "node tools/circuits.ts"
+    "circuits": "node tools/circuits.ts",
+    "matchup": "node tools/matchup.ts"
   },
   "dependencies": {
     "ws": "^8.20.0",

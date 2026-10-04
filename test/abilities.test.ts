@@ -25,6 +25,8 @@ import { aiSeat } from "../src/context/seat.ts";
 import { decisionApi, type Classify } from "../src/context/model.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { focus, type Packet } from "../src/context/packet.ts";
+import { matchTable, elf, shock } from "../tools/matchup-fixture.ts";
+import { runMatchup, authoredInference } from "../tools/matchup.ts";
 
 function position(table = abilityTable()) {
 	for (;;) {
@@ -47,6 +49,28 @@ function fire(table: Table, procedure: Procedure) {
 }
 const pass = (table: Table) => { while (!nextDecision(table)) advance(table); apply(table, "pass", "engine", "forced"); };
 const settle = (table: Table, why: "chosen" | "delegated" = "delegated") => apply(table, nextDecision(table)!.options[0]!.id, "model", why);
+
+function mainFor(table: Table, seat: number) {
+	while (table.cursor.turn < 4) {
+		const decision = nextDecision(table);
+		if (!decision) { advance(table); continue; }
+		if (decision.situation === "priority" && decision.seat === seat && table.cursor.active === seat && table.cursor.steps[0] === "precombat-main") return;
+		const id = decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? decision.options[0]!.id;
+		apply(table, id, "model", decision.options.length === 1 ? "forced" : "chosen");
+	}
+	throw new Error("Missed main phase");
+}
+function castElf() {
+	const table = matchTable("real-standard-9"); mainFor(table, 0);
+	const land = nextDecision(table)!.options.find((option) => option.label === "Play Forest")!;
+	apply(table, land.id, "model", "chosen"); fire(table, manaProcedure("Forest", "G"));
+	const before = structuredClone(table), offered = proposed(table, elf);
+	assert.deepEqual(table, before, "listing casts changes no state");
+	assert.throws(() => activate(table, { ...offered.activation, paid: [] }, { picked: offered.option.id, offered: [offered.option.id], by: "model", why: "declared" }), /payment/);
+	assert.deepEqual(table, before, "an unpaid cast changes neither cards nor the ledger");
+	fire(table, elf); pass(table); pass(table); settle(table);
+	return table;
+}
 
 test("a prepared activation spends existing resources once and refuses a bad payment atomically", async () => {
 	const table = position();
@@ -169,6 +193,63 @@ test("responses resolve newest first and a pending choice closes priority withou
 	pass(table); pass(table); settle(table); settle(table, "chosen");
 	assert.equal(cardsIn(table, "stack").length, 0);
 	assert.equal(table.cursor.steps[0], "upkeep", "resolution did not advance the step");
+
+	const real = castElf(), creature = cardsIn(real, "battlefield").find((object) => object.card === "Llanowar Elves")!;
+	assert.deepEqual(creature.creature, { power: 1, toughness: 1 });
+	assert.equal(real.things.size, 120, "casting and resolving preserved every registered card");
+	advance(real);
+	const tapElf = manaProcedure("Llanowar Elves", "G");
+	assert.equal(proposed(real, tapElf), undefined, "a newly cast Elf cannot pay its tap cost");
+	const unready = structuredClone(real);
+	assert.throws(() => activationChanges(real, { source: { id: creature.id, incarnation: creature.incarnation }, controller: 0,
+		claim: tapElf.claim, basis: tapElf.basis, timing: "mana", cost: tapElf.cost, instructions: tapElf.instructions, delegate: true, paid: [] }), /turn began/);
+	assert.deepEqual(real, unready);
+	mainFor(real, 1);
+	apply(real, nextDecision(real)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
+	fire(real, manaProcedure("Mountain", "R"));
+	const choices = procedureOptions(draft(shock), workFrame(real, 1));
+	assert.equal(choices.length, 3, "one creature and either player are different announced targets");
+	assert.equal(new Set(choices.map((choice) => choice.option.shows)).size, 3);
+	const playerHit = structuredClone(real), playerTarget = choices.find((choice) => choice.activation.target && "player" in choice.activation.target && choice.activation.target.player === 0)!;
+	activate(playerHit, playerTarget.activation, { picked: playerTarget.option.id, offered: choices.map((choice) => choice.option.id), by: "model", why: "declared" });
+	pass(playerHit); pass(playerHit); settle(playerHit);
+	assert.equal(playerHit.seats[0]!.life, 18, "damage to an announced player changes that player's life");
+	assert.equal(playerHit.things.get(creature.id)!.damage, 0, "a player target never becomes a creature target");
+	const aimed = choices.find((choice) => choice.activation.target && "id" in choice.activation.target)!;
+	const changed = structuredClone(real);
+	commit(changed, [{ do: "move", what: creature.id, to: "hand", reason: "bounce" }, { do: "move", what: creature.id, to: "battlefield", reason: "resolve" }], "resolve");
+	const snapshot = structuredClone(changed);
+	assert.throws(() => activationChanges(changed, aimed.activation), /target is unavailable/);
+	assert.deepEqual(changed, snapshot, "a stale target cannot spend mana or move the spell");
+	activate(real, aimed.activation, { picked: aimed.option.id, offered: choices.map((choice) => choice.option.id), by: "model", why: "declared" });
+	const vanished = structuredClone(real);
+	commit(vanished, [{ do: "move", what: creature.id, to: "hand", reason: "bounce" }], "bounce");
+	pass(vanished); pass(vanished); settle(vanished);
+	assert.equal(cardsIn(vanished, "graveyard", 1).some((object) => object.card === "Shock"), true);
+	assert.equal(cardsIn(vanished, "hand", 0).find((object) => object.id === creature.id)!.damage, 0);
+	assert.equal(vanished.resolution, null, "a spell with its only target gone finishes without damage");
+	const allInstructions = structuredClone(snapshot);
+	// An authored multi-instruction spell checks cancellation of the whole effect,
+	// not a claim that Shock also draws cards.
+	const rebound = procedureOptions(draft({ ...shock, instructions: [...shock.instructions, { do: "draw", who: "self", count: 2 }] }), workFrame(allInstructions, 1))[0]!;
+	activate(allInstructions, rebound.activation, { picked: rebound.option.id, offered: [rebound.option.id], by: "model", why: "declared" });
+	commit(allInstructions, [{ do: "move", what: creature.id, to: "hand", reason: "bounce" }], "bounce");
+	const librarySize = cardsIn(allInstructions, "library", 1).length;
+	pass(allInstructions); pass(allInstructions); settle(allInstructions);
+	assert.equal(allInstructions.resolution, null);
+	assert.equal(cardsIn(allInstructions, "library", 1).length, librarySize, "an unavailable only target cancels even the untargeted draw");
+	assert.equal(cardsIn(allInstructions, "stack").length, 0);
+	pass(real); pass(real); settle(real);
+	assert.equal(creature.damage, 2);
+	assert.equal(creature.zone, "battlefield", "damage is marked before the state-based checkpoint");
+	assert.equal(nextDecision(real)!.situation, "state-based");
+	settle(real);
+	assert.equal(creature.zone, "graveyard");
+	assert.equal(creature.incarnation, 4, "hand, stack, battlefield, then graveyard are distinct incarnations");
+	assert.equal(real.things.size, 120);
+	const matured = castElf();
+	mainFor(matured, 1); mainFor(matured, 0);
+	assert.ok(proposed(matured, tapElf), "the Elf's tap cost becomes available on its controller's next turn");
 });
 
 test("state-based checks wait for the whole accepted effect, including a pause between instructions", () => {
@@ -266,4 +347,20 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 	assert.equal(cardsIn(manual, "hand", 0).length, before);
 	assert.equal(manual.resolution?.instruction, 0);
 	assert.equal(refuseExecution(draft(lootProcedure()), workFrame(manual, 0)) !== null, true);
+
+	const real = await runMatchup(authoredInference(), [{ role: "decide", pattern: "authored", model: { type: "classifier", id: "authored", provider: "offline", api: "typesafe-system-one" } as never },
+		{ role: "pregame", pattern: "off", off: true }], directory, "real-standard-9", true, () => {});
+	assert.equal(real.result.completed, true);
+	assert.equal(real.result.replayMatches, true);
+	assert.deepEqual(real.result.gaps, []);
+	const response = replay(real.result.journal, (header) => matchTable(header.seed), real.result.stackVersion).table;
+	assert.equal(cardsIn(response, "stack")[0]!.card, "Shock");
+	assert.equal(response.seats[1]!.pool.length, 0, "a response clone carries the paid cost");
+	assert.ok(cardsIn(response, "battlefield", 0).some((object) => object.card === "Llanowar Elves"));
+	assert.equal(response.ledger.filter((row) => row.activation?.timing === "spell").length, 2);
+	const resumed = await runMatchup(authoredInference(), [{ role: "decide", pattern: "authored", model: { type: "classifier", id: "authored", provider: "offline", api: "typesafe-system-one" } as never },
+		{ role: "pregame", pattern: "off", off: true }], directory, "ignored-for-resume", true, () => {}, { path: real.result.journal, version: real.result.stackVersion });
+	assert.equal(resumed.result.completed, true);
+	assert.equal(resumed.result.replayMatches, true);
+	assert.deepEqual(resumed.table.ledger.filter((row) => row.activation), real.table.ledger.filter((row) => row.activation), "continuing the response clone never casts or pays twice");
 });

@@ -222,6 +222,7 @@ test("due attention is consulted before automatic passes and cannot become fallb
 	assert.deepEqual(packet.options, frame.decision!.options, "the physical options keep their ids and facts");
 	assert.equal(asked.criteria.pass, undefined, "never ask a classifier to choose a pass the core refuses");
 	assert.ok(asked.criteria[land.id], "other physical plays remain available");
+	assert.match(asked.criteria[land.id]!, /does not adopt or advance/);
 	assert.ok(asked.criteria["work:execute"] && asked.criteria["work:park"] && asked.criteria["work:cancel"]);
 	assert.deepEqual(sequence, beforeMenu, "building the available menu is pure");
 	const parked = workFrame(sequence, 0);
@@ -251,6 +252,12 @@ test("due attention is consulted before automatic passes and cannot become fallb
 	const offered = question(focus(pending, startingIntent(0)));
 	assert.ok(offered.type === "choice" && !offered.criteria["work:execute"] && offered.criteria["work:dismiss:two"],
 		"a prepared pass cannot bypass a nomination either");
+	const preview = structuredClone(pending);
+	delete preview.view.work!.draft;
+	const nomination = question(focus(preview, startingIntent(0)));
+	assert.ok(nomination.type === "choice" && nomination.criteria["work:adopt:two"]!.includes("Play then pass") && nomination.criteria["work:adopt:two"]!.includes("Land; Pass"),
+		"adoption carries guidance and step labels rather than only a recipe id");
+	assert.equal(JSON.stringify(focus(preview, startingIntent(0))).includes('"action"'), false, "a recipe preview excludes executable bodies");
 	assert.match(refuseExecution(pending.view.work!.draft!, pending)!, /Other due work/);
 	editWork(sequence, 0, [{ do: "suggestion.dismiss", recipe: "two" }], "decline-repeat");
 	assert.ok(workMenu(workFrame(sequence, 0)).some((option) => option.id === "work:execute"),
@@ -417,6 +424,7 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 		for (const fact of sent.cards) {
 			assert.ok(known.has(fact.name), "card text comes from visible objects or registered composition");
 			assert.equal(fact.oracle, universe.cards.get(fact.name)!.oracle);
+			assert.equal(fact.stats, universe.cards.get(fact.name)!.stats, "creature preparation receives printed characteristics");
 		}
 	}
 	const frame = workFrame(table, 0);

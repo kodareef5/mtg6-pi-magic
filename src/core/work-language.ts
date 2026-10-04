@@ -29,6 +29,7 @@ export const TaskSchema = object({
 export const ColorSchema = enumeration(["W", "U", "B", "R", "G", "C"]);
 const player = Type.Union([Type.Literal("self"), Type.Literal("opponent")]);
 export const InstructionSchema = Type.Union([
+	object({ do: Type.Literal("damage"), amount: Type.Integer({ minimum: 1 }) }),
 	object({ do: Type.Literal("mana"), who: player, colors: Type.Array(ColorSchema, { minItems: 1 }) }),
 	object({ do: Type.Literal("draw"), who: player, count: Type.Integer({ minimum: 1 }) }),
 	object({ do: Type.Literal("choose-move"), who: player, count: Type.Literal(1),
@@ -38,9 +39,13 @@ export const InstructionSchema = Type.Union([
 ]);
 export const ProcedureSchema = object({
 	source: QuerySchema, claim: text, basis: text,
-	timing: Type.Union([Type.Literal("mana"), Type.Literal("stack")]),
+	timing: Type.Union([Type.Literal("mana"), Type.Literal("stack"), Type.Literal("spell")]),
+	spell: Type.Optional(object({ speed: Type.Union([Type.Literal("instant"), Type.Literal("sorcery")]),
+		destination: Type.Union([Type.Literal("battlefield"), Type.Literal("graveyard")]),
+		creature: Type.Optional(object({ power: Type.Integer(), toughness: Type.Integer() })) })),
+	target: Type.Optional(enumeration(["creature", "player", "creature-or-player"])),
 	cost: object({ tap: Type.Boolean(), generic: natural, colors: Type.Array(ColorSchema) }),
-	instructions: Type.Array(InstructionSchema, { minItems: 1 }),
+	instructions: Type.Array(InstructionSchema),
 	/** Permission for this seat's unique resolution continuations, never another seat's choice. */
 	delegate: Type.Boolean(),
 });

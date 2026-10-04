@@ -1,11 +1,11 @@
 /** Two established Merchants activate across one priority exchange. Authored models,
  * real circuits, payments, stack, resolution and game loop. Setup is a fixture,
- * not a claim that these permanents were cast through the unfinished spell path.
+ * not a claim that these permanents were cast during this game.
  */
 import { commit, start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
 import { card, checkDeck, load } from "../src/core/cards.ts";
-import { cardsIn } from "../src/core/table.ts";
+import { cardsIn, type Mana } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { play } from "../src/core/loop.ts";
@@ -28,7 +28,7 @@ export function abilityTable(seed = "ability-experiment") {
 	return table;
 }
 
-export function manaProcedure(card: string, color: "G" | "U"): Procedure {
+export function manaProcedure(card: string, color: Mana["color"]): Procedure {
 	return { source: { zones: ["battlefield"], controller: "self", card }, claim: `Tap ${card} for ${color}`,
 		basis: `Basic land type ${card}; CR 305.6.`, timing: "mana", cost: { tap: true, generic: 0, colors: [] },
 		instructions: [{ do: "mana", who: "self", colors: [color] }], delegate: true };

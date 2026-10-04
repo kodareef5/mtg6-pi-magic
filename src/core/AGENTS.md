@@ -103,6 +103,12 @@ without giving anyone priority. Only completion returns to state-based checks
 and then the active player's priority. One continuation is delegated only when
 the accepted procedure explicitly says so; it is never forced by a shortlist.
 
+The first spell path stores accepted base creature characteristics and entry
+time. These are inputs, not cached derived power or toughness. Its lethal-damage
+check is valid only for the unmodified creatures the opening probe exercises.
+Do not silently omit counters, layers, protection, replacements or entry
+instructions to make another card fit that probe.
+
 Listing a forced action does not apply it. The loop applies the listed group
 and asks again to discover cascading actions. Cleanup likewise remains pending
 after a discard while the hand still exceeds its limit.

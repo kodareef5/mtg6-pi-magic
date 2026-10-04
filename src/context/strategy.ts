@@ -28,11 +28,15 @@ const SYSTEM = [
 	"Use task.put to schedule checks; times counts distinct actual matching step visits.",
 	"Omitting times repeats indefinitely. after schedules a follow-up after another check's run count.",
 	"fromTurn and throughTurn use the table's global turn numbers, not rounds or your own turns.",
-	"Recipe steps bind listed options, or prepare a procedure from a visible permanent with a claim and its basis.",
+	"Recipe steps bind listed options, or prepare an activation from a visible permanent or a spell from hand, with a claim and its basis.",
+	"Listed action.option and action.prefix match option ids, never labels. A land play uses prefix land: and an objects selector for the card.",
+	"A review that should nominate a recipe must include its id in task.recipes. For concept-only reviews use scope {zones: []}; an empty selector matches all visible objects.",
 	"A procedure can pay unrestricted colored and generic mana, tap its source, and add mana, draw, change life, or choose one card to move.",
 	"Immediate mana procedures only add mana. Other procedures use the stack and expose each remaining instruction on resolution.",
 	"Set delegate only when this seat authorizes unique resolution continuations to run without another classifier call. It cannot authorize another seat's choice.",
-	"This vocabulary cannot cast spells, recognize triggers, apply replacements, choose targets, or verify that the claimed card meaning is correct.",
+	"Spell procedures use timing spell and source hand. Supply spell speed and destination; creature base power and toughness go in spell.creature. A creature with no resolution instructions uses an empty instructions array.",
+	"A spell with damage instructions announces one target: creature, player, or creature-or-player. The binding menu chooses it before payment; resolution rechecks it. Planeswalker and battle targets are not yet offered.",
+	"The vocabulary cannot recognize triggers, apply replacements or continuous effects, run combat, or verify that the claimed card meaning is correct. Do not replace unsupported card text with an invented simpler effect.",
 	"Instruction amounts are literals. Values that must be computed later need machinery this vocabulary does not yet have.",
 	"Copy the relevant card instruction or accepted ruling into basis. Accepted meaning remains frozen through replay and cloning.",
 	"Card facts cover visible objects and public registered lists. Deck counts do not identify another hand or the library order.",
@@ -58,7 +62,7 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		options: frame.decision?.options, brief: context.brief,
 		cards: [...new Set([...(frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []),
 			...(frame.view.decks ?? []).flatMap((deck) => Object.keys(deck.cards))])]
-			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, oracle: card.oracle }] : []; }),
+			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
 		recaps: context.recaps?.slice(-3), refused: frame.refused,
 	});
 	const tools = commands(JSON.parse(await reasoner.think("seat plan", { system: SYSTEM, user })));

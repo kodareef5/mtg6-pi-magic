@@ -4,6 +4,9 @@ A seat can prepare a sequence, schedule future attention, and account for the
 concerns it reviewed before passing. The LLM supplies the strategy and the
 prepared guidance. The classifier executes and notices through fixed choices.
 
+[The real Standard matchup](STANDARD.md) now exercises casting and targeted
+damage from ordinary setup. The experiments below remain regression fixtures.
+
 ## Try the first experiment
 
 ```
@@ -169,11 +172,16 @@ and can require its tapped state. It expresses a strategic preference, not a
 rules restriction on other players or the ordinary move list.
 
 The seat opens a recipe, binds its next move, accepts readiness, then executes.
+Recipe adoption and dismissal show the prepared guidance and sequence labels,
+so the classifier can assess the proposed line before a draft exists.
 These are separate choices. Readiness records the position it assessed; a
 changed position requires acceptance again. Execution recomputes the offered
 move and checks bindings and reservations before using the normal commit path.
 Only an executed action advances the draft. A listed move is recorded as chosen;
 a prepared procedure is recorded as declared, with its accepted terms.
+Choosing an ordinary play outside the draft leaves its progress unchanged, even
+if that play consumes the card its next step expected. The classifier menu names
+this consequence beside ordinary actions and explains bind, ready, execute.
 
 The sequence pauses when its next step belongs to a future window. Changed
 reserves and missed execution windows surface for inspection, cancellation,
@@ -189,7 +197,7 @@ only changes reservations or guidance. Core retains the completed prefix.
 ## A prepared procedure
 
 The first physical vocabulary is deliberately small. A procedure selects a
-visible permanent, states a claim and its basis, names its cost, and carries an
+visible source, states a claim and its basis, names its cost, and carries an
 ordered list of instructions. The strategy role receives card text for visible objects and public registered
 lists. No per-card compiler runs.
 
@@ -228,6 +236,22 @@ payment, instructions and delegation become public and are frozen in the
 physical journal. Private strategic guidance stays in the recipe. Editing that
 recipe later cannot rewrite an ability already on the stack.
 
+A spell procedure selects a card in hand and uses `timing: "spell"`. Its
+`spell` terms supply `speed` (`instant` or `sorcery`) and `destination`
+(`battlefield` or `graveyard`). `spell.creature` can carry accepted base power
+and toughness. An ordinary creature such as Llanowar Elves has an empty
+resolution instruction list; its activated ability is a later procedure.
+The source card itself moves to the stack, retaining the accepted terms until
+resolution completes. Costs and targets are checked before any card moves.
+
+`target` offers one `creature`, `player`, or `creature-or-player` selection.
+The announced incarnation remains fixed. `{ "do": "damage", "amount": 2 }`
+marks damage on that target, or reduces a targeted player's life. If the only
+target is unavailable when resolution starts, no instruction runs and the
+spell goes to the graveyard. A creature's lethal marked damage is checked after
+the whole effect, not between instructions. This first check uses accepted
+base toughness; layers, prevention and indestructible need more machinery.
+
 After consecutive passes, the top ability begins resolving. Its instruction
 index and remaining count live in the table. A draw does not expose a library
 identity in its option; a following choice sees the hand after that draw.
@@ -257,10 +281,11 @@ objects, pending reviews, and menus; it never executes an action. `/magic work
 through the same vocabulary, and may prepare or revise work without answering
 reviews or executing moves for the classifier.
 
-The vocabulary remains provisional. Procedures currently activate face-up
-permanents under their controller's priority, with tap and unrestricted mana
-costs. Instructions add mana, draw, change life, or choose one card to move.
-Spell casting, targets, amounts computed later, complex or simultaneous multi-card payments and choices,
+The vocabulary remains provisional. Procedures activate face-up permanents or
+cast cards from hand under their controller's priority, with unrestricted mana
+and source tap costs where applicable. Instructions add mana, draw, change
+life, deal literal damage, or choose one card to move. Wider casting and target
+restrictions, amounts computed later, complex or simultaneous multi-card payments and choices,
 mana abilities inside a payment, triggers, replacements, continuous effects,
 and the judge's remedy remain unwritten. Legality and card interpretation are
 claims the table records, not certifications these tests establish.

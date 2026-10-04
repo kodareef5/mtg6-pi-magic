@@ -166,8 +166,9 @@ recorded as truncated.
 
 ## Build order
 
-Two selected real Standard lists first. Pin the lists, their legality date, and
-the card and rules data, then inventory the mechanics they need. Completion
+Two selected real Standard lists first. `decks/standard-matchup.json` pins the
+lists, legality date, card data and rules; `docs/STANDARD.md` inventories their
+mechanics. Completion
 means ordinary deck setup, supported relevant actions and interactions, outcomes
 without missing-machinery gaps, and replay and clone parity. An established
 board fixture or passing over unsupported cards does not meet that target.
@@ -190,11 +191,14 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    model:** `/magic play` finishes a game through Pi's classifier API. Measured
    live at 108 turns, 2357 decisions, 95.4% forced, 109 model calls, 0 gaps.
    The bulk runner is still unwritten.
-2. **Activated abilities through prepared procedures.** The first experiment
+2. **Spells and activated abilities through prepared procedures.** The first experiment
    binds visible sources, pays tap and unrestricted mana costs, resolves two
    draw/discard abilities in stack order, and clones during a pending discard.
    Accepted claims and instructions are journaled. Card interpretation and
-   rules legality are not certified by this experiment.
+   rules legality are not certified by this experiment. `npm run matchup`
+   starts two pinned real lists through ordinary opening setup, casts Llanowar
+   Elves, then targets it with Shock. The monitor stops after the exchange.
+   `docs/STANDARD.md` records the lists, data pins and remaining mechanics.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard.
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
@@ -379,6 +383,9 @@ tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           stub for bulk games and counters
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/circuits.ts      offline circuit experiments and a local timeline inspector
+tools/matchup.ts       monitored opening from pinned Standard lists; --live uses Pi
+decks/standard-matchup.json  source lists, legality date, card and rules hashes
+docs/STANDARD.md       first real opening, observed failures and mechanics inventory
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
 docs/CIRCUITS.md       the toolbox, the circuits built from it, and how a seat
@@ -420,10 +427,11 @@ verify every carried field against the source and refuse to pass on a mismatch.
   `declare`, free-form delegation, and `judge.rule` still throw or leave the
   decision pending. Conservation and the judge must carry the weight that a
   fully informed move list would.
-- The rest of card meaning. `syntax.ts` holds physical changes and layers;
-  `work-language.ts` holds the first prepared instruction vocabulary. Casting,
-  targets, triggers, replacements, restricted mana and complex costs remain
-  unwritten. The archived measurements remain an inventory to draw from.
+- The rest of card meaning. Prepared procedures can cast a card from hand,
+  announce one creature or player target, and deal literal damage. Creature
+  checks use accepted base characteristics, not a completed layer walk. Wider
+  targets, combat, triggers, replacements, restricted mana and complex costs
+  remain unwritten. `docs/STANDARD.md` inventories the pinned lists' needs.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.
@@ -432,7 +440,7 @@ verify every carried field against the source and refuse to pass on a mismatch.
   nothing holds that conversation. `docs/STATE.md` holds the reasoning.
 - More resolution choices. The table now holds the remaining instruction and
   count while a choice is pending, and distinguishes continuation from a
-  state-based checkpoint. Targets, bindings between instructions and
+  state-based checkpoint. Multiple or restricted targets, bindings between instructions and
   simultaneous multi-card choices still need machinery.
 - Provenance beyond the accepted claim. The journal now carries each executed
   procedure's basis, instructions, payment and delegation. Replay uses those

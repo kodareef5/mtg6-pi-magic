@@ -12,8 +12,9 @@ can be kept distinct. Playing strength and cost benefits still need measurement.
 
 **The syntax** supplies operations over Magic objects: select a visible source,
 state a cost, order instructions and propose a physical change. Operations are
-generic rather than compiled per card. Querying targets, computing amounts and
-building complex payments remain future work.
+generic rather than compiled per card. A first spell path binds one creature
+or player target. Wider target restrictions, computed amounts and complex
+payments remain future work.
 
 **A circuit** is a sequence of menus. Each selected id can produce the next
 menu mechanically, without a strategy call. The classifier can inspect, bind,

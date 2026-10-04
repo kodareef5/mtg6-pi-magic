@@ -125,10 +125,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// receipt no trigger can read.
 	const before: Receipt["before"] = {};
 	for (const change of changes) {
-		if ("what" in change) {
-			const was = table.things.get(change.what);
-			if (was) before[change.what] = structuredClone(was);
-		}
+		const id = "what" in change ? change.what : change.do === "damage" && "id" in change.target ? change.target.id : undefined;
+		const was = id === undefined ? undefined : table.things.get(id);
+		if (was) before[was.id] = structuredClone(was);
 	}
 
 	for (const [index, change] of changes.entries()) {
@@ -155,6 +154,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.faceDown = false;
 				moving.counters = {};
 				moving.damage = 0;
+				if (change.to === "battlefield") moving.entered = table.cursor.clock + 1;
+				else delete moving.entered;
 				if (ORDERED.has(change.to)) {
 					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner));
 					if (change.position === "bottom") {
@@ -183,8 +184,16 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "spend-mana":
 				seat(table, change.who).pool = seat(table, change.who).pool.filter((mana) => !change.ids.includes(mana.id));
 				break;
+			case "damage":
+				if ("player" in change.target) seat(table, change.target.player).life -= change.amount;
+				else thing(table, change.target.id).damage += change.amount;
+				break;
 			case "activate":
-				if (change.ability.timing === "stack") {
+				if (change.ability.timing === "spell") {
+					const card = thing(table, change.what);
+					card.ability = structuredClone(change.ability);
+					if (change.ability.spell?.creature) card.creature = structuredClone(change.ability.spell.creature);
+				} else if (change.ability.timing === "stack") {
 					for (const object of cardsIn(table, "stack")) object.position = (object.position ?? 0) + 1;
 					table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.ability.controller, controller: change.ability.controller,
 						zone: "stack", position: 0, tapped: false, faceDown: false, counters: {}, damage: 0, ability: structuredClone(change.ability) });
@@ -269,7 +278,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	const instructions = object.ability!.instructions;
 	if (change.action === "begin") {
 		const first = instructions[0]!;
-		table.resolution = { object: object.id, instruction: 0, remaining: "count" in first ? first.count : 1 };
+		table.resolution = { object: object.id, instruction: 0, remaining: first && "count" in first ? first.count : 1 };
 		table.cursor.priority = null;
 		return;
 	}
@@ -277,9 +286,12 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	if (!change.skip && --pending.remaining > 0) return;
 	pending.instruction += 1;
 	const next = instructions[pending.instruction];
-	if (next) { pending.remaining = "count" in next ? next.count : 1; return; }
-	table.things.delete(object.id);
-	for (const other of cardsIn(table, "stack")) if ((other.position ?? 0) > (object.position ?? 0)) other.position! -= 1;
+	if (next && !change.abort) { pending.remaining = "count" in next ? next.count : 1; return; }
+	if (object.card) delete object.ability;
+	else {
+		table.things.delete(object.id);
+		for (const other of cardsIn(table, "stack")) if ((other.position ?? 0) > (object.position ?? 0)) other.position! -= 1;
+	}
 	table.resolution = null;
 	// Leave a checkpoint. The dispatcher checks state before advance grants priority.
 	table.cursor.priority = null;

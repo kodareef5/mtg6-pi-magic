@@ -65,9 +65,10 @@ export type Change =
 	| { do: "tap" | "untap"; what: string }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
+	| { do: "damage"; source: string; target: NonNullable<Activation["target"]>; amount: number }
 	| { do: "activate"; what: string; id: string; ability: Activation }
 	| { do: "resolution"; action: "begin"; what: string }
-	| { do: "resolution"; action: "next"; what: string; skip?: boolean }
+	| { do: "resolution"; action: "next"; what: string; skip?: boolean; abort?: boolean }
 	| { do: "shuffle"; whose: SeatId }
 	/**
 	 * A counter or flag that belongs to a seat rather than a card: poison,

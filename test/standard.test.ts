@@ -8,6 +8,7 @@ import { test } from "node:test";
 
 import { card, checkDeck, copiesAllowed, load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
+import { matchup, expand } from "../tools/matchup-fixture.ts";
 
 const universe = load("cards/standard.tsv");
 
@@ -27,9 +28,18 @@ test("a card legal in an older format is absent, not marked", () => {
 	assert.throws(() => card(universe, "Ancient Tomb"));
 });
 
-test("sixty basics is a legal standard deck", () => {
+test("registered decks satisfy Standard size, copy limits and pinned legality", () => {
 	assert.deepEqual(checkDeck(universe, Array(60).fill("Forest"), standard), []);
 	assert.equal(copiesAllowed(universe, "Forest", standard), Infinity);
+	assert.equal(matchup.legalityDate, universe.generated);
+	assert.equal(matchup.decks.length, 2);
+	for (const deck of matchup.decks) {
+		const main = expand(deck.main), sideboard = expand(deck.sideboard);
+		assert.equal(main.length, 60);
+		assert.equal(sideboard.length, 15);
+		assert.deepEqual(checkDeck(universe, main, standard), []);
+		assert.deepEqual(checkDeck(universe, [...main, ...sideboard], standard), [], "copy limits include the sideboard");
+	}
 });
 
 test("four is the limit on a nonbasic", () => {

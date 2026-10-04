@@ -70,6 +70,8 @@ export type Decision = {
  * and never silence.
  */
 export type SeatView = {
+	/** This viewer's most recent turn start, for tap-cost availability. */
+	began?: number;
 	window: Window;
 	/** Public facts, one line each, same order every time so two frames diff. */
 	table: string[];

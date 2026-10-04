@@ -25,10 +25,8 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 		}
 	}
 
-	// Later: cast a spell once per distinct cost configuration, activate an
-	// ability, take a special action. A kicked and an unkicked spell are two
-	// moves, not one move with a blank to fill in. That is what stops a model
-	// writing a cost.
+	// Prepared spell and activation menus live in procedures.ts. Ordinary
+	// discovery of those actions, alternative costs and special actions is unfinished.
 
 	// Canonical order: pass, then lands by card name then by id. Same table,
 	// same list, same order, so a seed replays.
