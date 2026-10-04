@@ -20,7 +20,6 @@ schemas, and every `basis` is checked against the card's text.
 | `x-costs.md` | X in a cost, a permanent remembering X, counted X, `sum`, damage to each |
 | `stack-and-replacements.md` | countering, ward, a replacement placed by a spell, rules words, `each`, suppression |
 | `baseline-overrides.md` | the baseline rules, and the cards that change them: extra lands, haste, flash |
-| `reveal.md` | a proposal: revealing a hand for another seat to choose from |
 | `turn-plan.md` | a whole turn as a plan, with a reaction, asks and packages |
 | `reactions.md` | plans for the opponent's turn |
 | `combat.md` | attack and block plans, marked options, damage |

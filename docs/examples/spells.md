@@ -51,7 +51,7 @@ Auntie's Sentence's second mode:
 }
 ```
 
-Its first mode reveals a hand for another seat to choose from; see `reveal.md`.
+Its first mode, revealing a hand for you to choose from, is not in the syntax yet.
 
 ## Kicker is a procedure with the bigger cost
 

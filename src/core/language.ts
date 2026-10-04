@@ -77,7 +77,6 @@ const SelectorFields = {
 	attachedTo: Type.Optional(ObjectRef),
 	/** Cards the source exiled with `link` ("exiled with this"). */
 	linked: Type.Optional(Type.Literal(true)),
-	revealed: Type.Optional(Type.Literal(true)),
 };
 
 const Defs = {
@@ -188,7 +187,6 @@ const Defs = {
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
-		step({ do: Type.Literal("reveal"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Type.Optional(PlayerRef) }),
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),
 		step({ do: Type.Literal("draw"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
@@ -197,7 +195,8 @@ const Defs = {
 		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: one("tap", "untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Ref("TokenSpec"), tapped: Type.Optional(Type.Literal(true)) }),
-		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification") }),
+		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
+		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
 		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */
 		step({ do: Type.Literal("permit"), what: ObjectRef, who: PlayerRef, from: Type.Optional(one("now", "next-turn")), until: Duration }),
 		step({ do: Type.Literal("register"), on: ObjectRef, registration: Type.Ref("Registration") }),
@@ -281,6 +280,15 @@ export const ProcedureSchema = Type.Cyclic({ ...Defs, Procedure: object({
 	instructions: Type.Array(Type.Ref("Instruction")),
 	words: Type.Optional(Type.Array(text)),
 }) }, "Procedure");
+
+/**
+ * A public label a player puts on its own object: "power doubled until end of
+ * turn", "warped: exile at the next end step". With a `change` the layer walk
+ * applies it; without one it is information for the players and the judge.
+ * `modify` writes one of these too. Each ends by its lifetime.
+ */
+export const LabelSchema = Type.Cyclic({ ...Defs, Label: object({ text, until: Duration, change: Type.Optional(Type.Ref("Modification")) }) }, "Label");
+export type Label = Static<typeof LabelSchema>;
 
 /** What a seat's permanent registers when it enters, by card name. Private until it is used. */
 export const PackageSchema = Type.Cyclic({ ...Defs, Package: object({ card: text, registers: Type.Array(Type.Ref("Registration")) }) }, "Package");

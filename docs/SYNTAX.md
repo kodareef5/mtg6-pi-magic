@@ -76,7 +76,6 @@ watched. Each field narrows, and a list matches any of its members.
 | `attachedTo` | "Equipment attached to that creature" |
 | `linked` | "exiled with this" |
 | `targeting` | a spell on the stack whose targets match: "a spell that targets a creature you control" |
-| `revealed` | objects currently revealed to the chooser |
 
 On the battlefield a selector reads derived characteristics. Elsewhere it reads
 printed ones. A creature with "all creature types" matches any creature subtype,
@@ -124,15 +123,14 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link` |
 | `destroy` | moves to the graveyard; indestructible refuses it |
-| `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it |
-| `reveal` | shows an object or set to a player or everyone |
+| `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone |
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
 | `mana` | `colors` or `any`, `times` to repeat, `spendOnly` |
 | `tap`, `untap` | |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, words, registrations |
-| `modify` | change characteristics `until` a duration |
+| `modify` | change characteristics `until` a duration, written as a public label |
 | `permit` | a player may play a card, `from` now or next turn, `until` a duration |
 | `register` | add a registration to an object |
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
@@ -303,42 +301,50 @@ and fires when it dies even though its source is gone. Ghost Vacuum sacrificed a
 part of its cost keeps "the cards exiled with it", because the linked set is bound
 when the ability is announced.
 
-## Labels: a proposal
+## Labels
 
 Counters and marked damage are physical. Anything else a player tracks beside a
 card is a public label with text and a lifetime: "power doubled until end of
 turn", "warped: exile at the next end step", "earthbent: returns when it dies".
-The controller keeps its labels current.
+A player puts labels on its own objects and keeps them current.
 
-Proposed: labels and `modify` are one bucket. A label whose terms parse is
-applied by the layer walk. A label without terms is information for the players
-and the judge. Every view shows every label, and each expires by its lifetime.
-Prompts and examples make keeping labels current part of every action.
+Labels and `modify` are one bucket. `modify` writes a label on each object it
+affects, with the claim as its text unless `label` gives one. A label with a
+`change` is applied by the layer walk; a label without one is information for the
+players and the judge. Every view shows every label, and each ends by its
+lifetime.
 
-## Revealing to another seat: a proposal
+## Rollback
 
-"Reveal your hand; an opponent chooses a nonland card" is common in Standard,
-though no card in this matchup needs it. Proposed: `reveal` records knowledge,
-`choose` takes a `who` that can be another seat, and `revealed` selects only what
-that chooser was shown. The chooser's menu lists those cards, and the receipt says
-publicly what was revealed. This may need more syntax.
+A judge's ruling that an action was wrong is settled by a rollback, which is an
+ordinary event in the game:
 
-## Open questions
+1. The rollback is declared with the case, the contested action, the point just
+   before it, and the reasoning. It is recorded in the journal and every seat
+   sees it.
+2. The table returns to that point. What each seat saw stays seen: the rollback
+   note records it.
+3. The offending seat's strategy proposes how play continues from there. Every
+   seat and the judge must agree to that plan before play resumes.
 
-- Labels and `modify` as one bucket, above.
-- Whether a reveal plus a cross-seat `choose` is enough.
-- How many group shortcuts combat menus offer before they get noisy: a
-  two-blocker group against menace, "all eligible attackers".
-- Rewinds. CR 733.1 limits reversal around library operations and other hidden
-  randomness. Proposed: a ruling rewinds only when nothing hidden was randomized
-  or newly seen since the contested action; otherwise the verdict stands and the
-  remedy corrects forward. Knowledge a seat gained survives a rewind.
-- How far a plan reaches. One strategy session per turn plus escalations may be
-  too little for a reactive opponent's turn.
+There is no other remedy machinery.
+
+## How far a plan reaches
+
+One strategy session per turn, plus escalations. Jev does the work in between,
+and an escalation is the fix when the plan stops fitting.
+
+## How the syntax grows
+
+A shape is added when a card needs it. Coverage grows by reviewing cards that
+need real support and checking each one against the syntax, not by adding
+shapes in advance. Revealing a hand for another seat to choose from is the next
+likely addition; no card in the matchup needs it yet.
 
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.
+- Revealing a hand for another seat to choose from.
 - Replacement ordering when two replacements change where something goes. None
   of these cards produce it.
 - Copies, effects that take control of a permanent, and face-down permanents.

@@ -49,5 +49,6 @@ the card does not have. The table does not stop these. Your jev is offered an
 objection to each action since its last decision, and a judge rules.
 
 Object when an action contradicts a printed card or a rule you can cite. Do not
-object to play you merely dislike. The judge's remedy can rewind the game to
-before the action; the offending seat then decides again.
+object to play you merely dislike. When the judge agrees, the game rolls back to
+just before the action, and the offending seat's strategy proposes how play goes
+on from there. Every seat and the judge must agree to that plan.
