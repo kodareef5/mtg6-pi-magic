@@ -128,11 +128,13 @@ test("the table flies the plan: one fitting option is taken, silence passes, and
 	assert.deepEqual(workFrame(replay(childPath, () => position()).table, 0).view.done, [0, 1], "a clone holds exactly the progress of its prefix");
 });
 
-test("a stop asks for a new plan once, a stop that already holds is refused, and help past the turn's budget is refused", async () => {
+test("a stop asks for a new plan once, a stop that already holds waits for a change, and help past the turn's budget is refused", async () => {
 	const table = position();
 	const lands = (atLeast: number) => ({ amount: { count: { types: ["land" as const], controller: "you" } }, atLeast });
+	// A stop that already holds waits until it has been false: it names a change, not a state.
 	const already: Plan = { objective: "Hold.", guidance: "Pass.", steps: [], askWhen: [{ label: "three lands", if: lands(3) }] };
-	assert.throws(() => editWork(table, 0, [{ do: "plan.put", plan: already }], "already"), /"three lands" already holds now/);
+	editWork(table, 0, [{ do: "plan.put", plan: already }], "already");
+	assert.deepEqual(table.work[0]!.unarmed, ["three lands"]);
 	const growing: Plan = { objective: "Play the Forest.", guidance: "Then reconsider.", askWhen: [{ label: "four lands", if: lands(4) }],
 		steps: [{ label: "Play a Forest", when: { ...turn3, step: "precombat-main" }, action: { prefix: "land:", objects: { zones: ["hand"], card: "Forest" } } }] };
 	// A standing branch keeps the pilot consulted, so it can ask for help.

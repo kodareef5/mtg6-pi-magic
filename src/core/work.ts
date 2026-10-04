@@ -12,6 +12,8 @@ export type Workspace = {
 	plan?: Plan;
 	/** The revision that accepted the plan: ledger rows name it, so a later request does not reset progress. */
 	planned?: number;
+	/** Stops that held when the plan was accepted. Each arms once it has been false, so a stop fires on a change. */
+	unarmed?: string[];
 	/** What this seat's permanents register when they enter, by card name, kept across plans. Private until one is used. */
 	packages?: Package[];
 	/** The clock when this seat last accepted a plan. */

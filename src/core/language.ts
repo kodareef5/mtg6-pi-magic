@@ -374,7 +374,8 @@ export function problems<T extends TSchema>(schema: T, value: unknown, limit = 1
 			: typeof params.additionalProperty === "string" ? ` (${params.additionalProperty})` : "";
 		// A key no field allows: say so, and name the fields that do belong there.
 		const parent = path.slice(0, path.lastIndexOf("/")) || "/", key = path.slice(path.lastIndexOf("/") + 1);
-		const text = error.message === "schema is false" ? `${parent} has no field "${key}"; its fields are ${fieldsAt(schema, parent).join(", ") || "fixed"}`
+		const allowed = error.message === "schema is false" ? fieldsAt(schema, parent) : [];
+		const text = error.message === "schema is false" ? `${parent} has no field "${key}"${allowed.length ? `; its fields are ${allowed.join(", ")}` : ""}`
 			: `${path} ${error.message}${detail}`;
 		const depth = path.split("/").length;
 		if ((deepest.get(group)?.depth ?? -1) < depth) deepest.set(group, { path, text, depth });

@@ -28,6 +28,8 @@ export type PlanState = {
 	branches: Fit[];
 	/** `askWhen` labels that hold now. */
 	stops: string[];
+	/** Unarmed stops that are false now, and so arm. */
+	arming: string[];
 	held: { purpose: string; objects: SeenObject[] }[];
 	/** The announcements due steps and branches offer, beside the table's own options. */
 	procedures: ProcedureOption[];
@@ -71,7 +73,8 @@ export function planState(frame: Frame): PlanState | null {
 	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length);
 	return {
 		revision, plan, due, waiting, branches, procedures,
-		stops: (plan.askWhen ?? []).filter((stop) => condition(scope, stop.if)).map((stop) => stop.label),
+		stops: (plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && condition(scope, stop.if)).map((stop) => stop.label),
+		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && !condition(scope, stop.if)).map((stop) => stop.label),
 		held: (plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
 			.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length),
 	};

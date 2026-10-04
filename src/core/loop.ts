@@ -22,7 +22,7 @@ import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
 import { describe, project } from "./view.ts";
 import { annotate, execution, planReason, planState, type PlanState } from "./planning.ts";
-import { editWork, prepareWork, workFrame } from "./work-tools.ts";
+import { editWork, prepareWork, recordWork, workFrame } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
 
 export type Watcher = (line: string) => void;
@@ -241,6 +241,13 @@ const escalations = (table: Table, seat: SeatId) => table.workLog.filter((entry)
  * turn, within the escalation budget. True when it raised one.
  */
 function raiseStop(table: Table, decision: Decision, state: PlanState): boolean {
+	// A stop that held when its plan was accepted arms the first time it is false.
+	const work = table.work[decision.seat]!;
+	if (state.arming.length) {
+		const unarmed = (work.unarmed ?? []).filter((label) => !state.arming.includes(label));
+		const { unarmed: _, ...rest } = work;
+		recordWork(table, decision.seat, { ...rest, ...(unarmed.length ? { unarmed } : {}) }, `arm-${decision.seat}-${table.cursor.clock}`, `armed: ${state.arming.join("; ")}`);
+	}
 	// Only a step whose window names this step can be missed here; a wider window stays open.
 	const step = state.due[0], named = step && state.plan.steps[step.at]!.when.step === table.cursor.steps[0];
 	const empty = ![...table.things.values()].some((object) => object.zone === "stack");

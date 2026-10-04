@@ -43,11 +43,9 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 		}
 	};
 	plan.steps.forEach((step, at) => option(step, `steps[${at}]`));
-	// A stop names a change. One that already holds would fire the moment the plan is accepted.
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	for (const stop of plan.askWhen ?? []) {
-		try { if (holds(scope, stop.if)) found.push(`askWhen "${stop.label}" already holds now, so it would stop the plan at once; name a fact that becomes true only if the position changes`); }
-		catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
+		try { holds(scope, stop.if); } catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
 	}
 	(plan.may ?? []).forEach((branch, at) => option(branch, `may[${at}]`));
 	for (const pack of plan.packages ?? []) { const wrong = packageProblem(frame, pack); if (wrong) found.push(wrong); }
@@ -94,6 +92,10 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				if (problems.length) throw new Error(`The plan has ${problems.length} problem${problems.length === 1 ? "" : "s"}: ${problems.join("; ")}.`);
 				work.plan = structuredClone(tool.plan);
 				work.planned = work.revision + 1;
+				// A stop fires when its fact becomes true: one that holds already waits until it has been false.
+				const scope = { world: viewWorld(frame.view), controller: frame.seat };
+				const waiting = (tool.plan.askWhen ?? []).filter((stop) => holds(scope, stop.if)).map((stop) => stop.label);
+				if (waiting.length) work.unarmed = waiting; else delete work.unarmed;
 				work.packages = withPackages(work.packages, tool.plan.packages);
 				work.accepted = frame.version;
 				delete work.request;
