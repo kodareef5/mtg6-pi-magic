@@ -63,40 +63,40 @@ export const ROLES: Record<
 		does: "read the deck and write the snippets a later decision reads",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6.1-sol:low",
+		suggested: "gpt-6-luna:low",
 		why:
-			"Runs once per game and shapes every turn after it, so it is worth real reasoning. " +
-			"A cheap frontier model on low thinking is the measured default rather than a " +
-			"frontier flagship: this is a deck reading, not a research problem, and the pass " +
-			"is a dozen small concurrent questions rather than one large one.",
-		instead: "gpt-6.1-sol:high, the same model thinking longer. Benchmark it before paying for it",
+			"Luna while the game is being built: testing wants cheap and fast. A game that " +
+			"plays well on luna plays better on a stronger model. This is a deck reading, a " +
+			"dozen small concurrent questions rather than one large one.",
+		instead: "gpt-6.1-sol:low or gpt-6-astra:low, slower and stronger. Benchmark it before paying for it",
 	},
 	strategy: {
 		does: "prepare or revise seat recipes and scheduled reviews on request",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6.1-sol:low",
+		suggested: "gpt-6-luna:low",
 		why:
-			"Authors checked preparation tools on an explicit request. A phase change alone " +
-			"makes no call. Its plans still need live evaluation for quality and cost.",
-		instead: "gpt-6.1-sol:high, when prepared plans measure better for the extra tokens",
+			"Plans each turn and answers escalations, and the game waits for it. Luna while the " +
+			"game is being built: a sol call took 50 to 95 seconds a turn. A game that plays well " +
+			"on luna plays better on a stronger model.",
+		instead: "gpt-6.1-sol:low or gpt-6-astra:low, when prepared plans measure better for the extra time",
 	},
 	judge: {
 		does: "rule on an objection, citing the rules on disk",
 		kind: "chat",
 		whose: "table",
-		suggested: "gpt-6.1-sol:low",
+		suggested: "gpt-6-luna:low",
 		why:
-			"Rare: only an objection reaches it. Rarity is why it gets the better reasoner " +
-			"rather than the cheapest one, since a wrong ruling changes a game and the cost " +
-			"across a run is nearly nothing. The decision model narrows the rules first, so " +
-			"this reads a few rules rather than three thousand.",
+			"Rare: only an objection reaches it. Luna while the game is being built; a wrong " +
+			"ruling changes a game, so it is the first role to move to a stronger model. The " +
+			"decision model narrows the rules first, so this reads a few rules rather than " +
+			"three thousand.",
 	},
 	summary: {
 		does: "say what happened this turn in two sentences, as the commentator",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-5.6-luna:low",
+		suggested: "gpt-6-luna:low",
 		why:
 			"Called every turn and read by every seat, so it is the one place to be strict " +
 			"about cost. The job is small and bounded: summarise public events in two or three " +
@@ -127,7 +127,7 @@ export type Cast = {
 	 * Measured on a game of basic lands, the recaps are 107 calls and about four
 	 * cents, so this is not a cost rescue. It is for a bulk run where nobody
 	 * reads the lines, and for pricing a role against playing without it:
-	 * `summary: "off"` against `summary: "gpt-5.6-luna:low"` is the experiment.
+	 * `summary: "off"` against `summary: "gpt-6-luna:low"` is the experiment.
 	 */
 	off?: boolean;
 };

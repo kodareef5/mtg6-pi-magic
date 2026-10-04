@@ -100,6 +100,12 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				if (attackers.length) found.push({ on: "attacked-with", objects: attackers, player: table.cursor.active });
 				break;
 			}
+			case "block":
+				for (const one of change.blockers) {
+					const object = now(one.id);
+					if (object) found.push({ on: "blocks", object, traits: characteristics(table, object), found: ref(object), player: object.controller });
+				}
+				break;
 			case "damage": {
 				const source = now(change.source);
 				if (!change.combat || !source) break;

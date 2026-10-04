@@ -122,6 +122,12 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			const traits = characteristics(table, item);
 			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}) };
 		});
+	if (table.combat) {
+		const combat = table.combat, named = (one: { id: string }) => publicName(table.things.get(one.id));
+		for (const one of combat.attackers) lines.push(`Attacking ${seat(table, one.defending).name}: ${named(one)}${combat.blocked.some((aimed) => aimed.id === one.id) ? ", blocked" : ""}`);
+		for (const one of combat.blockers) lines.push(`Blocking: ${named(one)} blocks ${one.blocking.map(named).join(", ")}`);
+		for (const pick of combat.choosing) lines.push("blocker" in pick ? `Declaring a block: ${named(pick.blocker)} on ${named(pick.attacker)}` : `Declaring an attacker: ${named(pick.attacker)}`);
+	}
 	for (const trigger of table.waiting) {
 		const source = table.things.get(trigger.source.id);
 		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
@@ -173,7 +179,7 @@ export function describe(table: Table, receipt: Receipt): string {
 				parts.push(`${change.do}ped ${publicName(receipt.before[change.what])}`);
 				break;
 			case "damage":
-				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount} damage`);
+				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount}${change.combat ? " combat" : ""} damage from ${publicName(receipt.before[change.source] ?? table.things.get(change.source))}`);
 				break;
 			case "activate":
 				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : change.ability.timing === "spell" ? "spell on the stack" : "on the stack"})`);
@@ -223,7 +229,10 @@ export function describe(table: Table, receipt: Receipt): string {
 				parts.push(`${publicName(receipt.before[change.what])} ceased to exist`);
 				break;
 			case "attack":
-				parts.push(`attacking: ${change.attackers.map((one) => publicName(receipt.before[one.id] ?? table.things.get(one.id))).join(", ")}`);
+				parts.push(change.attackers.length ? `attacking: ${change.attackers.map((one) => publicName(receipt.before[one.id] ?? table.things.get(one.id))).join(", ")}` : "no attackers");
+				break;
+			case "block":
+				parts.push(change.blockers.length ? `blocking: ${change.blockers.map((one) => `${publicName(table.things.get(one.id))} blocks ${one.blocking.map((aimed) => publicName(table.things.get(aimed.id))).join(", ")}`).join("; ")}` : "no blockers");
 				break;
 			case "end-game":
 				parts.push(`${seat(table, change.who).name} ${change.result}s the game`);

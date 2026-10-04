@@ -157,7 +157,7 @@ intent, and the ledger records that as `delegated` rather than `forced`.
 ## Implementation boundaries
 
 `syntax.ts` names the layers and physical changes. `turn.ts` and `steps.ts` own
-turn obligations and step order. `loop.ts` accounts for forced and delegated
-actions. These boundaries do not imply the layer reader or combat choices are
-implemented. Add them against the selected deck mechanics and keep derived
-characteristics out of stored state.
+turn obligations and step order; `combat.ts` builds the three combat
+turn-based actions, and `characteristics.ts` is the layer reader. `loop.ts`
+accounts for forced and delegated actions. Derived characteristics stay out of
+stored state.

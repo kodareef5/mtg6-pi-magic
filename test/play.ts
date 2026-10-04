@@ -52,13 +52,15 @@ export function establish(table: Table, seat: number, card: string, registers = 
 	commit(table, [{ do: "move", what: object.id, to: "battlefield", reason: "game-setup", registers }], "game-setup");
 	return table.things.get(object.id)!;
 }
+/** The answer that changes least: pass, attack with nothing, block with nothing, or the first option. */
+export const quiet = (options: { id: string }[]) => options.find((option) => option.id === "pass" || option.id === "attack:done" || option.id === "block:done") ?? options[0]!;
 /** Keep both hands, answer forced decisions, and stop at a seat's first main phase with priority. */
 export function main(table: Table, seat: number, turn = seat + 1, step = "precombat-main") {
 	for (let guard = 0; guard < 2000; guard++) {
 		const decision = nextDecision(table);
 		if (!decision) { advance(table); continue; }
 		if (decision.situation === "priority" && decision.seat === seat && table.cursor.turn === turn && table.cursor.steps[0] === step) return;
-		apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? decision.options[0]!.id, "engine", "forced");
+		apply(table, decision.situation === "pregame" ? "keep" : quiet(decision.options).id, "engine", "forced");
 	}
 	throw new Error("Never reached the main phase.");
 }
@@ -87,6 +89,6 @@ export const finish = (table: Table) => {
 	for (let decision = nextDecision(table); decision?.situation !== "priority"; decision = nextDecision(table)) {
 		if (decision?.situation === "trigger-order") return;
 		if (!decision) advance(table);
-		else apply(table, decision.options[0]!.id, "engine", "forced");
+		else apply(table, quiet(decision.options).id, "engine", "forced");
 	}
 };

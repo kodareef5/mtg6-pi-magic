@@ -7,6 +7,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { quiet } from "./play.ts";
 import { abilityExercise, abilityTable, lootProcedure, manaProcedure } from "../tools/ability-fixture.ts";
 import { activate, activationChanges, procedureOptions } from "../src/core/procedures.ts";
 import { fundings } from "../src/core/funding.ts";
@@ -42,7 +43,7 @@ function position(table = abilityTable()) {
 		const decision = nextDecision(table);
 		if (!decision) advance(table);
 		else if (decision.situation === "priority" && table.cursor.turn === 3) return table;
-		else apply(table, decision.options[0]!.id, "engine", "forced");
+		else apply(table, quiet(decision.options).id, "engine", "forced");
 	}
 }
 const draft = (procedure: Procedure): Draft => ({ id: "test", recipe: "test", label: "Test", guidance: "Test", next: 0, status: "editing", reserves: [],
@@ -64,7 +65,7 @@ function mainFor(table: Table, seat: number) {
 		const decision = nextDecision(table);
 		if (!decision) { advance(table); continue; }
 		if (decision.situation === "priority" && decision.seat === seat && table.cursor.active === seat && table.cursor.steps[0] === "precombat-main") return;
-		const id = decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? decision.options[0]!.id;
+		const id = decision.situation === "pregame" ? "keep" : quiet(decision.options).id;
 		apply(table, id, "model", decision.options.length === 1 ? "forced" : "chosen");
 	}
 	throw new Error("Missed main phase");
@@ -389,7 +390,7 @@ test("permanents are cast for their printed cost, register their seat's package 
 			if (decision.situation === "priority" && decision.seat === seat && table.cursor.active === seat && table.cursor.turn === turn && table.cursor.steps[0] === "precombat-main") return decision;
 			// Keep the lands and the cards this position needs.
 			const discard = decision.options.find((option) => option.id.startsWith("discard:") && !/Forest|Mountain|Llanowar Elves|Bear Cub/.test(option.label));
-			apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? discard?.id ?? decision.options[0]!.id, "model", "chosen");
+			apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass" || option.id === "attack:done" || option.id === "block:done")?.id ?? discard?.id ?? decision.options[0]!.id, "model", "chosen");
 		}
 	};
 	const casts = (card: string) => nextDecision(table)!.options.filter((option) => option.id.startsWith("cast:") && option.label.includes(card));

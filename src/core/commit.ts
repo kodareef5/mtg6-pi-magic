@@ -297,8 +297,28 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				break;
 			}
 			case "attack":
-				table.combat = { attackers: structuredClone(change.attackers), blockers: [] };
+				table.combat = { attackers: structuredClone(change.attackers), blockers: [], blocked: [], choosing: [], assigned: [] };
+				// 508.8: nobody attacked, so there are no blockers and no combat damage.
+				if (!change.attackers.length) table.cursor.steps = table.cursor.steps.filter((step) => step !== "declare-blockers" && step !== "combat-damage");
 				break;
+			case "block": {
+				const combat = table.combat!;
+				combat.blockers = structuredClone(change.blockers);
+				combat.blocked = combat.attackers.filter((one) => change.blockers.some((blocker) => blocker.blocking.some((aimed) => aimed.id === one.id && aimed.incarnation === one.incarnation)))
+					.map(({ id, incarnation }) => ({ id, incarnation }));
+				combat.choosing = [];
+				break;
+			}
+			case "combat": {
+				const combat = table.combat ??= { attackers: [], blockers: [], blocked: [], choosing: [], assigned: [] };
+				if (change.action === "choose") combat.choosing.push(structuredClone(change.pick));
+				else if (change.action === "assign") combat.assigned.push(...change.division.map((part) => ({ source: structuredClone(change.source), ...structuredClone(part) })));
+				else {
+					combat.first = structuredClone(change.first);
+					table.cursor.steps.splice(1, 0, "combat-damage");
+				}
+				break;
+			}
 			case "change-life":
 				seat(table, change.who).life += change.amount;
 				break;
@@ -422,7 +442,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
  * writer. It is the logging that stops, not the discipline.
  */
 const control = (changes: Change[]): boolean =>
-	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution");
+	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution" || (change.do === "combat" && change.action !== "strike"));
 
 /**
  * Who may act next, and where the turn is. A transition shares the commit door
@@ -460,7 +480,10 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 				for (const thing of table.things.values()) { thing.damage = 0; delete thing.deathtouched; }
 				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
 			}
-			if (step === "end-of-combat") table.notes = table.notes.filter((note) => note.until !== "end-of-combat");
+			// 511.3: everything is removed from combat as the end of combat step ends.
+			if (step === "end-of-combat") { table.notes = table.notes.filter((note) => note.until !== "end-of-combat"); table.combat = null; }
+			// Each damage step divides afresh.
+			if (step === "combat-damage" && table.combat) table.combat.assigned = [];
 			cursor.stepDone = false;
 			cursor.priority = null;
 			cursor.passes = 0;

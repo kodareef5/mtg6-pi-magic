@@ -4,11 +4,12 @@ import type { Pending } from "./moves.ts";
 import { STEPS } from "./steps.ts";
 import type { Reason } from "./syntax.ts";
 import { commit } from "./commit.ts";
+import { combatDamage, declareAttackers, declareBlockers } from "./combat.ts";
 import { cardsIn, playing, seat, type Table } from "./table.ts";
 
 /**
- * Situation 2. Untap, draw for the turn, declare attackers and blockers,
- * assign combat damage, discard to hand size.
+ * Situation 2. Untap, draw for the turn, declare attackers and blockers
+ * (combat.ts), assign combat damage, discard to hand size.
  *
  * Nobody is asked when there is one lawful answer, and most untap steps, most
  * discards and most damage assignments have exactly one. Untapping looks
@@ -58,6 +59,10 @@ export function turnBased(table: Table): Pending | null {
 			],
 		};
 	}
+
+	if (step === "declare-attackers") return declareAttackers(table);
+	if (step === "declare-blockers") return declareBlockers(table);
+	if (step === "combat-damage") return combatDamage(table);
 
 	// 514.1: the active player discards down to maximum hand size, one card at
 	// a time so the option list stays readable.

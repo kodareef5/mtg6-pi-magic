@@ -165,7 +165,8 @@ function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 		if (id === "pass" && table.cursor.passes + 1 === playing(table).length && top?.ability) changes.push(beginResolving(table, top));
 		return changes;
 	}
-	if (p.situation === "turn-based") return [{ do: "turn", action: "complete" }];
+	// One pick toward a declaration or a division leaves the step's action unfinished.
+	if (p.situation === "turn-based") return move.changes.some((change) => change.do === "combat" && change.action !== "strike") ? [] : [{ do: "turn", action: "complete" }];
 	if (p.situation === "pregame") {
 		if (id === "keep" || id === "mulligan") return [{ do: "opening", action: "declare", who: p.seat, choice: id }];
 		return [{ do: "opening", action: "bottom", who: p.seat }];

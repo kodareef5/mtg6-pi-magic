@@ -39,7 +39,8 @@
     "rules": "node tools/rules.ts --verify -o rules/cr.tsv",
     "smoke": "node tools/smoke.ts",
     "circuits": "node tools/circuits.ts",
-    "matchup": "node tools/matchup.ts"
+    "matchup": "node tools/matchup.ts",
+    "stats": "node tools/stats.ts"
   },
   "dependencies": {
     "ws": "^8.20.0",

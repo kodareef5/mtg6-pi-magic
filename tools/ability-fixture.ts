@@ -75,7 +75,8 @@ export async function abilityExercise() {
 			const ids = Object.keys(question.criteria);
 			let choice: string;
 			if (key.startsWith("concern-")) { concernQuestions += 1; choice = packet.work?.draft ? "no-action" : "recipe:loot"; }
-			else choice = ids.find((id) => id === "work:execute") ?? ids.find((id) => id === "work:ready") ?? ids.find((id) => id.startsWith("work:bind:")) ?? ids.find((id) => id.startsWith("work:adopt:")) ?? ids.find((id) => id.startsWith("land:")) ?? ids[0]!;
+			else choice = ids.find((id) => id === "work:execute") ?? ids.find((id) => id === "work:ready") ?? ids.find((id) => id.startsWith("work:bind:")) ?? ids.find((id) => id.startsWith("work:adopt:")) ?? ids.find((id) => id.startsWith("land:")) ??
+				ids.find((id) => id === "attack:done" || id === "block:done") ?? ids[0]!;
 			return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }];
 		}));
 		if (packet.reviews?.length) batches += 1;

@@ -397,6 +397,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
   triggers.ts        events read from each group, watches matched, the trigger window
+  combat.ts          declaring attackers and blockers, dividing and dealing combat damage
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
   procedures.ts      one offer path for drafts and default casts, activation terms
@@ -472,8 +473,9 @@ verify every carried field against the source and refuse to pass on a mismatch.
   `declare`, free-form delegation, and `judge.rule` still throw or leave the
   decision pending. Conservation and the judge must carry the weight that a
   fully informed move list would.
-- Combat. Attacks, blocks and combat damage are the next stage; `attack` is
-  recorded and its triggers fire, but nothing declares it yet.
+- Parts of combat no card in the matchup needs: attacking a planeswalker or
+  battle, a creature blocking more than one attacker, lifelink, and counting
+  other creatures' damage in the same step toward trample's lethal (702.19b).
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.

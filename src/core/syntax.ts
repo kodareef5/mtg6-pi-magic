@@ -4,7 +4,7 @@
 
 import type { ObjectRef, SeatId } from "./types.ts";
 import type { Activation, Combat, Mana, Note, Resolution, Trigger } from "./table.ts";
-import type { Bound } from "./selectors.ts";
+import type { Bound, Chosen } from "./selectors.ts";
 import type { Registration, Selector, TokenSpec } from "./language.ts";
 
 /**
@@ -50,6 +50,7 @@ export type Reason =
 	| "cleanup-discard"
 	| "state-based-action"
 	| "cost-payment"
+	| "combat"
 	| "game-setup";
 
 /**
@@ -104,8 +105,18 @@ export type Change =
 	| { do: "note"; note: DistributiveOmit<Note, "id" | "written"> }
 	/** A token outside the battlefield ceases to exist (704.5d). */
 	| { do: "cease"; what: string }
-	/** The finished declaration of attackers, one group (508.1). */
+	/** The finished declaration of attackers, one group (508.1). With none, there are no blockers or damage (508.8). */
 	| { do: "attack"; attackers: Combat["attackers"] }
+	/** The finished declaration of blockers, one group (509.1). */
+	| { do: "block"; blockers: Combat["blockers"] }
+	/**
+	 * Bookkeeping inside a combat step: one pick toward a declaration, one
+	 * creature's damage division, or the first-strike step beginning, which adds
+	 * a second damage step after it.
+	 */
+	| { do: "combat"; action: "choose"; pick: Combat["choosing"][number] }
+	| { do: "combat"; action: "assign"; source: ObjectRef; division: { to: Chosen; amount: number }[] }
+	| { do: "combat"; action: "strike"; first: ObjectRef[] }
 	/**
 	 * A counter or flag that belongs to a seat rather than a card: poison,
 	 * energy, experience, and "tried to draw from an empty library", 704.5b.

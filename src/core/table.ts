@@ -161,10 +161,22 @@ export type Resolution = {
 	optional?: true;
 };
 
-/** Who is attacking whom and who blocks what, from declaration until combat ends (506-511). */
+/**
+ * Who is attacking whom and who blocks what, from the first declaration until
+ * the end of combat step ends (506-511). A creature that leaves the battlefield
+ * is a new object, so it is out of combat without anything being erased.
+ */
 export type Combat = {
 	attackers: { id: ObjectId; incarnation: number; defending: SeatId }[];
 	blockers: { id: ObjectId; incarnation: number; blocking: ObjectRef[] }[];
+	/** Attackers that became blocked (509.1h). They stay blocked when their blockers are gone. */
+	blocked: ObjectRef[];
+	/** Picks toward a declaration not yet finished. Nothing has moved, and nothing has triggered. */
+	choosing: ({ attacker: ObjectRef } | { blocker: ObjectRef; attacker: ObjectRef })[];
+	/** The creatures with first or double strike as the first of two damage steps began (510.4). */
+	first?: ObjectRef[];
+	/** Damage divided so far in this damage step, before it is all dealt at once (510.1-2). */
+	assigned: { source: ObjectRef; to: Chosen; amount: number }[];
 };
 
 /**

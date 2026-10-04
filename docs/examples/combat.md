@@ -55,8 +55,9 @@ by prefix and the blocker's objects. The attacker is in the label and guidance.
 
 ## Damage
 
-With one blocker or none, damage needs no choice. With several blockers, or
-trample, the table lists the legal divisions and you pick one: lethal damage to
-each blocker first, counting damage already marked, and with trample the rest
-may go to the player (702.19b). First strike and double strike add a damage step
-before the regular one (510.4); the table runs it when a creature has the word.
+With one blocker or none, damage needs no choice. With several blockers, the
+table lists every division and you pick one: there is no order and no lethal
+damage owed first (510.1c). With trample, damage reaches the player only once
+every blocker has lethal damage assigned, counting damage already marked
+(702.19b). First strike and double strike add a damage step before the regular
+one (510.4); the table runs it when a creature has the word.
