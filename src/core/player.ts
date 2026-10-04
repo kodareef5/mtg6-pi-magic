@@ -23,8 +23,8 @@ import { commands, type WorkCommand } from "./work-language.ts";
 export type Answer =
 	/** Take one of the moves the table listed. The cheap path, and the common one. */
 	| { kind: "pick"; option: string; actionId: string }
-	/** Edit private equipment atomically. It neither answers priority nor moves cards. */
-	| { kind: "work"; tools: WorkCommand[]; revision: number; actionId: string }
+	/** Edit private equipment atomically. It neither answers priority nor moves cards. A writer may object to another seat's action beside its edits. */
+	| { kind: "work"; tools: WorkCommand[]; revision: number; actionId: string; objection?: Objection }
 	/**
 	 * Move specific cards. `says` is the announcement: what this seat claims it
 	 * is doing, in enough detail that another seat could check it. The table
@@ -44,8 +44,8 @@ export type Answer =
 	| { kind: "delegate"; instruction: string }
 	/** Ask for more options, better targets, or a new plan. Returns to this same decision. */
 	| { kind: "ask"; route: string }
-	/** Object, and let the judge settle it. Any seat, whether or not it holds priority. */
-	| { kind: "object"; claim: string }
+	/** Object to another seat's recorded action, and let the judge settle it. Any seat, whether or not it holds priority. */
+	| ({ kind: "object" } & Objection)
 	/** One of the fixed messages, at a phase ending. Flavour, and it changes nothing. */
 	| { kind: "say"; message: MessageId }
 	/**
@@ -57,6 +57,9 @@ export type Answer =
 	 * seat can still play badly, and a game given away was not lost.
 	 */
 	| { kind: "concede" };
+
+/** What a seat objects to: another seat's recorded action, by its ledger row, the rule it breaks, and why. */
+export type Objection = { row: number; claim: string; rule?: string };
 
 /**
  * Why this answer cannot be taken, or null when it can.
@@ -89,7 +92,7 @@ export function refuse(value: unknown, decision: Decision): string | null {
 		case "declare":
 			if (!Array.isArray((value as { changes?: unknown }).changes)) return "A declaration needs a changes array.";
 			return needs("actionId", "a string actionId") ?? needs("says", "a says line another seat could check");
-		case "object": return needs("claim", "a claim");
+		case "object": return needs("claim", "a claim") ?? (Number.isInteger((value as { row?: unknown }).row) ? null : "An objection names the action by its row number.");
 		case "delegate": return needs("instruction", "an instruction");
 		case "ask": return needs("route", "a route");
 		case "say": {

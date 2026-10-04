@@ -2,7 +2,8 @@
  * A game on disk. One file per game, append-only, one JSON object per line.
  *
  * Full export copies the journal. A clone copies a prefix and replays it;
- * public and seat exports use projections. Agreed rollback is unfinished.
+ * public and seat exports use projections. A judge's rollback is a line of its
+ * own, and the lines it rolled past stay in the file behind it.
  * docs/STATE.md describes the file and visibility boundaries.
  *
  * Past 150 lines because the file, the replay over it and the two ways to copy
@@ -21,6 +22,7 @@ import type { SeatId } from "./types.ts";
 import type { WorkEntry } from "./work.ts";
 import { activate } from "./procedures.ts";
 import type { Deck } from "./decks.ts";
+import type { Ruled } from "./judge.ts";
 
 export type Header = {
 	/** The game id. Also the directory a published game lives in. */
@@ -50,13 +52,18 @@ export type Header = {
  * rather than a cache beside the journal, so a clone carries it and there is no
  * second format to keep in step. The core does not read it; it carries it, which
  * is why the shape is opaque here.
+ *
+ * A `ruling` line is the judge's. One whose remedy is a rollback takes the
+ * game back to its version: the lines before it with a later version are the
+ * game that was rolled past, kept in the file and left out of the game.
  */
 export type Line =
 	| { v: number; receipt: Receipt }
 	| { v: number; row: LedgerRow }
 	| { v: number; said: Said }
 	| { v: number; work: WorkEntry }
-	| { v: number; prepared: { seat: SeatId; made: unknown } };
+	| { v: number; prepared: { seat: SeatId; made: unknown } }
+	| { v: number; ruling: Ruled };
 
 /**
  * `saved` is a position in `linesOf`, not a count of writes.
@@ -70,6 +77,8 @@ export type Journal = {
 	path: string;
 	header: Header;
 	saved: number;
+	/** How many of the table's rulings the file holds. */
+	ruled: number;
 	/** What a resume cut off a torn last line, for the caller to report. */
 	repaired?: string;
 };
@@ -87,7 +96,7 @@ export function open(path: string, header: Header): Journal {
 	}
 	mkdirSync(dirname(path), { recursive: true });
 	writeFileSync(path, `${JSON.stringify({ header })}\n`);
-	return { path, header, saved: 0 };
+	return { path, header, saved: 0, ruled: 0 };
 }
 
 /**
@@ -108,16 +117,19 @@ export function reopen(path: string, header: Header, already: Table): Journal {
 	const torn = repair(path);
 	const back = read(path);
 	const rebuilt = linesOf(already);
-	const recorded = back.lines.filter((line) => !("prepared" in line));
+	const recorded = back.lines.filter((line) => !("prepared" in line) && !("ruling" in line));
 	// A crash inside a decision group can leave a receipt without its row, or
 	// omit a setup group that replay derives. Reconcile to the durable decisions
 	// before appending rather than skipping or duplicating reconstructed entries.
+	// Each ruling goes back after the lines of its version, where it rolls nothing past.
 	const reconciled = back.truncated || recorded.length !== rebuilt.length;
+	const rulings = back.lines.filter((line) => "ruling" in line);
+	const merged = [...rebuilt.map((line, at) => ({ line, at, v: line.v })), ...rulings.map((line, at) => ({ line, at, v: line.v + 0.5 }))].sort((a, b) => a.v - b.v || a.at - b.at).map(({ line }) => line);
 	if (reconciled) writeFileSync(path, [JSON.stringify({ header }),
 		...back.lines.filter((line) => "prepared" in line).map((line) => JSON.stringify(line)),
-		...rebuilt.map((line) => JSON.stringify(line))].join("\n") + "\n");
+		...merged.map((line) => JSON.stringify(line))].join("\n") + "\n");
 	const repaired = [torn, reconciled ? back.truncated ?? "Reconstructed missing derived journal entries." : null].filter(Boolean).join(" ");
-	return { path, header, saved: rebuilt.length, ...(repaired ? { repaired } : {}) };
+	return { path, header, saved: rebuilt.length, ruled: already.rulings.length, ...(repaired ? { repaired } : {}) };
 }
 
 export function append(journal: Journal, line: Line): void {
@@ -131,11 +143,19 @@ export function append(journal: Journal, line: Line): void {
  * it did the counter it sliced with was counting something else.
  */
 export function save(journal: Journal, table: Table): number {
+	// A rollback's table is shorter than the file: the line says so, and the
+	// table's own lines resume after the ones it kept.
+	const rulings = table.rulings.slice(journal.ruled);
+	for (const ruled of rulings) {
+		append(journal, { v: ruled.at, ruling: ruled });
+		if (ruled.kept !== undefined) journal.saved = ruled.kept;
+	}
+	journal.ruled = table.rulings.length;
 	const lines = linesOf(table);
 	const fresh = lines.slice(journal.saved);
 	for (const line of fresh) append(journal, line);
 	journal.saved = lines.length;
-	return fresh.length;
+	return fresh.length + rulings.length;
 }
 
 /**
@@ -187,22 +207,31 @@ export function read(path: string): { header: Header; lines: Line[]; truncated?:
 	const opening = JSON.parse(first) as { header?: Header };
 	if (!opening.header) throw new Error(`${path} does not start with a header.`);
 
-	const lines: Line[] = [];
+	let lines: Line[] = [];
+	// A rollback leaves the game it rolled past in the file and out of the game.
+	const take = (line: Line) => {
+		if ("ruling" in line && line.ruling.kept !== undefined) lines = lines.filter((one) => one.v <= line.v || "prepared" in one);
+		lines.push(line);
+	};
 	for (const [at, row] of rows.entries()) {
 		if (!row) continue;
+		let line: Line;
 		try {
-			lines.push(JSON.parse(row) as Line);
+			line = JSON.parse(row) as Line;
 		} catch (error) {
 			throw new Error(`${path} line ${at + 2} is not a line: ${String(error)}`);
 		}
+		take(line);
 	}
 	let truncated: string | undefined;
 	if (last && last.length) {
+		let line: Line | undefined;
 		try {
-			lines.push(JSON.parse(last) as Line);
+			line = JSON.parse(last) as Line;
 		} catch {
 			truncated = `${path} ends mid line. The last entry was dropped.`;
 		}
+		if (line) take(line);
 	}
 	const durable = lines.reduce((last, line) => "row" in line ? Math.max(last, line.row.seq + 1) : last, 0);
 	const complete = lines.filter((line) => line.v <= durable);
@@ -279,19 +308,30 @@ export function relive(table: Table, rows: LedgerRow[]): Table {
 }
 
 /**
- * Roll a live game back to a declared point, with every remaining seat agreeing.
+ * Take a live game back to just before a recorded action, because the judge
+ * ruled it illegal.
  *
- * The agreement is the feature. Without it this is a corrupted game, because a
- * seat that saw a card has not unseen it in the room, only in the record. With
- * it, the players know what they are accepting.
+ * The judge decides; the seats are not asked. The rollback is itself a record:
+ * the ruling is kept on the table and becomes a journal line, and the lines it
+ * rolled past stay in the file behind it. A seat that saw a card has not unseen
+ * it, and the view says a rollback happened.
  *
- * So the rollback is itself an entry: the journal says one happened, who agreed,
- * and where it went back to. A reader can always see that information crossed.
- * Nothing rewrites the entries it rolled past; they stay, behind the marker.
+ * The table is rebuilt in place from a fresh start and the decisions before the
+ * action, so whoever holds it keeps holding the game. Equipment and table talk
+ * go back to that version too. Save the journal first: what the rolled-back
+ * table no longer holds cannot be written afterwards.
  */
-export function rollback(journal: Journal, to: number, agreed: SeatId[]): void {
-	void [journal, to, agreed];
-	throw new Error("rollback is unwritten: every remaining seat agrees, and the entry stays.");
+export function rollback(table: Table, ruled: Pick<Ruled, "case" | "ruling">, restart: () => Table): void {
+	const to = ruled.case.row;
+	const fresh = relive(restart(), table.ledger.slice(0, to));
+	fresh.workLog = table.workLog.filter((entry) => entry.at <= to).map((entry) => structuredClone(entry));
+	fresh.work = {};
+	for (const entry of fresh.workLog) fresh.work[entry.seat] = structuredClone(entry.workspace);
+	fresh.said = table.said.filter((one) => one.at <= to);
+	fresh.gaps = [...table.gaps];
+	fresh.rulings = [...table.rulings, { ...structuredClone(ruled), at: to, kept: linesOf(fresh).length }];
+	for (const key of Object.keys(table)) delete (table as Record<string, unknown>)[key];
+	Object.assign(table, fresh);
 }
 
 /**
@@ -327,6 +367,7 @@ export function replay(
 	const table = relive(start(header), rowsOf(lines, upTo));
 	restoreWork(table, lines, upTo);
 	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
+	table.rulings = lines.flatMap((line) => "ruling" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.ruling)] : []);
 	return {
 		table,
 		header,

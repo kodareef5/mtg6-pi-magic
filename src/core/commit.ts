@@ -88,6 +88,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		resolution: null,
 		combat: null,
 		waiting: [],
+		rulings: [],
 	};
 
 	const taken = new Set<string>();

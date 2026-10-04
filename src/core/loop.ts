@@ -15,7 +15,8 @@ import { concede } from "./concede.ts";
 import { declare } from "./declare.ts";
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Intent } from "./intent.ts";
-import { rule } from "./judge.ts";
+import type { Case, Ruling } from "./judge.ts";
+import { rollback } from "./journal.ts";
 import { refuse, type Answer, type Player } from "./player.ts";
 import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
@@ -77,6 +78,7 @@ export async function play(
 	watch?: Watcher,
 	onTurn?: TurnWatcher,
 	workBudget = 32,
+	judge?: Judge,
 ): Promise<Outcome | null> {
 	if (!Number.isSafeInteger(workBudget) || workBudget < 1) throw new Error("The work edit budget must be a positive integer.");
 	// What each seat has already been shown, so a frame's "since" is the part it
@@ -190,6 +192,14 @@ export async function play(
 			continue;
 		}
 
+		// An objection is ruled on before anything else in the answer: a rollback leaves nothing for it to apply to.
+		const objection = answer.kind === "object" ? answer : answer.kind === "work" ? answer.objection : undefined;
+		if (objection && await object(table, { row: objection.row, raisedBy: decision.seat, claim: objection.claim, ...(objection.rule ? { rule: objection.rule } : {}) }, judge)) {
+			told = table.log.length;
+			for (const one of table.seats) seen[one.id] = table.log.length;
+			continue;
+		}
+
 		switch (answer.kind) {
 			case "work":
 				editWork(table, decision.seat, answer.tools, answer.actionId, answer.revision);
@@ -205,15 +215,7 @@ export async function play(
 				declare(table, decision.seat, answer.changes, answer.says);
 				break;
 			case "object":
-				// Any seat may object, whoever holds priority. The contested move
-				// waits. A ruling is recorded against the case, and the next pass
-				// of the loop reads whatever table the ruling left.
-				rule(table, {
-					id: `case-${table.cursor.clock}`,
-					about: { option: decision.options[0]?.id ?? "" },
-					raisedBy: decision.seat,
-					claim: answer.claim,
-				});
+				// Ruled above; the decision is still this seat's to answer.
 				break;
 			case "say":
 				table.said.push({ seat: decision.seat, message: answer.message, at: table.ledger.length });
@@ -234,6 +236,39 @@ export async function play(
 
 	told = report(table, told, watch);
 	return table.outcome;
+}
+
+/**
+ * The judge a game may have: it rules on an objection, and a rollback rebuilds
+ * the table from `restart`, a fresh table for the same seats, decks and seed.
+ * `flush` saves whatever records the game before a rollback shortens it.
+ */
+export type Judge = { rule(table: Table, open: Case): Promise<Ruling>; restart(): Table; flush?(): void };
+
+/**
+ * Rule on one objection. True when the game went back: the table is rebuilt to
+ * just before the action, and every seat with a plan is asked for a new one.
+ * The judge decides; the seats are not asked to agree. A ruling that leaves the
+ * action standing is recorded and play goes on.
+ */
+async function object(table: Table, open: Case, judge?: Judge): Promise<boolean> {
+	const row = table.ledger[open.row];
+	if (!row || row.seat === open.raisedBy) {
+		table.gaps.push(`Seat ${open.raisedBy} objected to action ${open.row}, which is not another seat's recorded action.`);
+		return false;
+	}
+	if (!judge) { table.gaps.push(`Seat ${open.raisedBy} objected to action ${open.row}, and this game has no judge.`); return false; }
+	let ruling: Ruling;
+	try { ruling = await judge.rule(table, open); } catch (error) {
+		table.gaps.push(`The judge could not rule on seat ${open.raisedBy}'s objection to action ${open.row}: ${error instanceof Error ? error.message : String(error)}`);
+		return false;
+	}
+	if (ruling.legal || ruling.remedy === "stand") { table.rulings.push({ case: open, ruling, at: table.ledger.length }); return false; }
+	judge.flush?.();
+	rollback(table, { case: open, ruling }, judge.restart);
+	const said = `The judge ruled action ${open.row} illegal (${ruling.rule}: ${ruling.because}) and the game went back to just before it. Plan from here.`;
+	for (const seat of table.seats) if (table.work[seat.id]) editWork(table, seat.id, [{ do: "plan.request", reason: said }], `ruling-${table.rulings.length}-${seat.id}`);
+	return true;
 }
 
 /** Requests for a new plan a seat may make in one turn, by stops or by asking for help. Past it, the pilot decides. */

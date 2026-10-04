@@ -24,6 +24,7 @@ import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
+import type { Ruled } from "./judge.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import type { Bound, Chosen } from "./selectors.ts";
 import type { Traits } from "./characteristics.ts";
@@ -358,6 +359,8 @@ export type Table = {
 	combat: Combat | null;
 	/** Triggered abilities waiting to be put on the stack, in the order they triggered. */
 	waiting: Trigger[];
+	/** Every objection the judge ruled on, rollbacks included. A rollback keeps this list: what was seen stays known. */
+	rulings: Ruled[];
 };
 
 /**

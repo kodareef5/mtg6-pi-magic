@@ -19,40 +19,29 @@
 import type { Receipt, Table } from "./table.ts";
 import type { SeatId } from "./types.ts";
 
+/** One objection: a seat says another seat's recorded action broke a rule or misread a card. */
 export type Case = {
-	id: string;
-	/** The attempted move or the committed receipt under question. */
-	about: { option: string } | { receipt: number };
-	raisedBy: SeatId | "engine";
-	/** What the objection says, from a fixed set rather than free prose. */
+	/** The ledger row of the contested action. */
+	row: number;
+	raisedBy: SeatId;
 	claim: string;
+	/** The rule the objecting seat cites, if it names one. */
+	rule?: string;
 };
 
-export type Ruling =
-	| { kind: "allowed"; case: string; because: string[] }
-	| { kind: "disallowed"; case: string; because: string[] }
-	/** Change an uncommitted move before it commits. */
-	| { kind: "amend"; case: string; option: string; because: string[] }
-	/** A new explicit operation with its own receipt. Never a secret rewrite. */
-	| { kind: "repair"; case: string; because: string[] }
-	| { kind: "needs-evidence"; case: string; asking: string[] };
+/**
+ * What the judge decided. An illegal action is rolled back to just before it,
+ * or left standing with the ruling on record when going back would cost more
+ * than the mistake. A legal one stands.
+ */
+export type Ruling = { legal: boolean; rule: string; remedy: "rollback" | "stand"; because: string };
 
 /**
- * Rule on one case.
- *
- * The evidence is pinned: the card text, the receipt, the current frame, the
- * accepted terms, the uncovered spans, and every objection. Source coverage is
- * not limited to the terms that supported the contested move, because the
- * missing term is usually the problem.
- *
- * A ruling authorises that case only. It cannot replace the table with
- * arbitrary data and it cannot rewrite the old log. Information already
- * disclosed stays disclosed: a repair does not make a seat forget a card.
+ * A ruling as the game keeps it. `at` is the version it applies at: for a
+ * rollback, the version the game went back to. `kept` is how many journal lines
+ * the rolled-back table holds, so the journal knows where its next line goes.
  */
-export function rule(table: Table, open: Case): Ruling {
-	void [table, open];
-	throw new Error("rule is unwritten.");
-}
+export type Ruled = { case: Case; ruling: Ruling; at: number; kept?: number };
 
 /**
  * The last resort, when the rules cannot settle it and no ruling lands.

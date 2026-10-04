@@ -132,6 +132,12 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		const source = table.things.get(trigger.source.id);
 		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
 	}
+	// A rollback does not make anyone forget: every seat is told it happened.
+	for (const { case: open, ruling, kept } of table.rulings) {
+		const by = seat(table, open.raisedBy).name;
+		lines.push(kept !== undefined ? `The judge upheld ${by}'s objection to action ${open.row} (${ruling.rule}: ${ruling.because}); the game went back to just before it, and what was seen since stays known.`
+			: `The judge heard ${by}'s objection to action ${open.row} and let it stand (${ruling.rule}: ${ruling.because}).`);
+	}
 	if (table.resolution) lines.push(`Resolving ${publicName(table.things.get(table.resolution.object))}, ${table.resolution.program.length} instruction${table.resolution.program.length === 1 ? "" : "s"} left. Nobody has priority during this choice.`);
 	const names = [...new Set(objects.flatMap((object) => "card" in object && object.card ? [object.card] : []))].sort();
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], landsPlayed: seat(table, viewer).landsPlayed } : {}),
