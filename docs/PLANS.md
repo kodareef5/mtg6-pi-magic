@@ -69,6 +69,12 @@ prepared plan is offered:
 - otherwise after a short review (`strategy.reviewPlan`), which keeps it with
   `{accept: true}` or revises it.
 
+Once the preparation passes the code's checks, a challenger
+(`strategy.challengePlan`) looks for what code cannot see: a trigger expected
+before its source enters, guidance the steps contradict, a missed lethal, the
+opponent's best reply uncovered. Real errors get one revision, used only if it
+is ready when the turn begins.
+
 A failed or stale preparation leaves the ordinary turn plan. The plan goes
 through `plan.put` as always, so the journal and replay are unchanged.
 
