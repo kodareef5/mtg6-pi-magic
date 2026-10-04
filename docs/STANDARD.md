@@ -12,47 +12,23 @@ Standard card snapshot. The pin records SHA-256 hashes of that file and the
 Comprehensive Rules effective September 25, 2026. This establishes deck
 legality at the pinned date, not correctness of any gameplay interpretation.
 
-## Run an opening
+## Run the matchup
 
 ```
+npm run support
 npm run matchup
-npm run matchup -- --live
 ```
 
-The first command uses authored choices. `--live` uses Pi's configured models
-and makes paid calls: strategy prepares procedures and the classifier executes
-them. Both commands deal the full main decks through ordinary opening setup.
-Registered main-deck counts are public; hands and library order stay hidden.
-The sideboards are pinned for later match play but are not used in this game.
+`npm run matchup` plays both lists live through Pi from ordinary setup, with no
+scripted line, and stops at an outcome, the first engine gap, or `--turns`.
+Seating refuses while any registered card is unsupported, so today it stops
+before the first decision and names the cards. `npm run support` shows the
+coverage and what the missing cards need; `docs/SUPPORT.md` is the target.
 
-The default seed, `real-standard-9`, was selected for an immediate interaction.
-It does not stack either library. Green keeps Fabled Passage, three Forests,
-Llanowar Elves, Sazh's Chocobo, and Snakeskin Veil. Red keeps Emberheart
-Challenger, Hired Claw, two Mountains, Nova Hellkite, Shock, and Soulstone
-Sanctuary. The operator can inspect both hands; each player receives only its own.
-
-The requested line is Forest, green mana, Llanowar Elves on the first turn;
-Mountain, red mana, Shock targeting the Elf on the second. Casting moves the
-actual card to the shared stack and spends its announced payment. The Elf
-resolves as a 1/1. Shock marks two damage, goes to the graveyard, and the Elf
-dies at the following state-based check. Newly entered creatures cannot pay
-tap costs until their controller's next turn. Haste and control changes need
-further terms.
-
-The monitor stops after that exchange, or after the opening is missed. It
-does not manufacture a game outcome or continue passing over unsupported
-cards. This is a prescribed execution probe, not a test of strategic strength.
-Choosing to spend Shock here is part of the probe, not a claim of best play.
-
-Output goes to `.pi/real-standard/`: the journal, exact model requests and
-replies, a result file, and a response clone with Shock still on the stack.
-Each model request checkpoints accepted progress. These are private operator
-artifacts, not spectator exports. The result checks replay and reports whether
-the requested exchange actually happened; zero engine gaps alone is insufficient.
-
-To retry a recorded position, add `--resume <journal> --version <decision>`.
-The monitor forks that prefix and carries its accepted preparation and costs.
-Use `--live` again to continue with Pi models. The original journal stays intact.
+An earlier version of this tool scripted Forest, Llanowar Elves, Mountain and
+Shock as a prescribed probe, with an authored offline mode. Both are gone: the
+probe dictated the line, and the offline mode was a second path that could
+disagree with the live one. The observations below come from that probe.
 
 ## What this opening added
 

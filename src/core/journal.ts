@@ -35,6 +35,8 @@ export type Header = {
 	 */
 	cards: { path: string; generated: string };
 	rules: { path: string; effective: string };
+	/** Declared card meaning. A replay against different support plays different cards. */
+	support?: { path: string; sha256: string };
 	created: string;
 	forkedFrom?: { game: string; version: number };
 };
@@ -319,7 +321,7 @@ export function replay(
 	path: string,
 	start: (header: Header) => Table,
 	upTo?: number,
-	against?: { cards: { generated: string }; rules: { effective: string } },
+	against?: { cards: { generated: string }; rules: { effective: string }; support?: { sha256: string } },
 ): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
 	const { header, lines } = read(path);
 	if (against) {
@@ -330,6 +332,9 @@ export function replay(
 			against.rules.effective === header.rules.effective
 				? null
 				: `rules are ${against.rules.effective}, the game used ${header.rules.effective}`,
+			!header.support || !against.support || against.support.sha256 === header.support.sha256
+				? null
+				: `card support is ${against.support.sha256.slice(0, 12)}, the game used ${header.support.sha256.slice(0, 12)}`,
 		].filter(Boolean);
 		if (drift.length) throw new Error(`${path} cannot be replayed here: ${drift.join("; ")}`);
 	}

@@ -38,7 +38,7 @@ export function basePT(printed?: Printed): { power: number; toughness: number } 
 }
 
 /** Generic and colored symbols only. X, hybrid and Phyrexian costs need choices. */
-export function manaCost(printed?: Printed): { generic: number; colors: Mana["color"][] } | undefined {
+export function manaCost(printed?: Printed): { tap: false; generic: number; colors: Mana["color"][] } | undefined {
 	if (!printed) return undefined;
 	const symbols = printed.mana.match(/\{[^}]+\}/g) ?? [];
 	if (symbols.join("") !== printed.mana) return undefined;
@@ -49,7 +49,7 @@ export function manaCost(printed?: Printed): { generic: number; colors: Mana["co
 		else if (/^[WUBRGC]$/.test(symbol)) colors.push(symbol as Mana["color"]);
 		else return undefined;
 	}
-	return { generic, colors };
+	return { tap: false, generic, colors };
 }
 
 const BASIC: Record<string, Mana["color"]> = { Plains: "W", Island: "U", Swamp: "B", Mountain: "R", Forest: "G" };

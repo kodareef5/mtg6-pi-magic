@@ -32,6 +32,7 @@ import { bill, tally, type Spend, type Tally } from "./spend.ts";
 import { aiSeat } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
 import { planWork } from "./strategy.ts";
+import { refuseUnsupported } from "../core/support.ts";
 import { editWork } from "../core/work-tools.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
@@ -111,6 +112,9 @@ export async function seat(
 		for (const gap of made.gaps) table.gaps.push(`Seat ${at} brief (${how}): ${gap}`);
 	};
 
+	// A game the table cannot play as written does not begin. Card support is
+	// declared ahead of play, like deck legality, never patched over mid game.
+	refuseUnsupported(table);
 	for (const at of table.seats) {
 		const decide = pick(parts.get(at.id)!, "decide");
 		if (!decide?.model || decide.model.type !== "classifier") {

@@ -17,12 +17,13 @@
 
 import type { Format } from "./format.ts";
 import type { Printed } from "./printed.ts";
+import type { Tap } from "./funding.ts";
 import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
-import type { Instruction, Procedure } from "./work-language.ts";
+import type { Instruction, Procedure, Support } from "./work-language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -85,8 +86,11 @@ export type Activation = {
 	spell?: Procedure["spell"];
 	targetRule?: Procedure["target"];
 	target?: ObjectRef | { player: SeatId };
-	cost: Procedure["cost"];
+	cost: NonNullable<Procedure["cost"]>;
+	/** Floating mana spent. */
 	paid: string[];
+	/** Mana abilities activated while paying (601.2g), with their accepted claims. */
+	funding?: Tap[];
 	instructions: Instruction[];
 	delegate: boolean;
 };
@@ -214,6 +218,8 @@ export type Table = {
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */
 	printed: Record<string, Printed>;
+	/** Declared support lines for registered names. Public, pinned with the registry file. */
+	support: Record<string, Support>;
 	/** In turn order. */
 	seats: Seat[];
 	things: Map<ObjectId, Thing>;

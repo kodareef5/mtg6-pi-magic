@@ -39,11 +39,12 @@ export const InstructionSchema = Type.Union([
 ]);
 export const ProcedureSchema = object({
 	source: QuerySchema, claim: text, basis: text,
-	timing: Type.Union([Type.Literal("mana"), Type.Literal("stack"), Type.Literal("spell")]),
+	timing: Type.Union([Type.Literal("mana"), Type.Literal("stack"), Type.Literal("spell"), Type.Literal("land")]),
 	spell: Type.Optional(object({ speed: Type.Union([Type.Literal("instant"), Type.Literal("sorcery")]),
 		destination: Type.Union([Type.Literal("battlefield"), Type.Literal("graveyard")]) })),
 	target: Type.Optional(enumeration(["creature", "player", "creature-or-player"])),
-	cost: object({ tap: Type.Boolean(), generic: natural, colors: Type.Array(ColorSchema) }),
+	/** Omitted only by a spell or land: a spell then pays its printed mana cost. */
+	cost: Type.Optional(object({ tap: Type.Boolean(), generic: natural, colors: Type.Array(ColorSchema) })),
 	instructions: Type.Array(InstructionSchema),
 	/** Permission for this seat's unique resolution continuations, never another seat's choice. */
 	delegate: Type.Boolean(),
@@ -55,6 +56,13 @@ export const StepSchema = object({
 		object({ procedure: ProcedureSchema }),
 	]),
 });
+/** One ability or permission of a named card, reusable at every opportunity. */
+export const InterpretationSchema = object({ id: text, procedure: ProcedureSchema });
+/** A declared support line. A game refuses a registered card without a supported one. */
+export const SupportSchema = Type.Union([
+	object({ card: text, status: Type.Literal("supported"), interpretations: Type.Array(InterpretationSchema, { minItems: 1 }), example: Type.Optional(text) }),
+	object({ card: text, status: Type.Literal("todo"), needs: Type.Array(text, { minItems: 1 }), apology: Type.Optional(text) }),
+]);
 export const RecipeSchema = object({
 	id: text, label: text, guidance: text, steps: Type.Array(StepSchema, { minItems: 1 }),
 	reserves: Type.Array(object({ object: RefSchema, purpose: text, tapped: Type.Optional(Type.Boolean()) })),
@@ -86,6 +94,8 @@ export type DraftStep = Static<typeof StepSchema>;
 export type Recipe = Static<typeof RecipeSchema>;
 export type Instruction = Static<typeof InstructionSchema>;
 export type Procedure = Static<typeof ProcedureSchema>;
+export type Interpretation = Static<typeof InterpretationSchema>;
+export type Support = Static<typeof SupportSchema>;
 export type WorkCommand = Static<typeof CommandSchema>;
 
 /** Shape checking proves neither card meaning nor strategic quality. */

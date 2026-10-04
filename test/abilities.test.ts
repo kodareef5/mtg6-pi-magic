@@ -7,7 +7,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { abilityExercise, abilityTable, lootProcedure, manaProcedure } from "../tools/ability-fixture.ts";
-import { activate, activationChanges, payments, procedureOptions } from "../src/core/procedures.ts";
+import { activate, activationChanges, procedureOptions } from "../src/core/procedures.ts";
+import { fundings } from "../src/core/funding.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
@@ -16,9 +17,11 @@ import { project } from "../src/core/view.ts";
 import { prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { workMenu } from "../src/core/work-menu.ts";
 import { refuseExecution } from "../src/core/draft.ts";
-import { fork, open, read, replay, save, linesOf, type Header } from "../src/core/journal.ts";
+import { fork, open, read, relive, replay, save, linesOf, type Header } from "../src/core/journal.ts";
+import { refuseUnsupported } from "../src/core/support.ts";
 import { play } from "../src/core/loop.ts";
 import type { Procedure } from "../src/core/work-language.ts";
+import type { Mana } from "../src/core/table.ts";
 import type { Draft } from "../src/core/work.ts";
 import type { Player } from "../src/core/player.ts";
 import { aiSeat } from "../src/context/seat.ts";
@@ -26,7 +29,6 @@ import { decisionApi, type Classify } from "../src/context/model.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { focus, type Packet } from "../src/context/packet.ts";
 import { matchTable, elf, shock } from "../tools/matchup-fixture.ts";
-import { runMatchup, authoredInference } from "../tools/matchup.ts";
 
 function position(table = abilityTable()) {
 	for (;;) {
@@ -74,7 +76,10 @@ function castElf() {
 
 test("a prepared activation spends existing resources once and refuses a bad payment atomically", async () => {
 	const table = position();
-	assert.equal(proposed(table, lootProcedure()), undefined);
+	const viaLand = proposed(table, lootProcedure());
+	assert.deepEqual(viaLand.activation.funding, [{ source: { id: "0-1", incarnation: 1 }, colors: ["G"], claim: "Tap Forest for mana (basic land type)", intrinsic: true }],
+		"with an empty pool, the land's basic type pays the generic cost during activation (601.2g)");
+	assert.match(viaLand.option.shows!, /Pay with tap Forest \(0-1\)/);
 	const before = structuredClone(table);
 	const mana = proposed(table, manaProcedure("Forest", "G"));
 	assert.ok(mana);
@@ -98,6 +103,8 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 	const committed = structuredClone(table);
 	assert.throws(() => activationChanges(table, paid), /already tapped/);
 	assert.deepEqual(table, committed);
+	const payments = (mana: Mana[], cost: { tap: boolean; generic: number; colors: Mana["color"][] }) =>
+		fundings({ seat: 0, version: 0, view: { window: { kind: "turn" }, table: [], yours: [], since: [], objects: [], pools: [{ seat: 0, mana }] } } as never, cost);
 	assert.deepEqual(payments([{ id: "a", color: "U", spendOnly: "creatures" }], { tap: false, generic: 1, colors: [] }), []);
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U" }], { tap: false, generic: 1, colors: [] }).length, 1, "identical unrestricted units do not multiply a menu");
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", persists: true }], { tap: false, generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
@@ -110,7 +117,10 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 	commit(twins, ["0-0", "0-1"].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
 	const frame = workFrame(position(twins), 0);
 	frame.view.pools = [{ seat: 0, mana: [{ id: "green", color: "G", persists: true }, { id: "blue", color: "U" }] }];
-	frame.view.work = prepareWork(frame, [{ do: "recipe.put", recipe: { id: "payments", label: "Choose payment", guidance: "Preserve green mana.", reserves: [], steps: draft(lootProcedure()).steps } }, { do: "draft.start", recipe: "payments" }]);
+	// Two Merchants differ to this seat only once its own label sets one apart; identical objects are one source.
+	const held = frame.view.objects!.find((object) => object.id === "0-0")!;
+	frame.view.work = prepareWork(frame, [{ do: "recipe.put", recipe: { id: "payments", label: "Choose payment", guidance: "Preserve green mana.", reserves: [], steps: draft(lootProcedure()).steps } }, { do: "draft.start", recipe: "payments" },
+		{ do: "label.put", object: { id: held.id, incarnation: held.incarnation }, role: "blocker", purpose: "Hold back to block." }]);
 	const source = frame.view.objects!.find((object) => object.id === "0-1")!;
 	const sourceText = `Source: Qiqirn Merchant (${source.id}@${source.incarnation})`;
 	let calls = 0, description = "";
@@ -204,7 +214,7 @@ test("responses resolve newest first and a pending choice closes priority withou
 	assert.equal(proposed(real, tapElf), undefined, "a newly cast Elf cannot pay its tap cost");
 	const unready = structuredClone(real);
 	assert.throws(() => activationChanges(real, { source: { id: creature.id, incarnation: creature.incarnation }, controller: 0,
-		claim: tapElf.claim, basis: tapElf.basis, timing: "mana", cost: tapElf.cost, instructions: tapElf.instructions, delegate: true, paid: [] }), /turn began/);
+		claim: tapElf.claim, basis: tapElf.basis, timing: "mana", cost: tapElf.cost!, instructions: tapElf.instructions, delegate: true, paid: [] }), /turn began/);
 	assert.deepEqual(real, unready);
 	mainFor(real, 1);
 	apply(real, nextDecision(real)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
@@ -350,19 +360,69 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 	assert.equal(manual.resolution?.instruction, 0);
 	assert.equal(refuseExecution(draft(lootProcedure()), workFrame(manual, 0)) !== null, true);
 
-	const real = await runMatchup(authoredInference(), [{ role: "decide", pattern: "authored", model: { type: "classifier", id: "authored", provider: "offline", api: "typesafe-system-one" } as never },
-		{ role: "pregame", pattern: "off", off: true }], directory, "real-standard-9", true, () => {});
-	assert.equal(real.result.completed, true);
-	assert.equal(real.result.replayMatches, true);
-	assert.deepEqual(real.result.gaps, []);
-	const response = replay(real.result.journal, (header) => matchTable(header.seed), real.result.stackVersion).table;
-	assert.equal(cardsIn(response, "stack")[0]!.card, "Shock");
-	assert.equal(response.seats[1]!.pool.length, 0, "a response clone carries the paid cost");
-	assert.ok(cardsIn(response, "battlefield", 0).some((object) => object.card === "Llanowar Elves"));
-	assert.equal(response.ledger.filter((row) => row.activation?.timing === "spell").length, 2);
-	const resumed = await runMatchup(authoredInference(), [{ role: "decide", pattern: "authored", model: { type: "classifier", id: "authored", provider: "offline", api: "typesafe-system-one" } as never },
-		{ role: "pregame", pattern: "off", off: true }], directory, "ignored-for-resume", true, () => {}, { path: real.result.journal, version: real.result.stackVersion });
-	assert.equal(resumed.result.completed, true);
-	assert.equal(resumed.result.replayMatches, true);
-	assert.deepEqual(resumed.table.ledger.filter((row) => row.activation), real.table.ledger.filter((row) => row.activation), "continuing the response clone never casts or pays twice");
+});
+
+test("declared support offers ordinary actions, pays through lands and mana abilities, and replays", () => {
+	const decks = [{ name: "Green", deck: [...Array(4).fill("Llanowar Elves"), ...Array(56).fill("Forest")] },
+		{ name: "Red", deck: [...Array(4).fill("Lightning Strike"), ...Array(4).fill("Shock"), ...Array(52).fill("Mountain")] }];
+	// Known cards in hand, the way a benchmark stacks a deck. Replay rebuilds the same table.
+	const dealt = () => {
+		const fresh = start(standard, decks, "declared-support");
+		for (const [seat, card] of [[0, "Llanowar Elves"], [0, "Llanowar Elves"], [1, "Shock"], [1, "Lightning Strike"]] as const) {
+			const object = cardsIn(fresh, "library", seat).find((one) => one.card === card)!;
+			commit(fresh, [{ do: "move", what: object.id, to: "hand", reason: "draw" }], "draw");
+		}
+		return fresh;
+	};
+	const table = dealt();
+	assert.doesNotThrow(() => refuseUnsupported(table), "every registered card has a supported line or no rules text");
+	assert.throws(() => refuseUnsupported(matchTable("real-standard-9")), /cannot begin: .*Sazh's Chocobo \(needs/);
+	const reach = (seat: number, turn: number) => {
+		for (;;) {
+			const decision = nextDecision(table);
+			if (!decision) { advance(table); continue; }
+			if (decision.situation === "priority" && decision.seat === seat && table.cursor.active === seat && table.cursor.turn === turn && table.cursor.steps[0] === "precombat-main") return decision;
+			const discard = decision.options.find((option) => /Forest|Mountain/.test(option.label));
+			apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? discard?.id ?? decision.options[0]!.id, "model", "chosen");
+		}
+	};
+	const ids = (prefix: string) => nextDecision(table)!.options.filter((option) => option.id.startsWith(prefix));
+	reach(0, 1);
+	assert.equal(ids("play:llanowar-elves-cast").length, 0, "no mana source, no cast");
+	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Forest")!.id, "model", "chosen");
+	const before = structuredClone(table);
+	const [elf] = ids("play:llanowar-elves-cast");
+	assert.deepEqual(table, before, "listing declared actions changes nothing");
+	assert.ok(elf && ids("play:llanowar-elves-cast").length === 1, "one untapped Forest is one way to pay");
+	assert.match(elf.shows!, /Printed cost: 0 generic \+ \{G\}\. Pay with tap Forest/);
+	apply(table, elf.id, "model", "chosen");
+	const cast = table.ledger.at(-1)!;
+	assert.equal(cast.activation?.funding?.[0]?.intrinsic, true, "the Forest's basic type paid the printed cost during casting");
+	assert.equal(table.seats[0]!.pool.length, 0, "a funded payment leaves no floating mana");
+	pass(table); pass(table); settle(table);
+	assert.ok(cardsIn(table, "battlefield", 0).some((object) => object.card === "Llanowar Elves"));
+
+	reach(1, 2);
+	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
+	assert.equal(ids("play:lightning-strike-cast").length, 0, "one Mountain cannot pay {1}{R}");
+	assert.equal(ids("play:shock-cast").length, 3, "the Elf and either player are different announced targets");
+
+	reach(0, 3);
+	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Forest")!.id, "model", "chosen");
+	const pays = ids("play:llanowar-elves-cast").map((option) => option.shows!.match(/Pay with ([^.]*)\./)![1]);
+	assert.ok(pays.some((pay) => /Llanowar Elves/.test(pay!)) && pays.some((pay) => /^tap Forest/.test(pay!)),
+		"an Elf that has been controlled since the turn began is a different payment from a Forest");
+
+	reach(1, 4);
+	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
+	const strike = ids("play:lightning-strike-cast").find((option) => option.id.endsWith(":target:seat-0"))!;
+	assert.match(strike.shows!, /Pay with tap Mountain \(.*\), tap Mountain/, "two identical Mountains are one payment, newly supplied data, no new handler");
+	apply(table, strike.id, "model", "chosen");
+	pass(table); pass(table); settle(table);
+	assert.equal(table.seats[0]!.life, 17);
+	assert.equal(table.things.size, 120);
+
+	const rebuilt = relive(dealt(), table.ledger);
+	assert.deepEqual(rebuilt.log, table.log, "declared casts replay from their recorded activations, change for change");
+	assert.deepEqual([...rebuilt.things], [...table.things]);
 });

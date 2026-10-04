@@ -17,6 +17,7 @@ import { createHash } from "node:crypto";
 import { firstMulliganFree, type Format } from "./format.ts";
 import { printedFacts, shipped } from "./printed.ts";
 import type { Universe } from "./cards.ts";
+import { shippedSupport, supportFor, type Registry } from "./support.ts";
 import { claim } from "./names.ts";
 import type { Change, Reason } from "./syntax.ts";
 import {
@@ -36,8 +37,9 @@ export type Entrant = {
 	deck: string[];
 };
 
-/** Printed facts come from the pinned card file; the shipped Standard file by default. */
-export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped()): Table {
+/** Printed facts and declared support come from pinned files; the shipped ones by default.
+ * Seating refuses a game with unsupported cards; a table built to test one mechanic does not. */
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), registry: Registry = shippedSupport()): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -47,6 +49,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 	const table: Table = {
 		format,
 		printed: printedFacts(universe, entrants.flatMap((entrant) => entrant.deck)),
+		support: supportFor(registry, entrants.flatMap((entrant) => entrant.deck)),
 		seats: [],
 		things: new Map(),
 		notes: [],
@@ -120,9 +123,13 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
  */
 export function commit(table: Table, changes: Change[], reason: Reason): Receipt {
 	// Refuse an unavailable or duplicated payment before an earlier tap can commit.
+	// Mana added earlier in the same group, by a mana ability activated while paying, can be spent.
 	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
-	for (const change of changes) if (change.do === "spend-mana") for (const id of change.ids) {
-		if (!available.get(change.who)?.delete(id)) throw new Error(`Mana ${id} is not available to spend.`);
+	for (const [index, change] of changes.entries()) {
+		if (change.do === "add-mana") change.colors.forEach((_, unit) => available.get(change.who)?.add(`mana-${table.cursor.clock + 1}-${index}-${unit}`));
+		if (change.do === "spend-mana") for (const id of change.ids) {
+			if (!available.get(change.who)?.delete(id)) throw new Error(`Mana ${id} is not available to spend.`);
+		}
 	}
 	// Read what a watcher may need before anything moves. After the group it
 	// is gone, and a receipt that cannot say what a thing looked like is a

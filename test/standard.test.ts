@@ -11,6 +11,7 @@ import { standard } from "../src/core/format.ts";
 import { basePT, instant, intrinsicMana, manaCost, permanent, plainLand, printedFacts } from "../src/core/printed.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { priorityMoves } from "../src/core/priority.ts";
+import { loadSupport } from "../src/core/support.ts";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { matchup, expand } from "../tools/matchup-fixture.ts";
@@ -70,7 +71,7 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 	assert.deepEqual(basePT(printed["Llanowar Elves"]), { power: 1, toughness: 1 });
 	assert.deepEqual(basePT(printed["Mossborn Hydra"]), { power: 0, toughness: 0 }, "its entry counter is text, not a printed fact");
 	assert.equal(basePT(printed["Shock"]), undefined);
-	assert.deepEqual(manaCost(printed["Lightning Strike"]), { generic: 1, colors: ["R"] });
+	assert.deepEqual(manaCost(printed["Lightning Strike"]), { tap: false, generic: 1, colors: ["R"] });
 	assert.equal(instant(printed["Shock"]) && !permanent(printed["Shock"]), true);
 
 	const table = start(standard, [{ deck: [...Array(59).fill("Forest"), "Fabled Passage"] }, { deck: Array(60).fill("Mountain") }], "printed");
@@ -85,4 +86,13 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 		const code = readFileSync(join("src/core", file), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
 		for (const name of names) assert.equal(new RegExp(`["'\`]${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'\`]`).test(code), false, `${file} names ${name}`);
 	}
+});
+
+test("the support registry loads, every line checked against the vocabulary", () => {
+	const registry = loadSupport("cards/support.jsonl");
+	for (const [name, line] of registry.cards) {
+		assert.ok(universe.cards.has(name), `${name} is a Standard card`);
+		if (line.status === "todo") assert.ok(line.needs.length);
+	}
+	assert.ok([...registry.cards.values()].some((line) => line.status === "supported" && line.example), "examples guide the next lines");
 });

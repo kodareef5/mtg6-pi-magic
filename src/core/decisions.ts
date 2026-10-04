@@ -20,6 +20,8 @@ import { commit } from "./commit.ts";
 import { cardsIn, playing, type Table, type LedgerRow } from "./table.ts";
 import type { Decision } from "./types.ts";
 import { resolving } from "./resolution.ts";
+import { interpretedMoves } from "./actions.ts";
+import { activate } from "./procedures.ts";
 import { targetAvailable } from "./targets.ts";
 import { project } from "./view.ts";
 import { basePT, facts } from "./printed.ts";
@@ -74,7 +76,7 @@ function pending(table: Table): Pending | null {
 			seat: holder,
 			question: "You have priority.",
 			fallback: "pass",
-			moves: priorityMoves(table, holder).filter((move) => legal(table, move)),
+			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...interpretedMoves(table, holder)],
 		};
 	}
 
@@ -121,6 +123,10 @@ function take(
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 	execution?: LedgerRow["execution"],
 ): void {
+	if (move.activation) {
+		activate(table, move.activation, { picked: move.option.id, offered: p.moves.map((candidate) => candidate.option.id), by, why, ...(execution ? { execution } : {}) });
+		return;
+	}
 	// The row goes in first, so every group this decision commits is stamped with
 	// a version that includes the decision that caused it. Nothing in `commit`
 	// reads the ledger, so the order costs nothing else.
