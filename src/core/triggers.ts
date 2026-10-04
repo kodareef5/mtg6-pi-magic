@@ -8,9 +8,10 @@
  * Detection is part of `commit`, so it replays with the group that caused it.
  * Leaves-the-battlefield watches look back to the moment before the group
  * (603.10a); every other watch reads the table after it (603.6).
+ * Past 150 lines to keep detection beside the trigger window that empties it.
  */
 import { characteristics, walk, type Traits } from "./characteristics.ts";
-import { summary, targetings } from "./announce.ts";
+import { aiming, summary, targetings } from "./announce.ts";
 import { holds, matches, players, tableWorld, targetKey, type Scope, type Seen, type World } from "./selectors.ts";
 import { playing, type Activation, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Pending, Move } from "./moves.ts";
@@ -265,15 +266,10 @@ export function triggerWindow(table: Table): Pending | null {
 				cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(trigger.effect.instructions),
 				trigger: { event: structuredClone(trigger.event), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
 					...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
-			const aimed = slots.length ? targets.map((set, slot) => `Target ${slot + 1}: ${set.map((chosen) => "player" in chosen ? `seat ${chosen.player}` :
-				`${world.lastKnown(chosen)?.object.card ?? world.lastKnown(chosen)?.object.token?.name ?? chosen.id} (${chosen.id}@${chosen.incarnation})`).join(", ") || "none"}.`) : [];
-			const marks = targets.flat().flatMap((chosen) => {
-				const object = "id" in chosen ? world.lastKnown(chosen)?.object : undefined;
-				return object && object.controller !== trigger.controller && world.read(object)?.words.includes("hexproof") ? [`${object.card ?? object.id} conflicts with hexproof.`] : [];
-			});
+			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
 			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
 				label: `Put on the stack: ${name}: ${trigger.basis}`,
-				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...marks, ...trigger.effect.instructions.map(summary)].join(" "),
+				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...trigger.effect.instructions.map(summary)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])] },
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
 		});

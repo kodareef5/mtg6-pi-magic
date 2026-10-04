@@ -10,11 +10,11 @@
  */
 import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
-import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen } from "./selectors.ts";
+import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import { allowance, flashed, playable } from "./permits.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
-import type { Frame, ObjectRef, Option } from "./types.ts";
+import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
 export type ProcedureOption = { option: Option; activation: Activation };
@@ -72,8 +72,16 @@ export function subsets<T>(items: T[], most: number, least = most): T[][] {
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 const name = (object: Seen) => object.card ?? object.token?.name ?? object.id;
-const label = (chosen: Chosen, frame: Frame) => "player" in chosen ? `seat ${chosen.player}` :
-	`${name(frame.view.objects!.find((one) => one.id === chosen.id)!)} (${chosen.id}@${chosen.incarnation})`;
+
+/** Each target slot as an option shows it, then any choice that conflicts with hexproof. One wording for spells, abilities and triggers. */
+export function aiming(targets: Chosen[][], world: World, controller: SeatId): string[] {
+	const named = (chosen: Chosen) => { if ("player" in chosen) return `seat ${chosen.player}`; const object = world.lastKnown(chosen)?.object; return `${object ? name(object) : chosen.id} (${chosen.id}@${chosen.incarnation})`; };
+	const marks = targets.flat().flatMap((chosen) => {
+		const object = "id" in chosen ? world.lastKnown(chosen)?.object : undefined;
+		return object && object.controller !== controller && world.read(object)?.words.includes("hexproof") ? [`${named(chosen)} conflicts with hexproof.`] : [];
+	});
+	return [...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map(named).join(", ") : "none"}.`), ...marks];
+}
 
 /** The objects and players each slot could take now, before counting. */
 function candidates(slot: Target, scope: Scope): Chosen[] {
@@ -166,10 +174,6 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				for (const { funding, shows: paying } of fundings(frame, price, new Set(extra.uses), spending)) {
 					for (const targets of aims) {
 						const aimed = targets.flat();
-						const marks = aimed.flatMap((chosen) => {
-							const object = "id" in chosen ? frame.view.objects?.find((one) => one.id === chosen.id) : undefined;
-							return object && object.controller !== frame.seat && object.traits?.words.includes("hexproof") ? [`${label(chosen, frame)} conflicts with hexproof.`] : [];
-						});
 						offered.push({
 							option: {
 								id: `${prefix}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => tap.source.id), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
@@ -179,8 +183,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
 										`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduce ? ` (reduced by ${reduce})` : ""}. ${extra.shows}${paying}`,
 									procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
-									...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map((one) => label(one, frame)).join(", ") : "none"}.`),
-									...marks, ...procedure.instructions.map(summary), `Claimed basis: ${procedure.basis}`,
+									...aiming(targets, world, frame.seat), ...procedure.instructions.map(summary), `Claimed basis: ${procedure.basis}`,
 								].filter(Boolean).join(" "),
 								objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 							},
