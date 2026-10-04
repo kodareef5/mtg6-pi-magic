@@ -128,3 +128,31 @@ export function atSize(
  * belief about what an opponent is holding, and a decision model's confidence
  * in its own answer are not the same number and never combine into one.
  */
+
+const choose = (n: number, k: number): number => {
+	if (k < 0 || k > n) return 0;
+	let result = 1;
+	for (let at = 1; at <= Math.min(k, n - k); at++) result = (result * (n - at + 1)) / at;
+	return result;
+};
+
+/**
+ * Every split of a draw across disjoint categories, with its chance: drawing
+ * `draws` cards without replacement from a pool whose categories have these
+ * counts. Exact, so overlapping events are added from these splits rather than
+ * multiplied. For an opening hand the pool is the registered main deck before
+ * anything is seen, which is why it needs no knowledge accounting.
+ */
+export function splits(categories: number[], draws: number): { counts: number[]; chance: number }[] {
+	const total = categories.reduce((sum, count) => sum + count, 0), all = choose(total, draws);
+	const found: { counts: number[]; chance: number }[] = [];
+	const walk = (at: number, left: number, counts: number[], ways: number) => {
+		if (at === categories.length - 1) {
+			if (left <= categories[at]!) found.push({ counts: [...counts, left], chance: (ways * choose(categories[at]!, left)) / all });
+			return;
+		}
+		for (let take = 0; take <= Math.min(left, categories[at]!); take++) walk(at + 1, left - take, [...counts, take], ways * choose(categories[at]!, take));
+	};
+	walk(0, draws, [], 1);
+	return found;
+}

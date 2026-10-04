@@ -23,7 +23,7 @@ import { play, type Watcher } from "../core/loop.ts";
 import type { Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
 import type { Outcome, SeatId } from "../core/types.ts";
-import { brief, emptyBrief, type Brief } from "./brief.ts";
+import { brief, current, emptyBrief, type Brief } from "./brief.ts";
 import { decisionApi, type Classify } from "./model.ts";
 import type { Chronicle } from "./packet.ts";
 import { startingIntent } from "./plan.ts";
@@ -142,9 +142,7 @@ export async function seat(
 		});
 	}
 
-	// One wave for the whole table. Every question is answerable from a deck list
-	// and a seat count, so none waits on another and the pass costs one round
-	// trip of wall time rather than one per question.
+	// Every seat prepares at once: its analysts together, then its synthesis.
 	await Promise.all(
 		table.seats.map(async (at) => {
 			// The carried brief first, before the roster is consulted at all. A
@@ -154,7 +152,7 @@ export async function seat(
 			// the top of it.
 			const carried = options.prepared?.find((made) => made.seat === at.id);
 			if (carried) {
-				take(at.id, carried.made as Brief, "carried");
+				take(at.id, current(carried.made, at.id), "carried");
 				return;
 			}
 			const role = pick(parts.get(at.id)!, "pregame");
@@ -175,19 +173,14 @@ export async function seat(
 				return;
 			}
 			const others = table.seats.filter((other) => other.id !== at.id) as Seat[];
-			const written = await brief(
-				at,
-				others,
-				universe,
-				reasoner({
-					role: "pregame",
-					stream: inference.stream,
-					model: role.model as Model<Api>,
-					...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
-					tally: counted,
-				}),
-				{ ...options, openLists: table.format.decksRegistered },
-			);
+			// A reasoner per call, so one analyst's failures cannot stop its siblings or the synthesis.
+			const written = await brief(at, others, universe, () => reasoner({
+				role: "pregame",
+				stream: inference.stream,
+				model: role.model as Model<Api>,
+				...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
+				tally: counted,
+			}), { format: options.format, ...(options.rules ? { rules: options.rules } : {}) });
 			take(at.id, written, "written");
 		}),
 	);

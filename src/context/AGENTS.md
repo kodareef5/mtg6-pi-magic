@@ -38,9 +38,11 @@ result that cannot be compared with another.
 The classifier executes. The thinking happens in the other four roles, and what
 reaches a decision is a short plan plus the facts.
 
-- **pregame** runs once per seat as one concurrent wave. The unit of the pass is
-  the unit of injection: each answer is filed under where it will be read. Never
-  one question, because one answer gets pasted into every decision.
+- **pregame** runs once per seat: four analysts at once (deck and resources,
+  matchup, opening, a challenger), each able to look up rules and cards, then one
+  synthesis that files the brief by where it is read. Both seats prepare at the
+  same time. Strategy reads the whole brief; the pilot reads only the slice for
+  its window, never the whole of it.
 - **strategy** writes the seat's plan before it first acts, once per turn of its
   own after it draws, and on a request: a stop the plan named or jev's
   `ask:help`. A phase boundary is not a reason to spend money. Its system prompt

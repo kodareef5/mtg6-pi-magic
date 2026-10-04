@@ -1,292 +1,229 @@
 /**
- * The pregame pass, and what it leaves behind.
+ * The pregame: the deepest thinking a seat gets, done once per game.
  *
- * One wave of questions, asked at once, per seat. Not one question. A single
- * "tell me your strategy" call produces a paragraph that is then pasted into
- * every decision, which is the failure this file exists to avoid: a decision
- * about blocking does not want the mulligan reasoning, and a context window
- * carrying both answers neither well.
+ * Four analysts per seat work at once, each on its own question, with both
+ * registered lists in front of them and tools to look up a rule or a card. One
+ * synthesis per seat then reconciles their findings into the brief. Both seats
+ * prepare at the same time, so the wall time is the slowest analyst plus one
+ * synthesis.
  *
- * So the unit of the pass is the unit of injection, not the unit of the deck.
- * Every answer is a snippet filed under where it will be read:
+ * The brief is filed by where it is read. Strategy reads all of it whenever it
+ * plans. The pilot reads only the opening policy while it mulligans, the note
+ * for the phase it is in on whose turn it is, and the notes for cards its
+ * options name; pasting the whole brief into every decision is the failure this
+ * shape exists to avoid.
  *
- *   deck      what this deck does and cannot do. Read once per game
- *   combos    the pairs meant to work together, and the threat model
- *   opening   what a keepable hand looks like, and the named edge cases
- *   phases    one per phase with a real decision window. Read on that phase
- *   cards     one per card that earns a note. Read when that card is an option
- *
- * Card notes are keyed by name and cost nothing on a turn where the card never
- * appears, which is why they are per card rather than per group. Grouping the
- * creatures would produce one snippet that is injected whenever any creature is
- * an option, which is most turns, which is the paste-everywhere failure again.
- * A card earns a note mechanically, before a call is spent: a basic land does
- * not, because the engine already knows what it does.
- *
- * Past 150 lines because a reader asking "what is this seat told, and where did
- * it come from" wants the questions, the filing and the prompts in one place.
+ * Past 150 lines because a reader asking "what was this seat told, and where
+ * did it come from" wants the questions, the tools and the filing in one place.
  */
-
+import { Type, type Static } from "typebox";
 import type { Card, Universe } from "../core/cards.ts";
-import type { Policy } from "../core/intent.ts";
+import { listed } from "../core/decks.ts";
+import { problems } from "../core/language.ts";
+import { splits } from "../core/odds.ts";
+import { search, term, type Rules } from "../core/rules.ts";
 import type { Phase } from "../core/steps.ts";
 import type { Seat } from "../core/table.ts";
-import { listed } from "../core/decks.ts";
 import type { SeatId } from "../core/types.ts";
-import type { Reasoner } from "./reason.ts";
+import type { Lookup, Reasoner, Submission } from "./reason.ts";
 
-/**
- * What a seat is told, filed by where it is read.
- *
- * Version rises when the pass runs again, so a snippet injected into a decision
- * is attributable to the pass that wrote it.
- */
-export type Brief = {
-	seat: SeatId;
-	version: number;
-	deck: string;
-	combos: string;
-	opening: string;
-	/** By opponent seat id as a string, because a brief is written to disk. */
-	against: Record<string, string>;
-	phases: Partial<Record<Phase, string>>;
-	/** By card name. */
-	cards: Record<string, string>;
-	/** Questions that failed. The game plays on without that snippet. */
-	gaps: string[];
-};
+const PHASES = ["beginning", "precombat-main", "combat", "postcombat-main", "ending"] as const satisfies readonly Phase[];
+const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
+const text = Type.String({ minLength: 1 });
+
+/** Where a brief is read, by field. */
+const BriefSchema = Type.Cyclic({ Side: object({ own: Type.Optional(text), opponent: Type.Optional(text) }), Brief: object({
+	/** Strategy: who must force the exchange at the start, and what changes that. */
+	role: text,
+	/** Strategy: the main route to a win, and the route when its key dependency fails. */
+	route: text,
+	recovery: text,
+	/** Strategy: both clocks, the opposing threats and their windows, how to deny them. */
+	matchup: text,
+	/** The pilot, while it keeps or mulligans and bottoms. */
+	opening: text,
+	/** The pilot, for the phase it is in, on its own turn or the opponent's. */
+	phases: object({ beginning: Type.Optional(Type.Ref("Side")), "precombat-main": Type.Optional(Type.Ref("Side")), combat: Type.Optional(Type.Ref("Side")),
+		"postcombat-main": Type.Optional(Type.Ref("Side")), ending: Type.Optional(Type.Ref("Side")) }),
+	/** The pilot, when an option names the card; strategy always. Only cards with a real choice or trap. */
+	cards: Type.Record(Type.String(), text),
+	/** Strategy: plays that look automatic and are wrong in this matchup. */
+	traps: Type.Array(text),
+}) }, "Brief");
+export type Brief = Static<typeof BriefSchema> & { seat: SeatId; version: 2; gaps: string[] };
 
 export const emptyBrief = (seat: SeatId): Brief => ({
-	seat, version: 0, deck: "", combos: "", opening: "",
-	against: {}, phases: {}, cards: {}, gaps: [],
+	seat, version: 2, role: "", route: "", recovery: "", matchup: "", opening: "", phases: {}, cards: {}, traps: [], gaps: [],
 });
 
-/**
- * The phases a plan is worth writing for: the ones with a decision window a
- * seat can lose a game in. Untap and cleanup grant no priority, and the
- * beginning and ending phases are included because holding a response through
- * upkeep and discarding at end of turn are both real choices.
- */
-const PHASES: Phase[] = ["beginning", "precombat-main", "combat", "postcombat-main", "ending"];
+/** A brief carried from a journal written before this shape is not used: reading it would mean guessing its fields. */
+export const current = (made: unknown, seat: SeatId): Brief =>
+	(made as { version?: number })?.version === 2 ? made as Brief : { ...emptyBrief(seat), gaps: ["The carried brief is an older shape and was not used."] };
 
-/**
- * Does this card need a note of its own?
- *
- * Mechanical, so no call is spent deciding. A basic land is excluded by name
- * rather than by text, because the engine supplies its mana ability and a note
- * saying "taps for green" is a snippet injected on most turns of the game for
- * nothing. A card with no rules text has nothing to explain either.
- *
- * Everything else earns one. A fifteen card nonland deck is fifteen small
- * concurrent calls once per game, and most of them are cheap.
- */
+const DESTINATIONS = ["role", "route", "recovery", "matchup", "opening", "phase", "card", "trap"] as const;
+const FindingsSchema = object({
+	conclusions: Type.Array(object({
+		claim: text,
+		/** Card facts, counts or rules this rests on. */
+		evidence: Type.Array(text),
+		assumptions: Type.Array(text),
+		/** The visible fact that would change it. */
+		changesWhen: text,
+		destination: Type.Union(DESTINATIONS.map((one) => Type.Literal(one))),
+		card: Type.Optional(text),
+		phase: Type.Optional(Type.Union(PHASES.map((one) => Type.Literal(one)))),
+		turn: Type.Optional(Type.Union([Type.Literal("own"), Type.Literal("opponent")])),
+	}), { minItems: 1, maxItems: 10 }),
+	/** What the analyst could not settle. */
+	unsure: Type.Array(text),
+});
+type Findings = Static<typeof FindingsSchema>;
+
+/** Does this card earn a note? A basic land or a card with no rules text has nothing to explain. */
 const BASIC = new Set(["Forest", "Island", "Mountain", "Plains", "Swamp", "Wastes"]);
-export const needsNote = (card: Card): boolean =>
-	!BASIC.has(card.name) && card.oracle.trim().length > 0;
-
-/** One question, and where its answer is filed. */
-type Ask = { key: string; about: string; user: string };
+export const needsNote = (card: Card): boolean => !BASIC.has(card.name) && card.oracle.trim().length > 0;
 
 const deckLines = (deck: string[], universe: Universe): string[] => {
 	const counted = new Map<string, number>();
 	for (const name of deck) counted.set(name, (counted.get(name) ?? 0) + 1);
 	return [...counted].sort().map(([name, n]) => {
 		const card = universe.cards.get(name);
-		if (!card) return `${n} ${name} (not in the card list)`;
-		return `${n} ${name}  ${card.mana}  ${card.type}  ${card.stats}  ${card.oracle.replace(/\n/g, " / ")}`;
+		return card ? `${n} ${name}  ${card.mana}  ${card.type}  ${card.stats}  ${card.oracle.replace(/\n/g, " / ")}` : `${n} ${name} (not in the card list)`;
 	});
 };
 
-/** Mana curve by converted cost, which is what a mulligan judgment rests on. */
-const curve = (deck: string[], universe: Universe): string => {
+/** The curve, and the opening-hand odds a mulligan rests on, computed rather than guessed. */
+function numbers(deck: string[], universe: Universe): string {
+	const cards = deck.map((name) => universe.cards.get(name)).filter((card): card is Card => !!card);
+	const land = (card: Card) => card.type.includes("Land");
+	const lands = cards.filter(land).length, cheap = cards.filter((card) => !land(card) && card.cmc <= 2).length;
 	const buckets = new Map<number, number>();
-	let lands = 0;
-	for (const name of deck) {
-		const card = universe.cards.get(name);
-		if (!card) continue;
-		if (card.type.includes("Land")) lands += 1;
-		else buckets.set(card.cmc, (buckets.get(card.cmc) ?? 0) + 1);
-	}
-	const spells = [...buckets].sort((a, b) => a[0] - b[0]).map(([cmc, n]) => `${cmc}:${n}`);
-	return `${deck.length} cards, ${lands} lands. Spells by cost: ${spells.join(" ") || "none"}.`;
-};
+	for (const card of cards) if (!land(card)) buckets.set(card.cmc, (buckets.get(card.cmc) ?? 0) + 1);
+	const percent = (value: number) => `${(100 * value).toFixed(1)}%`;
+	const byLands = splits([lands, deck.length - lands], 7);
+	const playable = splits([lands, cheap, deck.length - lands - cheap], 7).filter(({ counts }) => counts[0]! >= 2 && counts[0]! <= 4 && counts[1]! >= 1)
+		.reduce((sum, one) => sum + one.chance, 0);
+	return [
+		`${deck.length} cards, ${lands} lands. Spells by mana value: ${[...buckets].sort((a, b) => a[0] - b[0]).map(([cmc, n]) => `${cmc}:${n}`).join(" ")}.`,
+		`Lands in an opening seven: ${byLands.map(({ counts, chance }) => `${counts[0]}: ${percent(chance)}`).join(", ")}.`,
+		`Two to four lands and at least one spell costing two or less: ${percent(playable)}.`,
+		"Exact odds for a random seven from the registered main deck, with no other assumption.",
+	].join("\n");
+}
 
-/**
- * What the model is and is not being asked for.
- *
- * It names what the answer does not promise, because a plan written before the
- * first untap step is a plan about a game nobody has played yet. A snippet that
- * reads as a rule gets followed off a cliff; one that reads as a prior gets
- * revised.
- */
 const SYSTEM = [
-	"You are preparing one seat of a game of Magic: The Gathering before it starts.",
+	"You prepare one seat for a game of Magic: The Gathering, before it starts.",
+	"You are one of four analysts working at once on separate questions. A writer then reconciles your findings into the seat's brief.",
+	"The strategist reads the whole brief whenever it plans a turn. A fast pilot reads only a short note for the window it is in and notes for the cards in front of it.",
 	"",
-	"Write guidance that will be injected into one narrow decision later, so it has",
-	"to be short and it has to be about something. Name cards and numbers. Say what",
-	"to do and what would mean doing something else instead.",
+	"Both registered deck lists are public and given in full. They give composition, never a hand or the library order. Do not assume any other card.",
+	"Think like a strong player preparing a matchup: roles and clocks, threats and their last answer windows, scarce resources, and plays that look automatic but are wrong here.",
+	"Teach each default with the visible condition that reverses it. Never write a bare slogan such as always save removal.",
+	"Every conclusion gives the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Say what you are unsure of instead of inventing certainty.",
 	"",
-	"Registered deck lists give composition, never the opponent's hand or library order.",
-	"Use only the lists supplied in this question. Your guidance cannot predict the board",
-	"or certify a play's legality. Name the assumptions that would change the plan.",
-	"",
-	"No preamble, no headings, no restating the question. Prose, a few lines.",
+	"You may look a rule or a card up with the tools. Then call submit once with your findings. Nothing you write as text is read.",
 ].join("\n");
 
-/**
- * Build the wave.
- *
- * Every question is answerable from the deck list and the seat count alone, so
- * none waits on another and all of them go at once. That independence is a
- * design constraint rather than a convenience: a question that needed an
- * earlier answer would serialise the pass and double its wall time.
- *
- * Registered deck composition is public by default. Lists contain names and
- * counts, never object ids, hands, or library order.
- */
-export function asks(
-	seat: Seat,
-	others: Seat[],
-	universe: Universe,
-	options: { format: string; openLists?: boolean },
-): Ask[] {
-	const mine = deckLines(listed(seat.deck.main), universe);
-	const deck = `Your deck, ${options.format}:\n${mine.join("\n")}\n\n${curve(listed(seat.deck.main), universe)}`;
-	const asksOf: Ask[] = [
-		{
-			key: "deck",
-			about: "deck strengths and weaknesses",
-			user: `${deck}\n\nWhat does this deck do well, and what can it not do? Two or three lines.`,
-		},
-		{
-			key: "combos",
-			about: "combinations and threat model",
-			user:
-				`${deck}\n\nWhich cards here are meant to work together, and what is this deck ` +
-				`built to beat? Name the pairs. If nothing combines, say so in one line rather ` +
-				`than inventing an interaction.`,
-		},
-		{
-			key: "opening",
-			about: "mulligan guidance",
-			user:
-				`${deck}\n\nThere are ${others.length + 1} seats. Guide the opening.\n` +
-				`What a keepable seven looks like, in cards and lands. How far to mulligan and ` +
-				`when to stop. What to do with no land, and with lands only. How much the first ` +
-				`two turns matter for this deck. Give the counts, not the theory.`,
-		},
-	];
+const QUESTIONS = {
+	deck: "DECK AND RESOURCES. What does your deck do: its engines and the pieces they depend on, the curve against the mana it can really make (restrictions included), recurring value, its weak draws, and its routes to a win.",
+	matchup: "MATCHUP. Both clocks, the opponent's engines and threats with the windows in which they must be answered, the removal and protection exchanges, evasion, when the roles change, and how your sequencing can deny the conditions their key cards need.",
+	opening: "OPENING. Keep, mulligan and bottom choices on the play and on the draw: what a keep needs, the borderline hands and the plan behind each, and what to bottom first. Use the computed odds.",
+	challenge: "CHALLENGE. Find the mistakes a competent player of this deck is likely to make in this matchup: wrong shortcuts, missed response windows, resource conflicts, trigger order, and plays that look automatic but lose.",
+} as const;
 
-	for (const other of others) {
-		asksOf.push({
-			key: `against:${other.id}`,
-			about: `against seat ${other.id}`,
-			user:
-				`${deck}\n\n` +
-				(options.openLists !== false
-					? `Seat ${other.id}'s public registered deck:\n` +
-						`${deckLines(listed(other.deck.main), universe).join("\n")}\n\nWhere is your deck ahead of theirs and where is it behind?`
-					: `You are seated against ${others.length} opponent${others.length === 1 ? "" : "s"} ` +
-						`in ${options.format}, and you have not seen their cards. What should this deck ` +
-						`expect to be ahead of and behind in this format, and what early sign would ` +
-						`tell you which? Do not guess a specific decklist.`),
-		});
-	}
-
-	for (const phase of PHASES) {
-		asksOf.push({
-			key: `phase:${phase}`,
-			about: `${phase} guidance`,
-			user:
-				`${deck}\n\nGuidance for the ${phase} phase with this deck. What this deck ` +
-				`usually wants to do here, what it should hold back, and what on the board ` +
-				`would change that. Two or three lines, and nothing that is true of every deck.`,
-		});
-	}
-
-	const notable = Object.keys(seat.deck.main)
-		.map((name) => universe.cards.get(name))
-		.filter((card): card is Card => !!card && needsNote(card));
-	for (const card of notable) {
-		asksOf.push({
-			key: `card:${card.name}`,
-			about: `note on ${card.name}`,
-			user:
-				`${deck}\n\nThis card: ${card.name}  ${card.mana}  ${card.type}  ${card.oracle}\n\n` +
-				`Why is it in this deck, what is it for, and when is playing it wrong? Two lines.`,
-		});
-	}
-
-	return asksOf;
+/** The tools an analyst may use. A miss answers "not found", so a lookup never ends the work. */
+function lookups(universe: Universe, rules?: Rules): Lookup[] {
+	const card: Lookup = { name: "card", description: "Look up a Standard card's text by its exact name.",
+		parameters: { type: "object", properties: { name: { type: "string" } }, required: ["name"], additionalProperties: false },
+		answer: (args) => { const found = universe.cards.get(String(args.name)); return found ? `${found.name}  ${found.mana}  ${found.type}  ${found.stats}\n${found.oracle}` : `No Standard card is named ${String(args.name)}.`; } };
+	if (!rules) return [card];
+	const rule: Lookup = { name: "rule", description: "Look up a Comprehensive Rules entry by number (such as 702.19b) or search it by words (such as trample).",
+		parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"], additionalProperties: false },
+		answer: (args) => {
+			const query = String(args.query).trim();
+			const exact = rules.byRef.get(query) ?? term(rules, query);
+			const hits = exact ? [exact] : search(rules, query, 5);
+			return hits.length ? hits.map((entry) => `${entry.ref}  ${entry.text}`).join("\n") : `Nothing in the rules matches ${query}.`;
+		} };
+	return [card, rule];
 }
 
-/** File one answer under the slot its key names. */
-function file(brief: Brief, key: string, answer: string): void {
-	const [kind, rest] = [key.slice(0, key.indexOf(":")), key.slice(key.indexOf(":") + 1)];
-	if (key === "deck" || key === "combos" || key === "opening") brief[key] = answer;
-	else if (kind === "against") brief.against[rest] = answer;
-	else if (kind === "phase") brief.phases[rest as Phase] = answer;
-	else if (kind === "card") brief.cards[rest] = answer;
-	else brief.gaps.push(`No slot for ${key}`);
+/** The submit tool for a schema: its answer is `value`, checked against the schema and then by `extra`. */
+const submission = <T>(schema: Parameters<typeof problems>[0], description: string, extra: (value: T) => string[] = () => []): Submission => ({
+	name: "submit", description,
+	parameters: { type: "object", properties: { value: pointers(schema) }, required: ["value"], additionalProperties: false },
+	check: (args) => {
+		const wrong = problems(schema, args.value);
+		if (wrong.length) return `It does not match the schema: ${wrong.join("; ")}.`;
+		const more = extra(args.value as T);
+		return more.length ? more.join("; ") : null;
+	},
+});
+/** JSON Schema as a provider reads it: a cyclic schema's bare refs become pointers into its `$defs`. */
+const pointers = (schema: object): object => JSON.parse(JSON.stringify(schema).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"'));
+
+/** The facts every analyst reads: both lists in full, the computed numbers, the table. */
+function facts(seat: Seat, others: Seat[], universe: Universe, format: string): string {
+	const mine = listed(seat.deck.main);
+	return [
+		`You are seat ${seat.id} in a ${others.length + 1}-seat game of ${format}. Who plays first is not yet known.`,
+		"", `Your registered deck:`, ...deckLines(mine, universe), "", numbers(mine, universe),
+		...others.flatMap((other) => ["", `Seat ${other.id}'s public registered deck:`, ...deckLines(listed(other.deck.main), universe), "", numbers(listed(other.deck.main), universe)]),
+	].join("\n");
 }
 
 /**
- * Run the wave for one seat.
- *
- * A question that fails is a gap and the game starts without that snippet,
- * because a missing plan costs a seat some quality and a refused game costs it
- * everything.
- *
- * Every question failing is a different claim. A seat briefed on nothing is not
- * a seat with a thin plan, it is a seat whose model never answered, and a run
- * that reports that as a finished game is a run that broke without noticing. So
- * this throws when nothing came back at all, or when the reasoner has given up
- * because the configuration is wrong.
+ * Prepare one seat: the four analysts at once, then the synthesis. A failed
+ * analyst reaches the synthesis as a failure, never as an invented answer. The
+ * brief fails only when the synthesis does, or when every analyst did.
  */
 export async function brief(
 	seat: Seat,
 	others: Seat[],
 	universe: Universe,
-	reasoner: Reasoner,
-	options: { format: string; openLists?: boolean; version?: number },
+	reasoners: () => Pick<Reasoner, "work">,
+	options: { format: string; rules?: Rules },
 ): Promise<Brief> {
-	const built = { ...emptyBrief(seat.id), version: options.version ?? 1 };
-	const wave = asks(seat, others, universe, options);
-	const answers = await Promise.all(
-		wave.map(async (ask) => {
-			try {
-				return { key: ask.key, answer: await reasoner.think(ask.about, { system: SYSTEM, user: ask.user }) };
-			} catch (error) {
-				return { key: ask.key, failed: `${ask.about}: ${String(error)}` };
-			}
-		}),
-	);
-	let answered = 0;
-	for (const got of answers) {
-		if (got.failed) built.gaps.push(got.failed);
-		else {
-			answered += 1;
-			file(built, got.key, got.answer!);
-		}
-	}
-	const why = reasoner.broken();
-	if (why) throw new Error(`Seat ${seat.id} has no brief: ${why}`);
-	if (!answered) {
-		throw new Error(`Seat ${seat.id} has no brief: all ${wave.length} questions failed. ${built.gaps[0] ?? ""}`.trim());
-	}
-	return built;
+	const user = facts(seat, others, universe, options.format);
+	const tools = lookups(universe, options.rules);
+	const findings = submission<Findings>(FindingsSchema, "Submit your findings for this question. Call it once.");
+	const results = await Promise.all(Object.entries(QUESTIONS).map(async ([key, question]) => {
+		try {
+			const answer = await reasoners().work(`pregame ${key}`, { system: SYSTEM, user, task: `${question}\nSubmit at most ten conclusions.` },
+				{ submit: findings, lookups: tools, turns: 6 }, ANALYST);
+			return { key, findings: answer.value as Findings };
+		} catch (error) { return { key, failed: String(error instanceof Error ? error.message : error) }; }
+	}));
+	const failed = results.flatMap((one) => "failed" in one ? [`${one.key}: ${one.failed}`] : []);
+	if (failed.length === results.length) throw new Error(`Seat ${seat.id} has no brief: every analyst failed. ${failed[0]}`);
+
+	const deck = new Set(Object.keys(seat.deck.main));
+	const written = submission<Static<typeof BriefSchema>>(BriefSchema, "Submit the seat's brief. Call it once.",
+		(value) => Object.keys(value.cards).filter((name) => !deck.has(name)).map((name) => `cards names ${name}, which is not in your deck`));
+	const answer = await reasoners().work("pregame synthesis", { system: SYNTHESIS, user, task: [
+		"The analysts' findings, by question:", JSON.stringify(Object.fromEntries(results.map((one) => [one.key, "findings" in one ? one.findings : { failed: one.failed }]))),
+		"", "Write the brief now and submit it.",
+	].join("\n") }, { submit: written }, SYNTHESIZED);
+	return { ...(answer.value as Static<typeof BriefSchema>), seat: seat.id, version: 2, gaps: failed };
 }
 
-/**
- * The brief as this seat's deck policy.
- *
- * `Policy` is core, because a person at a seat wants a deck plan too. This is
- * the one place a brief becomes something the engine already holds, and it
- * carries only the deck-level lines: the phase and card snippets are injected
- * per decision and do not belong in a record read on every one of them.
- */
-export const policyFrom = (brief: Brief): Policy => ({
-	seat: brief.seat,
-	winsBy: brief.deck,
-	priorities: [brief.combos, ...Object.values(brief.against)].filter(Boolean),
-});
+/** Output ceilings: an analyst thinks and looks things up; the synthesis writes every field. */
+const ANALYST = 2000, SYNTHESIZED = 4000;
+
+const SYNTHESIS = [
+	"You write one seat's brief for a game of Magic: The Gathering from four analysts' findings, given after the deck lists.",
+	"Reconcile them. Where they conflict, decide, or keep the disagreement as a condition when it depends on unknown play: do X unless Y.",
+	"A missing or failed analyst stays missing: do not invent its part.",
+	"",
+	"The fields, and who reads them:",
+	"- role: who must force the exchange at the start, and the visible facts that change it. Read by the strategist.",
+	"- route: the main route to a win. recovery: the route when its key dependency fails. Read by the strategist.",
+	"- matchup: both clocks, the opponent's threats with their last answer windows, and how to deny their key cards' conditions. Read by the strategist.",
+	"- opening: the keep, mulligan and bottom policy on the play and on the draw. Read by the pilot while it mulligans.",
+	"- phases: for each phase, a note for your own turn and one for the opponent's, only where there is something to do or avoid. One or two sentences each. Read by the pilot in that window.",
+	"- cards: notes only for cards with a real choice or trap: when to play it, when not to, what to hold it for. Read by the pilot when an option names the card.",
+	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",
+	"Every default comes with the visible condition that reverses it. Name cards and numbers. No preamble.",
+	"",
+	"Call submit once with the brief. Nothing you write as text is read.",
+].join("\n");

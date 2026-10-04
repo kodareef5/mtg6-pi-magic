@@ -95,16 +95,16 @@ plan costs some quality and a refused game costs everything.
 
 ### What each call is for
 
-**`pregame` runs once, as one concurrent wave per seat.** Not one question. A
-single "tell me your strategy" call produces a paragraph that then gets pasted
-into every decision, and a decision about blocking does not want the mulligan
-reasoning. So the unit of the pass is the unit of injection: every answer is a
-snippet filed under where it will be read. The deck's strengths, the pairs meant
-to combine, the opening with its named edge cases, one per phase with a decision
-window, and one per card that earns a note. Card notes are keyed by name and
-cost nothing on a turn where the card never appears, which is why they are per
-card rather than per group. A card earns a note mechanically before a call is
-spent, so a basic land gets none.
+**`pregame` runs once per seat, and is the deepest thinking a seat gets.** Four
+analysts work at once on separate questions (deck and resources, the matchup,
+the opening, a challenger looking for traps), with both registered lists, exact
+opening-hand odds computed in code, and tools to look up a rule or a card. One
+synthesis then reconciles them into the brief; a failed analyst reaches it as a
+failure, never as an invented answer. Both seats prepare at the same time, so the
+wall time is the slowest analyst plus one synthesis. The brief is filed by where
+it is read: strategy reads it all; the pilot reads the opening policy while it
+mulligans, the note for its phase on whose turn it is, and notes for the cards
+its options name. A decision about blocking does not want the mulligan reasoning.
 
 Registered deck lists are public. Every seat and spectator receives names and
 counts, never the assignment of those names to hidden objects or library order.

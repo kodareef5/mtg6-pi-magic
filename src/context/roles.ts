@@ -66,8 +66,8 @@ export const ROLES: Record<
 		suggested: "gpt-6-luna:low",
 		why:
 			"Luna while the game is being built: testing wants cheap and fast. A game that " +
-			"plays well on luna plays better on a stronger model. This is a deck reading, a " +
-			"dozen small concurrent questions rather than one large one.",
+			"plays well on luna plays better on a stronger model. Four analysts per seat at " +
+			"once, then one synthesis, once per game; the deepest thinking a seat gets.",
 		instead: "gpt-6.1-sol:low or gpt-6-astra:low, slower and stronger. Benchmark it before paying for it",
 	},
 	strategy: {

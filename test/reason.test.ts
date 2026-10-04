@@ -16,7 +16,7 @@ import { test } from "node:test";
 
 import type { Api, Model } from "@earendil-works/pi-ai";
 
-import { asks, brief, needsNote, policyFrom } from "../src/context/brief.ts";
+import { brief, current, emptyBrief, needsNote } from "../src/context/brief.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
@@ -26,6 +26,8 @@ import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
 import { worthPlanning } from "../src/context/strategy.ts";
 import { load as loadCards } from "../src/core/cards.ts";
+import { load as loadRules } from "../src/core/rules.ts";
+import { splits } from "../src/core/odds.ts";
 import { fork, linesOf, open, preparedIn, read, reopen, replay, rowsOf } from "../src/core/journal.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
@@ -67,106 +69,97 @@ const table = () => start(standard, [
 	{ name: "B", deck: deck("Dimir Control") },
 ], "reasoning");
 
-test("the pregame asks several questions at once and files each answer where it is read", async () => {
+/** What an analyst submits, and what the synthesis submits, in the shape the pregame checks. */
+const FINDINGS = { conclusions: [{ claim: "Develop the Elves before anything else.", evidence: ["4 Llanowar Elves", "16 one-drops"], assumptions: ["no early removal"],
+	changesWhen: "the opponent shows removal on turn one", destination: "route" }], unsure: [] };
+const BRIEF = { role: "Beatdown: force the exchange before control stabilizes.", route: "Curve out and pump the biggest creature.", recovery: "Rebuild with Elves.",
+	matchup: "Their removal is sorcery-speed; attack around it.", opening: "Keep two to four lands with a one-drop.",
+	phases: { "precombat-main": { own: "Play a land, then a creature.", opponent: "Hold Veil for a removal spell." } },
+	cards: { "Snakeskin Veil": "Hold it for their removal, not for a block." }, traps: ["Pumping into an open blocker."] };
+/** Pi's stream as the pregame meets it: each analyst submits findings, the synthesis submits the brief. */
+function pregame(options: { hold?: Promise<void>; fail?: string; brief?: object } = {}) {
+	const tasks: string[] = [], seen: string[] = [];
+	const stream: Stream = (_model, context) => {
+		const task = String((context.messages[1] as { content?: unknown } | undefined)?.content ?? "");
+		const synthesis = task.includes("Write the brief now");
+		tasks.push(task);
+		seen.push(JSON.stringify(context.messages));
+		const failing = options.fail && task.includes(options.fail);
+		return { result: async () => {
+			if (options.hold && !synthesis) await options.hold;
+			const usage = { input: 100, output: 20, cacheRead: 10, cacheWrite: 0, reasoning: 8, totalTokens: 130, cost: { input: 0.0001, output: 0.00004, cacheRead: 0, cacheWrite: 0, total: 0.00014 } };
+			if (failing) return { content: [{ type: "text", text: "Prose instead of findings." }], stopReason: "stop", usage };
+			return { content: [{ type: "toolCall", id: `call-${tasks.length}`, name: "submit", arguments: { value: synthesis ? options.brief ?? { ...BRIEF, cards: {} } : FINDINGS } }], stopReason: "toolUse", usage };
+		} };
+	};
+	return { stream, tasks, seen };
+}
+
+test("the pregame asks four analysts at once, then one synthesis, and files the brief where it is read", async () => {
 	const built = table();
 	const [me, them] = built.seats;
-
-	// A land deck earns no card note, because the engine already knows what a
-	// basic land does. That is the filter working, not a missing feature.
 	assert.equal(needsNote(universe.cards.get("Forest")!), false);
 	assert.equal(needsNote(universe.cards.get("Cavern of Souls")!), true);
 
-	const wave = asks(me!, [them!], universe, { format: standard.name });
-	const keys = wave.map((ask) => ask.key);
-	assert.deepEqual(keys.slice(0, 3), ["deck", "combos", "opening"]);
-	assert.ok(keys.includes("against:1"));
-	for (const phase of ["beginning", "precombat-main", "combat", "postcombat-main", "ending"]) {
-		assert.ok(keys.includes(`phase:${phase}`), phase);
-	}
-	assert.equal(keys.some((key) => ["card:Forest", "card:Island", "card:Swamp"].includes(key)), false, "no card note for basics");
-	assert.ok(keys.includes("card:Snakeskin Veil"), "a card with something to say gets its own note");
-	assert.equal(new Set(keys).size, keys.length, "no question asked twice");
-
-	// Registered composition is public by default, without hands or object ids.
-	const sent = wave.map((ask) => ask.user).join("\n");
-	assert.match(sent, /public registered deck/);
-	assert.match(sent, /4 Qiqirn Merchant/, "the opponent's registered list is in the question");
-	for (const id of built.things.keys()) assert.equal(sent.includes(id), false);
-	// Mulligan guidance is asked with the curve and the seat count in front of it.
-	const opening = wave.find((ask) => ask.key === "opening")!.user;
-	assert.match(opening, /60 cards, 20 lands\. Spells by cost: 1:16 2:12 3:2 4:8 5:2\./);
-	assert.match(opening, /There are 2 seats/);
-	assert.match(opening, /no land/);
-
-	// Retain the existing closed-list branch for a future game setting.
-	const closed = asks(me!, [them!], universe, { format: standard.name, openLists: false });
-	assert.equal(closed.some((ask) => ask.user.includes("Swamp")), false);
-
+	let release = () => {};
+	const hold = new Promise<void>((resolve) => { release = resolve; });
+	const { stream, tasks } = pregame({ hold, brief: BRIEF });
 	const counted = tally();
-	const { stream, sent: prompts } = chat((user) => `answer for ${user.slice(-40)}`);
-	const written = await brief(me!, [them!], universe, reasoner({ role: "pregame", stream, model: sol, thinking: "low", tally: counted, backoffMs: 0 }), { format: standard.name });
-
-	assert.equal(prompts.length, wave.length, "one call per question");
-	assert.ok(written.deck.length > 0);
-	assert.ok(written.combos.length > 0);
-	assert.ok(written.opening.length > 0);
-	assert.ok(written.against["1"]!.length > 0);
-	assert.ok(written.phases.combat!.length > 0);
-	assert.deepEqual(Object.keys(written.cards).sort(), ["Ankle Biter", "Colossadactyl", "Elvish Archdruid", "Fanatical Strength", "Giant Growth", "Llanowar Elves", "Snakeskin Veil"],
-		"a note for each card with rules text, none for a vanilla creature or a basic");
+	const writing = brief(me!, [them!], universe, () => reasoner({ role: "pregame", stream, model: sol, thinking: "low", tally: counted, backoffMs: 0 }), { format: standard.name });
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	assert.equal(tasks.length, 4, "all four analysts started before any finished");
+	assert.deepEqual(tasks.map((task) => task.split(".")[0]).sort(), ["CHALLENGE", "DECK AND RESOURCES", "MATCHUP", "OPENING"]);
+	release();
+	const written = await writing;
+	assert.equal(tasks.length, 5, "then one synthesis");
+	assert.match(tasks[4]!, /"deck":\{"conclusions"/, "the synthesis reads every analyst's findings");
+	assert.deepEqual({ ...written, seat: undefined, version: undefined, gaps: undefined }, { ...BRIEF, seat: undefined, version: undefined, gaps: undefined });
+	assert.equal(written.version, 2);
 	assert.deepEqual(written.gaps, []);
+	assert.deepEqual(current({ seat: 0, version: 1, deck: "An older brief." }, 0).gaps, ["The carried brief is an older shape and was not used."]);
 
-	// Every call is metered with the ceiling it asked for, which is what some
-	// routes price against.
-	assert.equal(counted.spent().length, wave.length);
-	for (const spend of counted.spent()) {
-		assert.equal(spend.ceiling, CEILING.pregame);
-		assert.equal(spend.thinking, "low");
-		assert.equal(spend.usage?.reasoning, 8);
-		assert.ok(spend.about.length > 0);
-	}
-	for (const prompt of prompts) assert.equal(prompt.maxTokens, CEILING.pregame);
-	const reading = bill(counted.spent()).join("\n");
-	assert.match(reading, /pregame/);
-	assert.match(reading, /thinking/);
-	assert.match(reading, /cached/);
-	assert.match(reading, /total/);
-
-	// The deck-level lines become the seat's policy, which the core already holds.
-	assert.equal(policyFrom(written).seat, 0);
-	assert.equal(policyFrom(written).winsBy, written.deck);
+	const spent = counted.spent();
+	assert.deepEqual(spent.map((one) => one.ceiling), [2000, 2000, 2000, 2000, 4000], "an analyst's ceiling, then the synthesis's");
+	assert.ok(spent.every((one) => one.thinking === "low" && one.usage?.reasoning === 8));
+	assert.match(bill(spent).join("\n"), /pregame/);
 });
 
-test("a failed question is a gap and the game still starts", async () => {
+test("the analysts read both lists and computed odds, look rules up, and a failed analyst reaches the synthesis as a failure", async () => {
 	const built = table();
-	const counted = tally();
-	const { stream } = chat((user) => (user.includes("keepable seven") ? "" : "fine"));
-	const traces: CallTrace[] = [];
-	let dropped = false;
-	const observed = traceInference({ classify: async () => { throw new Error("No classifier in this pass"); },
-		stream: (model, context, options) => {
-			if (!dropped && String((context.messages[0] as { content?: unknown }).content).includes("keepable seven")) {
-				dropped = true;
-				return { result: async () => { throw new Error("fixture connection dropped"); } };
-			}
-			return stream(model, context, options);
-		},
-	}, (event) => traces.push(event));
-	const written = await brief(built.seats[0]!, [built.seats[1]!], universe, reasoner({ role: "pregame", stream: observed.stream, model: sol, tally: counted, backoffMs: 0 }), { format: standard.name });
-	assert.equal(written.opening, "", "the snippet is missing");
+	const rules = loadRules("rules/cr.tsv");
+	const { stream, tasks, seen } = pregame({ fail: "OPENING" });
+	const written = await brief(built.seats[0]!, [built.seats[1]!], universe, () => reasoner({ role: "pregame", stream, model: sol, tally: tally(), backoffMs: 0 }), { format: standard.name, rules });
+	const facts = seen[0]!;
+	assert.match(facts, /public registered deck/);
+	assert.match(facts, /4 Qiqirn Merchant/, "the opponent's registered list is in front of every analyst");
+	assert.match(facts, /60 cards, 20 lands/);
+	assert.match(facts, /Lands in an opening seven: 0: \d+\.\d%/);
+	for (const id of built.things.keys()) assert.equal(facts.includes(`"${id}"`), false, "no object ids");
 	assert.equal(written.gaps.length, 1);
-	assert.match(written.gaps[0]!, /mulligan guidance/);
-	assert.ok(written.deck.length > 0, "the other answers still arrived");
-	// Tried again before giving up, and every attempt is in the bill, or the run
-	// understates what it was charged for.
-	const failed = counted.spent().filter((spend) => spend.failed);
-	assert.equal(failed.length, 3, "three attempts at the one question");
-	for (const attempt of failed) assert.match(attempt.about, /mulligan guidance/);
-	const requests = traces.filter((event) => event.event === "request");
-	assert.equal(requests.length, counted.spent().length, "capture includes every retry");
-	const error = traces.find((event) => event.event === "error");
-	assert.ok(error?.event === "error" && error.error.includes("fixture connection dropped"));
-	assert.ok(requests.some((request) => request.id === error!.id), "a thrown call keeps its request correlation");
+	assert.match(written.gaps[0]!, /^opening:.*did not submit/);
+	assert.match(tasks.at(-1)!, /"opening":\{"failed"/, "the synthesis is told the opening analyst failed");
+	assert.equal(written.route, BRIEF.route, "the brief is still written from the others");
+
+	// Lookups answer rather than throw.
+	// Each analyst looks one thing up, then submits; the synthesis submits the brief.
+	const lookup = (name: string, args: Record<string, unknown>) => {
+		const answers: string[] = [];
+		const asking: Stream = (_model, context) => {
+			const last = context.messages.at(-1) as { role?: string };
+			if (last.role === "toolResult") answers.push(JSON.stringify(last));
+			const fresh = context.messages.length === 2 && !String((context.messages[1] as { content?: unknown }).content).includes("Write the brief now");
+			const value = String((context.messages[1] as { content?: unknown }).content).includes("Write the brief now") ? { ...BRIEF, cards: {} } : FINDINGS;
+			return { result: async () => fresh ? { content: [{ type: "toolCall", id: "a", name, arguments: args }], stopReason: "toolUse" }
+				: { content: [{ type: "toolCall", id: "b", name: "submit", arguments: { value } }], stopReason: "toolUse" } };
+		};
+		return { asking, answered: () => answers.join("\n") };
+	};
+	for (const [name, args, expected] of [["rule", { query: "702.19b" }, /702\.19b/], ["rule", { query: "no such words anywhere" }, /Nothing in the rules matches/],
+		["card", { name: "Snakeskin Veil" }, /hexproof/], ["card", { name: "Not A Card" }, /No Standard card is named/]] as const) {
+		const probe = lookup(name, args);
+		await brief(built.seats[0]!, [built.seats[1]!], universe, () => reasoner({ role: "pregame", stream: probe.asking, model: sol, tally: tally(), backoffMs: 0 }), { format: standard.name, rules });
+		assert.match(probe.answered(), expected);
+	}
 });
 
 test("a brief snippet reaches the decision and a card note only when its card is visible", async () => {
@@ -183,15 +176,12 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		apply(built, pending.options[0]!.id, "engine", "forced");
 	}
 
-	const written = {
-		seat: 0, version: 1,
-		deck: "Green Stompy curves out and pumps its biggest creature.",
-		combos: "No combinations.",
+	const written = { ...emptyBrief(0),
+		route: "Green Stompy curves out and pumps its biggest creature.",
+		matchup: "Expect to be behind on everything.",
 		opening: "Keep any seven.",
-		against: { "1": "Expect to be behind on everything." },
-		phases: { "precombat-main": "Play a land. There is nothing else." as string },
+		phases: { "precombat-main": { own: "Play a land. There is nothing else.", opponent: "Nothing to do on their main phase." } },
 		cards: { Forest: "It taps for green.", "Cavern of Souls": "Name the tribe you cast most." },
-		gaps: [],
 	};
 	const recaps = [{ turn: 1, active: "A", line: "A played a Forest.", from: 0, to: 4 }];
 	const decision = nextDecision(built)!;
@@ -201,7 +191,8 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		{ brief: written, recaps },
 	);
 
-	assert.ok(packet.guidance.includes("Play a land. There is nothing else."), "this window's note is in");
+	assert.ok(packet.guidance.includes("Play a land. There is nothing else."), "this window's note, for whose turn it is");
+	assert.equal(packet.guidance.includes("Nothing to do on their main phase."), false);
 	assert.ok(packet.guidance.some((line) => line.startsWith("Forest:")), "the note for a card an option names is in");
 	assert.equal(packet.guidance.some((line) => line.startsWith("Cavern")), false, "an absent card costs nothing");
 	assert.equal(JSON.stringify(packet).includes("Green Stompy curves out"), false, "the deck reading is strategy's, not the pilot's");
@@ -318,7 +309,7 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 			},
 		};
 	};
-	const { stream: thinking } = chat(() => "Play lands. Nothing else is possible.");
+	const { stream: thinking } = pregame();
 
 	let picks = 0;
 	const inference = {
@@ -350,8 +341,8 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	const traces: CallTrace[] = [];
 	const observed = traceInference(inference, (event) => traces.push(event));
 	const seated = await seatTable(built, async () => parts, observed, universe, { format: standard.name });
-	assert.ok(seated.chronicle.briefs[0]?.deck, "seat 0 was briefed");
-	assert.ok(seated.chronicle.briefs[1]?.deck, "seat 1 was briefed");
+	assert.ok(seated.chronicle.briefs[0]?.route, "seat 0 was briefed");
+	assert.ok(seated.chronicle.briefs[1]?.route, "seat 1 was briefed");
 
 	const outcome = await run(built, seated, observed, parts[2]!, undefined);
 	const ms = Date.now() - began;
@@ -440,9 +431,7 @@ test("a carried brief keeps its failures, and a stuck recap cannot lose a saved 
 	};
 
 	// A brief carried from a clone, with a question that had failed in the parent.
-	const scarred = { seat: 0, version: 1, deck: "Green Stompy.", combos: "None.",
-		opening: "", against: {}, phases: {}, cards: {},
-		gaps: ["mulligan guidance: the model fell over"] };
+	const scarred = { ...emptyBrief(0), route: "Green Stompy.", gaps: ["opening: the model fell over"] };
 
 	const journal = open(join(dir, "child.jsonl"), {
 		id: "child", format: standard.name, seed: "reasoning",
@@ -459,7 +448,7 @@ test("a carried brief keeps its failures, and a stuck recap cannot lose a saved 
 
 	// Carried as given: a clone is the same game continued, so there is nothing
 	// to check it against. But its failures are still this run's failures.
-	assert.equal(seated.chronicle.briefs[0]!.deck, "Green Stompy.");
+	assert.equal(seated.chronicle.briefs[0]!.route, "Green Stompy.");
 	assert.equal(seated.tally.spent().filter((spend) => spend.role === "pregame").length, 0, "not re-asked");
 	assert.match(built.gaps.join(" "), /brief \(carried\).*the model fell over/);
 	assert.ok(degraded(built, seated), "a carried failure is not a clean run");
@@ -493,7 +482,7 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 	const jev = { type: "classifier" as const, id: "jev-latest", name: "Jev", api: "typesafe-system-one",
 		provider: "typesafe", baseUrl: "x", input: ["text" as const],
 		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 64000 };
-	const talk = chat(() => "A land, and a pass.");
+	const talk = pregame();
 	const inference = {
 		classify: (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string> }> }) => {
 			const ids = Object.keys(request.questions.pick!.criteria);
@@ -557,7 +546,7 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 	const again = await seatTable(back.table, async () => off, inference, universe, {
 		format: standard.name, journal: childJournal, prepared: back.prepared,
 	});
-	assert.equal(again.chronicle.briefs[0]!.deck, seated.chronicle.briefs[0]!.deck, "the carried plan survived");
+	assert.equal(again.chronicle.briefs[0]!.route, seated.chronicle.briefs[0]!.route, "the carried plan survived");
 	assert.equal(again.tally.spent().filter((spend) => spend.role === "pregame").length, 0, "not re-asked");
 	assert.equal(preparedIn(read(childPath).lines).length, 2, "and not written a second time");
 
@@ -603,4 +592,15 @@ test("work takes its answer only through submit, and tells the model what was wr
 
 	const stubborn = reasoner({ role: "strategy", stream: () => ({ result: async () => ({ content: [{ type: "text", text: "Prose." }], stopReason: "stop" }) }), model: sol, tally: tally(), backoffMs: 0 });
 	await assert.rejects(stubborn.work("seat plan", { system: "S", user: "facts" }, { submit, turns: 2 }), /did not submit an accepted answer/);
+});
+
+test("opening-hand splits are exact: they match counting every hand", () => {
+	// Six cards: two lands, one cheap spell, three others. Every three-card hand, counted.
+	const deck = ["L", "L", "C", "O", "O", "O"], hands: string[][] = [];
+	for (let a = 0; a < 6; a++) for (let b = a + 1; b < 6; b++) for (let c = b + 1; c < 6; c++) hands.push([deck[a]!, deck[b]!, deck[c]!]);
+	for (const { counts, chance } of splits([2, 1, 3], 3)) {
+		const matching = hands.filter((hand) => ["L", "C", "O"].every((kind, at) => hand.filter((card) => card === kind).length === counts[at])).length;
+		assert.ok(Math.abs(chance - matching / hands.length) < 1e-12, `${counts}`);
+	}
+	assert.ok(Math.abs(splits([2, 1, 3], 3).reduce((sum, one) => sum + one.chance, 0) - 1) < 1e-12);
 });

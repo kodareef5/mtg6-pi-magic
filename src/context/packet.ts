@@ -102,7 +102,7 @@ export function focus(
 	const brief = context.brief;
 	const named = decision.options.map((option) => `${option.label} ${option.shows ?? ""}`).join("\n");
 	const guidance = [
-		view.window.kind === "opening" ? brief?.opening : brief?.phases?.[view.window.phase],
+		view.window.kind === "opening" ? brief?.opening : brief?.phases?.[view.window.phase]?.[view.window.active === seat ? "own" : "opponent"],
 		...Object.entries(brief?.cards ?? {}).filter(([card]) => named.includes(card)).map(([card, note]) => `${card}: ${note}`),
 	].filter((line): line is string => !!line && line.length > 0);
 
