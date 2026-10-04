@@ -1,7 +1,8 @@
 # Combat, characteristics, and what to automate
 
-Design notes for combat and derived characteristics. The layer walk, attack and
-block choices, and damage assignment are unfinished. Rule numbers refer to the
+Design notes for combat and derived characteristics. The layer walk is
+implemented in `src/core/characteristics.ts`; attack and block choices and
+damage assignment are unfinished. Rule numbers refer to the
 committed `rules/cr.tsv`; these notes do not describe working combat support.
 
 ## Nothing is calculated and stored

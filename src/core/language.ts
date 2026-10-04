@@ -244,6 +244,8 @@ export const EventSchema = of("Event");
 export const EffectSchema = of("Effect");
 export const InstructionSchema = of("Instruction");
 export const RegistrationSchema = of("Registration");
+export const ModificationSchema = of("Modification");
+export const TokenSpecSchema = of("TokenSpec");
 
 export const RefSchema = object({ id: text, incarnation: natural });
 const seatSide = one("self", "opponent", "any");
@@ -330,6 +332,8 @@ export type GameEvent = Static<typeof EventSchema>;
 export type Effect = Static<typeof EffectSchema>;
 export type Instruction = Static<typeof InstructionSchema>;
 export type Registration = Static<typeof RegistrationSchema>;
+export type Modification = Static<typeof ModificationSchema>;
+export type TokenSpec = Static<typeof TokenSpecSchema>;
 export type Procedure = Static<typeof ProcedureSchema>;
 export type Package = Static<typeof PackageSchema>;
 

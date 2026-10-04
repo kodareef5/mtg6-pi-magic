@@ -103,13 +103,15 @@ without giving anyone priority. Only completion returns to state-based checks
 and then the active player's priority. One continuation is delegated only when
 the accepted procedure explicitly says so; it is never forced by a shortlist.
 
-Printed type, mana cost and power/toughness come from the pinned card file
-through `printed.ts`, read on every use and never stored on an object. A model's
-claim never supplies them. The lethal-damage check reads printed toughness, so
-it is valid only for unmodified creatures. Tokens, face-down and animated
-objects get their characteristics from effects and need a characteristics
-reader. Do not silently omit counters, layers, protection, replacements or
-entry instructions to make another card fit.
+Characteristics are read through the layers by `characteristics.ts` on every
+use and never stored on an object: the printed card or token spec, then type
+changes, then abilities, then power and toughness with counters, by timestamp
+(613). A model's claim never supplies the printed values. Registrations and
+labels with a change are the effects; dependency (613.8) is approximated by
+dropping an effect whose ability was removed earlier in the walk. State-based
+actions, mana, sickness and the view all read the result. Face-down objects
+have no characteristics yet. Do not silently omit counters, layers,
+protection, replacements or entry instructions to make another card fit.
 
 Listing a forced action does not apply it. The loop applies the listed group
 and asks again to discover cascading actions. Cleanup likewise remains pending

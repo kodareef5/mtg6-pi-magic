@@ -24,7 +24,7 @@ import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
 import type { Instruction, Procedure } from "./work-language.ts";
-import type { Registration } from "./language.ts";
+import type { Modification, Registration, TokenSpec } from "./language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -55,6 +55,10 @@ export type Thing = {
 	entered?: number;
 	/** What it registered as it entered: public, and gone when it leaves. docs/SYNTAX.md. */
 	registrations?: Registration[];
+	/** A token's characteristics, from the effect that made it. A token has no card. */
+	token?: TokenSpec;
+	/** The object an Aura or Equipment is attached to. */
+	attached?: ObjectRef;
 	owner: SeatId;
 	controller: SeatId;
 	zone: Zone;
@@ -65,6 +69,8 @@ export type Thing = {
 	counters: Record<string, number>;
 	/** Marked damage. Not a counter. Wiped at cleanup. */
 	damage: number;
+	/** Dealt damage by a source with deathtouch since the last state check (704.5h). */
+	deathtouched?: true;
 };
 
 /**
@@ -97,23 +103,41 @@ export type Activation = {
 	instructions: Instruction[];
 	delegate: boolean;
 };
+/** Who is attacking whom and who blocks what, from declaration until combat ends (506-511). */
+export type Combat = {
+	attackers: { id: ObjectId; incarnation: number; defending: SeatId }[];
+	blockers: { id: ObjectId; incarnation: number; blocking: ObjectRef[] }[];
+};
+
 /** A resolution can pause for its controller or another player, with no priority. */
 export type Resolution = { object: ObjectId; instruction: number; remaining: number;
 	/** 608.2b: every announced target was illegal as resolution began. */
 	lost?: boolean };
 
-/** The notepad. Expires on its own; nobody has to remember to erase it. */
+/**
+ * The notepad. Public, and it expires on its own; nobody has to remember to
+ * erase it. A note on an object belongs to that incarnation and is gone when the
+ * object changes zones.
+ *
+ * A label is what a player writes beside a card: "power doubled until end of
+ * turn". With a `change` the layer walk applies it; without one it is
+ * information for the players and the judge. A register note gives an object an
+ * ability after it entered. A link records "exiled with this".
+ */
 export type Note = {
 	id: string;
-	kind: "modification" | "restriction" | "requirement" | "replacement" | "delayed" | "marker" | "chosen" | "link" | "cost" | "permission";
-	source: ObjectId;
-	sourceIncarnation: number;
-	until: "end-of-turn" | "end-of-combat" | "source-leaves" | "indefinite" | string;
-	/** The terms, in the card language. design-ref/archive/SYNTAX.md. */
-	terms: unknown;
-	/** Rises with the clock, because "which of these two is newer" must have an answer. */
+	/** Who wrote it. */
+	by: SeatId;
+	until: "end-of-turn" | "end-of-combat" | "while-source" | "indefinite";
+	/** For `while-source`, and the exiling object of a link. */
+	source?: ObjectRef;
+	/** Rises with the clock, because "which of these two is newer" must have an answer (613.7). */
 	written: number;
-};
+} & (
+	| { kind: "label"; on: ObjectRef; text: string; change?: Modification }
+	| { kind: "register"; on: ObjectRef; registration: Registration }
+	| { kind: "link"; on: ObjectRef; source: ObjectRef }
+);
 
 /**
  * A turn is a proposal, not a script. Phases and steps can be skipped, repeated
@@ -252,6 +276,7 @@ export type Table = {
 	work: Record<SeatId, Workspace>;
 	workLog: WorkEntry[];
 	resolution: Resolution | null;
+	combat: Combat | null;
 };
 
 /**

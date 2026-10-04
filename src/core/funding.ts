@@ -5,7 +5,7 @@
  * a different payment and is offered too.
  */
 import { select } from "./agenda.ts";
-import { intrinsicMana, isCreature } from "./printed.ts";
+import { intrinsic } from "./characteristics.ts";
 import type { Mana } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Procedure } from "./work-language.ts";
@@ -22,7 +22,9 @@ type Yield = { colors: Color[]; claim: string; intrinsic?: true };
 type Unit = { key: string; id: string; label: string; yields: Yield[]; pool?: Mana; source?: SeenObject };
 
 const COLORS: Color[] = ["W", "U", "B", "R", "G"];
-const sick = (frame: Frame, object: SeenObject) => isCreature(frame.view.printed?.[object.card ?? ""]) && (object.entered ?? 0) >= (frame.view.began ?? 0);
+/** 302.6, read from what the seat sees: a creature that is not yet its controller's since its turn began, without haste. */
+export const sick = (frame: Frame, object: SeenObject) => !!object.traits?.types.includes("creature") && !object.traits.words.includes("haste") &&
+	(object.entered ?? 0) >= (frame.view.began ?? 0);
 /** Two objects are interchangeable only when every fact this seat can see about them matches. */
 export const sameness = (frame: Frame, object: SeenObject): string => [
 	object.card, object.zone, object.tapped, JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
@@ -49,8 +51,8 @@ function manaSources(frame: Frame, except?: string): Unit[] {
 	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
 		if (object.id === except || sick(frame, object)) continue;
 		const yields = [
-			...intrinsicMana(frame.view.printed?.[object.card ?? ""]).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
-			...(object.registrations ?? []).flatMap(produces),
+			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
+			...(object.traits?.registrations ?? []).flatMap(produces),
 		];
 		// A source whose abilities make different amounts is one unit per amount; the walk uses an object once.
 		for (const size of [...new Set(yields.map((one) => one.colors.length))]) {

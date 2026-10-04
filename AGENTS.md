@@ -209,7 +209,10 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard.
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
-   has the sublayers, taken from 613.4.
+   has the sublayers, taken from 613.4. **Implemented:** `characteristics.ts`
+   walks types, abilities and power/toughness from registrations, labels and
+   counters; state-based actions read it, including indestructible, deathtouch,
+   tokens, Auras, Equipment, counter cancelling and the legend rule as a choice.
 5. **Replacements**, including the ones on `enters`.
 
 The engine's main job is bulk one on one games, so that interesting positions
@@ -374,6 +377,8 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   entry.ts           what a permanent registers as it enters, frozen on the ledger row
   funding.ts         paying a cost: floating mana and mana abilities while paying
   procedures.ts      one offer path for drafts and default casts, activation terms
+  characteristics.ts the layer walk: what an object is now, never stored
+  selectors.ts       refs, selectors, amounts and conditions read against the table
   resolution.ts      remaining instructions and choices before a checkpoint
   pregame.ts           the opening procedure and its choices
   turn.ts, steps.ts    turn obligations, step order, and phase boundaries
@@ -444,8 +449,7 @@ verify every carried field against the source and refuse to pass on a mismatch.
   decision pending. Conservation and the judge must carry the weight that a
   fully informed move list would.
 - The rest of card meaning. Prepared procedures can cast a card from hand,
-  announce one creature or player target, and deal literal damage. Creature
-  checks read printed power and toughness, not a completed layer walk. Wider
+  announce one creature or player target, and deal literal damage. Wider
   targets, combat, triggers, replacements, restricted mana and complex costs
   remain unwritten. Most cards in the pinned lists need machinery that does
   not exist yet; `npm run matchup` stops at the first one it meets.

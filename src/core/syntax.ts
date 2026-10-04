@@ -2,8 +2,8 @@
  * supply instructions as needed; the table never compiles a deck's card text.
  */
 
-import type { SeatId } from "./types.ts";
-import type { Activation, Mana } from "./table.ts";
+import type { ObjectRef, SeatId } from "./types.ts";
+import type { Activation, Combat, Mana, Note } from "./table.ts";
 import type { Registration } from "./language.ts";
 
 /**
@@ -72,6 +72,16 @@ export type Change =
 	| { do: "resolution"; action: "begin"; what: string; lost?: boolean }
 	| { do: "resolution"; action: "next"; what: string; skip?: boolean; abort?: boolean }
 	| { do: "shuffle"; whose: SeatId }
+	/** Counters of one kind put on or, negative, removed. */
+	| { do: "counters"; what: string; kind: string; amount: number }
+	/** Attach to an object, or unattach with no `to`. */
+	| { do: "attach"; what: string; to?: ObjectRef }
+	/** Write on the notepad: a label, a registration added after entry, a link. Its id and timestamp come from the clock. */
+	| { do: "note"; note: DistributiveOmit<Note, "id" | "written"> }
+	/** A token outside the battlefield ceases to exist (704.5d). */
+	| { do: "cease"; what: string }
+	/** The finished declaration of attackers, one group (508.1). */
+	| { do: "attack"; attackers: Combat["attackers"] }
 	/**
 	 * A counter or flag that belongs to a seat rather than a card: poison,
 	 * energy, experience, and "tried to draw from an empty library", 704.5b.
@@ -111,3 +121,5 @@ export type Layer =
 	| "7c-modify"
 	/** Effects that switch power and toughness. 613.4d. */
 	| "7d-switch";
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

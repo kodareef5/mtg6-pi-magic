@@ -17,7 +17,7 @@ import { advanceTurn, turnBased } from "./turn.ts";
 import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
 import { commit } from "./commit.ts";
-import { cardsIn, playing, type Table, type LedgerRow } from "./table.ts";
+import { cardsIn, playing, type Table, type LedgerRow, type Thing } from "./table.ts";
 import type { Decision } from "./types.ts";
 import { resolving } from "./resolution.ts";
 import { attach } from "./entry.ts";
@@ -25,7 +25,7 @@ import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
 import { targetAvailable } from "./targets.ts";
 import { project } from "./view.ts";
-import { basePT, facts } from "./printed.ts";
+import { characteristics, has } from "./characteristics.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
@@ -172,29 +172,62 @@ function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 
 /**
  * Situation 6. Almost all of these need no decision: lethal damage kills, zero
- * life loses, and nobody is asked. The legend rule is the one that asks, and it
- * needs cards.
+ * life loses, and nobody is asked. The legend rule asks which to keep. Every
+ * action found in one check is one group (704.3), read through characteristics.
  */
 function stateBased(table: Table): Pending | null {
 	const losing = playing(table).filter((s) =>
 		s.life <= 0 || (s.marks["drew-from-empty"] ?? 0) > 0 || (s.marks.poison ?? 0) >= 10,
 	);
-	// Printed toughness only. Counters and continuous effects need the layer walk.
-	const dead = cardsIn(table, "battlefield").flatMap((object) => {
-		const body = basePT(facts(table, object));
-		return body && (body.toughness <= 0 || object.damage >= body.toughness) ? [{ object, zero: body.toughness <= 0 }] : [];
-	});
-	if (!losing.length && !dead.length) return null;
+	const changes: Change[] = [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const }))];
+	const field = cardsIn(table, "battlefield");
+	const gone = new Set<string>();
+	const leave = (object: Thing, reason: "state-based-action" | "destroy") => { gone.add(object.id); changes.push({ do: "move", what: object.id, to: "graveyard", reason }); };
+	for (const object of field) {
+		const traits = characteristics(table, object);
+		if (!traits?.types.includes("creature") || traits.toughness === undefined) continue;
+		// 704.5f, then 704.5g and 704.5h, which indestructible ignores.
+		if (traits.toughness <= 0) leave(object, "state-based-action");
+		else if ((object.damage >= traits.toughness || (object.deathtouched && object.damage > 0)) && !has(traits, "indestructible")) leave(object, "destroy");
+	}
+	for (const object of field) {
+		if (gone.has(object.id)) continue;
+		const traits = characteristics(table, object);
+		const host = object.attached && table.things.get(object.attached.id);
+		const attachedNow = !!host && host.incarnation === object.attached!.incarnation && host.zone === "battlefield";
+		// 704.5m: an Aura not attached to anything goes; 704.5n: Equipment off a creature falls off.
+		if (traits?.subtypes.includes("Aura") && !attachedNow) leave(object, "state-based-action");
+		else if (traits?.subtypes.includes("Equipment") && object.attached && (!attachedNow || !characteristics(table, host!)?.types.includes("creature"))) changes.push({ do: "attach", what: object.id });
+		// 704.5q.
+		const both = Math.min(object.counters["+1/+1"] ?? 0, object.counters["-1/-1"] ?? 0);
+		if (both) changes.push({ do: "counters", what: object.id, kind: "+1/+1", amount: -both }, { do: "counters", what: object.id, kind: "-1/-1", amount: -both });
+	}
+	// 704.5d.
+	for (const object of table.things.values()) if (object.token && object.zone !== "battlefield") changes.push({ do: "cease", what: object.id });
+	// 704.5j: the legend rule, one name at a time.
+	const legends = new Map<string, Thing[]>();
+	for (const object of field) {
+		const traits = characteristics(table, object);
+		if (gone.has(object.id) || !traits?.supertypes.includes("legendary")) continue;
+		const key = `${object.controller}|${traits.name}`;
+		legends.set(key, [...(legends.get(key) ?? []), object]);
+	}
+	const crowded = [...legends.values()].find((group) => group.length > 1);
+	if (!changes.length && !crowded) return null;
+	const seat = crowded?.[0]!.controller ?? losing[0]?.id ?? table.cursor.active;
+	const group: Move = {
+		option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: "Apply state-based actions" },
+		changes, reason: "state-based-action",
+	};
 	return {
 		situation: "state-based",
-		seat: losing[0]?.id ?? table.cursor.active,
-		question: "Apply state-based losses and creature deaths together.",
-		moves: [{
-			option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: "Apply state-based losses and creature deaths" },
-			changes: [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const })),
-				...dead.map(({ object, zero }) => ({ do: "move" as const, what: object.id, to: "graveyard" as const, reason: zero ? "state-based-action" as const : "destroy" as const }))],
-			reason: "state-based-action",
-		}],
+		seat,
+		question: crowded ? `Choose which ${characteristics(table, crowded[0]!)!.name} to keep; the rest go to the graveyard (704.5j).` : "Apply state-based actions together.",
+		moves: crowded ? crowded.map((keep) => ({
+			option: { id: `keep:${keep.id}`, label: `Keep ${keep.card ?? keep.token?.name} (${keep.id})`, objects: [{ id: keep.id, incarnation: keep.incarnation }] },
+			changes: [...changes, ...crowded.filter((other) => other !== keep).map((other) => ({ do: "move" as const, what: other.id, to: "graveyard" as const, reason: "state-based-action" as const }))],
+			reason: "state-based-action" as const,
+		})) : [group],
 	};
 }
 

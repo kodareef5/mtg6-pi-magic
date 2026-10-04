@@ -1,10 +1,11 @@
 /** Private equipment for a seat. Its revision and history are separate from card motion. */
 import type { Thing } from "./table.ts";
+import type { Traits } from "./characteristics.ts";
 import type { Recipe, TaskSpec, ObjectRef, DraftStep, WorkCommand } from "./work-language.ts";
 import type { Package } from "./language.ts";
 
-/** A projected object. `creature` is the printed base read at projection time. */
-export type SeenObject = Omit<Thing, "card"> & { card?: string; creature?: { power: number; toughness: number } };
+/** A projected object, with its characteristics as they are now. A face-down object has none. */
+export type SeenObject = Omit<Thing, "card"> & { card?: string; traits?: Traits };
 export type ReviewRun = {
 	occurrence: string;
 	stamp: string;

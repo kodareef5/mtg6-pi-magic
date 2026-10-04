@@ -10,8 +10,9 @@ import { select } from "./agenda.ts";
 import { project } from "./view.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
-import { fundings, covers, sameness, produces, type Cost } from "./funding.ts";
-import { facts, intrinsicMana, isCreature, manaCost } from "./printed.ts";
+import { fundings, covers, sameness, produces, sick, type Cost } from "./funding.ts";
+import { manaCost } from "./printed.ts";
+import { characteristics, intrinsic, sick as sickness } from "./characteristics.ts";
 import { seat, thing, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, Option } from "./types.ts";
 import type { Draft } from "./work.ts";
@@ -63,11 +64,10 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 	if (procedure.spell?.speed === "sorcery" && !mainWindow(frame)) return [];
 	if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= 1)) return [];
 	const fromHand = procedure.timing === "spell" || procedure.timing === "land";
-	const sick = (source: { card?: string; entered?: number }) => isCreature(frame.view.printed?.[source.card ?? ""]) && (source.entered ?? 0) >= (frame.view.began ?? 0);
 	// Identical objects are one source; the lowest id stands for the rest.
 	const seen = new Set<string>();
 	const sources = select(procedure.source, frame).filter((source) => source.card && source.zone === (fromHand ? "hand" : "battlefield") && source.controller === frame.seat &&
-		(!procedure.cost?.tap || (!source.tapped && !sick(source))) && !seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
+		(!procedure.cost?.tap || (!source.tapped && !sick(frame, source))) && !seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	const aimed = procedure.target ? targets(procedure.target, frame.view) : [undefined];
 	return sources.flatMap((source) => {
 		const cost = procedure.cost ?? (procedure.timing === "land" ? FREE : manaCost(frame.view.printed?.[source.card!]));
@@ -113,7 +113,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
 	const visible = view.objects?.find((object) => object.id === source.id && object.incarnation === source.incarnation);
 	if (!visible?.card || visible.zone !== (fromHand ? "hand" : "battlefield") || visible.controller !== controller) throw new Error("The prepared source is no longer available in this seat's expected zone.");
-	const sick = (id: string) => { const object = thing(table, id); return isCreature(facts(table, object)) && (object.entered ?? 0) >= table.cursor.began[controller]!; };
+	const sick = (id: string) => sickness(table, thing(table, id));
 	if (cost.tap && sick(source.id)) throw new Error("This creature has not been controlled since the turn began; its tap cost is unavailable.");
 	if (cost.tap && visible.tapped) throw new Error("The source was already tapped; its tap cost is unavailable.");
 	const pool = seat(table, controller).pool;
@@ -122,9 +122,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	for (const tap of funding) {
 		const object = view.objects?.find((one) => one.id === tap.source.id && one.incarnation === tap.source.incarnation);
 		if (!object || object.zone !== "battlefield" || object.controller !== controller || object.tapped || sick(object.id)) throw new Error("A mana source in the payment is unavailable.");
-		const intrinsic = intrinsicMana(facts(table, thing(table, object.id)));
-		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic.includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
-		const registered = (thing(table, object.id).registrations ?? []).flatMap(produces);
+		const traits = characteristics(table, thing(table, object.id));
+		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(traits).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
+		const registered = (traits?.registrations ?? []).flatMap(produces);
 		if (!tap.intrinsic && !registered.some((one) => one.colors.join() === tap.colors.join())) throw new Error("The source has no registered mana ability that makes that mana.");
 	}
 	if (new Set(paid).size !== paid.length || tapped.size !== (cost.tap ? 1 : 0) + funding.length || payment.some((mana) => !mana || mana.spendOnly) ||

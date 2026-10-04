@@ -16,6 +16,7 @@ import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
 import { printedFacts, shipped } from "./printed.ts";
+import { characteristics, has } from "./characteristics.ts";
 import type { Universe } from "./cards.ts";
 import { claim } from "./names.ts";
 import type { Change, Reason } from "./syntax.ts";
@@ -26,6 +27,7 @@ import {
 	playing,
 	seat,
 	thing,
+	type Note,
 	type Receipt,
 	type Table,
 } from "./table.ts";
@@ -72,6 +74,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		work: {},
 		workLog: [],
 		resolution: null,
+		combat: null,
 	};
 
 	const taken = new Set<string>();
@@ -162,6 +165,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.faceDown = false;
 				moving.counters = {};
 				moving.damage = 0;
+				delete moving.deathtouched;
+				delete moving.attached;
 				if (change.to === "battlefield") moving.entered = table.cursor.clock + 1;
 				else delete moving.entered;
 				if (change.to === "battlefield" && change.registers?.length) moving.registrations = structuredClone(change.registers);
@@ -177,9 +182,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				} else {
 					delete moving.position;
 				}
-				table.notes = table.notes.filter(
-					(note) => note.source !== moving.id || note.sourceIncarnation === moving.incarnation,
-				);
+				table.notes = table.notes.filter((note) => !(("on" in note && note.on.id === moving.id) ||
+					(note.until === "while-source" && note.source?.id === moving.id)));
 				break;
 			}
 			case "tap":
@@ -196,7 +200,12 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				break;
 			case "damage":
 				if ("player" in change.target) seat(table, change.target.player).life -= change.amount;
-				else thing(table, change.target.id).damage += change.amount;
+				else {
+					const hurt = thing(table, change.target.id);
+					hurt.damage += change.amount;
+					// 704.5h reads this at the next check; cleanup clears it with the damage.
+					if (deathtouch(table, change.source)) hurt.deathtouched = true;
+				}
 				break;
 			case "activate":
 				if (change.ability.timing === "spell") {
@@ -225,6 +234,26 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				}
 				break;
 			}
+			case "counters": {
+				const object = thing(table, change.what);
+				const count = (object.counters[change.kind] ?? 0) + change.amount;
+				if (count > 0) object.counters[change.kind] = count;
+				else delete object.counters[change.kind];
+				break;
+			}
+			case "attach":
+				if (change.to) thing(table, change.what).attached = structuredClone(change.to);
+				else delete thing(table, change.what).attached;
+				break;
+			case "note":
+				table.notes.push({ ...structuredClone(change.note), id: `note-${table.cursor.clock + 1}-${index}`, written: table.cursor.clock + 1 } as Note);
+				break;
+			case "cease":
+				table.things.delete(change.what);
+				break;
+			case "attack":
+				table.combat = { attackers: structuredClone(change.attackers), blockers: [] };
+				break;
 			case "change-life":
 				seat(table, change.who).life += change.amount;
 				break;
@@ -355,7 +384,7 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 			cursor.visit += 1;
 			for (const s of table.seats) s.pool = s.pool.filter((mana) => mana.persists);
 			if (step === "cleanup") {
-				for (const thing of table.things.values()) thing.damage = 0;
+				for (const thing of table.things.values()) { thing.damage = 0; delete thing.deathtouched; }
 				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
 			}
 			if (step === "end-of-combat") table.notes = table.notes.filter((note) => note.until !== "end-of-combat");
@@ -413,4 +442,10 @@ export function random(table: Table, bound: number, stream = "play"): number {
 	const digest = createHash("sha256").update(`${table.rng.seed}:${stream}:${n}`).digest();
 	table.rng.calls[stream] = n + 1;
 	return digest.readUInt32BE(0) % bound;
+}
+
+/** A source with deathtouch, read as it is now or, gone, as it last was on the battlefield. */
+function deathtouch(table: Table, source: string): boolean {
+	const now = table.things.get(source);
+	return !!now && has(characteristics(table, now), "deathtouch");
 }

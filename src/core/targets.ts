@@ -7,7 +7,7 @@ export type Target = NonNullable<Activation["target"]>;
 export function targets(rule: Activation["targetRule"], view: SeatView): { target: Target; label: string }[] {
 	if (!rule) return [];
 	return [
-		...(rule !== "player" ? (view.objects ?? []).filter((object) => object.zone === "battlefield" && object.creature && !object.faceDown)
+		...(rule !== "player" ? (view.objects ?? []).filter((object) => object.zone === "battlefield" && object.traits?.types.includes("creature") && !object.faceDown)
 			.map((object) => ({ target: { id: object.id, incarnation: object.incarnation }, label: `${object.card} (${object.id}@${object.incarnation})` })) : []),
 		...(rule !== "creature" ? (view.pools ?? []).map(({ seat }) => ({ target: { player: seat }, label: `seat ${seat}` })) : []),
 	];

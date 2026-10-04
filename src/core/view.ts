@@ -17,12 +17,12 @@
 import { cardsIn, seat, type Receipt, type Table, type Thing } from "./table.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
-import { basePT, facts } from "./printed.ts";
+import { characteristics } from "./characteristics.ts";
 import type { Frame, SeatView, Viewer, Window } from "./types.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
-const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.ability?.claim ?? "an unnamed object" : "an unknown card";
+const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.token?.name ?? thing.ability?.claim ?? "an unnamed object" : "an unknown card";
 
 function window(table: Table): Window {
 	if (table.outcome) return { kind: "finished" };
@@ -82,6 +82,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			permanent.tapped ? "tapped" : null,
 			permanent.damage ? `${permanent.damage} damage marked` : null,
 			...Object.entries(permanent.counters).map(([kind, n]) => `${n} ${kind}`),
+			...table.notes.flatMap((note) => note.kind === "label" && note.on.id === permanent.id && note.on.incarnation === permanent.incarnation ? [`"${note.text}" until ${note.until}`] : []),
 		].filter(Boolean);
 		lines.push(
 			`  ${publicName(permanent)} (${seat(table, permanent.controller).name})` +
@@ -116,9 +117,9 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		.filter((item) => PUBLIC.has(item.zone) || (viewer !== "spectator" && item.zone === "hand" && item.owner === viewer))
 		.map((item) => {
 			const { card, ...seen } = structuredClone(item);
-			// Read from printed facts on every projection, never stored on the object.
-			const creature = item.zone === "battlefield" ? basePT(facts(table, item)) : undefined;
-			return item.faceDown ? seen : { ...seen, card, ...(creature ? { creature } : {}) };
+			// Read through the layers on every projection, never stored on the object.
+			const traits = characteristics(table, item);
+			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}) };
 		});
 	if (table.resolution) lines.push(`Resolving ${table.resolution.object}, instruction ${table.resolution.instruction + 1}. Nobody has priority during this choice.`);
 	const names = [...new Set(objects.flatMap((object) => "card" in object && object.card ? [object.card] : []))].sort();
@@ -188,6 +189,22 @@ export function describe(table: Table, receipt: Receipt): string {
 				break;
 			case "mark-player":
 				parts.push(`${seat(table, change.who).name}: ${change.key} +${change.add}`);
+				break;
+			case "counters":
+				parts.push(`${change.amount < 0 ? "removed" : "put"} ${Math.abs(change.amount)} ${change.kind} ${change.amount < 0 ? "from" : "on"} ${publicName(receipt.before[change.what])}`);
+				break;
+			case "attach":
+				parts.push(change.to ? `attached ${publicName(receipt.before[change.what])} to ${publicName(table.things.get(change.to.id) ?? receipt.before[change.to.id])}` : `unattached ${publicName(receipt.before[change.what])}`);
+				break;
+			case "note":
+				if (change.note.kind === "label") parts.push(`labelled ${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])}: ${change.note.text}`);
+				if (change.note.kind === "register") parts.push(`${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])} registered: ${change.note.registration.basis}`);
+				break;
+			case "cease":
+				parts.push(`${publicName(receipt.before[change.what])} ceased to exist`);
+				break;
+			case "attack":
+				parts.push(`attacking: ${change.attackers.map((one) => publicName(receipt.before[one.id] ?? table.things.get(one.id))).join(", ")}`);
 				break;
 			case "end-game":
 				parts.push(`${seat(table, change.who).name} ${change.result}s the game`);

@@ -209,9 +209,10 @@ test("responses resolve newest first and a pending choice closes priority withou
 	assert.equal(table.cursor.steps[0], "upkeep", "resolution did not advance the step");
 
 	const real = castElf(), creature = cardsIn(real, "battlefield").find((object) => object.card === "Llanowar Elves")!;
-	assert.equal("creature" in creature, false, "printed characteristics are read, never stored on the object");
-	assert.deepEqual(project(real, 1).objects!.find((object) => object.id === creature.id)!.creature, { power: 1, toughness: 1 },
-		"every seat reads the printed base toughness of a public creature");
+	assert.equal("traits" in creature, false, "characteristics are read, never stored on the object");
+	const seen = project(real, 1).objects!.find((object) => object.id === creature.id)!.traits!;
+	assert.deepEqual([seen.power, seen.toughness, seen.types, seen.subtypes], [1, 1, ["creature"], ["Elf", "Druid"]],
+		"every seat reads the characteristics of a public creature");
 	assert.equal(real.things.size, 120, "casting and resolving preserved every registered card");
 	advance(real);
 	const tapElf = manaProcedure("Llanowar Elves", "G");
