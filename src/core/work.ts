@@ -1,7 +1,7 @@
 /** Private equipment for a seat: its accepted plan. Its revision and history are separate from card motion. */
 import type { Thing } from "./table.ts";
 import type { Traits } from "./characteristics.ts";
-import type { WorkCommand } from "./work-language.ts";
+import type { Notebook, WorkCommand } from "./work-language.ts";
 import type { Package, Plan } from "./language.ts";
 
 /** A projected object, with its characteristics as they are now. A face-down object has none. */
@@ -22,6 +22,8 @@ export type Workspace = {
 	eachTurn?: true;
 	/** Why strategy is wanted now: a request, a stop the table raised, or the pilot asking for help. */
 	request?: string;
+	/** The strategist's own notes, kept across plans so each call builds on the last. Never shown to the pilot. */
+	notebook?: Notebook;
 };
 export type WorkEntry = {
 	seq: number;

@@ -6,7 +6,7 @@ import { STEPS } from "./steps.ts";
 import type { Frame, SeatId } from "./types.ts";
 import type { Table } from "./table.ts";
 import { emptyWork, type Workspace } from "./work.ts";
-import { commands, type WorkCommand, type When } from "./work-language.ts";
+import { commands, NOTEBOOK_LIMIT, noteEdits, notebookSize, type WorkCommand, type When } from "./work-language.ts";
 import { checkProcedure } from "./procedures.ts";
 import type { Package, Plan, PlanOption, Registration } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
@@ -133,6 +133,12 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				const wrong = packageProblem(frame, tool.package);
 				if (wrong) throw new Error(wrong);
 				work.packages = withPackages(work.packages, [tool.package]);
+				break;
+			}
+			case "notebook.edit": {
+				const notebook = noteEdits(work.notebook, tool.edits, frame.view.window.kind === "turn" ? frame.view.window.turn : 0), size = notebookSize(notebook);
+				if (size > NOTEBOOK_LIMIT) throw new Error(`The notebook would be ${size} characters, over its ${NOTEBOOK_LIMIT}; compact it.`);
+				work.notebook = notebook;
 				break;
 			}
 			case "plan.request": work.request = tool.reason; break;

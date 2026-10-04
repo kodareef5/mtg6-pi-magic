@@ -22,7 +22,7 @@ names does not change the shuffle draws.
 
 Receipts record committed changes. Ledger rows record decisions and whether
 they were forced, delegated, chosen, declared or fallback. Prepared briefs and
-private equipment edits, such as an accepted plan, are journal entries too. Executed procedures carry
+private equipment edits, such as an accepted plan or a revised notebook, are journal entries too. Executed procedures carry
 their accepted basis, costs, payment, instructions and delegation, so replay
 uses those terms without another interpretation call.
 

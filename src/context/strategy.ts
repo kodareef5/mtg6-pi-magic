@@ -7,19 +7,20 @@ import type { Table } from "../core/table.ts";
 import { nextDecision } from "../core/decisions.ts";
 import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
-import type { WorkCommand } from "../core/work-language.ts";
+import { NOTEBOOK_COMPACT, NOTEBOOK_LIMIT, noteEdits, notebookSize, type NoteEdit, type WorkCommand } from "../core/work-language.ts";
+import type { Prepared } from "./seat.ts";
 import type { Objection } from "../core/player.ts";
 import { planProblems } from "../core/work-tools.ts";
 import { lifted, PlanSchema, problems, type Plan, type Registration, type Selector } from "../core/language.ts";
 import type { Brief } from "./brief.ts";
-import type { Reasoner } from "./reason.ts";
+import type { Lookup, Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
 import type { Universe } from "../core/cards.ts";
 import { planReason } from "../core/planning.ts";
 import { intrinsic } from "../core/characteristics.ts";
 import { sources } from "../core/funding.ts";
 import { budget, entersTapped } from "../core/budget.ts";
-import type { SeenObject } from "../core/work.ts";
+import { emptyWork, type SeenObject } from "../core/work.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { readFileSync } from "node:fs";
@@ -101,6 +102,9 @@ const SYSTEM = [
 	"- Copy the card's own words into basis. Do not replace card text with an invented simpler effect.",
 	"",
 	"OBJECTING. view.actions lists the opponent's actions since your last plan, by row. The table does not police them. If one broke a rule or misread a card, such as a blocker without flying or reach on a flier, or a land that says it enters tapped entering untapped, or a permanent whose registers do what its card does not say, add objection {row, claim, rule} beside your plan, citing the rule number. A judge decides; an upheld objection takes the game back to just before that action, and you plan again from there. Never object to play you merely think is poor.",
+	"",
+	"YOUR NOTEBOOK. notebook holds this seat's notes from earlier calls this game, by topic: what the opponent has shown and may hold, threats, your engine and its combinations, what you are watching, lines that worked and failed and why, sequences and syntax worth reusing. It has room, about 50k tokens: keep the details that will be useful again. Build on it: start from what it says, and do not work out again what it already holds.",
+	"Several sessions work for this seat and share the notebook: the preparation during the opponent's turn, a challenger checking it, the review when your turn begins, and a replan when a stop fires. Each maintains its own part, named in its task, and reads the others'. Write with the note tool, a topic at a time, as often as you need before submit: a topic you write replaces that topic, an empty note retires it, and the rest stands.",
 	"",
 	"HOW TO ANSWER. Call the submit tool once with your whole plan. Nothing you write as text is read.",
 	"If submit reports problems, fix every one of them and call submit again with the whole corrected plan.",
@@ -184,6 +188,35 @@ function objected(objection: unknown, frame: Frame): string[] {
 }
 
 /**
+ * The notebook as a tool. The writer adds, revises or retires a topic as often as it needs in one
+ * session, and the edits go to the table with its answer, merged into the notebook as it then stands.
+ * Each call reads back the room left; an edit past the limit is refused.
+ */
+function noting(frame: Frame, edits: NoteEdit[]): Lookup {
+	return {
+		name: "note",
+		description: "Write one topic of your notebook: a new topic, or a whole revised note for one that exists. An empty note retires the topic. Call it as often as you need, before submit.",
+		parameters: { type: "object", additionalProperties: false, required: ["topic", "note"], properties: {
+			topic: { type: "string", minLength: 1, maxLength: 80 }, note: { type: "string", description: "The whole note for this topic, as detailed as is useful; empty retires it." } } },
+		answer(args) {
+			const topic = String(args.topic ?? "").trim(), note = String(args.note ?? "");
+			if (!topic || topic.length > 80) return "A topic is 1 to 80 characters.";
+			const size = notebookSize(noteEdits(frame.view.work?.notebook, [...edits, { topic, note }], 0));
+			if (size > NOTEBOOK_LIMIT) return `Not noted: the notebook would be ${size} characters, over its ${NOTEBOOK_LIMIT}. Compact first: merge topics, shorten them, retire what no longer matters.`;
+			edits.push({ topic, note });
+			return `${note.trim() ? "Noted" : "Retired"} "${topic}". The notebook is ${size} of ${NOTEBOOK_LIMIT} characters${size > NOTEBOOK_COMPACT ? "; compact it before it fills" : ""}.`;
+		},
+	};
+}
+
+/** The work an answer asks for: its plan, and the notebook edits its session made. */
+const answered = (plan: Plan, edits: readonly NoteEdit[]): WorkCommand[] =>
+	[{ do: "plan.put", plan }, ...(edits.length ? [{ do: "notebook.edit" as const, edits: [...edits] }] : [])];
+
+/** A writer session's tool turns: room to look things up and keep notes before it submits. */
+const TURNS = 8;
+
+/**
  * What the seat can spend, worked out rather than left to the writer. Mana
  * available now, source by source, and what a land play could add, read from
  * the land's own type line and its package. A land with no package is said to
@@ -219,7 +252,7 @@ type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe };
 function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}): string {
 	const { work, done, objects: _objects, printed: _printed, ...view } = frame.view;
 	return JSON.stringify({
-		seat: frame.seat, mana: mana(frame), view, objects: objects(frame),
+		seat: frame.seat, notebook: work?.notebook ?? [], mana: mana(frame), view, objects: objects(frame),
 		plan: work?.plan ? { ...work.plan, done: (done ?? []).map((at) => work.plan!.steps[at]?.label) } : null,
 		...more,
 		packages: (work?.packages ?? []).map((pack) => pack.card),
@@ -274,10 +307,11 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
 	const why = !frame.view.work?.request ? "turn plan" : frame.view.work.accepted === undefined ? "opening plan" : request.startsWith("Stop:") ? "plan after a stop"
 		: request.startsWith("The pilot asked") ? "plan after help" : "plan on request";
-	const told: Told = {};
-	const answer = await reasoner.work(why, { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => checked(frame, args, told) } });
+	const told: Told = {}, edits: NoteEdit[] = [];
+	const answer = await reasoner.work(why, { system: SYSTEM, user: facts(frame, context), task },
+		{ submit: { ...SUBMIT, check: (args) => checked(frame, args, told) }, lookups: [noting(frame, edits)], turns: TURNS });
 	const objection = answer.objection as Objection | undefined;
-	return { tools: [{ do: "plan.put", plan: answer.plan as Plan }], ...(objection ? { objection } : {}) };
+	return { tools: answered(answer.plan as Plan, edits), ...(objection ? { objection } : {}) };
 }
 
 /**
@@ -285,22 +319,32 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
  * accepted here: the plan comes back to the seat, which offers it when its own
  * turn begins. The request asks for more than a turn plan, because there is time.
  */
-export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">): Promise<Plan> {
+export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">): Promise<Prepared> {
 	const at = frame.view.window;
 	if (at.kind !== "turn" || at.active === frame.seat) throw new Error("A turn is prepared during the opponent's turn.");
 	const ours = at.turn + 1, theirs = at.turn + 2;
+	const size = notebookSize(frame.view.work?.notebook);
 	const task = [
 		`YOUR TASK: PREPARE YOUR NEXT TURN. It is the opponent's turn ${at.turn}; yours, turn ${ours}, comes next. You have time now: think it through completely, so that on your turn the plan only needs checking.`,
-		"1. Review: what happened since your last plan, whether it worked, and what the opponent has shown.",
+		`1. Your notebook first. You keep its analysis: the opponent (what they have shown, what they may hold), threats, your engine and its combinations, lessons, and your line for turn ${ours} and why. With note, write what is new, revise what changed, retire what no longer holds. Keep the details you will want again, such as sequences and syntax that worked.` +
+			(size > NOTEBOOK_COMPACT ? ` It is at ${size} of ${NOTEBOOK_LIMIT} characters: compact it now, merging topics and retiring what no longer matters.` : ""),
 		`2. Plan turn ${ours} window by window, with when.fromTurn and throughTurn ${ours}. In phases, say for each window what to do and why: precombat main, which land and which spells, paid with which sources; combat, which creatures attack and under what condition; postcombat main. Name the sources you keep for a response in holds.`,
 		"3. You draw one card at the start of that turn. Keep the steps to the cards you hold now, and write a may branch for each draw that would change the line, with an if that the card is in your hand: {\"amount\": {\"count\": {\"zones\": [\"hand\"], \"controller\": \"you\", \"name\": \"...\"}}, \"atLeast\": 1}.",
 		"4. Order the steps by priority, and mark essential: true on the steps the line cannot do without.",
 		`5. Cover the opponent's turn ${theirs}: responses and blocks as branches with fromTurn and throughTurn ${theirs}, and the sources they need in holds.`,
 		ANSWER,
 	].join("\n");
-	const told: Told = {};
-	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context), task }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, told); } } });
-	return answer.plan as Plan;
+	const told: Told = {}, edits: NoteEdit[] = [];
+	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context), task },
+		{ submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, told); } }, lookups: [noting(frame, edits)], turns: TURNS });
+	return { plan: answer.plan as Plan, ...(edits.length ? { edits } : {}) };
+}
+
+/** The frame with notebook edits not yet at the table merged in, so a session reads what the others wrote. */
+function withNotes(frame: Frame, edits: readonly NoteEdit[] = []): Frame {
+	if (!edits.length) return frame;
+	const work = frame.view.work ?? emptyWork(), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
+	return { ...frame, view: { ...frame.view, work: { ...work, notebook: noteEdits(work.notebook, edits, turn) } } };
 }
 
 const CHALLENGE = {
@@ -318,7 +362,9 @@ const CHALLENGE = {
  * opponent's best reply left uncovered. Undefined when nothing was found or the
  * revision failed; the errors reach the seat through `criticized` either way.
  */
-export async function challengePlan(frame: Frame, prepared: Plan, context: Context, reasoner: Pick<Reasoner, "work">, criticized: (errors: string[]) => boolean = () => true): Promise<Plan | undefined> {
+export async function challengePlan(frame: Frame, made: Prepared, context: Context, reasoner: Pick<Reasoner, "work">, criticized: (errors: string[]) => boolean = () => true): Promise<Prepared | undefined> {
+	const prepared = made.plan, at = frame.view.window, ours = at.kind === "turn" ? at.turn + 1 : 0;
+	const base = withNotes(frame, made.edits), edits: NoteEdit[] = [...(made.edits ?? [])];
 	const task = [
 		"YOUR TASK: CHALLENGE THE PREPARED PLAN above, as prepared. Look for what code cannot check:",
 		"- a step that expects a trigger from an event that happens before the trigger's source is on the battlefield, or after it is gone;",
@@ -326,17 +372,20 @@ export async function challengePlan(frame: Frame, prepared: Plan, context: Conte
 		"- lethal damage available and not taken, or the opponent's lethal not covered;",
 		"- the opponent's best reply to the line, with the mana and cards they can have, left uncovered;",
 		"- a card read wrongly against its text.",
-		"Report only real errors, each in a sentence. An empty list is the right answer for a sound plan.",
+		`Report only real errors, each in a sentence. An empty list is the right answer for a sound plan. Your errors go into the notebook as "challenge of turn ${ours}", where the preparation and the review read them; note anything else they should know.`,
 	].join("\n");
-	const found = await reasoner.work("challenge", { system: SYSTEM, user: facts(frame, context, { prepared }), task }, { submit: { ...CHALLENGE, check: (args) =>
-		Array.isArray(args.errors) && args.errors.every((one) => typeof one === "string") ? null : "errors is a list of sentences." } });
+	const found = await reasoner.work("challenge", { system: SYSTEM, user: facts(base, context, { prepared }), task }, { submit: { ...CHALLENGE, check: (args) =>
+		Array.isArray(args.errors) && args.errors.every((one) => typeof one === "string") ? null : "errors is a list of sentences." }, lookups: [noting(base, edits)], turns: TURNS });
 	const errors = (found.errors as string[]).filter((one) => one.trim());
+	if (errors.length) edits.push({ topic: `challenge of turn ${ours}`, note: errors.join(" ") });
 	// The errors go to the seat before the revision is asked for, so they stand against the plan even if it fails; a job no longer wanted asks for nothing more.
-	if (!errors.length || !criticized(errors)) return undefined;
-	const revise = `YOUR TASK: REVISE THE PREPARED PLAN above, as prepared. A challenge found: ${errors.join(" ")} Fix what is right in it, keep the rest, and submit the whole revised plan.\n${ANSWER}`;
-	const told: Told = {};
-	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(frame, context, { prepared }), task: revise }, { submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, told); } } });
-	return answer.plan as Plan;
+	if (!errors.length) return edits.length > (made.edits?.length ?? 0) ? { plan: prepared, edits } : undefined;
+	if (!criticized(errors)) return undefined;
+	const revise = `YOUR TASK: REVISE THE PREPARED PLAN above, as prepared. A challenge found: ${errors.join(" ")} Fix what is right in it, keep the rest, and submit the whole revised plan. Note in "challenge of turn ${ours}" what you fixed and what you rejected and why.\n${ANSWER}`;
+	const told: Told = {}, noted = withNotes(frame, edits);
+	const answer = await reasoner.work("preparation", { system: SYSTEM, user: facts(noted, context, { prepared }), task: revise },
+		{ submit: { ...SUBMIT, check: (args) => { delete args.objection; return checked(frame, args, told); } }, lookups: [noting(withNotes(frame, made.edits), edits)], turns: TURNS });
+	return { plan: answer.plan as Plan, edits };
 }
 
 /** The writer's answer to a review: keep the prepared plan, or a whole revised one, and perhaps an objection. */
@@ -355,20 +404,23 @@ const REVIEW = {
  * Check a prepared plan at the start of the seat's own turn, after the draw:
  * keep it, or revise it for what changed. Keeping it is a short answer.
  */
-export async function reviewPlan(frame: Frame, prepared: Plan, changed: string[], context: Context, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
+export async function reviewPlan(frame: Frame, made: Prepared, changed: string[], context: Context, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
+	const prepared = made.plan, at = frame.view.window, turn = at.kind === "turn" ? at.turn : 0;
+	const base = withNotes(frame, made.edits), mine: NoteEdit[] = [];
 	const task = [
-		"YOUR TASK: Your turn has begun and you have drawn. Above is the plan you prepared during the opponent's turn, as prepared.",
+		"YOUR TASK: Your turn has begun and you have drawn. Above is the plan you prepared during the opponent's turn, as prepared, and your notebook with what the preparation and the challenger wrote.",
 		`Since you prepared it: ${changed.join("; ") || "nothing you can see changed"}.`,
-		"If it still fits, call submit with {\"accept\": true}. If not, submit the whole revised plan. Object to an opponent action only if it broke a rule.",
+		`This is maintenance, not a new analysis: what in your notes and plan does this touch? Keep the rest. Note under "turn ${turn} review" what changed and what you did about it, and revise the topics it touched; retire a challenge you have dealt with.`,
+		"If the plan still fits, call submit with {\"accept\": true}. If not, submit the whole revised plan. Object to an opponent action only if it broke a rule.",
 	].join("\n");
 	const told: Told = {};
-	const answer = await reasoner.work("review", { system: SYSTEM, user: facts(frame, context, { prepared }), task }, { submit: { ...REVIEW, check: (args) => {
+	const answer = await reasoner.work("review", { system: SYSTEM, user: facts(base, context, { prepared }), task }, { submit: { ...REVIEW, check: (args) => {
 		if (args.accept === true && args.plan === undefined) {
 			const found = [...planProblems(frame, prepared), ...forecast(frame, prepared, told), ...misregistered(prepared)];
 			return found.length ? `The prepared plan no longer fits: ${found.join("; ")}. Submit a revised plan.` : null;
 		}
 		return checked(frame, args, told);
-	} } });
+	} }, lookups: [noting(base, mine)], turns: TURNS });
 	const objection = answer.objection as Objection | undefined;
-	return { tools: [{ do: "plan.put", plan: (answer.plan as Plan | undefined) ?? prepared }], ...(objection ? { objection } : {}) };
+	return { tools: answered((answer.plan as Plan | undefined) ?? prepared, [...(made.edits ?? []), ...mine]), ...(objection ? { objection } : {}) };
 }

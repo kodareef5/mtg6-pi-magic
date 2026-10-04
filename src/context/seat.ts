@@ -19,7 +19,7 @@ import type { Intent } from "../core/intent.ts";
 import { follow } from "./dial.ts";
 import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
-import type { WorkCommand } from "../core/work-language.ts";
+import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
 import { planProblems } from "../core/work-tools.ts";
 import type { Plan, PlanOption } from "../core/language.ts";
@@ -62,18 +62,24 @@ export type AiSeatOptions = {
 	/** Writes this seat's plan when one is wanted. Without it, the seat cannot ask for help. */
 	plan?(frame: Frame): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
 	/** Prepares this seat's next turn while the opponent plays. Without it the turn is planned when it begins. */
-	prepare?(frame: Frame): Promise<Plan>;
+	prepare?(frame: Frame): Promise<Prepared>;
 	/**
 	 * Challenges a prepared plan in the background, and revises it once if it found errors. Never waited on.
 	 * The errors are passed to `criticized` as soon as they are found, so a revision still running, or failed, does not lose them;
 	 * it answers whether a revision is still wanted.
 	 */
-	challenge?(frame: Frame, prepared: Plan, criticized: (errors: string[]) => boolean): Promise<Plan | undefined>;
+	challenge?(frame: Frame, prepared: Prepared, criticized: (errors: string[]) => boolean): Promise<Prepared | undefined>;
 	/** Checks a prepared plan when the turn begins, given what changed since it was prepared. */
-	review?(frame: Frame, prepared: Plan, changed: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
+	review?(frame: Frame, prepared: Prepared, changed: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
 	/** Called each time the seat waited on strategy for its plan: how the plan came, how long the table waited, and whether a preparation was ready. */
 	onPlanned?(planned: Planned): void;
 };
+
+/** A prepared turn: the plan, and the notebook edits the preparation and its challenger made, not yet at the table. */
+export type Prepared = { plan: Plan; edits?: NoteEdit[] };
+
+/** The work that puts a prepared turn in place: its plan, and its notebook edits. */
+export const putting = (prepared: Prepared): WorkCommand[] => [{ do: "plan.put", plan: prepared.plan }, ...(prepared.edits?.length ? [{ do: "notebook.edit" as const, edits: prepared.edits }] : [])];
 
 /** How a seat's plan came: a prepared plan as it was, after a review, written at the time, or written for a stop or a request. */
 export type Planned = { seat: number; turn: number; how: "prepared" | "reviewed" | "written" | "escalation"; waitedMs: number; ready?: boolean };
@@ -196,7 +202,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	// The next own turn being prepared, from the frame it was prepared from. A failed preparation is undefined and the turn is planned as usual.
 	// A challenger's revision replaces it only if it is already done when the turn begins; its errors, once found, are kept either way.
 	// A job is current only while it is this variable: one taken, replaced or closed starts nothing more and is never used.
-	let preparation: { turn: number; from: Frame; plan: Promise<Plan | undefined>; ready?: true; criticism?: string[]; revised?: Plan } | undefined;
+	let preparation: { turn: number; from: Frame; plan: Promise<Prepared | undefined>; ready?: true; criticism?: string[]; revised?: Prepared } | undefined;
 	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
 
 	return {
@@ -234,14 +240,16 @@ export function aiSeat(options: AiSeatOptions): Player {
 			if (reason && !frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
 				const job = preparation, ready = !!job.ready;
 				preparation = undefined;
-				const prepared = job.revised ?? await job.plan;
+				const made = await job.plan;
+				// A challenge whose revision did not finish still goes into the notebook, where the review reads it.
+				const prepared = job.revised ?? (made && job.criticism ? { ...made, edits: [...(made.edits ?? []), { topic: `challenge of turn ${at.kind === "turn" ? at.turn : 0}`, note: job.criticism.join(" ") }] } : made);
 				if (prepared) {
 					const changed = changes(job.from, frame), id = `${options.name}-${frame.version}-${revision}-prepared-${++asked}`;
 					// A challenge's errors that no finished revision answered stand against the plan until the writer has read them.
 					const criticism = job.revised ? [] : (job.criticism ?? []).map((error) => `a challenge of the prepared plan found: ${error}`);
-					if (!criticism.length && settled(frame, prepared, changed)) {
+					if (!criticism.length && settled(frame, prepared.plan, changed)) {
 						planned("prepared", ready);
-						return { kind: "work", tools: [{ do: "plan.put", plan: prepared }], revision, actionId: id };
+						return { kind: "work", tools: putting(prepared), revision, actionId: id };
 					}
 					if (options.review) {
 						const { tools, objection } = await options.review(frame, prepared, [...changed.lines, ...criticism]);

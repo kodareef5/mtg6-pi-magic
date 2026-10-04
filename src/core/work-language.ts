@@ -8,6 +8,42 @@ export type { Instruction, Procedure } from "./language.ts";
 
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
+/**
+ * The strategist's own notes, kept across plans: topics, each as long as it needs, and the turn it was last
+ * revised. The whole is budgeted (`NOTEBOOK_LIMIT`), and the strategist compacts it as it nears the limit.
+ */
+export const NotebookSchema = Type.Array(object({
+	topic: Type.String({ minLength: 1, maxLength: 80 }),
+	note: Type.String({ minLength: 1 }),
+	since: Type.Integer({ minimum: 0 }),
+}));
+export type Notebook = Static<typeof NotebookSchema>;
+/** Edits to the notebook: a topic written replaces that topic or joins it, an empty note retires it, a topic left out stands. */
+export const NoteEditsSchema = Type.Array(object({ topic: Type.String({ minLength: 1, maxLength: 80 }), note: Type.String() }), { minItems: 1 });
+export type NoteEdit = Static<typeof NoteEditsSchema>[number];
+/** About 50k tokens of notes, in characters. */
+export const NOTEBOOK_LIMIT = 200_000;
+/** Where the strategist is asked to compact: about 40k tokens. */
+export const NOTEBOOK_COMPACT = 160_000;
+export const notebookSize = (notebook: Notebook = []) => notebook.reduce((sum, one) => sum + one.topic.length + one.note.length, 0);
+
+/**
+ * A notebook with edits applied: a topic written replaces that topic in place or joins at the end, an empty
+ * note retires it. A changed note carries `turn`. Edits merge into whatever the notebook holds when they
+ * land, so writers working at once each keep their own topics.
+ */
+export function noteEdits(notebook: Notebook = [], edits: readonly NoteEdit[], turn: number): Notebook {
+	const notes = [...notebook];
+	for (const { topic, note } of edits) {
+		const at = notes.findIndex((one) => one.topic === topic);
+		if (!note.trim()) { if (at >= 0) notes.splice(at, 1); continue; }
+		if (at >= 0 && notes[at]!.note === note) continue;
+		const revised = { topic, note, since: turn };
+		if (at >= 0) notes[at] = revised; else notes.push(revised);
+	}
+	return notes;
+}
+
 /** One cyclic schema for the whole seat vocabulary, so a plan and a package share the syntax's definitions. */
 const Vocabulary = { ...PlanDefs,
 	Command: Type.Union([
@@ -18,6 +54,8 @@ const Vocabulary = { ...PlanDefs,
 		object({ do: Type.Literal("plan.keep"), reason: text }),
 		/** What a permanent of this name registers when it enters under this seat's control. Replaces an earlier package. */
 		object({ do: Type.Literal("package.put"), package: Type.Ref("Package") }),
+		/** Edit the strategist's notebook, topic by topic. */
+		object({ do: Type.Literal("notebook.edit"), edits: NoteEditsSchema }),
 		/** The seat plans each of its own turns once it has drawn. */
 		object({ do: Type.Literal("plan.each-turn") }),
 	]),

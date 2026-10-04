@@ -20,6 +20,31 @@ it; the table takes what the plan already settles. The shape is `PlanSchema` in
 The plan is accepted whole with `plan.put`, or refused whole with every problem
 named. It moves nothing.
 
+## The notebook
+
+Beside the plan, the strategist keeps its own notes by topic, about 50k tokens of
+room (`NOTEBOOK_LIMIT`), each topic stamped with the turn it was last revised
+(`Workspace.notebook`). They hold what the opponent has shown and may hold,
+threats, our engine, what to watch, what was learned, sequences and syntax worth
+reusing. Every writer call reads them first and builds on them rather than
+working the position out again. The pilot never sees them.
+
+The writer edits them with a `note` tool, a topic at a time, as often as it
+needs within its session; the edits go to the table with its answer as
+`notebook.edit` and merge into the notebook as it then stands. So the sessions
+that work for one seat at once share it, each keeping its own part:
+
+| Session | Its part |
+|---|---|
+| Preparation | The analysis: opponent, threats, engine, lessons, the next turn's line. |
+| Challenger | `challenge of turn N`: what it found, and what the revision fixed or rejected. |
+| Review | `turn N review`: what changed and what it touched; retires a challenge dealt with. |
+| A stop or help | What fired and what changed. |
+
+Past about 40k tokens the preparation is asked to compact it; an edit past the
+limit is refused. It is private equipment, so it is journaled, replayed and
+cloned.
+
 ## How the table flies it
 
 `src/core/planning.ts` reads the seat's frame: which steps are due (window open,
