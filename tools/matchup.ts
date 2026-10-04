@@ -59,7 +59,15 @@ finally { save(journal, table); }
 while (!table.outcome && !nextDecision(table)) advance(table);
 // The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
 const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome?.results });
-const result = { seed: table.rng.seed, outcome: table.outcome, turn: table.cursor.turn, gaps: table.gaps,
+// Every time play stopped to ask strategy or the judge, by why: the measure of how well the plans were prepared.
+const requests = table.workLog.flatMap((entry) => (entry.tools ?? []).flatMap((tool) => tool.do === "plan.request" ? [tool.reason] : []));
+const interruptions = {
+	stops: requests.filter((reason) => reason.startsWith("Stop:") && !/^Stop: Step \d+ cannot be taken now/.test(reason)).length,
+	essential: requests.filter((reason) => /^Stop: Step \d+ cannot be taken now/.test(reason)).length,
+	help: requests.filter((reason) => reason.startsWith("The pilot asked")).length,
+	rulings: table.rulings.length, upheld: table.rulings.filter((one) => one.kept !== undefined).length,
+};
+const result = { seed: table.rng.seed, outcome: table.outcome, turn: table.cursor.turn, gaps: table.gaps, interruptions,
 	replayMatches: state(replay(path, (header) => matchTable(header.seed)).table) === state(table),
 	reasons: Object.fromEntries(["forced", "delegated", "chosen", "declared", "fallback"].map((why) => [why, table.ledger.filter((row) => row.why === why).length])),
 	calls: seated.tally.spent(), planned: seated.planned, elapsedMs: Date.now() - began, journal: path, trace: calls };

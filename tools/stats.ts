@@ -12,7 +12,8 @@ import { join } from "node:path";
 
 type Call = { role: string; about?: string; at?: number; ms: number; failed?: string; usage?: { input: number; output: number; cacheRead?: number; reasoning?: number; cost?: { total: number } } };
 type Planned = { seat: number; turn: number; how: string; waitedMs: number; ready?: boolean };
-type Result = { seed: string; turn: number; outcome: unknown; elapsedMs: number; replayMatches: boolean; gaps: string[]; calls: Call[]; planned?: Planned[] };
+type Interruptions = { stops: number; essential: number; help: number; rulings: number; upheld: number };
+type Result = { seed: string; turn: number; outcome: unknown; elapsedMs: number; replayMatches: boolean; gaps: string[]; calls: Call[]; planned?: Planned[]; interruptions?: Interruptions };
 
 const DIR = ".pi/real-standard";
 const named = process.argv.slice(2);
@@ -49,6 +50,12 @@ for (const run of runs) {
 	console.log(`\n${run.file}`);
 	console.log(`  seed ${run.seed}, ${run.outcome ? "finished" : "stopped"} on turn ${run.turn}, ${seconds(run.elapsedMs)} wall, ` +
 		`replay ${run.replayMatches ? "matched" : "MISMATCH"}, ${run.gaps.length} gaps${failed ? `, ${failed} failed calls` : ""}`);
+	// How often play stopped for strategy or the judge, and why: fewer is better prepared.
+	const stopped = run.interruptions;
+	if (stopped) {
+		const total = stopped.stops + stopped.essential + stopped.help + stopped.rulings;
+		console.log(`  interruptions ${total}, ${(total / turns).toFixed(2)} a turn: ${stopped.stops} stops, ${stopped.essential} essential steps, ${stopped.help} help, ${stopped.rulings} rulings (${stopped.upheld} upheld)`);
+	}
 	// The table's own wait for each plan, as the seats measured it: calls overlap once preparation runs, so their durations are not summed.
 	const planned = run.planned ?? [];
 	console.log(`  pregame ${seconds(pregame)} before the first decision; then ${seconds((run.elapsedMs - pregame) / turns)} a turn` +
