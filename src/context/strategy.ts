@@ -105,6 +105,7 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 const HINTS: [RegExp, string][] = [
 	[/has no field "at(Least|Most)"/, "atLeast and atMost sit beside amount, not inside it: {\"amount\": {\"count\": {...}}, \"atLeast\": 1}."],
 	[/when\/step must be equal to one of/, "Leave step out to match every step."],
+	[/has no priority, so nothing can be done in it/, "The table untaps, draws and discards to hand size for you; plan only what you choose."],
 ];
 const hints = (found: string[]) => HINTS.filter(([pattern]) => found.some((line) => pattern.test(line))).map(([, hint]) => ` ${hint}`).join("");
 
@@ -154,7 +155,7 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		const shape = problems(PlanSchema, args.plan);
 		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
 		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
-		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.` : null;
+		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.${hints(found)}` : null;
 	} };
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
 	const why = !frame.view.work?.request ? "turn plan" : request.startsWith("Stop:") || request.startsWith("Step ") ? "plan after a stop"
