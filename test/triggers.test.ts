@@ -330,3 +330,19 @@ test("permanents entering together never shape each other's entry, whatever orde
 		assert.equal(counters(table, later!.id), 1, `${order}: a later creature enters with the counter`);
 	}
 });
+
+test("a leaves-the-battlefield watch looks back at a table that still remembers this turn", () => {
+	// Not a printed card: a dies watch whose intervening if reads what was cast this turn (603.4, 603.10a).
+	const REMEMBERS: Registration = { basis: "When this creature dies, if you cast a spell this turn, you gain 2 life.", kind: "watch",
+		event: { on: "dies", of: { is: "this" } }, if: { amount: { history: "cast", by: "you" }, atLeast: 1 },
+		effect: { instructions: [{ do: "life", who: "you", amount: 2 }] } };
+	const table = matchup("remembers");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", [REMEMBERS]);
+	place(table, 0, "battlefield", "Forest");
+	place(table, 0, "hand", "Llanowar Elves");
+	main(table, 0);
+	apply(table, nextDecision(table)!.options.find((option) => option.id.startsWith("cast:") && option.label.includes("Llanowar Elves"))!.id, "model", "chosen");
+	resolveTop(table);
+	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" }], "resolve");
+	assert.equal(table.waiting.length, 1, "the Elves were cast this turn, so the dies watch triggers");
+});

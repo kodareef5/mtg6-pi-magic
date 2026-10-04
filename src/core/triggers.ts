@@ -51,10 +51,10 @@ const PUBLIC = new Set<Zone>(["battlefield", "graveyard", "stack", "exile", "com
 export function before(table: Table, changes: Change[]): World | undefined {
 	if (!changes.some((change) => change.do === "move" && table.things.get(change.what)?.zone === "battlefield" && change.to !== "battlefield")) return undefined;
 	const traits = walk(table), objects = [...table.things.values()].map((one) => ({ ...one, counters: { ...one.counters } }));
-	const world = tableWorld(table);
+	const world = tableWorld(table), history = world.history;
 	return {
 		objects, read: (object) => object.zone === "battlefield" ? traits.get(object.id) : world.read(object),
-		players: world.players.map((one) => ({ ...one })), notes: [...table.notes], combat: structuredClone(table.combat), history: [],
+		players: world.players.map((one) => ({ ...one })), notes: [...table.notes], combat: structuredClone(table.combat), history,
 		lastKnown: (wanted) => { const object = objects.find((one) => one.id === wanted.id && one.incarnation === wanted.incarnation); return object ? { object, traits: traits.get(object.id) } : undefined; },
 	};
 }
