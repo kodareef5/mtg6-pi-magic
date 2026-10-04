@@ -203,13 +203,15 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
 });
 
-test("the writer's habits with one meaning are read as meant: an untap step, an action inside its if, bounds inside an amount", async () => {
+test("the writer's habits with one meaning are read as meant: an untap step, an action inside its if, bounds inside an amount, fields beside the plan", async () => {
 	const table = position();
 	main(table, 0);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const habits = { objective: "o", guidance: "g", steps: [{ label: "Untap", when: { step: "untap" }, action: { option: "pass" } }, line.steps[0]],
 		may: [{ label: "Pass while they hold three cards", when: {}, if: { amount: { count: { zones: ["hand"], controller: "opponent" }, atLeast: 3 }, action: { option: "pass" } } }] };
-	const stream: Stream = () => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: structuredClone(habits) } }], stopReason: "toolUse" }) });
+	// The plan closed too early: its branches written beside it.
+	const { may, ...early } = habits;
+	const stream: Stream = () => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: structuredClone(early), may: structuredClone(may) } }], stopReason: "toolUse" }) });
 	const [put] = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.ok(put?.do === "plan.put");
 	assert.deepEqual(put.plan.steps.map((step) => step.label), ["Play a Forest"], "the table untaps for the seat");
@@ -238,7 +240,8 @@ test("strategy plans before a seat first acts and at each of its turns after the
 		})) as never,
 		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
 			prompts.push({ user: context.messages[0]!.content, system: context.systemPrompt, ceiling: options.maxTokens });
-			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { plan: { objective: "Develop.", guidance: "Play lands.", steps: [] } } }], stopReason: "toolUse" }) };
+			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { plan: { objective: "Develop.", guidance: "Play lands.",
+				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } } }], stopReason: "toolUse" }) };
 		}) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "work");

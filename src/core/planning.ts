@@ -116,8 +116,9 @@ export function annotate(options: Option[], state: PlanState): Option[] {
  */
 export function planDue(frame: Frame): boolean {
 	const work = frame.view.work, at = frame.view.window;
-	return !!work?.eachTurn && work.accepted !== undefined && at.kind === "turn" && at.active === frame.seat && at.step !== "upkeep" &&
-		work.accepted < (frame.view.began ?? 0);
+	// After the untap and the draw: the seat's first priority of its turn, outside the upkeep.
+	return !!work?.eachTurn && work.accepted !== undefined && at.kind === "turn" && at.active === frame.seat && !["untap", "upkeep"].includes(at.step) &&
+		(!frame.decision || frame.decision.situation === "priority") && work.accepted < (frame.view.began ?? 0);
 }
 
 /**

@@ -124,11 +124,20 @@ function tidy(value: unknown): unknown {
 	if (!value || typeof value !== "object" || Array.isArray(value)) return value;
 	const plan = lifted({ steps: [], ...(value as object) }) as Record<string, unknown>;
 	const option = (one: unknown) => {
-		const record = one as Record<string, unknown> & { if?: Record<string, unknown> };
-		if (!record || typeof record !== "object" || record.action || !record.if?.action) return one;
-		const { action, ...condition } = record.if;
-		const { if: _, ...rest } = record;
-		return { ...rest, action, ...(Object.keys(condition).length ? { if: condition } : {}) };
+		let record = one as Record<string, unknown> & { if?: Record<string, unknown>; action?: Record<string, unknown> };
+		if (!record || typeof record !== "object") return one;
+		if (!record.action && record.if?.action) {
+			const { action, ...condition } = record.if;
+			const { if: _, ...rest } = record;
+			record = { ...rest, action: action as Record<string, unknown>, ...(Object.keys(condition).length ? { if: condition } : {}) };
+		}
+		// An option id written with a trailing colon, such as "cast:", is a prefix.
+		const id = record.action?.option;
+		if (typeof id === "string" && id.endsWith(":") && !record.action!.prefix) {
+			const { option: _, ...action } = record.action!;
+			record = { ...record, action: { ...action, prefix: id } };
+		}
+		return record;
 	};
 	const timed = (one: unknown) => !["untap", "cleanup"].includes(((one as { when?: { step?: string } })?.when?.step) ?? "");
 	return { ...plan, steps: (plan.steps as unknown[]).map(option).filter(timed), ...(Array.isArray(plan.may) ? { may: plan.may.map(option).filter(timed) } : {}) };
@@ -191,10 +200,16 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
-		args.plan = tidy(args.plan);
+		// Fields of the plan written beside it, as when the plan object is closed too early, belong inside it.
+		const { plan: written, ...beside } = args;
+		args.plan = tidy({ ...beside, ...(written as object) });
+		for (const key of Object.keys(beside)) delete args[key];
 		const shape = problems(PlanSchema, args.plan);
 		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
-		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
+		const plan = args.plan as Plan;
+		const idle = at.kind === "turn" && at.active === frame.seat && !plan.steps.length && !plan.may?.length
+			? ["the plan has no steps and no branches, so the table would pass every window of your turn; if that is what you mean, add a step {\"label\": \"Pass the turn\", \"when\": {\"active\": \"self\"}, \"action\": {\"option\": \"pass\"}}"] : [];
+		const found = [...planProblems(frame, plan), ...misregistered(plan), ...idle];
 		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.${hints(found)}` : null;
 	} };
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
