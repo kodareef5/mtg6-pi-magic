@@ -38,7 +38,6 @@
     "universe": "node tools/cards.ts --verify",
     "rules": "node tools/rules.ts --verify -o rules/cr.tsv",
     "smoke": "node tools/smoke.ts",
-    "circuits": "node tools/circuits.ts",
     "matchup": "node tools/matchup.ts",
     "stats": "node tools/stats.ts"
   },
