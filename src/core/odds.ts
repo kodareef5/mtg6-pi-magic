@@ -12,7 +12,7 @@
 
 import type { Knowledge } from "./knowledge.ts";
 import type { Table } from "./table.ts";
-import type { SeatId } from "./types.ts";
+import type { Frame, SeatId } from "./types.ts";
 
 export type NameOdds = {
 	/** Copies not accounted for outside the library, including an opponent's unknown hand. */
@@ -25,6 +25,9 @@ export type NameOdds = {
 	inHand: number;
 	/** The visibility and allocation assumptions behind the two numbers. */
 	basis: string;
+	/** The pool drawn from, and how many of its cards are an unknown hand. */
+	pool: number;
+	hand: number;
 };
 
 /**
@@ -57,24 +60,41 @@ export type NameOdds = {
  * the allocations where a known copy is already in hand. A copy known to be in
  * hand makes inHand exactly one.
  */
-export function odds(
-	table: Table,
-	knowledge: Knowledge,
-	owner: SeatId,
-): Record<string, NameOdds> {
+export function odds(frame: Frame, owner: SeatId): Record<string, NameOdds> {
 	/*
-	 * 1. Start from the registered deck list for `owner`, by card name. Tokens,
-	 *    copies and ability objects are not cards and are not counted.
+	 * The smallest honest scope, from this seat's view alone. Regions are not
+	 * read yet: a scry, a card put on top, a reveal or a look leaves the pool
+	 * uniform, and `basis` says so.
+	 * 1. Start from the registered deck list for `owner`, by card name.
 	 * 2. Subtract every copy this viewer can name outside that library.
-	 * 3. Choose the pool by the rule above, and record which one in `basis`.
-	 * 4. Apply the formulas, taking regions into account where they cover the
-	 *    relevant position.
-	 * 5. Absent beats guessed. If the game type registered no deck lists, or a
-	 *    zone this viewer cannot reason about has entered the pool, return
-	 *    nothing for that name rather than a number from the truth.
+	 * 3. The pool: our library, or another seat's unknown hand and library together.
+	 * 4. The formulas above, with no region.
+	 * 5. Absent beats guessed: no registered list, no numbers.
 	 */
-	void [table, knowledge, owner];
-	throw new Error("odds is unwritten. Five steps above.");
+	const list = frame.view.decks?.find((deck) => deck.seat === owner)?.cards;
+	const player = frame.view.players?.find((one) => one.id === owner);
+	if (!list || player?.library === undefined || player.hand === undefined) return {};
+	const mine = owner === frame.seat;
+	const named = (frame.view.objects ?? []).filter((object) => object.owner === owner && object.card && object.zone !== "library");
+	const inHand = (name: string) => named.filter((object) => object.zone === "hand" && object.card === name).length;
+	const hidden = mine ? 0 : player.hand - named.filter((object) => object.zone === "hand").length;
+	const pool = player.library + hidden;
+	const left = Object.fromEntries(Object.entries(list).map(([name, copies]) => [name, Math.max(0, copies - named.filter((object) => object.card === name).length)]));
+	const counted = Object.values(left).reduce((sum, copies) => sum + copies, 0);
+	const basis = `${mine ? `your library of ${pool}` : `their ${hidden} unknown cards in hand and ${player.library} in library`}, from the registered list less every copy you can name; ` +
+		`library order is not tracked, so a scry, a card put on top or a reveal is not counted` + (counted !== pool ? `; ${counted} unaccounted copies against a pool of ${pool}, so the list and the pool disagree` : "");
+	return Object.fromEntries(Object.entries(left).map(([name, copies]) => [name, {
+		remaining: copies, knownInHand: inHand(name),
+		draw: pool ? copies / pool : 0,
+		inHand: inHand(name) > 0 ? 1 : mine || !hidden ? 0 : 1 - choose(pool - copies, hidden) / choose(pool, hidden),
+		basis, pool, hand: hidden,
+	}]));
+}
+
+/** The chance at least one of these names comes within the next `draws` draws of `owner`'s pool, with no region: 1 - C(N-K, n) / C(N, n). */
+export function within(found: Record<string, NameOdds>, names: string[], pool: number, draws: number): number {
+	const copies = names.reduce((sum, name) => sum + (found[name]?.remaining ?? 0), 0);
+	return pool ? 1 - choose(pool - copies, Math.min(draws, pool)) / choose(pool, Math.min(draws, pool)) : 0;
 }
 
 /**

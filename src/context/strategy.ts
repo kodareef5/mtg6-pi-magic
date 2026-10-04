@@ -21,6 +21,7 @@ import { planReason } from "../core/planning.ts";
 import { intrinsic } from "../core/characteristics.ts";
 import { sources } from "../core/funding.ts";
 import { budget, entersTapped } from "../core/budget.ts";
+import { odds, within } from "../core/odds.ts";
 import { emptyWork, type SeenObject } from "../core/work.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
@@ -105,7 +106,7 @@ const SYSTEM = [
 	"OBJECTING. view.actions lists the opponent's actions since your last plan, by row. The table does not police them. If one broke a rule or misread a card, such as a blocker without flying or reach on a flier, or a land that says it enters tapped entering untapped, or a permanent whose registers do what its card does not say, add objection {row, claim, rule} beside your plan, citing the rule number. A judge decides; an upheld objection takes the game back to just before that action, and you plan again from there. Never object to play you merely think is poor.",
 	"",
 	"YOUR NOTEBOOK. notebook holds this seat's notes from earlier calls this game, by topic: what the opponent has shown and may hold, threats, your engine and its combinations, what you are watching, lines that worked and failed and why, sequences and syntax worth reusing. It has room, about 50k tokens: keep the details that will be useful again. Build on it: start from what it says, and do not work out again what it already holds.",
-	"view.worked lists the steps and branches you carried out earlier this game, with their syntax. Reuse a sequence and its syntax that worked rather than writing it anew. Look up a card's text with card and a rule with rule when you are not sure; it is cheaper than a wrong plan.",
+	"view.worked lists the steps and branches you carried out earlier this game, with their syntax. Reuse a sequence and its syntax that worked rather than writing it anew. Look up a card's text with card and a rule with rule when you are not sure, and use odds for your draws and what the opponent may hold; it is cheaper than a wrong plan.",
 	"Several sessions work for this seat and share the notebook: the preparation during the opponent's turn, a challenger checking it, the review when your turn begins, and a replan when a stop fires. Each maintains its own part, named in its task, and reads the others'. Write with the note tool, a topic at a time, as often as you need before submit: a topic you write replaces that topic, an empty note retires it, and the rest stands.",
 	"",
 	"HOW TO ANSWER. Call the submit tool once with your whole plan. Nothing you write as text is read.",
@@ -258,8 +259,37 @@ function turns(frame: Frame): string {
 	return `Your turns are ${next(mine)}…; the opponent's are ${next(mine === at.turn ? at.turn + 1 : at.turn)}….`;
 }
 
-/** The tools a writer session has: its notebook, and the cards and rules to look up. */
-const tooling = (frame: Frame, context: Context, edits: NoteEdit[]): Lookup[] => [noting(frame, edits), ...(context.cards ? lookups(context.cards, context.rules) : [])];
+/**
+ * Draw odds from this seat's view, as a tool: a named card, or every card of a type word, in our library or the
+ * opponent's unknown cards. Library order is not tracked, and the answer says so.
+ */
+function chancing(frame: Frame): Lookup {
+	return {
+		name: "odds",
+		description: "Chances from what you can see. whose you: a card or type drawn within your next draws. whose opponent: a card or type in their hand now, and their next draw.",
+		parameters: { type: "object", additionalProperties: false, required: ["whose"], properties: {
+			whose: { type: "string", enum: ["you", "opponent"] }, card: { type: "string", description: "A card's exact name." },
+			type: { type: "string", description: "A type or subtype word, such as land, creature, instant, Dragon." }, draws: { type: "integer", minimum: 1, maximum: 20 } } },
+		answer(args) {
+			const owner = args.whose === "opponent" ? frame.view.players?.find((one) => one.id !== frame.seat)?.id : frame.seat;
+			const found = owner === undefined ? {} : odds(frame, owner), mine = owner === frame.seat;
+			const word = String(args.type ?? "").toLowerCase();
+			const names = args.card ? [String(args.card)] : word ? Object.keys(found).filter((name) => (frame.view.printed?.[name]?.type ?? "").toLowerCase().split(/[\s—-]+/).includes(word)) : [];
+			const first = Object.values(found)[0];
+			if (!first) return "There is no registered list to count from.";
+			if (!names.length || names.some((name) => !found[name])) return `Name a card on ${mine ? "your" : "their"} list, or a type word that one of its cards has.`;
+			const draws = Number(args.draws ?? 1), percent = (chance: number) => `${(100 * chance).toFixed(1)}%`;
+			const line = (name: string) => `${name}: ${found[name]!.remaining} unaccounted` + (mine ? `, ${percent(within(found, [name], first.pool, draws))} within ${draws} draw${draws === 1 ? "" : "s"}`
+				: `, ${percent(found[name]!.inHand)} in hand now, ${percent(found[name]!.draw)} their next draw`);
+			const any = names.length > 1 ? [`Any of them: ${mine ? `${percent(within(found, names, first.pool, draws))} within ${draws} draw${draws === 1 ? "" : "s"}`
+				: `${percent(within(found, names, first.pool, first.hand))} in hand now`}.`] : [];
+			return [...names.slice(0, 15).map(line), ...any, `Basis: ${first.basis}.`].join("\n");
+		},
+	};
+}
+
+/** The tools a writer session has: its notebook, the odds, and the cards and rules to look up. */
+const tooling = (frame: Frame, context: Context, edits: NoteEdit[]): Lookup[] => [noting(frame, edits), chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])];
 
 /** What every writer call reads: the seat's position, its mana, its plan, the brief and the cards in play and in both lists. */
 function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}, recent = 3): string {

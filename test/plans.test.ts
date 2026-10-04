@@ -21,6 +21,7 @@ import { annotate, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget } from "../src/core/budget.ts";
+import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
 import { NOTEBOOK_LIMIT } from "../src/core/work-language.ts";
@@ -839,5 +840,23 @@ test("our turn's plan going in starts the next preparation, and a stop with note
 	assert.match(seen[0]!.messages, /This is maintenance, not a new analysis/);
 	assert.match(seen[0]!.messages, /Note under \\"stop on turn 5\\"/);
 	assert.match(seen[0]!.messages, /Your turns are 5, 7, 9…; the opponent's are 6, 8, 10…/);
-	assert.deepEqual(seen[0]!.tools.sort(), ["card", "note", "rule", "submit"]);
+	assert.deepEqual(seen[0]!.tools.sort(), ["card", "note", "odds", "rule", "submit"]);
+});
+
+test("odds count from what the seat can name: our library exactly, the opponent's hand and library together", () => {
+	const table = matchup("odds");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Forest", "Forest");
+	const frame = workFrame(table, 0);
+	const ours = odds(frame, 0), library = cardsIn(table, "library", 0);
+	assert.equal(ours.Forest!.pool, library.length);
+	assert.equal(ours.Forest!.remaining, library.filter((one) => one.card === "Forest").length, "every copy we cannot name is in our library");
+	assert.equal(ours.Forest!.draw, ours.Forest!.remaining / library.length);
+	const theirs = odds(frame, 1), unknown = [...cardsIn(table, "hand", 1), ...cardsIn(table, "library", 1)];
+	assert.equal(theirs.Shock!.pool, unknown.length);
+	assert.equal(theirs.Shock!.remaining, unknown.filter((one) => one.card === "Shock").length);
+	const choose = (n: number, k: number) => { let r = 1; for (let i = 1; i <= k; i++) r = (r * (n - i + 1)) / i; return r; };
+	const hand = cardsIn(table, "hand", 1).length;
+	assert.ok(Math.abs(theirs.Shock!.inHand - (1 - choose(unknown.length - theirs.Shock!.remaining, hand) / choose(unknown.length, hand))) < 1e-12);
+	assert.match(theirs.Shock!.basis, /library order is not tracked/);
 });
