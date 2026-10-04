@@ -30,6 +30,7 @@ import { reasoner, type Stream } from "../src/context/reason.ts";
 import { seat as seatTable, run } from "../src/context/sit.ts";
 import { CEILING, tally } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
+import { emptyBrief } from "../src/context/brief.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, reviewPlan, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
@@ -452,15 +453,26 @@ test("a step is carried out with a payment that spares what the plan holds, and 
 	assert.ok(table.ledger.some((row) => row.picked.startsWith("cast:") && row.why === "delegated"), "and the table took the cast itself");
 });
 
-test("the pilot reads the plan's guidance for the window it is in, and no other", () => {
+test("in a scripted window the pilot reads the script and nothing else of the plan, and asks only for what the script names", () => {
 	const table = position();
 	main(table, 0, 3);
 	editWork(table, 0, [{ do: "plan.put", plan: { ...line, phases: [
-		{ when: { active: "self", step: "precombat-main" }, guidance: "Land first, then the Passage." },
+		{ when: { active: "self", step: "precombat-main" }, goal: "Grow the Chocobo twice.", guidance: "Land first, then the Passage.", reevaluate: ["Red flashes in a blocker"] },
 		{ when: { active: "self", step: "declare-attackers" }, guidance: "Attack with the Chocobo." }] } }], "plan");
-	const packet = focus(workFrame(table, 0), startingIntent(0));
-	assert.deepEqual(packet.plan!.phase, ["Land first, then the Passage."]);
-	assert.match(question(packet, true).instructions, /Now: Land first, then the Passage\./);
+	const brief = { ...emptyBrief(0), steps: { "precombat-main": { own: "Develop before combat." } } };
+	const packet = focus(workFrame(table, 0), startingIntent(0), { brief, recaps: [{ turn: 2, active: "Red", line: "Red cast a Challenger.", from: 0, to: 1 }] });
+	assert.deepEqual(packet.plan!.script, { goal: ["Grow the Chocobo twice."], guidance: ["Land first, then the Passage."],
+		steps: ["Now: Play a Forest", "Then: Crack Fabled Passage"], reevaluate: ["Red flashes in a blocker"] }, "this window's script, its steps in order");
+	assert.equal(packet.plan!.guidance, undefined, "the whole plan's guidance is not repeated");
+	assert.deepEqual([packet.guidance, packet.lately], [[], []], "nor the brief's notes or the recaps");
+	const asked = question(packet, true).instructions;
+	assert.match(asked, /This phase: Grow the Chocobo twice\.\nLand first, then the Passage\.\nIts steps, in order:\n- Now: Play a Forest\n- Then: Crack Fabled Passage/);
+	assert.match(asked, /Choose ask:help only if one of these has happened: Red flashes in a blocker; or if no listed option can carry out the phase\. Anything else is normal play/);
+	// A window without a script keeps today's view of the plan.
+	editWork(table, 0, [{ do: "plan.put", plan: line }], "unscripted");
+	const plain = focus(workFrame(table, 0), startingIntent(0), { brief });
+	assert.equal(plain.plan!.script, undefined);
+	assert.deepEqual(plain.guidance, ["Develop before combat."]);
 });
 
 test("the turn before ours prepares our next one; a quiet turn offers it as it is, a changed one asks for a review", async () => {

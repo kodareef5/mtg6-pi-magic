@@ -165,10 +165,11 @@ export function question(packet: Packet, help: boolean): Question {
 		...packet.known,
 		...(packet.resources.length ? ["", ...packet.resources] : []),
 		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
-		...(plan ? ["", `Your plan: ${plan.objective}`, plan.guidance, ...plan.phase.map((line) => `Now: ${line}`),
-			...(plan.done.length ? [`Done: ${plan.done.join("; ")}.`] : []),
-			plan.due ? `Due now: ${plan.due}.` : "No step is due now.",
-			...(plan.next.length ? [`Later: ${plan.next.join("; ")}.`] : []),
+		...(plan ? ["", `Your strategy: ${plan.objective}`,
+			...(plan.script ? [...plan.script.goal.map((goal) => `This phase: ${goal}`), ...plan.script.guidance,
+				...(plan.script.steps.length ? ["Its steps, in order:", ...plan.script.steps.map((step) => `- ${step}`)] : ["No step of this phase is left."])]
+				: [plan.guidance ?? "", ...(plan.done.length ? [`Done: ${plan.done.join("; ")}.`] : []), plan.due ? `Due now: ${plan.due}.` : "No step is due now.",
+					...(plan.next.length ? [`Later: ${plan.next.join("; ")}.`] : [])]),
 			...(plan.branches.length ? [`Branches that apply now: ${plan.branches.join("; ")}.`] : []),
 			...plan.held.map((hold) => `Held: ${hold}.`),
 			...(plan.stops.length ? [`The plan said to stop if: ${plan.stops.join("; ")}.`] : [])] : []),
@@ -180,7 +181,10 @@ export function question(packet: Packet, help: boolean): Question {
 		...(plan ? [
 			"Take the option marked as the due plan step. Take an option marked as a plan branch when its situation is in front of you.",
 			"An option that uses a held resource spends what the plan is keeping; take it only when the plan says so.",
-			...(help ? [`If no option carries out the plan, or the position no longer fits it, choose ${HELP}. Do not invent a new line.`] : []),
+			// Asking is rare: a script names what justifies it, and anything else in the window is normal play.
+			...(help ? [plan.script?.reevaluate.length
+				? `Choose ${HELP} only if one of these has happened: ${plan.script.reevaluate.join("; ")}; or if no listed option can carry out the phase. Anything else is normal play: play the phase as written.`
+				: `If no option carries out the plan, or the position no longer fits it, choose ${HELP}. Do not invent a new line.`] : []),
 		] : []),
 		...(packet.routes.length ? ["Some ids are asks rather than moves: an ask shows the rules it names, changes nothing, and brings this decision back.",
 			"The rule that decides this may not be among them."] : []),

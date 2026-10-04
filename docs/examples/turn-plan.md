@@ -57,13 +57,17 @@ the Passage, attack with the Chocobo, and keep the new Forest open for Veil.
         ] } } }
   ],
   "askWhen": [
-    { "label": "The Hydra is gone before combat", "if": { "not": { "amount": { "count": { "subtypes": ["Hydra"], "controller": "you" } }, "atLeast": 1 } } },
-    { "label": "Red has three or more untapped lands", "if": { "amount": { "count": { "types": ["land"], "controller": "opponent", "tapped": false } }, "atLeast": 3 } }
+    { "label": "The Hydra is gone before combat", "if": { "not": { "amount": { "count": { "subtypes": ["Hydra"], "controller": "you" } }, "atLeast": 1 } } }
   ],
   "phases": [
-    { "when": { "active": "self", "step": "precombat-main" }, "guidance": "Hydra first with both Forests and the Elves, then the land, then the Passage: each land doubles the Hydra. Leave the new Forest untapped for Veil." },
-    { "when": { "active": "self", "step": "declare-attackers" }, "guidance": "Attack with the Chocobo only. The Hydra entered this turn and stays home." },
-    { "when": { "active": "opponent" }, "guidance": "Hold the Forest for Veil. Spend it only to answer a spell aimed at the Hydra." }
+    { "when": { "active": "self", "step": "precombat-main" }, "goal": "Hydra to four counters, Veil mana kept.",
+      "guidance": "Hydra first with both Forests and the Elves, then the land, then the Passage: each land doubles the Hydra. Leave the new Forest untapped for Veil." },
+    { "when": { "active": "self", "step": "declare-attackers" }, "goal": "Chip in without risking the Hydra.",
+      "guidance": "Attack with the Chocobo only. The Hydra entered this turn and stays home.",
+      "reevaluate": ["Red has an untapped creature that can block and kill the Chocobo"] },
+    { "when": { "active": "opponent" }, "goal": "Keep the Hydra alive through Red's turn.",
+      "guidance": "Hold the Forest for Veil. Spend it only to answer a spell aimed at the Hydra; let burn aimed at the face or the Chocobo resolve. Block a lone Challenger with the Hydra; chump nothing.",
+      "reevaluate": ["Red untaps with three or more lands and casts a creature bigger than the Hydra", "Red's attack would bring Green to 5 life or less"] }
   ],
   "packages": [
     { "card": "Mossborn Hydra", "registers": [

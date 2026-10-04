@@ -308,7 +308,7 @@ export const PackageSchema = Type.Cyclic({ ...Defs, Package: PackageDef }, "Pack
  * no longer fits, so the seat asks for a new one instead of improvising.
  * `holds` names resources kept for a purpose; an option that spends one is
  * marked, never removed. `packages` is what each permanent registers as it enters.
- * `phases` is the guidance for each window, which the pilot reads while it is open.
+ * `phases` is the pilot's script for each window, which it reads while the window is open.
  * A step marked `essential` is one the line cannot do without: when it cannot be
  * taken where it should be, the table asks for a new plan rather than passing.
  */
@@ -330,8 +330,11 @@ export const PlanDefs = { ...Defs,
 		/** A stop, watched at every decision or only in its window. */
 		askWhen: Type.Optional(Type.Array(object({ label: text, when: Type.Optional(WhenSchema), if: Type.Ref("Condition") }))),
 		holds: Type.Optional(Type.Array(object({ objects: QuerySchema, purpose: text, releaseWhen: Type.Optional(Type.Ref("Condition")) }))),
-		/** What to do and why in a window, read by the pilot while that window is open. */
-		phases: Type.Optional(Type.Array(object({ when: WhenSchema, guidance: text }))),
+		/**
+		 * The pilot's script for a window, read while it is open: the goal, the decisions in it (what to do and why), and the
+		 * few situations that justify asking strategy again. Anything else in the window is normal play.
+		 */
+		phases: Type.Optional(Type.Array(object({ when: WhenSchema, goal: Type.Optional(text), guidance: text, reevaluate: Type.Optional(Type.Array(text)) }))),
 		packages: Type.Optional(Type.Array(Type.Ref("Package"))),
 	}),
 };

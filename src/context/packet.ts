@@ -27,7 +27,8 @@ export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
 /** The part of the seat's plan this decision needs: what it is for, what is due, and what would make it wrong. */
 export type PlanSlice = {
 	objective: string;
-	guidance: string;
+	/** The plan's whole guidance, where no phase script covers the window. */
+	guidance?: string;
 	/** The step due now, if any, then the next two waiting. */
 	due?: string;
 	next: string[];
@@ -35,9 +36,9 @@ export type PlanSlice = {
 	held: string[];
 	/** Facts the plan named as reasons to stop, holding now. */
 	stops: string[];
-	/** The plan's guidance for this window. */
-	phase: string[];
 	done: string[];
+	/** The phase script for this window: its goal, its decisions, its steps in order, and what justifies asking strategy again. */
+	script?: { goal: string[]; guidance: string[]; steps: string[]; reevaluate: string[] };
 };
 
 /** An object as a pilot reads it: what it is and its state, without its registrations. */
@@ -120,16 +121,25 @@ export function focus(
 	].filter((line) => line.length > 0);
 
 	const state = planState(frame);
+	// The window's script, when the plan has one: then the pilot reads it and not the whole plan, the brief or the recaps.
+	const scripts = (state?.plan.phases ?? []).filter((one) => matches(one.when, frame));
+	const dueAt = state?.due.find((one) => one.candidates.length)?.at, done = new Set(view.done ?? []);
 	const plan = state && {
-		objective: state.plan.objective, guidance: state.plan.guidance,
-		...(state.due.find((one) => one.candidates.length) ? { due: state.due.find((one) => one.candidates.length)!.label } : {}),
+		objective: state.plan.objective,
+		...(scripts.length ? {} : { guidance: state.plan.guidance }),
+		...(dueAt !== undefined ? { due: state.plan.steps[dueAt]!.label } : {}),
 		next: state.waiting.slice(0, 2).map((one) => one.label),
 		branches: state.branches.map((one) => one.label),
 		held: state.held.map((hold) => `${hold.objects.map((object) => object.card ?? object.id).join(", ")}: ${hold.purpose}`),
 		stops: state.stops,
-		phase: (state.plan.phases ?? []).filter((one) => matches(one.when, frame)).map((one) => one.guidance),
 		done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
+		...(scripts.length ? { script: {
+			goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
+			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : at === dueAt ? "Now" : "Then"}: ${step.label}`] : []),
+			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []),
+		} } : {}),
 	};
+	const scripted = !!plan?.script;
 	return {
 		actor: seat, window: structuredClone(view.window), version,
 		obligation: decision.question,
@@ -139,8 +149,8 @@ export function focus(
 		known: [...view.table, ...view.since],
 		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
-		guidance,
-		lately: [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
+		guidance: scripted ? [] : guidance,
+		lately: scripted ? [] : [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
 		routes: dial(decision, context.rules),
 		...(context.learned?.length ? { learned: [...context.learned] } : {}),
 		...(refused?.length ? { refused: [...refused] } : {}),

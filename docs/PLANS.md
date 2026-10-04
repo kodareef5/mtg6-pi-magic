@@ -14,7 +14,7 @@ it; the table takes what the plan already settles. The shape is `PlanSchema` in
 | `may` | Standing branches: a response, a block, another way if the first is unavailable. Taken when their window and `if` hold. |
 | `askWhen` | Visible facts that mean the plan no longer fits. |
 | `holds` | Resources kept for a purpose, and what releases them. |
-| `phases` | Guidance window by window: what to do and why while that window is open. The pilot reads the entries that match now. |
+| `phases` | The pilot's script, window by window: a `goal`, the decisions in `guidance`, and in `reevaluate` the few situations worth asking strategy again. The pilot reads the entries that match now. |
 | `packages` | What each permanent registers as it enters. They join the seat's packages and outlive the plan. |
 
 The plan is accepted whole with `plan.put`, or refused whole with every problem
@@ -134,11 +134,25 @@ progress of its prefix.
 
 ## What the pilot reads
 
-`src/context/packet.ts`: the obligation; the plan's objective, the due step, the
-next two, live branches, holds and stops; the marked options; the public
-position with compact objects; this window's brief note and notes for cards the
-options name; the last recaps. Not the deck lists, not card registrations, not
-analysis the plan already settled.
+`src/context/packet.ts`. In a window with a phase script, the pilot reads:
+- the plan's objective, as the general strategy;
+- the script: its goal, its decisions, this window's steps in order (done, now,
+  then), the live branches and holds;
+- what would justify asking again;
+- the marked options;
+- the public position with compact objects.
+
+It is offered `ask:help` only for what the script's `reevaluate` names, or when
+nothing listed can carry out the phase. Anything else is normal play. A
+well-scripted phase is flown without a planning call, and `npm run stats`
+counts every interruption.
+
+In a window without a script, it reads the whole plan's guidance, the due step
+and the next two, this window's brief note, notes for cards the options name,
+and the last recaps.
+
+It never sees the deck lists, card registrations, the notebook, or analysis the
+plan already settled.
 
 ## What it does not promise
 
