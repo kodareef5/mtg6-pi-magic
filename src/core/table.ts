@@ -16,6 +16,7 @@
  */
 
 import type { Format } from "./format.ts";
+import type { Printed } from "./printed.ts";
 import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
@@ -48,8 +49,7 @@ export type Thing = {
 	/** Cards have a name. Spells and noncard stack objects hold accepted instructions. */
 	card?: string;
 	ability?: Activation;
-	/** Accepted base characteristics, not a cached layer result. */
-	creature?: { power: number; toughness: number };
+	/** The clock when it last entered the battlefield. */
 	entered?: number;
 	owner: SeatId;
 	controller: SeatId;
@@ -91,7 +91,9 @@ export type Activation = {
 	delegate: boolean;
 };
 /** A resolution can pause for its controller or another player, with no priority. */
-export type Resolution = { object: ObjectId; instruction: number; remaining: number };
+export type Resolution = { object: ObjectId; instruction: number; remaining: number;
+	/** 608.2b: every announced target was illegal as resolution began. */
+	lost?: boolean };
 
 /** The notepad. Expires on its own; nobody has to remember to erase it. */
 export type Note = {
@@ -210,6 +212,8 @@ export type Seat = {
 export type Table = {
 	/** The game type. One table runs one. */
 	format: Format;
+	/** Printed characteristics for every registered name. Public, pinned with the card file. */
+	printed: Record<string, Printed>;
 	/** In turn order. */
 	seats: Seat[];
 	things: Map<ObjectId, Thing>;

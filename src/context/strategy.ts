@@ -34,7 +34,7 @@ const SYSTEM = [
 	"A procedure can pay unrestricted colored and generic mana, tap its source, and add mana, draw, change life, or choose one card to move.",
 	"Immediate mana procedures only add mana. Other procedures use the stack and expose each remaining instruction on resolution.",
 	"Set delegate only when this seat authorizes unique resolution continuations to run without another classifier call. It cannot authorize another seat's choice.",
-	"Spell procedures use timing spell and source hand. Supply spell speed and destination; creature base power and toughness go in spell.creature. A creature with no resolution instructions uses an empty instructions array.",
+	"Spell procedures use timing spell and source hand. Supply spell speed and destination. The table reads printed type, cost and power/toughness from its card file; do not restate them. A creature with no resolution instructions uses an empty instructions array.",
 	"A spell with damage instructions announces one target: creature, player, or creature-or-player. The binding menu chooses it before payment; resolution rechecks it. Planeswalker and battle targets are not yet offered.",
 	"The vocabulary cannot recognize triggers, apply replacements or continuous effects, run combat, or verify that the claimed card meaning is correct. Do not replace unsupported card text with an invented simpler effect.",
 	"Instruction amounts are literals. Values that must be computed later need machinery this vocabulary does not yet have.",

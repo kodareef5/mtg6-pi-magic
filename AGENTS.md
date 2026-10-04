@@ -230,7 +230,9 @@ every time it is asked for. If a change would be easier by caching one, the walk
 is in the wrong place.
 
 The table never reads printed card text. Meaning arrives as structured terms,
-checked against an enumeration before anything moves.
+checked against an enumeration before anything moves. Printed type line, mana
+cost and power/toughness are structured fields, not text, so the table reads
+those from the pinned card file rather than trusting a claim.
 
 A decision with one legal option is not a decision. Take it, record it as
 forced, ask nobody. This saves calls on physical decisions. Circuit navigation
@@ -429,7 +431,7 @@ verify every carried field against the source and refuse to pass on a mismatch.
   fully informed move list would.
 - The rest of card meaning. Prepared procedures can cast a card from hand,
   announce one creature or player target, and deal literal damage. Creature
-  checks use accepted base characteristics, not a completed layer walk. Wider
+  checks read printed power and toughness, not a completed layer walk. Wider
   targets, combat, triggers, replacements, restricted mana and complex costs
   remain unwritten. `docs/STANDARD.md` inventories the pinned lists' needs.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds

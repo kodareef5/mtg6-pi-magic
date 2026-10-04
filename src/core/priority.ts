@@ -1,6 +1,7 @@
 /** Priority actions. Timing gates belong here; a seat may still declare its own motion. */
 import type { Move } from "./moves.ts";
 import { cardsIn, seat, type Table } from "./table.ts";
+import { facts, plainLand } from "./printed.ts";
 import type { SeatId } from "./types.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
@@ -9,14 +10,15 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 		{ option: { id: "pass", label: "Pass" }, changes: [], reason: "game-setup" },
 	];
 
-	// Playing a land: one move per land in hand, when this seat has played
-	// fewer than it may, it is this seat's main phase and the stack is empty.
+	// Playing a land whose printed facts are complete: one move per land in hand,
+	// when this seat has played fewer than it may, it is this seat's main phase
+	// and the stack is empty.
 	// Playing a land does not use the stack. 305.1.
 	const step = table.cursor.steps[0] ?? "";
 	const main = step === "precombat-main" || step === "postcombat-main";
 	if (main && table.cursor.active === holder && seat(table, holder).landsPlayed < 1 && !cardsIn(table, "stack").length) {
 		for (const card of cardsIn(table, "hand", holder)) {
-			if (!isLand(card.card)) continue;
+			if (!plainLand(facts(table, card))) continue;
 			moves.push({
 				option: { id: `land:${card.id}`, label: `Play ${card.card}`, objects: [{ id: card.id, incarnation: card.incarnation }] },
 				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land" }],
@@ -36,8 +38,6 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 	];
 }
 
-/** The engine knows a basic land's mana ability without reading its text. */
-const isLand = (card: string | undefined) => card === "Forest" || card === "Swamp" || card === "Island" || card === "Mountain" || card === "Plains";
 
 /**
  * A move is offered only when every one of these holds. This is the whole

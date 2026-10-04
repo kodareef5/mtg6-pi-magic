@@ -2,7 +2,8 @@
 import type { Thing } from "./table.ts";
 import type { Recipe, TaskSpec, ObjectRef, DraftStep, WorkCommand } from "./work-language.ts";
 
-export type SeenObject = Omit<Thing, "card"> & { card?: string };
+/** A projected object. `creature` is the printed base read at projection time. */
+export type SeenObject = Omit<Thing, "card"> & { card?: string; creature?: { power: number; toughness: number } };
 export type ReviewRun = {
 	occurrence: string;
 	stamp: string;

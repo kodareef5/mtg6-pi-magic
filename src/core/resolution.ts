@@ -13,9 +13,9 @@ export function resolving(table: Table): Pending | null {
 	const instruction = ability.instructions[pending.instruction]!;
 	const who = instruction && instruction.do !== "damage" ? recipient(table, ability.controller, instruction.who) : ability.controller;
 	const prefix = `resolve:${pending.object}:${pending.instruction}:${pending.remaining}`;
-	// Targets are checked once as resolution starts. Later instructions can
+	// Targets were checked once as resolution began. Later instructions can
 	// move or change that target without cancelling unrelated remaining effects.
-	const failedTarget = pending.instruction === 0 && pending.remaining === (instruction && "count" in instruction ? instruction.count : 1) && !targetAvailable(ability, { view: project(table, ability.controller) });
+	const failedTarget = !!pending.lost;
 	const finishes = failedTarget || !instruction || pending.instruction === ability.instructions.length - 1 && pending.remaining === 1;
 	const finish: Change[] = finishes && ability.timing === "spell" ? [{ do: "move", what: pending.object,
 		to: failedTarget ? "graveyard" : ability.spell!.destination, reason: "resolve" }] : [];

@@ -15,6 +15,8 @@
 import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
+import { printedFacts, shipped } from "./printed.ts";
+import type { Universe } from "./cards.ts";
 import { claim } from "./names.ts";
 import type { Change, Reason } from "./syntax.ts";
 import {
@@ -34,7 +36,8 @@ export type Entrant = {
 	deck: string[];
 };
 
-export function start(format: Format, entrants: Entrant[], seed: string): Table {
+/** Printed facts come from the pinned card file; the shipped Standard file by default. */
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped()): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -43,6 +46,7 @@ export function start(format: Format, entrants: Entrant[], seed: string): Table 
 
 	const table: Table = {
 		format,
+		printed: printedFacts(universe, entrants.flatMap((entrant) => entrant.deck)),
 		seats: [],
 		things: new Map(),
 		notes: [],
@@ -192,7 +196,6 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.ability.timing === "spell") {
 					const card = thing(table, change.what);
 					card.ability = structuredClone(change.ability);
-					if (change.ability.spell?.creature) card.creature = structuredClone(change.ability.spell.creature);
 				} else if (change.ability.timing === "stack") {
 					for (const object of cardsIn(table, "stack")) object.position = (object.position ?? 0) + 1;
 					table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.ability.controller, controller: change.ability.controller,
@@ -278,7 +281,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	const instructions = object.ability!.instructions;
 	if (change.action === "begin") {
 		const first = instructions[0]!;
-		table.resolution = { object: object.id, instruction: 0, remaining: first && "count" in first ? first.count : 1 };
+		table.resolution = { object: object.id, instruction: 0, remaining: first && "count" in first ? first.count : 1, ...(change.lost ? { lost: true } : {}) };
 		table.cursor.priority = null;
 		return;
 	}

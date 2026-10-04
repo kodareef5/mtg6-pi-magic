@@ -28,7 +28,7 @@ export const matchTable = (seed: string) => start(standard, matchup.decks.map((d
 export const elf: Procedure = {
 	source: { zones: ["hand"], controller: "self", card: "Llanowar Elves" }, claim: "Cast Llanowar Elves",
 	basis: `${card(universe, "Llanowar Elves").type}; ${card(universe, "Llanowar Elves").stats}; {G}. ${card(universe, "Llanowar Elves").oracle}`,
-	timing: "spell", spell: { speed: "sorcery", destination: "battlefield", creature: { power: 1, toughness: 1 } },
+	timing: "spell", spell: { speed: "sorcery", destination: "battlefield" },
 	cost: { tap: false, generic: 0, colors: ["G"] }, instructions: [], delegate: true,
 };
 export const shock: Procedure = {

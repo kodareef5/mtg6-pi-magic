@@ -103,11 +103,13 @@ without giving anyone priority. Only completion returns to state-based checks
 and then the active player's priority. One continuation is delegated only when
 the accepted procedure explicitly says so; it is never forced by a shortlist.
 
-The first spell path stores accepted base creature characteristics and entry
-time. These are inputs, not cached derived power or toughness. Its lethal-damage
-check is valid only for the unmodified creatures the opening probe exercises.
-Do not silently omit counters, layers, protection, replacements or entry
-instructions to make another card fit that probe.
+Printed type, mana cost and power/toughness come from the pinned card file
+through `printed.ts`, read on every use and never stored on an object. A model's
+claim never supplies them. The lethal-damage check reads printed toughness, so
+it is valid only for unmodified creatures. Tokens, face-down and animated
+objects get their characteristics from effects and need a characteristics
+reader. Do not silently omit counters, layers, protection, replacements or
+entry instructions to make another card fit.
 
 Listing a forced action does not apply it. The loop applies the listed group
 and asks again to discover cascading actions. Cleanup likewise remains pending

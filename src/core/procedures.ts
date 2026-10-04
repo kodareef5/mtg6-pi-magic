@@ -18,7 +18,6 @@ export function checkProcedure(procedure: Procedure): void {
 	if (procedure.timing === "spell" && procedure.cost.tap) throw new Error("A spell does not pay a source tap cost.");
 	if (!procedure.instructions.length && procedure.spell?.destination !== "battlefield") throw new Error("This operation needs at least one instruction.");
 	if (procedure.instructions.some((instruction) => instruction.do === "damage") && !procedure.target) throw new Error("Damage needs an announced target.");
-	if (procedure.spell?.creature && procedure.spell.destination !== "battlefield") throw new Error("A creature spell resolves to the battlefield.");
 	if (procedure.timing === "mana" && procedure.instructions.some((instruction) => instruction.do !== "mana")) {
 		throw new Error("Immediate mana procedures currently support only adding mana. Other instructions require the stack.");
 	}
@@ -84,7 +83,7 @@ export function procedureOptions(draft: Draft, frame: Frame): ProcedureOption[] 
 				}).join(", ") : "no mana"}.`,
 				procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : "Put the ability on the stack.",
 				...(aim ? [`Target: ${aim.label}. Chosen on announcement, rechecked on resolution.`] : []),
-				...(procedure.spell ? [`Resolves to ${procedure.spell.destination}.`, ...(procedure.spell.creature ? [`Base creature: ${procedure.spell.creature.power}/${procedure.spell.creature.toughness}.`] : [])] : []),
+				...(procedure.spell ? [`Resolves to ${procedure.spell.destination}.`] : []),
 				...procedure.instructions.map(instructionText),
 				...(procedure.timing !== "mana" ? [procedure.delegate ? "Unique continuations for this seat are delegated." : "Resolution waits for this seat's answers."] : []),
 				`Claimed basis: ${procedure.basis}`,

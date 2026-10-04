@@ -67,7 +67,7 @@ export type Change =
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string; target: NonNullable<Activation["target"]>; amount: number }
 	| { do: "activate"; what: string; id: string; ability: Activation }
-	| { do: "resolution"; action: "begin"; what: string }
+	| { do: "resolution"; action: "begin"; what: string; lost?: boolean }
 	| { do: "resolution"; action: "next"; what: string; skip?: boolean; abort?: boolean }
 	| { do: "shuffle"; whose: SeatId }
 	/**

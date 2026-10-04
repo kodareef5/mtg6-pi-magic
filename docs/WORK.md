@@ -238,8 +238,8 @@ recipe later cannot rewrite an ability already on the stack.
 
 A spell procedure selects a card in hand and uses `timing: "spell"`. Its
 `spell` terms supply `speed` (`instant` or `sorcery`) and `destination`
-(`battlefield` or `graveyard`). `spell.creature` can carry accepted base power
-and toughness. An ordinary creature such as Llanowar Elves has an empty
+(`battlefield` or `graveyard`). Printed power and toughness come from the
+card file, never the claim. An ordinary creature such as Llanowar Elves has an empty
 resolution instruction list; its activated ability is a later procedure.
 The source card itself moves to the stack, retaining the accepted terms until
 resolution completes. Costs and targets are checked before any card moves.

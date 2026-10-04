@@ -8,6 +8,11 @@ import { test } from "node:test";
 
 import { card, checkDeck, copiesAllowed, load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
+import { basePT, instant, intrinsicMana, manaCost, permanent, plainLand, printedFacts } from "../src/core/printed.ts";
+import { commit, start } from "../src/core/commit.ts";
+import { priorityMoves } from "../src/core/priority.ts";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { matchup, expand } from "../tools/matchup-fixture.ts";
 
 const universe = load("cards/standard.tsv");
@@ -54,4 +59,30 @@ test("oracle text with several lines survives the round trip", () => {
 	const many = [...universe.cards.values()].filter((one) => one.oracle.includes("\n"));
 	assert.ok(many.length > 500, `${many.length} cards with a line break`);
 	for (const one of many.slice(0, 200)) assert.equal(one.oracle.includes("\\n"), false);
+});
+
+test("printed facts decide land plays, intrinsic mana and creature bodies, and core names no card", () => {
+	const printed = printedFacts(universe, ["Forest", "Fabled Passage", "Llanowar Elves", "Shock", "Mossborn Hydra", "Lightning Strike"]);
+	assert.equal(plainLand(printed["Forest"]), true, "reminder text adds nothing a basic land type does not grant");
+	assert.deepEqual(intrinsicMana(printed["Forest"]), ["G"]);
+	assert.equal(plainLand(printed["Fabled Passage"]), false, "a land with rules text needs an accepted interpretation");
+	assert.deepEqual(intrinsicMana(printed["Fabled Passage"]), []);
+	assert.deepEqual(basePT(printed["Llanowar Elves"]), { power: 1, toughness: 1 });
+	assert.deepEqual(basePT(printed["Mossborn Hydra"]), { power: 0, toughness: 0 }, "its entry counter is text, not a printed fact");
+	assert.equal(basePT(printed["Shock"]), undefined);
+	assert.deepEqual(manaCost(printed["Lightning Strike"]), { generic: 1, colors: ["R"] });
+	assert.equal(instant(printed["Shock"]) && !permanent(printed["Shock"]), true);
+
+	const table = start(standard, [{ deck: [...Array(59).fill("Forest"), "Fabled Passage"] }, { deck: Array(60).fill("Mountain") }], "printed");
+	commit(table, [{ do: "move", what: "0-59", to: "hand", reason: "draw" }, { do: "move", what: "0-0", to: "hand", reason: "draw" }], "draw");
+	table.cursor.steps = ["precombat-main"];
+	assert.deepEqual(priorityMoves(table, 0).map((move) => move.option.label), ["Pass", "Play Forest"], "Fabled Passage waits for an interpretation");
+	assert.ok(table.printed["Fabled Passage"] && !table.printed["Llanowar Elves"], "a table holds facts for registered names only");
+
+	// A card-name branch in core would be a per-card switch. Comments may name examples.
+	const names = new Set(matchup.decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
+	for (const file of readdirSync("src/core").filter((name) => name.endsWith(".ts"))) {
+		const code = readFileSync(join("src/core", file), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+		for (const name of names) assert.equal(new RegExp(`["'\`]${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'\`]`).test(code), false, `${file} names ${name}`);
+	}
 });

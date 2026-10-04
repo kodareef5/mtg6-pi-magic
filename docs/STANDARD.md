@@ -56,15 +56,16 @@ Use `--live` again to continue with Pi models. The original journal stays intact
 
 ## What this opening added
 
-Prepared procedures now carry spell timing, a destination, accepted base
-creature characteristics, and one announced creature or player target.
+Prepared procedures now carry spell timing, a destination and one announced
+creature or player target. Printed type, cost and power/toughness come from
+the pinned card file, not from the claim.
 Literal damage uses that target. Menus expose source, target, payment and
 remaining instructions; replay uses the accepted terms without interpreting
 the card again. No card compiler or separate casting engine was added.
 
 These terms cover the Elf/Shock exchange. They do not implement all targets
 allowed by Shock, which can also hit planeswalkers and battles. The current
-creature check uses accepted base toughness; modifiers, indestructible and
+creature check uses printed toughness; modifiers, indestructible and
 damage replacement effects are not implemented. Giving Mossborn Hydra its
 printed 0/0 without its entry counter would be incorrect play.
 

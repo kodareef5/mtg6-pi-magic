@@ -20,6 +20,9 @@ import { commit } from "./commit.ts";
 import { cardsIn, playing, type Table, type LedgerRow } from "./table.ts";
 import type { Decision } from "./types.ts";
 import { resolving } from "./resolution.ts";
+import { targetAvailable } from "./targets.ts";
+import { project } from "./view.ts";
+import { basePT, facts } from "./printed.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
@@ -141,7 +144,9 @@ function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 	if (p.situation === "priority") {
 		const changes: Change[] = [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
 		const top = cardsIn(table, "stack")[0];
-		if (id === "pass" && table.cursor.passes + 1 === playing(table).length && top?.ability) changes.push({ do: "resolution", action: "begin", what: top.id });
+		// 608.2b. Targets are checked once, as resolution begins.
+		if (id === "pass" && table.cursor.passes + 1 === playing(table).length && top?.ability) changes.push({ do: "resolution", action: "begin", what: top.id,
+			...(targetAvailable(top.ability, { view: project(table, top.ability.controller) }) ? {} : { lost: true }) });
 		return changes;
 	}
 	if (p.situation === "turn-based") return [{ do: "turn", action: "complete" }];
@@ -161,8 +166,11 @@ function stateBased(table: Table): Pending | null {
 	const losing = playing(table).filter((s) =>
 		s.life <= 0 || (s.marks["drew-from-empty"] ?? 0) > 0 || (s.marks.poison ?? 0) >= 10,
 	);
-	const dead = cardsIn(table, "battlefield").filter((object) => object.creature &&
-		(object.creature.toughness <= 0 || object.damage >= object.creature.toughness));
+	// Printed toughness only. Counters and continuous effects need the layer walk.
+	const dead = cardsIn(table, "battlefield").flatMap((object) => {
+		const body = basePT(facts(table, object));
+		return body && (body.toughness <= 0 || object.damage >= body.toughness) ? [{ object, zero: body.toughness <= 0 }] : [];
+	});
 	if (!losing.length && !dead.length) return null;
 	return {
 		situation: "state-based",
@@ -171,7 +179,7 @@ function stateBased(table: Table): Pending | null {
 		moves: [{
 			option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: "Apply state-based losses and creature deaths" },
 			changes: [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const })),
-				...dead.map((object) => ({ do: "move" as const, what: object.id, to: "graveyard" as const, reason: object.creature!.toughness <= 0 ? "state-based-action" as const : "destroy" as const }))],
+				...dead.map(({ object, zero }) => ({ do: "move" as const, what: object.id, to: "graveyard" as const, reason: zero ? "state-based-action" as const : "destroy" as const }))],
 			reason: "state-based-action",
 		}],
 	};

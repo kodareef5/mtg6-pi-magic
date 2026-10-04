@@ -17,6 +17,7 @@
 import { cardsIn, seat, type Receipt, type Table, type Thing } from "./table.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
+import { basePT, facts } from "./printed.ts";
 import type { Frame, SeatView, Viewer, Window } from "./types.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
@@ -114,8 +115,10 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const objects = [...table.things.values()]
 		.filter((item) => PUBLIC.has(item.zone) || (viewer !== "spectator" && item.zone === "hand" && item.owner === viewer))
 		.map((item) => {
-			const { card, creature, ...facts } = structuredClone(item);
-			return item.faceDown ? facts : { ...facts, card, ...(creature ? { creature } : {}) };
+			const { card, ...seen } = structuredClone(item);
+			// Read from printed facts on every projection, never stored on the object.
+			const creature = item.zone === "battlefield" ? basePT(facts(table, item)) : undefined;
+			return item.faceDown ? seen : { ...seen, card, ...(creature ? { creature } : {}) };
 		});
 	if (table.resolution) lines.push(`Resolving ${table.resolution.object}, instruction ${table.resolution.instruction + 1}. Nobody has priority during this choice.`);
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer] } : {}), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
