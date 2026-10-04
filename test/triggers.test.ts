@@ -346,3 +346,18 @@ test("a leaves-the-battlefield watch looks back at a table that still remembers 
 	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.equal(table.waiting.length, 1, "the Elves were cast this turn, so the dies watch triggers");
 });
+
+test("a cast watch reads the zone the spell was cast from", () => {
+	// Not printed cards: two watches that differ only in the zone they name.
+	const watching = (zone: "hand" | "graveyard"): Registration => ({ basis: `Whenever you cast a spell from your ${zone}, you gain 1 life.`, kind: "watch",
+		event: { on: "cast", by: "you", from: [zone] }, effect: { instructions: [{ do: "life", who: "you", amount: 1 }] } });
+	for (const zone of ["hand", "graveyard"] as const) {
+		const table = matchup("cast-from");
+		establish(table, 0, "Sazh's Chocobo", [watching(zone)]);
+		place(table, 0, "battlefield", "Forest");
+		place(table, 0, "hand", "Llanowar Elves");
+		main(table, 0);
+		apply(table, nextDecision(table)!.options.find((option) => option.id.startsWith("cast:") && option.label.includes("Llanowar Elves"))!.id, "model", "chosen");
+		assert.equal(table.waiting.length, zone === "hand" ? 1 : 0, `cast from the hand: a watch for the ${zone} ${zone === "hand" ? "triggers" : "does not"}`);
+	}
+});

@@ -87,7 +87,9 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				const id = change.do === "activate" ? (ability?.timing === "spell" ? change.what : change.id) : change.action === "put" ? change.id : undefined;
 				const spell = id ? now(id) : undefined;
 				if (!ability || !spell || ability.timing === "mana") break;
-				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", object: spell, traits: characteristics(table, spell), found: ref(spell), player: ability.controller });
+				// Cast from the zone the card was in before the group moved it to the stack (601.2a).
+				const from = receipt.before[spell.id]?.zone;
+				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", object: spell, traits: characteristics(table, spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
 				for (const chosen of ability.targets.flat()) {
 					const aimed = "id" in chosen ? now(chosen.id) : undefined;
 					if (aimed && "id" in chosen && aimed.incarnation === chosen.incarnation) found.push({ on: "targeted", object: aimed, traits: characteristics(table, aimed), found: ref(aimed), player: ability.controller, source: spell });
