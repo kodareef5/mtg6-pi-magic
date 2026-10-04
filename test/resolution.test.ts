@@ -37,7 +37,7 @@ test("a search shows the library only to its chooser, may find nothing, binds th
 	passBoth(table);
 	const search = nextDecision(table)!;
 	assert.equal(search.seat, 0);
-	assert.deepEqual(search.options.map((option) => option.label), ["Choose Forest (library)", "Choose nothing"], "identical Forests are one choice, and finding nothing is allowed");
+	assert.deepEqual(search.options.map((option) => option.label), ["Choose Forest (library)", "Decline: choose none of them, so this finds nothing"], "identical Forests are one choice, and finding nothing is allowed");
 	assert.equal(JSON.stringify(project(table, 1)).includes("library)"), false, "the other seat sees no library card");
 	step(table, (label) => label === "Choose Forest (library)");
 	const fetched = table.resolution!.bound.land!.objects[0]!;
@@ -219,5 +219,5 @@ test("a target can depend on an earlier one, a card enters with its new controll
 	// A count of zero is already met.
 	announce(table, ability("Choose none", [{ do: "choose", who: "you", from: { zones: ["hand"], owner: "you" }, count: 0, as: "none" }]));
 	passBoth(table);
-	assert.deepEqual(nextDecision(table)!.options.map((option) => option.label), ["Choose nothing"]);
+	assert.deepEqual(nextDecision(table)!.options.map((option) => option.label), ["Nothing can be chosen"]);
 });

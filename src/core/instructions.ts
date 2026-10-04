@@ -120,7 +120,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 					...(last ? finish([ref(object)]) : { pick: ref(object) }) };
 			});
 			// Up to, a hidden-zone search, and running out are all ways to stop short (701.23b).
-			if (instruction.upTo || instruction.may || !pool.length || picked.length >= count) choices.push({ id: "done", label: picked.length ? "Done choosing" : "Choose nothing", changes: [], ...finish([]) });
+			// Declining gives up what the instruction is for, so the label says so; it reads as finishing otherwise.
+			if (instruction.upTo || instruction.may || !pool.length || picked.length >= count) choices.push({ id: "done",
+				label: picked.length ? `Stop here, with ${picked.length} chosen` : pool.length && count ? "Decline: choose none of them, so this finds nothing" : "Nothing can be chosen", changes: [], ...finish([]) });
 			return { actor: who, question: `${claim}: choose ${count === 1 ? "one" : `${count}`}${instruction.upTo ? " or fewer" : ""} (${picked.length} chosen).`, choices };
 		}
 		case "shuffle": return one("Shuffle", players(scope, instruction.who).map((whose) => ({ do: "shuffle" as const, whose })));
