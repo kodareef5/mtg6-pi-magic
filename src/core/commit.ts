@@ -167,6 +167,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const was = id === undefined ? undefined : table.things.get(id);
 		if (was) before[was.id] = structuredClone(was);
 	}
+	const born = new Set(changes.flatMap((change) => change.do === "token" ? [change.id] : []));
 
 	for (const [index, change] of changes.entries()) {
 		switch (change.do) {
@@ -199,7 +200,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else delete moving.entered;
 				if (change.to === "battlefield" && change.registers?.length) moving.registrations = structuredClone(change.registers);
 				else delete moving.registrations;
-				if (change.to === "battlefield") enter(table, moving, change);
+				if (change.to === "battlefield") enter(table, moving, change, before, born);
 				if (ORDERED.has(change.to)) {
 					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner));
 					if (change.position === "bottom") {
@@ -282,7 +283,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				const token: Thing = { id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
 					tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered: table.cursor.clock + 1, token: structuredClone(change.spec) };
 				table.things.set(change.id, token);
-				enter(table, token, change);
+				enter(table, token, change, before, born);
 				break;
 			}
 			case "reveal":
@@ -392,9 +393,9 @@ function stack(table: Table, id: string, ability: Activation): void {
 }
 
 /** Entering terms apply as part of the motion, and the recorded change says so. */
-function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number> }): void {
+function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number> }, before: Receipt["before"], born: ReadonlySet<string>): void {
 	forget(table);
-	const entering = terms(table, object);
+	const entering = terms(table, object, before, born);
 	if (entering.tapped) object.tapped = change.tapped = true;
 	for (const [kind, count] of Object.entries(entering.counters)) if (count > 0) object.counters[kind] = (object.counters[kind] ?? 0) + count;
 	if (Object.keys(object.counters).length) change.counters = { ...object.counters };

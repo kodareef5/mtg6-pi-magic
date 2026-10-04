@@ -18,6 +18,7 @@ import { editWork } from "../src/core/work-tools.ts";
 import { describe, project } from "../src/core/view.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import type { Procedure, Registration } from "../src/core/language.ts";
+import type { Change } from "../src/core/syntax.ts";
 import type { ProcedureOption } from "../src/core/procedures.ts";
 import { announce, establish, example, finish, main, matchup, pack, passBoth, place, step } from "./play.ts";
 
@@ -310,4 +311,22 @@ test("Icetill Explorer permits a second land and lands from the graveyard; Elvis
 	main(elves, 0, 3);
 	const paid = nextDecision(elves)!.options.find((option) => option.label.includes("Gigantosaurus"));
 	assert.match(paid?.shows ?? "", /Elvish Archdruid .* for GGG/, "three Elves, three green");
+});
+
+test("permanents entering together never shape each other's entry, whatever order the group is written in (614.12)", () => {
+	// Not a printed card: a creature whose entering term reaches every creature its controller enters, itself included.
+	const SWELL: Registration = { basis: "Each creature you control enters with an additional +1/+1 counter on it.", kind: "enters",
+		affects: { types: ["creature"], controller: "you" }, counters: { "+1/+1": 1 } };
+	for (const order of ["swell first", "elves first"]) {
+		const table = matchup("together");
+		const [swell, elves] = place(table, 0, "hand", "Sazh's Chocobo", "Llanowar Elves");
+		const moves: Change[] = [{ do: "move", what: swell!.id, to: "battlefield", reason: "resolve", registers: [SWELL] }, { do: "move", what: elves!.id, to: "battlefield", reason: "resolve" }];
+		commit(table, order === "swell first" ? moves : moves.reverse(), "resolve");
+		assert.equal(counters(table, swell!.id), 1, `${order}: its own term reaches itself`);
+		assert.equal(counters(table, elves!.id), 0, `${order}: a permanent entering alongside it is not yet on the battlefield to be affected by it`);
+		// Already on the battlefield, it does reach the next creature.
+		const [later] = place(table, 0, "hand", "Llanowar Elves");
+		commit(table, [{ do: "move", what: later!.id, to: "battlefield", reason: "resolve" }], "resolve");
+		assert.equal(counters(table, later!.id), 1, `${order}: a later creature enters with the counter`);
+	}
 });

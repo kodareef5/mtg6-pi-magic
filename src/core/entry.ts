@@ -1,5 +1,5 @@
 /** A permanent registers its seat's package for its name as it enters, by whatever route. */
-import { cardsIn, thing, type Table, type ObjectId, type Thing } from "./table.ts";
+import { thing, type Table, type ObjectId, type Thing } from "./table.ts";
 import { characteristics } from "./characteristics.ts";
 import { amount, holds, matches, tableWorld, type Scope } from "./selectors.ts";
 import type { Registration } from "./language.ts";
@@ -36,12 +36,20 @@ export function entering(table: Table, seat: SeatId, card: string): string {
 
 /**
  * How a permanent enters: tapped, with counters (614.1c-d). Its own `enters`
- * registrations and every other permanent's that affects it apply, each read
- * with the entering permanent as it now is on the battlefield (614.12).
+ * registrations and those of permanents already on the battlefield apply, each
+ * read with the entering permanent as it now is on the battlefield (614.12).
+ * Everything else its group touches reads as it was before the group, so
+ * permanents entering together never shape each other's entry, whatever order
+ * the changes are written in.
  */
-export function terms(table: Table, object: Thing): { tapped?: true; counters: Record<string, number> } {
-	const world = tableWorld(table), found: { tapped?: true; counters: Record<string, number> } = { counters: {} };
-	for (const holder of cardsIn(table, "battlefield")) {
+export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set()): { tapped?: true; counters: Record<string, number> } {
+	const live = tableWorld(table);
+	const objects = live.objects.flatMap((one) => one.id === object.id ? [one] : born.has(one.id) ? [] : [before[one.id] ?? one]);
+	for (const [id, was] of Object.entries(before)) if (id !== object.id && !table.things.has(id)) objects.push(was);
+	const world = { ...live, objects, get history() { return live.history; } };
+	const found: { tapped?: true; counters: Record<string, number> } = { counters: {} };
+	for (const holder of objects as Thing[]) {
+		if (holder.zone !== "battlefield") continue;
 		for (const registration of characteristics(table, holder)?.registrations ?? []) {
 			if (registration.kind !== "enters") continue;
 			const scope: Scope = { world, controller: holder.controller, source: holder };
