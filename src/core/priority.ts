@@ -2,7 +2,7 @@
 import type { Move } from "./moves.ts";
 import { cardsIn, seat, type Table } from "./table.ts";
 import { facts, isLand, permanentSpell } from "./printed.ts";
-import { offers } from "./procedures.ts";
+import { offers } from "./announce.ts";
 import { entering } from "./entry.ts";
 import { project } from "./view.ts";
 import type { Frame, SeatId } from "./types.ts";
@@ -52,8 +52,7 @@ export function defaultCasts(table: Table, holder: SeatId): Move[] {
 	const frame: Frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
 	const names = [...new Set(cardsIn(table, "hand", holder).filter((card) => permanentSpell(facts(table, card))).map((card) => card.card!))].sort();
 	return names.flatMap((name) => offers({ source: { zones: ["hand"], controller: "self", card: name }, claim: "Cast for its printed cost",
-		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", spell: { speed: "sorcery", destination: "battlefield" },
-		instructions: [], delegate: true }, frame, "cast").map(({ option, activation }) => {
+		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, "cast").map(({ option, activation }) => {
 		const note = entering(table, holder, name);
 		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
 	}));

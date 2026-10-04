@@ -1,0 +1,22 @@
+{
+  "name": "Dimir Control",
+  "format": "standard",
+  "source": "Practice deck for tests and quick games, built from Standard-legal cards with mostly simple text. Not a tournament list.",
+  "main": {
+    "Island": 12,
+    "Swamp": 11,
+    "Aegis Turtle": 4,
+    "Qiqirn Merchant": 4,
+    "Kalakscion, Hunger Tyrant": 2,
+    "Highborn Vampire": 4,
+    "Yargle, Goliath of Otaria": 2,
+    "Fell": 4,
+    "Last Gasp": 4,
+    "Essence Scatter": 3,
+    "Negate": 2,
+    "Chart a Course": 4,
+    "Unsummon": 2,
+    "Bake into a Pie": 2
+  },
+  "sideboard": {}
+}

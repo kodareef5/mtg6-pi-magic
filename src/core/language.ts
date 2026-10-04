@@ -193,7 +193,8 @@ const Defs = {
 		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("Amount") }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),
 		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")) }),
-		step({ do: one("tap", "untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
+		step({ do: Type.Literal("tap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
+		step({ do: Type.Literal("untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Ref("TokenSpec"), tapped: Type.Optional(Type.Literal(true)) }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),

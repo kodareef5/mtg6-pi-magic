@@ -3,17 +3,20 @@
  * breaks the reader or the deck check fails here rather than in a game.
  */
 
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { card, checkDeck, copiesAllowed, load } from "../src/core/cards.ts";
+import { card, copiesAllowed, load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
 import { basePT, intrinsicMana, manaCost, permanentSpell, printedFacts } from "../src/core/printed.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { priorityMoves } from "../src/core/priority.ts";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { matchup, expand } from "../tools/matchup-fixture.ts";
+import { matchup, decks, matchTable } from "../tools/matchup-fixture.ts";
+import { collection, listed, problems, register } from "../src/core/decks.ts";
+import { cardsIn } from "../src/core/table.ts";
 
 const universe = load("cards/standard.tsv");
 
@@ -33,26 +36,25 @@ test("a card legal in an older format is absent, not marked", () => {
 	assert.throws(() => card(universe, "Ancient Tomb"));
 });
 
-test("registered decks satisfy Standard size, copy limits and pinned legality", () => {
-	assert.deepEqual(checkDeck(universe, Array(60).fill("Forest"), standard), []);
+test("every kept deck registers for Standard, and the matchup lists keep their sideboards", () => {
 	assert.equal(copiesAllowed(universe, "Forest", standard), Infinity);
 	assert.equal(matchup.legalityDate, universe.generated);
-	assert.equal(matchup.decks.length, 2);
-	for (const deck of matchup.decks) {
-		const main = expand(deck.main), sideboard = expand(deck.sideboard);
-		assert.equal(main.length, 60);
-		assert.equal(sideboard.length, 15);
-		assert.deepEqual(checkDeck(universe, main, standard), []);
-		assert.deepEqual(checkDeck(universe, [...main, ...sideboard], standard), [], "copy limits include the sideboard");
-	}
+	for (const kept of collection().values()) assert.deepEqual(problems(universe, kept, standard), [], `${kept.name} registers`);
+	assert.deepEqual(decks.map((one) => [listed(one.main).length, listed(one.sideboard).length]), [[60, 15], [60, 15]]);
+	const green = decks[0]!;
+	assert.ok(problems(universe, { ...green, sideboard: { ...green.sideboard, "Sazh's Chocobo": 1 } }, standard)
+		.includes("5 copies of Sazh's Chocobo across deck and sideboard, 4 allowed"), "copy limits include the sideboard (100.4a)");
+	assert.deepEqual(problems(universe, { ...green, sideboard: { ...green.sideboard, "Snakeskin Veil": 1 } }, standard).filter((one) => one.includes("sideboard cards")),
+		["16 sideboard cards, standard allows 15"]);
+	const table = matchTable("registered");
+	assert.equal(table.things.size, 150, "main decks are libraries and sideboards are outside the game");
+	assert.equal([...table.things.values()].filter((one) => one.zone === "outside").length, 30);
 });
 
 test("four is the limit on a nonbasic", () => {
 	assert.equal(copiesAllowed(universe, "Llanowar Elves", standard), 4);
-	const deck = [...Array(55).fill("Forest"), ...Array(5).fill("Llanowar Elves")];
-	assert.deepEqual(checkDeck(universe, deck, standard), [
-		"5 copies of Llanowar Elves, 4 allowed",
-	]);
+	const stompy = deck("Green Stompy");
+	assert.deepEqual(problems(universe, { ...stompy, main: { ...stompy.main, "Llanowar Elves": 5 } }, standard), ["5 copies of Llanowar Elves, 4 allowed"]);
 });
 
 test("oracle text with several lines survives the round trip", () => {
@@ -74,15 +76,16 @@ test("printed facts decide land plays, default casts, intrinsic mana and creatur
 	assert.equal(basePT(printed["Shock"]), undefined);
 	assert.deepEqual(manaCost(printed["Lightning Strike"]), { tap: false, generic: 1, colors: ["R"] });
 
-	const table = start(standard, [{ deck: [...Array(59).fill("Forest"), "Fabled Passage"] }, { deck: Array(60).fill("Mountain") }], "printed");
-	commit(table, [{ do: "move", what: "0-59", to: "hand", reason: "draw" }, { do: "move", what: "0-0", to: "hand", reason: "draw" }], "draw");
+	const table = start(standard, [{ deck: deck("Mono-Green Landfall") }, { deck: deck("Red Burn") }], "printed");
+	const first = (card: string) => cardsIn(table, "library", 0).find((one) => one.card === card)!.id;
+	commit(table, [{ do: "move", what: first("Fabled Passage"), to: "hand", reason: "draw" }, { do: "move", what: first("Forest"), to: "hand", reason: "draw" }], "draw");
 	table.cursor.steps = ["precombat-main"];
 	assert.deepEqual(priorityMoves(table, 0).map((move) => move.option.label), ["Pass", "Play Fabled Passage", "Play Forest"], "any land can be played");
 	assert.equal(priorityMoves(table, 0)[1]!.option.shows, "No package is prepared: it enters with nothing registered.", "an entry is never silent");
-	assert.ok(table.printed["Fabled Passage"] && !table.printed["Llanowar Elves"], "a table holds facts for registered names only");
+	assert.ok(table.printed["Fabled Passage"] && !table.printed["Bear Cub"], "a table holds facts for registered names only");
 
 	// Core must not branch on a card name. Comments are excluded.
-	const names = new Set(matchup.decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
+	const names = new Set([...collection().values()].flatMap((kept) => [...Object.keys(kept.main), ...Object.keys(kept.sideboard)]));
 	for (const file of readdirSync("src/core").filter((name) => name.endsWith(".ts"))) {
 		const code = readFileSync(join("src/core", file), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
 		for (const name of names) assert.equal(new RegExp(`["'\`]${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'\`]`).test(code), false, `${file} names ${name}`);
@@ -90,5 +93,6 @@ test("printed facts decide land plays, default casts, intrinsic mana and creatur
 });
 
 test("an unsupported card refuses its deck", () => {
-	assert.deepEqual(checkDeck(universe, [...Array(4).fill("Shock"), ...Array(56).fill("Mountain")], standard, new Set(["Shock"])), ["Shock is not supported yet"]);
+	assert.deepEqual(problems(universe, deck("Red Burn"), standard, new Set(["Shock"])), ["Shock is not supported yet"]);
+	assert.throws(() => register(universe, { ...deck("Red Burn"), main: { ...deck("Red Burn").main, Shock: 5 } }, standard), /Red Burn cannot be registered for standard/);
 });

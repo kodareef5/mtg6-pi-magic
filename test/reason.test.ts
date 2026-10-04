@@ -7,6 +7,7 @@
  * holds nothing private, and every call lands in the bill with its ceiling.
  */
 
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { appendFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -62,8 +63,8 @@ function chat(reply: (user: string, system: string) => string, stop = "stop") {
 }
 
 const table = () => start(standard, [
-	{ name: "A", deck: Array(60).fill("Forest") },
-	{ name: "B", deck: Array(60).fill("Swamp") },
+	{ name: "A", deck: deck("Green Stompy") },
+	{ name: "B", deck: deck("Dimir Control") },
 ], "reasoning");
 
 test("the pregame asks several questions at once and files each answer where it is read", async () => {
@@ -82,17 +83,18 @@ test("the pregame asks several questions at once and files each answer where it 
 	for (const phase of ["beginning", "precombat-main", "combat", "postcombat-main", "ending"]) {
 		assert.ok(keys.includes(`phase:${phase}`), phase);
 	}
-	assert.equal(keys.some((key) => key.startsWith("card:")), false, "no card note for basics");
+	assert.equal(keys.some((key) => ["card:Forest", "card:Island", "card:Swamp"].includes(key)), false, "no card note for basics");
+	assert.ok(keys.includes("card:Snakeskin Veil"), "a card with something to say gets its own note");
 	assert.equal(new Set(keys).size, keys.length, "no question asked twice");
 
 	// Registered composition is public by default, without hands or object ids.
 	const sent = wave.map((ask) => ask.user).join("\n");
 	assert.match(sent, /public registered deck/);
-	assert.match(sent, /60 Swamp/);
+	assert.match(sent, /4 Qiqirn Merchant/, "the opponent's registered list is in the question");
 	for (const id of built.things.keys()) assert.equal(sent.includes(id), false);
 	// Mulligan guidance is asked with the curve and the seat count in front of it.
 	const opening = wave.find((ask) => ask.key === "opening")!.user;
-	assert.match(opening, /60 cards, 60 lands/);
+	assert.match(opening, /60 cards, 20 lands\. Spells by cost: 1:16 2:12 3:2 4:8 5:2\./);
 	assert.match(opening, /There are 2 seats/);
 	assert.match(opening, /no land/);
 
@@ -110,7 +112,8 @@ test("the pregame asks several questions at once and files each answer where it 
 	assert.ok(written.opening.length > 0);
 	assert.ok(written.against["1"]!.length > 0);
 	assert.ok(written.phases.combat!.length > 0);
-	assert.deepEqual(written.cards, {});
+	assert.deepEqual(Object.keys(written.cards).sort(), ["Ankle Biter", "Colossadactyl", "Elvish Archdruid", "Fanatical Strength", "Giant Growth", "Llanowar Elves", "Snakeskin Veil"],
+		"a note for each card with rules text, none for a vanilla creature or a basic");
 	assert.deepEqual(written.gaps, []);
 
 	// Every call is metered with the ceiling it asked for, which is what some
@@ -182,7 +185,7 @@ test("a brief snippet reaches the decision and a card note only when its card is
 
 	const written = {
 		seat: 0, version: 1,
-		deck: "Sixty Forests. It casts nothing.",
+		deck: "Green Stompy curves out and pumps its biggest creature.",
 		combos: "No combinations.",
 		opening: "Keep any seven.",
 		against: { "1": "Expect to be behind on everything." },
@@ -198,7 +201,7 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		{ brief: written, recaps },
 	);
 
-	assert.ok(packet.guidance.includes("Sixty Forests. It casts nothing."));
+	assert.ok(packet.guidance.includes("Green Stompy curves out and pumps its biggest creature."));
 	assert.ok(packet.guidance.some((line) => line.startsWith("Forest:")), "the visible card's note is in");
 	assert.equal(packet.guidance.some((line) => line.startsWith("Cavern")), false, "an absent card costs nothing");
 	assert.deepEqual(packet.assumed, ["Expect to be behind on everything."]);
@@ -209,7 +212,7 @@ test("a brief snippet reaches the decision and a card note only when its card is
 	const asked = question(packet);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
-	assert.match(asked.instructions, /Sixty Forests/);
+	assert.match(asked.instructions, /Green Stompy curves out/);
 	assert.match(asked.instructions, /may have been revised for this position/);
 	assert.match(asked.instructions, /do not certify card meaning or rules legality/);
 	assert.match(asked.instructions, /Recently:/);
@@ -265,9 +268,9 @@ test("a recap is two sentences of public events and skips a turn where nothing h
 	commit(built, [{ do: "move", what: hidden[0]!.id, to: "battlefield", reason: "play-land" }], "play-land");
 	const after = await recap(built, reasoner({ role: "summary", stream, model: sol, tally: counted, backoffMs: 0 }), { number: 2, active: "B", from: built.log.length - 1 });
 	assert.ok(after);
-	// A Swamp on the battlefield is public and may be named; a count of a hand is
+	// An Island on the battlefield is public and may be named; a count of a hand is
 	// all the request carries about what is still hidden.
-	assert.match(sent.at(-1)!.user, /Swamp/);
+	assert.match(sent.at(-1)!.user, /Island/);
 	assert.match(sent.at(-1)!.user, /\d+ in hand/);
 });
 
@@ -281,8 +284,8 @@ test("a phase is planned only when it has a choice that could be lost", () => {
 	apply(built, "keep", "model", "chosen");
 	advance(built);
 
-	// Walk a turn. A plan is worth a call only where more than one move is listed,
-	// which on a land deck is the main phase and nothing else.
+	// Walk a turn. A plan is worth a call only where more than one move is listed:
+	// the main phases, where a land or a spell can be played, and nowhere else.
 	const planned = new Set<string>();
 	while (built.cursor.turn === 1) {
 		if (worthPlanning(built)) planned.add(built.cursor.steps[0]!);
@@ -291,7 +294,7 @@ test("a phase is planned only when it has a choice that could be lost", () => {
 		const land = decision.options.find((option) => option.id.startsWith("land:"));
 		apply(built, (land ?? decision.options[0]!).id, "model", "chosen");
 	}
-	assert.deepEqual([...planned], ["precombat-main"]);
+	assert.deepEqual([...planned], ["precombat-main", "postcombat-main"]);
 });
 
 test("the whole table is seated, briefed and played, and the recaps do not block it", async () => {
@@ -389,7 +392,9 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	assert.match(reading, /pregame/);
 	assert.match(reading, /summary/);
 	assert.match(reading, /picks     \d+ decision-model calls/);
-	assert.match(reading, /forced    9\d\.\d%/);
+	const [, forced, chosen] = reading.match(/forced (\d+)  delegated \d+  chosen (\d+)/)!;
+	assert.ok(Number(forced) > 5 * Number(chosen), "the table takes far more decisions than it asks");
+	assert.match(reading, /forced    \d+\.\d%/);
 
 	// A role switched off is a decision, not a gap.
 	const quiet = table();
@@ -436,7 +441,7 @@ test("a carried brief keeps its failures, and a stuck recap cannot lose a saved 
 	};
 
 	// A brief carried from a clone, with a question that had failed in the parent.
-	const scarred = { seat: 0, version: 1, deck: "Sixty Forests.", combos: "None.",
+	const scarred = { seat: 0, version: 1, deck: "Green Stompy.", combos: "None.",
 		opening: "", against: {}, phases: {}, cards: {},
 		gaps: ["mulligan guidance: the model fell over"] };
 
@@ -455,7 +460,7 @@ test("a carried brief keeps its failures, and a stuck recap cannot lose a saved 
 
 	// Carried as given: a clone is the same game continued, so there is nothing
 	// to check it against. But its failures are still this run's failures.
-	assert.equal(seated.chronicle.briefs[0]!.deck, "Sixty Forests.");
+	assert.equal(seated.chronicle.briefs[0]!.deck, "Green Stompy.");
 	assert.equal(seated.tally.spent().filter((spend) => spend.role === "pregame").length, 0, "not re-asked");
 	assert.match(built.gaps.join(" "), /brief \(carried\).*the model fell over/);
 	assert.ok(degraded(built, seated), "a carried failure is not a clean run");
@@ -517,7 +522,7 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 
 	// One: a fresh game, played and saved. Its pregame writes two briefs, which
 	// is what used to cost it the first two receipts.
-	const first = start(standard, [{ deck: Array(60).fill("Forest") }, { deck: Array(60).fill("Swamp") }], "life");
+	const first = start(standard, [{ deck: deck("Green Stompy") }, { deck: deck("Dimir Control") }], "life");
 	const parentPath = join(dir, "parent.jsonl");
 	const parentJournal = open(parentPath, header("parent", first));
 	const seated = await seatTable(first, async () => parts, inference, universe, {

@@ -16,8 +16,9 @@ import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
 import { printedFacts, shipped } from "./printed.ts";
-import { characteristics, has } from "./characteristics.ts";
+import { characteristics, has, type Traits } from "./characteristics.ts";
 import type { Universe } from "./cards.ts";
+import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
 import type { Change, Reason } from "./syntax.ts";
 import {
@@ -35,20 +36,27 @@ import {
 export type Entrant = {
 	/** Asked for, or absent for a generated one. Letters, digits, hyphen, 20 or fewer. */
 	name?: string;
-	deck: string[];
+	deck: Deck;
 };
 
-/** Printed facts come from the pinned card file, the shipped Standard file by default. */
+/**
+ * Set a game up. Each seat's deck is registered first, against the card universe
+ * and the format: a deck that does not register stops the game here. Every card
+ * object in the game comes from a registered deck, its main deck into the
+ * library and its sideboard outside the game. Printed facts come from the
+ * pinned card file, the shipped Standard file by default.
+ */
 export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped()): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
 		);
 	}
+	const decks = entrants.map((entrant) => register(universe, entrant.deck, format));
 
 	const table: Table = {
 		format,
-		printed: printedFacts(universe, entrants.flatMap((entrant) => entrant.deck)),
+		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
 		things: new Map(),
 		notes: [],
@@ -85,21 +93,21 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		table.seats.push({
 			id,
 			name,
-			deck: entrant.deck,
+			deck: decks[id]!,
 			life: format.startingLife,
 			pool: [],
 			landsPlayed: 0,
 			marks: {},
 		});
-		entrant.deck.forEach((card, i) => {
+		const main = listed(decks[id]!.main);
+		[...main, ...listed(decks[id]!.sideboard)].forEach((card, i) => {
 			table.things.set(`${id}-${i}`, {
 				id: `${id}-${i}`,
 				incarnation: 0,
 				card,
 				owner: id,
 				controller: id,
-				zone: "library",
-				position: i,
+				...(i < main.length ? { zone: "library" as const, position: i } : { zone: "outside" as const }),
 				tapped: false,
 				faceDown: false,
 				counters: {},
@@ -134,8 +142,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// Read what a watcher may need before anything moves. After the group it
 	// is gone, and a receipt that cannot say what a thing looked like is a
 	// receipt no trigger can read.
-	const before: Receipt["before"] = {};
+	const before: Receipt["before"] = {}, known: Record<string, Traits> = {};
 	for (const change of changes) {
+		if (change.do === "move") {
+			const leaving = table.things.get(change.what);
+			const traits = leaving?.zone === "battlefield" && change.to !== "battlefield" ? characteristics(table, leaving) : undefined;
+			if (traits) known[change.what] = structuredClone(traits);
+		}
 		const id = "what" in change ? change.what : change.do === "damage" && "id" in change.target ? change.target.id : undefined;
 		const was = id === undefined ? undefined : table.things.get(id);
 		if (was) before[was.id] = structuredClone(was);
@@ -161,9 +174,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				// Identity changes on a zone change, so every note left on the
 				// old incarnation stops applying.
 				moving.incarnation += 1;
-				moving.tapped = false;
+				moving.tapped = change.to === "battlefield" && !!change.tapped;
+				moving.controller = change.controller ?? moving.owner;
 				moving.faceDown = false;
-				moving.counters = {};
+				moving.counters = change.to === "battlefield" ? structuredClone(change.counters ?? {}) : {};
 				moving.damage = 0;
 				delete moving.deathtouched;
 				delete moving.attached;
@@ -245,12 +259,21 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.to) thing(table, change.what).attached = structuredClone(change.to);
 				else delete thing(table, change.what).attached;
 				break;
+			case "token":
+				table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
+					tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered: table.cursor.clock + 1, token: structuredClone(change.spec) });
+				break;
+			case "reveal":
+				break;
 			case "note":
 				table.notes.push({ ...structuredClone(change.note), id: `note-${table.cursor.clock + 1}-${index}`, written: table.cursor.clock + 1 } as Note);
 				break;
-			case "cease":
-				table.things.delete(change.what);
+			case "cease": {
+				const gone = thing(table, change.what);
+				table.things.delete(gone.id);
+				if (gone.zone === "stack") for (const other of cardsIn(table, "stack")) if ((other.position ?? 0) > (gone.position ?? 0)) other.position! -= 1;
 				break;
+			}
 			case "attack":
 				table.combat = { attackers: structuredClone(change.attackers), blockers: [] };
 				break;
@@ -301,6 +324,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		reason,
 		before,
 		after,
+		...(Object.keys(known).length ? { known } : {}),
 	};
 	// The clock moves for every group, logged or not, because a note needs a
 	// stamp and "which of these two is newer" must have an answer.
@@ -312,21 +336,23 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 
 /** Remaining instructions and choices belong to the table throughout resolution. */
 function resolutionTransition(table: Table, change: Extract<Change, { do: "resolution" }>): void {
-	const object = thing(table, change.what);
-	const instructions = object.ability!.instructions;
 	if (change.action === "begin") {
-		const first = instructions[0]!;
-		table.resolution = { object: object.id, instruction: 0, remaining: first && "count" in first ? first.count : 1, ...(change.lost ? { lost: true } : {}) };
+		table.resolution = { object: change.what, source: structuredClone(change.source), program: structuredClone(change.program), bound: {},
+			illegal: [...change.illegal], picked: [], ...(change.lost ? { lost: true } : {}) };
 		table.cursor.priority = null;
 		return;
 	}
 	const pending = table.resolution!;
-	if (!change.skip && --pending.remaining > 0) return;
-	pending.instruction += 1;
-	const next = instructions[pending.instruction];
-	if (next && !change.abort) { pending.remaining = "count" in next ? next.count : 1; return; }
-	if (object.card) delete object.ability;
-	else {
+	if (change.follow) pending.source = structuredClone(change.follow);
+	if (change.pick) { pending.picked.push(structuredClone(change.pick)); return; }
+	if (change.bind) Object.assign(pending.bound, structuredClone(change.bind));
+	pending.program.shift();
+	pending.picked = [];
+	if (change.expand) pending.program.unshift(...structuredClone(change.expand));
+	if (pending.program.length && !change.abort && !pending.lost) return;
+	const object = table.things.get(change.what);
+	if (object?.card) delete object.ability;
+	else if (object) {
 		table.things.delete(object.id);
 		for (const other of cardsIn(table, "stack")) if ((other.position ?? 0) > (object.position ?? 0)) other.position! -= 1;
 	}

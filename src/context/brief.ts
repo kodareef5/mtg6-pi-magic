@@ -31,6 +31,7 @@ import type { Card, Universe } from "../core/cards.ts";
 import type { Policy } from "../core/intent.ts";
 import type { Phase } from "../core/steps.ts";
 import type { Seat } from "../core/table.ts";
+import { listed } from "../core/decks.ts";
 import type { SeatId } from "../core/types.ts";
 import type { Reasoner } from "./reason.ts";
 
@@ -149,8 +150,8 @@ export function asks(
 	universe: Universe,
 	options: { format: string; openLists?: boolean },
 ): Ask[] {
-	const mine = deckLines(seat.deck, universe);
-	const deck = `Your deck, ${options.format}:\n${mine.join("\n")}\n\n${curve(seat.deck, universe)}`;
+	const mine = deckLines(listed(seat.deck.main), universe);
+	const deck = `Your deck, ${options.format}:\n${mine.join("\n")}\n\n${curve(listed(seat.deck.main), universe)}`;
 	const asksOf: Ask[] = [
 		{
 			key: "deck",
@@ -184,7 +185,7 @@ export function asks(
 				`${deck}\n\n` +
 				(options.openLists !== false
 					? `Seat ${other.id}'s public registered deck:\n` +
-						`${deckLines(other.deck, universe).join("\n")}\n\nWhere is your deck ahead of theirs and where is it behind?`
+						`${deckLines(listed(other.deck.main), universe).join("\n")}\n\nWhere is your deck ahead of theirs and where is it behind?`
 					: `You are seated against ${others.length} opponent${others.length === 1 ? "" : "s"} ` +
 						`in ${options.format}, and you have not seen their cards. What should this deck ` +
 						`expect to be ahead of and behind in this format, and what early sign would ` +
@@ -203,7 +204,7 @@ export function asks(
 		});
 	}
 
-	const notable = [...new Set(seat.deck)]
+	const notable = Object.keys(seat.deck.main)
 		.map((name) => universe.cards.get(name))
 		.filter((card): card is Card => !!card && needsNote(card));
 	for (const card of notable) {

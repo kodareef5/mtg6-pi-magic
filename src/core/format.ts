@@ -20,7 +20,8 @@ export type Format = {
 	 * that file is a candidate for deck checking, not proof of gameplay support.
 	 */
 	legality: string;
-	deck: { minSize: number; maxCopies: number };
+	/** 100.2a and 100.4a for constructed play. */
+	deck: { minSize: number; maxCopies: number; maxSideboard: number };
 	/** Commander, and anything else that starts outside the library. */
 	commandZone: boolean;
 	/**
@@ -63,7 +64,7 @@ export const standard: Format = {
 	maxHandSize: 7,
 	singleton: false,
 	legality: "standard",
-	deck: { minSize: 60, maxCopies: 4 },
+	deck: { minSize: 60, maxCopies: 4, maxSideboard: 15 },
 	mulliganBottom: "on-keep",
 	commandZone: false,
 	decksRegistered: true,

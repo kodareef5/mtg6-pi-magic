@@ -14,7 +14,7 @@ schemas, and every `basis` is checked against the card's text.
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |
 | `until-end-of-turn.md` | temporary changes, counters with keywords, doubling power, `if` and `limit`, play permissions |
 | `costs.md` | sacrifice with last known information, discard or exile the card itself, life, reductions |
-| `search.md` | searching as choose, move, shuffle; an Omen shuffling itself |
+| `search.md` | searching as choose, move, shuffle, from a land and from a spell |
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
 | `animation.md` | crew, a land becoming a creature, earthbend, changing creature types and granting a trigger |
 | `x-costs.md` | X in a cost, a permanent remembering X, counted X, `sum`, damage to each |

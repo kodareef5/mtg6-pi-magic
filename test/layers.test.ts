@@ -7,16 +7,16 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { commit, start } from "../src/core/commit.ts";
+import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { characteristics, intrinsic, sick } from "../src/core/characteristics.ts";
-import { matches } from "../src/core/selectors.ts";
+import { matches, tableWorld } from "../src/core/selectors.ts";
 import { nextDecision, advance, apply } from "../src/core/decisions.ts";
 import type { Registration } from "../src/core/language.ts";
 
-const green = ["Mossborn Hydra", "Ba Sing Se", "Llanowar Elves", "Elvish Archdruid", "Emberheart Challenger"];
-const red = ["Zhao, the Moon Slayer", "Soulstone Sanctuary", "Kellan, Planar Trailblazer", "Smaug the Magnificent", "Smaug the Magnificent"];
-const deal = () => start(standard, [{ name: "Green", deck: [...green, ...Array(55).fill("Forest")] }, { name: "Red", deck: [...red, ...Array(55).fill("Mountain")] }], "layers");
+/** The pinned matchup, with Green Stompy's Archdruid for a lord. */
+const deal = (green = "Mono-Green Landfall") => start(standard, [{ name: "Green", deck: deck(green) }, { name: "Red", deck: deck("Mono-Red Aggro") }], "layers");
 const find = (table: Table, card: string, nth = 0) => [...table.things.values()].filter((one) => one.card === card)[nth]!;
 const enter = (table: Table, card: string, registers: Registration[] = [], nth = 0) => {
 	const object = find(table, card, nth);
@@ -35,10 +35,12 @@ test("characteristics apply by layer and timestamp, and nothing derived is store
 	assert.equal("power" in hydra, false, "the object stores none of it");
 
 	// A lord affects other Elves, not itself, whenever it is read.
-	const elves = enter(table, "Llanowar Elves");
-	enter(table, "Elvish Archdruid", [{ basis: "Other Elf creatures you control get +1/+1.", kind: "continuous",
+	const stompy = deal("Green Stompy");
+	const elf = enter(stompy, "Llanowar Elves");
+	enter(stompy, "Elvish Archdruid", [{ basis: "Other Elf creatures you control get +1/+1.", kind: "continuous",
 		affects: { types: ["creature"], subtypes: ["Elf"], controller: "you", other: true }, change: { power: 1, toughness: 1 } }]);
-	assert.deepEqual([characteristics(table, elves)!.power, characteristics(table, find(table, "Elvish Archdruid"))!.power], [2, 2]);
+	assert.deepEqual([characteristics(stompy, elf)!.power, characteristics(stompy, find(stompy, "Elvish Archdruid"))!.power], [2, 2]);
+	const elves = enter(table, "Llanowar Elves");
 
 	// Setting land subtypes removes the land's own abilities and gives the basic type's mana (305.7).
 	const village = enter(table, "Ba Sing Se", [{ basis: "{T}: Add {G}.", kind: "mana", cost: { tap: true }, colors: ["G"] }]);
@@ -57,8 +59,8 @@ test("characteristics apply by layer and timestamp, and nothing derived is store
 		change: { types: { add: ["creature"] }, subtypes: { allCreatureTypes: true }, base: { power: 3, toughness: 3 }, words: ["vigilance"] } } }], "resolve");
 	const animated = characteristics(table, sanctuary)!;
 	assert.deepEqual([animated.types, animated.power, animated.words], [["land", "creature"], 3, ["vigilance"]]);
-	assert.ok(matches({ table, controller: 1 }, sanctuary, { subtypes: ["Lizard"], controller: "you" }), "all creature types makes it a Lizard");
-	assert.ok(!matches({ table, controller: 1 }, sanctuary, { subtypes: ["Equipment"] }), "but not an artifact type");
+	assert.ok(matches({ world: tableWorld(table), controller: 1 }, sanctuary, { subtypes: ["Lizard"], controller: "you" }), "all creature types makes it a Lizard");
+	assert.ok(!matches({ world: tableWorld(table), controller: 1 }, sanctuary, { subtypes: ["Equipment"] }), "but not an artifact type");
 	assert.equal(characteristics(table, sanctuary)!.subtypes.includes("Mountain"), true, "Zhao's effect, earlier, still makes it a Mountain");
 
 	// Replacing creature subtypes keeps the land and other subtypes.

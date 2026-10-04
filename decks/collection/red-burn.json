@@ -1,0 +1,20 @@
+{
+  "name": "Red Burn",
+  "format": "standard",
+  "source": "Practice deck for tests and quick games, built from Standard-legal cards with mostly simple text. Not a tournament list.",
+  "main": {
+    "Mountain": 21,
+    "Swab Goblin": 4,
+    "Tyrox, Saurid Tyrant": 4,
+    "Hired Claw": 4,
+    "Brazen Scourge": 4,
+    "Fire Elemental": 3,
+    "Skyraker Giant": 2,
+    "Shock": 4,
+    "Lightning Strike": 4,
+    "Burst Lightning": 4,
+    "Boltwave": 2,
+    "Scorching Shot": 4
+  },
+  "sideboard": {}
+}

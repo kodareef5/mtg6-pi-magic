@@ -8,6 +8,7 @@
  * safe to build.
  */
 
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
@@ -26,8 +27,8 @@ import { project } from "../src/core/view.ts";
 const rules = loadRules("rules/cr.tsv");
 
 const table = () => start(standard, [
-	{ name: "A", deck: Array(60).fill("Forest") },
-	{ name: "B", deck: Array(60).fill("Swamp") },
+	{ name: "A", deck: deck("Green Stompy") },
+	{ name: "B", deck: deck("Dimir Control") },
 ], "dial");
 
 /** Pi's classify, as a double. Answers with whatever the rule says, in order. */

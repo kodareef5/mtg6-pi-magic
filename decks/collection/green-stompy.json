@@ -1,0 +1,20 @@
+{
+  "name": "Green Stompy",
+  "format": "standard",
+  "source": "Practice deck for tests and quick games, built from Standard-legal cards with mostly simple text. Not a tournament list.",
+  "main": {
+    "Forest": 20,
+    "Llanowar Elves": 4,
+    "Ankle Biter": 4,
+    "Jibbirik Omnivore": 4,
+    "Bear Cub": 4,
+    "Colossadactyl": 4,
+    "Ordinary Bear": 4,
+    "Gigantosaurus": 2,
+    "Giant Growth": 4,
+    "Fanatical Strength": 4,
+    "Snakeskin Veil": 4,
+    "Elvish Archdruid": 2
+  },
+  "sideboard": {}
+}

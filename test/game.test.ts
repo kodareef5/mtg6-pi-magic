@@ -1,6 +1,7 @@
 /**
- * Milestone one: two seats play a legal Standard deck of basic lands to a
- * recorded end. Pass, play a land, untap, draw, mulligan, deck out.
+ * Milestone one: two seats play registered Standard decks from the collection to
+ * a recorded end. The fixture policy only plays lands and passes, so the game
+ * runs through untap, draw, mulligan, cleanup and deck out.
  *
  * No leak, replay, and forced live here. Decision and phase invariants have
  * their own fixtures; idempotency for the parked wire lives in test/seating.
@@ -17,12 +18,12 @@ import { relive } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
 import { scriptedPlayer, type Player } from "../src/core/player.ts";
 import { commit, start } from "../src/core/commit.ts";
-import type { Table } from "../src/core/table.ts";
+import { cardsIn, type Table } from "../src/core/table.ts";
+import { deck } from "../src/core/decks.ts";
 import type { Frame } from "../src/core/types.ts";
 import { describe, project, render } from "../src/core/view.ts";
 
 const universe = load("cards/standard.tsv");
-const deck = (card: string) => Array.from({ length: 60 }, () => card);
 
 /**
  * A seat that keeps its hand, plays a land when it can, and otherwise takes the
@@ -46,7 +47,7 @@ function policy(name: string, seen: Frame[] = []): Player {
 	};
 }
 
-const table = () => start(standard, [{ deck: deck("Forest") }, { deck: deck("Swamp") }], "seed-1");
+const table = (seed = "seed-1") => start(standard, [{ deck: deck("Green Stompy") }, { deck: deck("Dimir Control") }], seed);
 
 const finish = async (built: Table) => {
 	const players = Object.fromEntries(built.seats.map((s) => [s.id, policy(s.name)]));
@@ -56,11 +57,15 @@ const finish = async (built: Table) => {
 test("the decks are legal before a card moves", () => {
 	const built = table();
 	assert.equal(built.seats.length, 2);
-	assert.equal(built.things.size, 120);
-	for (const s of built.seats) assert.equal(universe.cards.has(s.deck[0]!), true);
+	assert.equal(built.things.size, 120, "two main decks; neither practice deck has a sideboard");
+	for (const s of built.seats) for (const name of Object.keys(s.deck.main)) assert.equal(universe.cards.has(name), true);
+	assert.throws(() => start(standard, [{ deck: { ...deck("Green Stompy"), main: { ...deck("Green Stompy").main, "Gigantosaurus": 5 } } }, { deck: deck("Dimir Control") }], "illegal"),
+		/cannot be registered for standard: 5 copies of Gigantosaurus/, "setup refuses a deck the format does not allow");
+	assert.throws(() => start(standard, [{ deck: { ...deck("Green Stompy"), main: { ...deck("Green Stompy").main, "Not A Card": 1 } } }, { deck: deck("Dimir Control") }], "unknown"),
+		/no card named Not A Card/, "every game card comes from the universe");
 });
 
-test("a game of lands finishes, and somebody decks out", async () => {
+test("a game finishes, and somebody decks out", async () => {
 	const built = table();
 	const outcome = await finish(built);
 	assert.ok(outcome);
@@ -163,7 +168,7 @@ test("replay: a fallback is replayed as a fallback, not as a missing answer", as
 
 test("a different seed gives a different game", async () => {
 	const a = table();
-	const b = start(standard, [{ deck: deck("Forest") }, { deck: deck("Swamp") }], "seed-2");
+	const b = table("seed-2");
 	await finish(a);
 	await finish(b);
 	assert.notEqual(
@@ -173,34 +178,36 @@ test("a different seed gives a different game", async () => {
 });
 
 test("no leak: public deck counts never identify hidden objects", async () => {
-	// Use a distinct identity so a public copy cannot mask a leak in the test.
-	const hidden = start(standard, [{ deck: ["Secret"] }, { deck: ["Forest"] }], "hidden");
-	const tap = commit(hidden, [{ do: "tap", what: "0-0" }], "game-setup");
-	assert.equal(describe(hidden, tap).includes("Secret"), false);
-	commit(hidden, [{ do: "move", what: "0-0", to: "battlefield", reason: "resolve" }], "resolve");
-	assert.equal(describe(hidden, tap).includes("Secret"), false, "later reveals do not rewrite history");
-	const card = hidden.things.get("0-0")!;
+	// Gigantosaurus is only in Green's deck, so no public copy can mask a leak.
+	const hidden = table("hidden");
+	const giant = cardsIn(hidden, "library", 0).find((object) => object.card === "Gigantosaurus")!;
+	const tap = commit(hidden, [{ do: "tap", what: giant.id }], "game-setup");
+	assert.equal(describe(hidden, tap).includes("Gigantosaurus"), false);
+	commit(hidden, [{ do: "move", what: giant.id, to: "battlefield", reason: "resolve" }], "resolve");
+	assert.equal(describe(hidden, tap).includes("Gigantosaurus"), false, "later reveals do not rewrite history");
+	const card = hidden.things.get(giant.id)!;
 	card.faceDown = true;
 	const faceDownTap = commit(hidden, [{ do: "tap", what: card.id }], "cost-payment");
 	for (const zone of ["battlefield", "stack", "exile"] as const) {
 		card.zone = zone;
 		for (const viewer of [1, "spectator"] as const) {
 			const { decks, ...position } = project(hidden, viewer);
-			assert.equal(JSON.stringify(position).includes("Secret"), false);
-			assert.deepEqual(decks, [{ seat: 0, cards: { Secret: 1 } }, { seat: 1, cards: { Forest: 1 } }]);
+			assert.equal(JSON.stringify(position).includes("Gigantosaurus"), false);
+			assert.equal(decks![0]!.cards.Gigantosaurus, 2, "the registered count is public");
 		}
 	}
 	card.faceDown = false;
-	assert.equal(describe(hidden, faceDownTap).includes("Secret"), false);
-	assert.ok(project(hidden, "spectator").objects!.some((object) => object.card === "Secret"));
+	assert.equal(describe(hidden, faceDownTap).includes("Gigantosaurus"), false);
+	assert.ok(project(hidden, "spectator").objects!.some((object) => object.card === "Gigantosaurus"));
 
 	const built = table();
 	let checks = 0;
 
 	const registered = project(built, "spectator").decks;
-	assert.deepEqual(registered, [{ seat: 0, cards: { Forest: 60 } }, { seat: 1, cards: { Swamp: 60 } }]);
+	const sorted = (counts: Record<string, number>) => Object.fromEntries(Object.entries(counts).sort(([a], [b]) => a.localeCompare(b)));
+	assert.deepEqual(registered, built.seats.map((one) => ({ seat: one.id, name: one.deck.name, cards: sorted(one.deck.main), sideboard: {} })));
 	const edited = project(built, 0);
-	edited.decks![1]!.cards.Swamp = 0;
+	edited.decks![1]!.cards.Island = 0;
 	assert.deepEqual(project(built, 0).decks, registered, "projection owns its deck counts");
 	assert.equal(project({ ...built, format: { ...standard, decksRegistered: false } }, 0).decks, undefined);
 
@@ -239,7 +246,7 @@ test("no leak: public deck counts never identify hidden objects", async () => {
 						}
 						for (const other of built.seats) {
 							if (other.id === self) continue;
-							for (const name of new Set(other.deck)) {
+							for (const name of Object.keys(other.deck.main)) {
 								if (may.has(name)) continue;
 								assert.equal(text.includes(name), false, `seat ${self} was shown ${name}`);
 							}
@@ -272,9 +279,8 @@ test("the private block holds nothing of another seat's", async () => {
 	for (const s of built.seats) {
 		const mine = project(built, s.id);
 		const theirs = built.seats.find((x) => x.id !== s.id)!;
-		for (const line of mine.yours) {
-			assert.equal(line.includes(theirs.deck[0]!), false, line);
-		}
+		const only = Object.keys(theirs.deck.main).filter((name) => !(name in s.deck.main));
+		for (const line of mine.yours) for (const name of only) assert.equal(line.includes(name), false, line);
 	}
 });
 

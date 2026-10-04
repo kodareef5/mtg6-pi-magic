@@ -349,5 +349,7 @@ likely addition; no card in the matchup needs it yet.
   of these cards produce it.
 - Copies, effects that take control of a permanent, and face-down permanents.
   None of these cards produce them.
+- Casting the back half of a split, adventure or Omen card: the table reads the
+  front face.
 - Hybrid and Phyrexian mana symbols. The printed cost reader and a stated cost
   both accept generic, colored and X symbols only.

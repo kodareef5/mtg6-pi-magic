@@ -1,3 +1,4 @@
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
@@ -14,8 +15,8 @@ import { startingIntent } from "../src/context/plan.ts";
 
 test("context preserves the seat's options and knowledge and scopes assumptions to a turn and phase", async () => {
 	const table = start(standard, [
-		{ name: "A", deck: Array(60).fill("Forest") },
-		{ name: "B", deck: Array(60).fill("Swamp") },
+		{ name: "A", deck: deck("Green Stompy") },
+		{ name: "B", deck: deck("Dimir Control") },
 	], "context");
 	const intent: Intent = {
 		seat: 0, version: 0,
@@ -33,9 +34,9 @@ test("context preserves the seat's options and knowledge and scopes assumptions 
 	// No rules were handed in, so nothing is advertised. Advertising a route
 	// cannot make it answerable. test/dial.test.ts is the dialer's own test.
 	assert.deepEqual(packet.routes, []);
-	assert.deepEqual(packet.decks, [{ seat: 0, cards: { Forest: 60 } }, { seat: 1, cards: { Swamp: 60 } }]);
+	assert.deepEqual(packet.decks?.map((one) => [one.seat, one.name, one.cards["Qiqirn Merchant"]]), [[0, "Green Stompy", undefined], [1, "Dimir Control", 4]]);
 	const { decks: _decks, ...position } = packet;
-	assert.equal(JSON.stringify(position).includes("Swamp"), false, "registered counts do not identify hidden objects");
+	assert.equal(JSON.stringify(position).includes("Qiqirn Merchant"), false, "registered counts do not identify hidden objects");
 	packet.options[0]!.label = "Changed by a consumer";
 	assert.deepEqual(opening, before);
 	assert.throws(() => focus(opening, { ...intent, seat: 1 }), /own seat/);
@@ -78,8 +79,8 @@ test("context preserves the seat's options and knowledge and scopes assumptions 
 
 test("a retry packet differs from the first only by the refusal it carries", async () => {
 	const table = start(standard, [
-		{ name: "A", deck: Array(60).fill("Forest") },
-		{ name: "B", deck: Array(60).fill("Swamp") },
+		{ name: "A", deck: deck("Green Stompy") },
+		{ name: "B", deck: deck("Dimir Control") },
 	], "refused");
 	const intent: Intent = {
 		seat: 0, version: 0,

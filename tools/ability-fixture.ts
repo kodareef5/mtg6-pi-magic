@@ -4,7 +4,8 @@
  */
 import { commit, start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
-import { card, checkDeck, load } from "../src/core/cards.ts";
+import { card, load } from "../src/core/cards.ts";
+import { deck } from "../src/core/decks.ts";
 import { cardsIn, type Mana } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
 import { editWork } from "../src/core/work-tools.ts";
@@ -19,30 +20,30 @@ import { planWork } from "../src/context/strategy.ts";
 import type { Reasoner } from "../src/context/reason.ts";
 import { tally } from "../src/context/spend.ts";
 
+/** Dimir Control against itself, each seat starting with its first Merchant and an Island in play. */
 export function abilityTable(seed = "ability-experiment") {
-	const table = start(standard, [
-		{ name: "A", deck: ["Qiqirn Merchant", ...Array(59).fill("Forest")] },
-		{ name: "B", deck: ["Qiqirn Merchant", ...Array(59).fill("Island")] },
-	], seed);
-	commit(table, ["0-0", "0-1", "1-0", "1-1"].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
+	const table = start(standard, [{ name: "A", deck: deck("Dimir Control") }, { name: "B", deck: deck("Dimir Control") }], seed);
+	const first = (seat: number, card: string) => cardsIn(table, "library", seat).find((one) => one.card === card)!.id;
+	commit(table, [0, 1].flatMap((seat) => [first(seat, "Qiqirn Merchant"), first(seat, "Island")]).map((what) => ({ do: "move" as const, what, to: "battlefield" as const, reason: "game-setup" as const })), "game-setup");
 	return table;
 }
 
 export function manaProcedure(card: string, color: Mana["color"]): Procedure {
 	return { source: { zones: ["battlefield"], controller: "self", card }, claim: `Tap ${card} for ${color}`,
-		basis: `Basic land type ${card}; CR 305.6.`, timing: "mana", cost: { tap: true, generic: 0, colors: [] },
-		instructions: [{ do: "mana", who: "self", colors: [color] }], delegate: true };
+		basis: `Basic land type ${card}; CR 305.6.`, timing: "mana", cost: { tap: true }, instructions: [{ do: "mana", who: "you", colors: [color] }] };
 }
 
 export function lootProcedure(basis = "{1}, {T}: Draw a card, then discard a card."): Procedure {
 	return { source: { zones: ["battlefield"], controller: "self", card: "Qiqirn Merchant" }, claim: "Qiqirn Merchant: draw, then discard",
-		basis, timing: "stack", cost: { tap: true, generic: 1, colors: [] }, delegate: true,
-		instructions: [{ do: "draw", who: "self", count: 1 }, { do: "choose-move", who: "self", from: "hand", to: "graveyard", reason: "discard", count: 1 }] };
+		basis, timing: "stack", cost: { mana: "{1}", tap: true }, instructions: [
+			{ do: "draw", who: "you", count: 1 },
+			{ do: "choose", who: "you", from: { zones: ["hand"], owner: "you" }, count: 1, as: "discard" },
+			{ do: "move", what: "bound:discard", to: "graveyard", reason: "discard" },
+		] };
 }
 
 export async function abilityExercise() {
 	const table = abilityTable(), universe = load("cards/standard.tsv"), counted = tally();
-	for (const seat of table.seats) if (checkDeck(universe, seat.deck, standard).length) throw new Error("The fixture needs legal Standard decks.");
 	const basis = card(universe, "Qiqirn Merchant").oracle.split("\n")[0]!;
 	let plans = 0, batches = 0, concernQuestions = 0, exchangeCalls = 0;
 	const paused: { version: number; seat: number; frame: Frame }[] = [];
@@ -58,7 +59,7 @@ export async function abilityExercise() {
 		const { seat } = JSON.parse(prompt.user) as { seat: number };
 		const tools: WorkCommand[] = [
 			{ do: "recipe.put", recipe: { id: "loot", label: "Fund and activate the Merchant", guidance: "Make one mana, then pay and tap the Merchant. The draw is delegated; choose the discard after seeing it.", reserves: [], steps: [
-				{ label: "Make one mana", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, action: { procedure: manaProcedure(seat === 0 ? "Forest" : "Island", seat === 0 ? "G" : "U") } },
+				{ label: "Make one mana", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, action: { procedure: manaProcedure("Island", "U") } },
 				{ label: "Pay and announce the draw/discard ability", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, action: { procedure: lootProcedure(basis) } },
 			] } },
 			{ do: "task.put", task: { id: "opening-exchange", label: "Consider the prepared activation", when: { step: "upkeep", fromTurn: 3, throughTurn: 3 }, times: 1,
@@ -91,6 +92,6 @@ export async function abilityExercise() {
 			return player.answer(frame);
 		} }];
 	}));
-	const outcome = await play(table, players, {}, (event) => checkpoint(event));
+	const outcome = await play(table, players, Object.fromEntries(table.seats.map((seat) => [seat.id, startingIntent(seat.id)])), (event) => checkpoint(event));
 	return { table, outcome, paused, plans, batches, concernQuestions, exchangeCalls, calls: counted.spent().length, history, trace };
 }

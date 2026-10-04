@@ -1,6 +1,7 @@
 /** Physical procedure invariants. These test declared meaning, not card interpretation.
  * Past 150 lines because the same exchange is exercised through choices and journals.
  */
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -30,10 +31,12 @@ import { focus, type Packet } from "../src/context/packet.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
 
 const elf: Procedure = { source: { zones: ["hand"], controller: "self", card: "Llanowar Elves" }, claim: "Cast Llanowar Elves", basis: "Creature — Elf Druid 1/1.",
-	timing: "spell", spell: { speed: "sorcery", destination: "battlefield" }, instructions: [], delegate: true };
+	timing: "spell", instructions: [] };
 const shock: Procedure = { source: { zones: ["hand"], controller: "self", card: "Shock" }, claim: "Cast Shock", basis: "Shock deals 2 damage to any target.",
-	timing: "spell", spell: { speed: "instant", destination: "graveyard" }, target: "creature-or-player", instructions: [{ do: "damage", amount: 2 }], delegate: true };
+	timing: "spell", targets: [{ object: { types: ["creature", "planeswalker", "battle"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] };
 
+/** A seat's first permanent with that name. */
+const on = (table: Table, seat: number, card: string) => cardsIn(table, "battlefield", seat).find((one) => one.card === card)!;
 function position(table = abilityTable()) {
 	for (;;) {
 		const decision = nextDecision(table);
@@ -81,51 +84,50 @@ function castElf() {
 test("a prepared activation spends existing resources once and refuses a bad payment atomically", async () => {
 	const table = position();
 	const viaLand = proposed(table, lootProcedure());
-	assert.deepEqual(viaLand.activation.funding, [{ source: { id: "0-1", incarnation: 1 }, colors: ["G"], claim: "Tap Forest for mana (basic land type)", intrinsic: true }],
+	const island = on(table, 0, "Island"), merchant = on(table, 0, "Qiqirn Merchant");
+	assert.deepEqual(viaLand.activation.funding, [{ source: { id: island.id, incarnation: 1 }, colors: ["U"], claim: "Tap Island for mana (basic land type)", intrinsic: true }],
 		"with an empty pool, the land's basic type pays the generic cost during activation (601.2g)");
-	assert.match(viaLand.option.shows!, /Pay with tap Forest \(0-1\)/);
+	assert.match(viaLand.option.shows!, new RegExp(`Pay with tap Island \\(${island.id}\\)`));
 	const before = structuredClone(table);
-	const mana = proposed(table, manaProcedure("Forest", "G"));
+	const mana = proposed(table, manaProcedure("Island", "U"));
 	assert.ok(mana);
 	assert.deepEqual(table, before, "enumerating a source and payment moves nothing");
-	fire(table, manaProcedure("Forest", "G"));
+	fire(table, manaProcedure("Island", "U"));
 	assert.equal(table.seats[0]!.pool.length, 1);
-	assert.equal(table.things.get("0-1")!.tapped, true);
+	assert.equal(table.things.get(island.id)!.tapped, true);
 	assert.equal(cardsIn(table, "stack").length, 0, "a mana procedure does not open a response window");
 	assert.equal(table.cursor.priority, 0);
 	const paid = proposed(table, lootProcedure()).activation;
 	const funded = structuredClone(table);
 	assert.throws(() => activationChanges(table, { ...paid, cost: { ...paid.cost, generic: 2 }, paid: [paid.paid[0]!, paid.paid[0]!] }), /duplicated/);
-	assert.throws(() => activationChanges(table, { ...paid, cost: { ...paid.cost, generic: 0, colors: ["U"] } }), /stated cost/);
+	assert.throws(() => activationChanges(table, { ...paid, cost: { ...paid.cost, generic: 0, colors: ["G"] } }), /stated cost/);
 	assert.deepEqual(table, funded, "a failed payment did not tap the source or remove mana");
-	assert.throws(() => commit(table, [{ do: "tap", what: "0-0" }, { do: "spend-mana", who: 0, ids: [paid.paid[0]!, paid.paid[0]!] }], "cost-payment"), /not available/);
+	assert.throws(() => commit(table, [{ do: "tap", what: merchant.id }, { do: "spend-mana", who: 0, ids: [paid.paid[0]!, paid.paid[0]!] }], "cost-payment"), /not available/);
 	assert.deepEqual(table, funded, "even the writer refuses a duplicate spend before earlier changes");
 	fire(table, lootProcedure());
 	assert.equal(table.seats[0]!.pool.length, 0);
-	assert.equal(table.things.get("0-0")!.tapped, true);
+	assert.equal(table.things.get(merchant.id)!.tapped, true);
 	assert.equal(cardsIn(table, "stack").length, 1);
 	const committed = structuredClone(table);
-	assert.throws(() => activationChanges(table, paid), /already tapped/);
+	assert.throws(() => activationChanges(table, paid), /cannot be tapped/);
 	assert.deepEqual(table, committed);
-	const payments = (mana: Mana[], cost: { tap: boolean; generic: number; colors: Mana["color"][] }) =>
+	const payments = (mana: Mana[], cost: { generic: number; colors: Mana["color"][] }) =>
 		fundings({ seat: 0, version: 0, view: { window: { kind: "turn" }, table: [], yours: [], since: [], objects: [], pools: [{ seat: 0, mana }] } } as never, cost);
-	assert.deepEqual(payments([{ id: "a", color: "U", spendOnly: "creatures" }], { tap: false, generic: 1, colors: [] }), []);
-	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U" }], { tap: false, generic: 1, colors: [] }).length, 1, "identical unrestricted units do not multiply a menu");
-	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", persists: true }], { tap: false, generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
+	assert.deepEqual(payments([{ id: "a", color: "U", spendOnly: "creatures" }], { generic: 1, colors: [] }), []);
+	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U" }], { generic: 1, colors: [] }).length, 1, "identical unrestricted units do not multiply a menu");
+	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", persists: true }], { generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
 
 	// The actual classifier request must distinguish both sources and payments.
-	const twins = start(standard, [
-		{ name: "A", deck: ["Qiqirn Merchant", "Qiqirn Merchant", ...Array(58).fill("Forest")] },
-		{ name: "B", deck: Array(60).fill("Island") },
-	], "payment-descriptions");
-	commit(twins, ["0-0", "0-1"].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
+	const twins = start(standard, [{ name: "A", deck: deck("Dimir Control") }, { name: "B", deck: deck("Dimir Control") }], "payment-descriptions");
+	const [first, second] = cardsIn(twins, "library", 0).filter((one) => one.card === "Qiqirn Merchant");
+	commit(twins, [first!.id, second!.id].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
 	const frame = workFrame(position(twins), 0);
 	frame.view.pools = [{ seat: 0, mana: [{ id: "green", color: "G", persists: true }, { id: "blue", color: "U" }] }];
 	// Label one Merchant so the two are distinct sources.
-	const held = frame.view.objects!.find((object) => object.id === "0-0")!;
+	const held = frame.view.objects!.find((object) => object.id === first!.id)!;
 	frame.view.work = prepareWork(frame, [{ do: "recipe.put", recipe: { id: "payments", label: "Choose payment", guidance: "Preserve green mana.", reserves: [], steps: draft(lootProcedure()).steps } }, { do: "draft.start", recipe: "payments" },
 		{ do: "label.put", object: { id: held.id, incarnation: held.incarnation }, role: "blocker", purpose: "Hold back to block." }]);
-	const source = frame.view.objects!.find((object) => object.id === "0-1")!;
+	const source = frame.view.objects!.find((object) => object.id === second!.id)!;
 	const sourceText = `Source: Qiqirn Merchant (${source.id}@${source.incarnation})`;
 	let calls = 0, description = "";
 	const classify: Classify = async (model, request) => {
@@ -146,10 +148,10 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 		if (calls === 0) description = shown;
 		assert.equal(shown, description, "binding, readiness and execution carry the same terms");
 		assert.ok(question.criteria[chosen]!.includes(description));
-		assert.match(description, /Stated cost: tap source; 1 generic/);
+		assert.match(description, /Cost: 1 generic\. Tap the source\./);
 		assert.match(description, /Put the ability on the stack/);
-		assert.match(description, /Source controller draws 1 card/);
-		assert.match(description, /chooses one card from their hand to put into graveyard/);
+		assert.match(description, /you draws 1\./);
+		assert.match(description, /you chooses 1 of \{"zones":\["hand"\],"owner":"you"\} as discard\. Put bound:discard into graveyard \(discard\)\./);
 		assert.equal(JSON.stringify(packet.work).includes('"action"'), false);
 		calls += 1;
 		return { api: model.api, provider: model.provider, model: model.id, stopReason: "stop", timestamp: 0,
@@ -172,18 +174,18 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 
 test("responses resolve newest first and a pending choice closes priority without revealing a hidden card", () => {
 	const table = position();
-	fire(table, manaProcedure("Forest", "G"));
+	fire(table, manaProcedure("Island", "U"));
 	const accepted = fire(table, lootProcedure());
 	accepted.instructions.length = 0;
 	const a = cardsIn(table, "stack")[0]!;
-	assert.equal(a.ability!.instructions.length, 2, "accepted meaning is not a reference to editable preparation");
+	assert.equal(a.ability!.instructions.length, 3, "accepted meaning is not a reference to editable preparation");
 	pass(table);
 	fire(table, manaProcedure("Island", "U"));
 	fire(table, lootProcedure());
 	const b = cardsIn(table, "stack")[0]!;
 	assert.deepEqual(cardsIn(table, "stack").map((object) => object.controller), [1, 0]);
 	// A source leaving does not erase the ability it already put on the stack.
-	commit(table, [{ do: "move", what: "0-0", to: "graveyard", reason: "destroy" }], "destroy");
+	commit(table, [{ do: "move", what: on(table, 0, "Qiqirn Merchant").id, to: "graveyard", reason: "destroy" }], "destroy");
 	pass(table); pass(table);
 	assert.equal(table.resolution?.object, b.id);
 	assert.equal(table.cursor.priority, null);
@@ -192,19 +194,19 @@ test("responses resolve newest first and a pending choice closes priority withou
 	const hand = cardsIn(table, "hand", 1).length;
 	settle(table);
 	assert.equal(cardsIn(table, "hand", 1).length, hand + 1);
-	assert.equal(table.resolution?.instruction, 1);
+	assert.equal(table.resolution?.program[0]?.instruction.do, "choose");
 	assert.equal(nextDecision(table)!.seat, 1);
 	assert.equal(nextDecision(table)!.options.some((option) => option.id === "pass"), false);
 	assert.equal(JSON.stringify(project(table, 0)).includes(top.id), false);
 	assert.equal(JSON.stringify(project(table, "spectator")).includes(top.id), false);
 	assert.equal(project(table, 1).objects!.some((object) => object.id === top.id), true);
-	settle(table, "chosen");
+	settle(table, "chosen"); settle(table);
 	assert.equal(table.resolution, null);
 	assert.equal(table.cursor.priority, null, "finishing reaches a checkpoint before priority");
 	advance(table);
 	assert.equal(table.cursor.priority, 0, "the active player receives priority between resolutions");
 	assert.deepEqual(cardsIn(table, "stack").map((object) => object.id), [a.id]);
-	pass(table); pass(table); settle(table); settle(table, "chosen");
+	pass(table); pass(table); settle(table); settle(table, "chosen"); settle(table);
 	assert.equal(cardsIn(table, "stack").length, 0);
 	assert.equal(table.cursor.steps[0], "upkeep", "resolution did not advance the step");
 
@@ -213,13 +215,13 @@ test("responses resolve newest first and a pending choice closes priority withou
 	const seen = project(real, 1).objects!.find((object) => object.id === creature.id)!.traits!;
 	assert.deepEqual([seen.power, seen.toughness, seen.types, seen.subtypes], [1, 1, ["creature"], ["Elf", "Druid"]],
 		"every seat reads the characteristics of a public creature");
-	assert.equal(real.things.size, 120, "casting and resolving preserved every registered card");
+	assert.equal(real.things.size, 150, "casting and resolving preserved every registered card, sideboards included");
 	advance(real);
 	const tapElf = manaProcedure("Llanowar Elves", "G");
 	assert.equal(proposed(real, tapElf), undefined, "a newly cast Elf cannot pay its tap cost");
 	const unready = structuredClone(real);
 	assert.throws(() => activationChanges(real, { source: { id: creature.id, incarnation: creature.incarnation }, controller: 0,
-		claim: tapElf.claim, basis: tapElf.basis, timing: "mana", cost: tapElf.cost!, instructions: tapElf.instructions, delegate: true, paid: [] }), /turn began/);
+		claim: tapElf.claim, basis: tapElf.basis, timing: "mana", cost: { generic: 0, colors: [], tap: true }, instructions: tapElf.instructions, targets: [], slots: [], paid: [] }), /cannot be tapped/);
 	assert.deepEqual(real, unready);
 	mainFor(real, 1);
 	apply(real, nextDecision(real)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
@@ -227,12 +229,12 @@ test("responses resolve newest first and a pending choice closes priority withou
 	const choices = procedureOptions(draft(shock), workFrame(real, 1));
 	assert.equal(choices.length, 3, "one creature and either player are different announced targets");
 	assert.equal(new Set(choices.map((choice) => choice.option.shows)).size, 3);
-	const playerHit = structuredClone(real), playerTarget = choices.find((choice) => choice.activation.target && "player" in choice.activation.target && choice.activation.target.player === 0)!;
+	const playerHit = structuredClone(real), playerTarget = choices.find((choice) => choice.activation.targets[0]!.some((one) => "player" in one && one.player === 0))!;
 	activate(playerHit, playerTarget.activation, { picked: playerTarget.option.id, offered: choices.map((choice) => choice.option.id), by: "model", why: "declared" });
 	pass(playerHit); pass(playerHit); settle(playerHit);
 	assert.equal(playerHit.seats[0]!.life, 18, "damage to an announced player changes that player's life");
 	assert.equal(playerHit.things.get(creature.id)!.damage, 0, "a player target never becomes a creature target");
-	const aimed = choices.find((choice) => choice.activation.target && "id" in choice.activation.target)!;
+	const aimed = choices.find((choice) => choice.activation.targets[0]!.some((one) => "id" in one))!;
 	const changed = structuredClone(real);
 	commit(changed, [{ do: "move", what: creature.id, to: "hand", reason: "bounce" }, { do: "move", what: creature.id, to: "battlefield", reason: "resolve" }], "resolve");
 	const snapshot = structuredClone(changed);
@@ -248,7 +250,8 @@ test("responses resolve newest first and a pending choice closes priority withou
 	const allInstructions = structuredClone(snapshot);
 	// An authored multi-instruction spell checks cancellation of the whole effect,
 	// not a claim that Shock also draws cards.
-	const rebound = procedureOptions(draft({ ...shock, instructions: [...shock.instructions, { do: "draw", who: "self", count: 2 }] }), workFrame(allInstructions, 1))[0]!;
+	const rebound = procedureOptions(draft({ ...shock, instructions: [...shock.instructions, { do: "draw", who: "you", count: 2 }] }), workFrame(allInstructions, 1))
+		.find((choice) => choice.activation.targets[0]!.some((one) => "id" in one))!;
 	activate(allInstructions, rebound.activation, { picked: rebound.option.id, offered: [rebound.option.id], by: "model", why: "declared" });
 	commit(allInstructions, [{ do: "move", what: creature.id, to: "hand", reason: "bounce" }], "bounce");
 	const librarySize = cardsIn(allInstructions, "library", 1).length;
@@ -263,7 +266,7 @@ test("responses resolve newest first and a pending choice closes priority withou
 	settle(real);
 	assert.equal(creature.zone, "graveyard");
 	assert.equal(creature.incarnation, 4, "hand, stack, battlefield, then graveyard are distinct incarnations");
-	assert.equal(real.things.size, 120);
+	assert.equal(real.things.size, 150);
 	const matured = castElf();
 	mainFor(matured, 1); mainFor(matured, 0);
 	assert.ok(proposed(matured, tapElf), "the Elf's tap cost becomes available on its controller's next turn");
@@ -271,8 +274,8 @@ test("responses resolve newest first and a pending choice closes priority withou
 
 test("state-based checks wait for the whole accepted effect, including a pause between instructions", () => {
 	const table = position();
-	fire(table, { ...lootProcedure(), claim: "Checkpoint fixture", basis: "An authored checkpoint test, not a card ruling.", cost: { tap: true, generic: 0, colors: [] },
-		instructions: [{ do: "life", who: "self", amount: -25 }, { do: "draw", who: "self", count: 1 }, { do: "life", who: "self", amount: 25 }] });
+	fire(table, { ...lootProcedure(), claim: "Checkpoint fixture", basis: "An authored checkpoint test, not a card ruling.", cost: { tap: true },
+		instructions: [{ do: "life", who: "you", amount: -25 }, { do: "draw", who: "you", count: 1 }, { do: "life", who: "you", amount: 25 }] });
 	pass(table); pass(table); settle(table);
 	assert.equal(table.seats[0]!.life, -5);
 	assert.equal(nextDecision(table)!.situation, "resolution");
@@ -285,7 +288,7 @@ test("state-based checks wait for the whole accepted effect, including a pause b
 	assert.equal(table.ledger.some((row) => row.situation === "state-based"), false);
 
 	const loses = position();
-	fire(loses, { ...lootProcedure(), cost: { tap: true, generic: 0, colors: [] }, instructions: [{ do: "life", who: "self", amount: -25 }] });
+	fire(loses, { ...lootProcedure(), cost: { tap: true }, instructions: [{ do: "life", who: "you", amount: -25 }] });
 	pass(loses); pass(loses); settle(loses);
 	assert.equal(loses.resolution, null);
 	assert.equal(nextDecision(loses)!.situation, "state-based", "the checkpoint runs as soon as resolution finishes");
@@ -299,7 +302,7 @@ test("the real seat loop delegates a unique effect continuation and asks for eac
 	assert.equal(run.table.ledger.filter((row) => row.activation?.timing === "mana").length, 2);
 	assert.equal(run.table.ledger.filter((row) => row.activation?.timing === "stack").length, 2);
 	assert.deepEqual(run.paused.map((pause) => pause.seat), [1, 0]);
-	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "delegated").length, 2);
+	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "delegated").length, 4, "each draw and each move of the chosen card");
 	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "chosen").length, 2);
 	assert.equal(run.table.ledger.some((row) => row.situation === "resolution" && row.why === "forced"), false);
 	assert.ok(run.exchangeCalls > 0);
@@ -308,12 +311,12 @@ test("the real seat loop delegates a unique effect continuation and asks for eac
 	const other = position();
 	const hand = cardsIn(other, "hand", 1);
 	commit(other, hand.slice(1).map((object) => ({ do: "move", what: object.id, to: "graveyard", reason: "game-setup" })), "game-setup");
-	fire(other, { ...lootProcedure(), claim: "Another seat's choice", basis: "An authored delegation test, not a card ruling.", cost: { tap: true, generic: 0, colors: [] },
-		instructions: [{ do: "choose-move", who: "opponent", from: "hand", to: "graveyard", reason: "discard", count: 1 }] });
+	fire(other, { ...lootProcedure(), claim: "Another seat's choice", basis: "An authored delegation test, not a card ruling.", cost: { tap: true },
+		instructions: [{ do: "choose", who: "opponent", from: { zones: ["hand"], owner: "opponent" }, count: 1, as: "discard" },
+			{ do: "move", what: "bound:discard", to: "graveyard", reason: "discard" }] });
 	pass(other); pass(other);
 	assert.equal(nextDecision(other)!.seat, 1);
 	assert.equal(nextDecision(other)!.options.length, 1);
-	assert.equal(nextDecision(other)!.delegated, false);
 	let asked = 0;
 	const unavailable: Player = { name: "B", observe() {}, close() {}, async answer() { asked += 1; throw new Error("No delegation from this seat"); } };
 	assert.equal(await play(other, { 1: unavailable }, {}), null);
@@ -338,13 +341,14 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 	fork(journal.path, pause.version, "child", childPath);
 	const child = replay(childPath, (header) => abilityTable(header.seed)).table;
 	assert.deepEqual(workFrame(child, pause.seat), { ...pause.frame, view: project(child, pause.seat) });
-	assert.equal(child.resolution?.instruction, 1);
+	assert.equal(child.resolution?.program[0]?.instruction.do, "choose");
 	assert.equal(child.cursor.priority, null);
 	assert.equal(cardsIn(child, "stack").length, 2);
 	const hand = cardsIn(child, "hand", pause.seat).length;
 	const library = cardsIn(child, "library", pause.seat).length;
 	const next = nextDecision(child)!;
 	apply(child, next.options.at(-1)!.id, "model", "chosen");
+	apply(child, nextDecision(child)!.options[0]!.id, "model", "delegated");
 	assert.equal(cardsIn(child, "hand", pause.seat).length, hand - 1);
 	assert.equal(cardsIn(child, "library", pause.seat).length, library, "the clone did not repeat the already completed draw");
 	assert.equal(child.resolution, null);
@@ -352,9 +356,9 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 	assert.deepEqual(linesOf(child).filter((line) => line.v <= pause.version), prefix);
 	assert.ok(readFileSync(childPath, "utf8").includes("{1}, {T}: Draw a card, then discard a card."));
 
-	// With delegation withdrawn, even the one draw instruction belongs to a seat.
+	// Without a seat's intent delegating it, even the one draw instruction belongs to that seat.
 	const manual = position();
-	fire(manual, { ...lootProcedure(), delegate: false, cost: { tap: true, generic: 0, colors: [] } });
+	fire(manual, { ...lootProcedure(), cost: { tap: true } });
 	pass(manual); pass(manual);
 	const before = cardsIn(manual, "hand", 0).length;
 	let asked = 0;
@@ -362,17 +366,16 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 	assert.equal(await play(manual, { 0: unavailable, 1: unavailable }, {}), null);
 	assert.equal(asked, 2);
 	assert.equal(cardsIn(manual, "hand", 0).length, before);
-	assert.equal(manual.resolution?.instruction, 0);
+	assert.equal(manual.resolution?.program.length, 3, "nothing resolved without the seat");
 	assert.equal(refuseExecution(draft(lootProcedure()), workFrame(manual, 0)) !== null, true);
 
 });
 
 test("permanents are cast for their printed cost, register their seat's package as they enter, and replay from the frozen row", () => {
-	const decks = [{ name: "Green", deck: [...Array(4).fill("Llanowar Elves"), ...Array(4).fill("Bear Cub"), ...Array(52).fill("Forest")] },
-		{ name: "Red", deck: Array(60).fill("Mountain") }];
+	const decks = [{ name: "Green", deck: deck("Green Stompy") }, { name: "Red", deck: deck("Red Burn") }];
 	const dealt = () => {
 		const fresh = start(standard, decks, "default-casts");
-		for (const card of ["Llanowar Elves", "Bear Cub"]) {
+		for (const card of ["Llanowar Elves", "Bear Cub", "Forest", "Forest"]) {
 			const object = cardsIn(fresh, "library", 0).find((one) => one.card === card)!;
 			commit(fresh, [{ do: "move", what: object.id, to: "hand", reason: "draw" }], "draw");
 		}
@@ -384,7 +387,8 @@ test("permanents are cast for their printed cost, register their seat's package 
 			const decision = nextDecision(table);
 			if (!decision) { advance(table); continue; }
 			if (decision.situation === "priority" && decision.seat === seat && table.cursor.active === seat && table.cursor.turn === turn && table.cursor.steps[0] === "precombat-main") return decision;
-			const discard = decision.options.find((option) => /Forest|Mountain/.test(option.label));
+			// Keep the lands and the cards this position needs.
+			const discard = decision.options.find((option) => option.id.startsWith("discard:") && !/Forest|Mountain|Llanowar Elves|Bear Cub/.test(option.label));
 			apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? discard?.id ?? decision.options[0]!.id, "model", "chosen");
 		}
 	};
@@ -396,7 +400,7 @@ test("permanents are cast for their printed cost, register their seat's package 
 	assert.equal(casts("Llanowar Elves").length, 0, "no mana source, no cast");
 	land();
 	const [bare] = casts("Llanowar Elves");
-	assert.match(bare!.shows!, /Printed cost: 0 generic \+ \{G\}\. Pay with tap Forest .* for G\. .*No package is prepared: it enters with nothing registered\./, "an entry without a package is announced");
+	assert.match(bare!.shows!, /Cost: 0 generic \+ \{G\}\. Pay with tap Forest .* for G\. .*No package is prepared: it enters with nothing registered\./, "an entry without a package is announced");
 	editWork(table, 0, [{ do: "package.put", package: { card: "Llanowar Elves", registers: [mana] } }], "package-elves");
 	const before = structuredClone(table);
 	const [elves] = casts("Llanowar Elves");

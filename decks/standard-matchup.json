@@ -14,70 +14,7 @@
     "sha256": "27cf88bcb2564eb2daabf198d5c4b28eb87d43cde02f48141f1441e1897f2002"
   },
   "decks": [
-    {
-      "name": "Mono-Green Landfall",
-      "pilot": "L1X0",
-      "source": "https://www.mtgo.com/decklist/standard-challenge-32-2026-09-1812854496?player=L1X0",
-      "main": {
-        "Ba Sing Se": 2,
-        "Earthbender Ascension": 4,
-        "Elven Passage": 1,
-        "Escape Tunnel": 3,
-        "Fabled Passage": 4,
-        "Forest": 15,
-        "Glimpse the Core": 4,
-        "Icetill Explorer": 4,
-        "Keen-Eyed Curator": 1,
-        "Llanowar Elves": 4,
-        "Meltstrider's Resolve": 1,
-        "Mightform Harmonizer": 4,
-        "Mossborn Hydra": 4,
-        "Promising Vein": 1,
-        "Sapling Nursery": 1,
-        "Sazh's Chocobo": 4,
-        "Snakeskin Veil": 2,
-        "Surrak, Elusive Hunter": 1
-      },
-      "sideboard": {
-        "Keen-Eyed Curator": 1,
-        "Meltstrider's Resolve": 3,
-        "Origin of Metalbending": 2,
-        "Sapling Nursery": 3,
-        "Soul-Guide Lantern": 1,
-        "Surrak, Elusive Hunter": 1,
-        "Torpor Orb": 2,
-        "Warg Tactics": 2
-      }
-    },
-    {
-      "name": "Mono-Red Aggro",
-      "pilot": "__OVC__",
-      "source": "https://www.mtgo.com/decklist/standard-challenge-32-2026-09-1812854496?player=__OVC__",
-      "main": {
-        "Abrade": 2,
-        "Burst Lightning": 4,
-        "Emberheart Challenger": 4,
-        "Hired Claw": 4,
-        "Kellan, Planar Trailblazer": 3,
-        "Lightning Strike": 2,
-        "Mountain": 18,
-        "Nova Hellkite": 4,
-        "Rockface Village": 3,
-        "Shock": 3,
-        "Smaug the Magnificent": 3,
-        "Soulstone Sanctuary": 4,
-        "Witchstalker Frenzy": 2,
-        "Zhao, the Moon Slayer": 4
-      },
-      "sideboard": {
-        "Abrade": 1,
-        "Fiery Annihilation": 2,
-        "Ghost Vacuum": 1,
-        "Hexing Squelcher": 2,
-        "Magebane Lizard": 2,
-        "Soul-Guide Lantern": 3,
-        "Sunspine Lynx": 4
-      }
-    }
+    "Mono-Green Landfall",
+    "Mono-Red Aggro"
   ]
 }

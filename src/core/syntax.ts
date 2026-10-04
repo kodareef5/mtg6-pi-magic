@@ -3,8 +3,9 @@
  */
 
 import type { ObjectRef, SeatId } from "./types.ts";
-import type { Activation, Combat, Mana, Note } from "./table.ts";
-import type { Registration } from "./language.ts";
+import type { Activation, Combat, Mana, Note, Resolution } from "./table.ts";
+import type { Bound } from "./selectors.ts";
+import type { Registration, TokenSpec } from "./language.ts";
 
 /**
  * The seven zones, plus two places we track as their own.
@@ -62,15 +63,30 @@ export type Change =
 	| { do: "opening"; action: "begin" | "round" }
 	| { do: "opening"; action: "declare"; who: SeatId; choice: "keep" | "mulligan" }
 	| { do: "opening"; action: "bottom"; who: SeatId }
-	/** `registers` is what the object registers as it enters the battlefield. */
-	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[] }
+	/**
+	 * `registers`, `tapped`, `counters` and `controller` are how it enters the
+	 * battlefield: part of the motion, never a step after it (614.1c-d).
+	 */
+	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[];
+		tapped?: true; counters?: Record<string, number>; controller?: SeatId }
+	/** A token made on the battlefield (111.1). */
+	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true }
+	/** Shown to every seat. Nothing moves. */
+	| { do: "reveal"; what: string }
 	| { do: "tap" | "untap"; what: string }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
-	| { do: "damage"; source: string; target: NonNullable<Activation["target"]>; amount: number }
+	| { do: "damage"; source: string; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }
 	| { do: "activate"; what: string; id: string; ability: Activation }
-	| { do: "resolution"; action: "begin"; what: string; lost?: boolean }
-	| { do: "resolution"; action: "next"; what: string; skip?: boolean; abort?: boolean }
+	| { do: "resolution"; action: "begin"; what: string; source: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean }
+	/**
+	 * Finish the current instruction, or record one pick of a `choose` that has
+	 * more to pick. `bind` keeps what it did for later instructions, and follows
+	 * what it moved under names bound earlier (400.7); `expand`
+	 * puts an `each` in its place; `follow` is the permanent a spell became.
+	 */
+	| { do: "resolution"; action: "next"; what: string; pick?: ObjectRef; bind?: Record<string, Bound>;
+		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean }
 	| { do: "shuffle"; whose: SeatId }
 	/** Counters of one kind put on or, negative, removed. */
 	| { do: "counters"; what: string; kind: string; amount: number }

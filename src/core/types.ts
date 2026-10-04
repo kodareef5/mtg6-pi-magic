@@ -7,7 +7,8 @@
 
 import type { Phase, Step } from "./steps.ts";
 import type { SeenObject, Workspace } from "./work.ts";
-import type { Mana, Resolution } from "./table.ts";
+import type { Combat, Mana, Note, Resolution } from "./table.ts";
+import type { Happened } from "./selectors.ts";
 import type { Printed } from "./printed.ts";
 
 export type SeatId = number;
@@ -87,7 +88,7 @@ export type SeatView = {
 	/** Visible objects only; unknown public identities have no card field. */
 	objects?: SeenObject[];
 	/** Registered composition is public. Counts carry no object ids or hidden order. */
-	decks?: { seat: SeatId; cards: Record<string, number> }[];
+	decks?: { seat: SeatId; name: string; cards: Record<string, number>; sideboard: Record<string, number> }[];
 	/** Actual step visit. A repeated combat is a new scheduling opportunity. */
 	visit?: number;
 	/** Only this seat's equipment. A spectator receives none. */
@@ -96,6 +97,13 @@ export type SeatView = {
 	pools?: { seat: SeatId; mana: Mana[] }[];
 	/** The remaining instruction cursor, without any hidden library identities. */
 	resolution?: Resolution;
+	/** Seats still playing and their life. */
+	players?: { id: SeatId; life: number }[];
+	/** The public notepad: labels, registrations added after entry, links, permissions. */
+	notes?: Note[];
+	combat?: Combat | null;
+	/** This turn's public events that cards count. */
+	history?: Happened[];
 };
 
 /** What a seat is shown at one moment. A decision means it is this seat's turn. */

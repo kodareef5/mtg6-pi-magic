@@ -1,3 +1,4 @@
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
@@ -10,8 +11,8 @@ import { commit, start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 
 const table = () => start(standard, [
-	{ name: "A", deck: Array(60).fill("Forest") },
-	{ name: "B", deck: Array(60).fill("Swamp") },
+	{ name: "A", deck: deck("Green Stompy") },
+	{ name: "B", deck: deck("Dimir Control") },
 ], "phases");
 
 test("listed actions stay in their window and a pending choice cannot be skipped", () => {

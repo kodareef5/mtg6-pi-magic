@@ -7,6 +7,7 @@
  * standing in for Pi, and its shape is Pi's own `classify`.
  */
 
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -116,8 +117,8 @@ function fake(answer: (criteria: string[], instructions: string) => Record<strin
 }
 
 const table = () => start(standard, [
-	{ name: "A", deck: Array(60).fill("Forest") },
-	{ name: "B", deck: Array(60).fill("Swamp") },
+	{ name: "A", deck: deck("Green Stompy") },
+	{ name: "B", deck: deck("Dimir Control") },
 ], "models");
 
 const seatsOf = (built: ReturnType<typeof table>, classify: Classify, gaps: string[], onAsk?: () => void) =>

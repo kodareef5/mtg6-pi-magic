@@ -1,3 +1,4 @@
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
@@ -7,8 +8,8 @@ import { commit, start } from "../src/core/commit.ts";
 import { cardsIn } from "../src/core/table.ts";
 
 const table = () => start(standard, [
-	{ name: "A", deck: Array(60).fill("Forest") },
-	{ name: "B", deck: Array(60).fill("Swamp") },
+	{ name: "A", deck: deck("Green Stompy") },
+	{ name: "B", deck: deck("Dimir Control") },
 ], "decisions");
 
 test("listing a decision never changes the table, including pending losses", () => {

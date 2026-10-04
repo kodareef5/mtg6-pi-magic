@@ -2,6 +2,7 @@
  * Past 150 lines to keep the two model doubles beside the scenario they exercise.
  */
 import { start } from "../src/core/commit.ts";
+import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
@@ -19,8 +20,8 @@ import type { Reasoner } from "../src/context/reason.ts";
 
 export async function exercise(lostReservation = false) {
 	const table = start(standard, [
-		{ name: "A", deck: Array(60).fill("Forest") },
-		{ name: "B", deck: Array(60).fill("Swamp") },
+		{ name: "A", deck: deck("Green Stompy") },
+		{ name: "B", deck: deck("Dimir Control") },
 	], "circuit-experiment");
 	const trace: { clock: number; turn: number; step: string; event: string; equipment?: unknown }[] = [];
 	const counted = tally();

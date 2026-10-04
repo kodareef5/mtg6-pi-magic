@@ -1,140 +1,113 @@
-/** Prepared spells, lands and activations. The claim supplies meaning; the table checks resources.
- * One offer path serves a draft step and the table's default casts alike.
- * Preparation reads a projection. Execution checks it again before one physical commit.
- * Past 150 lines because offering and checking the same announcement belong together.
+/** Prepared spells, lands and activations: checking a procedure, and committing an announcement.
+ * The claim supplies meaning; the table checks the shape, timing, resources and
+ * targets again against the live table before one physical commit. Offers are in
+ * announce.ts, built from the seat's frame.
+ * Past 150 lines because every part of a cost is checked and paid in one place.
  */
-import { targets, targetId, targetAvailable } from "./targets.ts";
-import { Check } from "typebox/value";
-import { ProcedureSchema, type Instruction, type Procedure } from "./work-language.ts";
-import { select } from "./agenda.ts";
-import { project } from "./view.ts";
+import { check, ProcedureSchema, type Instruction, type Procedure } from "./language.ts";
+import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
-import { fundings, covers, sameness, produces, sick, type Cost } from "./funding.ts";
-import { manaCost } from "./printed.ts";
-import { characteristics, intrinsic, sick as sickness } from "./characteristics.ts";
-import { seat, thing, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
-import type { Frame, Option } from "./types.ts";
+import { covers, produces } from "./funding.ts";
+import { characteristics, intrinsic, sick } from "./characteristics.ts";
+import { matches, players, tableWorld, type Scope } from "./selectors.ts";
+import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
+import type { Frame, ObjectRef } from "./types.ts";
 import type { Draft } from "./work.ts";
 import type { Change } from "./syntax.ts";
 
-const FREE: Cost = { tap: false, generic: 0, colors: [] };
+export type { ProcedureOption } from "./announce.ts";
 
-export function checkProcedure(procedure: Procedure): void {
-	if (!Check(ProcedureSchema, procedure)) throw new Error("The prepared operation does not match the procedure vocabulary.");
-	if ((procedure.timing === "spell") !== !!procedure.spell) throw new Error("Spell timing requires spell terms, and only spell timing uses them.");
-	if (procedure.timing === "land" && (procedure.cost || procedure.target || procedure.instructions.length)) throw new Error("Playing a land has no cost, target or instructions in this vocabulary.");
-	if (!procedure.cost && procedure.timing !== "spell" && procedure.timing !== "land") throw new Error("An activated ability states its cost.");
-	if (procedure.timing === "spell" && procedure.cost?.tap) throw new Error("A spell does not pay a source tap cost.");
-	if (!procedure.instructions.length && procedure.timing !== "land" && procedure.spell?.destination !== "battlefield") throw new Error("This operation needs at least one instruction.");
-	if (procedure.instructions.some((instruction) => instruction.do === "damage") && !procedure.target) throw new Error("Damage needs an announced target.");
-	if (procedure.timing === "mana" && procedure.instructions.some((instruction) => instruction.do !== "mana")) {
-		throw new Error("Immediate mana procedures currently support only adding mana. Other instructions require the stack.");
-	}
+/** Shape, then the structure the schema cannot say: refs that point somewhere, timing that fits. */
+export function checkProcedure(value: unknown): Procedure {
+	const procedure = check(ProcedureSchema, value, "Procedure");
+	if (procedure.timing === "land" && (procedure.cost || procedure.targets?.length || procedure.instructions.length)) throw new Error("Playing a land has no cost, targets or instructions; what it registers is its package.");
+	if (procedure.timing !== "spell" && procedure.timing !== "land" && !procedure.cost) throw new Error("An activated ability states its cost.");
+	if (procedure.timing === "mana" && (procedure.targets?.length || procedure.instructions.some((instruction) => instruction.do !== "mana" || !instruction.colors)))
+		throw new Error("A mana ability has no targets and only adds mana of stated colors (605.1a).");
+	const slots = procedure.targets?.length ?? 0, bound = new Set(["player"]);
+	const visit = (instructions: Instruction[]) => {
+		for (const instruction of instructions) {
+			const text = JSON.stringify({ ...instruction, ...("effect" in instruction ? { effect: undefined } : {}), ...("instructions" in instruction ? { instructions: undefined } : {}) });
+			for (const [, slot] of text.matchAll(/"target:(\d+)"/g)) if (Number(slot) >= slots) throw new Error(`target:${slot} names a target slot the procedure does not have.`);
+			for (const [, name] of text.matchAll(/"bound:([a-z][a-z0-9-]*)"/g)) if (!bound.has(name!)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
+			if (instruction.as) bound.add(instruction.as);
+			if ("instructions" in instruction) visit(instruction.instructions);
+		}
+	};
+	visit(procedure.instructions);
+	return procedure;
 }
-
-export type ProcedureOption = { option: Option; activation: Activation };
-
-/** Describe the executable terms, even when the claim or quoted basis disagrees. */
-function instructionText(instruction: Instruction): string {
-	const who = instruction.do !== "damage" && instruction.who === "self" ? "Source controller" : "Opponent";
-	switch (instruction.do) {
-		case "damage": return `Deal ${instruction.amount} damage to the announced target.`;
-		case "draw": return `${who} draws ${instruction.count} card${instruction.count === 1 ? "" : "s"}.`;
-		case "choose-move": return `${who} chooses one card from their ${instruction.from} to put into ${instruction.to} (${instruction.reason}).`;
-		case "life": return `${who} changes life by ${instruction.amount}.`;
-		case "mana": return `${who} adds ${instruction.colors.map((color) => `{${color}}`).join(" ")}.`;
-	}
-}
-
-const MAIN = ["precombat-main", "postcombat-main"];
-/** A sorcery-speed action or a land play needs this seat's main phase and an empty stack. */
-const mainWindow = (frame: Frame) => frame.view.window.kind === "turn" && frame.view.window.active === frame.seat &&
-	MAIN.includes(frame.view.window.step) && !frame.view.objects?.some((object) => object.zone === "stack");
 
 /** The current draft step's announcements, while this seat holds priority. */
 export function procedureOptions(draft: Draft, frame: Frame): ProcedureOption[] {
 	const action = draft.steps[draft.next]?.action;
 	if (!action || !("procedure" in action) || frame.decision?.situation !== "priority") return [];
-	return offers(action.procedure, frame, `procedure:${draft.id}:${draft.next}`);
+	return offers(action.procedure as Procedure, frame, `procedure:${draft.id}:${draft.next}`);
 }
 
-/** Every source, payment and target this seat could announce for one procedure now. */
-export function offers(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
-	if (procedure.spell?.speed === "sorcery" && !mainWindow(frame)) return [];
-	if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= 1)) return [];
-	const fromHand = procedure.timing === "spell" || procedure.timing === "land";
-	// Identical objects are one source; the lowest id stands for the rest.
-	const seen = new Set<string>();
-	const sources = select(procedure.source, frame).filter((source) => source.card && source.zone === (fromHand ? "hand" : "battlefield") && source.controller === frame.seat &&
-		(!procedure.cost?.tap || (!source.tapped && !sick(frame, source))) && !seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
-	const aimed = procedure.target ? targets(procedure.target, frame.view) : [undefined];
-	return sources.flatMap((source) => {
-		const cost = procedure.cost ?? (procedure.timing === "land" ? FREE : manaCost(frame.view.printed?.[source.card!]));
-		if (!cost) return [];
-		return fundings(frame, cost, cost.tap ? source.id : undefined).flatMap(({ funding, shows: paying }) => aimed.map((aim) => ({
-			option: {
-				id: `${prefix}:${source.id}@${source.incarnation}:${[...funding.paid, ...funding.taps.map((tap) => tap.source.id)].join(",") || "free"}${aim ? ":target:" + targetId(aim.target) : ""}`,
-				label: `${procedure.claim} (${source.card})`,
-				shows: [
-					`Source: ${source.card} (${source.id}@${source.incarnation}).`,
-					procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
-						`${procedure.cost ? "Stated" : "Printed"} cost: ${cost.tap ? "tap source; " : ""}${cost.generic} generic${cost.colors.map((color) => ` + {${color}}`).join("")}.`,
-					...(procedure.timing === "land" ? [] : [paying]),
-					procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
-					...(aim ? [`Target: ${aim.label}. Chosen on announcement, rechecked on resolution.`] : []),
-					...(procedure.spell ? [`Resolves to ${procedure.spell.destination}.`] : []),
-					...procedure.instructions.map(instructionText),
-					...(procedure.timing === "spell" || procedure.timing === "stack" ? [procedure.delegate ? "Unique continuations for this seat are delegated." : "Resolution waits for this seat's answers."] : []),
-					`Claimed basis: ${procedure.basis}`,
-				].filter(Boolean).join(" "),
-				objects: [{ id: source.id, incarnation: source.incarnation }, ...funding.taps.map((tap) => tap.source), ...(aim && "id" in aim.target ? [aim.target] : [])],
-			},
-			activation: { source: { id: source.id, incarnation: source.incarnation }, controller: frame.seat,
-				claim: procedure.claim, basis: procedure.basis, timing: procedure.timing, cost: structuredClone(cost), paid: funding.paid,
-				...(funding.taps.length ? { funding: structuredClone(funding.taps) } : {}),
-				instructions: structuredClone(procedure.instructions), delegate: procedure.delegate,
-				...(procedure.spell ? { spell: structuredClone(procedure.spell) } : {}),
-				...(aim ? { target: structuredClone(aim.target), targetRule: procedure.target } : {}) },
-		})));
-	});
-}
+const MAIN = ["precombat-main", "postcombat-main"];
+const live = (table: Table, ref: ObjectRef) => { const found = table.things.get(ref.id); return found?.incarnation === ref.incarnation ? found : undefined; };
 
 /** Paying a stated cost proves neither that the source has the ability nor its legality. */
 export function activationChanges(table: Table, activation: Activation): Change[] {
-	const { controller, source, cost, paid, funding = [], instructions, target: _target, targetRule, ...terms } = activation;
-	checkProcedure({ ...terms, source: { refs: [source] }, ...(activation.timing === "land" ? {} : { cost }), instructions, ...(targetRule ? { target: targetRule } : {}) });
-	if (table.outcome || table.resolution || table.cursor.priority !== controller || table.cursor.passes >= table.seats.filter((seat) => !seat.result).length) throw new Error("A prepared action needs this seat's priority opportunity.");
-	const view = project(table, controller);
-	if (!targetAvailable(activation, { view })) throw new Error("The announced target is unavailable.");
-	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && ![...table.things.values()].some((object) => object.zone === "stack");
-	if (activation.spell?.speed === "sorcery" && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
-	if (activation.timing === "land" && (!main || seat(table, controller).landsPlayed >= 1)) throw new Error("A land play needs this seat's main phase, an empty stack and an unused land play.");
+	const { controller, source, cost, paid, funding = [] } = activation;
+	if (table.outcome || table.resolution || table.cursor.priority !== controller || table.cursor.passes >= table.seats.filter((one) => !one.result).length) throw new Error("A prepared action needs this seat's priority opportunity.");
+	const object = live(table, source);
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
-	const visible = view.objects?.find((object) => object.id === source.id && object.incarnation === source.incarnation);
-	if (!visible?.card || visible.zone !== (fromHand ? "hand" : "battlefield") || visible.controller !== controller) throw new Error("The prepared source is no longer available in this seat's expected zone.");
-	const sick = (id: string) => sickness(table, thing(table, id));
-	if (cost.tap && sick(source.id)) throw new Error("This creature has not been controlled since the turn began; its tap cost is unavailable.");
-	if (cost.tap && visible.tapped) throw new Error("The source was already tapped; its tap cost is unavailable.");
+	if (!object || (fromHand && object.zone !== "hand") || (object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller)
+		throw new Error("The prepared source is no longer available in this seat's expected zone.");
+	const traits = characteristics(table, object);
+	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
+	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
+	if (activation.timing === "land" && (!main || seat(table, controller).landsPlayed >= 1)) throw new Error("A land play needs this seat's main phase, an empty stack and an unused land play.");
+	if (activation.timing !== "spell" && activation.speed === "sorcery" && !main) throw new Error("This ability is activated only as a sorcery.");
+
+	const scope: Scope = { world: tableWorld(table), controller, source: object };
+	activation.slots.forEach((slot, at) => {
+		for (const chosen of activation.targets[at] ?? []) {
+			const ok = "player" in chosen ? (slot.player === "any" ? table.seats.some((one) => one.id === chosen.player && !one.result) : !!slot.player && players(scope, slot.player).includes(chosen.player))
+				: !!slot.object && !!live(table, chosen) && matches(scope, live(table, chosen)!, slot.object);
+			if (!ok) throw new Error("An announced target is unavailable.");
+		}
+		if ((activation.targets[at]?.length ?? 0) < (slot.upTo ? 0 : slot.count ?? 1)) throw new Error("A target slot is not filled.");
+	});
+
+	// Costs other than mana: each object must still be there to pay with.
+	const own = (ref: ObjectRef, zone: string) => { const one = live(table, ref); if (!one || one.zone !== zone || (zone === "battlefield" ? one.controller : one.owner) !== controller) throw new Error("A cost names something no longer there to pay with."); return one; };
+	if (cost.tap && (object.zone !== "battlefield" || object.tapped || sick(table, object))) throw new Error("The source cannot be tapped to pay this cost.");
+	for (const ref of cost.tapped ?? []) if (own(ref, "battlefield").tapped) throw new Error("A creature tapped as a cost was already tapped.");
+	cost.sacrificed?.forEach((ref) => own(ref, "battlefield"));
+	cost.discarded?.forEach((ref) => own(ref, "hand"));
+	cost.exiled?.forEach((ref) => { if (!live(table, ref)) throw new Error("The card to exile is gone."); });
+	if (cost.life !== undefined && seat(table, controller).life < cost.life) throw new Error("Not enough life to pay.");
+	if (cost.counters && (object.counters[cost.counters.kind] ?? 0) < cost.counters.count) throw new Error("Not enough counters to remove.");
+
 	const pool = seat(table, controller).pool;
 	const payment = paid.map((id) => pool.find((mana) => mana.id === id));
-	const tapped = new Set([...(cost.tap ? [source.id] : []), ...funding.map((tap) => tap.source.id)]);
+	const tapped = new Set([...(cost.tap ? [source.id] : []), ...(cost.tapped ?? []).map((ref) => ref.id), ...funding.map((tap) => tap.source.id)]);
 	for (const tap of funding) {
-		const object = view.objects?.find((one) => one.id === tap.source.id && one.incarnation === tap.source.incarnation);
-		if (!object || object.zone !== "battlefield" || object.controller !== controller || object.tapped || sick(object.id)) throw new Error("A mana source in the payment is unavailable.");
-		const traits = characteristics(table, thing(table, object.id));
-		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(traits).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
-		const registered = (traits?.registrations ?? []).flatMap(produces);
-		if (!tap.intrinsic && !registered.some((one) => one.colors.join() === tap.colors.join())) throw new Error("The source has no registered mana ability that makes that mana.");
+		const mana = live(table, tap.source);
+		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
+		const made = characteristics(table, mana);
+		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
+		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap(produces).some((one) => one.colors.join() === tap.colors.join())) throw new Error("The source has no registered mana ability that makes that mana.");
 	}
-	if (new Set(paid).size !== paid.length || tapped.size !== (cost.tap ? 1 : 0) + funding.length || payment.some((mana) => !mana || mana.spendOnly) ||
+	if (new Set(paid).size !== paid.length || tapped.size !== (cost.tap ? 1 : 0) + (cost.tapped?.length ?? 0) + funding.length || payment.some((mana) => !mana || mana.spendOnly) ||
 		!covers([...payment.map((mana) => mana?.color as Mana["color"]), ...funding.flatMap((tap) => tap.colors)], cost)) {
 		throw new Error("The stated payment is unavailable, restricted, duplicated, or does not cover the stated cost.");
 	}
+
 	const changes: Change[] = [
 		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const }] : []),
 		...(activation.timing === "land" ? [{ do: "move" as const, what: source.id, to: "battlefield" as const, reason: "play-land" as const }] : []),
 		...(cost.tap ? [{ do: "tap" as const, what: source.id }] : []),
+		...(cost.tapped ?? []).map((ref) => ({ do: "tap" as const, what: ref.id })),
+		...(cost.sacrificed ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "sacrifice" as const })),
+		...(cost.exiled ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "exile" as const, reason: "cost-payment" as const })),
+		...(cost.discarded ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "discard" as const })),
+		...(cost.life ? [{ do: "change-life" as const, who: controller, amount: -cost.life, reason: "cost-payment" as const }] : []),
+		...(cost.counters ? [{ do: "counters" as const, what: source.id, kind: cost.counters.kind, amount: -cost.counters.count }] : []),
 	];
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	const made: string[] = [];
@@ -145,18 +118,11 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	}
 	if (paid.length || made.length) changes.push({ do: "spend-mana", who: controller, ids: [...paid, ...made] });
 	changes.push({ do: "activate", what: source.id, id: `ability-${table.cursor.clock + 1}`, ability: structuredClone(activation) });
-	if (activation.timing === "mana") for (const instruction of instructions) {
-		if (instruction.do !== "mana") throw new Error("Unsupported immediate instruction.");
-		changes.push({ do: "add-mana", who: recipient(table, controller, instruction.who), colors: instruction.colors as Mana["color"][] });
+	if (activation.timing === "mana") for (const instruction of activation.instructions) {
+		if (instruction.do !== "mana" || !instruction.colors) throw new Error("A mana ability only adds mana of stated colors.");
+		for (const who of players(scope, instruction.who)) changes.push({ do: "add-mana", who, colors: instruction.colors as Mana["color"][] });
 	}
 	return [...changes, { do: "turn", action: "act", who: controller, ...(activation.timing === "land" ? { land: true } : {}) }];
-}
-
-export function recipient(table: Table, controller: number, who: "self" | "opponent"): number {
-	if (who === "self") return controller;
-	const others = table.seats.filter((seat) => seat.id !== controller && !seat.result);
-	if (others.length !== 1) throw new Error("An opponent-relative instruction requires exactly one opponent.");
-	return others[0]!.id;
 }
 
 /** One announced activation is one recorded decision, including its accepted meaning. */
@@ -168,3 +134,5 @@ export function activate(table: Table, activation: Activation, choice: Pick<Ledg
 		...structuredClone(choice), activation: structuredClone(activation), ...(Object.keys(entered).length ? { registered: entered } : {}) });
 	commit(table, changes, activation.timing === "spell" ? "cast" : activation.timing === "land" ? "play-land" : "activate");
 }
+
+export { offers };

@@ -1,43 +1,19 @@
 /** The seat's tool vocabulary. JSON data, never executable model-written code. */
 import { Type, type Static } from "typebox";
 import { Check, Errors } from "typebox/value";
-import { RefSchema, QuerySchema, WhenSchema, PackageSchema } from "./language.ts";
+import { RefSchema, QuerySchema, WhenSchema, PackageSchema, ProcedureSchema } from "./language.ts";
 
-export { RefSchema, QuerySchema, WhenSchema };
+export { RefSchema, QuerySchema, WhenSchema, ProcedureSchema };
+export type { Instruction, Procedure } from "./language.ts";
 
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
-const natural = Type.Integer({ minimum: 0 });
-const enumeration = (values: string[]) => Type.String({ enum: values });
 export const TaskSchema = object({
 	id: text, label: text, when: WhenSchema,
 	times: Type.Optional(Type.Integer({ minimum: 1 })),
 	after: Type.Optional(object({ task: text, runs: Type.Integer({ minimum: 1 }) })),
 	scope: QuerySchema, concepts: Type.Array(text), concerns: Type.Array(text, { minItems: 1 }),
 	guidance: text, recipes: Type.Array(text),
-});
-export const ColorSchema = enumeration(["W", "U", "B", "R", "G", "C"]);
-const player = Type.Union([Type.Literal("self"), Type.Literal("opponent")]);
-export const InstructionSchema = Type.Union([
-	object({ do: Type.Literal("damage"), amount: Type.Integer({ minimum: 1 }) }),
-	object({ do: Type.Literal("mana"), who: player, colors: Type.Array(ColorSchema, { minItems: 1 }) }),
-	object({ do: Type.Literal("draw"), who: player, count: Type.Integer({ minimum: 1 }) }),
-	object({ do: Type.Literal("choose-move"), who: player, count: Type.Literal(1),
-		from: enumeration(["hand", "battlefield", "graveyard"]), to: enumeration(["hand", "battlefield", "graveyard", "exile", "library"]),
-		reason: enumeration(["discard", "sacrifice", "exile", "bounce"]) }),
-	object({ do: Type.Literal("life"), who: player, amount: Type.Integer() }),
-]);
-export const ProcedureSchema = object({
-	source: QuerySchema, claim: text, basis: text,
-	timing: Type.Union([Type.Literal("mana"), Type.Literal("stack"), Type.Literal("spell"), Type.Literal("land")]),
-	spell: Type.Optional(object({ speed: Type.Union([Type.Literal("instant"), Type.Literal("sorcery")]),
-		destination: Type.Union([Type.Literal("battlefield"), Type.Literal("graveyard")]) })),
-	target: Type.Optional(enumeration(["creature", "player", "creature-or-player"])),
-	/** Omitted only by a spell or land: a spell then pays its printed mana cost. */
-	cost: Type.Optional(object({ tap: Type.Boolean(), generic: natural, colors: Type.Array(ColorSchema) })),
-	instructions: Type.Array(InstructionSchema),
-	/** Permission for this seat's unique resolution continuations, never another seat's choice. */
-	delegate: Type.Boolean(),
 });
 export const StepSchema = object({
 	label: text, when: WhenSchema,
@@ -80,8 +56,6 @@ export type When = Static<typeof WhenSchema>;
 export type TaskSpec = Static<typeof TaskSchema>;
 export type DraftStep = Static<typeof StepSchema>;
 export type Recipe = Static<typeof RecipeSchema>;
-export type Instruction = Static<typeof InstructionSchema>;
-export type Procedure = Static<typeof ProcedureSchema>;
 export type WorkCommand = Static<typeof CommandSchema>;
 
 /** Shape checking proves neither card meaning nor strategic quality. */

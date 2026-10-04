@@ -1,50 +1,125 @@
 /**
- * Reading the syntax against the table: which objects a ref or selector means,
+ * Reading the syntax against a world: which objects a ref or selector means,
  * what an amount is, whether a condition holds. docs/SYNTAX.md.
  *
- * Everything is worked out when it is asked for. A scope says whose ability it
- * is and what was announced, bound and triggered; a scope with a viewer sees only
- * what that seat has earned, which is how a plan's conditions are checked.
+ * A world is what a reader knows. The table's own world holds every object,
+ * libraries included, and is what resolution reads. A seat's world is built
+ * from its view, so what it is offered and what its plan's conditions test is
+ * only what it has earned. Everything is worked out when it is asked for.
  * Past 150 lines because refs, selectors, amounts and conditions read each other.
  */
-import { cardsIn, playing, seat, type Table, type Thing } from "./table.ts";
+import { playing, type Combat, type Note, type Table, type Thing } from "./table.ts";
 import type { Amount, Condition, Selector } from "./language.ts";
 import { characteristics, creatureType, type Traits } from "./characteristics.ts";
-import type { ObjectRef, SeatId } from "./types.ts";
+import type { ObjectRef, SeatId, SeatView } from "./types.ts";
+import type { SeenObject } from "./work.ts";
 
+export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered">> & { card?: string };
+/** Something that happened this turn that cards count. All of it is public. */
+export type Happened =
+	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
+	| { kind: "activated"; by: SeatId; source: ObjectRef; basis: string }
+	| { kind: "attacked"; by: SeatId; attackers: { object: Seen; traits?: Traits }[] }
+	| { kind: "life"; who: SeatId; amount: number };
+export type World = {
+	objects: Seen[];
+	read(object: Seen): Traits | undefined;
+	players: { id: SeatId; life: number }[];
+	notes: Note[];
+	combat: Combat | null;
+	history: Happened[];
+	/** The object as it is, or as it last was (608.2h). */
+	lastKnown(ref: ObjectRef): { object: Seen; traits?: Traits } | undefined;
+};
 export type Chosen = ObjectRef | { player: SeatId };
 /** What an earlier instruction bound with `as`. */
 export type Bound = { objects: ObjectRef[]; players: SeatId[]; amount?: number };
 export type Scope = {
-	table: Table;
+	world: World;
 	/** "You": the controller of the spell or ability. */
 	controller: SeatId;
-	/** "This". On the stack or gone, it is read as it last existed. */
-	source?: Thing;
-	targets?: Chosen[];
+	/** "This". Gone, it is read as it last existed. */
+	source?: Seen;
+	/** One list per target slot. */
+	targets?: Chosen[][];
+	/** Targets that were illegal as resolution began (608.2b), by `targetKey`: they name nothing. */
+	illegal?: string[];
 	bound?: Record<string, Bound>;
-	event?: { object?: Thing; objects?: Thing[]; player?: SeatId; source?: Thing };
+	event?: { object?: Seen; objects?: Seen[]; player?: SeatId; source?: Seen };
 	x?: number;
-	/** Only what this seat may see. */
-	viewer?: SeatId;
-	/** Characteristics during the layer walk; otherwise read fresh. */
-	read?: (object: Thing) => Traits | undefined;
 };
 
-const traitsOf = (scope: Scope, object: Thing) => (scope.read ?? ((one: Thing) => characteristics(scope.table, one)))(object);
-const live = (table: Table, ref: ObjectRef) => { const found = table.things.get(ref.id); return found && found.incarnation === ref.incarnation ? found : undefined; };
-const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command"]);
-export const visibleTo = (object: Thing, viewer: SeatId) => !object.faceDown && (PUBLIC.has(object.zone) || (object.zone === "hand" && object.owner === viewer));
+/** The table's own world. `read` overrides characteristics during the layer walk. */
+export function tableWorld(table: Table, read?: (object: Seen) => Traits | undefined): World {
+	const reader = read ?? ((object: Seen) => characteristics(table, object as Thing));
+	let events: Happened[] | undefined;
+	return {
+		objects: [...table.things.values()], read: reader,
+		players: playing(table).map((one) => ({ id: one.id, life: one.life })),
+		notes: table.notes, combat: table.combat,
+		get history() { return (events ??= happened(table)); },
+		lastKnown(ref) {
+			const now = table.things.get(ref.id);
+			if (now?.incarnation === ref.incarnation) return { object: now, traits: reader(now) };
+			for (let at = table.log.length - 1; at >= 0; at--) {
+				const was = table.log[at]!.before[ref.id];
+				if (was?.incarnation === ref.incarnation) return { object: was, ...(table.log[at]!.known?.[ref.id] ? { traits: table.log[at]!.known![ref.id] } : {}) };
+			}
+			return undefined;
+		},
+	};
+}
+
+/** A seat's world: only what its view holds. */
+export function viewWorld(view: SeatView): World {
+	const objects = view.objects ?? [];
+	return {
+		objects, read: (object) => (object as SeenObject).traits, players: view.players ?? [], notes: view.notes ?? [],
+		combat: view.combat ?? null, history: view.history ?? [],
+		lastKnown(ref) { const object = objects.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
+	};
+}
+
+/** This turn's public events cards count, from the receipts. Nothing is kept beside the log. */
+export function happened(table: Table): Happened[] {
+	const began = table.cursor.began[table.cursor.active] ?? 0, events: Happened[] = [];
+	for (const receipt of table.log) {
+		if ((receipt.clock ?? 0) <= began) continue;
+		for (const change of receipt.changes) {
+			if (change.do === "activate" && change.ability.timing !== "spell") events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis });
+			if (change.do === "activate" && change.ability.timing === "spell") {
+				const spell = receipt.after[change.what] ?? receipt.before[change.what];
+				const traits = spell && characteristics(table, spell);
+				if (spell) events.push({ kind: "cast", by: change.ability.controller, spell, ...(traits ? { traits } : {}) });
+			}
+			if (change.do === "attack") events.push({ kind: "attacked", by: table.cursor.active, attackers: change.attackers.map((one) => {
+				const now = table.things.get(one.id);
+				const traits = now?.incarnation === one.incarnation ? characteristics(table, now) : undefined;
+				return { object: receipt.before[one.id] ?? now!, ...(traits ? { traits } : {}) };
+			}) });
+			if (change.do === "damage" && "player" in change.target) events.push({ kind: "life", who: change.target.player, amount: -change.amount });
+			if (change.do === "change-life") events.push({ kind: "life", who: change.who, amount: change.amount });
+		}
+	}
+	return events;
+}
+
+export const targetKey = (chosen: Chosen) => "player" in chosen ? `seat-${chosen.player}` : `${chosen.id}@${chosen.incarnation}`;
+const live = (world: World, ref: ObjectRef) => world.objects.find((one) => one.id === ref.id && one.incarnation === ref.incarnation);
+const traitsOf = (scope: Scope, object: Seen) =>
+	live(scope.world, object) ? scope.world.read(object) : scope.world.lastKnown(object)?.traits ?? scope.world.read(object);
 
 /** The objects a ref names, as they are now. A target or binding that changed zones names nothing. */
-export function objects(scope: Scope, ref: string | { top: number; of: string }): Thing[] {
-	if (typeof ref !== "string") return players(scope, ref.of).flatMap((owner) => cardsIn(scope.table, "library", owner).slice(0, ref.top));
+export function objects(scope: Scope, ref: string | { top: number; of: string }): Seen[] {
+	if (typeof ref !== "string") return players(scope, ref.of).flatMap((owner) => scope.world.objects.filter((one) => one.zone === "library" && one.owner === owner)
+		.sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).slice(0, ref.top));
 	const [head, rest] = [ref.split(":")[0], ref.slice(ref.indexOf(":") + 1)];
 	switch (head) {
 		case "this": return scope.source ? [scope.source] : [];
-		case "attached": { const at = scope.source?.attached && live(scope.table, scope.source.attached); return at ? [at] : []; }
-		case "target": { const chosen = scope.targets?.[Number(rest)]; const found = chosen && "id" in chosen ? live(scope.table, chosen) : undefined; return found ? [found] : []; }
-		case "bound": return (scope.bound?.[rest]?.objects ?? []).flatMap((one) => live(scope.table, one) ?? []);
+		case "attached": { const at = scope.source?.attached && live(scope.world, scope.source.attached); return at ? [at] : []; }
+		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "id" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? live(scope.world, chosen) ?? [] : []);
+		case "bound": return (scope.bound?.[rest]?.objects ?? []).flatMap((one) => live(scope.world, one) ?? []);
 		case "event": return rest === "object" ? (scope.event?.object ? [scope.event.object] : []) : rest === "objects" ? scope.event?.objects ?? [] : scope.event?.source ? [scope.event.source] : [];
 		default: return [];
 	}
@@ -52,14 +127,14 @@ export function objects(scope: Scope, ref: string | { top: number; of: string })
 
 /** The players a ref names. */
 export function players(scope: Scope, ref: string): SeatId[] {
-	const others = playing(scope.table).map((one) => one.id).filter((id) => id !== scope.controller);
+	const all = scope.world.players.map((one) => one.id);
 	const [head, rest] = [ref.split(":")[0], ref.slice(ref.indexOf(":") + 1)];
 	switch (head) {
 		case "you": return [scope.controller];
-		case "opponent": return others;
-		case "each-player": return playing(scope.table).map((one) => one.id);
+		case "opponent": return all.filter((id) => id !== scope.controller);
+		case "each-player": return all;
 		case "event": return scope.event?.player === undefined ? [] : [scope.event.player];
-		case "target": { const chosen = scope.targets?.[Number(rest)]; return chosen && "player" in chosen ? [chosen.player] : []; }
+		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "player" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? [chosen.player] : []);
 		case "bound": return scope.bound?.[rest]?.players ?? [];
 		case "controller": return objects(scope, rest).map((one) => one.controller);
 		case "owner": return objects(scope, rest).map((one) => one.owner);
@@ -70,11 +145,8 @@ export function players(scope: Scope, ref: string): SeatId[] {
 const side = (scope: Scope, ref: string | undefined, seatId: SeatId) => ref === undefined || ref === "any" || players(scope, ref).includes(seatId);
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
-export function matches(scope: Scope, object: Thing, selector: Selector): boolean {
-	if (!(selector.zones ?? ["battlefield"]).includes(object.zone as never)) return false;
-	if (scope.viewer !== undefined && !visibleTo(object, scope.viewer)) return false;
-	const traits = traitsOf(scope, object);
-	if (!traits) return false;
+export function matches(scope: Scope, object: Seen, selector: Selector, traits = traitsOf(scope, object)): boolean {
+	if (!(selector.zones ?? ["battlefield"]).includes(object.zone as never) || !traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
 	if (!side(scope, selector.controller, holder) || !side(scope, selector.owner, object.owner)) return false;
 	const subtype = (wanted: string) => traits.subtypes.some((one) => same(one, wanted)) || (!!traits.allCreatureTypes && creatureType(wanted));
@@ -91,56 +163,47 @@ export function matches(scope: Scope, object: Thing, selector: Selector): boolea
 	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness)) return false;
 	if (selector.tapped !== undefined && selector.tapped !== object.tapped) return false;
 	if (selector.token !== undefined && selector.token !== !!object.token) return false;
-	if (selector.attacking !== undefined && selector.attacking !== !!scope.table.combat?.attackers.some((one) => one.id === object.id)) return false;
-	if (selector.blocking !== undefined && selector.blocking !== !!scope.table.combat?.blockers.some((one) => one.id === object.id)) return false;
+	const combat = scope.world.combat;
+	if (selector.attacking !== undefined && selector.attacking !== !!combat?.attackers.some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
+	if (selector.blocking !== undefined && selector.blocking !== !!combat?.blockers.some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
 	if (selector.other && object.id === scope.source?.id) return false;
 	if (selector.is && !objects(scope, selector.is).some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
 	if (selector.attachedTo && !objects(scope, selector.attachedTo).some((one) => object.attached?.id === one.id && object.attached.incarnation === one.incarnation)) return false;
-	if (selector.linked && !scope.table.notes.some((note) => note.kind === "link" && note.on.id === object.id && note.on.incarnation === object.incarnation &&
+	if (selector.linked && !scope.world.notes.some((note) => note.kind === "link" && note.on.id === object.id && note.on.incarnation === object.incarnation &&
 		note.source.id === scope.source?.id && note.source.incarnation === scope.source.incarnation)) return false;
-	if (selector.targeting && !(object.zone === "stack" && (object.ability?.target ? [object.ability.target] : []).some((chosen) => "id" in chosen &&
-		!!live(scope.table, chosen) && matches(scope, live(scope.table, chosen)!, selector.targeting!)))) return false;
+	if (selector.targeting && !(object.zone === "stack" && (object.ability?.targets ?? []).flat().some((chosen) => {
+		const aimed = "id" in chosen ? live(scope.world, chosen) : undefined;
+		return !!aimed && matches(scope, aimed, selector.targeting!);
+	}))) return false;
 	return true;
 }
 
 /** Every object a selector means, in id order. */
-export const select = (scope: Scope, selector: Selector): Thing[] =>
-	[...scope.table.things.values()].filter((object) => matches(scope, object, selector)).sort((a, b) => a.id.localeCompare(b.id));
+export const select = (scope: Scope, selector: Selector): Seen[] =>
+	scope.world.objects.filter((object) => matches(scope, object, selector)).sort((a, b) => a.id.localeCompare(b.id));
 
 export function amount(scope: Scope, value: Amount): number {
 	if (typeof value === "number") return value;
 	if ("count" in value) return select(scope, value.count).length;
-	if ("counters" in value) return objects(scope, value.on)[0]?.counters[value.counters] ?? 0;
+	if ("counters" in value) { const one = objects(scope, value.on)[0]; return one ? one.counters[value.counters] ?? 0 : 0; }
 	if ("power" in value) { const one = objects(scope, value.power)[0]; return (one && traitsOf(scope, one)?.power) ?? 0; }
 	if ("toughness" in value) { const one = objects(scope, value.toughness)[0]; return (one && traitsOf(scope, one)?.toughness) ?? 0; }
 	if ("bound" in value) { const bound = scope.bound?.[value.bound]; return bound?.amount ?? (bound ? bound.objects.length + bound.players.length : 0); }
 	if ("distinct" in value) return new Set(select(scope, value.among).flatMap((one) => traitsOf(scope, one)?.types ?? [])).size;
-	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + seat(scope.table, id).life, 0);
+	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.life ?? 0), 0);
 	if ("history" in value) return history(scope, value);
 	if ("x" in value) return scope.x ?? 0;
 	if ("sum" in value) return value.sum.reduce((total: number, part) => total + amount(scope, part), 0);
 	return -amount(scope, value.negate);
 }
 
-/** This turn so far, from the receipts. Nothing here is a counter kept beside the log. */
 function history(scope: Scope, value: Extract<Amount, { history: string }>): number {
-	const began = scope.table.cursor.began[scope.table.cursor.active] ?? 0;
 	let total = 0;
-	for (const receipt of scope.table.log) {
-		if ((receipt.clock ?? 0) <= began) continue;
-		for (const change of receipt.changes) {
-			if (value.history === "cast" && change.do === "activate" && change.ability.timing === "spell" && side(scope, value.by, change.ability.controller)) {
-				const spell = receipt.after[change.what] ?? receipt.before[change.what];
-				if (spell && (!value.of || matches({ ...scope, viewer: undefined }, spell, value.of))) total += 1;
-			}
-			if (value.history === "attacked" && change.do === "attack") total += change.attackers.filter((one) => {
-				const was = receipt.before[one.id];
-				return !value.of || (was && matches(scope, was, value.of));
-			}).length;
-			if (value.history === "life-lost" && change.do === "damage" && "player" in change.target && side(scope, value.by, change.target.player)) total += change.amount;
-			if (change.do === "change-life" && side(scope, value.by, change.who) &&
-				(value.history === "life-lost" ? change.amount < 0 : value.history === "life-gained" && change.amount > 0)) total += Math.abs(change.amount);
-		}
+	for (const event of scope.world.history) {
+		if (value.history === "cast" && event.kind === "cast" && side(scope, value.by, event.by) && (!value.of || matches(scope, event.spell, value.of, event.traits))) total += 1;
+		if (value.history === "attacked" && event.kind === "attacked" && side(scope, value.by, event.by))
+			total += event.attackers.filter((one) => !value.of || matches(scope, one.object, value.of, one.traits)).length;
+		if (event.kind === "life" && side(scope, value.by, event.who) && (value.history === "life-lost" ? event.amount < 0 : value.history === "life-gained" && event.amount > 0)) total += Math.abs(event.amount);
 	}
 	return total;
 }

@@ -11,14 +11,14 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { check, PackageSchema, PlanSchema, ProcedureSchema, type Package, type Plan, type Procedure } from "../src/core/language.ts";
 import { load } from "../src/core/cards.ts";
-import { matchup } from "../tools/matchup-fixture.ts";
+import { decks } from "../tools/matchup-fixture.ts";
 
 const DIR = join(import.meta.dirname, "..", "docs", "examples");
 const SCHEMAS = { procedure: ProcedureSchema, package: PackageSchema, plan: PlanSchema };
 
 test("every example block parses and quotes its card", () => {
 	const cards = load(join(import.meta.dirname, "..", "cards", "standard.tsv")).cards;
-	const inMatchup = new Set(matchup.decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
+	const inMatchup = new Set(decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
 	const named = new Set<string>();
 	const quotes = (card: string, basis: string, where: string) => {
 		const oracle = cards.get(card)?.oracle.replaceAll("\\n", " ");

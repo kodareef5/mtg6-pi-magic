@@ -35,7 +35,8 @@ import {
 	type Role,
 } from "./src/context/roles.ts";
 import { degraded, report, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
-import { checkDeck, load, type Universe } from "./src/core/cards.ts";
+import { load, type Universe } from "./src/core/cards.ts";
+import { deck } from "./src/core/decks.ts";
 import { start } from "./src/core/commit.ts";
 import { nextDecision } from "./src/core/decisions.ts";
 import { standard } from "./src/core/format.ts";
@@ -59,14 +60,10 @@ import { pendingReviews } from "./src/core/agenda.ts";
 import { workMenu } from "./src/core/work-menu.ts";
 
 /**
- * Milestone one plays with nothing but lands: pass, play a land, untap, draw,
- * mulligan. It proves the loop and the ledger before a card has an ability.
- * design-ref/archive/CIRCUITRY.md section 12.
- *
- * Sixty basics is a legal Standard deck, which is the point: it goes through
- * the same legality check a tournament list will.
+ * A new game seats two practice decks from decks/collection. Setup registers
+ * them against the card universe, as it would any tournament list.
  */
-const landDeck = (name: string): string[] => Array.from({ length: 60 }, () => name);
+const PLAY = ["Green Stompy", "Red Burn"];
 
 /**
  * Where the util writes, where its 75MB download is kept, and where the roster
@@ -153,7 +150,7 @@ export default function (pi: ExtensionAPI) {
 			if (!existsSync(path)) throw new Error(`No game ${from.resume} in ${GAMES}.`);
 			const back = replayGame(
 				path,
-				(saved) => start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed),
+				(saved) => start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed, cards),
 				undefined,
 				{ cards, rules },
 			);
@@ -169,12 +166,7 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(`Resumed past a torn last line. Dropped: ${journal.repaired.slice(0, 80)}`, "warning");
 			}
 		} else {
-			const entrants = [{ deck: landDeck("Forest") }, { deck: landDeck("Swamp") }];
-			for (const entrant of entrants) {
-				const problems = checkDeck(cards, entrant.deck, standard);
-				if (problems.length) throw new Error(`Illegal deck: ${problems.join("; ")}`);
-			}
-			opened = start(standard, entrants, from.seed);
+			opened = start(standard, PLAY.map((name) => ({ deck: deck(name) })), from.seed, cards);
 			header = {
 				id: from.seed,
 				format: standard.name,

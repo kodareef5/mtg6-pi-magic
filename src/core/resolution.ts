@@ -1,56 +1,67 @@
-/** A paused instruction is table state. Priority and state checks wait for its end. */
-import { cardsIn, thing, type Mana, type Table } from "./table.ts";
-import { targetAvailable } from "./targets.ts";
-import { project } from "./view.ts";
-import { recipient } from "./procedures.ts";
+/**
+ * A resolving spell or ability is table state: what is left to do, what it has
+ * bound, and which targets were illegal as it began (608.2b). Its next
+ * instruction is one decision for that instruction's actor, with nobody holding
+ * priority. Finishing it is a checkpoint.
+ */
+import { characteristics } from "./characteristics.ts";
+import { instructionStep } from "./instructions.ts";
+import { holds, matches, players, tableWorld, targetKey, type Scope } from "./selectors.ts";
 import type { Pending, Move } from "./moves.ts";
-import type { Change, Reason, Zone } from "./syntax.ts";
+import type { Table, Thing } from "./table.ts";
+import type { Change } from "./syntax.ts";
+
+const PERMANENT = ["artifact", "battle", "creature", "enchantment", "land", "planeswalker"];
+
+/**
+ * As the top object starts resolving: its program and the targets now illegal.
+ * A permanent spell enters first, and its instructions then run with `this` the
+ * permanent it became.
+ */
+export function begin(table: Table, object: Thing): Change {
+	const ability = object.ability!;
+	const scope: Scope = { world: tableWorld(table), controller: ability.controller, source: object };
+	const illegal = ability.slots.flatMap((slot, at) => (ability.targets[at] ?? []).filter((chosen) => {
+		if ("player" in chosen) return !table.seats.some((one) => one.id === chosen.player && !one.result) || (slot.player !== "any" && !!slot.player && !players(scope, slot.player).includes(chosen.player));
+		const now = table.things.get(chosen.id);
+		return !now || now.incarnation !== chosen.incarnation || !slot.object || !matches(scope, now, slot.object);
+	}).map(targetKey));
+	const chosen = ability.targets.flat();
+	const lost = chosen.length > 0 && illegal.length === chosen.length;
+	const permanent = ability.timing === "spell" && !!characteristics(table, object)?.types.some((type) => PERMANENT.includes(type));
+	return { do: "resolution", action: "begin", what: object.id, source: ability.timing === "spell" ? { id: object.id, incarnation: object.incarnation } : ability.source,
+		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const } }] : []),
+			...ability.instructions.map((instruction) => ({ instruction }))], illegal, ...(lost ? { lost: true } : {}) };
+}
 
 export function resolving(table: Table): Pending | null {
 	const pending = table.resolution;
 	if (!pending) return null;
-	const ability = thing(table, pending.object).ability!;
-	const instruction = ability.instructions[pending.instruction]!;
-	const who = instruction && instruction.do !== "damage" ? recipient(table, ability.controller, instruction.who) : ability.controller;
-	const prefix = `resolve:${pending.object}:${pending.instruction}:${pending.remaining}`;
-	// Targets were checked once as resolution began. Later instructions can
-	// move or change that target without cancelling unrelated remaining effects.
-	const failedTarget = !!pending.lost;
-	const finishes = failedTarget || !instruction || pending.instruction === ability.instructions.length - 1 && pending.remaining === 1;
-	const finish: Change[] = finishes && ability.timing === "spell" ? [{ do: "move", what: pending.object,
-		to: failedTarget ? "graveyard" : ability.spell!.destination, reason: "resolve" }] : [];
-	const next: Change = { do: "resolution", action: "next", what: pending.object, ...(failedTarget ? { abort: true } : {}) };
-	const continuation = (label: string, changes: Change[], skip = false): Move => ({
-		option: { id: prefix, label }, changes: [...changes, { ...next, skip }, ...finish], reason: "resolve",
-	});
-	let moves: Move[];
-	if (!instruction || failedTarget) return { situation: "resolution", seat: ability.controller,
-		question: `Resolve: ${ability.claim}.`, delegated: ability.delegate,
-		moves: [continuation(failedTarget ? "The announced target is unavailable; none of this effect's instructions resolve." : `Put ${ability.claim} into ${ability.spell!.destination}.`, [], true)] };
-	switch (instruction.do) {
-		case "damage": moves = [continuation(`Deal ${instruction.amount} damage to the announced target if it remains available.`, targetAvailable(ability, { view: project(table, ability.controller) })
-			? [{ do: "damage", source: pending.object, target: ability.target!, amount: instruction.amount }] : [])]; break;
-		case "draw": {
-			const top = cardsIn(table, "library", who)[0];
-			moves = [continuation(`Draw one card (${pending.remaining} remaining in this instruction)`, top
-				? [{ do: "move", what: top.id, to: "hand", reason: "draw" }]
-				: [{ do: "mark-player", who, key: "drew-from-empty", add: 1 }])];
-			break;
-		}
-		case "choose-move": {
-			const eligible = cardsIn(table, instruction.from as Zone).filter((object) => !object.ability &&
-				(instruction.from === "battlefield" ? object.controller : object.owner) === who);
-			moves = eligible.map((object) => ({
-				option: { id: `${prefix}:${object.id}`, label: `Put ${object.faceDown ? "an unknown card" : object.card} into ${instruction.to} (${instruction.reason})`, objects: [{ id: object.id, incarnation: object.incarnation }] },
-				changes: [{ do: "move", what: object.id, to: instruction.to as Zone, reason: instruction.reason as Reason }, next, ...finish], reason: "resolve",
-			}));
-			if (!moves.length) moves = [continuation("No eligible card remains; continue the instruction.", [], true)];
-			break;
-		}
-		case "life": moves = [continuation(`Change life by ${instruction.amount}`, [{ do: "change-life", who, amount: instruction.amount, reason: "resolve" }])]; break;
-		case "mana": moves = [continuation(`Add ${instruction.colors.join(" ")}`, [{ do: "add-mana", who, colors: instruction.colors as Mana["color"][] }])]; break;
+	const object = table.things.get(pending.object)!, ability = object.ability!;
+	const world = tableWorld(table), item = pending.program[0];
+	const scope: Scope = { world, controller: ability.controller, source: world.lastKnown(pending.source)?.object, targets: ability.targets, illegal: pending.illegal,
+		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
+	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;
+	// An instant or sorcery still on the stack goes to the graveyard as the last part (608.2n).
+	const finish = (changes: Change[]): Change[] => ability.timing === "spell" && object.zone === "stack" && !changes.some((change) => change.do === "move" && change.what === object.id)
+		? [{ do: "move", what: object.id, to: "graveyard", reason: "resolve" }] : [];
+	if (pending.lost || !item) {
+		const label = pending.lost ? "Every target is illegal; it does not resolve (608.2b)." : `Finish resolving ${ability.claim}.`;
+		return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}.`,
+			moves: [{ option: { id: prefix, label }, changes: [...finish([]), { do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" }] };
 	}
-	const actor = instruction.do === "choose-move" ? who : ability.controller;
-	return { situation: "resolution", seat: actor, question: `Resolve: ${ability.claim}. Instruction ${pending.instruction + 1} of ${ability.instructions.length}.`,
-		delegated: ability.delegate && actor === ability.controller, moves };
+	const instruction = item.instruction;
+	const skipped = instruction.if && !holds(scope, instruction.if);
+	const step = skipped ? { actor: ability.controller, question: "Its condition is false.", choices: [{ id: "skip", label: "Skip: its condition is false", changes: [] as Change[] }] }
+		: instructionStep(table, scope, instruction, pending, ability.claim);
+	if (!skipped && instruction.may && instruction.do !== "choose") step.choices.push({ id: "decline", label: "Decline: it is optional", changes: [] });
+	const last = pending.program.length === 1;
+	const moves: Move[] = step.choices.map((choice) => ({
+		option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.pick ? { objects: [choice.pick] } : {}) },
+		changes: [...choice.changes, ...(last && !choice.pick && !choice.expand ? finish(choice.changes) : []),
+			{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(choice.bind ? { bind: choice.bind } : {}),
+				...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
+		reason: "resolve",
+	}));
+	return { situation: "resolution", seat: step.actor, question: `Resolve: ${ability.claim}. ${step.question}`, moves };
 }

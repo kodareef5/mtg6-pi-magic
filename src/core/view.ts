@@ -14,7 +14,8 @@
  * both use the same visibility filter.
  */
 
-import { cardsIn, seat, type Receipt, type Table, type Thing } from "./table.ts";
+import { cardsIn, playing, seat, type Receipt, type Table, type Thing } from "./table.ts";
+import { happened } from "./selectors.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
 import { characteristics } from "./characteristics.ts";
@@ -121,14 +122,17 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			const traits = characteristics(table, item);
 			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}) };
 		});
-	if (table.resolution) lines.push(`Resolving ${table.resolution.object}, instruction ${table.resolution.instruction + 1}. Nobody has priority during this choice.`);
+	if (table.resolution) lines.push(`Resolving ${publicName(table.things.get(table.resolution.object))}, ${table.resolution.program.length} instruction${table.resolution.program.length === 1 ? "" : "s"} left. Nobody has priority during this choice.`);
 	const names = [...new Set(objects.flatMap((object) => "card" in object && object.card ? [object.card] : []))].sort();
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
-		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id,
-			cards: Object.fromEntries([...new Set(deck)].sort().map((name) => [name, deck.filter((card) => card === name).length])),
+		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id, name: deck.name,
+			cards: Object.fromEntries(Object.entries(deck.main).sort(([a], [b]) => a.localeCompare(b))),
+			sideboard: Object.fromEntries(Object.entries(deck.sideboard).sort(([a], [b]) => a.localeCompare(b))),
 		})) } : {}),
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life })),
+		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
 		...(at.kind === "turn" ? { visit: table.cursor.visit } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };

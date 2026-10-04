@@ -8,11 +8,11 @@ import { select } from "./agenda.ts";
 import { intrinsic } from "./characteristics.ts";
 import type { Mana } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
-import type { Procedure } from "./work-language.ts";
 import type { Registration } from "./language.ts";
 import type { SeenObject } from "./work.ts";
 
-export type Cost = NonNullable<Procedure["cost"]>;
+/** The mana part of a locked cost. */
+export type Price = { generic: number; colors: Mana["color"][] };
 type Color = Mana["color"];
 /** One mana ability activated while paying, with the claim it was accepted under. */
 export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true };
@@ -46,10 +46,10 @@ export function produces(registration: Registration): Yield[] {
 }
 
 /** Untapped sources this seat could tap for mana now: basic land types (305.6) and registered mana abilities. */
-function manaSources(frame: Frame, except?: string): Unit[] {
+function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 	const units: Unit[] = [];
 	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
-		if (object.id === except || sick(frame, object)) continue;
+		if (except.has(object.id) || sick(frame, object)) continue;
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
 			...(object.traits?.registrations ?? []).flatMap(produces),
@@ -65,7 +65,7 @@ function manaSources(frame: Frame, except?: string): Unit[] {
 }
 
 /** Every distinct way to pay exactly, from floating mana, tapped sources, or both. */
-export function fundings(frame: Frame, cost: Cost, except?: string): { funding: Funding; shows: string }[] {
+export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set()): { funding: Funding; shows: string }[] {
 	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter((mana) => !mana.spendOnly)
 		.map((mana): Unit => ({ key: `pool|${mana.color}|${!!mana.persists}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
 			label: `{${mana.color}} (${mana.id}, ${mana.persists ? "persists" : "expires at step end"})` }));
@@ -80,7 +80,7 @@ export function fundings(frame: Frame, cost: Cost, except?: string): { funding: 
 	});
 }
 
-function exact(units: Unit[], cost: Cost): Unit[][] {
+function exact(units: Unit[], cost: Price): Unit[][] {
 	const groups = new Map<string, Unit[]>();
 	for (const unit of [...units].sort((a, b) => a.id.localeCompare(b.id))) groups.set(unit.key, [...(groups.get(unit.key) ?? []), unit]);
 	const buckets = [...groups.values()], total = cost.generic + cost.colors.length, found: Unit[][] = [];
@@ -99,7 +99,7 @@ function exact(units: Unit[], cost: Cost): Unit[][] {
 }
 
 /** Pick one yield per unit so the colored symbols are met. */
-function cover(units: Unit[], cost: Cost): Map<string, Yield> | null {
+function cover(units: Unit[], cost: Price): Map<string, Yield> | null {
 	const pick = (at: number, chosen: Map<string, Yield>): Map<string, Yield> | null => {
 		if (at === units.length) return covers([...chosen.values()].flatMap((one) => one.colors), cost) ? chosen : null;
 		for (const option of units[at]!.yields) {
@@ -112,5 +112,5 @@ function cover(units: Unit[], cost: Cost): Map<string, Yield> | null {
 }
 
 /** The colors a funding produces and spends, for checking a recorded payment. */
-export const covers = (colors: Color[], cost: Cost): boolean => colors.length === cost.generic + cost.colors.length &&
+export const covers = (colors: Color[], cost: Price): boolean => colors.length === cost.generic + cost.colors.length &&
 	cost.colors.every((color) => colors.filter((one) => one === color).length >= cost.colors.filter((wanted) => wanted === color).length);

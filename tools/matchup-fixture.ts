@@ -1,24 +1,21 @@
-/** Real registered lists, pinned with their card and rules data. */
+/** The pinned matchup: two real tournament lists from the deck collection, with their card and rules data. */
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { start } from "../src/core/commit.ts";
-import { load, checkDeck } from "../src/core/cards.ts";
+import { load } from "../src/core/cards.ts";
+import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 
 export const matchup = JSON.parse(readFileSync(new URL("../decks/standard-matchup.json", import.meta.url), "utf8")) as {
 	event: string; eventDate: string; legalityDate: string;
 	cards: { path: string; generated: string; sha256: string }; rules: { path: string; effective: string; sha256: string };
-	decks: { name: string; pilot: string; source: string; main: Record<string, number>; sideboard: Record<string, number> }[];
+	/** Names in decks/collection. */
+	decks: string[];
 };
 export const universe = load(matchup.cards.path);
-export const expand = (counts: Record<string, number>): string[] => Object.entries(counts).flatMap(([name, count]) => Array(count).fill(name));
 for (const pin of [matchup.cards, matchup.rules]) {
 	if (createHash("sha256").update(readFileSync(pin.path)).digest("hex") !== pin.sha256) throw new Error(`Pinned data changed: ${pin.path}`);
 }
-for (const deck of matchup.decks) {
-	const main = expand(deck.main), sideboard = expand(deck.sideboard);
-	const problems = [...checkDeck(universe, main, standard), ...checkDeck(universe, [...main, ...sideboard], standard)];
-	if (main.length !== 60 || sideboard.length !== 15 || problems.length) throw new Error(`${deck.name}: ${problems.join("; ") || "expected 60 + 15 cards"}`);
-}
-export const matchTable = (seed: string) => start(standard, matchup.decks.map((deck, seat) => ({ name: seat ? "Red" : "Green", deck: expand(deck.main) })), seed);
-
+export const decks = matchup.decks.map((name) => deck(name));
+/** A game of the two lists. Setup registers both; an illegal list refuses the game. */
+export const matchTable = (seed: string) => start(standard, decks.map((one, seat) => ({ name: seat ? "Red" : "Green", deck: one })), seed, universe);

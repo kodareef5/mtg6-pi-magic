@@ -25,7 +25,8 @@ which revises the remaining sequence and releases the obsolete reservation.
 Neither repeats the completed land play. Three upkeep checks lead to a final
 strategy request. These runs verify choreography, not strategic quality.
 
-`ability-exchange` starts with two established Qiqirn Merchants and basic lands.
+`ability-exchange` plays Dimir Control against itself, each seat starting with a
+Qiqirn Merchant and an Island in play.
 The fixture waits until turn three, after both controllers have begun a turn,
 then each seat makes mana and pays for the Merchant's first ability. The second
 activation responds to the first. Each draw is delegated; each discard is a

@@ -7,6 +7,7 @@
  * needs. Any later version is a position, and forking there plays on from it.
  */
 
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -35,15 +36,14 @@ import { cardsIn } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
 
 const where = () => mkdtempSync(join(tmpdir(), "magic-journal-"));
-const deck = (card: string) => Array.from({ length: 60 }, () => card);
 
 const header = (id: string, seed: string): Header => ({
 	id,
 	format: standard.name,
 	seed,
 	seats: [
-		{ id: 0, name: "A", deck: deck("Forest") },
-		{ id: 1, name: "B", deck: deck("Swamp") },
+		{ id: 0, name: "A", deck: deck("Green Stompy") },
+		{ id: 1, name: "B", deck: deck("Dimir Control") },
 	],
 	cards: { path: "cards/standard.tsv", generated: "2026-10-03" },
 	rules: { path: "rules/cr.tsv", effective: "September 25, 2026" },
@@ -71,7 +71,7 @@ async function recorded(dir: string, id = "one", seed = "journal") {
 	const journal = open(join(dir, `${id}.jsonl`), made);
 	for (const at of table.seats) {
 		keep(journal, at.id, {
-			seat: at.id, version: 1, deck: `Sixty ${at.deck[0]}s.`, combos: "None.",
+			seat: at.id, version: 1, deck: `${at.deck.name}.`, combos: "None.",
 			opening: "Keep any seven.", against: {}, phases: {}, cards: {}, gaps: [],
 		});
 	}
@@ -155,7 +155,7 @@ test("forking at version zero reuses the pregame, and later forks carry the posi
 	// A clone is the same game continued, so the briefs come across as they are
 	// and there is nothing to match them against.
 	assert.deepEqual(preparedIn(zero.lines).map((made) => made.seat), [0, 1]);
-	assert.match(JSON.stringify(preparedIn(zero.lines)[0]!.made), /Sixty Forests/);
+	assert.match(JSON.stringify(preparedIn(zero.lines)[0]!.made), /Green Stompy\./);
 
 	// A later version is a position. Replaying the prefix puts the cards back
 	// where they were and leaves the game unfinished.
@@ -204,7 +204,7 @@ test("a game reconstructed from its header deals the cards the original dealt", 
 	// randomness. They shared a counter, so a game rebuilt from a header, which
 	// supplies the names it recorded, never made those draws and every shuffle
 	// after them moved. That path is every replay.
-	const generated = start(standard, [{ deck: deck("Forest") }, { deck: deck("Swamp") }], "streams");
+	const generated = start(standard, [{ deck: deck("Green Stompy") }, { deck: deck("Dimir Control") }], "streams");
 	const rebuilt = start(
 		standard,
 		generated.seats.map((at) => ({ name: at.name, deck: at.deck })),
@@ -235,10 +235,7 @@ test("the stack is one order for the table, not one per seat", () => {
 	// A library and a graveyard are each a seat's own, so two seats can both
 	// hold a top card. The stack has a single top, and what is on it resolves in
 	// one sequence whoever cast it.
-	const table = start(standard, [
-		{ name: "A", deck: ["Forest", "Forest", "Forest"] },
-		{ name: "B", deck: ["Swamp", "Swamp", "Swamp"] },
-	], "stack");
+	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "stack");
 
 	const cast = ["0-0", "1-0", "0-1", "1-1"];
 	for (const what of cast) commit(table, [{ do: "move", what, to: "stack", reason: "cast" }], "cast");

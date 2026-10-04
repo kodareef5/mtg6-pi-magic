@@ -18,7 +18,8 @@ import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 
 import { cast, readRoster, rosterFor, type Crew, type Role } from "../src/context/roles.ts";
 import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
-import { checkDeck, load as loadCards } from "../src/core/cards.ts";
+import { load as loadCards } from "../src/core/cards.ts";
+import { deck } from "../src/core/decks.ts";
 import { open, reopen, replay, save, type Header } from "../src/core/journal.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
@@ -62,7 +63,8 @@ if (a.help) {
   --trace         save exact model requests and replies in a private calls file;
                   checkpoint the journal before each request and print call progress
 
-  One game of basic lands between two model-backed seats. It makes real calls
+  One game of Green Stompy against Red Burn, from decks/collection, between two
+  model-backed seats. It makes real calls
   and costs real money. A forced decision makes no call at all, so the cost is
   the call counts below and not the decision count.`);
 	process.exit(0);
@@ -83,11 +85,8 @@ const parts = cast(rosterFor({ every }), catalogue);
 console.log(readRoster(parts).join("\n"));
 
 const cards = loadCards("cards/standard.tsv");
-const decks = [Array(60).fill("Forest") as string[], Array(60).fill("Swamp") as string[]];
-for (const deck of decks) {
-	const problems = checkDeck(cards, deck, standard);
-	if (problems.length) throw new Error(`Illegal deck: ${problems.join("; ")}`);
-}
+// Two practice decks from the collection; setup registers them against the card universe.
+const decks = [deck("Green Stompy"), deck("Red Burn")];
 
 const inference = {
 	classify: (model: never, request: never, options: never) => runtime.classify(model, request, options),
@@ -96,14 +95,14 @@ const inference = {
 
 const rules = loadRules("rules/cr.tsv");
 const dealt = (saved: Header) =>
-	start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed);
+	start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed, cards);
 
 // --from continues that game. It is the same game, so everything it held comes
 // with it and nothing has to be matched up afterwards.
 const carried = a.from
 	? replay(join(a.out!, `${a.from}.jsonl`), dealt, undefined, { cards, rules })
 	: null;
-const table = carried?.table ?? start(standard, decks.map((deck) => ({ deck })), seed);
+const table = carried?.table ?? start(standard, decks.map((one) => ({ deck: one })), seed, cards);
 const journal = carried
 	? reopen(join(a.out!, `${a.from}.jsonl`), carried.header, carried.table)
 	: open(join(a.out!, `${seed}.jsonl`), {

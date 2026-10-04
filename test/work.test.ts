@@ -1,6 +1,7 @@
 /** Seat equipment invariants across edits, reviews, execution and continuation.
  * Past 150 lines because each invariant includes changed and resumed positions.
  */
+import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -30,7 +31,7 @@ import { planWork } from "../src/context/strategy.ts";
 import { question } from "../src/context/seat.ts";
 
 const make = (steps = standard.steps) => start({ ...standard, steps }, [
-	{ name: "A", deck: Array(60).fill("Forest") }, { name: "B", deck: Array(60).fill("Swamp") },
+	{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") },
 ], "work");
 function seek(table: Table, accepts: (frame: Frame) => boolean): Frame {
 	for (let count = 0; count < 20_000; count++) {
@@ -467,7 +468,7 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 	completedStep(revising, 0, "land");
 	const remaining = { label: "Consider the prepared life change", when: {}, action: { procedure: {
 		source: { zones: ["battlefield"], card: "Forest" }, claim: "An authored life change", basis: "A test of preparation, not a card ruling.",
-		timing: "stack" as const, cost: { tap: true, generic: 0, colors: [] }, instructions: [{ do: "life" as const, who: "self" as const, amount: 1 }], delegate: false,
+		timing: "stack" as const, cost: { tap: true as const }, instructions: [{ do: "life" as const, who: "you", amount: 1 }],
 	} } };
 	editWork(revising, 0, [{ do: "draft.edit", steps: [remaining] }, { do: "plan.request", reason: "Reconsider the remaining instruction." }], "revise");
 	const current = workFrame(revising, 0), before = structuredClone(revising);
@@ -476,7 +477,7 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 		assert.deepEqual(sent.view.work.draft, current.view.work!.draft, "strategy gets the edited draft, including its instructions");
 		assert.deepEqual(sent.view.work.recipes, current.view.work!.recipes);
 		assert.notDeepEqual(sent.view.work.draft.steps, sent.view.work.recipes[0].steps, "the edited draft differs from its starting recipe");
-		return JSON.stringify([{ do: "draft.edit", steps: [{ ...remaining, action: { procedure: { ...remaining.action.procedure, instructions: [{ do: "life", who: "self", amount: 2 }] } } }] },
+		return JSON.stringify([{ do: "draft.edit", steps: [{ ...remaining, action: { procedure: { ...remaining.action.procedure, instructions: [{ do: "life", who: "you", amount: 2 }] } } }] },
 			{ do: "plan.accept", objective: "Continue after the completed land play." }]);
 	} });
 	assert.deepEqual(revising, before, "strategy validates without writing the game or equipment");
@@ -486,5 +487,5 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 	assert.deepEqual(revising.work[0]!.draft!.steps[0], before.work[0]!.draft!.steps[0]);
 	const action = revising.work[0]!.draft!.steps[1]!.action;
 	assert.ok("procedure" in action);
-	assert.deepEqual(action.procedure.instructions, [{ do: "life", who: "self", amount: 2 }]);
+	assert.deepEqual(action.procedure.instructions, [{ do: "life", who: "you", amount: 2 }]);
 });

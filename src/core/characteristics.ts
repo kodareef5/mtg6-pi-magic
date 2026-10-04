@@ -14,7 +14,7 @@ import { load as loadRules, rule, type Rules } from "./rules.ts";
 import { cardsIn, type Note, type Table, type Thing } from "./table.ts";
 import type { Mana } from "./table.ts";
 import type { Modification, Registration } from "./language.ts";
-import { amount, holds, matches, type Scope } from "./selectors.ts";
+import { amount, holds, matches, tableWorld, type Scope, type Seen } from "./selectors.ts";
 
 type Color = Mana["color"];
 export type Traits = {
@@ -84,7 +84,7 @@ export function characteristics(table: Table, object: Thing): Traits | undefined
 	return object.zone === "battlefield" ? walk(table).get(object.id) : base(table, object);
 }
 
-type Effect = { at: number; change: Modification; source?: Thing; applies: (scope: Scope, object: Thing) => boolean; when?: (scope: Scope) => boolean; ability?: Registration };
+type Effect = { at: number; change: Modification; source?: Thing; applies: (scope: Scope, object: Seen) => boolean; when?: (scope: Scope) => boolean; ability?: Registration };
 
 const cache = new WeakMap<Table, { clock: number; size: number; traits: Map<string, Traits> }>();
 /** Every battlefield object's characteristics, walked once per table revision. */
@@ -93,8 +93,8 @@ export function walk(table: Table): Map<string, Traits> {
 	if (cached && cached.clock === table.cursor.clock && cached.size === table.things.size) return cached.traits;
 	const field = cardsIn(table, "battlefield");
 	const now = new Map(field.flatMap((object) => { const traits = base(table, object); return traits ? [[object.id, traits] as const] : []; }));
-	const read = (object: Thing) => object.zone === "battlefield" ? now.get(object.id) : base(table, object);
-	const scope = (source?: Thing): Scope => ({ table, controller: source?.controller ?? 0, ...(source ? { source } : {}), read });
+	const world = tableWorld(table, (object: Seen) => object.zone === "battlefield" ? now.get(object.id) : base(table, object as Thing));
+	const scope = (source?: Thing): Scope => ({ world, controller: source?.controller ?? 0, ...(source ? { source } : {}) });
 
 	const effects: Effect[] = [
 		...field.flatMap((source) => (now.get(source.id)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" ? [{

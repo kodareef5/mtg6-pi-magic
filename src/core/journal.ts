@@ -21,13 +21,15 @@ import type { SeatId } from "./types.ts";
 import type { WorkEntry } from "./work.ts";
 import { advanceDraft } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
+import type { Deck } from "./decks.ts";
 
 export type Header = {
 	/** The game id. Also the directory a published game lives in. */
 	id: string;
 	format: string;
 	seed: string;
-	seats: { id: SeatId; name: string; deck: string[] }[];
+	/** Each seat's registered deck, so a replay registers the same lists. */
+	seats: { id: SeatId; name: string; deck: Deck }[];
 	/**
 	 * The data files this game was played against, with their dates. A set
 	 * release changes oracle text, and a replay against different text is a

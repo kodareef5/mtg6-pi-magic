@@ -16,6 +16,7 @@
  */
 
 import type { Format } from "./format.ts";
+import type { Deck } from "./decks.ts";
 import type { Printed } from "./printed.ts";
 import type { Tap } from "./funding.ts";
 import type { Said } from "./say.ts";
@@ -23,8 +24,10 @@ import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
-import type { Instruction, Procedure } from "./work-language.ts";
-import type { Modification, Registration, TokenSpec } from "./language.ts";
+import type { Instruction, Procedure, Target } from "./language.ts";
+import type { Bound, Chosen } from "./selectors.ts";
+import type { Traits } from "./characteristics.ts";
+import type { Effect, GameEvent, Modification, Registration, TokenSpec } from "./language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -85,34 +88,55 @@ export type Mana = {
 	persists?: boolean;
 };
 
-/** One accepted announcement. Meaning and delegation are frozen at execution. */
+/** One accepted announcement, frozen at execution so replay never infers its meaning again. */
 export type Activation = {
 	source: ObjectRef;
 	controller: SeatId;
 	claim: string;
 	basis: string;
 	timing: Procedure["timing"];
-	spell?: Procedure["spell"];
-	targetRule?: Procedure["target"];
-	target?: ObjectRef | { player: SeatId };
-	cost: NonNullable<Procedure["cost"]>;
+	/** An activation's "only as a sorcery", or a spell's claimed flash. */
+	speed?: Procedure["speed"];
+	/** The cost as it was locked and paid (601.2f-h). */
+	cost: Paid;
 	/** Floating mana spent. */
 	paid: string[];
 	/** Mana abilities activated while paying (601.2g), with their accepted claims. */
 	funding?: Tap[];
+	/** One per target slot, in slot order; "up to" slots may hold none. */
+	targets: Chosen[][];
+	slots: Target[];
 	instructions: Instruction[];
-	delegate: boolean;
+	words?: string[];
+	x?: number;
 };
+/** What was paid besides mana. */
+export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tapped?: ObjectRef[]; sacrificed?: ObjectRef[];
+	exiled?: ObjectRef[]; discarded?: ObjectRef[]; life?: number; counters?: { kind: string; count: number } };
+/**
+ * A resolution in progress. Its remaining program, what it has bound, and the
+ * target slots that were illegal as it began (608.2b) are table state, so a
+ * choice in the middle pauses it with nobody holding priority.
+ */
+export type Resolution = {
+	object: ObjectId;
+	/** "This": the source, or the permanent a resolving spell became. */
+	source: ObjectRef;
+	program: { instruction: Instruction; player?: SeatId }[];
+	bound: Record<string, Bound>;
+	/** Targets illegal as resolution began, by target key (608.2b). */
+	illegal: string[];
+	/** Every target was illegal: nothing resolves (608.2b). */
+	lost?: boolean;
+	/** Picks so far in the current `choose`. */
+	picked: ObjectRef[];
+};
+
 /** Who is attacking whom and who blocks what, from declaration until combat ends (506-511). */
 export type Combat = {
 	attackers: { id: ObjectId; incarnation: number; defending: SeatId }[];
 	blockers: { id: ObjectId; incarnation: number; blocking: ObjectRef[] }[];
 };
-
-/** A resolution can pause for its controller or another player, with no priority. */
-export type Resolution = { object: ObjectId; instruction: number; remaining: number;
-	/** 608.2b: every announced target was illegal as resolution began. */
-	lost?: boolean };
 
 /**
  * The notepad. Public, and it expires on its own; nobody has to remember to
@@ -137,6 +161,13 @@ export type Note = {
 	| { kind: "label"; on: ObjectRef; text: string; change?: Modification }
 	| { kind: "register"; on: ObjectRef; registration: Registration }
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
+	/** "You may play that card": from a turn, while that card stays where it is. */
+	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number }
+	/**
+	 * A delayed trigger (603.7). It belongs to the table, not its source, and its
+	 * refs other than the event's were fixed when it was created.
+	 */
+	| { kind: "delay"; event: GameEvent; effect: Effect; fixed: { source: ObjectRef; targets: Chosen[][]; bound: Record<string, Bound>; x?: number }; once: boolean }
 );
 
 /**
@@ -180,6 +211,8 @@ export type Receipt = {
 	before: Record<ObjectId, Thing>;
 	/** Event-time visibility must not change when the object is revealed later. */
 	after: Record<ObjectId, Thing>;
+	/** How each permanent leaving the battlefield in this group last was: last known information (608.2h). */
+	known?: Record<ObjectId, Traits>;
 };
 
 /** Every decision and its pick. design-ref/archive/CIRCUITRY.md section 11. */
@@ -227,7 +260,8 @@ export type Seat = {
 	 */
 	name: string;
 	/** The deck as card names. Kept so a game replays from the seed. */
-	deck: string[];
+	/** The deck registered for this game. Kept so a game replays from the seed. */
+	deck: Deck;
 	life: number;
 	pool: Mana[];
 	landsPlayed: number;

@@ -19,12 +19,10 @@ import type { Move, Pending } from "./moves.ts";
 import { commit } from "./commit.ts";
 import { cardsIn, playing, type Table, type LedgerRow, type Thing } from "./table.ts";
 import type { Decision } from "./types.ts";
-import { resolving } from "./resolution.ts";
+import { begin as beginResolving, resolving } from "./resolution.ts";
 import { attach } from "./entry.ts";
 import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
-import { targetAvailable } from "./targets.ts";
-import { project } from "./view.ts";
 import { characteristics, has } from "./characteristics.ts";
 
 /**
@@ -158,8 +156,7 @@ function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 		const changes: Change[] = [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
 		const top = cardsIn(table, "stack")[0];
 		// 608.2b. Targets are checked once, as resolution begins.
-		if (id === "pass" && table.cursor.passes + 1 === playing(table).length && top?.ability) changes.push({ do: "resolution", action: "begin", what: top.id,
-			...(targetAvailable(top.ability, { view: project(table, top.ability.controller) }) ? {} : { lost: true }) });
+		if (id === "pass" && table.cursor.passes + 1 === playing(table).length && top?.ability) changes.push(beginResolving(table, top));
 		return changes;
 	}
 	if (p.situation === "turn-based") return [{ do: "turn", action: "complete" }];

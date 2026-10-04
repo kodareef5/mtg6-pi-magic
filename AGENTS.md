@@ -41,6 +41,16 @@ later ruling.
 nothing spent that does not exist. The table can check that a stated cost was
 paid from resources that existed. It cannot know what the cost was.
 
+**Decks are registered.** A deck is a name, a source, and a main deck and
+sideboard as counts of card names; a name identifies one card in the card
+universe. Setup registers each seat's deck for its game: every card must exist
+in the universe, be legal in the format, and be supported, and the counts must
+follow the format (100.2a, 100.4a). A deck that does not register stops the
+game before it begins. Every card in a game comes from a registered deck: the
+main deck becomes the library and the sideboard waits outside the game.
+`decks/collection/` keeps tournament lists and practice decks for tests and
+play; tests build their positions from those decks, never from invented lists.
+
 **Rules legality is offered.** The move list is help, so a player need not know
 the rules and misses nothing. Prepared procedures record the motion and the accepted claim without certifying
 that a card permits it. Raw declarations and objections with remedies remain
@@ -183,7 +193,7 @@ starting life, hand size, singleton and the command zone are fields in a record.
 Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
 
 1. **A game with no cards.** Pass, play a land, untap, draw, mulligan, deck out.
-   **Implemented for basic-land fixtures:** two seats finish by deck out.
+   **Implemented:** two seats finish by deck out.
    Decision discovery is pure, simultaneous losses settle together, and cleanup
    keeps asking until the hand fits. Opening choices, turn obligations and
    priority actions have separate handlers. Views identify the current window;
@@ -374,6 +384,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   work-tools.ts      atomic equipment edits, separate from physical motion
   work-menu.ts       the draft and agenda menus any player can use
   printed.ts         type line, mana cost and power/toughness from the card file
+  decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, frozen on the ledger row
   funding.ts         paying a cost: floating mana and mana abilities while paying
   procedures.ts      one offer path for drafts and default casts, activation terms
@@ -405,7 +416,8 @@ tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
 docs/SYNTAX.md         the syntax, the table's line, and execution semantics
 docs/examples/         worked uses of the syntax by shape, checked against card text
-decks/standard-matchup.json  source lists, legality date, card and rules hashes
+decks/collection/      decks kept for tests and play: tournament lists and practice decks
+decks/standard-matchup.json  the pinned matchup: its two lists, legality date, card and rules hashes
 docs/STANDARD.md       first real opening, observed failures and mechanics inventory
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
