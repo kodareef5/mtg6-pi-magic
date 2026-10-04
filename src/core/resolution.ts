@@ -33,7 +33,7 @@ export function begin(table: Table, object: Thing): Change {
 	const lost = (chosen.length > 0 && illegal.length === chosen.length) || (!!trigger?.check && !holds(scope, trigger.check));
 	const permanent = ability.timing === "spell" && !!characteristics(table, object)?.types.some((type) => PERMANENT.includes(type));
 	return { do: "resolution", action: "begin", what: object.id, source: ability.timing === "spell" ? { id: object.id, incarnation: object.incarnation } : ability.source,
-		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const } }] : []),
+		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const, controller: "you" as const } }] : []),
 			...ability.instructions.map((instruction) => ({ instruction }))], illegal, ...(lost ? { lost: true } : {}),
 		...(trigger?.bound ? { bound: structuredClone(trigger.bound) } : {}), ...(trigger?.may ? { optional: true } : {}) };
 }

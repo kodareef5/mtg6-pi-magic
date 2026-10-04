@@ -361,3 +361,30 @@ test("a cast watch reads the zone the spell was cast from", () => {
 		assert.equal(table.waiting.length, zone === "hand" ? 1 : 0, `cast from the hand: a watch for the ${zone} ${zone === "hand" ? "triggers" : "does not"}`);
 	}
 });
+
+test("a seat may play a card another seat owns when a permission names it, and controls what it plays", () => {
+	const table = matchup("borrowed");
+	const [mountain, claw] = place(table, 1, "exile", "Mountain", "Hired Claw");
+	commit(table, [mountain!, claw!].map((card): Change => ({ do: "note", note: { kind: "permit", by: 0, until: "indefinite", on: { id: card.id, incarnation: card.incarnation }, who: 0, fromTurn: 0 } })), "game-setup");
+	main(table, 0);
+	const play = nextDecision(table)!.options.find((option) => option.id === `land:${mountain!.id}`);
+	assert.ok(play, "Red's Mountain is offered to Green as a land play from exile");
+	apply(table, play.id, "model", "chosen");
+	assert.deepEqual([table.things.get(mountain!.id)!.zone, table.things.get(mountain!.id)!.controller, table.things.get(mountain!.id)!.owner], ["battlefield", 0, 1], "it enters under Green, still Red's card");
+	const cast = nextDecision(table)!.options.find((option) => option.label.includes("Hired Claw"));
+	assert.ok(cast, `Red's Hired Claw is offered to Green: ${nextDecision(table)!.options.map((option) => option.label).join(" | ")}`);
+	apply(table, cast.id, "model", "chosen");
+	assert.equal(table.things.get(claw!.id)!.controller, 0, "Green controls the spell it cast");
+	resolveTop(table);
+	assert.deepEqual([table.things.get(claw!.id)!.zone, table.things.get(claw!.id)!.controller], ["battlefield", 0], "and the creature it becomes");
+});
+
+test("a flash permission reaches a spell without saying it looks at the stack", () => {
+	// Not a printed card: "You may cast creature spells as though they had flash."
+	const table = matchup("flash");
+	establish(table, 0, "Sazh's Chocobo", [{ basis: "You may cast creature spells as though they had flash.", kind: "permit", flash: { types: ["creature"] } }]);
+	place(table, 0, "battlefield", "Forest");
+	place(table, 0, "hand", "Llanowar Elves");
+	main(table, 0, 1, "begin-combat");
+	assert.ok(nextDecision(table)!.options.some((option) => option.label.includes("Llanowar Elves")), "Llanowar Elves can be cast at the beginning of combat");
+});

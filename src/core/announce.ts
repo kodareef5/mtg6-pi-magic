@@ -135,7 +135,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 	const zones = procedure.source.zones ?? [fromHand ? "hand" : "battlefield"];
 	const seen = new Set<string>();
 	const sources = query(procedure.source, frame).filter((source) => (source.card || source.token) && zones.includes(source.zone as never) &&
-		(source.zone === "battlefield" || source.zone === "stack" ? source.controller : source.owner) === frame.seat &&
+		(fromHand || (source.zone === "battlefield" || source.zone === "stack" ? source.controller : source.owner) === frame.seat) &&
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	const offered: ProcedureOption[] = [];
 	for (const source of sources) {

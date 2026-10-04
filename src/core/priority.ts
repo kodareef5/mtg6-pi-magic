@@ -29,7 +29,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 			const note = entering(table, holder, card.card!);
 			moves.push({
 				option: { id: `land:${card.id}`, label: `Play ${card.card}${card.zone === "hand" ? "" : ` from ${card.zone}`}`, objects: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
-				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land" }],
+				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land", controller: holder }],
 				reason: "play-land",
 			});
 		}
@@ -59,7 +59,7 @@ export function defaultCasts(table: Table, holder: SeatId): Move[] {
 	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
 		(card.zone === "hand" ? card.owner === holder : playable(world, holder, card, table.cursor.turn, false)));
 	const sources = [...new Set(castable.map((card) => `${card.zone}|${card.card}`))].sort().map((key) => key.split("|") as ["hand" | "exile" | "graveyard", string]);
-	return sources.flatMap(([zone, name]) => offers({ source: { zones: [zone], controller: "self", card: name }, claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost`,
+	return sources.flatMap(([zone, name]) => offers({ source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name }, claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost`,
 		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
 		const note = entering(table, holder, name);
 		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };

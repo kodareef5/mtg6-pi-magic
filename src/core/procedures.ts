@@ -54,8 +54,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const object = live(table, source);
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
 	const world = tableWorld(table);
-	if (!object || (fromHand && !playable(world, controller, object, table.cursor.turn, activation.timing === "land")) ||
-		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller)
+	// A card is cast or played from hand, or where a permission lets this seat, whoever owns it.
+	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land") :
+		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
 	const traits = characteristics(table, object);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
@@ -110,8 +111,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	}
 
 	const changes: Change[] = [
-		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const }] : []),
-		...(activation.timing === "land" ? [{ do: "move" as const, what: source.id, to: "battlefield" as const, reason: "play-land" as const }] : []),
+		// Whoever casts or plays it controls it, though another seat may own it (110.2, 305.2).
+		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const, controller }] : []),
+		...(activation.timing === "land" ? [{ do: "move" as const, what: source.id, to: "battlefield" as const, reason: "play-land" as const, controller }] : []),
 		...(cost.tap ? [{ do: "tap" as const, what: source.id }] : []),
 		...(cost.tapped ?? []).map((ref) => ({ do: "tap" as const, what: ref.id })),
 		...(cost.sacrificed ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "sacrifice" as const })),
