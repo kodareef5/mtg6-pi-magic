@@ -39,7 +39,8 @@
     "rules": "node tools/rules.ts --verify -o rules/cr.tsv",
     "smoke": "node tools/smoke.ts",
     "matchup": "node tools/matchup.ts",
-    "stats": "node tools/stats.ts"
+    "stats": "node tools/stats.ts",
+    "pregame": "node tools/pregame.ts"
   },
   "dependencies": {
     "ws": "^8.20.0",

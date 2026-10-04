@@ -8,7 +8,7 @@
 import type { Rules } from "../core/rules.ts";
 import type { Frame, SeatId, SeatView, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
-import type { Brief } from "./brief.ts";
+import { say, type Brief } from "./brief.ts";
 import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
 import { planState } from "../core/planning.ts";
@@ -101,10 +101,11 @@ export function focus(
 	// This window's snippet, and a note for each card an option names: the note is wanted where the card is a choice.
 	const brief = context.brief;
 	const named = decision.options.map((option) => `${option.label} ${option.shows ?? ""}`).join("\n");
+	const step = view.window.kind === "turn" ? brief?.steps?.[view.window.step as keyof Brief["steps"]] : undefined;
 	const guidance = [
-		view.window.kind === "opening" ? brief?.opening : brief?.phases?.[view.window.phase]?.[view.window.active === seat ? "own" : "opponent"],
-		...Object.entries(brief?.cards ?? {}).filter(([card]) => named.includes(card)).map(([card, note]) => `${card}: ${note}`),
-	].filter((line): line is string => !!line && line.length > 0);
+		say(view.window.kind === "opening" ? brief?.opening : view.window.kind === "turn" ? step?.[view.window.active === seat ? "own" : "opponent"] : undefined),
+		...Object.entries(brief?.cards ?? {}).filter(([card]) => named.includes(card)).map(([card, note]) => `${card}: ${say(note)}`),
+	].filter((line) => line.length > 0);
 
 	const state = planState(frame);
 	const plan = state && {

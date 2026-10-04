@@ -372,8 +372,31 @@ export function problems<T extends TSchema>(schema: T, value: unknown, limit = 1
 		const params = error.params as Record<string, unknown>;
 		const detail = Array.isArray(params.allowedValues) ? ` (${params.allowedValues.join(", ")})` : Array.isArray(params.requiredProperties) ? ` (${params.requiredProperties.join(", ")})`
 			: typeof params.additionalProperty === "string" ? ` (${params.additionalProperty})` : "";
+		// A key no field allows: say so, and name the fields that do belong there.
+		const parent = path.slice(0, path.lastIndexOf("/")) || "/", key = path.slice(path.lastIndexOf("/") + 1);
+		const text = error.message === "schema is false" ? `${parent} has no field "${key}"; its fields are ${fieldsAt(schema, parent).join(", ") || "fixed"}`
+			: `${path} ${error.message}${detail}`;
 		const depth = path.split("/").length;
-		if ((deepest.get(group)?.depth ?? -1) < depth) deepest.set(group, { path, text: `${path} ${error.message}${detail}`, depth });
+		if ((deepest.get(group)?.depth ?? -1) < depth) deepest.set(group, { path, text, depth });
 	}
-	return [...deepest.values()].slice(0, limit).map((one) => one.text);
+	const found = [...deepest.values()];
+	// "Must not have additional properties" says less than the line naming the field.
+	return found.filter((one) => !(one.text.endsWith("must not have additional properties") && found.some((other) => other !== one && other.path.startsWith(one.path))))
+		.slice(0, limit).map((one) => one.text);
+}
+
+/** The field names a schema allows at a value path, following refs and list items. Empty where it cannot tell. */
+function fieldsAt(schema: TSchema, path: string): string[] {
+	const root = schema as { $defs?: Record<string, unknown>; $ref?: string };
+	const resolve = (node: unknown): Record<string, unknown> | undefined => {
+		const one = node as { $ref?: string } | undefined;
+		return (one?.$ref ? root.$defs?.[one.$ref] : one) as Record<string, unknown> | undefined;
+	};
+	let node = resolve(root);
+	for (const step of path.split("/").filter(Boolean)) {
+		const properties = node?.properties as Record<string, unknown> | undefined;
+		node = resolve(properties?.[step] ?? (/^\d+$/.test(step) ? node?.items : undefined));
+		if (node && "anyOf" in node && !("properties" in node)) return [];
+	}
+	return Object.keys((node?.properties as Record<string, unknown> | undefined) ?? {});
 }

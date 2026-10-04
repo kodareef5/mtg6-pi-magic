@@ -14,13 +14,16 @@ import { seat as seatTable } from "../src/context/sit.ts";
 import { cast, rosterFor } from "../src/context/roles.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { bill } from "../src/context/spend.ts";
+import { load as loadRules } from "../src/core/rules.ts";
 
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
-	turns: { type: "string", default: "40" }, resume: { type: "string" }, version: { type: "string" } } });
+	turns: { type: "string", default: "40" }, resume: { type: "string" }, version: { type: "string" },
+	/** Model patterns for a role this run only, such as gpt-6.1-sol:high. */
+	pregame: { type: "string" }, strategy: { type: "string" } } });
 if (values.version && (!values.resume || !/^\d+$/.test(values.version))) throw new Error("--version needs a journal supplied by --resume and a nonnegative decision count.");
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
-const parts = cast(rosterFor({ every: { pregame: "off", summary: "off" } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") });
+const parts = cast(rosterFor({ every: { summary: "off", ...(values.pregame ? { pregame: values.pregame } : {}), ...(values.strategy ? { strategy: values.strategy } : {}) } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") });
 const inference = { classify: (model: never, request: never, options: never) => runtime.classify(model, request, options),
 	stream: (model: never, request: never, options: never) => runtime.streamSimple(model, request, options) as never };
 
@@ -41,7 +44,7 @@ const observed = traceInference(inference as never, (event) => {
 });
 // The clock starts before seating, so the elapsed time includes the pregame.
 const began = Date.now();
-const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, ...(carried ? { prepared: carried.prepared } : {}) });
+const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) });
 const stop = new Error("Monitor stop");
 const limit = Number(values.turns);
 try {

@@ -74,7 +74,7 @@ const FINDINGS = { conclusions: [{ claim: "Develop the Elves before anything els
 	changesWhen: "the opponent shows removal on turn one", destination: "route" }], unsure: [] };
 const BRIEF = { role: "Beatdown: force the exchange before control stabilizes.", route: "Curve out and pump the biggest creature.", recovery: "Rebuild with Elves.",
 	matchup: "Their removal is sorcery-speed; attack around it.", opening: "Keep two to four lands with a one-drop.",
-	phases: { "precombat-main": { own: "Play a land, then a creature.", opponent: "Hold Veil for a removal spell." } },
+	steps: { "precombat-main": { own: "Play a land, then a creature.", opponent: "Hold Veil for a removal spell." } },
 	cards: { "Snakeskin Veil": "Hold it for their removal, not for a block." }, traps: ["Pumping into an open blocker."] };
 /** Pi's stream as the pregame meets it: each analyst submits findings, the synthesis submits the brief. */
 function pregame(options: { hold?: Promise<void>; fail?: string; brief?: object } = {}) {
@@ -114,7 +114,7 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	assert.equal(tasks.length, 5, "then one synthesis");
 	assert.match(tasks[4]!, /"deck":\{"conclusions"/, "the synthesis reads every analyst's findings");
 	assert.deepEqual({ ...written, seat: undefined, version: undefined, gaps: undefined }, { ...BRIEF, seat: undefined, version: undefined, gaps: undefined });
-	assert.equal(written.version, 2);
+	assert.equal(written.version, 3);
 	assert.deepEqual(written.gaps, []);
 	assert.deepEqual(current({ seat: 0, version: 1, deck: "An older brief." }, 0).gaps, ["The carried brief is an older shape and was not used."]);
 
@@ -180,7 +180,7 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		route: "Green Stompy curves out and pumps its biggest creature.",
 		matchup: "Expect to be behind on everything.",
 		opening: "Keep any seven.",
-		phases: { "precombat-main": { own: "Play a land. There is nothing else.", opponent: "Nothing to do on their main phase." } },
+		steps: { "precombat-main": { own: "Play a land. There is nothing else.", opponent: "Nothing to do on their main phase." } },
 		cards: { Forest: "It taps for green.", "Cavern of Souls": "Name the tribe you cast most." },
 	};
 	const recaps = [{ turn: 1, active: "A", line: "A played a Forest.", from: 0, to: 4 }];

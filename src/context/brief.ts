@@ -22,45 +22,57 @@ import { listed } from "../core/decks.ts";
 import { problems } from "../core/language.ts";
 import { splits } from "../core/odds.ts";
 import { search, term, type Rules } from "../core/rules.ts";
-import type { Phase } from "../core/steps.ts";
+import type { Step } from "../core/steps.ts";
 import type { Seat } from "../core/table.ts";
 import type { SeatId } from "../core/types.ts";
 import type { Lookup, Reasoner, Submission } from "./reason.ts";
 
-const PHASES = ["beginning", "precombat-main", "combat", "postcombat-main", "ending"] as const satisfies readonly Phase[];
+/** The steps a note can be written for: the ones with priority, by the table's own names. */
+const STEPS = ["upkeep", "draw", "precombat-main", "begin-combat", "declare-attackers", "declare-blockers", "combat-damage", "end-of-combat", "postcombat-main", "end"] as const satisfies readonly Step[];
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
+/** A sentence, or a small structure of short sentences: a strong writer organizes a matchup by threat, and that structure is worth keeping. */
+const Note = Type.Union([text, Type.Array(Type.Unknown(), { minItems: 1 }), Type.Record(Type.String(), Type.Unknown())]);
+const Side = object({ own: Type.Optional(Note), opponent: Type.Optional(Note) });
 
 /** Where a brief is read, by field. */
-const BriefSchema = Type.Cyclic({ Side: object({ own: Type.Optional(text), opponent: Type.Optional(text) }), Brief: object({
+const BriefSchema = object({
 	/** Strategy: who must force the exchange at the start, and what changes that. */
-	role: text,
+	role: Note,
 	/** Strategy: the main route to a win, and the route when its key dependency fails. */
-	route: text,
-	recovery: text,
+	route: Note,
+	recovery: Note,
 	/** Strategy: both clocks, the opposing threats and their windows, how to deny them. */
-	matchup: text,
+	matchup: Note,
 	/** The pilot, while it keeps or mulligans and bottoms. */
-	opening: text,
-	/** The pilot, for the phase it is in, on its own turn or the opponent's. */
-	phases: object({ beginning: Type.Optional(Type.Ref("Side")), "precombat-main": Type.Optional(Type.Ref("Side")), combat: Type.Optional(Type.Ref("Side")),
-		"postcombat-main": Type.Optional(Type.Ref("Side")), ending: Type.Optional(Type.Ref("Side")) }),
+	opening: Note,
+	/** The pilot, in that step, on its own turn or the opponent's. Only steps with something to do or avoid. */
+	steps: object(Object.fromEntries(STEPS.map((step) => [step, Type.Optional(Side)])) as Record<(typeof STEPS)[number], ReturnType<typeof Type.Optional<typeof Side>>>),
 	/** The pilot, when an option names the card; strategy always. Only cards with a real choice or trap. */
-	cards: Type.Record(Type.String(), text),
+	cards: Type.Record(Type.String(), Note),
 	/** Strategy: plays that look automatic and are wrong in this matchup. */
-	traps: Type.Array(text),
-}) }, "Brief");
-export type Brief = Static<typeof BriefSchema> & { seat: SeatId; version: 2; gaps: string[] };
+	traps: Note,
+});
+export type Brief = Static<typeof BriefSchema> & { seat: SeatId; version: 3; gaps: string[] };
 
 export const emptyBrief = (seat: SeatId): Brief => ({
-	seat, version: 2, role: "", route: "", recovery: "", matchup: "", opening: "", phases: {}, cards: {}, traps: [], gaps: [],
+	seat, version: 3, role: "", route: "", recovery: "", matchup: "", opening: "", steps: {}, cards: {}, traps: [], gaps: [],
 });
+
+/** A note as the pilot reads it: one line, a structure flattened into "key: value" parts. */
+export function say(note: unknown): string {
+	if (note === undefined || note === null) return "";
+	if (typeof note === "string") return note;
+	if (Array.isArray(note)) return note.map(say).filter(Boolean).join(" ");
+	if (typeof note === "object") return Object.entries(note).map(([key, value]) => `${key}: ${say(value)}`).join(". ");
+	return String(note);
+}
 
 /** A brief carried from a journal written before this shape is not used: reading it would mean guessing its fields. */
 export const current = (made: unknown, seat: SeatId): Brief =>
-	(made as { version?: number })?.version === 2 ? made as Brief : { ...emptyBrief(seat), gaps: ["The carried brief is an older shape and was not used."] };
+	(made as { version?: number })?.version === 3 ? made as Brief : { ...emptyBrief(seat), gaps: ["The carried brief is an older shape and was not used."] };
 
-const DESTINATIONS = ["role", "route", "recovery", "matchup", "opening", "phase", "card", "trap"] as const;
+const DESTINATIONS = ["role", "route", "recovery", "matchup", "opening", "step", "card", "trap"] as const;
 const FindingsSchema = object({
 	conclusions: Type.Array(object({
 		claim: text,
@@ -69,10 +81,10 @@ const FindingsSchema = object({
 		assumptions: Type.Array(text),
 		/** The visible fact that would change it. */
 		changesWhen: text,
-		destination: Type.Union(DESTINATIONS.map((one) => Type.Literal(one))),
+		destination: Type.Enum([...DESTINATIONS]),
 		card: Type.Optional(text),
-		phase: Type.Optional(Type.Union(PHASES.map((one) => Type.Literal(one)))),
-		turn: Type.Optional(Type.Union([Type.Literal("own"), Type.Literal("opponent")])),
+		step: Type.Optional(Type.Enum([...STEPS])),
+		turn: Type.Optional(Type.Enum(["own", "opponent"])),
 	}), { minItems: 1, maxItems: 10 }),
 	/** What the analyst could not settle. */
 	unsure: Type.Array(text),
@@ -121,7 +133,8 @@ const SYSTEM = [
 	"Teach each default with the visible condition that reverses it. Never write a bare slogan such as always save removal.",
 	"Every conclusion gives the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Say what you are unsure of instead of inventing certainty.",
 	"",
-	"You may look a rule or a card up with the tools. Then call submit once with your findings. Nothing you write as text is read.",
+	"Every card's text in both decks is above, so do not look cards up. Look a rule up only when you are unsure of it, at most two lookups,",
+	"then call submit once with your findings. Nothing you write as text is read.",
 ].join("\n");
 
 const QUESTIONS = {
@@ -190,21 +203,25 @@ export async function brief(
 	const results = await Promise.all(Object.entries(QUESTIONS).map(async ([key, question]) => {
 		try {
 			const answer = await reasoners().work(`pregame ${key}`, { system: SYSTEM, user, task: `${question}\nSubmit at most ten conclusions.` },
-				{ submit: findings, lookups: tools, turns: 6 }, ANALYST);
+				{ submit: findings, lookups: tools, turns: 3 }, ANALYST);
 			return { key, findings: answer.value as Findings };
 		} catch (error) { return { key, failed: String(error instanceof Error ? error.message : error) }; }
 	}));
 	const failed = results.flatMap((one) => "failed" in one ? [`${one.key}: ${one.failed}`] : []);
 	if (failed.length === results.length) throw new Error(`Seat ${seat.id} has no brief: every analyst failed. ${failed[0]}`);
 
-	const deck = new Set(Object.keys(seat.deck.main));
+	// Notes may be on either deck's cards; one note may name several, joined by " / ".
+	const known = new Set([seat, ...others].flatMap((one) => [...Object.keys(one.deck.main), ...Object.keys(one.deck.sideboard)]));
+	const names = (key: string) => key.split(" / ").map((name) => name.replace(/\s*\((yours|opponent|theirs)\)$/i, "").trim());
 	const written = submission<Static<typeof BriefSchema>>(BriefSchema, "Submit the seat's brief. Call it once.",
-		(value) => Object.keys(value.cards).filter((name) => !deck.has(name)).map((name) => `cards names ${name}, which is not in your deck`));
+		(value) => Object.keys(value.cards).flatMap((key) => names(key).filter((name) => !known.has(name)).map((name) => `cards names ${name}, which is in neither registered deck`)));
 	const answer = await reasoners().work("pregame synthesis", { system: SYNTHESIS, user, task: [
 		"The analysts' findings, by question:", JSON.stringify(Object.fromEntries(results.map((one) => [one.key, "findings" in one ? one.findings : { failed: one.failed }]))),
 		"", "Write the brief now and submit it.",
 	].join("\n") }, { submit: written }, SYNTHESIZED);
-	return { ...(answer.value as Static<typeof BriefSchema>), seat: seat.id, version: 2, gaps: failed };
+	const made = answer.value as Static<typeof BriefSchema>;
+	const cards = Object.fromEntries(Object.entries(made.cards).flatMap(([key, note]) => names(key).map((name) => [name, note])));
+	return { ...made, cards, seat: seat.id, version: 3, gaps: failed };
 }
 
 /** Output ceilings: an analyst thinks and looks things up; the synthesis writes every field. */
@@ -220,10 +237,11 @@ const SYNTHESIS = [
 	"- route: the main route to a win. recovery: the route when its key dependency fails. Read by the strategist.",
 	"- matchup: both clocks, the opponent's threats with their last answer windows, and how to deny their key cards' conditions. Read by the strategist.",
 	"- opening: the keep, mulligan and bottom policy on the play and on the draw. Read by the pilot while it mulligans.",
-	"- phases: for each phase, a note for your own turn and one for the opponent's, only where there is something to do or avoid. One or two sentences each. Read by the pilot in that window.",
-	"- cards: notes only for cards with a real choice or trap: when to play it, when not to, what to hold it for. Read by the pilot when an option names the card.",
+	"- steps: keyed by these step names only: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end. Each holds own and opponent notes, for your turn and theirs, only where there is something to do or avoid. Read by the pilot in that step.",
+	"- cards: keyed by exact card name, from either deck: notes only for cards with a real choice or trap, such as when to play it, what to hold it for, or how to play around it. Read by the pilot when an option names the card.",
 	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",
 	"Every default comes with the visible condition that reverses it. Name cards and numbers. No preamble.",
+	"Any field may be a sentence or a small structure of short sentences, such as one entry per threat with its answer window.",
 	"",
 	"Call submit once with the brief. Nothing you write as text is read.",
 ].join("\n");
