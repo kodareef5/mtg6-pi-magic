@@ -63,7 +63,7 @@ const SYSTEM = [
 	"- A step is due when its window is open and its if holds. The pilot takes the first due step. When exactly one listed option fits it, the table takes it for you.",
 	"- When no step or branch fits anything listed, the table passes priority for you, and on your turn declares no attackers. Write every land play, spell, attack, block and response you want.",
 	"- may holds standing branches for what may happen: a response on the opponent's turn (if they target my creature, protect it), a block, another way if the first is unavailable. Give each a window and an if.",
-	"- askWhen names visible facts that mean this plan no longer fits, such as a creature the line depends on dying, or lethal damage on the opponent's board. When one holds you are asked again.",
+	"- askWhen names visible facts that mean this plan no longer fits, such as a creature the line depends on dying, or lethal damage on the opponent's board. When one becomes true you are asked again, which costs a whole planning session: name only changes that break the line before your next turn, never routine events such as a trigger resolving or an expected attack. Cover expected events with branches instead.",
 	"- holds names resources the plan keeps, such as mana for a response, with the condition that releases them. An option that spends one is marked for the pilot.",
 	"- packages says what each permanent registers as it enters. Write one for every permanent your plan may put onto the battlefield. Without one it enters with nothing registered: no trigger, no mana ability, no keyword.",
 	"- Cover this turn and the opponent's next turn. You plan again at your next turn, or sooner when a stop holds or the pilot asks for help.",
