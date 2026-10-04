@@ -101,6 +101,14 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 	...(object.traits?.words.length ? { words: object.traits.words } : {}), ...(object.registrations?.length ? { registers: object.registrations.map((one) => one.basis) } : {}),
 }));
 
+/** The shapes the first live plans most often got wrong, and the right one, added to a refusal that shows the mistake. */
+const HINTS: [RegExp, string][] = [
+	[/has no field "at(Least|Most)"/, "atLeast and atMost sit beside amount, not inside it: {\"amount\": {\"count\": {...}}, \"atLeast\": 1}."],
+	[/askWhen\/\d+ has no field "when"/, "A stop has only label and if; it is checked at every decision, so it has no window."],
+	[/when\/step must be equal to one of/, "Leave step out to match every step."],
+];
+const hints = (found: string[]) => HINTS.filter(([pattern]) => found.some((line) => pattern.test(line))).map(([, hint]) => ` ${hint}`).join("");
+
 /** "{1}{R}: ...", "{T}, Sacrifice this: ...": a cost, a colon, an effect. */
 const ACTIVATED = /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/;
 
@@ -144,7 +152,7 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
 		const shape = problems(PlanSchema, args.plan);
-		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.`;
+		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.${hints(shape)}`;
 		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
 		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.` : null;
 	} };

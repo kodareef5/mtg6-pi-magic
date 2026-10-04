@@ -41,17 +41,17 @@ const BriefSchema = object({
 	role: Note,
 	/** Strategy: the main route to a win, and the route when its key dependency fails. */
 	route: Note,
-	recovery: Note,
+	recovery: Type.Optional(Note),
 	/** Strategy: both clocks, the opposing threats and their windows, how to deny them. */
-	matchup: Note,
+	matchup: Type.Optional(Note),
 	/** The pilot, while it keeps or mulligans and bottoms. */
 	opening: Note,
 	/** The pilot, in that step, on its own turn or the opponent's. Only steps with something to do or avoid. */
-	steps: object(Object.fromEntries(STEPS.map((step) => [step, Type.Optional(Side)])) as Record<(typeof STEPS)[number], ReturnType<typeof Type.Optional<typeof Side>>>),
+	steps: Type.Optional(object(Object.fromEntries(STEPS.map((step) => [step, Type.Optional(Side)])) as Record<(typeof STEPS)[number], ReturnType<typeof Type.Optional<typeof Side>>>)),
 	/** The pilot, when an option names the card; strategy always. Only cards with a real choice or trap. */
-	cards: Type.Record(Type.String(), Note),
+	cards: Type.Optional(Type.Record(Type.String(), Note)),
 	/** Strategy: plays that look automatic and are wrong in this matchup. */
-	traps: Note,
+	traps: Type.Optional(Note),
 });
 export type Brief = Static<typeof BriefSchema> & { seat: SeatId; version: 3; gaps: string[] };
 
@@ -214,13 +214,13 @@ export async function brief(
 	const known = new Set([seat, ...others].flatMap((one) => [...Object.keys(one.deck.main), ...Object.keys(one.deck.sideboard)]));
 	const names = (key: string) => key.split(" / ").map((name) => name.replace(/\s*\((yours|opponent|theirs)\)$/i, "").trim());
 	const written = submission<Static<typeof BriefSchema>>(BriefSchema, "Submit the seat's brief. Call it once.",
-		(value) => Object.keys(value.cards).flatMap((key) => names(key).filter((name) => !known.has(name)).map((name) => `cards names ${name}, which is in neither registered deck`)));
+		(value) => Object.keys(value.cards ?? {}).flatMap((key) => names(key).filter((name) => !known.has(name)).map((name) => `cards names ${name}, which is in neither registered deck`)));
 	const answer = await reasoners().work("pregame synthesis", { system: SYNTHESIS, user, task: [
 		"The analysts' findings, by question:", JSON.stringify(Object.fromEntries(results.map((one) => [one.key, "findings" in one ? one.findings : { failed: one.failed }]))),
 		"", "Write the brief now and submit it.",
 	].join("\n") }, { submit: written }, SYNTHESIZED);
 	const made = answer.value as Static<typeof BriefSchema>;
-	const cards = Object.fromEntries(Object.entries(made.cards).flatMap(([key, note]) => names(key).map((name) => [name, note])));
+	const cards = Object.fromEntries(Object.entries(made.cards ?? {}).flatMap(([key, note]) => names(key).map((name) => [name, note])));
 	return { ...made, cards, seat: seat.id, version: 3, gaps: failed };
 }
 
