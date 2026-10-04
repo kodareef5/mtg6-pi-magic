@@ -37,7 +37,6 @@ import {
 import { degraded, report, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { checkDeck, load, type Universe } from "./src/core/cards.ts";
 import { start } from "./src/core/commit.ts";
-import { shippedSupport } from "./src/core/support.ts";
 import { nextDecision } from "./src/core/decisions.ts";
 import { standard } from "./src/core/format.ts";
 import {
@@ -156,7 +155,7 @@ export default function (pi: ExtensionAPI) {
 				path,
 				(saved) => start(standard, saved.seats.map((at) => ({ name: at.name, deck: at.deck })), saved.seed),
 				undefined,
-				{ cards, rules, support: shippedSupport() },
+				{ cards, rules },
 			);
 			if (back.table.outcome) throw new Error(`${from.resume} is finished. Clone it at a version first.`);
 			opened = back.table;
@@ -183,7 +182,6 @@ export default function (pi: ExtensionAPI) {
 				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
 				cards: { path: cards.path, generated: cards.generated },
 				rules: { path: RULES, effective: rules.effective },
-				support: { path: shippedSupport().path, sha256: shippedSupport().sha256 },
 				created: new Date().toISOString(),
 			};
 			journal = openGame(join(GAMES, `${from.seed}.jsonl`), header);

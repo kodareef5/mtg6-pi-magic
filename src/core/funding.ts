@@ -1,7 +1,7 @@
-/** Paying a mana cost (601.2g-h): floating mana, and mana abilities activated during payment.
- * Units group only when every fact this seat can see about them matches, including
- * its own labels and reserves, so a menu never merges two sources the seat could
- * tell apart. Payment is exact; a source that would leave mana floating is not used.
+/** Paying a mana cost from floating mana and from mana abilities activated while paying (601.2g-h).
+ * Sources are grouped only when everything this seat can see about them matches,
+ * including its own labels and reserves. Payment is exact: a source that would
+ * leave mana floating is not used.
  */
 import { select } from "./agenda.ts";
 import { intrinsicMana, isCreature } from "./printed.ts";
@@ -12,7 +12,7 @@ import type { SeenObject } from "./work.ts";
 
 export type Cost = NonNullable<Procedure["cost"]>;
 type Color = Mana["color"];
-/** One mana ability activated while paying. Its claim is the accepted meaning, not a certification. */
+/** One mana ability activated while paying, with the claim it was accepted under. */
 export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true };
 export type Funding = { paid: string[]; taps: Tap[] };
 type Unit = { key: string; id: string; label: string; yields: Color[][]; pool?: Mana; source?: SeenObject; claim?: string; intrinsic?: true };
@@ -26,23 +26,22 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
 ].join("|");
 
 /** Untapped sources this seat could tap for mana now, by printed basic type or accepted interpretation. */
-export function manaSources(frame: Frame, except?: string): Unit[] {
-	const mark = (object: SeenObject) => sameness(frame, object);
+function manaSources(frame: Frame, except?: string): Unit[] {
 	const units = new Map<string, Unit>();
 	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
 		const colors = object.id === except || !object.card ? [] : intrinsicMana(frame.view.printed?.[object.card]);
-		if (colors.length) units.set(object.id, { key: `${mark(object)}|${colors}`, id: object.id, source: object, claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true,
+		if (colors.length) units.set(object.id, { key: `${sameness(frame, object)}|${colors}`, id: object.id, source: object, claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true,
 			label: `tap ${object.card} (${object.id})`, yields: colors.map((color) => [color]) });
 	}
-	const declared = Object.values(frame.view.support ?? {}).flatMap((line) => line.status === "supported" ? line.interpretations : []);
-	for (const { procedure } of declared) {
+	const missing = new Set((frame.view.work?.missing ?? []).map((entry) => entry.card));
+	for (const { procedure } of frame.view.work?.interpretations ?? []) {
 		const terms = procedure.cost;
-		if (procedure.timing !== "mana" || !terms?.tap || terms.generic || terms.colors.length) continue;
+		if (procedure.timing !== "mana" || !terms?.tap || terms.generic || terms.colors.length || missing.has(procedure.source.card!)) continue;
 		if (!procedure.instructions.length || procedure.instructions.some((instruction) => instruction.do !== "mana" || instruction.who !== "self")) continue;
 		const colors = procedure.instructions.flatMap((instruction) => instruction.do === "mana" ? instruction.colors as Color[] : []);
 		for (const object of select(procedure.source, frame)) {
 			if (object.zone !== "battlefield" || object.controller !== frame.seat || object.tapped || object.id === except || sick(frame, object) || units.has(object.id)) continue;
-			units.set(object.id, { key: `${mark(object)}|${colors}`, id: object.id, source: object, claim: procedure.claim,
+			units.set(object.id, { key: `${sameness(frame, object)}|${colors}`, id: object.id, source: object, claim: procedure.claim,
 				label: `tap ${object.card} (${object.id}) for ${colors.join("")}`, yields: [colors] });
 		}
 	}

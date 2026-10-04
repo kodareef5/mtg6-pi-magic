@@ -194,16 +194,14 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
 2. **Spells and activated abilities through prepared procedures.** The first experiment
    binds visible sources, pays tap and unrestricted mana costs, resolves two
    draw/discard abilities in stack order, and clones during a pending discard.
-   Accepted claims and instructions are journaled. **Declared card support:**
-   `cards/support.jsonl` holds each card's accepted meaning as interpretations
-   in the procedure vocabulary, or a todo line naming what it needs. The table
-   offers every supported interpretation at each priority, and pays printed
-   costs by tapping lands and mana abilities during casting (601.2g). A game
-   refuses to begin while a registered card with rules text is unsupported.
-   `npm run support` reports coverage and ranks what the missing cards need;
-   `--write` authors missing lines live. `docs/SUPPORT.md` is the target and
-   the apology list. `npm run matchup` plays the pinned lists live once they
-   are fully supported.
+   Accepted claims and instructions are journaled. Every legal card is
+   assumed supported; `cards/unsupported.txt` lists the ones that are not, and
+   a deck containing one is refused. When a card first appears, strategy writes
+   its interpretations in the procedure vocabulary, using `cards/examples.jsonl`
+   as reference, and the table offers them at every priority. Printed costs are
+   paid by tapping lands and mana abilities during casting (601.2g). Text the
+   vocabulary cannot express is recorded as a gap and the card is not offered.
+   `npm run matchup` plays the pinned lists live and stops at the first gap.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard.
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
@@ -368,10 +366,9 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   work-tools.ts      atomic equipment edits, separate from physical motion
   work-menu.ts       the draft and agenda menus any player can use
   printed.ts         type line, mana cost and power/toughness from the card file
-  support.ts         the declared support registry, and the refusal to begin
-  actions.ts         supported interpretations offered as ordinary actions
+  actions.ts         a seat's interpretations offered as ordinary actions
   funding.ts         paying a cost: floating mana and mana abilities while paying
-  procedures.ts      one offer path for drafts and support, accepted activation terms
+  procedures.ts      one offer path for drafts and interpretations, activation terms
   resolution.ts      remaining instructions and choices before a checkpoint
   pregame.ts           the opening procedure and its choices
   turn.ts, steps.ts    turn obligations, step order, and phase boundaries
@@ -395,9 +392,8 @@ tools/sim.ts           stub for bulk games and counters
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/circuits.ts      offline circuit experiments and a local timeline inspector
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
-tools/support.ts       support coverage, and live authoring of missing lines
-cards/support.jsonl    declared card support, one line per card
-docs/SUPPORT.md        coverage target, how a line is written, the apology list
+cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
+cards/examples.jsonl   accepted interpretations shown to strategy as reference
 decks/standard-matchup.json  source lists, legality date, card and rules hashes
 docs/STANDARD.md       first real opening, observed failures and mechanics inventory
 cards/standard.tsv     5164 cards, committed, every field checked against source
@@ -445,8 +441,8 @@ verify every carried field against the source and refuse to pass on a mismatch.
   announce one creature or player target, and deal literal damage. Creature
   checks read printed power and toughness, not a completed layer walk. Wider
   targets, combat, triggers, replacements, restricted mana and complex costs
-  remain unwritten. 5 of the 41 cards in the pinned lists are playable;
-  `npm run support` ranks what the rest need.
+  remain unwritten. Most cards in the pinned lists need machinery that does
+  not exist yet; `npm run matchup` stops at the first one it meets.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.

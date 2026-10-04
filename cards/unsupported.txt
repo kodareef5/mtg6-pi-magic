@@ -1,0 +1,1 @@
+# Legal cards this engine cannot play yet, one name per line. A deck containing one is refused.

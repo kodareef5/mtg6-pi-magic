@@ -56,13 +56,9 @@ export const StepSchema = object({
 		object({ procedure: ProcedureSchema }),
 	]),
 });
-/** One ability or permission of a named card, reusable at every opportunity. */
+/** One ability of a named card, in procedure terms. */
 export const InterpretationSchema = object({ id: text, procedure: ProcedureSchema });
-/** A declared support line. A game refuses a registered card without a supported one. */
-export const SupportSchema = Type.Union([
-	object({ card: text, status: Type.Literal("supported"), interpretations: Type.Array(InterpretationSchema, { minItems: 1 }), example: Type.Optional(text) }),
-	object({ card: text, status: Type.Literal("todo"), needs: Type.Array(text, { minItems: 1 }), apology: Type.Optional(text) }),
-]);
+
 export const RecipeSchema = object({
 	id: text, label: text, guidance: text, steps: Type.Array(StepSchema, { minItems: 1 }),
 	reserves: Type.Array(object({ object: RefSchema, purpose: text, tapped: Type.Optional(Type.Boolean()) })),
@@ -83,6 +79,9 @@ export const CommandSchema = Type.Union([
 	object({ do: Type.Literal("draft.cancel") }),
 	object({ do: Type.Literal("suggestion.dismiss"), recipe: text }),
 	object({ do: Type.Literal("plan.request"), reason: text }),
+	object({ do: Type.Literal("interpretation.put"), interpretation: InterpretationSchema }),
+	/** Card text the vocabulary cannot express. The card is not offered and the table records a gap. */
+	object({ do: Type.Literal("interpretation.missing"), card: text, text }),
 	object({ do: Type.Literal("plan.accept"), objective: text }),
 ]);
 export const CommandsSchema = Type.Array(CommandSchema, { minItems: 1 });
@@ -95,7 +94,6 @@ export type Recipe = Static<typeof RecipeSchema>;
 export type Instruction = Static<typeof InstructionSchema>;
 export type Procedure = Static<typeof ProcedureSchema>;
 export type Interpretation = Static<typeof InterpretationSchema>;
-export type Support = Static<typeof SupportSchema>;
 export type WorkCommand = Static<typeof CommandSchema>;
 
 /** Shape checking proves neither card meaning nor strategic quality. */

@@ -12,9 +12,14 @@
  *
  * A file filtered to one format is that format's legality set by construction:
  * a card missing from it is not legal, and checkDeck says so by name.
+ *
+ * Every legal card is assumed supported. `cards/unsupported.txt` lists the names
+ * this engine cannot play yet, one per line, and checkDeck refuses a deck that
+ * contains one.
  */
 
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import type { Format } from "./format.ts";
 
@@ -35,6 +40,10 @@ export type Card = {
  * against different text is a different game.
  */
 export type Universe = { path: string; generated: string; cards: Map<string, Card> };
+
+const UNSUPPORTED = join(import.meta.dirname, "..", "..", "cards", "unsupported.txt");
+let listed: Set<string> | undefined;
+export const unsupported = (): Set<string> => (listed ??= new Set(readFileSync(UNSUPPORTED, "utf8").split("\n").map((line) => line.trim()).filter((line) => line && !line.startsWith("#"))));
 
 /** Columns that are not a format. Everything else in the header is one. */
 const FIXED = new Set([
@@ -93,7 +102,7 @@ export function copiesAllowed(universe: Universe, name: string, format: Format):
 }
 
 /** Every problem with a deck, named. An empty list means it may be played. */
-export function checkDeck(universe: Universe, deck: string[], format: Format): string[] {
+export function checkDeck(universe: Universe, deck: string[], format: Format, blocked = unsupported()): string[] {
 	const problems: string[] = [];
 	if (deck.length < format.deck.minSize) {
 		problems.push(`${deck.length} cards, ${format.name} wants at least ${format.deck.minSize}`);
@@ -106,6 +115,7 @@ export function checkDeck(universe: Universe, deck: string[], format: Format): s
 			problems.push(`no card named ${name}`);
 			continue;
 		}
+		if (blocked.has(name)) problems.push(`${name} is not supported yet`);
 		const allowed = copiesAllowed(universe, name, format);
 		if (allowed === 0) problems.push(`${name} is not legal in ${format.name}`);
 		else if (count > allowed) problems.push(`${count} copies of ${name}, ${allowed} allowed`);

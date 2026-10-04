@@ -10,6 +10,8 @@ import type { Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
 import { workContext } from "./packet.ts";
 import type { Universe } from "../core/cards.ts";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 /** The old mechanical planning estimate remains useful for comparing call policies. */
 export function worthPlanning(table: Table): boolean {
@@ -69,6 +71,44 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 	if (tools.some((tool) => !ALLOWED.has(tool.do)) || tools.filter((tool) => tool.do === "plan.accept").length !== 1 || tools.at(-1)?.do !== "plan.accept") {
 		throw new Error("Strategy must use preparation tools and finish with exactly one plan.accept.");
 	}
+	prepareWork(frame, tools);
+	return tools;
+}
+
+const INTERPRET = [
+	"Translate Magic: The Gathering cards into the table's procedure vocabulary for one seat.",
+	"The table offers each interpretation as an action whenever its timing, source, payment and targets allow. The decision model picks among those actions and does not read card text.",
+	"Write one interpretation per ability: casting the card, playing it as a land, and each activated or mana ability. Ids are lowercase card-name-purpose.",
+	"Source is {zones, controller: \"self\", card: exact name}. Use [\"hand\"] for casting and land play and [\"battlefield\"] for a permanent's abilities. Do not use refs.",
+	"Timing spell casts the card. Give spell.speed and spell.destination and omit cost; the table charges the printed mana cost.",
+	"Timing land plays a land and has no cost, target or instructions.",
+	"Timing mana is a mana ability that only adds mana. The table uses it while paying for other actions.",
+	"Timing stack is any other activated ability, with its cost stated.",
+	"Amounts are literals. A permanent spell that does nothing else on resolution has an empty instructions array.",
+	"target is creature, player or creature-or-player. Planeswalker and battle targets are not offered yet.",
+	"The table reads printed type, mana cost, power and toughness from its card file. Copy the card's rules text into basis.",
+	"If any rules text cannot be expressed exactly, use interpretation.missing with the card and that text, and write nothing else for that card. Reminder text in parentheses is not separate text.",
+	"Do not replace text with a simpler effect.",
+	"Every named card needs interpretation.put entries or one interpretation.missing.",
+	"The table checks resources and timing, not whether an interpretation matches its card.",
+	"The examples show accepted interpretations of other cards.",
+	"Return a JSON array of tool commands only, with no markdown. Tool schema:",
+	JSON.stringify(CommandsSchema),
+].join("\n");
+
+let examples: unknown[] | undefined;
+const loadExamples = () => (examples ??= readFileSync(join(import.meta.dirname, "..", "..", "cards", "examples.jsonl"), "utf8").trim().split("\n").map((line) => JSON.parse(line)));
+
+/** Interpretations for this seat's newly visible cards, in one call. */
+export async function interpretCards(frame: Frame, names: string[], context: { cards?: Universe }, reasoner: Reasoner): Promise<WorkCommand[]> {
+	const user = JSON.stringify({ seat: frame.seat, interpret: names, examples: loadExamples(),
+		cards: names.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
+		refused: frame.refused });
+	const tools = commands(JSON.parse(await reasoner.think("card interpretation", { system: INTERPRET, user })));
+	if (tools.some((tool) => tool.do !== "interpretation.put" && tool.do !== "interpretation.missing")) throw new Error("Use only interpretation.put and interpretation.missing.");
+	const covered = new Set(tools.map((tool) => tool.do === "interpretation.put" ? tool.interpretation.procedure.source.card : tool.do === "interpretation.missing" ? tool.card : undefined));
+	const absent = names.filter((name) => !covered.has(name));
+	if (absent.length) throw new Error(`Nothing written for ${absent.join(", ")}.`);
 	prepareWork(frame, tools);
 	return tools;
 }

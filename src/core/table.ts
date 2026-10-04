@@ -23,7 +23,7 @@ import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
-import type { Instruction, Procedure, Support } from "./work-language.ts";
+import type { Instruction, Procedure } from "./work-language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -218,8 +218,6 @@ export type Table = {
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */
 	printed: Record<string, Printed>;
-	/** Declared support lines for registered names. Public, pinned with the registry file. */
-	support: Record<string, Support>;
 	/** In turn order. */
 	seats: Seat[];
 	things: Map<ObjectId, Thing>;

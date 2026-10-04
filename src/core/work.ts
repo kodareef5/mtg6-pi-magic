@@ -1,6 +1,6 @@
 /** Private equipment for a seat. Its revision and history are separate from card motion. */
 import type { Thing } from "./table.ts";
-import type { Recipe, TaskSpec, ObjectRef, DraftStep, WorkCommand } from "./work-language.ts";
+import type { Recipe, TaskSpec, ObjectRef, DraftStep, WorkCommand, Interpretation } from "./work-language.ts";
 
 /** A projected object. `creature` is the printed base read at projection time. */
 export type SeenObject = Omit<Thing, "card"> & { card?: string; creature?: { power: number; toughness: number } };
@@ -32,6 +32,10 @@ export type Workspace = {
 	recipes: Recipe[];
 	labels: { object: ObjectRef; role: string; purpose: string }[];
 	suggested: string[];
+	/** Accepted meaning of this seat's cards, one entry per ability. */
+	interpretations?: Interpretation[];
+	/** Card text the vocabulary could not express. Those cards are not offered. */
+	missing?: { card: string; text: string }[];
 	draft?: Draft;
 	request?: string;
 };

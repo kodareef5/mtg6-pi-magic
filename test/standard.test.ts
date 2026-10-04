@@ -8,10 +8,11 @@ import { test } from "node:test";
 
 import { card, checkDeck, copiesAllowed, load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
-import { basePT, instant, intrinsicMana, manaCost, permanent, plainLand, printedFacts } from "../src/core/printed.ts";
+import { basePT, intrinsicMana, manaCost, plainLand, printedFacts } from "../src/core/printed.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { priorityMoves } from "../src/core/priority.ts";
-import { loadSupport } from "../src/core/support.ts";
+import { checkProcedure } from "../src/core/procedures.ts";
+import type { Procedure } from "../src/core/work-language.ts";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { matchup, expand } from "../tools/matchup-fixture.ts";
@@ -72,7 +73,6 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 	assert.deepEqual(basePT(printed["Mossborn Hydra"]), { power: 0, toughness: 0 }, "its entry counter is text, not a printed fact");
 	assert.equal(basePT(printed["Shock"]), undefined);
 	assert.deepEqual(manaCost(printed["Lightning Strike"]), { tap: false, generic: 1, colors: ["R"] });
-	assert.equal(instant(printed["Shock"]) && !permanent(printed["Shock"]), true);
 
 	const table = start(standard, [{ deck: [...Array(59).fill("Forest"), "Fabled Passage"] }, { deck: Array(60).fill("Mountain") }], "printed");
 	commit(table, [{ do: "move", what: "0-59", to: "hand", reason: "draw" }, { do: "move", what: "0-0", to: "hand", reason: "draw" }], "draw");
@@ -80,7 +80,7 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 	assert.deepEqual(priorityMoves(table, 0).map((move) => move.option.label), ["Pass", "Play Forest"], "Fabled Passage waits for an interpretation");
 	assert.ok(table.printed["Fabled Passage"] && !table.printed["Llanowar Elves"], "a table holds facts for registered names only");
 
-	// A card-name branch in core would be a per-card switch. Comments may name examples.
+	// Core must not branch on a card name. Comments are excluded.
 	const names = new Set(matchup.decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
 	for (const file of readdirSync("src/core").filter((name) => name.endsWith(".ts"))) {
 		const code = readFileSync(join("src/core", file), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
@@ -88,11 +88,14 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 	}
 });
 
-test("the support registry loads, every line checked against the vocabulary", () => {
-	const registry = loadSupport("cards/support.jsonl");
-	for (const [name, line] of registry.cards) {
-		assert.ok(universe.cards.has(name), `${name} is a Standard card`);
-		if (line.status === "todo") assert.ok(line.needs.length);
+test("examples are valid interpretations, and an unsupported card refuses its deck", () => {
+	for (const line of readFileSync("cards/examples.jsonl", "utf8").trim().split("\n")) {
+		const example = JSON.parse(line) as { card: string; interpretations: { procedure: Procedure }[] };
+		assert.ok(universe.cards.has(example.card));
+		for (const { procedure } of example.interpretations) {
+			assert.equal(procedure.source.card, example.card);
+			assert.doesNotThrow(() => checkProcedure(procedure));
+		}
 	}
-	assert.ok([...registry.cards.values()].some((line) => line.status === "supported" && line.example), "examples guide the next lines");
+	assert.deepEqual(checkDeck(universe, [...Array(4).fill("Shock"), ...Array(56).fill("Mountain")], standard, new Set(["Shock"])), ["Shock is not supported yet"]);
 });

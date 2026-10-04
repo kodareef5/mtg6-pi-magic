@@ -1,7 +1,6 @@
-/** Printed characteristics from the pinned card file. Facts, not meaning.
- * Type line, mana cost and power/toughness are structured fields. Core records
- * only whether rules text exists; it never reads that text. Effects that change
- * characteristics, tokens and face-down objects need a characteristics reader.
+/** Type line, mana cost and power/toughness from the pinned card file.
+ * Core records whether a card has rules text but never reads it. Tokens,
+ * face-down objects and effects that change characteristics are not handled here.
  */
 import { join } from "node:path";
 import { load, type Universe } from "./cards.ts";
@@ -11,10 +10,10 @@ export type Printed = { type: string; mana: string; stats: string; text: boolean
 
 const SHIPPED = join(import.meta.dirname, "..", "..", "cards", "standard.tsv");
 let shippedUniverse: Universe | undefined;
-/** The committed Standard file, read once. A journal pins its hash. */
+/** The committed Standard file, read once. */
 export const shipped = (): Universe => (shippedUniverse ??= load(SHIPPED));
 
-/** Reminder text in parentheses explains an ability the type line already grants. */
+/** `text` is false when a card's only text is reminder text, as on a basic land. */
 export function printedFacts(universe: Universe, names: string[]): Record<string, Printed> {
 	return Object.fromEntries([...new Set(names)].sort().flatMap((name) => {
 		const card = universe.cards.get(name);
@@ -26,12 +25,10 @@ const front = (field: string) => field.split(" // ")[0]!.trim();
 
 export const facts = (table: Table, object: Pick<Thing, "card" | "faceDown">): Printed | undefined =>
 	object.card && !object.faceDown ? table.printed[object.card] : undefined;
-export const isLand = (printed?: Printed) => !!printed && /\bLand\b/.test(printed.type.split("—")[0]!);
+const isLand = (printed?: Printed) => !!printed && /\bLand\b/.test(printed.type.split("—")[0]!);
 export const isCreature = (printed?: Printed) => !!printed && /\bCreature\b/.test(printed.type.split("—")[0]!);
-export const permanent = (printed?: Printed) => !!printed && /\b(Artifact|Battle|Creature|Enchantment|Land|Planeswalker)\b/.test(printed.type.split("—")[0]!);
-export const instant = (printed?: Printed) => !!printed && /\bInstant\b/.test(printed.type.split("—")[0]!);
 
-/** Numeric base power and toughness. A star is defined by text, so it has none here. */
+/** Numeric printed power and toughness. A `*` value is undefined here. */
 export function basePT(printed?: Printed): { power: number; toughness: number } | undefined {
 	const match = isCreature(printed) ? printed!.stats.match(/^(-?\d+)\/(-?\d+)$/) : null;
 	return match ? { power: Number(match[1]), toughness: Number(match[2]) } : undefined;
@@ -53,12 +50,12 @@ export function manaCost(printed?: Printed): { tap: false; generic: number; colo
 }
 
 const BASIC: Record<string, Mana["color"]> = { Plains: "W", Island: "U", Swamp: "B", Mountain: "R", Forest: "G" };
-/** 305.6: a land with a basic land type taps for that color. Read from the subtype list. */
+/** 305.6: a land with a basic land type taps for that type's color. */
 export function intrinsicMana(printed?: Printed): Mana["color"][] {
 	if (!isLand(printed)) return [];
 	const subtypes = printed!.type.split("—")[1]?.trim().split(/\s+/) ?? [];
 	return subtypes.flatMap((subtype) => BASIC[subtype] ? [BASIC[subtype]] : []);
 }
 
-/** Playable without an accepted interpretation: a land whose printed facts are complete. */
+/** A land with no rules text, playable without an interpretation. */
 export const plainLand = (printed?: Printed) => isLand(printed) && !printed!.text;

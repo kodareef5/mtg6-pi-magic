@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Play the pinned Standard matchup live through Pi, from ordinary setup, unscripted.
- * Seating refuses while any registered card is unsupported; `npm run support`
- * reports which. The run stops at an outcome, the first engine gap, or --turns.
+ * Strategy interprets each card when it first appears. The run stops at an
+ * outcome, the first gap, or --turns.
  */
 import { mkdirSync, appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -14,7 +14,6 @@ import { seat as seatTable } from "../src/context/sit.ts";
 import { cast, rosterFor } from "../src/context/roles.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { bill } from "../src/context/spend.ts";
-import { shippedSupport } from "../src/core/support.ts";
 
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
 	turns: { type: "string", default: "40" }, resume: { type: "string" }, version: { type: "string" } } });
@@ -27,14 +26,14 @@ const inference = { classify: (model: never, request: never, options: never) => 
 
 const from = values.resume ? { path: values.resume, ...(values.version ? { version: Number(values.version) } : {}) } : undefined;
 const carried = from && replay(from.path, (header) => matchTable(header.seed), from.version,
-	{ cards: matchup.cards, rules: matchup.rules, support: shippedSupport() });
+	{ cards: matchup.cards, rules: matchup.rules });
 const table = carried ? carried.table : matchTable(values.seed!);
 const id = `${table.rng.seed}-${Date.now()}`;
 mkdirSync(values.out!, { recursive: true });
 const path = join(values.out!, `${id}.jsonl`), calls = join(values.out!, `${id}.calls.jsonl`);
 const journal = from ? reopen(path, fork(from.path, from.version ?? table.ledger.length, id, path), table)
 	: open(path, { id, format: "standard", seed: table.rng.seed, seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })),
-		cards: matchup.cards, rules: matchup.rules, support: { path: shippedSupport().path, sha256: shippedSupport().sha256 }, created: new Date().toISOString() });
+		cards: matchup.cards, rules: matchup.rules, created: new Date().toISOString() });
 writeFileSync(calls, "", { flag: "wx", mode: 0o600 });
 const observed = traceInference(inference as never, (event) => {
 	if (event.event === "request") save(journal, table);

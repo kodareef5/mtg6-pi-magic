@@ -9,7 +9,6 @@ import type { Phase, Step } from "./steps.ts";
 import type { SeenObject, Workspace } from "./work.ts";
 import type { Mana, Resolution } from "./table.ts";
 import type { Printed } from "./printed.ts";
-import type { Support } from "./work-language.ts";
 
 export type SeatId = number;
 export type ObjectRef = { id: string; incarnation: number };
@@ -78,8 +77,6 @@ export type SeatView = {
 	landsPlayed?: number;
 	/** Printed facts for the names of visible objects. Public, from the pinned card file. */
 	printed?: Record<string, Printed>;
-	/** Declared support lines for the names of visible objects. Public. */
-	support?: Record<string, Support>;
 	window: Window;
 	/** Public facts, one line each, same order every time so two frames diff. */
 	table: string[];

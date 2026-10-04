@@ -15,15 +15,13 @@ legality at the pinned date, not correctness of any gameplay interpretation.
 ## Run the matchup
 
 ```
-npm run support
 npm run matchup
 ```
 
 `npm run matchup` plays both lists live through Pi from ordinary setup, with no
-scripted line, and stops at an outcome, the first engine gap, or `--turns`.
-Seating refuses while any registered card is unsupported, so today it stops
-before the first decision and names the cards. `npm run support` shows the
-coverage and what the missing cards need; `docs/SUPPORT.md` is the target.
+scripted line, and stops at an outcome, the first gap, or `--turns`. Strategy
+interprets each card when it first appears. A card whose text the vocabulary
+cannot express yet is recorded as a gap, which stops the run.
 
 An earlier version of this tool scripted Forest, Llanowar Elves, Mountain and
 Shock as a prescribed probe, with an authored offline mode. Both are gone: the

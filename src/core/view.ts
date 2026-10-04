@@ -123,8 +123,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	if (table.resolution) lines.push(`Resolving ${table.resolution.object}, instruction ${table.resolution.instruction + 1}. Nobody has priority during this choice.`);
 	const names = [...new Set(objects.flatMap((object) => "card" in object && object.card ? [object.card] : []))].sort();
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], landsPlayed: seat(table, viewer).landsPlayed } : {}),
-		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])),
-		support: Object.fromEntries(names.flatMap((name) => table.support[name] ? [[name, table.support[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
+		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
 		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id,
 			cards: Object.fromEntries([...new Set(deck)].sort().map((name) => [name, deck.filter((card) => card === name).length])),
 		})) } : {}),

@@ -14,11 +14,10 @@ import { commit, start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
-import { prepareWork, workFrame } from "../src/core/work-tools.ts";
+import { editWork, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { workMenu } from "../src/core/work-menu.ts";
 import { refuseExecution } from "../src/core/draft.ts";
 import { fork, open, read, relive, replay, save, linesOf, type Header } from "../src/core/journal.ts";
-import { refuseUnsupported } from "../src/core/support.ts";
 import { play } from "../src/core/loop.ts";
 import type { Procedure } from "../src/core/work-language.ts";
 import type { Mana } from "../src/core/table.ts";
@@ -117,7 +116,7 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 	commit(twins, ["0-0", "0-1"].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
 	const frame = workFrame(position(twins), 0);
 	frame.view.pools = [{ seat: 0, mana: [{ id: "green", color: "G", persists: true }, { id: "blue", color: "U" }] }];
-	// Two Merchants differ to this seat only once its own label sets one apart; identical objects are one source.
+	// Label one Merchant so the two are distinct sources.
 	const held = frame.view.objects!.find((object) => object.id === "0-0")!;
 	frame.view.work = prepareWork(frame, [{ do: "recipe.put", recipe: { id: "payments", label: "Choose payment", guidance: "Preserve green mana.", reserves: [], steps: draft(lootProcedure()).steps } }, { do: "draft.start", recipe: "payments" },
 		{ do: "label.put", object: { id: held.id, incarnation: held.incarnation }, role: "blocker", purpose: "Hold back to block." }]);
@@ -362,21 +361,26 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 
 });
 
-test("declared support offers ordinary actions, pays through lands and mana abilities, and replays", () => {
+test("interpretations are offered as ordinary actions, paid through lands and mana abilities, and replayed", () => {
 	const decks = [{ name: "Green", deck: [...Array(4).fill("Llanowar Elves"), ...Array(56).fill("Forest")] },
 		{ name: "Red", deck: [...Array(4).fill("Lightning Strike"), ...Array(4).fill("Shock"), ...Array(52).fill("Mountain")] }];
-	// Known cards in hand, the way a benchmark stacks a deck. Replay rebuilds the same table.
+	// Lightning Strike uses only existing vocabulary.
+	const strikeProcedure: Procedure = { ...shock, source: { ...shock.source, card: "Lightning Strike" }, claim: "Cast Lightning Strike",
+		basis: "Lightning Strike deals 3 damage to any target.", instructions: [{ do: "damage", amount: 3 }] };
+	const mana = (examples: string) => JSON.parse(readFileSync("cards/examples.jsonl", "utf8").trim().split("\n").find((line) => line.includes(examples))!).interpretations;
+	// Known cards in hand and recorded interpretations, so replay can rebuild this table.
 	const dealt = () => {
 		const fresh = start(standard, decks, "declared-support");
 		for (const [seat, card] of [[0, "Llanowar Elves"], [0, "Llanowar Elves"], [1, "Shock"], [1, "Lightning Strike"]] as const) {
 			const object = cardsIn(fresh, "library", seat).find((one) => one.card === card)!;
 			commit(fresh, [{ do: "move", what: object.id, to: "hand", reason: "draw" }], "draw");
 		}
+		editWork(fresh, 0, mana("Llanowar Elves").map((interpretation: unknown) => ({ do: "interpretation.put", interpretation })), "interpret-0");
+		editWork(fresh, 1, [{ do: "interpretation.put", interpretation: { id: "shock-cast", procedure: shock } },
+			{ do: "interpretation.put", interpretation: { id: "lightning-strike-cast", procedure: strikeProcedure } }], "interpret-1");
 		return fresh;
 	};
 	const table = dealt();
-	assert.doesNotThrow(() => refuseUnsupported(table), "every registered card has a supported line or no rules text");
-	assert.throws(() => refuseUnsupported(matchTable("real-standard-9")), /cannot begin: .*Sazh's Chocobo \(needs/);
 	const reach = (seat: number, turn: number) => {
 		for (;;) {
 			const decision = nextDecision(table);
@@ -423,6 +427,8 @@ test("declared support offers ordinary actions, pays through lands and mana abil
 	assert.equal(table.things.size, 120);
 
 	const rebuilt = relive(dealt(), table.ledger);
+	assert.deepEqual(project(table, 1).work?.interpretations?.map(({ id }) => id), ["shock-cast", "lightning-strike-cast"]);
+	assert.equal(project(table, 1).work?.interpretations?.some(({ id }) => id.startsWith("llanowar")), false, "interpretations are private equipment");
 	assert.deepEqual(rebuilt.log, table.log, "declared casts replay from their recorded activations, change for change");
 	assert.deepEqual([...rebuilt.things], [...table.things]);
 });
