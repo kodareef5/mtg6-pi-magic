@@ -12,7 +12,7 @@
  */
 
 import { applyDeclared, begin, nextOpening, mulligansSettled } from "./pregame.ts";
-import { priorityMoves, legal } from "./priority.ts";
+import { priorityMoves, defaultCasts, legal } from "./priority.ts";
 import { advanceTurn, turnBased } from "./turn.ts";
 import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
@@ -20,7 +20,8 @@ import { commit } from "./commit.ts";
 import { cardsIn, playing, type Table, type LedgerRow } from "./table.ts";
 import type { Decision } from "./types.ts";
 import { resolving } from "./resolution.ts";
-import { interpretedMoves } from "./actions.ts";
+import { attach } from "./entry.ts";
+import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
 import { targetAvailable } from "./targets.ts";
 import { project } from "./view.ts";
@@ -76,7 +77,7 @@ function pending(table: Table): Pending | null {
 			seat: holder,
 			question: "You have priority.",
 			fallback: "pass",
-			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...interpretedMoves(table, holder)],
+			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, holder)],
 		};
 	}
 
@@ -102,6 +103,8 @@ export function apply(
 	by: "engine" | "model" | "judge",
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 	execution?: LedgerRow["execution"],
+	/** On replay, what the recorded row says entering permanents registered. */
+	registered?: Record<string, Registration[]>,
 ): void {
 	const p = pending(table);
 	if (p === null) throw new Error("apply was called with nothing pending");
@@ -111,7 +114,7 @@ export function apply(
 			`No option ${optionId}. Offered: ${p.moves.map((m) => m.option.id).join(", ")}`,
 		);
 	}
-	take(table, p, move, by, why, execution);
+	take(table, p, move, by, why, execution, registered);
 }
 
 /** Commit one move and write its ledger row. The only path from a pick to the table. */
@@ -122,11 +125,14 @@ function take(
 	by: "engine" | "model" | "judge",
 	why: "forced" | "delegated" | "chosen" | "declared" | "fallback",
 	execution?: LedgerRow["execution"],
+	registered?: Record<string, Registration[]>,
 ): void {
 	if (move.activation) {
-		activate(table, move.activation, { picked: move.option.id, offered: p.moves.map((candidate) => candidate.option.id), by, why, ...(execution ? { execution } : {}) });
+		activate(table, move.activation, { picked: move.option.id, offered: p.moves.map((candidate) => candidate.option.id), by, why, ...(execution ? { execution } : {}) }, registered);
 		return;
 	}
+	const changes = [...move.changes, ...bookkeeping(table, p, move)];
+	const entered = attach(table, changes, registered);
 	// The row goes in first, so every group this decision commits is stamped with
 	// a version that includes the decision that caused it. Nothing in `commit`
 	// reads the ledger, so the order costs nothing else.
@@ -140,8 +146,9 @@ function take(
 		picked: move.option.id,
 		by,
 		why,
+		...(Object.keys(entered).length ? { registered: entered } : {}),
 	});
-	commit(table, [...move.changes, ...bookkeeping(table, p, move)], move.reason);
+	commit(table, changes, move.reason);
 }
 
 /** A listed action and its bookkeeping are one committed event. */

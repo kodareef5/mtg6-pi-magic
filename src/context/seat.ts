@@ -18,8 +18,7 @@ import { focus, type Chronicle, type Packet } from "./packet.ts";
 import { answerReview } from "./review.ts";
 import type { WorkCommand } from "../core/work-language.ts";
 import { pendingReviews } from "../core/agenda.ts";
-import { workMenu } from "../core/work-menu.ts";
-import { uninterpreted } from "../core/actions.ts";
+import { workMenu, planReason } from "../core/work-menu.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -54,8 +53,6 @@ export type AiSeatOptions = {
 	onAsk?(packet: Packet): void;
 	/** Called only when private equipment explicitly requests fresh thought. */
 	plan?(frame: Frame): Promise<WorkCommand[]>;
-	/** Called for this seat's visible cards that have rules text and no interpretation. */
-	interpret?(frame: Frame, names: string[]): Promise<WorkCommand[]>;
 };
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
@@ -164,24 +161,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const budget = options.dials ?? 2;
 			if (navigation?.version !== frame.version) navigation = { version: frame.version, learned: [], walked: [] };
 			const { learned, walked } = navigation;
-			// A card is offered once it has an interpretation. A failed call is a
-			// gap recorded against those cards, never a pass. With strategy off,
-			// nothing is interpreted and only drafts and lands are offered.
-			const unread = frame.decision.situation === "priority" && options.interpret ? uninterpreted(frame) : [];
-			if (unread.length) {
-				const revision = frame.view.work?.revision ?? 0;
-				let tools: WorkCommand[];
-				try {
-					tools = await options.interpret!(frame, unread);
-				} catch (error) {
-					tools = unread.map((card) => ({ do: "interpretation.missing", card, text: `Interpretation failed: ${String(error)}` }));
-				}
-				for (const tool of tools) if (tool.do === "interpretation.missing") options.onGap(`${options.name}: ${tool.card} is not playable. ${tool.text}`);
-				return { kind: "work", tools, revision, actionId: `${options.name}-${frame.version}-${revision}-interpret-${++asked}` };
-			}
-			if (frame.view.work?.request && frame.decision.situation === "priority") {
-				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${frame.view.work.request}`);
-				return { kind: "work", tools: await options.plan(frame), revision: frame.view.work.revision, actionId: `${options.name}-${frame.version}-${frame.view.work.revision}-plan-${++asked}` };
+			const reason = frame.decision.situation === "priority" ? planReason(frame) : undefined;
+			if (reason) {
+				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
+				return { kind: "work", tools: await options.plan(frame), revision: frame.view.work!.revision, actionId: `${options.name}-${frame.version}-${frame.view.work!.revision}-plan-${++asked}` };
 			}
 
 			for (;;) {

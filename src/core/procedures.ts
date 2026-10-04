@@ -1,5 +1,5 @@
 /** Prepared spells, lands and activations. The claim supplies meaning; the table checks resources.
- * One offer path serves a draft step and an accepted interpretation alike.
+ * One offer path serves a draft step and the table's default casts alike.
  * Preparation reads a projection. Execution checks it again before one physical commit.
  * Past 150 lines because offering and checking the same announcement belong together.
  */
@@ -9,7 +9,8 @@ import { ProcedureSchema, type Instruction, type Procedure } from "./work-langua
 import { select } from "./agenda.ts";
 import { project } from "./view.ts";
 import { commit } from "./commit.ts";
-import { fundings, covers, sameness, type Cost } from "./funding.ts";
+import { attach } from "./entry.ts";
+import { fundings, covers, sameness, produces, type Cost } from "./funding.ts";
 import { facts, intrinsicMana, isCreature, manaCost } from "./printed.ts";
 import { seat, thing, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, Option } from "./types.ts";
@@ -123,6 +124,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		if (!object || object.zone !== "battlefield" || object.controller !== controller || object.tapped || sick(object.id)) throw new Error("A mana source in the payment is unavailable.");
 		const intrinsic = intrinsicMana(facts(table, thing(table, object.id)));
 		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic.includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
+		const registered = (thing(table, object.id).registrations ?? []).flatMap(produces);
+		if (!tap.intrinsic && !registered.some((one) => one.colors.join() === tap.colors.join())) throw new Error("The source has no registered mana ability that makes that mana.");
 	}
 	if (new Set(paid).size !== paid.length || tapped.size !== (cost.tap ? 1 : 0) + funding.length || payment.some((mana) => !mana || mana.spendOnly) ||
 		!covers([...payment.map((mana) => mana?.color as Mana["color"]), ...funding.flatMap((tap) => tap.colors)], cost)) {
@@ -157,9 +160,11 @@ export function recipient(table: Table, controller: number, who: "self" | "oppon
 }
 
 /** One announced activation is one recorded decision, including its accepted meaning. */
-export function activate(table: Table, activation: Activation, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">): void {
+export function activate(table: Table, activation: Activation, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">,
+	registered?: LedgerRow["registered"]): void {
 	const changes = activationChanges(table, activation);
+	const entered = attach(table, changes, registered);
 	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: activation.controller,
-		...structuredClone(choice), activation: structuredClone(activation) });
+		...structuredClone(choice), activation: structuredClone(activation), ...(Object.keys(entered).length ? { registered: entered } : {}) });
 	commit(table, changes, activation.timing === "spell" ? "cast" : activation.timing === "land" ? "play-land" : "activate");
 }

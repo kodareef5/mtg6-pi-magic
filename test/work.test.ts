@@ -185,6 +185,18 @@ test("due attention is consulted before automatic passes and cannot become fallb
 	assert.equal(await play(spinning, { 0: spinner, 1: spinner }, {}), null);
 	assert.equal(edits, spent, "resuming does not discard already accepted edits at this version");
 
+	// A seat that plans each turn is asked for that plan after drawing, even when pass is all the table lists.
+	const planning = make();
+	seek(planning, (frame) => frame.seat === 0 && frame.view.window.kind === "turn" && frame.view.window.turn === 1 && frame.view.window.step === "upkeep");
+	editWork(planning, 0, [{ do: "plan.each-turn" }, { do: "plan.accept", objective: "Turn one." }], "planned");
+	const nextDraw = seek(planning, (frame) => frame.seat === 0 && frame.view.window.kind === "turn" && frame.view.window.turn === 3 && frame.view.window.step === "draw" && frame.decision?.situation === "priority");
+	assert.deepEqual(nextDraw.decision!.options.map((option) => option.id), ["pass"]);
+	assert.ok(needsAttention(nextDraw), "the turn's plan is due before an automatic pass");
+	editWork(planning, 0, [{ do: "plan.accept", objective: "Turn three." }], "replanned");
+	assert.equal(needsAttention(workFrame(planning, 0)), false, "one plan per turn");
+	const opponentsTurn = seek(planning, (frame) => frame.seat === 0 && frame.view.window.kind === "turn" && frame.view.window.turn === 4);
+	assert.equal(needsAttention(opponentsTurn), false, "the opponent's turn is covered by this seat's own plan");
+
 	const table = make();
 	const at = seek(table, (frame) => frame.seat === 0 && frame.view.window.kind === "turn" && frame.view.window.step === "upkeep");
 	editWork(table, 0, [{ do: "task.put", task: { ...task(), when: { active: "self", step: "upkeep" }, scope: { zones: [] }, concepts: ["future resources"], times: 1 } }], "setup");
@@ -412,9 +424,21 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 	assert.equal(prompts.length, 0, "seating did not spend strategy before a priority opportunity");
 	assert.ok(await run(table, seated, inference, undefined));
 	assert.equal(table.gaps.length, 0);
-	assert.equal(prompts.length, 2, "one opening preparation per seat, none per ordinary phase");
+	// One opening preparation per seat, then one per turn of its own after drawing, and none per phase.
+	const sessions = prompts.map((prompt) => JSON.parse(prompt.user) as { seat: number; view: { window: { turn: number; active: number; step: string } } });
+	const turns = table.cursor.turn;
+	for (const seat of [0, 1]) {
+		const own = sessions.filter((session) => session.seat === seat && session.view.window.active === seat);
+		assert.deepEqual(own.map((session) => session.view.window.turn), [...new Set(own.map((session) => session.view.window.turn))], "at most one plan per own turn");
+		assert.ok(own.every((session) => session.view.window.step !== "upkeep" || session.view.window.turn === 1), "a turn's plan waits for the draw");
+		const expected = Array.from({ length: turns }, (_, index) => index + 1).filter((turn) => (turn - 1) % 2 === seat);
+		const planned = own.map((session) => session.view.window.turn);
+		// The losing draw ends the last turn before anyone gets priority.
+		assert.ok([expected, expected.slice(0, -1)].some((each) => JSON.stringify(each) === JSON.stringify(planned)), `every own turn is planned: ${planned} of ${expected}`);
+	}
+	assert.equal(sessions.filter((session) => session.view.window.active !== session.seat).length, 1, "the only plan on another seat's turn is the opening request");
 	assert.ok(prompts.every((prompt) => prompt.ceiling === CEILING.strategy));
-	assert.equal(seated.tally.spent().filter((spend) => spend.role === "strategy").length, 2);
+	assert.equal(seated.tally.spent().filter((spend) => spend.role === "strategy").length, prompts.length);
 	for (const prompt of prompts) {
 		const sent = JSON.parse(prompt.user);
 		assert.ok(sent.view.objects.every((object: { zone: string; owner: number }) => object.zone !== "library" && (object.zone !== "hand" || object.owner === sent.seat)));

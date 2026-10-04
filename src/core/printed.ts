@@ -25,7 +25,7 @@ const front = (field: string) => field.split(" // ")[0]!.trim();
 
 export const facts = (table: Table, object: Pick<Thing, "card" | "faceDown">): Printed | undefined =>
 	object.card && !object.faceDown ? table.printed[object.card] : undefined;
-const isLand = (printed?: Printed) => !!printed && /\bLand\b/.test(printed.type.split("—")[0]!);
+export const isLand = (printed?: Printed) => !!printed && /\bLand\b/.test(printed.type.split("—")[0]!);
 export const isCreature = (printed?: Printed) => !!printed && /\bCreature\b/.test(printed.type.split("—")[0]!);
 
 /** Numeric printed power and toughness. A `*` value is undefined here. */
@@ -57,5 +57,6 @@ export function intrinsicMana(printed?: Printed): Mana["color"][] {
 	return subtypes.flatMap((subtype) => BASIC[subtype] ? [BASIC[subtype]] : []);
 }
 
-/** A land with no rules text, playable without an interpretation. */
-export const plainLand = (printed?: Printed) => isLand(printed) && !printed!.text;
+/** A permanent spell other than an Aura, with a cost of generic and colored symbols only. */
+export const permanentSpell = (printed?: Printed) => !!printed && !isLand(printed) && !!manaCost(printed) &&
+	/\b(Artifact|Battle|Creature|Enchantment|Planeswalker)\b/.test(printed.type.split("—")[0]!) && !/\bAura\b/.test(printed.type.split("—")[1] ?? "");

@@ -27,7 +27,12 @@ import { aiSeat } from "../src/context/seat.ts";
 import { decisionApi, type Classify } from "../src/context/model.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { focus, type Packet } from "../src/context/packet.ts";
-import { matchTable, elf, shock } from "../tools/matchup-fixture.ts";
+import { matchTable } from "../tools/matchup-fixture.ts";
+
+const elf: Procedure = { source: { zones: ["hand"], controller: "self", card: "Llanowar Elves" }, claim: "Cast Llanowar Elves", basis: "Creature — Elf Druid 1/1.",
+	timing: "spell", spell: { speed: "sorcery", destination: "battlefield" }, instructions: [], delegate: true };
+const shock: Procedure = { source: { zones: ["hand"], controller: "self", card: "Shock" }, claim: "Cast Shock", basis: "Shock deals 2 damage to any target.",
+	timing: "spell", spell: { speed: "instant", destination: "graveyard" }, target: "creature-or-player", instructions: [{ do: "damage", amount: 2 }], delegate: true };
 
 function position(table = abilityTable()) {
 	for (;;) {
@@ -361,23 +366,15 @@ test("a journal preserves accepted instructions and a clone resumes after the dr
 
 });
 
-test("interpretations are offered as ordinary actions, paid through lands and mana abilities, and replayed", () => {
-	const decks = [{ name: "Green", deck: [...Array(4).fill("Llanowar Elves"), ...Array(56).fill("Forest")] },
-		{ name: "Red", deck: [...Array(4).fill("Lightning Strike"), ...Array(4).fill("Shock"), ...Array(52).fill("Mountain")] }];
-	// Lightning Strike uses only existing vocabulary.
-	const strikeProcedure: Procedure = { ...shock, source: { ...shock.source, card: "Lightning Strike" }, claim: "Cast Lightning Strike",
-		basis: "Lightning Strike deals 3 damage to any target.", instructions: [{ do: "damage", amount: 3 }] };
-	const mana = (examples: string) => JSON.parse(readFileSync("cards/examples.jsonl", "utf8").trim().split("\n").find((line) => line.includes(examples))!).interpretations;
-	// Known cards in hand and recorded interpretations, so replay can rebuild this table.
+test("permanents are cast for their printed cost, register their seat's package as they enter, and replay from the frozen row", () => {
+	const decks = [{ name: "Green", deck: [...Array(4).fill("Llanowar Elves"), ...Array(4).fill("Bear Cub"), ...Array(52).fill("Forest")] },
+		{ name: "Red", deck: Array(60).fill("Mountain") }];
 	const dealt = () => {
-		const fresh = start(standard, decks, "declared-support");
-		for (const [seat, card] of [[0, "Llanowar Elves"], [0, "Llanowar Elves"], [1, "Shock"], [1, "Lightning Strike"]] as const) {
-			const object = cardsIn(fresh, "library", seat).find((one) => one.card === card)!;
+		const fresh = start(standard, decks, "default-casts");
+		for (const card of ["Llanowar Elves", "Bear Cub"]) {
+			const object = cardsIn(fresh, "library", 0).find((one) => one.card === card)!;
 			commit(fresh, [{ do: "move", what: object.id, to: "hand", reason: "draw" }], "draw");
 		}
-		editWork(fresh, 0, mana("Llanowar Elves").map((interpretation: unknown) => ({ do: "interpretation.put", interpretation })), "interpret-0");
-		editWork(fresh, 1, [{ do: "interpretation.put", interpretation: { id: "shock-cast", procedure: shock } },
-			{ do: "interpretation.put", interpretation: { id: "lightning-strike-cast", procedure: strikeProcedure } }], "interpret-1");
 		return fresh;
 	};
 	const table = dealt();
@@ -390,45 +387,47 @@ test("interpretations are offered as ordinary actions, paid through lands and ma
 			apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? discard?.id ?? decision.options[0]!.id, "model", "chosen");
 		}
 	};
-	const ids = (prefix: string) => nextDecision(table)!.options.filter((option) => option.id.startsWith(prefix));
-	reach(0, 1);
-	assert.equal(ids("play:llanowar-elves-cast").length, 0, "no mana source, no cast");
-	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Forest")!.id, "model", "chosen");
-	const before = structuredClone(table);
-	const [elf] = ids("play:llanowar-elves-cast");
-	assert.deepEqual(table, before, "listing declared actions changes nothing");
-	assert.ok(elf && ids("play:llanowar-elves-cast").length === 1, "one untapped Forest is one way to pay");
-	assert.match(elf.shows!, /Printed cost: 0 generic \+ \{G\}\. Pay with tap Forest/);
-	apply(table, elf.id, "model", "chosen");
-	const cast = table.ledger.at(-1)!;
-	assert.equal(cast.activation?.funding?.[0]?.intrinsic, true, "the Forest's basic type paid the printed cost during casting");
-	assert.equal(table.seats[0]!.pool.length, 0, "a funded payment leaves no floating mana");
-	pass(table); pass(table); settle(table);
-	assert.ok(cardsIn(table, "battlefield", 0).some((object) => object.card === "Llanowar Elves"));
+	const casts = (card: string) => nextDecision(table)!.options.filter((option) => option.id.startsWith("cast:") && option.label.includes(card));
+	const land = () => apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Forest")!.id, "model", "chosen");
+	const mana = { basis: "{T}: Add {G}.", kind: "mana" as const, cost: { tap: true as const }, colors: ["G"] };
 
-	reach(1, 2);
-	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
-	assert.equal(ids("play:lightning-strike-cast").length, 0, "one Mountain cannot pay {1}{R}");
-	assert.equal(ids("play:shock-cast").length, 3, "the Elf and either player are different announced targets");
+	reach(0, 1);
+	assert.equal(casts("Llanowar Elves").length, 0, "no mana source, no cast");
+	land();
+	const [bare] = casts("Llanowar Elves");
+	assert.match(bare!.shows!, /Printed cost: 0 generic \+ \{G\}\. Pay with tap Forest .* for G\. .*No package is prepared: it enters with nothing registered\./, "an entry without a package is announced");
+	editWork(table, 0, [{ do: "package.put", package: { card: "Llanowar Elves", registers: [mana] } }], "package-elves");
+	const before = structuredClone(table);
+	const [elves] = casts("Llanowar Elves");
+	assert.deepEqual(table, before, "listing casts changes nothing");
+	assert.match(elves!.shows!, /It enters registering: \{T\}: Add \{G\}\./);
+	apply(table, elves!.id, "model", "chosen");
+	pass(table); pass(table); settle(table);
+	const entered = cardsIn(table, "battlefield", 0).find((object) => object.card === "Llanowar Elves")!;
+	assert.deepEqual(entered.registrations, [mana], "the package attached as it entered");
+	assert.deepEqual(table.ledger.at(-1)!.registered, { [entered.id]: [mana] }, "the row that put it onto the battlefield froze what it registered");
+	assert.deepEqual(project(table, 1).objects!.find((object) => object.id === entered.id)!.registrations, [mana], "registrations are public");
 
 	reach(0, 3);
-	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Forest")!.id, "model", "chosen");
-	const pays = ids("play:llanowar-elves-cast").map((option) => option.shows!.match(/Pay with ([^.]*)\./)![1]);
-	assert.ok(pays.some((pay) => /Llanowar Elves/.test(pay!)) && pays.some((pay) => /^tap Forest/.test(pay!)),
-		"an Elf that has been controlled since the turn began is a different payment from a Forest");
+	land();
+	editWork(table, 0, [{ do: "package.put", package: { card: "Llanowar Elves", registers: [{ ...mana, colors: ["G", "G"] }] } }], "package-edit");
+	assert.deepEqual(thingOf(table, entered.id).registrations, [mana], "editing a package changes no permanent already on the battlefield");
+	const pays = casts("Bear Cub").map((option) => option.shows!.match(/Pay with ([^.]*)\./)![1]!);
+	assert.ok(pays.some((pay) => /Llanowar Elves .* for G/.test(pay)) && pays.some((pay) => !/Llanowar/.test(pay)), "a registered mana ability pays like a land");
+	assert.ok(casts("Bear Cub").every((option) => !/package/.test(option.shows!)), "a vanilla creature enters with nothing to register and says nothing");
 
-	reach(1, 4);
-	apply(table, nextDecision(table)!.options.find((option) => option.label === "Play Mountain")!.id, "model", "chosen");
-	const strike = ids("play:lightning-strike-cast").find((option) => option.id.endsWith(":target:seat-0"))!;
-	assert.match(strike.shows!, /Pay with tap Mountain \(.*\), tap Mountain/, "two identical Mountains are one payment, newly supplied data, no new handler");
-	apply(table, strike.id, "model", "chosen");
+	// Floating mana is one way to pay, never the only one offered.
+	fire(table, manaProcedure("Forest", "G"));
+	const floating = casts("Bear Cub").map((option) => option.shows!);
+	assert.ok(floating.some((pay) => /\{G\} \(mana-/.test(pay)), "the floating green can pay");
+	assert.ok(floating.some((pay) => !/\{G\} \(mana-/.test(pay)), "tapping other sources and keeping the floating green is offered too");
+	apply(table, casts("Bear Cub").find((option) => /Llanowar Elves/.test(option.shows!))!.id, "model", "chosen");
 	pass(table); pass(table); settle(table);
-	assert.equal(table.seats[0]!.life, 17);
-	assert.equal(table.things.size, 120);
+	assert.ok(cardsIn(table, "battlefield", 0).some((object) => object.card === "Bear Cub" && !object.registrations));
 
 	const rebuilt = relive(dealt(), table.ledger);
-	assert.deepEqual(project(table, 1).work?.interpretations?.map(({ id }) => id), ["shock-cast", "lightning-strike-cast"]);
-	assert.equal(project(table, 1).work?.interpretations?.some(({ id }) => id.startsWith("llanowar")), false, "interpretations are private equipment");
-	assert.deepEqual(rebuilt.log, table.log, "declared casts replay from their recorded activations, change for change");
+	assert.equal(Object.keys(rebuilt.work).length, 0, "replay reads no private work");
+	assert.deepEqual(rebuilt.log, table.log, "entries replay from their recorded rows, change for change");
 	assert.deepEqual([...rebuilt.things], [...table.things]);
 });
+const thingOf = (table: Table, id: string) => table.things.get(id)!;

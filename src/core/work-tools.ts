@@ -137,19 +137,15 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				if (!work.suggested.includes(tool.recipe)) throw new Error("This recipe has not been nominated.");
 				work.suggested = work.suggested.filter((id) => id !== tool.recipe);
 				break;
-			case "interpretation.put": {
-				const { procedure } = tool.interpretation, card = procedure.source.card;
-				checkProcedure(procedure);
-				if (!card || procedure.source.refs) throw new Error("An interpretation selects its card by name, not a particular object.");
+			case "package.put": {
+				const card = tool.package.card;
 				if (!frame.view.decks?.find((deck) => deck.seat === frame.seat)?.cards[card] && !frame.view.printed?.[card]) throw new Error(`${card} is not in this seat's view or registered list.`);
-				work.interpretations = [...(work.interpretations ?? []).filter((entry) => entry.id !== tool.interpretation.id), structuredClone(tool.interpretation)];
+				work.packages = [...(work.packages ?? []).filter((entry) => entry.card !== card), structuredClone(tool.package)];
 				break;
 			}
-			case "interpretation.missing":
-				work.missing = [...(work.missing ?? []).filter((entry) => entry.card !== tool.card), { card: tool.card, text: tool.text }];
-				break;
 			case "plan.request": work.request = tool.reason; break;
-			case "plan.accept": work.objective = tool.objective; delete work.request; break;
+			case "plan.accept": work.objective = tool.objective; work.accepted = frame.version; delete work.request; break;
+			case "plan.each-turn": work.eachTurn = true; break;
 		}
 	}
 	for (const task of work.tasks) for (const id of task.recipes) {

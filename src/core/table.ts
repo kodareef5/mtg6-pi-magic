@@ -24,6 +24,7 @@ import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
 import type { Instruction, Procedure } from "./work-language.ts";
+import type { Registration } from "./language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -52,6 +53,8 @@ export type Thing = {
 	ability?: Activation;
 	/** The clock when it last entered the battlefield. */
 	entered?: number;
+	/** What it registered as it entered: public, and gone when it leaves. docs/SYNTAX.md. */
+	registrations?: Registration[];
 	owner: SeatId;
 	controller: SeatId;
 	zone: Zone;
@@ -163,6 +166,8 @@ export type LedgerRow = {
 	execution?: { draft: string; step: number; actionId: string };
 	/** A prepared physical operation, recorded so replay never infers its meaning again. */
 	activation?: Activation;
+	/** What each permanent entering through this decision registered, by object id. Frozen so replay never reads private work. */
+	registered?: Record<ObjectId, Registration[]>;
 	situation: Decision["situation"];
 	seat: SeatId;
 	offered: string[];

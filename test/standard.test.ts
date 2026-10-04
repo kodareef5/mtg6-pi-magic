@@ -8,11 +8,9 @@ import { test } from "node:test";
 
 import { card, checkDeck, copiesAllowed, load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
-import { basePT, intrinsicMana, manaCost, plainLand, printedFacts } from "../src/core/printed.ts";
+import { basePT, intrinsicMana, manaCost, permanentSpell, printedFacts } from "../src/core/printed.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { priorityMoves } from "../src/core/priority.ts";
-import { checkProcedure } from "../src/core/procedures.ts";
-import type { Procedure } from "../src/core/work-language.ts";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { matchup, expand } from "../tools/matchup-fixture.ts";
@@ -63,11 +61,13 @@ test("oracle text with several lines survives the round trip", () => {
 	for (const one of many.slice(0, 200)) assert.equal(one.oracle.includes("\\n"), false);
 });
 
-test("printed facts decide land plays, intrinsic mana and creature bodies, and core names no card", () => {
-	const printed = printedFacts(universe, ["Forest", "Fabled Passage", "Llanowar Elves", "Shock", "Mossborn Hydra", "Lightning Strike"]);
-	assert.equal(plainLand(printed["Forest"]), true, "reminder text adds nothing a basic land type does not grant");
+test("printed facts decide land plays, default casts, intrinsic mana and creature bodies, and core names no card", () => {
+	const printed = printedFacts(universe, ["Forest", "Fabled Passage", "Llanowar Elves", "Shock", "Mossborn Hydra", "Lightning Strike", "Meltstrider's Resolve"]);
+	assert.equal(printed["Forest"]!.text, false, "reminder text adds nothing a basic land type does not grant");
 	assert.deepEqual(intrinsicMana(printed["Forest"]), ["G"]);
-	assert.equal(plainLand(printed["Fabled Passage"]), false, "a land with rules text needs an accepted interpretation");
+	assert.ok(permanentSpell(printed["Llanowar Elves"]) && permanentSpell(printed["Mossborn Hydra"]));
+	assert.ok(!permanentSpell(printed["Shock"]) && !permanentSpell(printed["Fabled Passage"]) && !permanentSpell(printed["Meltstrider's Resolve"]),
+		"instants, lands and Auras need more than entering");
 	assert.deepEqual(intrinsicMana(printed["Fabled Passage"]), []);
 	assert.deepEqual(basePT(printed["Llanowar Elves"]), { power: 1, toughness: 1 });
 	assert.deepEqual(basePT(printed["Mossborn Hydra"]), { power: 0, toughness: 0 }, "its entry counter is text, not a printed fact");
@@ -77,7 +77,8 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 	const table = start(standard, [{ deck: [...Array(59).fill("Forest"), "Fabled Passage"] }, { deck: Array(60).fill("Mountain") }], "printed");
 	commit(table, [{ do: "move", what: "0-59", to: "hand", reason: "draw" }, { do: "move", what: "0-0", to: "hand", reason: "draw" }], "draw");
 	table.cursor.steps = ["precombat-main"];
-	assert.deepEqual(priorityMoves(table, 0).map((move) => move.option.label), ["Pass", "Play Forest"], "Fabled Passage waits for an interpretation");
+	assert.deepEqual(priorityMoves(table, 0).map((move) => move.option.label), ["Pass", "Play Fabled Passage", "Play Forest"], "any land can be played");
+	assert.equal(priorityMoves(table, 0)[1]!.option.shows, "No package is prepared: it enters with nothing registered.", "an entry is never silent");
 	assert.ok(table.printed["Fabled Passage"] && !table.printed["Llanowar Elves"], "a table holds facts for registered names only");
 
 	// Core must not branch on a card name. Comments are excluded.
@@ -88,14 +89,6 @@ test("printed facts decide land plays, intrinsic mana and creature bodies, and c
 	}
 });
 
-test("examples are valid interpretations, and an unsupported card refuses its deck", () => {
-	for (const line of readFileSync("cards/examples.jsonl", "utf8").trim().split("\n")) {
-		const example = JSON.parse(line) as { card: string; interpretations: { procedure: Procedure }[] };
-		assert.ok(universe.cards.has(example.card));
-		for (const { procedure } of example.interpretations) {
-			assert.equal(procedure.source.card, example.card);
-			assert.doesNotThrow(() => checkProcedure(procedure));
-		}
-	}
+test("an unsupported card refuses its deck", () => {
 	assert.deepEqual(checkDeck(universe, [...Array(4).fill("Shock"), ...Array(56).fill("Mountain")], standard, new Set(["Shock"])), ["Shock is not supported yet"]);
 });

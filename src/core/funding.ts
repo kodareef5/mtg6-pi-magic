@@ -1,13 +1,15 @@
 /** Paying a mana cost from floating mana and from mana abilities activated while paying (601.2g-h).
  * Sources are grouped only when everything this seat can see about them matches,
  * including its own labels and reserves. Payment is exact: a source that would
- * leave mana floating is not used.
+ * leave mana floating is not used. Keeping floating mana and tapping instead is
+ * a different payment and is offered too.
  */
 import { select } from "./agenda.ts";
 import { intrinsicMana, isCreature } from "./printed.ts";
 import type { Mana } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Procedure } from "./work-language.ts";
+import type { Registration } from "./language.ts";
 import type { SeenObject } from "./work.ts";
 
 export type Cost = NonNullable<Procedure["cost"]>;
@@ -15,51 +17,63 @@ type Color = Mana["color"];
 /** One mana ability activated while paying, with the claim it was accepted under. */
 export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true };
 export type Funding = { paid: string[]; taps: Tap[] };
-type Unit = { key: string; id: string; label: string; yields: Color[][]; pool?: Mana; source?: SeenObject; claim?: string; intrinsic?: true };
+/** One way a source can produce mana, and what it claims. */
+type Yield = { colors: Color[]; claim: string; intrinsic?: true };
+type Unit = { key: string; id: string; label: string; yields: Yield[]; pool?: Mana; source?: SeenObject };
 
+const COLORS: Color[] = ["W", "U", "B", "R", "G"];
 const sick = (frame: Frame, object: SeenObject) => isCreature(frame.view.printed?.[object.card ?? ""]) && (object.entered ?? 0) >= (frame.view.began ?? 0);
 /** Two objects are interchangeable only when every fact this seat can see about them matches. */
 export const sameness = (frame: Frame, object: SeenObject): string => [
-	object.card, object.zone, object.tapped, JSON.stringify(object.counters), object.damage, sick(frame, object),
+	object.card, object.zone, object.tapped, JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
 	...(frame.view.work?.labels ?? []).filter((label) => label.object.id === object.id && label.object.incarnation === object.incarnation).map((label) => label.role).sort(),
 	...(frame.view.work?.draft?.reserves ?? []).some((reserve) => reserve.object.id === object.id && reserve.object.incarnation === object.incarnation) ? ["reserved"] : [],
 ].join("|");
 
-/** Untapped sources this seat could tap for mana now, by printed basic type or accepted interpretation. */
-function manaSources(frame: Frame, except?: string): Unit[] {
-	const units = new Map<string, Unit>();
-	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
-		const colors = object.id === except || !object.card ? [] : intrinsicMana(frame.view.printed?.[object.card]);
-		if (colors.length) units.set(object.id, { key: `${sameness(frame, object)}|${colors}`, id: object.id, source: object, claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true,
-			label: `tap ${object.card} (${object.id})`, yields: colors.map((color) => [color]) });
-	}
-	const missing = new Set((frame.view.work?.missing ?? []).map((entry) => entry.card));
-	for (const { procedure } of frame.view.work?.interpretations ?? []) {
-		const terms = procedure.cost;
-		if (procedure.timing !== "mana" || !terms?.tap || terms.generic || terms.colors.length || missing.has(procedure.source.card!)) continue;
-		if (!procedure.instructions.length || procedure.instructions.some((instruction) => instruction.do !== "mana" || instruction.who !== "self")) continue;
-		const colors = procedure.instructions.flatMap((instruction) => instruction.do === "mana" ? instruction.colors as Color[] : []);
-		for (const object of select(procedure.source, frame)) {
-			if (object.zone !== "battlefield" || object.controller !== frame.seat || object.tapped || object.id === except || sick(frame, object) || units.has(object.id)) continue;
-			units.set(object.id, { key: `${sameness(frame, object)}|${colors}`, id: object.id, source: object, claim: procedure.claim,
-				label: `tap ${object.card} (${object.id}) for ${colors.join("")}`, yields: [colors] });
-		}
-	}
-	return [...units.values()];
+/**
+ * What a registered mana ability produces when its only cost is tapping. Other
+ * costs, counted amounts and spend restrictions are not paid this way yet.
+ */
+export function produces(registration: Registration): Yield[] {
+	if (registration.kind !== "mana" || registration.cost.tap !== true || Object.keys(registration.cost).length !== 1 || registration.spendOnly) return [];
+	const times = registration.times ?? 1;
+	if (typeof times !== "number") return [];
+	const repeat = (colors: Color[]) => Array.from({ length: times }, () => colors).flat();
+	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), claim: registration.basis }];
+	return registration.any ? COLORS.map((color) => ({ colors: repeat(Array(registration.any).fill(color)), claim: registration.basis })) : [];
 }
 
-/** Every distinct way to pay exactly. Floating mana that covers the cost is used before tapping more. */
+/** Untapped sources this seat could tap for mana now: basic land types (305.6) and registered mana abilities. */
+function manaSources(frame: Frame, except?: string): Unit[] {
+	const units: Unit[] = [];
+	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
+		if (object.id === except || sick(frame, object)) continue;
+		const yields = [
+			...intrinsicMana(frame.view.printed?.[object.card ?? ""]).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
+			...(object.registrations ?? []).flatMap(produces),
+		];
+		// A source whose abilities make different amounts is one unit per amount; the walk uses an object once.
+		for (const size of [...new Set(yields.map((one) => one.colors.length))]) {
+			const sized = yields.filter((one) => one.colors.length === size);
+			units.push({ key: `${sameness(frame, object)}|${JSON.stringify(sized.map((one) => one.colors))}`, id: object.id, source: object, yields: sized,
+				label: `tap ${object.card} (${object.id})` });
+		}
+	}
+	return units;
+}
+
+/** Every distinct way to pay exactly, from floating mana, tapped sources, or both. */
 export function fundings(frame: Frame, cost: Cost, except?: string): { funding: Funding; shows: string }[] {
 	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter((mana) => !mana.spendOnly)
-		.map((mana): Unit => ({ key: `pool|${mana.color}|${!!mana.persists}`, id: mana.id, pool: mana, yields: [[mana.color]],
+		.map((mana): Unit => ({ key: `pool|${mana.color}|${!!mana.persists}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
 			label: `{${mana.color}} (${mana.id}, ${mana.persists ? "persists" : "expires at step end"})` }));
-	const fromPool = exact(pool, cost);
-	return (fromPool.length ? fromPool : exact([...pool, ...manaSources(frame, except)], cost)).map((units) => {
+	return exact([...pool, ...manaSources(frame, except)], cost).map((units) => {
 		const made = cover(units, cost)!;
 		return {
 			funding: { paid: units.flatMap((unit) => unit.pool ? [unit.id] : []),
-				taps: units.flatMap((unit) => unit.source ? [{ source: { id: unit.source.id, incarnation: unit.source.incarnation }, colors: made.get(unit.id)!, claim: unit.claim!, ...(unit.intrinsic ? { intrinsic: true as const } : {}) }] : []) },
-			shows: units.length ? `Pay with ${units.map((unit) => unit.label).join(", ")}.` : "No mana is spent.",
+				taps: units.flatMap((unit) => unit.source ? [{ source: { id: unit.source.id, incarnation: unit.source.incarnation }, colors: made.get(unit.id)!.colors,
+					claim: made.get(unit.id)!.claim, ...(made.get(unit.id)!.intrinsic ? { intrinsic: true as const } : {}) }] : []) },
+			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
 		};
 	});
 }
@@ -69,11 +83,11 @@ function exact(units: Unit[], cost: Cost): Unit[][] {
 	for (const unit of [...units].sort((a, b) => a.id.localeCompare(b.id))) groups.set(unit.key, [...(groups.get(unit.key) ?? []), unit]);
 	const buckets = [...groups.values()], total = cost.generic + cost.colors.length, found: Unit[][] = [];
 	const walk = (at: number, chosen: Unit[], mana: number) => {
-		if (mana === total) { if (cover(chosen, cost)) found.push(chosen); return; }
+		if (mana === total) { if (new Set(chosen.map((unit) => unit.id)).size === chosen.length && cover(chosen, cost)) found.push(chosen); return; }
 		const group = buckets[at];
 		if (!group || mana > total) return;
 		for (let count = 0; count <= group.length; count++) {
-			const added = group.slice(0, count).reduce((sum, unit) => sum + unit.yields[0]!.length, 0);
+			const added = group.slice(0, count).reduce((sum, unit) => sum + unit.yields[0]!.colors.length, 0);
 			if (mana + added > total) break;
 			walk(at + 1, [...chosen, ...group.slice(0, count)], mana + added);
 		}
@@ -82,13 +96,10 @@ function exact(units: Unit[], cost: Cost): Unit[][] {
 	return found;
 }
 
-/** Pick one yield per unit so the colored symbols are met. Returns each unit's produced colors. */
-function cover(units: Unit[], cost: Cost): Map<string, Color[]> | null {
-	const pick = (at: number, chosen: Map<string, Color[]>): Map<string, Color[]> | null => {
-		if (at === units.length) {
-			const made = [...chosen.values()].flat();
-			return cost.colors.every((color) => made.filter((one) => one === color).length >= cost.colors.filter((wanted) => wanted === color).length) ? chosen : null;
-		}
+/** Pick one yield per unit so the colored symbols are met. */
+function cover(units: Unit[], cost: Cost): Map<string, Yield> | null {
+	const pick = (at: number, chosen: Map<string, Yield>): Map<string, Yield> | null => {
+		if (at === units.length) return covers([...chosen.values()].flatMap((one) => one.colors), cost) ? chosen : null;
 		for (const option of units[at]!.yields) {
 			const result = pick(at + 1, new Map([...chosen, [units[at]!.id, option]]));
 			if (result) return result;

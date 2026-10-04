@@ -111,9 +111,11 @@ game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
 into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
-**`strategy` runs on an explicit request for preparation or reconsideration.**
-Experimental circuits ask it to author recipes, scheduled checks, labels and
-guidance through a checked tool batch. A phase change alone spends nothing.
+**`strategy` runs once per turn of its own seat, and on an escalation.** A seat
+that opts in with `plan.each-turn` is asked for its plan after it draws, before
+any automatic pass, and that plan covers the opponent's next turn too. Between
+sessions jev does the work; when the plan stops fitting, jev escalates and that
+is a request. A phase change alone spends nothing.
 `worthPlanning` retains the old mechanical estimate for comparison, but does
 not initiate calls. `/magic play <seed> circuits` opts into this path.
 
@@ -196,12 +198,14 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    draw/discard abilities in stack order, and clones during a pending discard.
    Accepted claims and instructions are journaled. Every legal card is
    assumed supported; `cards/unsupported.txt` lists the ones that are not, and
-   a deck containing one is refused. When a card first appears, strategy writes
-   its interpretations in the procedure vocabulary, using `cards/examples.jsonl`
-   as reference, and the table offers them at every priority. Printed costs are
-   paid by tapping lands and mana abilities during casting (601.2g). Text the
-   vocabulary cannot express is recorded as a gap and the card is not offered.
-   `npm run matchup` plays the pinned lists live and stops at the first gap.
+   a deck containing one is refused. Cards are not compiled: a seat uses a card
+   through the syntax in `docs/SYNTAX.md`, as procedures it announces and
+   packages its permanents register as they enter. The table offers any land
+   and casts a non-Aura permanent spell for its printed cost with no card text,
+   paying by tapping lands and registered mana abilities during casting
+   (601.2g). A seat that plans each turn plans once per turn of its own, after
+   drawing, before any automatic pass. `npm run matchup` plays the pinned lists
+   live and stops at the first gap.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard.
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
@@ -367,9 +371,9 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   work-tools.ts      atomic equipment edits, separate from physical motion
   work-menu.ts       the draft and agenda menus any player can use
   printed.ts         type line, mana cost and power/toughness from the card file
-  actions.ts         a seat's interpretations offered as ordinary actions
+  entry.ts           what a permanent registers as it enters, frozen on the ledger row
   funding.ts         paying a cost: floating mana and mana abilities while paying
-  procedures.ts      one offer path for drafts and interpretations, activation terms
+  procedures.ts      one offer path for drafts and default casts, activation terms
   resolution.ts      remaining instructions and choices before a checkpoint
   pregame.ts           the opening procedure and its choices
   turn.ts, steps.ts    turn obligations, step order, and phase boundaries
@@ -381,7 +385,7 @@ src/context/           questions for a decision model. Its own AGENTS.md
   spend.ts             what every call cost, and the output ceiling per role
   brief.ts             the pregame wave, and the snippets it files by use
   summary.ts           the turn in two sentences, from the spectator view
-  strategy.ts          preparation and reconsideration on an explicit request
+  strategy.ts          a turn's plan, and reconsideration on an escalation
   ruling.ts            the judge's two calls. Pipeline written, stops at verdict
   dial.ts              the routes a seat can ask for, answered from the rules
   packet.ts, seat.ts   one decision's context, and the seat that answers it
@@ -394,7 +398,6 @@ tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/circuits.ts      offline circuit experiments and a local timeline inspector
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
-cards/examples.jsonl   accepted interpretations shown to strategy as reference
 docs/SYNTAX.md         the syntax, the table's line, and execution semantics
 docs/examples/         worked uses of the syntax by shape, checked against card text
 decks/standard-matchup.json  source lists, legality date, card and rules hashes

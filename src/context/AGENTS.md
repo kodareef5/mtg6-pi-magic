@@ -41,8 +41,9 @@ reaches a decision is a short plan plus the facts.
 - **pregame** runs once per seat as one concurrent wave. The unit of the pass is
   the unit of injection: each answer is filed under where it will be read. Never
   one question, because one answer gets pasted into every decision.
-- **strategy** runs on a request recorded in the seat's equipment. It prepares
-  recipes and appointments; a phase boundary is not a reason to spend money.
+- **strategy** runs once per turn of its own for a seat that plans each turn,
+  and on a request recorded in the seat's equipment. A phase boundary is not a
+  reason to spend money.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
 - **judge** runs only on an objection: the classifier narrows the rules, then

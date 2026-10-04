@@ -4,6 +4,7 @@
 
 import type { SeatId } from "./types.ts";
 import type { Activation, Mana } from "./table.ts";
+import type { Registration } from "./language.ts";
 
 /**
  * The seven zones, plus two places we track as their own.
@@ -61,7 +62,8 @@ export type Change =
 	| { do: "opening"; action: "begin" | "round" }
 	| { do: "opening"; action: "declare"; who: SeatId; choice: "keep" | "mulligan" }
 	| { do: "opening"; action: "bottom"; who: SeatId }
-	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason }
+	/** `registers` is what the object registers as it enters the battlefield. */
+	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[] }
 	| { do: "tap" | "untap"; what: string }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }

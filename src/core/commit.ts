@@ -164,6 +164,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.damage = 0;
 				if (change.to === "battlefield") moving.entered = table.cursor.clock + 1;
 				else delete moving.entered;
+				if (change.to === "battlefield" && change.registers?.length) moving.registrations = structuredClone(change.registers);
+				else delete moving.registrations;
 				if (ORDERED.has(change.to)) {
 					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner));
 					if (change.position === "bottom") {

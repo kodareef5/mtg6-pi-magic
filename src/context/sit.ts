@@ -31,7 +31,7 @@ import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
 import { aiSeat } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
-import { planWork, interpretCards } from "./strategy.ts";
+import { planWork } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
@@ -127,7 +127,8 @@ export async function seat(
 				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
 		if (options.circuits && !table.work[at.id]) {
 			if (!planning) throw new Error(`Seat ${at.id} needs a strategy model to begin circuits.`);
-			editWork(table, at.id, [{ do: "plan.request", reason: "Prepare the opening stretch of play, with recipes and scheduled checks for threats, opportunities and maintenance. Begin at the first priority opportunity." }], `circuits-${at.id}`);
+			editWork(table, at.id, [{ do: "plan.request", reason: "Prepare the opening stretch of play, with recipes and scheduled checks for threats, opportunities and maintenance. Begin at the first priority opportunity." },
+				{ do: "plan.each-turn" }], `circuits-${at.id}`);
 		}
 		players[at.id] = aiSeat({
 			name: at.name,
@@ -138,8 +139,7 @@ export async function seat(
 			...(options.dials === undefined ? {} : { dials: options.dials }),
 			onGap: (note) => void table.gaps.push(note),
 			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
-			...(planning ? { plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
-				interpret: (frame, names) => interpretCards(frame, names, { cards: universe }, planning) } : {}),
+			...(planning ? { plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning) } : {}),
 		});
 	}
 

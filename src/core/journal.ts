@@ -281,8 +281,8 @@ export function relive(table: Table, rows: LedgerRow[]): Table {
 					`the table asks seat ${decision.seat} ${decision.situation}`,
 			);
 		}
-		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why, ...(row.execution ? { execution: row.execution } : {}) });
-		else apply(table, row.picked, row.by, row.why, row.execution);
+		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why, ...(row.execution ? { execution: row.execution } : {}) }, row.registered ?? {});
+		else apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});
 	}
 	return table;
 }

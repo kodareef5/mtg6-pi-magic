@@ -4,7 +4,6 @@ import { createHash } from "node:crypto";
 import { start } from "../src/core/commit.ts";
 import { load, checkDeck } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
-import type { Procedure } from "../src/core/work-language.ts";
 
 export const matchup = JSON.parse(readFileSync(new URL("../decks/standard-matchup.json", import.meta.url), "utf8")) as {
 	event: string; eventDate: string; legalityDate: string;
@@ -23,8 +22,3 @@ for (const deck of matchup.decks) {
 }
 export const matchTable = (seed: string) => start(standard, matchup.decks.map((deck, seat) => ({ name: seat ? "Red" : "Green", deck: expand(deck.main) })), seed);
 
-const examples = readFileSync(new URL("../cards/examples.jsonl", import.meta.url), "utf8").trim().split("\n")
-	.map((line) => JSON.parse(line) as { card: string; interpretations: { procedure: Procedure }[] });
-const example = (card: string): Procedure => examples.find((line) => line.card === card)!.interpretations[0]!.procedure;
-export const elf = example("Llanowar Elves");
-export const shock = example("Shock");

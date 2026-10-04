@@ -1,8 +1,11 @@
 /** Priority actions. Timing gates belong here; a seat may still declare its own motion. */
 import type { Move } from "./moves.ts";
 import { cardsIn, seat, type Table } from "./table.ts";
-import { facts, plainLand } from "./printed.ts";
-import type { SeatId } from "./types.ts";
+import { facts, isLand, permanentSpell } from "./printed.ts";
+import { offers } from "./procedures.ts";
+import { entering } from "./entry.ts";
+import { project } from "./view.ts";
+import type { Frame, SeatId } from "./types.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
 export function priorityMoves(table: Table, holder: SeatId): Move[] {
@@ -10,25 +13,24 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 		{ option: { id: "pass", label: "Pass" }, changes: [], reason: "game-setup" },
 	];
 
-	// Playing a land whose printed facts are complete: one move per land in hand,
-	// when this seat has played fewer than it may, it is this seat's main phase
-	// and the stack is empty.
+	// Playing a land: one move per land in hand, when this seat has played fewer
+	// than it may, it is this seat's main phase and the stack is empty. What the
+	// land registers comes from the seat's package as it enters.
 	// Playing a land does not use the stack. 305.1.
 	const step = table.cursor.steps[0] ?? "";
 	const main = step === "precombat-main" || step === "postcombat-main";
 	if (main && table.cursor.active === holder && seat(table, holder).landsPlayed < 1 && !cardsIn(table, "stack").length) {
 		for (const card of cardsIn(table, "hand", holder)) {
-			if (!plainLand(facts(table, card))) continue;
+			if (!isLand(facts(table, card))) continue;
+			const note = entering(table, holder, card.card!);
 			moves.push({
-				option: { id: `land:${card.id}`, label: `Play ${card.card}`, objects: [{ id: card.id, incarnation: card.incarnation }] },
+				option: { id: `land:${card.id}`, label: `Play ${card.card}`, objects: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
 				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land" }],
 				reason: "play-land",
 			});
 		}
 	}
 
-	// Prepared spell and activation menus live in procedures.ts. Ordinary
-	// discovery of those actions, alternative costs and special actions is unfinished.
 
 	// Canonical order: pass, then lands by card name then by id. Same table,
 	// same list, same order, so a seed replays.
@@ -38,6 +40,24 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 	];
 }
 
+
+/**
+ * Casting a permanent spell for its printed cost needs no card text: it goes on
+ * the stack and enters the battlefield. One option per distinct name, source and
+ * payment, in a main phase with an empty stack. An Aura needs a target and an
+ * X cost needs a number, so both wait for a seat's own procedure, as does
+ * anything the card does beyond entering.
+ */
+export function defaultCasts(table: Table, holder: SeatId): Move[] {
+	const frame: Frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
+	const names = [...new Set(cardsIn(table, "hand", holder).filter((card) => permanentSpell(facts(table, card))).map((card) => card.card!))].sort();
+	return names.flatMap((name) => offers({ source: { zones: ["hand"], controller: "self", card: name }, claim: "Cast for its printed cost",
+		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", spell: { speed: "sorcery", destination: "battlefield" },
+		instructions: [], delegate: true }, frame, "cast").map(({ option, activation }) => {
+		const note = entering(table, holder, name);
+		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
+	}));
+}
 
 /**
  * A move is offered only when every one of these holds. This is the whole

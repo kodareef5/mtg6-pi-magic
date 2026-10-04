@@ -42,5 +42,20 @@ export function workMenu(frame: Frame): WorkOption[] {
 /** A pass cannot silently bypass due attention. Other listed plays remain available. */
 export function needsAttention(frame: Frame): boolean {
 	if (frame.decision?.situation !== "priority" || !frame.view.work) return false;
-	return !!frame.view.work.request || pendingReviews(frame).length > 0 || workMenu(frame).length > 0;
+	return !!frame.view.work.request || planDue(frame) || pendingReviews(frame).length > 0 || workMenu(frame).length > 0;
 }
+
+/**
+ * A seat that asked to plan each turn plans once per turn of its own, after it
+ * has drawn: no plan accepted since its turn began. Before its first plan it
+ * waits for an explicit request.
+ */
+export function planDue(frame: Frame): boolean {
+	const work = frame.view.work, at = frame.view.window;
+	return !!work?.eachTurn && work.accepted !== undefined && at.kind === "turn" && at.active === frame.seat && at.step !== "upkeep" &&
+		work.accepted < (frame.view.began ?? 0);
+}
+
+/** Why strategy is being asked now, if it is. */
+export const planReason = (frame: Frame): string | undefined =>
+	frame.view.work?.request ?? (planDue(frame) ? "Your turn has begun and you have drawn. Plan this turn and the opponent's next turn." : undefined);

@@ -19,9 +19,11 @@ npm run matchup
 ```
 
 `npm run matchup` plays both lists live through Pi from ordinary setup, with no
-scripted line, and stops at an outcome, the first gap, or `--turns`. Strategy
-interprets each card when it first appears. A card whose text the vocabulary
-cannot express yet is recorded as a gap, which stops the run.
+scripted line, and stops at an outcome, the first gap, or `--turns`. The table
+offers land plays and printed-cost casts of permanent spells; everything a card
+does beyond entering comes from a seat's plan in the syntax. The machinery for
+triggers, statics, combat and the wider instructions is being built in stages;
+until then the run plays lands and vanilla bodies only.
 
 An earlier version of this tool scripted Forest, Llanowar Elves, Mountain and
 Shock as a prescribed probe, with an authored offline mode. Both are gone: the

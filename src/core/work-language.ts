@@ -1,7 +1,7 @@
 /** The seat's tool vocabulary. JSON data, never executable model-written code. */
 import { Type, type Static } from "typebox";
 import { Check, Errors } from "typebox/value";
-import { RefSchema, QuerySchema, WhenSchema } from "./language.ts";
+import { RefSchema, QuerySchema, WhenSchema, PackageSchema } from "./language.ts";
 
 export { RefSchema, QuerySchema, WhenSchema };
 
@@ -46,8 +46,6 @@ export const StepSchema = object({
 		object({ procedure: ProcedureSchema }),
 	]),
 });
-/** One ability of a named card, in procedure terms. */
-export const InterpretationSchema = object({ id: text, procedure: ProcedureSchema });
 
 export const RecipeSchema = object({
 	id: text, label: text, guidance: text, steps: Type.Array(StepSchema, { minItems: 1 }),
@@ -69,10 +67,11 @@ export const CommandSchema = Type.Union([
 	object({ do: Type.Literal("draft.cancel") }),
 	object({ do: Type.Literal("suggestion.dismiss"), recipe: text }),
 	object({ do: Type.Literal("plan.request"), reason: text }),
-	object({ do: Type.Literal("interpretation.put"), interpretation: InterpretationSchema }),
-	/** Card text the vocabulary cannot express. The card is not offered and the table records a gap. */
-	object({ do: Type.Literal("interpretation.missing"), card: text, text }),
+	/** What a permanent of this name registers when it enters under this seat's control. Replaces an earlier package. */
+	object({ do: Type.Literal("package.put"), package: PackageSchema }),
 	object({ do: Type.Literal("plan.accept"), objective: text }),
+	/** The seat plans each of its own turns once it has drawn. */
+	object({ do: Type.Literal("plan.each-turn") }),
 ]);
 export const CommandsSchema = Type.Array(CommandSchema, { minItems: 1 });
 export type ObjectRef = Static<typeof RefSchema>;
@@ -83,7 +82,6 @@ export type DraftStep = Static<typeof StepSchema>;
 export type Recipe = Static<typeof RecipeSchema>;
 export type Instruction = Static<typeof InstructionSchema>;
 export type Procedure = Static<typeof ProcedureSchema>;
-export type Interpretation = Static<typeof InterpretationSchema>;
 export type WorkCommand = Static<typeof CommandSchema>;
 
 /** Shape checking proves neither card meaning nor strategic quality. */

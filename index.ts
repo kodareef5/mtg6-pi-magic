@@ -53,7 +53,7 @@ import { load as loadRules, search as searchRules } from "./src/core/rules.ts";
 import type { Table } from "./src/core/table.ts";
 import type { SeatId } from "./src/core/types.ts";
 import { project, render } from "./src/core/view.ts";
-import { CommandsSchema } from "./src/core/work-language.ts";
+import { CommandsSchema, commands } from "./src/core/work-language.ts";
 import { editWork, workFrame } from "./src/core/work-tools.ts";
 import { pendingReviews } from "./src/core/agenda.ts";
 import { workMenu } from "./src/core/work-menu.ts";
@@ -213,7 +213,7 @@ export default function (pi: ExtensionAPI) {
 				if (running) throw new Error("The play loop is active. Edit equipment when the game is waiting.");
 				if (table.outcome) throw new Error("The game is finished. Clone an unfinished position to continue working on it.");
 				if (params.revision === undefined) throw new Error("Read the equipment first and supply its revision.");
-				editWork(table, params.seat, params.commands, actionId, params.revision);
+				editWork(table, params.seat, commands(params.commands), actionId, params.revision);
 				const journal = games.get(table);
 				if (journal) saveGame(journal, table);
 			}
