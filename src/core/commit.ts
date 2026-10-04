@@ -16,12 +16,15 @@ import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
 import { printedFacts, shipped } from "./printed.ts";
-import { characteristics, has, type Traits } from "./characteristics.ts";
+import { characteristics, forget, has, type Traits } from "./characteristics.ts";
+import { terms } from "./entry.ts";
+import { before as lookBack, detect } from "./triggers.ts";
 import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
-import type { Change, Reason } from "./syntax.ts";
+import type { Change, Reason, Zone } from "./syntax.ts";
 import {
+	type Activation,
 	cardsIn,
 	ORDERED,
 	orderedWithin,
@@ -31,6 +34,7 @@ import {
 	type Note,
 	type Receipt,
 	type Table,
+	type Thing,
 } from "./table.ts";
 
 export type Entrant = {
@@ -83,6 +87,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		workLog: [],
 		resolution: null,
 		combat: null,
+		waiting: [],
 	};
 
 	const taken = new Set<string>();
@@ -139,6 +144,15 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			if (!available.get(change.who)?.delete(id)) throw new Error(`Mana ${id} is not available to spend.`);
 		}
 	}
+	// "If it would die, exile it instead" changes the event before it happens (614.1a).
+	for (const change of changes) {
+		const dying = change.do === "move" && change.to === "graveyard" ? table.things.get(change.what) : undefined;
+		const instead = dying?.zone === "battlefield" ? characteristics(table, dying)?.registrations.find((one) => one.kind === "replace" && one.on === "dies") : undefined;
+		if (change.do === "move" && instead?.kind === "replace") change.to = instead.to as Zone;
+	}
+	// A fixture's setup is not a game event, and triggers nothing.
+	const detecting = reason !== "game-setup";
+	const prior = detecting ? lookBack(table, changes) : undefined;
 	// Read what a watcher may need before anything moves. After the group it
 	// is gone, and a receipt that cannot say what a thing looked like is a
 	// receipt no trigger can read.
@@ -185,6 +199,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else delete moving.entered;
 				if (change.to === "battlefield" && change.registers?.length) moving.registrations = structuredClone(change.registers);
 				else delete moving.registrations;
+				if (change.to === "battlefield") enter(table, moving, change);
 				if (ORDERED.has(change.to)) {
 					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner));
 					if (change.position === "bottom") {
@@ -226,10 +241,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.ability.timing === "spell") {
 					const card = thing(table, change.what);
 					card.ability = structuredClone(change.ability);
-				} else if (change.ability.timing === "stack") {
-					for (const object of cardsIn(table, "stack")) object.position = (object.position ?? 0) + 1;
-					table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.ability.controller, controller: change.ability.controller,
-						zone: "stack", position: 0, tapped: false, faceDown: false, counters: {}, damage: 0, ability: structuredClone(change.ability) });
+				} else if (change.ability.timing === "stack") stack(table, change.id, change.ability);
+				break;
+			case "trigger":
+				if (change.action === "wait") table.waiting.push(structuredClone(change.trigger));
+				else {
+					table.waiting = table.waiting.filter((trigger) => trigger.id !== change.trigger);
+					if (change.ability) stack(table, change.id!, change.ability);
 				}
 				break;
 			case "resolution":
@@ -260,10 +278,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.to) thing(table, change.what).attached = structuredClone(change.to);
 				else delete thing(table, change.what).attached;
 				break;
-			case "token":
-				table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
-					tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered: table.cursor.clock + 1, token: structuredClone(change.spec) });
+			case "token": {
+				const token: Thing = { id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
+					tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered: table.cursor.clock + 1, token: structuredClone(change.spec) };
+				table.things.set(change.id, token);
+				enter(table, token, change);
 				break;
+			}
 			case "reveal":
 				break;
 			case "note":
@@ -309,6 +330,14 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		}
 	}
 
+	// What the group caused to trigger waits for the next time a player would receive priority.
+	if (detecting) {
+		forget(table);
+		const found = detect(table, changes, { before, known }, prior);
+		table.waiting.push(...found.waiting);
+		if (found.spent.length) table.notes = table.notes.filter((note) => !found.spent.includes(note.id));
+	}
+
 	// Removed objects, including resolved abilities, have no after snapshot.
 	// Narration can use the event-time facts from before the group.
 	const after: Receipt["after"] = {};
@@ -335,15 +364,32 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	return receipt;
 }
 
+/** An ability or trigger goes on top of the stack as its own object. */
+function stack(table: Table, id: string, ability: Activation): void {
+	for (const object of cardsIn(table, "stack")) object.position = (object.position ?? 0) + 1;
+	table.things.set(id, { id, incarnation: 0, owner: ability.controller, controller: ability.controller,
+		zone: "stack", position: 0, tapped: false, faceDown: false, counters: {}, damage: 0, ability: structuredClone(ability) });
+}
+
+/** Entering terms apply as part of the motion, and the recorded change says so. */
+function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number> }): void {
+	forget(table);
+	const entering = terms(table, object);
+	if (entering.tapped) object.tapped = change.tapped = true;
+	for (const [kind, count] of Object.entries(entering.counters)) if (count > 0) object.counters[kind] = (object.counters[kind] ?? 0) + count;
+	if (Object.keys(object.counters).length) change.counters = { ...object.counters };
+}
+
 /** Remaining instructions and choices belong to the table throughout resolution. */
 function resolutionTransition(table: Table, change: Extract<Change, { do: "resolution" }>): void {
 	if (change.action === "begin") {
-		table.resolution = { object: change.what, source: structuredClone(change.source), program: structuredClone(change.program), bound: {},
-			illegal: [...change.illegal], picked: [], ...(change.lost ? { lost: true } : {}) };
+		table.resolution = { object: change.what, source: structuredClone(change.source), program: structuredClone(change.program), bound: structuredClone(change.bound ?? {}),
+			illegal: [...change.illegal], picked: [], ...(change.lost ? { lost: true } : {}), ...(change.optional ? { optional: true } : {}) };
 		table.cursor.priority = null;
 		return;
 	}
 	const pending = table.resolution!;
+	if (change.accept) { delete pending.optional; return; }
 	if (change.follow) pending.source = structuredClone(change.follow);
 	if (change.pick) { pending.picked.push(structuredClone(change.pick)); return; }
 	if (change.bind) Object.assign(pending.bound, structuredClone(change.bind));

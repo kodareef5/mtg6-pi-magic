@@ -7,19 +7,20 @@
 import { select } from "./agenda.ts";
 import { intrinsic } from "./characteristics.ts";
 import type { Mana } from "./table.ts";
-import type { Frame, ObjectRef } from "./types.ts";
-import type { Registration, Selector } from "./language.ts";
-import { matches, viewWorld } from "./selectors.ts";
+import type { Frame, ObjectRef, SeatId } from "./types.ts";
+import type { Amount, Registration, Selector } from "./language.ts";
+import type { Change } from "./syntax.ts";
+import { amount, matches, viewWorld } from "./selectors.ts";
 import type { SeenObject } from "./work.ts";
 
 /** The mana part of a locked cost. */
 export type Price = { generic: number; colors: Mana["color"][] };
 type Color = Mana["color"];
-/** One mana ability activated while paying, with the claim it was accepted under. */
-export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector };
+/** One mana ability activated while paying, with the claim it was accepted under. `sacrifice` is part of its cost, as a Treasure's is. */
+export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; sacrifice?: true };
 export type Funding = { paid: string[]; taps: Tap[] };
 /** One way a source can produce mana, what it claims, and what that mana may pay for. */
-type Yield = { colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector };
+type Yield = { colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; sacrifice?: true };
 type Unit = { key: string; id: string; label: string; yields: Yield[]; pool?: Mana; source?: SeenObject };
 
 const COLORS: Color[] = ["W", "U", "B", "R", "G"];
@@ -34,17 +35,34 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
 ].join("|");
 
 /**
- * What a registered mana ability produces when its only cost is tapping. Other
- * costs and counted amounts are not paid this way yet.
+ * What a registered mana ability produces when its cost is tapping, or tapping
+ * and sacrificing the source. `count` works out "for each Elf you control".
  */
-export function produces(registration: Registration): Yield[] {
-	if (registration.kind !== "mana" || registration.cost.tap !== true || Object.keys(registration.cost).length !== 1) return [];
-	const restrict = registration.spendOnly ? { spendOnly: registration.spendOnly } : {};
-	const times = registration.times ?? 1;
-	if (typeof times !== "number") return [];
+export function produces(registration: Registration, count: (amount: Amount) => number): Yield[] {
+	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
+	const { tap: _, sacrifice, ...other } = registration.cost;
+	if (Object.keys(other).length || (sacrifice !== undefined && sacrifice !== "this")) return [];
+	const terms = { claim: registration.basis, ...(registration.spendOnly ? { spendOnly: registration.spendOnly } : {}), ...(sacrifice ? { sacrifice: true as const } : {}) };
+	const times = count(registration.times ?? 1);
 	const repeat = (colors: Color[]) => Array.from({ length: times }, () => colors).flat();
-	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), claim: registration.basis, ...restrict }];
-	return registration.any ? COLORS.map((color) => ({ colors: repeat(Array(registration.any).fill(color)), claim: registration.basis, ...restrict })) : [];
+	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), ...terms }];
+	return registration.any ? COLORS.map((color) => ({ colors: repeat(Array(registration.any).fill(color)), ...terms })) : [];
+}
+
+/**
+ * The changes that activate these mana abilities and spend what they make and
+ * `paid`, as part of a group whose earlier changes number `offset`.
+ */
+export function paying(funding: Funding, who: SeatId, clock: number, offset: number): Change[] {
+	const changes: Change[] = [], made: string[] = [];
+	for (const tap of funding.taps) {
+		changes.push({ do: "tap", what: tap.source.id });
+		if (tap.sacrifice) changes.push({ do: "move", what: tap.source.id, to: "graveyard", reason: "sacrifice" });
+		tap.colors.forEach((_, unit) => made.push(`mana-${clock + 1}-${offset + changes.length}-${unit}`));
+		changes.push({ do: "add-mana", who, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}) });
+	}
+	if (funding.paid.length || made.length) changes.push({ do: "spend-mana", who, ids: [...funding.paid, ...made] });
+	return changes;
 }
 
 /** Untapped sources this seat could tap for mana now: basic land types (305.6) and registered mana abilities. */
@@ -52,9 +70,10 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 	const units: Unit[] = [];
 	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
 		if (except.has(object.id) || sick(frame, object)) continue;
+		const scope = { world: viewWorld(frame.view), controller: frame.seat, source: object };
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
-			...(object.traits?.registrations ?? []).flatMap(produces),
+			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, (value) => amount(scope, value))),
 		];
 		// A source whose abilities make different amounts is one unit per amount; the walk uses an object once.
 		for (const size of [...new Set(yields.map((one) => one.colors.length))]) {
@@ -82,9 +101,9 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 		return {
 			funding: { paid: units.flatMap((unit) => unit.pool ? [unit.id] : []),
 				taps: units.flatMap((unit) => unit.source ? [{ source: { id: unit.source.id, incarnation: unit.source.incarnation }, colors: made.get(unit.id)!.colors,
-					claim: made.get(unit.id)!.claim, ...(made.get(unit.id)!.intrinsic ? { intrinsic: true as const } : {}),
+					claim: made.get(unit.id)!.claim, ...(made.get(unit.id)!.intrinsic ? { intrinsic: true as const } : {}), ...(made.get(unit.id)!.sacrifice ? { sacrifice: true as const } : {}),
 					...(made.get(unit.id)!.spendOnly ? { spendOnly: made.get(unit.id)!.spendOnly! } : {}) }] : []) },
-			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
+			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label}${made.get(unit.id)!.sacrifice ? " and sacrifice it" : ""} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
 		};
 	});
 }

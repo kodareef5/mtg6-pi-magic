@@ -217,13 +217,23 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    drawing, before any automatic pass. `npm run matchup` plays the pinned lists
    live and stops at the first gap.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
-   triggers in Standard.
+   triggers in Standard. **Implemented:** `commit` reads each group's events
+   (enters, leaves, dies, cast, targeted, attacks, combat damage, step
+   beginnings) and matches registered watches and delayed triggers; leaving
+   the battlefield looks back to before the group. Triggers wait on the table
+   and go on the stack, active player first, before the next priority.
+   Intervening "if", "you may", "once each turn", reflexive triggers and
+   suppression work. Triggers during cleanup (514.3a) are not handled yet: they
+   wait for the next upkeep.
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
    has the sublayers, taken from 613.4. **Implemented:** `characteristics.ts`
    walks types, abilities and power/toughness from registrations, labels and
    counters; state-based actions read it, including indestructible, deathtouch,
    tokens, Auras, Equipment, counter cancelling and the legend rule as a choice.
-5. **Replacements**, including the ones on `enters`.
+5. **Replacements**, including the ones on `enters`. **Implemented:** entering
+   tapped or with counters, from a permanent's own package or another
+   permanent's (Zhao), and "if it would die, exile it instead". Ordering two
+   replacements on one event is not.
 
 The engine's main job is bulk one on one games, so that interesting positions
 can be frozen as benchmarks. `tools/sim.ts` is still a stub. A fixture is a
@@ -385,7 +395,9 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   work-menu.ts       the draft and agenda menus any player can use
   printed.ts         type line, mana cost and power/toughness from the card file
   decks.ts           a deck, its registration for a game, and the kept collection
-  entry.ts           what a permanent registers as it enters, frozen on the ledger row
+  entry.ts           what a permanent registers as it enters, and how it enters
+  triggers.ts        events read from each group, watches matched, the trigger window
+  permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
   procedures.ts      one offer path for drafts and default casts, activation terms
   characteristics.ts the layer walk: what an object is now, never stored
@@ -460,11 +472,8 @@ verify every carried field against the source and refuse to pass on a mismatch.
   `declare`, free-form delegation, and `judge.rule` still throw or leave the
   decision pending. Conservation and the judge must carry the weight that a
   fully informed move list would.
-- The rest of card meaning. Prepared procedures can cast a card from hand,
-  announce one creature or player target, and deal literal damage. Wider
-  targets, combat, triggers, replacements, restricted mana and complex costs
-  remain unwritten. Most cards in the pinned lists need machinery that does
-  not exist yet; `npm run matchup` stops at the first one it meets.
+- Combat. Attacks, blocks and combat damage are the next stage; `attack` is
+  recorded and its triggers fire, but nothing declares it yet.
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
 - The judge, review rounds, and declaring. A game finishes without them.

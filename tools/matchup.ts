@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Play the pinned Standard matchup live through Pi, from ordinary setup, unscripted.
- * Strategy interprets each card when it first appears. The run stops at an
- * outcome, the first gap, or --turns.
+ * Each seat's strategy plans its turns and writes what its permanents register;
+ * jev flies the plan. The run stops at an outcome, the first gap, or --turns.
  */
 import { mkdirSync, appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -39,7 +39,7 @@ const observed = traceInference(inference as never, (event) => {
 	if (event.event === "request") save(journal, table);
 	appendFileSync(calls, JSON.stringify(event) + "\n");
 });
-const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, ...(carried ? { prepared: carried.prepared } : {}) });
+const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, circuits: true, ...(carried ? { prepared: carried.prepared } : {}) });
 const stop = new Error("Monitor stop");
 const began = Date.now(), limit = Number(values.turns);
 try {

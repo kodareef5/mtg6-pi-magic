@@ -94,8 +94,9 @@ unreachable from a test.
 
 The checks inside it run in the order the rules fix, not a convenient one.
 State based actions and waiting triggers are handled before anybody receives
-priority. A step that cannot be detected without card meaning is absent rather
-than faked, and that absence is wrong the moment a card has a trigger.
+priority. The table detects triggers from what its permanents registered, never
+from card text: a permanent with no package triggers nothing, and its entry says
+so.
 
 A resolving effect continues before those checkpoints. Its remaining
 instructions and locked terms live in the table, and a choice can pause it

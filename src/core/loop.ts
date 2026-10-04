@@ -64,7 +64,7 @@ function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" 
 	if (decision.options.length !== 1) return null;
 	if (decision.delegated) return "delegated";
 	const only = decision.options[0]!;
-	if (["turn-based", "state-based", "pregame"].includes(decision.situation)) return "forced";
+	if (["turn-based", "state-based", "pregame", "trigger-order"].includes(decision.situation)) return "forced";
 	if (decision.situation === "priority" && only.id === "pass") return "forced";
 	if (intent?.deck.delegates?.includes(decision.situation)) return "delegated";
 	return null;

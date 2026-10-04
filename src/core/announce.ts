@@ -12,6 +12,7 @@ import { select as query } from "./agenda.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
+import { allowance, flashed, playable } from "./permits.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -80,6 +81,10 @@ function candidates(slot: Target, scope: Scope): Chosen[] {
 	return [...(slot.object ? scope.world.objects.filter((object) => matches(scope, object, slot.object!)).map(ref) : []), ...seats.map((player) => ({ player }))];
 }
 
+/** Every way to fill the slots, each chosen with the earlier slots in scope: "Equipment attached to that creature". */
+export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots.reduce<Chosen[][][]>((sets, slot) => sets.flatMap((set) =>
+	subsets(candidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.upTo ? 0 : slot.count ?? 1).map((option) => [...set, option])), [[]]);
+
 /** The extra costs a procedure states, as each way they can be paid. */
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string };
 function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
@@ -136,9 +141,11 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 	for (const source of sources) {
 		const scope: Scope = { world, controller: frame.seat, source };
 		// Timing: a spell's from its type line unless it claims flash; an activation's own restriction.
-		const instant = procedure.timing === "spell" && (source.traits?.types.includes("instant") || procedure.speed === "instant");
+		const instant = procedure.timing === "spell" && (source.traits?.types.includes("instant") || procedure.speed === "instant" || flashed(world, frame.seat, source));
 		if (procedure.timing === "spell" && !instant && !mainWindow(frame)) continue;
-		if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= 1)) continue;
+		if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= allowance(world, frame.seat).lands)) continue;
+		// A card is played from hand unless a permission says otherwise.
+		if (fromHand && !playable(world, frame.seat, source, frame.view.window.kind === "turn" ? frame.view.window.turn : 0, procedure.timing === "land")) continue;
 		if (procedure.timing !== "spell" && procedure.speed === "sorcery" && !mainWindow(frame)) continue;
 		if (procedure.if && !holds(scope, procedure.if)) continue;
 		if (procedure.limit === "once-per-turn" && world.history.some((event) => event.kind === "activated" && event.source.id === source.id &&
@@ -150,18 +157,14 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
 		// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
 		const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce - mana.colors.length) + 1 }, (_, at) => at) : [0];
-		// Each slot is chosen with the earlier slots in scope: "Equipment attached to that creature".
-		const targetings = (procedure.targets ?? []).reduce<Chosen[][][]>((sets, slot) => sets.flatMap((set) => {
-			const pool = candidates(slot, { ...scope, targets: set });
-			return subsets(pool, slot.count ?? 1, slot.upTo ? 0 : slot.count ?? 1).map((option) => [...set, option]);
-		}), [[]]);
+		const aims = targetings(procedure.targets ?? [], scope);
 		// Mana pays for the spell as it will be on the stack, or for the ability.
 		const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const } : source;
 		for (const x of xs) {
 			const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
 			for (const extra of extras(procedure, scope, source, frame)) {
 				for (const { funding, shows: paying } of fundings(frame, price, new Set(extra.uses), spending)) {
-					for (const targets of targetings) {
+					for (const targets of aims) {
 						const aimed = targets.flat();
 						const marks = aimed.flatMap((chosen) => {
 							const object = "id" in chosen ? frame.view.objects?.find((one) => one.id === chosen.id) : undefined;

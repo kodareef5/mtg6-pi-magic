@@ -7,6 +7,7 @@
 import { characteristics } from "./characteristics.ts";
 import { instructionStep } from "./instructions.ts";
 import { holds, matches, players, tableWorld, targetKey, type Scope } from "./selectors.ts";
+import { eventScope } from "./triggers.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { Table, Thing } from "./table.ts";
 import type { Change } from "./syntax.ts";
@@ -19,19 +20,22 @@ const PERMANENT = ["artifact", "battle", "creature", "enchantment", "land", "pla
  * permanent it became.
  */
 export function begin(table: Table, object: Thing): Change {
-	const ability = object.ability!;
-	const scope: Scope = { world: tableWorld(table), controller: ability.controller, source: object, targets: ability.targets, ...(ability.x !== undefined ? { x: ability.x } : {}) };
+	const ability = object.ability!, world = tableWorld(table), trigger = ability.trigger;
+	const scope: Scope = { world, controller: ability.controller, source: trigger ? world.lastKnown(ability.source)?.object : object, targets: ability.targets,
+		event: eventScope(world, trigger?.event), ...(trigger?.bound ? { bound: trigger.bound } : {}), ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const illegal = ability.slots.flatMap((slot, at) => (ability.targets[at] ?? []).filter((chosen) => {
 		if ("player" in chosen) return !table.seats.some((one) => one.id === chosen.player && !one.result) || (slot.player !== "any" && !!slot.player && !players(scope, slot.player).includes(chosen.player));
 		const now = table.things.get(chosen.id);
 		return !now || now.incarnation !== chosen.incarnation || !slot.object || !matches(scope, now, slot.object);
 	}).map(targetKey));
 	const chosen = ability.targets.flat();
-	const lost = chosen.length > 0 && illegal.length === chosen.length;
+	// An intervening "if" that no longer holds: it does nothing (603.4).
+	const lost = (chosen.length > 0 && illegal.length === chosen.length) || (!!trigger?.check && !holds(scope, trigger.check));
 	const permanent = ability.timing === "spell" && !!characteristics(table, object)?.types.some((type) => PERMANENT.includes(type));
 	return { do: "resolution", action: "begin", what: object.id, source: ability.timing === "spell" ? { id: object.id, incarnation: object.incarnation } : ability.source,
 		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const } }] : []),
-			...ability.instructions.map((instruction) => ({ instruction }))], illegal, ...(lost ? { lost: true } : {}) };
+			...ability.instructions.map((instruction) => ({ instruction }))], illegal, ...(lost ? { lost: true } : {}),
+		...(trigger?.bound ? { bound: structuredClone(trigger.bound) } : {}), ...(trigger?.may ? { optional: true } : {}) };
 }
 
 export function resolving(table: Table): Pending | null {
@@ -40,16 +44,23 @@ export function resolving(table: Table): Pending | null {
 	const object = table.things.get(pending.object)!, ability = object.ability!;
 	const world = tableWorld(table), item = pending.program[0];
 	const scope: Scope = { world, controller: ability.controller, source: world.lastKnown(pending.source)?.object, targets: ability.targets, illegal: pending.illegal,
+		event: eventScope(world, ability.trigger?.event),
 		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;
 	// An instant or sorcery still on the stack goes to the graveyard as the last part (608.2n).
 	const finish = (changes: Change[]): Change[] => ability.timing === "spell" && object.zone === "stack" && !changes.some((change) => change.do === "move" && change.what === object.id)
 		? [{ do: "move", what: object.id, to: "graveyard", reason: "resolve" }] : [];
 	if (pending.lost || !item) {
-		const label = pending.lost ? "Every target is illegal; it does not resolve (608.2b)." : `Finish resolving ${ability.claim}.`;
+		const targeted = ability.targets.flat().length;
+		const label = !pending.lost ? `Finish resolving ${ability.claim}.` : targeted && pending.illegal.length === targeted ? "Every target is illegal; it does not resolve (608.2b)."
+			: "Its condition no longer holds; it does nothing (603.4).";
 		return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}.`,
 			moves: [{ option: { id: prefix, label }, changes: [...finish([]), { do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" }] };
 	}
+	if (pending.optional) return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}. It is optional.`, moves: [
+		{ option: { id: `${prefix}:use`, label: "Use it" }, changes: [{ do: "resolution", action: "next", what: object.id, accept: true }], reason: "resolve" },
+		{ option: { id: `${prefix}:decline`, label: "Decline: it is optional" }, changes: [{ do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" },
+	] };
 	const instruction = item.instruction;
 	const skipped = instruction.if && !holds(scope, instruction.if);
 	const step = skipped ? { actor: ability.controller, question: "Its condition is false.", choices: [{ id: "skip", label: "Skip: its condition is false", changes: [] as Change[] }] }

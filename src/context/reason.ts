@@ -18,6 +18,7 @@
  * stopping once it is the configuration, is the point of the file rather than a
  * detail of it.
  */
+import { createHash } from "node:crypto";
 
 import type { Api, Model, ThinkingLevel as Reasoning } from "@earendil-works/pi-ai";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
@@ -29,7 +30,7 @@ import { CEILING, type Tally } from "./spend.ts";
 export type Stream = (
 	model: Model<Api>,
 	context: { systemPrompt?: string; messages: { role: "user"; content: string }[] },
-	options?: { reasoning?: Reasoning; maxTokens?: number; signal?: AbortSignal },
+	options?: { reasoning?: Reasoning; maxTokens?: number; signal?: AbortSignal; sessionId?: string },
 ) => { result(): Promise<{ content: unknown[]; usage?: unknown; stopReason: string; errorMessage?: string }> };
 
 /**
@@ -125,6 +126,9 @@ export function reasoner(options: {
 					{ systemPrompt: prompt.system, messages: [{ role: "user", content: prompt.user }] },
 					{
 						maxTokens: ceiling,
+						// The cache key: calls with the same system prompt share a prefix, and a
+						// provider that keys its prompt cache on the session reuses it only when told.
+						sessionId: `pi-magic-${options.role}-${createHash("sha256").update(prompt.system).digest("hex").slice(0, 16)}`,
 						// "off" is the absence of thinking, not a level to ask for.
 						...(options.thinking && options.thinking !== "off" ? { reasoning: options.thinking } : {}),
 						...(options.signal ? { signal: options.signal } : {}),

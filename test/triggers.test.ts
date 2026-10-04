@@ -1,0 +1,313 @@
+/**
+ * Registered. What a permanent registers works as it sits on the battlefield:
+ * entering terms apply as part of the motion, watches trigger from what the
+ * table recorded and wait for the next priority, delayed and reflexive triggers
+ * fire once, permissions add choices, and replacements change the event before
+ * it happens. Positions come from the pinned lists; packages and procedures
+ * from docs/examples where it has them, written alongside them where it does not.
+ */
+import { strict as assert } from "node:assert";
+import { test } from "node:test";
+import { commit, start } from "../src/core/commit.ts";
+import { deck } from "../src/core/decks.ts";
+import { standard } from "../src/core/format.ts";
+import { apply, nextDecision } from "../src/core/decisions.ts";
+import { relive } from "../src/core/journal.ts";
+import { characteristics } from "../src/core/characteristics.ts";
+import { editWork } from "../src/core/work-tools.ts";
+import { describe, project } from "../src/core/view.ts";
+import { cardsIn, type Table } from "../src/core/table.ts";
+import type { Procedure, Registration } from "../src/core/language.ts";
+import type { ProcedureOption } from "../src/core/procedures.ts";
+import { announce, establish, example, finish, main, matchup, pack, passBoth, place, step } from "./play.ts";
+
+const CHOCOBO: Registration = { basis: "Landfall — Whenever a land you control enters, put a +1/+1 counter on this creature.", kind: "watch",
+	event: { on: "enters", of: { types: ["land"], controller: "you" } }, effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } };
+const prepare = (table: Table, seat: number, card: string, registers = pack(card)) => editWork(table, seat, [{ do: "package.put", package: { card, registers } }], `package-${card}`);
+const counters = (table: Table, id: string) => table.things.get(id)!.counters["+1/+1"] ?? 0;
+/** Put the next waiting trigger on the stack: the option a test names, or the only one. */
+const trigger = (table: Table, pick?: (label: string) => boolean) => {
+	const decision = nextDecision(table)!;
+	assert.equal(decision.situation, "trigger-order", `a trigger is waiting, not ${decision.situation}`);
+	const option = pick ? decision.options.find((one) => pick(`${one.label} ${one.shows}`)) : decision.options.length === 1 ? decision.options[0] : undefined;
+	assert.ok(option, `a trigger option among: ${decision.options.map((one) => one.label).join(" | ")}`);
+	apply(table, option.id, "model", "chosen");
+	return decision;
+};
+const aimsAt = (id: string) => (option: ProcedureOption) => option.activation.targets[0]!.some((chosen) => "id" in chosen && chosen.id === id);
+/** Both seats pass, the top of the stack resolves, and play comes back to priority or the next trigger. */
+const resolveTop = (table: Table) => { passBoth(table); finish(table); };
+
+test("a landfall watch triggers once per land, waits for priority, and resolves from the stack; a permanent enters with its counters", () => {
+	const setup = () => {
+		const table = matchup("landfall");
+		establish(table, 0, "Sazh's Chocobo", [CHOCOBO]);
+		place(table, 0, "battlefield", "Forest", "Forest", "Forest");
+		place(table, 0, "hand", "Forest", "Mossborn Hydra");
+		prepare(table, 0, "Mossborn Hydra");
+		return table;
+	};
+	const table = setup();
+	const chocobo = cardsIn(table, "battlefield").find((one) => one.card === "Sazh's Chocobo")!;
+	main(table, 0);
+
+	// Mossborn Hydra is printed 0/0 and enters with its counter, as part of the motion.
+	const cast = nextDecision(table)!.options.find((option) => option.id.startsWith("cast:") && option.label.includes("Mossborn Hydra"))!;
+	assert.match(cast.shows!, /It enters registering: Trample/);
+	apply(table, cast.id, "model", "chosen");
+	resolveTop(table);
+	const hydra = cardsIn(table, "battlefield").find((one) => one.card === "Mossborn Hydra")!;
+	assert.equal(hydra.zone, "battlefield");
+	assert.equal(counters(table, hydra.id), 1);
+	assert.match(table.log.map((receipt) => describe(table, receipt)).join("\n"), /Mossborn Hydra into battlefield \(resolve\), 1 \+1\/\+1/);
+
+	// One land: both landfall watches trigger. Nothing has priority until they are on the stack.
+	const forest = cardsIn(table, "hand", 0).find((one) => one.card === "Forest")!;
+	apply(table, `land:${forest.id}`, "model", "chosen");
+	assert.equal(table.waiting.length, 2);
+	assert.match(project(table, 1).table.join("\n"), /Waiting to go on the stack: Green's Sazh's Chocobo/);
+	const order = trigger(table, (label) => label.includes("Sazh's Chocobo"));
+	assert.equal(order.seat, 0);
+	assert.equal(order.options.length, 2, "the seat chooses which of its triggers goes on first");
+	trigger(table);
+	assert.equal(cardsIn(table, "stack").length, 2);
+	assert.equal(nextDecision(table)!.situation, "priority");
+	resolveTop(table);
+	resolveTop(table);
+	assert.equal(counters(table, chocobo.id), 1);
+	assert.equal(counters(table, hydra.id), 2, "doubling adds as many as there are");
+	assert.equal(characteristics(table, table.things.get(hydra.id)!)!.power, 2);
+
+	// Replay rebuilds the triggers from the recorded picks.
+	const rebuilt = relive(setup(), table.ledger);
+	assert.deepEqual([counters(rebuilt, chocobo.id), counters(rebuilt, hydra.id)], [1, 2]);
+
+	// Two lands entering together are two occurrences (603.2c).
+	const [one, two] = cardsIn(table, "library", 0).filter((card) => card.card === "Forest");
+	commit(table, [{ do: "move", what: one!.id, to: "battlefield", reason: "resolve" }, { do: "move", what: two!.id, to: "battlefield", reason: "resolve" }], "resolve");
+	assert.equal(table.waiting.filter((waiting) => waiting.source.id === chocobo.id).length, 2);
+});
+
+test("entering terms read the permanent as it enters, and another permanent can change how lands enter", () => {
+	const playBaSingSe = (basics: number, zhao: boolean) => {
+		const table = matchup("entering");
+		if (basics) place(table, 0, "battlefield", ...Array(basics).fill("Forest"));
+		if (zhao) establish(table, 1, "Zhao, the Moon Slayer");
+		place(table, 0, "hand", "Ba Sing Se");
+		prepare(table, 0, "Ba Sing Se");
+		main(table, 0);
+		const land = cardsIn(table, "hand", 0).find((one) => one.card === "Ba Sing Se")!;
+		apply(table, `land:${land.id}`, "model", "chosen");
+		return table.things.get(land.id)!.tapped;
+	};
+	assert.equal(playBaSingSe(0, false), true, "no basic land: it enters tapped");
+	assert.equal(playBaSingSe(1, false), false, "with a Forest it enters untapped");
+	assert.equal(playBaSingSe(1, true), true, "Zhao makes every nonbasic land enter tapped, the opponent's too");
+});
+
+test("a reflexive trigger fires when its condition holds, targets as it goes on the stack, and rechecks as it resolves", () => {
+	const table = matchup("reflexive");
+	const ascension = establish(table, 0, "Earthbender Ascension");
+	const [elves] = place(table, 0, "battlefield", "Llanowar Elves");
+	place(table, 0, "hand", "Forest", "Forest", "Forest");
+	commit(table, [{ do: "counters", what: ascension.id, kind: "quest", amount: 2 }], "game-setup");
+	main(table, 0);
+	const play = () => apply(table, `land:${cardsIn(table, "hand", 0).find((one) => one.card === "Forest")!.id}`, "model", "chosen");
+
+	// Third counter: the intervening "if" is false, so nothing reflexive triggers.
+	play();
+	trigger(table);
+	resolveTop(table);
+	assert.equal(ascension.counters.quest, 3);
+	assert.equal(table.waiting.length, 0);
+
+	// Fourth counter, the next turn: "when you do" triggers and targets a creature now.
+	main(table, 0, 3);
+	play();
+	trigger(table);
+	resolveTop(table);
+	assert.equal(table.things.get(ascension.id)!.counters.quest, 4);
+	const reflexive = trigger(table);
+	assert.match(reflexive.options[0]!.shows!, /Target 1: Llanowar Elves/);
+	resolveTop(table);
+	assert.equal(counters(table, elves!.id), 1);
+	assert.ok(characteristics(table, table.things.get(elves!.id)!)!.words.includes("trample"));
+	assert.ok(nextDecision(table)!.situation === "priority");
+
+	// Fifth counter, then two removed while the reflexive trigger waits on the stack: it does nothing (603.4).
+	main(table, 0, 5);
+	play();
+	trigger(table);
+	resolveTop(table);
+	trigger(table);
+	commit(table, [{ do: "counters", what: ascension.id, kind: "quest", amount: -2 }], "resolve");
+	passBoth(table);
+	step(table, (label) => /condition no longer holds/.test(label));
+	assert.equal(counters(table, elves!.id), 1);
+});
+
+test("earthbend's delayed trigger looks back at the land that died and returns it, even when it bent itself", () => {
+	const table = matchup("earthbend");
+	const land = establish(table, 0, "Ba Sing Se");
+	place(table, 0, "battlefield", "Forest", "Forest", "Forest");
+	prepare(table, 0, "Ba Sing Se");
+	main(table, 0, 3);
+	announce(table, example("Earthbend 2 with Ba Sing Se"), aimsAt(land.id));
+	resolveTop(table);
+	const bent = { ...table.things.get(land.id)! };
+	assert.deepEqual([characteristics(table, table.things.get(land.id)!)!.types.includes("creature"), characteristics(table, table.things.get(land.id)!)!.power], [true, 2]);
+	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 1);
+
+	const red = cardsIn(table, "library", 1)[0]!;
+	commit(table, [{ do: "damage", source: red.id, target: { id: land.id, incarnation: bent.incarnation }, amount: 2 }], "resolve");
+	finish(table);
+	assert.equal(table.things.get(land.id)!.zone, "graveyard");
+	trigger(table);
+	resolveTop(table);
+	const back = table.things.get(land.id)!;
+	assert.deepEqual([back.zone, back.tapped, back.incarnation], ["battlefield", true, bent.incarnation + 2]);
+	assert.equal(characteristics(table, back)!.types.includes("creature"), false, "it returns as a new object, a land again");
+	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 0, "a delayed trigger fires once");
+});
+
+const NOVA_WARP: Procedure = { source: { zones: ["hand"], controller: "self", card: "Nova Hellkite" }, claim: "Cast Nova Hellkite for its warp cost",
+	basis: "Warp {2}{R} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+	timing: "spell", cost: { mana: "{2}{R}" }, instructions: [
+		{ do: "delay", event: { on: "step", step: "end", whose: "any" }, effect: { instructions: [
+			{ do: "move", what: "this", to: "exile", reason: "exile", as: "warped" },
+			{ do: "permit", what: "bound:warped", who: "you", from: "next-turn", until: "indefinite" },
+		] } },
+	] };
+const NOVA: Registration[] = [
+	{ basis: "Flying, haste", kind: "continuous", affects: { is: "this" }, change: { words: ["flying", "haste"] } },
+	{ basis: "When this creature enters, it deals 1 damage to target creature an opponent controls.", kind: "watch", event: { on: "enters", of: { is: "this" } },
+		effect: { targets: [{ object: { types: ["creature"], controller: "opponent" } }], instructions: [{ do: "damage", to: "target:0", amount: 1, from: "this" }] } },
+];
+
+test("a warped Hellkite triggers as it enters, is exiled at the end step, and may be cast from exile on a later turn", () => {
+	const table = matchup("warp");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", [CHOCOBO]);
+	place(table, 1, "battlefield", "Mountain", "Mountain", "Mountain", "Mountain", "Mountain");
+	place(table, 1, "hand", "Nova Hellkite");
+	prepare(table, 1, "Nova Hellkite", NOVA);
+	main(table, 1, 2);
+	announce(table, NOVA_WARP);
+	resolveTop(table);
+	const aimed = trigger(table);
+	assert.match(aimed.options[0]!.shows!, /Target 1: Sazh's Chocobo/);
+	resolveTop(table);
+	assert.equal(table.things.get(chocobo.id)!.zone, "graveyard");
+
+	main(table, 1, 2, "end");
+	assert.ok(cardsIn(table, "stack").some((object) => object.ability?.trigger), "the delayed trigger went on the stack as the end step began");
+	resolveTop(table);
+	assert.ok(cardsIn(table, "exile", 1).some((one) => one.card === "Nova Hellkite"));
+	const castable = () => nextDecision(table)!.options.some((option) => option.id.startsWith("play:") && option.label.includes("Nova Hellkite"));
+	assert.equal(castable(), false, "not this turn");
+	main(table, 1, 4);
+	assert.equal(castable(), true, "from exile on a later turn, for its printed cost");
+});
+
+test("Torpor Orb stops creatures entering from triggering anything", () => {
+	const table = matchup("torpor");
+	establish(table, 0, "Sazh's Chocobo", [CHOCOBO]);
+	establish(table, 0, "Torpor Orb");
+	place(table, 1, "battlefield", "Mountain", "Mountain", "Mountain");
+	place(table, 1, "hand", "Nova Hellkite");
+	prepare(table, 1, "Nova Hellkite", NOVA);
+	main(table, 1, 2);
+	announce(table, NOVA_WARP);
+	passBoth(table);
+	while (table.resolution) step(table);
+	assert.equal(table.waiting.length, 0);
+	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 1, "the warp delay is not an entering trigger");
+});
+
+test("valiant triggers once each turn, prowess on every noncreature spell, and both go on the stack above the spell", () => {
+	const table = matchup("valiant");
+	const challenger = establish(table, 1, "Emberheart Challenger");
+	place(table, 1, "battlefield", "Mountain", "Mountain");
+	place(table, 1, "hand", "Shock", "Shock");
+	main(table, 1, 2);
+	const shock = example("Cast Shock");
+	const atChallenger = aimsAt(challenger.id);
+	announce(table, shock, atChallenger);
+	assert.equal(table.waiting.length, 2, "cast and targeted, from one announcement");
+	trigger(table, (label) => label.includes("Prowess"));
+	trigger(table);
+	assert.equal(cardsIn(table, "stack").length, 3);
+	resolveTop(table);
+	resolveTop(table);
+	const exiled = cardsIn(table, "exile", 1);
+	assert.equal(exiled.length, 1, "valiant exiled the top card");
+	assert.ok(table.notes.some((note) => note.kind === "permit" && note.on.id === exiled[0]!.id && note.until === "end-of-turn"));
+	resolveTop(table);
+	assert.equal(table.things.get(challenger.id)!.damage, 2);
+	assert.equal(table.things.get(challenger.id)!.zone, "battlefield", "prowess made it 3/3 before the Shock resolved");
+
+	announce(table, shock, atChallenger);
+	assert.deepEqual(table.waiting.map((waiting) => waiting.basis), ["Prowess"], "valiant already triggered this turn");
+});
+
+test("a replacement placed by a spell exiles the creature instead of letting it die", () => {
+	const table = matchup("replace");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", [CHOCOBO]);
+	place(table, 1, "battlefield", "Mountain", "Mountain", "Mountain");
+	place(table, 1, "hand", "Fiery Annihilation");
+	main(table, 1, 2);
+	announce(table, { source: { zones: ["hand"], controller: "self", card: "Fiery Annihilation" }, claim: "Cast Fiery Annihilation",
+		basis: "Fiery Annihilation deals 5 damage to target creature. Exile up to one target Equipment attached to that creature. If that creature would die this turn, exile it instead.",
+		timing: "spell", targets: [{ object: { types: ["creature"] } }, { object: { subtypes: ["Equipment"], attachedTo: "target:0" }, upTo: true }],
+		instructions: [
+			{ do: "register", on: "target:0", registration: { basis: "If that creature would die this turn, exile it instead.", kind: "replace", on: "dies", to: "exile", until: "end-of-turn" } },
+			{ do: "damage", to: "target:0", amount: 5 },
+			{ do: "move", what: "target:1", to: "exile", reason: "exile" },
+		] });
+	resolveTop(table);
+	assert.equal(table.things.get(chocobo.id)!.zone, "exile");
+	assert.match(table.log.map((receipt) => describe(table, receipt)).join("\n"), /put Sazh's Chocobo into exile \(destroy\)/);
+});
+
+test("Smaug makes a Treasure at upkeep, and the Treasure pays by being sacrificed", () => {
+	const table = matchup("treasure");
+	establish(table, 1, "Smaug the Magnificent");
+	place(table, 1, "battlefield", "Mountain");
+	place(table, 1, "hand", "Emberheart Challenger");
+	main(table, 1, 2, "upkeep");
+	resolveTop(table);
+	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure")!;
+	assert.equal(treasure.controller, 1);
+	main(table, 1, 2);
+	const cast = nextDecision(table)!.options.find((option) => option.label.includes("Emberheart Challenger") && option.shows!.includes("sacrifice it"));
+	assert.ok(cast, "a payment that sacrifices the Treasure is offered");
+	apply(table, cast.id, "model", "chosen");
+	finish(table);
+	assert.equal(table.things.has(treasure.id), false, "sacrificed, and a token outside the battlefield ceases to exist");
+});
+
+test("Icetill Explorer permits a second land and lands from the graveyard; Elvish Archdruid makes mana for each Elf", () => {
+	const table = matchup("icetill");
+	establish(table, 0, "Icetill Explorer");
+	place(table, 0, "graveyard", "Forest");
+	place(table, 0, "hand", "Forest");
+	main(table, 0);
+	const lands = () => nextDecision(table)!.options.filter((option) => option.id.startsWith("land:"));
+	assert.ok(lands().some((option) => option.label === "Play Forest from graveyard"));
+	apply(table, lands().find((option) => option.label === "Play Forest from graveyard")!.id, "model", "chosen");
+	trigger(table);
+	resolveTop(table);
+	assert.ok(lands().length > 0, "a second land play");
+	apply(table, lands()[0]!.id, "model", "chosen");
+	trigger(table);
+	resolveTop(table);
+	assert.equal(lands().length, 0, "two land plays, no third");
+
+	const elves = start(standard, [{ name: "Green", deck: deck("Green Stompy") }, { name: "Red", deck: deck("Mono-Red Aggro") }], "archdruid");
+	establish(elves, 0, "Elvish Archdruid");
+	establish(elves, 0, "Llanowar Elves");
+	establish(elves, 0, "Llanowar Elves");
+	place(elves, 0, "hand", "Gigantosaurus");
+	main(elves, 0, 3);
+	const paid = nextDecision(elves)!.options.find((option) => option.label.includes("Gigantosaurus"));
+	assert.match(paid?.shows ?? "", /Elvish Archdruid .* for GGG/, "three Elves, three green");
+});

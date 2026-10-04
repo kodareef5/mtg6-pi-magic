@@ -4,13 +4,14 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
-import { check, ProcedureSchema, type Instruction, type Procedure, type Selector } from "./language.ts";
+import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
 import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
-import { covers, produces } from "./funding.ts";
+import { covers, paying, produces } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
+import { allowance, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Draft } from "./work.ts";
@@ -55,16 +56,18 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (table.outcome || table.resolution || table.cursor.priority !== controller || table.cursor.passes >= table.seats.filter((one) => !one.result).length) throw new Error("A prepared action needs this seat's priority opportunity.");
 	const object = live(table, source);
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
-	if (!object || (fromHand && object.zone !== "hand") || (object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller)
+	const world = tableWorld(table);
+	if (!object || (fromHand && !playable(world, controller, object, table.cursor.turn, activation.timing === "land")) ||
+		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller)
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
 	const traits = characteristics(table, object);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
-	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
-	if (activation.timing === "land" && (!main || seat(table, controller).landsPlayed >= 1)) throw new Error("A land play needs this seat's main phase, an empty stack and an unused land play.");
+	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !flashed(world, controller, object) && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
+	if (activation.timing === "land" && (!main || seat(table, controller).landsPlayed >= allowance(world, controller).lands)) throw new Error("A land play needs this seat's main phase, an empty stack and an unused land play.");
 	if (activation.timing !== "spell" && activation.speed === "sorcery" && !main) throw new Error("This ability is activated only as a sorcery.");
 
 	// Targets are checked with every announced target in scope, so a slot can depend on an earlier one.
-	const scope: Scope = { world: tableWorld(table), controller, source: object, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
+	const scope: Scope = { world, controller, source: object, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
 	activation.slots.forEach((slot, at) => {
 		for (const chosen of activation.targets[at] ?? []) {
 			const ok = "player" in chosen ? (slot.player === "any" ? table.seats.some((one) => one.id === chosen.player && !one.result) : !!slot.player && players(scope, slot.player).includes(chosen.player))
@@ -98,7 +101,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
 		const made = characteristics(table, mana);
 		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
-		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap(produces).some((one) => one.colors.join() === tap.colors.join() && JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly)))
+		const count = (value: Amount) => amount({ world, controller, source: mana }, value);
+		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, count)).some((one) => one.colors.join() === tap.colors.join() &&
+			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && !!one.sacrifice === !!tap.sacrifice))
 			throw new Error("The source has no registered mana ability that makes that mana.");
 		if (!allowed(tap.spendOnly)) throw new Error("That mana may not be spent on this.");
 	}
@@ -119,13 +124,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		...(cost.counters ? [{ do: "counters" as const, what: source.id, kind: cost.counters.kind, amount: -cost.counters.count }] : []),
 	];
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
-	const made: string[] = [];
-	for (const tap of funding) {
-		changes.push({ do: "tap", what: tap.source.id });
-		tap.colors.forEach((_, unit) => made.push(`mana-${table.cursor.clock + 1}-${changes.length}-${unit}`));
-		changes.push({ do: "add-mana", who: controller, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}) });
-	}
-	if (paid.length || made.length) changes.push({ do: "spend-mana", who: controller, ids: [...paid, ...made] });
+	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));
 	changes.push({ do: "activate", what: source.id, id: `ability-${table.cursor.clock + 1}`, ability: structuredClone(activation) });
 	if (activation.timing === "mana") for (const instruction of activation.instructions) {
 		if (instruction.do !== "mana" || !instruction.colors) throw new Error("A mana ability only adds mana of stated colors.");

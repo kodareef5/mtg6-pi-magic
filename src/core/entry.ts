@@ -1,5 +1,7 @@
 /** A permanent registers its seat's package for its name as it enters, by whatever route. */
-import { thing, type Table, type ObjectId } from "./table.ts";
+import { cardsIn, thing, type Table, type ObjectId, type Thing } from "./table.ts";
+import { characteristics } from "./characteristics.ts";
+import { amount, holds, matches, tableWorld, type Scope } from "./selectors.ts";
 import type { Registration } from "./language.ts";
 import type { Change } from "./syntax.ts";
 import type { SeatId } from "./types.ts";
@@ -30,4 +32,24 @@ export function entering(table: Table, seat: SeatId, card: string): string {
 	const registers = pack(table, seat, card);
 	if (registers) return `It enters registering: ${registers.map((registration) => registration.basis).join(" / ")}.`;
 	return table.printed[card]?.text ? "No package is prepared: it enters with nothing registered." : "";
+}
+
+/**
+ * How a permanent enters: tapped, with counters (614.1c-d). Its own `enters`
+ * registrations and every other permanent's that affects it apply, each read
+ * with the entering permanent as it now is on the battlefield (614.12).
+ */
+export function terms(table: Table, object: Thing): { tapped?: true; counters: Record<string, number> } {
+	const world = tableWorld(table), found: { tapped?: true; counters: Record<string, number> } = { counters: {} };
+	for (const holder of cardsIn(table, "battlefield")) {
+		for (const registration of characteristics(table, holder)?.registrations ?? []) {
+			if (registration.kind !== "enters") continue;
+			const scope: Scope = { world, controller: holder.controller, source: holder };
+			if (registration.affects ? !matches(scope, object, registration.affects) : holder !== object) continue;
+			if (registration.if && !holds(scope, registration.if)) continue;
+			if (registration.tapped) found.tapped = true;
+			for (const [kind, count] of Object.entries(registration.counters ?? {})) found.counters[kind] = (found.counters[kind] ?? 0) + amount(scope, count);
+		}
+	}
+	return found;
 }

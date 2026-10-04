@@ -24,14 +24,14 @@ import { attach } from "./entry.ts";
 import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
 import { characteristics, has } from "./characteristics.ts";
+import { triggerWindow } from "./triggers.ts";
+import { STEPS } from "./steps.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
  * waiting triggers are handled before anybody receives priority. CR 117.5.
  *
- * Replacements and waiting triggers still require meaning the table does not
- * have. A prepared stack ability does carry its accepted instructions, and
- * continuing that resolution comes before the next state-based checkpoint.
+ * A resolution in progress continues before the next state-based checkpoint.
  *
  * A state condition is not an event. It has no triggering moment, so it belongs
  * in step 3 and is never matched against the log. Treating it as an event makes
@@ -55,13 +55,19 @@ function pending(table: Table): Pending | null {
 	const automatic = stateBased(table);
 	if (automatic) return automatic;
 
-	// 4. A replacement applies to a pending event: which applies first.
-	// 5. Triggers waiting to go on the stack: what order.
-	//    Trigger and replacement discovery remain unwritten.
+	// 4. A replacement applies to a pending event: which applies first. Only one
+	//    replacement exists yet, dies to exile, so there is never a choice.
 
 	// 7. A turn based action is due: untap, draw, declare, discard to hand size.
 	const due = turnBased(table);
 	if (due) return due;
+
+	// 5. Triggers waiting to go on the stack, before anyone receives priority.
+	//    A step without priority (untap, cleanup) leaves them waiting.
+	if (table.waiting.length && table.cursor.stepDone && STEPS[table.cursor.steps[0]!]?.priority) {
+		const window = triggerWindow(table);
+		if (window) return window;
+	}
 
 	// 8. This step grants priority: act or pass.
 	//

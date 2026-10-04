@@ -3,7 +3,7 @@
  */
 
 import type { ObjectRef, SeatId } from "./types.ts";
-import type { Activation, Combat, Mana, Note, Resolution } from "./table.ts";
+import type { Activation, Combat, Mana, Note, Resolution, Trigger } from "./table.ts";
 import type { Bound } from "./selectors.ts";
 import type { Registration, Selector, TokenSpec } from "./language.ts";
 
@@ -78,7 +78,8 @@ export type Change =
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }
 	| { do: "activate"; what: string; id: string; ability: Activation }
-	| { do: "resolution"; action: "begin"; what: string; source: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean }
+	| { do: "resolution"; action: "begin"; what: string; source: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean;
+		bound?: Resolution["bound"]; optional?: true }
 	/**
 	 * Finish the current instruction, or record one pick of a `choose` that has
 	 * more to pick. `bind` keeps what it did for later instructions, and follows
@@ -86,7 +87,14 @@ export type Change =
 	 * puts an `each` in its place; `follow` is the permanent a spell became.
 	 */
 	| { do: "resolution"; action: "next"; what: string; pick?: ObjectRef; bind?: Record<string, Bound>;
-		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean }
+		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true }
+	/** A reflexive trigger made during resolution waits for the next priority (603.12). */
+	| { do: "trigger"; action: "wait"; trigger: Trigger }
+	/**
+	 * A waiting trigger goes on the stack with its targets as `id`, or, with no
+	 * legal targets, is removed (603.3d).
+	 */
+	| { do: "trigger"; action: "put"; trigger: string; id?: string; ability?: Activation }
 	| { do: "shuffle"; whose: SeatId }
 	/** Counters of one kind put on or, negative, removed. */
 	| { do: "counters"; what: string; kind: string; amount: number }

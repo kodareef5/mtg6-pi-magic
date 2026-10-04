@@ -6,65 +6,17 @@
  */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { commit, start } from "../src/core/commit.ts";
-import { deck } from "../src/core/decks.ts";
-import { standard } from "../src/core/format.ts";
-import { advance, apply, nextDecision } from "../src/core/decisions.ts";
-import { procedureOptions, activate, type ProcedureOption } from "../src/core/procedures.ts";
+import { commit } from "../src/core/commit.ts";
+import { apply, nextDecision } from "../src/core/decisions.ts";
+import { type ProcedureOption } from "../src/core/procedures.ts";
 import { characteristics } from "../src/core/characteristics.ts";
-import { editWork, workFrame } from "../src/core/work-tools.ts";
+import { editWork } from "../src/core/work-tools.ts";
 import { project } from "../src/core/view.ts";
-import { cardsIn, type Table } from "../src/core/table.ts";
+import { cardsIn } from "../src/core/table.ts";
 import type { Procedure } from "../src/core/language.ts";
-import type { Draft } from "../src/core/work.ts";
+import { announce, finish, main, matchup, offered, passBoth, place, step } from "./play.ts";
 
-/** The pinned matchup's two lists. */
-const deal = () => start(standard, [{ name: "Green", deck: deck("Mono-Green Landfall") }, { name: "Red", deck: deck("Mono-Red Aggro") }], "resolution");
-/** Put the first library copy of each card where a test needs it. */
-function place(table: Table, seat: number, zone: "hand" | "battlefield", ...cards: string[]) {
-	return cards.map((card) => {
-		const object = cardsIn(table, "library", seat).find((one) => one.card === card)!;
-		commit(table, [{ do: "move", what: object.id, to: zone, reason: "game-setup" }], "game-setup");
-		return table.things.get(object.id)!;
-	});
-}
-/** Keep both hands and stop at a seat's first main phase with priority. */
-function main(table: Table, seat: number, turn = seat + 1) {
-	for (let guard = 0; guard < 2000; guard++) {
-		const decision = nextDecision(table);
-		if (!decision) { advance(table); continue; }
-		if (decision.situation === "priority" && decision.seat === seat && table.cursor.turn === turn && table.cursor.steps[0] === "precombat-main") return;
-		apply(table, decision.situation === "pregame" ? "keep" : decision.options.find((option) => option.id === "pass")?.id ?? decision.options[0]!.id, "engine", "forced");
-	}
-	throw new Error("Never reached the main phase.");
-}
-const draft = (procedure: Procedure): Draft => ({ id: "test", recipe: "test", label: "Test", guidance: "Test", next: 0, status: "editing", reserves: [],
-	steps: [{ label: "Do it", when: {}, action: { procedure } }] });
-const offered = (table: Table, procedure: Procedure) => procedureOptions(draft(procedure), workFrame(table, table.cursor.priority!));
-function announce(table: Table, procedure: Procedure, which: (option: ProcedureOption) => boolean = () => true) {
-	const choice = offered(table, procedure).find(which);
-	assert.ok(choice, `${procedure.claim} is offered`);
-	activate(table, choice.activation, { picked: choice.option.id, offered: [choice.option.id], by: "model", why: "declared" });
-	return choice;
-}
-const passBoth = (table: Table) => { for (let at = 0; at < 2; at++) { while (!nextDecision(table)) advance(table); apply(table, "pass", "engine", "forced"); } };
-/** Answer the pending resolution step with the option a test names, or its only option. */
-const step = (table: Table, pick?: (label: string) => boolean) => {
-	const decision = nextDecision(table)!;
-	assert.equal(decision.situation, "resolution");
-	const option = pick ? decision.options.find((one) => pick(one.label)) : decision.options.length === 1 ? decision.options[0] : undefined;
-	assert.ok(option, `a resolution option among: ${decision.options.map((one) => one.label).join(" | ")}`);
-	apply(table, option.id, "model", "chosen");
-	return decision;
-};
-/** Finish resolving, apply the state check, and come back to the next priority. */
-const finish = (table: Table) => {
-	while (table.resolution) step(table);
-	for (let decision = nextDecision(table); decision?.situation !== "priority"; decision = nextDecision(table)) {
-		if (!decision) advance(table);
-		else apply(table, decision.options[0]!.id, "engine", "forced");
-	}
-};
+const deal = () => matchup("resolution");
 
 test("a search shows the library only to its chooser, may find nothing, binds that land and shuffles", () => {
 	const table = deal();
@@ -213,7 +165,7 @@ test("targets that partly fail, labels, fight, tokens, each player, and counter 
 
 	// Counter unless its controller pays: the payer decides.
 	const cub = cardsIn(table, "hand", 0).find((one) => one.card === "Sazh's Chocobo")!;
-	const cast = nextDecision(table)!.options.find((option) => option.id.startsWith("cast:") && option.label.includes("Sazh's Chocobo"))!;
+	const cast = nextDecision(table)!.options.find((option) => option.id.startsWith("cast:") && option.label.includes("Sazh's Chocobo") && !option.id.includes("token"))!;
 	apply(table, cast.id, "model", "chosen");
 	announce(table, ability("Tax", [{ do: "counter", what: "target:0", unless: { who: "controller:target:0", pays: { life: 2 } } }],
 		[{ object: { zones: ["stack"], types: ["creature"] } }]));

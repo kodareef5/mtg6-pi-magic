@@ -5,6 +5,8 @@ import { facts, isLand, permanentSpell } from "./printed.ts";
 import { offers } from "./announce.ts";
 import { entering } from "./entry.ts";
 import { project } from "./view.ts";
+import { tableWorld } from "./selectors.ts";
+import { allowance, playable } from "./permits.ts";
 import type { Frame, SeatId } from "./types.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
@@ -17,14 +19,16 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 	// than it may, it is this seat's main phase and the stack is empty. What the
 	// land registers comes from the seat's package as it enters.
 	// Playing a land does not use the stack. 305.1.
+	// A permanent may permit more land plays, or lands from another zone.
 	const step = table.cursor.steps[0] ?? "";
 	const main = step === "precombat-main" || step === "postcombat-main";
-	if (main && table.cursor.active === holder && seat(table, holder).landsPlayed < 1 && !cardsIn(table, "stack").length) {
-		for (const card of cardsIn(table, "hand", holder)) {
-			if (!isLand(facts(table, card))) continue;
+	const world = tableWorld(table);
+	if (main && table.cursor.active === holder && seat(table, holder).landsPlayed < allowance(world, holder).lands && !cardsIn(table, "stack").length) {
+		for (const card of [...table.things.values()]) {
+			if (!card.card || !isLand(facts(table, card)) || !["hand", "graveyard", "exile"].includes(card.zone) || !playable(world, holder, card, table.cursor.turn, true)) continue;
 			const note = entering(table, holder, card.card!);
 			moves.push({
-				option: { id: `land:${card.id}`, label: `Play ${card.card}`, objects: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
+				option: { id: `land:${card.id}`, label: `Play ${card.card}${card.zone === "hand" ? "" : ` from ${card.zone}`}`, objects: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
 				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land" }],
 				reason: "play-land",
 			});
@@ -50,9 +54,13 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
  */
 export function defaultCasts(table: Table, holder: SeatId): Move[] {
 	const frame: Frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
-	const names = [...new Set(cardsIn(table, "hand", holder).filter((card) => permanentSpell(facts(table, card))).map((card) => card.card!))].sort();
-	return names.flatMap((name) => offers({ source: { zones: ["hand"], controller: "self", card: name }, claim: "Cast for its printed cost",
-		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, "cast").map(({ option, activation }) => {
+	const world = tableWorld(table);
+	// From hand, and from another zone where a permission names the card ("you may cast it from exile").
+	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
+		(card.zone === "hand" ? card.owner === holder : playable(world, holder, card, table.cursor.turn, false)));
+	const sources = [...new Set(castable.map((card) => `${card.zone}|${card.card}`))].sort().map((key) => key.split("|") as ["hand" | "exile" | "graveyard", string]);
+	return sources.flatMap(([zone, name]) => offers({ source: { zones: [zone], controller: "self", card: name }, claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost`,
+		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
 		const note = entering(table, holder, name);
 		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
 	}));

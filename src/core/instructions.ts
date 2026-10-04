@@ -8,12 +8,12 @@
  * so "that much" and "its power" mean what they mean now (608.2h).
  * Past 150 lines because each instruction is a short case of one switch.
  */
-import { amount, objects, players, select, type Bound, type Scope, type Seen } from "./selectors.ts";
+import { amount, holds, objects, players, select, type Bound, type Scope, type Seen } from "./selectors.ts";
 import { characteristics, has } from "./characteristics.ts";
-import { fundings } from "./funding.ts";
+import { fundings, paying } from "./funding.ts";
 import { symbols } from "./announce.ts";
 import { project } from "./view.ts";
-import { cardsIn, seat, type Mana, type Note, type Resolution, type Table } from "./table.ts";
+import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
@@ -189,8 +189,17 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				once: !instruction.until };
 			return one("Create a delayed trigger", [{ do: "note", note }]);
 		}
-		case "reflect":
-			throw new Error("Reflexive triggers need the trigger window, which is not built yet.");
+		case "reflect": {
+			// "When you do": a trigger made now, put on the stack at the next priority (603.12).
+			if (instruction.check && !holds(scope, instruction.check)) return one("It does not trigger: its condition is false", []);
+			const event = scope.event;
+			const trigger: Trigger = { id: `trigger-${table.cursor.clock + 1}-reflexive`, controller, source: source ?? { id: pending.object, incarnation: 0 }, basis: `When you do (${claim})`,
+				effect: structuredClone(instruction.effect), ...(instruction.check ? { check: structuredClone(instruction.check) } : {}), bound: structuredClone(pending.bound),
+				event: { ...(event?.object ? { object: ref(event.object) } : {}), ...(event?.objects ? { objects: event.objects.map(ref) } : {}),
+					...(event?.player !== undefined ? { player: event.player } : {}), ...(event?.source ? { source: ref(event.source) } : {}) },
+				...(scope.x !== undefined ? { x: scope.x } : {}) };
+			return one("It triggers: when you do", [{ do: "trigger", action: "wait", trigger }]);
+		}
 		case "attach": {
 			const [what] = live(table, objects(scope, instruction.what)), [to] = live(table, objects(scope, instruction.to));
 			return one(`Attach ${name(what)} to ${name(to)}`, what && to ? [{ do: "attach", what: what.id, to: ref(to) }] : []);
@@ -204,13 +213,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const life = unless.pays.life ?? 0, mana = unless.pays.mana ? symbols(unless.pays.mana) : undefined;
 			const ways = mana ? fundings({ seat: payer, version: table.cursor.clock, view: project(table, payer) }, { generic: mana.generic, colors: mana.colors }) : [{ funding: { paid: [], taps: [] }, shows: "" }];
 			const pay = seat(table, payer).life >= life ? ways.map(({ funding, shows }, at): Choice => {
-				const made: string[] = [], changes: Change[] = [];
-				for (const tap of funding.taps) {
-					changes.push({ do: "tap", what: tap.source.id });
-					tap.colors.forEach((_, unit) => made.push(`mana-${table.cursor.clock + 1}-${changes.length}-${unit}`));
-					changes.push({ do: "add-mana", who: payer, colors: tap.colors });
-				}
-				if (funding.paid.length || made.length) changes.push({ do: "spend-mana", who: payer, ids: [...funding.paid, ...made] });
+				const changes = paying(funding, payer, table.cursor.clock, 0);
 				if (life) changes.push({ do: "change-life", who: payer, amount: -life, reason: "cost-payment" });
 				return { id: `pay-${at}`, label: `Pay${life ? ` ${life} life` : ""}${mana ? ` ${unless.pays.mana}` : ""}. ${shows}`, changes };
 			}) : [];

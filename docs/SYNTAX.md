@@ -253,8 +253,11 @@ needs an object id in advance.
 | `cast:<object>` | cast a permanent spell for its printed cost, with nothing on resolution |
 | `attack:<object>`, `attack:done` | add an attacker; finish declaring |
 | `block:<blocker>:<attacker>`, `block:done` | add a block; finish declaring |
-| `trigger:<n>` | put a waiting trigger on the stack next |
-| `play:<object>` | play a card a `permit` allows |
+| `trigger:<id>` | put that waiting trigger on the stack next, with its targets |
+| `play:<object>` | cast a card from another zone a `permit` allows |
+
+A land a permission lets you play from another zone is a `land:` option too,
+labelled with its zone.
 
 A procedure option is the procedure itself, offered with each legal source,
 target and payment.

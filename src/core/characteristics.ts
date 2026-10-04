@@ -87,6 +87,8 @@ export function characteristics(table: Table, object: Thing): Traits | undefined
 type Effect = { at: number; change: Modification; source?: Thing; applies: (scope: Scope, object: Seen) => boolean; when?: (scope: Scope) => boolean; ability?: Registration };
 
 const cache = new WeakMap<Table, { clock: number; size: number; traits: Map<string, Traits> }>();
+/** Drop the walk for this revision: `commit` changes the table before the clock moves. */
+export const forget = (table: Table) => void cache.delete(table);
 /** Every battlefield object's characteristics, walked once per table revision. */
 export function walk(table: Table): Map<string, Traits> {
 	const cached = cache.get(table);

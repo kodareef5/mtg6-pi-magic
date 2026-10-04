@@ -122,6 +122,10 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			const traits = characteristics(table, item);
 			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}) };
 		});
+	for (const trigger of table.waiting) {
+		const source = table.things.get(trigger.source.id);
+		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
+	}
 	if (table.resolution) lines.push(`Resolving ${publicName(table.things.get(table.resolution.object))}, ${table.resolution.program.length} instruction${table.resolution.program.length === 1 ? "" : "s"} left. Nobody has priority during this choice.`);
 	const names = [...new Set(objects.flatMap((object) => "card" in object && object.card ? [object.card] : []))].sort();
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], landsPlayed: seat(table, viewer).landsPlayed } : {}),
@@ -160,7 +164,8 @@ export function describe(table: Table, receipt: Receipt): string {
 				if (!moved) break;
 				const who = seat(table, moved.owner).name;
 				const name = visible(moved) ? moved.card : publicName(was);
-				parts.push(`${who} put ${name} into ${change.to} (${change.reason})`);
+				const terms = change.to === "battlefield" ? [change.tapped ? "tapped" : "", ...Object.entries(change.counters ?? {}).map(([kind, n]) => `${n} ${kind}`)].filter(Boolean) : [];
+				parts.push(`${who} put ${name} into ${change.to} (${change.reason})${terms.length ? `, ${terms.join(", ")}` : ""}`);
 				break;
 			}
 			case "tap":
@@ -172,6 +177,10 @@ export function describe(table: Table, receipt: Receipt): string {
 				break;
 			case "activate":
 				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : change.ability.timing === "spell" ? "spell on the stack" : "on the stack"})`);
+				break;
+			case "trigger":
+				if (change.action === "wait") parts.push(`triggered: ${change.trigger.basis}`);
+				else parts.push(change.ability ? `${seat(table, change.ability.controller).name} put on the stack: ${change.ability.claim}` : "a trigger with no legal targets was removed");
 				break;
 			case "add-mana":
 				parts.push(`${seat(table, change.who).name} added ${change.colors.join(" ")}`);

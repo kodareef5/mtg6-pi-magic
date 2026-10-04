@@ -27,7 +27,7 @@ import type { Workspace, WorkEntry } from "./work.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import type { Bound, Chosen } from "./selectors.ts";
 import type { Traits } from "./characteristics.ts";
-import type { Effect, GameEvent, Modification, Registration, Selector, TokenSpec } from "./language.ts";
+import type { Condition, Effect, GameEvent, Modification, Registration, Selector, TokenSpec } from "./language.ts";
 import type { ObjectRef } from "./types.ts";
 
 export type { Change, Reason, Zone } from "./syntax.ts";
@@ -109,6 +109,33 @@ export type Activation = {
 	instructions: Instruction[];
 	words?: string[];
 	x?: number;
+	/** Set when a triggered ability was put on the stack: what it needs to resolve. */
+	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound">;
+};
+/**
+ * A triggered ability waiting to be put on the stack (603.3). It belongs to the
+ * table: detection writes it, and the next time a player would receive priority
+ * its controller puts it on the stack and chooses its targets.
+ */
+export type Trigger = {
+	id: string;
+	controller: SeatId;
+	/** "This": the object whose ability triggered, as it was when it triggered. */
+	source: ObjectRef;
+	basis: string;
+	effect: Effect;
+	/** The intervening "if", checked as it triggers and again as it resolves (603.4). */
+	check?: Condition;
+	/** "You may": asked as it resolves. */
+	may?: true;
+	/** "Only once each turn": counted from what triggered this turn. */
+	limit?: "once-per-turn";
+	/** What the event happened to, who caused it, and the spell or ability that did. */
+	event: { object?: ObjectRef; objects?: ObjectRef[]; player?: SeatId; source?: ObjectRef };
+	/** A delayed or reflexive trigger's refs, fixed when it was created (603.7c). */
+	bound?: Record<string, Bound>;
+	targets?: Chosen[][];
+	x?: number;
 };
 /** What was paid besides mana. */
 export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tapped?: ObjectRef[]; sacrificed?: ObjectRef[];
@@ -130,6 +157,8 @@ export type Resolution = {
 	lost?: boolean;
 	/** Picks so far in the current `choose`. */
 	picked: ObjectRef[];
+	/** A "you may" trigger whose controller has not yet said whether to use it. */
+	optional?: true;
 };
 
 /** Who is attacking whom and who blocks what, from declaration until combat ends (506-511). */
@@ -311,6 +340,8 @@ export type Table = {
 	workLog: WorkEntry[];
 	resolution: Resolution | null;
 	combat: Combat | null;
+	/** Triggered abilities waiting to be put on the stack, in the order they triggered. */
+	waiting: Trigger[];
 };
 
 /**
