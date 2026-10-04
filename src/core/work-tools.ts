@@ -9,6 +9,7 @@ import { commands, type WorkCommand, type When } from "./work-language.ts";
 import { checkProcedure } from "./procedures.ts";
 import type { Package, Plan, PlanOption } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
+import { allowance } from "./permits.ts";
 
 export function workFrame(table: Table, seat: SeatId): Frame {
 	const decision = nextDecision(table);
@@ -43,6 +44,16 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 		}
 	};
 	plan.steps.forEach((step, at) => option(step, `steps[${at}]`));
+	// One land play a turn unless a permanent permits more: more land steps in one turn cannot all be taken.
+	const plays = new Map<string, string[]>();
+	for (const step of plan.steps) {
+		const action = step.action;
+		if ("procedure" in action ? action.procedure.timing !== "land" : !(action.option ?? action.prefix ?? "").startsWith("land:")) continue;
+		const turn = `${step.when.fromTurn ?? "?"}-${step.when.throughTurn ?? "?"}`;
+		plays.set(turn, [...(plays.get(turn) ?? []), step.label]);
+	}
+	const allowed = allowance(viewWorld(frame.view), frame.seat).lands;
+	for (const labels of plays.values()) if (labels.length > allowed) found.push(`${labels.length} land plays in one turn (${labels.join("; ")}), but you have ${allowed}; keep the others for later turns or make them a branch`);
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	for (const stop of plan.askWhen ?? []) {
 		try { holds(scope, stop.if); } catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
