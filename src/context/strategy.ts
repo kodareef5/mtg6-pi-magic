@@ -15,6 +15,10 @@ import type { Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
 import type { Universe } from "../core/cards.ts";
 import { planReason } from "../core/planning.ts";
+import { intrinsic } from "../core/characteristics.ts";
+import { sick } from "../core/funding.ts";
+import { allowance } from "../core/permits.ts";
+import { viewWorld } from "../core/selectors.ts";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -130,12 +134,26 @@ function misregistered(plan: Plan): string[] {
 	return found;
 }
 
+/**
+ * What the seat can spend this turn, worked out rather than left to the writer:
+ * its untapped mana sources and whether a land play and a land remain.
+ */
+function mana(frame: Frame): string {
+	const mine = (frame.view.objects ?? []).filter((object) => object.controller === frame.seat);
+	const sources = mine.filter((object) => object.zone === "battlefield" && !object.tapped && !sick(frame, object) &&
+		(intrinsic(object.traits).length > 0 || (object.traits?.registrations ?? []).some((one) => one.kind === "mana")));
+	const lands = mine.filter((object) => object.zone === "hand" && object.traits?.types.includes("land"));
+	const play = (frame.view.landsPlayed ?? 0) < allowance(viewWorld(frame.view), frame.seat).lands && lands.length > 0;
+	return `You can make ${sources.length + (play ? 1 : 0)} mana this turn: ${sources.length} untapped source${sources.length === 1 ? "" : "s"} (${sources.map((one) => one.card ?? one.token?.name).join(", ") || "none"})` +
+		`${play ? `, plus a land from hand (${[...new Set(lands.map((one) => one.card))].join(", ")})` : lands.length ? "; your land play is used" : "; no land in hand"}. A spell must be paid with this; check each step's cost against it.`;
+}
+
 export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<WorkCommand[]> {
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
 	const { work, done, objects: _objects, printed: _printed, ...view } = frame.view;
 	const user = JSON.stringify({
-		seat: frame.seat, view, objects: objects(frame),
+		seat: frame.seat, mana: mana(frame), view, objects: objects(frame),
 		plan: work?.plan ? { ...work.plan, done: (done ?? []).map((at) => work.plan!.steps[at]?.label) } : null,
 		packages: (work?.packages ?? []).map((pack) => pack.card),
 		options: frame.decision?.options, brief: context.brief,
