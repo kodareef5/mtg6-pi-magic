@@ -186,7 +186,9 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	main(table, 0);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const frame = workFrame(table, 0);
-	const broken = { ...line, steps: [{ label: "Untap", when: { step: "untap" }, action: { option: "pass" } }, { label: "Nothing", when: {}, action: {} }] };
+	const broken = { ...line, steps: [{ label: "Untap", when: { step: "untap" }, action: { option: "pass" } }, { label: "Nothing", when: {}, action: {} }],
+		packages: [{ card: "Hired Claw", registers: [{ basis: "{1}{R}: Put a +1/+1 counter on this creature.", kind: "watch", event: { on: "step", step: "end" },
+			effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } }] }] };
 	const replies = [{ plan: broken }, { plan: line }];
 	const seen: string[] = [];
 	const stream: Stream = (_model, context) => {
@@ -197,7 +199,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const tools = await planWork(frame, {}, writer);
 	assert.deepEqual(tools, [{ do: "plan.put", plan: line }]);
-	assert.match(seen[1]!, /2 problems: steps\[0\] \(Untap\): untap has no priority.*steps\[1\] \(Nothing\): name an option id/, "both problems in one refusal");
+	assert.match(seen[1]!, /\d problems: steps\[0\] \(Untap\): untap has no priority.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
 });
 

@@ -9,7 +9,7 @@ import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
 import type { WorkCommand } from "../core/work-language.ts";
 import { planProblems } from "../core/work-tools.ts";
-import { PlanSchema, problems, type Plan } from "../core/language.ts";
+import { PlanSchema, problems, type Plan, type Registration } from "../core/language.ts";
 import type { Brief } from "./brief.ts";
 import type { Reasoner } from "./reason.ts";
 import type { Recap } from "./summary.ts";
@@ -84,6 +84,7 @@ const SYSTEM = [
 	"- The table runs what permanents register: entering terms as they enter, and triggers, which it puts in front of their controller before the next priority.",
 	"- Combat is declared one creature at a time with attack: and block: options, then finished with attack:done or block:done. A block that breaks a word such as flying or menace is marked; do not plan one.",
 	"- Option ids are matched by option or prefix and objects, never by label. Turn numbers in when are the table's global turns.",
+	"- when.step is one of: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end. Leave step out to match every step; when.active is self, opponent or any.",
 	"- Copy the card's own words into basis. Do not replace card text with an invented simpler effect.",
 	"",
 	"HOW TO ANSWER. Call the submit tool once with your whole plan. Nothing you write as text is read.",
@@ -99,6 +100,26 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
 	...(object.traits?.words.length ? { words: object.traits.words } : {}), ...(object.registrations?.length ? { registers: object.registrations.map((one) => one.basis) } : {}),
 }));
+
+/** "{1}{R}: ...", "{T}, Sacrifice this: ...": a cost, a colon, an effect. */
+const ACTIVATED = /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/;
+
+/**
+ * Registrations whose own quoted basis reads as an activated ability. Those are
+ * announced as procedures when the seat chooses to, never registered to fire on
+ * their own; only a mana ability is registered.
+ */
+function misregistered(plan: Plan): string[] {
+	const found: string[] = [];
+	const visit = (registrations: Registration[], card: string) => {
+		for (const registration of registrations) {
+			if (registration.kind !== "mana" && ACTIVATED.test(registration.basis)) found.push(`package ${card}: "${registration.basis.slice(0, 60)}" is an activated ability (a cost, then a colon); announce it as a procedure step when you mean to pay for it, and do not register it. Only mana abilities are registered.`);
+			if (registration.kind === "continuous" && registration.change.registers) visit(registration.change.registers, card);
+		}
+	};
+	for (const pack of plan.packages ?? []) visit(pack.registers, pack.card);
+	return found;
+}
 
 export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<WorkCommand[]> {
 	const request = planReason(frame);
@@ -124,7 +145,7 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
 		const shape = problems(PlanSchema, args.plan);
 		if (shape.length) return `The plan does not match the schema: ${shape.join("; ")}.`;
-		const found = planProblems(frame, args.plan as Plan);
+		const found = [...planProblems(frame, args.plan as Plan), ...misregistered(args.plan as Plan)];
 		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.` : null;
 	} };
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
