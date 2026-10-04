@@ -191,8 +191,10 @@ test("no leak: public deck counts never identify hidden objects", async () => {
 	for (const zone of ["battlefield", "stack", "exile"] as const) {
 		card.zone = zone;
 		for (const viewer of [1, "spectator"] as const) {
-			const { decks, ...position } = project(hidden, viewer);
+			// Printed facts cover every card on the public lists, so they name no object.
+			const { decks, printed, ...position } = project(hidden, viewer);
 			assert.equal(JSON.stringify(position).includes("Gigantosaurus"), false);
+			assert.deepEqual(Object.keys(printed!), [...new Set(hidden.seats.flatMap(({ deck }) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]))].sort());
 			assert.equal(decks![0]!.cards.Gigantosaurus, 2, "the registered count is public");
 		}
 	}

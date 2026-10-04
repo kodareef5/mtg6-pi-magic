@@ -198,13 +198,13 @@ test("a target can depend on an earlier one, a card enters with its new controll
 	commit(table, [{ do: "move", what: claw!.id, to: "graveyard", reason: "destroy" }], "destroy");
 	finish(table);
 	assert.equal(table.things.get("equipment")!.attached, undefined, "the Equipment fell off as a state-based action (704.5n)");
-	editWork(table, 0, [{ do: "package.put", package: { card: "Hired Claw", registers: [{ basis: "Green's reading", kind: "continuous", affects: { is: "this" }, change: { words: ["haste"] } }] } }], "package");
+	editWork(table, 0, [{ do: "package.put", package: { card: "Hired Claw", registers: [{ basis: "Whenever you attack with one or more Lizards, this creature deals 1 damage to target opponent.", kind: "continuous", affects: { is: "this" }, change: { words: ["haste"] } }] } }], "package");
 	announce(table, ability("Reanimate", [{ do: "move", what: "target:0", to: "battlefield", controller: "you", reason: "resolve" }], [{ object: { zones: ["graveyard"], types: ["creature"] } }]));
 	passBoth(table);
 	finish(table);
 	const returned = table.things.get(claw!.id)!;
 	assert.equal(returned.controller, 0);
-	assert.deepEqual(returned.registrations?.map((one) => one.basis), ["Green's reading"]);
+	assert.deepEqual(returned.registrations?.map((one) => one.basis), ["Whenever you attack with one or more Lizards, this creature deals 1 damage to target opponent."]);
 
 	// A revealed card is named to every seat.
 	const veil = cardsIn(table, "hand", 0).find((one) => one.card === "Snakeskin Veil")!;

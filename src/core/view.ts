@@ -139,7 +139,9 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			: `The judge heard ${by}'s objection to action ${open.row} and let it stand (${ruling.rule}: ${ruling.because}).`);
 	}
 	if (table.resolution) lines.push(`Resolving ${publicName(table.things.get(table.resolution.object))}, ${table.resolution.program.length} instruction${table.resolution.program.length === 1 ? "" : "s"} left. Nobody has priority during this choice.`);
-	const names = [...new Set(objects.flatMap((object) => "card" in object && object.card ? [object.card] : []))].sort();
+	// Visible cards, and every card on a registered list: those lists are public, and a package for a card still in the library is checked against it.
+	const listed = table.format.decksRegistered ? table.seats.flatMap(({ deck }) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]) : [];
+	const names = [...new Set([...objects.flatMap((object) => "card" in object && object.card ? [object.card] : []), ...listed])].sort();
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
 		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id, name: deck.name,

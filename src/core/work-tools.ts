@@ -1,5 +1,5 @@
 /** The writer for private seat equipment. Card motion has its own commit boundary. */
-import { printedTargetless } from "./printed.ts";
+import { printedTargetless, quotes } from "./printed.ts";
 import { nextDecision } from "./decisions.ts";
 import { project } from "./view.ts";
 import { STEPS } from "./steps.ts";
@@ -8,7 +8,7 @@ import type { Table } from "./table.ts";
 import { emptyWork, type Workspace } from "./work.ts";
 import { commands, type WorkCommand, type When } from "./work-language.ts";
 import { checkProcedure } from "./procedures.ts";
-import type { Package, Plan, PlanOption } from "./language.ts";
+import type { Package, Plan, PlanOption, Registration } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
 import { matches } from "./query.ts";
 
@@ -97,8 +97,15 @@ function placement(id: string, when: When): string | null {
 	return null;
 }
 
-const packageProblem = (frame: Frame, pack: Package) => !frame.view.decks?.find((deck) => deck.seat === frame.seat)?.cards[pack.card] && !frame.view.printed?.[pack.card]
-	? `package ${pack.card}: that card is not in your view or registered list.` : null;
+/** A package names a card of the seat's, and each thing it registers quotes that card's own text. */
+function packageProblem(frame: Frame, pack: Package): string | null {
+	const printed = frame.view.printed?.[pack.card];
+	if (!frame.view.decks?.find((deck) => deck.seat === frame.seat)?.cards[pack.card] && !printed) return `package ${pack.card}: that card is not in your view or registered list.`;
+	if (!printed) return null;
+	const all = (registrations: Registration[]): Registration[] => registrations.flatMap((one) => [one, ...(one.kind === "continuous" && one.change.registers ? all(one.change.registers) : [])]);
+	const foreign = all(pack.registers).filter((one) => !quotes(printed, one.basis));
+	return foreign.length ? `package ${pack.card}: ${foreign.map((one) => JSON.stringify(one.basis)).join(", ")} ${foreign.length === 1 ? "is" : "are"} not on ${pack.card}; each registration quotes the card's own text word for word, and a card registers only abilities it has` : null;
+}
 const withPackages = (current: Package[] = [], added: Package[] = []) =>
 	[...current.filter((entry) => !added.some((one) => one.card === entry.card)), ...structuredClone(added)];
 

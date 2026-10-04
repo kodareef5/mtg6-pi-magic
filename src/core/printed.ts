@@ -1,12 +1,13 @@
 /** Type line, mana cost and power/toughness from the pinned card file.
- * Core records whether a card has rules text but never reads it. Tokens,
- * face-down objects and effects that change characteristics are not handled here.
+ * Core keeps a card's rules text but never interprets it: it only checks that
+ * a registration quotes it word for word. Tokens, face-down objects and effects
+ * that change characteristics are not handled here.
  */
 import { join } from "node:path";
 import { load, type Universe } from "./cards.ts";
 import type { Mana, Table, Thing } from "./table.ts";
 
-export type Printed = { type: string; mana: string; stats: string; text: boolean };
+export type Printed = { type: string; mana: string; stats: string; text: boolean; oracle: string };
 
 const SHIPPED = join(import.meta.dirname, "..", "..", "cards", "standard.tsv");
 let shippedUniverse: Universe | undefined;
@@ -18,7 +19,7 @@ export function printedFacts(universe: Universe, names: string[]): Record<string
 	return Object.fromEntries([...new Set(names)].sort().flatMap((name) => {
 		const card = universe.cards.get(name);
 		return card ? [[name, { type: front(card.type), mana: front(card.mana), stats: front(card.stats),
-			text: card.oracle.split(" // ")[0]!.replace(/\([^)]*\)/g, "").trim().length > 0 }]] : [];
+			text: card.oracle.split(" // ")[0]!.replace(/\([^)]*\)/g, "").trim().length > 0, oracle: card.oracle }]] : [];
 	}));
 }
 const front = (field: string) => field.split(" // ")[0]!.trim();
@@ -72,3 +73,15 @@ export const targetless = (types: readonly string[], subtypes: readonly string[]
 /** The same, read from a printed type line. */
 export const printedTargetless = (printed?: Printed) => !!printed &&
 	targetless(printed.type.split("—")[0]!.trim().split(/\s+/), (printed.type.split("—")[1] ?? "").trim().split(/\s+/).filter(Boolean));
+
+/**
+ * Whether a registration's basis is the card's own text, word for word: line
+ * breaks, reminder text, dashes, apostrophes and case aside. A card's abilities
+ * come from its card, never from a claim.
+ */
+export function quotes(printed: Printed | undefined, basis: string): boolean {
+	const plain = (text: string) => text.replace(/\\n|\n/g, " ").replace(/\([^)]*\)/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-")
+		.replace(/\s+/g, " ").trim().toLowerCase();
+	const quoted = plain(basis).replace(/^"|"$/g, "").replace(/\.$/, "");
+	return !!printed && !!quoted && plain(printed.oracle).includes(quoted);
+}

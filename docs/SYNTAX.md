@@ -192,6 +192,12 @@ exists, or until its own end. Every registration quotes the text it carries out
 in `basis`, so another seat or a judge can check it. Registrations are how a
 permanent "evaluates" things while it sits on the battlefield.
 
+The seat that plays a card is responsible for registering it faithfully. The
+table refuses a package whose `basis` is not that card's own text word for word
+(line breaks, reminder text, dashes and case aside): a card registers only
+abilities it has. Whether a registration does what its quote says is not
+checked by the table; the opponent sees both, and objects when they differ.
+
 | Kind | What it is | Rule |
 |---|---|---|
 | `watch` | a triggered ability: an event, an intervening `if`, an effect, `may`, `limit` | 603 |

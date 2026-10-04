@@ -401,8 +401,10 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.match(problems(two, { steps: [], askWhen: [{ label: "Never", when: { active: "opponent", fromTurn: turn(two), throughTurn: turn(two) }, if: { amount: { life: "you" }, atMost: 5 } }] }), /is your turn, so a window for the opponent's turn on it never opens/);
 
 	// A land that enters tapped makes nothing this turn.
-	editWork(two, 0, [{ do: "package.put", package: { card: "Forest", registers: [{ basis: "This land enters tapped.", kind: "enters", tapped: true }] } }], "tapped");
-	assert.match(problems(two, { steps: [land(two, "Forest"), cast(two, "Mossborn Hydra")] }), /costs \{2\}\{G\}/);
+	// A Forest never says so, so the table refuses that package; the walk alone is shown one.
+	const tapped: Plan["packages"] = [{ card: "Forest", registers: [{ basis: "This land enters tapped.", kind: "enters", tapped: true }] }];
+	assert.match(problems(two, { steps: [], packages: tapped }), /package Forest: "This land enters tapped\." is not on Forest/);
+	assert.match(budget(workFrame(two, 0), { objective: "o", guidance: "g", packages: tapped, steps: [land(two, "Forest"), cast(two, "Mossborn Hydra")] }).join(" "), /costs \{2\}\{G\}/);
 
 	// Icetill Explorer cast first permits the second land.
 	const icetill = matchup("icetill-plan");
@@ -740,4 +742,14 @@ test("a preparation closed or taken starts nothing more, and a challenge's error
 	await seat.answer(workFrame(table, 0));
 	assert.ok(reviewed.length === 1 && reviewed[0]!.includes("a challenge of the prepared plan found: The Chocobo attacks into an untapped blocker."), JSON.stringify(reviewed));
 	assert.deepEqual(planned, ["reviewed:true"], "the table waited on a review of a plan that was ready");
+});
+
+test("a package registers only what its card says: Elven Passage is refused Ba Sing Se's mana ability", () => {
+	const table = matchup("quotes");
+	main(table, 0, 3);
+	place(table, 0, "hand", "Elven Passage", "Ba Sing Se");
+	const mana = { basis: "{T}: Add {G}.", kind: "mana" as const, cost: { tap: true as const }, colors: ["G" as const] };
+	assert.throws(() => editWork(table, 0, [{ do: "package.put", package: { card: "Elven Passage", registers: [mana] } }], "passage"), /"\{T\}: Add \{G\}\." is not on Elven Passage/);
+	assert.equal(editWork(table, 0, [{ do: "package.put", package: { card: "Ba Sing Se", registers: [mana, { basis: "This land enters tapped unless you control a basic land.", kind: "enters", tapped: true,
+		if: { amount: { count: { types: ["land"], supertypes: ["basic"], controller: "you" } }, atMost: 0 } }] } }], "ba-sing-se"), true, "its own text, line breaks and all");
 });

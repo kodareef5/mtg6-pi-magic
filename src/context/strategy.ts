@@ -100,7 +100,7 @@ const SYSTEM = [
 	"- when.step is one of: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end. Leave step out to match every step; when.active is self, opponent or any.",
 	"- Copy the card's own words into basis. Do not replace card text with an invented simpler effect.",
 	"",
-	"OBJECTING. view.actions lists the opponent's actions since your last plan, by row. The table does not police them. If one broke a rule or misread a card, such as a blocker without flying or reach on a flier, or a land that says it enters tapped entering untapped, add objection {row, claim, rule} beside your plan, citing the rule number. A judge decides; an upheld objection takes the game back to just before that action, and you plan again from there. Never object to play you merely think is poor.",
+	"OBJECTING. view.actions lists the opponent's actions since your last plan, by row. The table does not police them. If one broke a rule or misread a card, such as a blocker without flying or reach on a flier, or a land that says it enters tapped entering untapped, or a permanent whose registers do what its card does not say, add objection {row, claim, rule} beside your plan, citing the rule number. A judge decides; an upheld objection takes the game back to just before that action, and you plan again from there. Never object to play you merely think is poor.",
 	"",
 	"HOW TO ANSWER. Call the submit tool once with your whole plan. Nothing you write as text is read.",
 	"If submit reports problems, fix every one of them and call submit again with the whole corrected plan.",
