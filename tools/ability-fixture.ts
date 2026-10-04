@@ -54,7 +54,7 @@ export async function abilityExercise() {
 		history.push({ clock: table.cursor.clock, seat, note: event, workspace: structuredClone(table.work[seat]), table: project(table, "spectator").table });
 		if (table.work[0]?.draft?.next === 2 && table.work[1]?.draft?.next === 2 && !cardsIn(table, "stack").length) exchangeCalls = counted.spent().length;
 	};
-	const thinking: Reasoner = { named: "offline/authored-ability-strategy", broken: () => null, async think(_about, prompt) {
+	const thinking: Pick<Reasoner, "work"> = { async work(_about, prompt, { submit }) {
 		plans += 1;
 		const { seat } = JSON.parse(prompt.user) as { seat: number };
 		const tools: WorkCommand[] = [
@@ -66,7 +66,9 @@ export async function abilityExercise() {
 				scope: { zones: [] }, concepts: ["prepared activation"], concerns: ["opportunity"], guidance: "Adopt loot once. B responds while A's ability is on the stack. Once the draft is adopted, finish it and pass.", recipes: ["loot"] } },
 			{ do: "plan.accept", objective: seat === 0 ? "Activate, then allow the opponent to respond." : "Respond with our own activation before theirs resolves." },
 		];
-		return JSON.stringify(tools);
+		const problem = submit.check({ commands: tools });
+		if (problem) throw new Error(problem);
+		return { commands: tools };
 	} };
 	const classify: Classify = async (_model, request) => {
 		const packet = request.state as unknown as Packet;

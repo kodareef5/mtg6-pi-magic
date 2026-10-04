@@ -38,8 +38,8 @@ export const CEILING: Record<Role, number> = {
 	decide: 0,
 	/** One brief snippet. Several are asked at once and each is a few lines. */
 	pregame: 500,
-	/** A bounded tool batch: recipes, appointments, and resource purposes. */
-	strategy: 2500,
+	/** A bounded tool batch: recipes, appointments, and resource purposes. Thinking counts against it too. */
+	strategy: 4000,
 	/** A verdict, the rule it rests on, and the remedy. */
 	judge: 700,
 	/** Two sentences, three if it must. */

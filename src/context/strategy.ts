@@ -34,6 +34,18 @@ export function syntaxReference(): string {
 	return [readFileSync(join(docs, "SYNTAX.md"), "utf8"), ...listed.map((file) => readFileSync(join(docs, "examples", file), "utf8"))].join("\n\n").trim();
 }
 
+/**
+ * How strategy answers: one call to `submit` whose `commands` are the whole
+ * answer. The schema's refs are rewritten as JSON pointers so a provider reads
+ * them, and the tool is identical on every call so it stays in the cached prefix.
+ */
+const SUBMIT = {
+	name: "submit",
+	description: "Submit your whole answer: the work commands for this seat, in order, ending with exactly one plan.accept. Call it once.",
+	parameters: JSON.parse(JSON.stringify({ type: "object", properties: { commands: { $ref: "Commands" } }, required: ["commands"], additionalProperties: false,
+		$defs: (CommandsSchema as unknown as { $defs: object }).$defs }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
+};
+
 const SYSTEM = [
 	"Prepare a stretch of play for one seat of Magic: The Gathering.",
 	"The classifier executes your guidance and recognizes your prepared branches.",
@@ -66,19 +78,19 @@ const SYSTEM = [
 	"package.put records what a permanent of that name registers when it enters under your control, such as its mana ability. Write one for each permanent your plan puts onto the battlefield.",
 	"You may use task.put, task.cancel, recipe.put, label.put, label.remove, draft.edit, draft.cancel, package.put, and plan.accept.",
 	"Finish with exactly one plan.accept. Do not answer reviews or execute moves for the classifier.",
-	"Return a JSON array of tool commands only, with no markdown.",
+	"",
+	"HOW TO ANSWER. You answer by calling the submit tool once. Its commands argument is your whole answer: an array of work commands ending with exactly one plan.accept.",
+	"Nothing you write as text is read. Do not explain your plan in text; put reasons in recipe guidance and the plan.accept objective.",
+	"If submit reports a problem, fix exactly that and call submit again with the whole corrected array.",
 	"",
 	"The syntax reference and its worked examples follow. The examples teach shapes; read your own card and write what it says.",
 	"",
 	syntaxReference(),
-	"",
-	"This is the tool schema:",
-	JSON.stringify(CommandsSchema),
 ].join("\n");
 
 const ALLOWED = new Set(["task.put", "task.cancel", "recipe.put", "label.put", "label.remove", "draft.edit", "draft.cancel", "package.put", "plan.accept"]);
 
-export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Reasoner): Promise<WorkCommand[]> {
+export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<WorkCommand[]> {
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
 	const user = JSON.stringify({
@@ -90,10 +102,22 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
 		recaps: context.recaps?.slice(-3), refused: frame.refused,
 	});
-	const tools = commands(JSON.parse(await reasoner.think("seat plan", { system: SYSTEM, user })));
-	if (tools.some((tool) => !ALLOWED.has(tool.do)) || tools.filter((tool) => tool.do === "plan.accept").length !== 1 || tools.at(-1)?.do !== "plan.accept") {
-		throw new Error("Strategy must use preparation tools and finish with exactly one plan.accept.");
-	}
-	prepareWork(frame, tools);
-	return tools;
+	const task = [
+		`YOUR TASK: ${request}`,
+		"Answer now by calling submit once. Its commands are an array that ends with exactly one plan.accept.",
+		`Use only these commands: ${[...ALLOWED].join(", ")}.`,
+		"Keep it compact: at most twelve commands, and one or two sentences in each guidance, purpose and objective.",
+	].join("\n");
+	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
+		try {
+			const tools = commands(args.commands);
+			const banned = tools.filter((tool) => !ALLOWED.has(tool.do)).map((tool) => tool.do);
+			if (banned.length) return `These commands are not yours to use here: ${[...new Set(banned)].join(", ")}. Use only ${[...ALLOWED].join(", ")}.`;
+			if (tools.filter((tool) => tool.do === "plan.accept").length !== 1 || tools.at(-1)?.do !== "plan.accept") return "The commands must end with exactly one plan.accept, and contain no other.";
+			prepareWork(frame, tools);
+			return null;
+		} catch (error) { return String(error instanceof Error ? error.message : error); }
+	} };
+	const answer = await reasoner.work("seat plan", { system: SYSTEM, user, task }, { submit });
+	return commands(answer.commands);
 }

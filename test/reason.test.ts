@@ -47,7 +47,7 @@ const sol: Model<Api> = {
 function chat(reply: (user: string, system: string) => string, stop = "stop") {
 	const sent: { system: string; user: string; maxTokens?: number }[] = [];
 	const stream: Stream = (_model, context, options) => {
-		const user = String(context.messages[0]?.content ?? "");
+		const user = String((context.messages[0] as { content?: unknown } | undefined)?.content ?? "");
 		sent.push({ system: context.systemPrompt ?? "", user, ...(options?.maxTokens !== undefined ? { maxTokens: options.maxTokens } : {}) });
 		const text = reply(user, context.systemPrompt ?? "");
 		return {
@@ -145,7 +145,7 @@ test("a failed question is a gap and the game still starts", async () => {
 	let dropped = false;
 	const observed = traceInference({ classify: async () => { throw new Error("No classifier in this pass"); },
 		stream: (model, context, options) => {
-			if (!dropped && context.messages[0]!.content.includes("keepable seven")) {
+			if (!dropped && String((context.messages[0] as { content?: unknown }).content).includes("keepable seven")) {
 				dropped = true;
 				return { result: async () => { throw new Error("fixture connection dropped"); } };
 			}
@@ -578,4 +578,30 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 	fork(childPath, 10, "grand", grandPath);
 	assert.equal(preparedIn(read(grandPath).lines).length, 2, "the briefs came across again");
 	assert.equal(rowsOf(read(grandPath).lines).length, 10);
+});
+
+test("work takes its answer only through submit, and tells the model what was wrong until it is right", async () => {
+	const replies = [
+		{ content: [{ type: "text", text: "We need to cast the Elves first, then..." }], stopReason: "stop" },
+		{ content: [{ type: "toolCall", id: "a", name: "lookup", arguments: { rule: "302.6" } }, { type: "toolCall", id: "b", name: "submit", arguments: { commands: [] } }], stopReason: "toolUse" },
+		{ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { commands: ["plan"] } }], stopReason: "toolUse" },
+	];
+	const seen: unknown[][] = [];
+	const stream: Stream = (_model, context) => { seen.push(structuredClone(context.messages)); const reply = replies.shift()!; return { result: async () => reply }; };
+	const counted = tally();
+	const thinking = reasoner({ role: "strategy", stream, model: sol, tally: counted, backoffMs: 0 });
+	const submit = { name: "submit", description: "The answer.", parameters: { type: "object" },
+		check: (args: Record<string, unknown>) => (args.commands as unknown[]).length ? null : "The commands are empty." };
+	const lookup = { name: "lookup", description: "A rule.", parameters: { type: "object" }, answer: (args: Record<string, unknown>) => `Rule ${args.rule}: summoning sickness.` };
+	const answer = await thinking.work("seat plan", { system: "S", user: "facts", task: "Plan now." }, { submit, lookups: [lookup], turns: 3 });
+	assert.deepEqual(answer, { commands: ["plan"] });
+	assert.equal(counted.spent().length, 3, "every reply is a metered call");
+	const second = JSON.stringify(seen[1]), third = JSON.stringify(seen[2]);
+	assert.match(second, /replied with text and did not call a tool/);
+	assert.match(third, /Rule 302.6: summoning sickness/, "a lookup is answered");
+	assert.match(third, /Not accepted: The commands are empty/, "a refused answer says why");
+	assert.match(JSON.stringify(seen[0]), /"facts".*"Plan now."/, "the task comes after the facts");
+
+	const stubborn = reasoner({ role: "strategy", stream: () => ({ result: async () => ({ content: [{ type: "text", text: "Prose." }], stopReason: "stop" }) }), model: sol, tally: tally(), backoffMs: 0 });
+	await assert.rejects(stubborn.work("seat plan", { system: "S", user: "facts" }, { submit, turns: 2 }), /did not submit an accepted answer/);
 });

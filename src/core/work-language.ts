@@ -69,14 +69,19 @@ export type WorkCommand = Static<typeof CommandSchema>;
 
 /** Shape checking proves neither card meaning nor strategic quality. */
 export function commands(value: unknown): WorkCommand[] {
-	if (!Check(CommandsSchema, value)) {
-		// A union's first errors can describe an unrelated tool. Report the
-		// selected command so a retry can repair the field that actually failed.
-		const at = Array.isArray(value) ? value.findIndex((tool) => !Check(CommandSchema, tool)) : -1;
-		const tool = at < 0 ? undefined : (value as unknown[])[at];
+	if (Check(CommandsSchema, value)) return value as WorkCommand[];
+	if (!Array.isArray(value)) throw new Error("commands must be an array of work commands.");
+	// Every failing command at once, each against the command it names: a union's
+	// first errors describe an unrelated branch, and one error per try costs a call per error.
+	const wrong = value.flatMap((tool, at) => {
+		if (Check(CommandSchema, tool)) return [];
 		const branch = Vocabulary.Command.anyOf.find((one) => tool && typeof tool === "object" && "do" in tool && one.properties.do.const === tool.do);
-		if (branch) throw new Error(`Seat tool ${at}: ${JSON.stringify([...Errors(Type.Cyclic({ ...Vocabulary, Picked: branch }, "Picked"), tool)].slice(0, 3))}`);
-		throw new Error(`Seat tools: ${JSON.stringify(Errors(CommandsSchema, value).slice(0, 3))}`);
-	}
-	return value as WorkCommand[];
+		if (!branch) return [`command ${at}: "do" must be one of ${Vocabulary.Command.anyOf.map((one) => one.properties.do.const).join(", ")}`];
+		const errors = [...Errors(Type.Cyclic({ ...Vocabulary, Picked: branch }, "Picked"), tool)]
+			.sort((a, b) => b.instancePath.length - a.instancePath.length).slice(0, 4)
+			.map((error) => `${error.instancePath || "/"} ${error.message}${"allowedValues" in error.params ? ` (${(error.params.allowedValues as unknown[]).join(", ")})` :
+				"requiredProperties" in error.params ? ` (${(error.params.requiredProperties as string[]).join(", ")})` : "additionalProperty" in error.params ? ` (${error.params.additionalProperty})` : ""}`);
+		return [`command ${at} (${(tool as { do: string }).do}): ${[...new Set(errors)].join("; ")}`];
+	});
+	throw new Error(`${wrong.length} command${wrong.length === 1 ? " is" : "s are"} wrong. ${wrong.join(". ")}.`);
 }

@@ -68,7 +68,7 @@ test("equipment edits are atomic, idempotent and physically separate", () => {
 	assert.deepEqual(table, accepted, "a failed batch did not partly cancel its task");
 	assert.throws(() => editWork(table, 0, [{ do: "task.cancel", id: "review" },
 		{ do: "draft.edit", reserves: [], guidance: "Release the spent source" } as unknown as WorkCommand], "missing-steps"),
-		(error: Error) => /Seat tool 1:/.test(error.message) && /steps/.test(error.message) && !/requiredProperties.*task/.test(error.message),
+		(error: Error) => /command 1 \(draft.edit\)/.test(error.message) && /steps/.test(error.message) && !/task/.test(error.message),
 		"a refused edit names its missing field, not another union branch's tool");
 	assert.deepEqual(table, accepted, "shape validation leaves the whole batch untouched");
 	assert.throws(() => editWork(table, 0, tools, "stale", 0), /equipment changed/);
@@ -414,10 +414,10 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 		})) as never,
 		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
 			prompts.push({ user: context.messages[0]!.content, system: context.systemPrompt, ceiling: options.maxTokens });
-			return { result: async () => ({ content: [{ type: "text", text: JSON.stringify([
+			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { commands: [
 				{ do: "task.put", task: { ...task("end-check"), when: { active: "opponent", step: "end", throughTurn: 2 }, scope: { zones: [] }, times: 1 } },
 				{ do: "plan.accept", objective: "Review the next opponent end step, then continue." },
-			]) }], stopReason: "stop" }) };
+			] } }], stopReason: "toolUse" }) };
 		}) as never,
 	};
 	const table = make();
@@ -474,13 +474,15 @@ test("strategy is requested, validated, metered and kept out of ordinary executi
 	} } };
 	editWork(revising, 0, [{ do: "draft.edit", steps: [remaining] }, { do: "plan.request", reason: "Reconsider the remaining instruction." }], "revise");
 	const current = workFrame(revising, 0), before = structuredClone(revising);
-	const tools = await planWork(current, {}, { named: "authored", broken: () => null, async think(_about, prompt) {
+	const tools = await planWork(current, {}, { async work(_about, prompt, { submit }) {
 		const sent = JSON.parse(prompt.user);
 		assert.deepEqual(sent.view.work.draft, current.view.work!.draft, "strategy gets the edited draft, including its instructions");
 		assert.deepEqual(sent.view.work.recipes, current.view.work!.recipes);
 		assert.notDeepEqual(sent.view.work.draft.steps, sent.view.work.recipes[0].steps, "the edited draft differs from its starting recipe");
-		return JSON.stringify([{ do: "draft.edit", steps: [{ ...remaining, action: { procedure: { ...remaining.action.procedure, instructions: [{ do: "life", who: "you", amount: 2 }] } } }] },
-			{ do: "plan.accept", objective: "Continue after the completed land play." }]);
+		const answer = { commands: [{ do: "draft.edit", steps: [{ ...remaining, action: { procedure: { ...remaining.action.procedure, instructions: [{ do: "life", who: "you", amount: 2 }] } } }] },
+			{ do: "plan.accept", objective: "Continue after the completed land play." }] };
+		assert.equal(submit.check(answer), null);
+		return answer;
 	} });
 	assert.deepEqual(revising, before, "strategy validates without writing the game or equipment");
 	editWork(revising, 0, tools, "accept-revision");

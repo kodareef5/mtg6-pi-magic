@@ -29,9 +29,17 @@ import { CEILING, type Tally } from "./spend.ts";
 /** The part of Pi this uses. `ctx.modelRegistry` satisfies it, and a double can too. */
 export type Stream = (
 	model: Model<Api>,
-	context: { systemPrompt?: string; messages: { role: "user"; content: string }[] },
+	context: { systemPrompt?: string; messages: unknown[]; tools?: ToolSpec[] },
 	options?: { reasoning?: Reasoning; maxTokens?: number; signal?: AbortSignal; sessionId?: string },
-) => { result(): Promise<{ content: unknown[]; usage?: unknown; stopReason: string; errorMessage?: string }> };
+) => { result(): Promise<Reply> };
+type Reply = { role?: "assistant"; content: unknown[]; usage?: unknown; stopReason: string; errorMessage?: string };
+
+/** A tool as the provider reads it: a name, what it is for, and JSON Schema parameters. */
+export type ToolSpec = { name: string; description: string; parameters: object };
+/** A tool our code answers while the model works, such as looking up a rule. */
+export type Lookup = ToolSpec & { answer(args: Record<string, unknown>): string };
+/** The one tool that ends the work. `check` says what is wrong with an answer, or null to take it. */
+export type Submission = ToolSpec & { check(args: Record<string, unknown>): string | null };
 
 /**
  * Worth trying again, or not.
@@ -63,6 +71,13 @@ export type Reasoner = {
 	 * typed out of it.
 	 */
 	think(about: string, prompt: { system: string; user: string }, ceiling?: number): Promise<string>;
+	/**
+	 * One task in a short conversation with tools. The model may call lookups,
+	 * which are answered, and finishes by calling `submit`. An answer that is
+	 * prose, cut off, or fails `check` goes back to the model with the problem
+	 * named, up to `turns` replies in all. Returns the accepted arguments.
+	 */
+	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number }, ceiling?: number): Promise<Record<string, unknown>>;
 	/**
 	 * Why this reasoner stopped answering, or null while it is working.
 	 *
@@ -108,8 +123,8 @@ export function reasoner(options: {
 	let consecutive = 0;
 	let gaveUp: string | null = null;
 
-	/** One attempt. Recorded whether it worked, because a failed call still costs. */
-	async function once(about: string, prompt: { system: string; user: string }, ceiling: number): Promise<string> {
+	/** One request. Recorded whether it worked, because a failed call still costs. */
+	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[]): Promise<Reply> {
 		const began = Date.now();
 		const base = {
 			role: options.role,
@@ -123,12 +138,12 @@ export function reasoner(options: {
 			reply = await options
 				.stream(
 					options.model,
-					{ systemPrompt: prompt.system, messages: [{ role: "user", content: prompt.user }] },
+					{ systemPrompt: system, messages, ...(tools ? { tools } : {}) },
 					{
 						maxTokens: ceiling,
 						// The cache key: calls with the same system prompt share a prefix, and a
 						// provider that keys its prompt cache on the session reuses it only when told.
-						sessionId: `pi-magic-${options.role}-${createHash("sha256").update(prompt.system).digest("hex").slice(0, 16)}`,
+						sessionId: `pi-magic-${options.role}-${createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16)}`,
 						// "off" is the absence of thinking, not a level to ask for.
 						...(options.thinking && options.thinking !== "off" ? { reasoning: options.thinking } : {}),
 						...(options.signal ? { signal: options.signal } : {}),
@@ -141,13 +156,9 @@ export function reasoner(options: {
 		}
 
 		const usage = reply.usage as { input: number } | undefined;
-		const text = textOf(reply.content);
-		const wrong =
-			reply.stopReason === "error" || reply.stopReason === "aborted"
-				? `${named} ${reply.stopReason}: ${reply.errorMessage ?? "no reason given"}`
-				: !text
-					? `${named} returned no text for ${about}`
-					: null;
+		const wrong = reply.stopReason === "error" || reply.stopReason === "aborted"
+			? `${named} ${reply.stopReason}: ${reply.errorMessage ?? "no reason given"}`
+			: !tools && !textOf(reply.content) ? `${named} returned no text for ${about}` : null;
 		options.tally.record({
 			...base,
 			ms: Date.now() - began,
@@ -156,38 +167,78 @@ export function reasoner(options: {
 			...(wrong ? { failed: wrong } : {}),
 		});
 		if (wrong) throw new Error(wrong);
-		return text;
+		return reply;
+	}
+
+	/** Try a request again while its failure is transient; give up on a settled one. */
+	async function retried<T>(about: string, request: () => Promise<T>): Promise<T> {
+		if (gaveUp) throw new Error(`${named} stopped answering: ${gaveUp}`);
+		const failures: string[] = [];
+		for (let attempt = 1; attempt <= attempts; attempt++) {
+			try {
+				const answer = await request();
+				consecutive = 0;
+				return answer;
+			} catch (error) {
+				const why = String(error);
+				failures.push(why);
+				// A settled problem gives the same answer every time. Stop now,
+				// and stop this reasoner, so one bad configuration is reported
+				// once rather than once per question.
+				if (!transient(why)) {
+					gaveUp = why;
+					break;
+				}
+				if (attempt < attempts) await wait(backoff * 2 ** (attempt - 1));
+			}
+		}
+		consecutive += 1;
+		if (!gaveUp && consecutive >= patience) {
+			gaveUp = `${consecutive} questions in a row failed. Last: ${failures.at(-1)}`;
+		}
+		throw new Error(`${named} failed ${about} after ${failures.length}: ${failures.join(" | ")}`);
 	}
 
 	return {
 		named,
 		broken: () => gaveUp,
 		async think(about, prompt, ceiling = CEILING[options.role]) {
-			if (gaveUp) throw new Error(`${named} stopped answering: ${gaveUp}`);
-			const failures: string[] = [];
-			for (let attempt = 1; attempt <= attempts; attempt++) {
-				try {
-					const text = await once(about, prompt, ceiling);
-					consecutive = 0;
-					return text;
-				} catch (error) {
-					const why = String(error);
-					failures.push(why);
-					// A settled problem gives the same answer every time. Stop now,
-					// and stop this reasoner, so one bad configuration is reported
-					// once rather than once per question.
-					if (!transient(why)) {
-						gaveUp = why;
-						break;
+			return retried(about, async () => textOf((await call(about, prompt.system, [{ role: "user", content: prompt.user, timestamp: Date.now() }], ceiling)).content));
+		},
+		async work(about, prompt, tools, ceiling = CEILING[options.role]) {
+			const specs = [...(tools.lookups ?? []), tools.submit].map(({ name, description, parameters }) => ({ name, description, parameters }));
+			// The task comes last, where it is read most recently, after the facts it is about.
+			const messages: unknown[] = [{ role: "user", content: prompt.user, timestamp: Date.now() },
+				...(prompt.task ? [{ role: "user", content: prompt.task, timestamp: Date.now() }] : [])];
+			const problems: string[] = [];
+			for (let turn = 1; turn <= (tools.turns ?? 3); turn++) {
+				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, specs));
+				messages.push(reply);
+				const calls = reply.content.filter((part): part is { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> } =>
+					(part as { type?: unknown }).type === "toolCall");
+				const results: unknown[] = [];
+				for (const used of calls) {
+					const lookup = tools.lookups?.find((one) => one.name === used.name);
+					let answer: string;
+					if (lookup) answer = lookup.answer(used.arguments);
+					else if (used.name !== tools.submit.name) answer = `There is no tool named ${used.name}.`;
+					else if (reply.stopReason === "length") answer = "Your answer was cut off at the output limit. Call submit again with a shorter answer.";
+					else {
+						const problem = tools.submit.check(used.arguments);
+						if (!problem) return used.arguments;
+						answer = `Not accepted: ${problem} Fix that and call ${tools.submit.name} again with the whole corrected answer.`;
+						problems.push(problem);
 					}
-					if (attempt < attempts) await wait(backoff * 2 ** (attempt - 1));
+					results.push({ role: "toolResult", toolCallId: used.id, toolName: used.name, content: [{ type: "text", text: answer }], isError: !lookup, timestamp: Date.now() });
 				}
+				if (!calls.length) {
+					const why = reply.stopReason === "length" ? "Your reply was cut off at the output limit before you called the tool." : "You replied with text and did not call a tool.";
+					problems.push(why);
+					results.push({ role: "user", content: `${why} Call ${tools.submit.name} once with your whole answer as its arguments. Do not write the answer as text.`, timestamp: Date.now() });
+				}
+				messages.push(...results);
 			}
-			consecutive += 1;
-			if (!gaveUp && consecutive >= patience) {
-				gaveUp = `${consecutive} questions in a row failed. Last: ${failures.at(-1)}`;
-			}
-			throw new Error(`${named} failed ${about} after ${failures.length}: ${failures.join(" | ")}`);
+			throw new Error(`${named} did not submit an accepted answer for ${about}: ${problems.join(" | ") || "it only looked things up"}`);
 		},
 	};
 }

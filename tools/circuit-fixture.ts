@@ -59,9 +59,8 @@ export async function exercise(lostReservation = false) {
 			{ do: "plan.accept", objective: "Develop once, preserve the card, and revisit the line after three upkeeps." },
 		];
 	};
-	const thinking: Reasoner = {
-		named: "offline/authored-strategy", broken: () => null,
-		async think(_about, prompt) {
+	const thinking: Pick<Reasoner, "work"> = {
+		async work(_about, prompt, { submit }) {
 			plans += 1;
 			const frame = JSON.parse(prompt.user) as { view: Frame["view"]; seat: number; request: string };
 			let tools: WorkCommand[];
@@ -76,7 +75,9 @@ export async function exercise(lostReservation = false) {
 				{ do: "plan.accept", objective: "Three upkeep checks reviewed. Retire the monitoring appointment and continue ordinary play." },
 			];
 			note(`Strategy ${plans}: ${frame.request}`, tools);
-			return JSON.stringify(tools);
+			const problem = submit.check({ commands: tools });
+		if (problem) throw new Error(problem);
+		return { commands: tools };
 		},
 	};
 	const classify: Classify = async (_model, request) => {
