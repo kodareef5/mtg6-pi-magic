@@ -141,7 +141,8 @@ function tidy(value: unknown): unknown {
 		return record;
 	};
 	const timed = (one: unknown) => !["untap", "cleanup"].includes(((one as { when?: { step?: string } })?.when?.step) ?? "");
-	return { ...plan, steps: (plan.steps as unknown[]).map(option).filter(timed), ...(Array.isArray(plan.may) ? { may: plan.may.map(option).filter(timed) } : {}) };
+	// Anything but a list is left as written, for the schema to name.
+	return { ...plan, ...(Array.isArray(plan.steps) ? { steps: plan.steps.map(option).filter(timed) } : {}), ...(Array.isArray(plan.may) ? { may: plan.may.map(option).filter(timed) } : {}) };
 }
 
 /** "{1}{R}: ...", "{T}, Sacrifice this: ...": a cost, a colon, an effect. */

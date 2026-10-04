@@ -19,9 +19,9 @@ import { play } from "../src/core/loop.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { annotate, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
-import { editWork, prepareWork, workFrame } from "../src/core/work-tools.ts";
+import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import type { Answer, Player } from "../src/core/player.ts";
-import type { Plan } from "../src/core/language.ts";
+import { lifted, type Plan } from "../src/core/language.ts";
 import type { Frame } from "../src/core/types.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
@@ -311,4 +311,46 @@ test("a step means playing what it names: never a discard, a token by its name, 
 	assert.deepEqual(planState(workFrame(hand, 0))!.branches.map((one) => one.label), ["Pass while they hold three cards"], "Red holds seven");
 	assert.equal(hand.work[0]!.unarmed, undefined, "and is not hellbent, so the stop is armed");
 	assert.equal(JSON.stringify(workFrame(hand, 0).view.objects).includes("hidden-"), false, "nothing stands in for those cards in what the seat is shown");
+});
+
+test("a strategy session that gives nothing usable leaves a gap, and the game goes on under the standing plan", async () => {
+	const universe = loadCards("cards/standard.tsv");
+	const model = { type: "classifier", id: "jev-latest", provider: "typesafe", api: "typesafe-system-one" } as never;
+	const chat = { id: "fixture", provider: "offline", type: "chat" } as never;
+	const roster = async () => [{ role: "decide" as const, pattern: "fixture", model }, { role: "pregame" as const, pattern: "off", off: true }, { role: "strategy" as const, pattern: "fixture", model: chat }];
+	const inference = {
+		classify: (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string> }> }) => ({ api: "typesafe-system-one", provider: "typesafe", model: "jev-latest", stopReason: "stop", timestamp: 0,
+			answers: Object.fromEntries(Object.entries(request.questions).map(([key, question]) => { const ids = Object.keys(question.criteria); const choice = ids.find((id) => id === "keep") ?? ids[0]!;
+				return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }]; })) })) as never,
+		// Every answer is malformed: steps that are not a list.
+		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: { objective: "o", guidance: "g", steps: null } } }], stopReason: "toolUse" }) })) as never,
+	};
+	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "unplanned");
+	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
+	assert.ok(outcome, "the game reaches an outcome");
+	assert.ok(table.gaps.some((gap) => gap.includes("/steps must be array") && gap.endsWith("The standing plan is kept.")), "each failed session is a gap that names why");
+});
+
+test("a stop is watched in its window, and its window and bounds are read as written", async () => {
+	// Accepted in the main phase, a stop for combat that already holds there is armed: it fires in its window.
+	const table = position();
+	main(table, 0, 3);
+	const lands = { amount: { count: { types: ["land" as const], controller: "you" as const } }, atLeast: 1 };
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [], askWhen: [{ label: "In combat with a land", when: { active: "self", step: "declare-attackers" }, if: lands }] } }], "plan");
+	assert.equal(table.work[0]!.unarmed, undefined, "outside its window it waits for nothing");
+	const requests: string[] = [];
+	const replanner: Player = { name: "Green", observe() {}, close() {}, async answer(frame): Promise<Answer> {
+		const work = frame.view.work!;
+		if (work.request) { requests.push(work.request); return { kind: "work", tools: [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], revision: work.revision, actionId: `plan-${requests.length}` }; }
+		return { kind: "pick", option: (frame.decision!.options.find((option) => option.id === "keep") ?? quiet(frame.decision!.options)).id, actionId: `green-${frame.version}` };
+	} };
+	await playUntil(table, { 0: replanner, 1: opponent }, 3);
+	assert.deepEqual(requests, ["Stop: In combat with a land"]);
+	// The first turn's budget is counted from when it begins, not from seating.
+	const fresh = matchup("began");
+	main(fresh, 0, 1);
+	assert.ok(fresh.cursor.began[0]! > 0, "turn 1 begins when the hands are settled");
+	// A stop in a step nobody acts in is refused, and a bound written twice is not quietly dropped.
+	assert.match(planProblems(workFrame(table, 0), { objective: "o", guidance: "g", steps: [], askWhen: [{ label: "At untap", when: { step: "untap" }, if: lands }] }).join(" "), /untap has no priority/);
+	assert.deepEqual(lifted({ if: { amount: { count: { types: ["creature"] }, atLeast: 3 }, atLeast: 1 } }), { if: { amount: { count: { types: ["creature"] }, atLeast: 3 }, atLeast: 1 } });
 });

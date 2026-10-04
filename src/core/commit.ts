@@ -528,6 +528,8 @@ function openingTransition(table: Table, change: Extract<Change, { do: "opening"
 		}
 		opening.declared = {};
 	}
+	// The first turn begins when the last hand is settled: what counts "this turn" starts there, not at seating.
+	if (opening.kept.length === table.seats.length && !Object.values(opening.owed).some((count) => count > 0)) table.cursor.began[table.cursor.active] = table.cursor.clock + 1;
 }
 
 /**

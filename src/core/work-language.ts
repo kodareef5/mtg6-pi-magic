@@ -14,6 +14,8 @@ const Vocabulary = { ...PlanDefs,
 		/** Accept a whole plan. It replaces the previous one; its packages join the seat's. */
 		object({ do: Type.Literal("plan.put"), plan: Type.Ref("Plan") }),
 		object({ do: Type.Literal("plan.request"), reason: text }),
+		/** No new plan came: the one standing, if any, is flown as it is, and the request is closed. */
+		object({ do: Type.Literal("plan.keep"), reason: text }),
 		/** What a permanent of this name registers when it enters under this seat's control. Replaces an earlier package. */
 		object({ do: Type.Literal("package.put"), package: Type.Ref("Package") }),
 		/** The seat plans each of its own turns once it has drawn. */

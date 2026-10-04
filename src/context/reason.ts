@@ -237,7 +237,9 @@ export function reasoner(options: {
 					else if (used.name !== tools.submit.name) answer = `There is no tool named ${used.name}.`;
 					else if (reply.stopReason === "length") answer = "Your answer was cut off at the output limit. Call submit again with a shorter answer.";
 					else {
-						const problem = tools.submit.check(used.arguments);
+						// A check that throws on a malformed answer is one more problem to correct, not the end of the session.
+						let problem: string | null;
+						try { problem = tools.submit.check(used.arguments); } catch (error) { problem = `The answer could not be read: ${error instanceof Error ? error.message : String(error)}.`; }
 						if (!problem) return used.arguments;
 						answer = `Not accepted: ${problem} Fix that and call ${tools.submit.name} again with the whole corrected answer.`;
 						problems.push(problem);

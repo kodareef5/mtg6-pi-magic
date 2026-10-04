@@ -174,8 +174,14 @@ export async function play(
 				failures.push(String(error));
 			}
 		}
+		if (!answer && attention) {
+			// Strategy gave nothing usable: the game goes on under the plan already standing, and the gap says so.
+			table.gaps.push(`Seat ${decision.seat}, strategy: ${failures.join(" Then: ")} The standing plan is kept.`);
+			editWork(table, decision.seat, [{ do: "plan.keep", reason: failures.at(-1) ?? "no plan" }], `keep-${version}`);
+			continue;
+		}
 		if (!answer) {
-			const terminal = attention ? undefined : decision.options.find((option) => option.id === decision.fallback);
+			const terminal = decision.options.find((option) => option.id === decision.fallback);
 			table.gaps.push(`Seat ${decision.seat}, ${decision.situation}: ${failures.join(" Then: ")} ` +
 				(terminal ? `Fallback: ${terminal.id}.` : "Selection remains pending; no terminating option."));
 			if (!terminal) { report(table, told, watch); return null; }

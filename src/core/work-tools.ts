@@ -9,6 +9,7 @@ import { commands, type WorkCommand, type When } from "./work-language.ts";
 import { checkProcedure } from "./procedures.ts";
 import type { Package, Plan, PlanOption } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
+import { matches } from "./query.ts";
 import { allowance } from "./permits.ts";
 
 export function workFrame(table: Table, seat: SeatId): Frame {
@@ -57,6 +58,8 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	for (const stop of plan.askWhen ?? []) {
 		try { holds(scope, stop.if); } catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
+		const window = stop.when && checkWhen(stop.when);
+		if (window) found.push(`askWhen "${stop.label}": ${window}`);
 	}
 	(plan.may ?? []).forEach((branch, at) => option(branch, `may[${at}]`));
 	for (const pack of plan.packages ?? []) { const wrong = packageProblem(frame, pack); if (wrong) found.push(wrong); }
@@ -103,9 +106,9 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				if (problems.length) throw new Error(`The plan has ${problems.length} problem${problems.length === 1 ? "" : "s"}: ${problems.join("; ")}.`);
 				work.plan = structuredClone(tool.plan);
 				work.planned = work.revision + 1;
-				// A stop fires when its fact becomes true: one that holds already waits until it has been false.
+				// A stop fires when its fact becomes true in its window: one that holds there already waits until it has been false, or the window has closed.
 				const scope = { world: viewWorld(frame.view), controller: frame.seat };
-				const waiting = (tool.plan.askWhen ?? []).filter((stop) => holds(scope, stop.if)).map((stop) => stop.label);
+				const waiting = (tool.plan.askWhen ?? []).filter((stop) => (!stop.when || matches(stop.when, frame)) && holds(scope, stop.if)).map((stop) => stop.label);
 				if (waiting.length) work.unarmed = waiting; else delete work.unarmed;
 				work.packages = withPackages(work.packages, tool.plan.packages);
 				work.accepted = frame.version;
@@ -119,6 +122,7 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				break;
 			}
 			case "plan.request": work.request = tool.reason; break;
+			case "plan.keep": work.accepted = frame.version; delete work.request; break;
 			case "plan.each-turn": work.eachTurn = true; break;
 		}
 	}

@@ -456,8 +456,11 @@ export function lifted<T>(value: T): T {
 	const entries = Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, lifted(inner)]));
 	const amount = entries.amount as Record<string, unknown> | undefined;
 	if (amount && typeof amount === "object" && !Array.isArray(amount) && ("atLeast" in amount || "atMost" in amount)) {
-		const { atLeast, atMost, ...rest } = amount;
-		return { ...entries, amount: rest, ...(atLeast !== undefined && entries.atLeast === undefined ? { atLeast } : {}), ...(atMost !== undefined && entries.atMost === undefined ? { atMost } : {}) } as T;
+		// A bound written in both places is two meanings: it stays where it was, for the schema to refuse.
+		const kept = Object.fromEntries((["atLeast", "atMost"] as const).filter((bound) => bound in amount && entries[bound] !== undefined).map((bound) => [bound, amount[bound]]));
+		const moved = Object.fromEntries((["atLeast", "atMost"] as const).filter((bound) => bound in amount && entries[bound] === undefined).map((bound) => [bound, amount[bound]]));
+		const { atLeast: _least, atMost: _most, ...rest } = amount;
+		return { ...entries, amount: { ...rest, ...kept }, ...moved } as T;
 	}
 	return entries as T;
 }
