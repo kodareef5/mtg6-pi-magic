@@ -30,7 +30,10 @@ of that seat's decisions, in this order:
    has drawn. Strategy writes the next plan.
 2. **A stop.** An `askWhen` has become true. The table requests a new plan,
    once per stop per turn, at most two requests a turn. A step that cannot be
-   taken now is passed over rather than a stop: many steps are "if able".
+   taken now is passed over rather than a stop: many steps are "if able". A
+   step marked `essential` is the exception: where it belongs (its own step, or
+   a main phase with an empty stack) and nothing listed carries it out, it is a
+   stop.
 3. **Forced.** One option, as always. A forced move that is a plan step is
    recorded as that step.
 4. **Settled.** No step or branch fits anything listed: at priority the table

@@ -308,10 +308,12 @@ export const PackageSchema = Type.Cyclic({ ...Defs, Package: PackageDef }, "Pack
  * no longer fits, so the seat asks for a new one instead of improvising.
  * `holds` names resources kept for a purpose; an option that spends one is
  * marked, never removed. `packages` is what each permanent registers as it enters.
+ * A step marked `essential` is one the line cannot do without: when it cannot be
+ * taken where it should be, the table asks for a new plan rather than passing.
  */
 export const PlanDefs = { ...Defs,
 	Option: object({
-		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")),
+		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")), essential: Type.Optional(Type.Literal(true)),
 		/** A listed table option by id or prefix and objects, or a procedure to announce. */
 		action: Type.Union([
 			object({ option: Type.Optional(text), prefix: Type.Optional(text), objects: Type.Optional(QuerySchema) }),

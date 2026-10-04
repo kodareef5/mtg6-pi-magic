@@ -412,3 +412,22 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.equal(problems(icetill, { steps: [cast(icetill, "Icetill Explorer"), land(icetill, "Forest"), land(icetill, "Forest")] }), "");
 	assert.match(problems(icetill, { steps: [land(icetill, "Forest"), land(icetill, "Forest")] }), /no land play is left for it this turn/);
 });
+
+test("an essential step that cannot be taken where it belongs asks for a new plan; a plain one is passed over", async () => {
+	for (const essential of [true, false]) {
+		const table = position();
+		main(table, 0, 3);
+		// The Passage is already on the battlefield, so no cast option ever names it.
+		const passage = cardsIn(table, "battlefield", 0).find((one) => one.card === "Fabled Passage")!;
+		editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [{ label: "Cast the Passage", when: { ...turn3, step: "precombat-main" },
+			...(essential ? { essential: true as const } : {}), action: { prefix: "cast:", objects: { refs: [{ id: passage.id, incarnation: passage.incarnation }] } } }] } }], "plan");
+		const requests: string[] = [];
+		const writer: Player = { name: "Green", observe() {}, close() {}, async answer(frame): Promise<Answer> {
+			const work = frame.view.work!;
+			if (work.request) { requests.push(work.request); return { kind: "work", tools: [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], revision: work.revision, actionId: `plan-${requests.length}` }; }
+			return { kind: "pick", option: quiet(frame.decision!.options).id, actionId: `g-${frame.version}` };
+		} };
+		await playUntil(table, { 0: writer, 1: opponent }, 3);
+		assert.deepEqual(requests, essential ? ["Stop: Step 1 cannot be taken now: Cast the Passage"] : []);
+	}
+});

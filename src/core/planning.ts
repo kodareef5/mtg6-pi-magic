@@ -26,7 +26,7 @@ export type PlanState = {
 	/** Steps not yet taken and not due now, in plan order. */
 	waiting: { at: number; label: string }[];
 	branches: Fit[];
-	/** `askWhen` labels that hold now. */
+	/** `askWhen` labels that hold now, and essential steps that should be taken here and cannot. */
 	stops: string[];
 	/** Unarmed stops that are false now, and so arm. */
 	arming: string[];
@@ -73,9 +73,14 @@ export function planState(frame: Frame): PlanState | null {
 		else waiting.push({ at, label: step.label });
 	});
 	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length);
+	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase with an empty stack.
+	const at = frame.view.window;
+	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" &&
+		(step.when.step ? step.when.step === at.step : (at.step === "precombat-main" || at.step === "postcombat-main") && !(frame.view.objects ?? []).some((object) => object.zone === "stack"));
+	const blocked = due.filter((one) => plan.steps[one.at]!.essential && !one.candidates.length && belongs(plan.steps[one.at]!)).map((one) => `Step ${one.at + 1} cannot be taken now: ${one.label}`);
 	return {
 		revision, plan, due, waiting, branches, procedures,
-		stops: (plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label),
+		stops: [...(plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label), ...blocked],
 		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && ((stop.when && !matches(stop.when, frame)) || !condition(scope, stop.if))).map((stop) => stop.label),
 		held: (plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
 			.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length),
