@@ -74,15 +74,16 @@ of that seat's decisions, in this order:
 Blocks, resolution choices and trigger order with a real choice are never
 defaulted; the pilot reads the plan and chooses.
 
-## Preparing the turn before ours
+## Preparing the next turn at once
 
-When the opponent's turn begins, every seat is shown it, and a seat with a
-writer starts preparing its own next turn in the background
-(`strategy.prepareTurn`). The request asks for more than a turn plan, because
+As soon as a seat's own turn plan goes in, the seat starts preparing its next
+own turn in the background (`strategy.prepareTurn`), from the position with
+that plan and its notes in place. If none is running when the opponent's turn
+begins, one starts then. The request asks for more than a turn plan, because
 there is time:
-- a review of the last turn;
-- the next turn window by window in `phases`, with the mana for each spell and
-  holds for responses;
+- the notebook first: what is new, revised, retired, learned;
+- the next turn window by window as phase scripts, with the mana for each spell
+  and holds for responses;
 - branches for the draws that would change the line;
 - essential steps marked;
 - the opponent's following turn.
@@ -94,6 +95,12 @@ prepared plan is offered:
   condition holds takes the drawn card;
 - otherwise after a short review (`strategy.reviewPlan`), which keeps it with
   `{accept: true}` or revises it.
+
+Every writer session can look up cards and rules (`card`, `rule`), reads
+`view.worked` (the steps it carried out earlier this game, with their syntax,
+to reuse) and is told whose turns are whose by number. A stop or a request for
+help with notes in place is answered as maintenance: change what it touches,
+keep the rest, and note what happened.
 
 "Changed" is read from the permanents themselves, not only which ones there
 are: counters, characteristics, registrations, attachments, the opponent's

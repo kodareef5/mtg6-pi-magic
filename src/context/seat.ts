@@ -21,7 +21,7 @@ import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
-import { planProblems } from "../core/work-tools.ts";
+import { planProblems, prepareWork } from "../core/work-tools.ts";
 import type { Plan, PlanOption } from "../core/language.ts";
 import type { SeenObject } from "../core/work.ts";
 import { budget } from "../core/budget.ts";
@@ -209,6 +209,23 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let preparation: { turn: number; from: Frame; plan: Promise<Prepared | undefined>; ready?: true; criticism?: string[]; revised?: Prepared } | undefined;
 	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
 
+	// Start preparing own turn `turn` from this frame, once: a job for that turn already running is kept.
+	const begin = (frame: Frame, turn: number) => {
+		if (!options.prepare || preparation?.turn === turn) return;
+		const job: NonNullable<typeof preparation> = { turn, from: frame, plan: options.prepare(frame).catch(() => undefined) };
+		preparation = job;
+		void job.plan.then(() => { job.ready = true; });
+		const challenge = options.challenge;
+		if (challenge) void job.plan.then((prepared) => prepared && preparation === job ? challenge(frame, prepared, (errors) => { job.criticism = errors; return preparation === job; }) : undefined)
+			.then((revised) => { if (revised) job.revised = revised; }, () => undefined);
+	};
+	// Our turn's plan is going in: start on the next one now, from the position with that plan and its notes in place.
+	const onward = (frame: Frame, tools: WorkCommand[]) => {
+		const at = frame.view.window;
+		if (at.kind !== "turn" || at.active !== frame.seat || frame.view.work?.request || !frame.view.work?.eachTurn) return;
+		try { begin({ ...frame, view: { ...frame.view, work: prepareWork(frame, tools) } }, at.turn + 2); } catch { /* the table will refuse it too; the opponent's turn starts preparation */ }
+	};
+
 	return {
 		name: options.name,
 
@@ -253,11 +270,13 @@ export function aiSeat(options: AiSeatOptions): Player {
 					const criticism = job.revised ? [] : (job.criticism ?? []).map((error) => `a challenge of the prepared plan found: ${error}`);
 					if (!criticism.length && settled(frame, prepared.plan, changed)) {
 						planned("prepared", ready);
+						onward(frame, putting(prepared));
 						return { kind: "work", tools: putting(prepared), revision, actionId: id };
 					}
 					if (options.review) {
 						const { tools, objection } = await options.review(frame, prepared, [...changed.lines, ...criticism]);
 						planned("reviewed", ready);
+						onward(frame, tools);
 						return { kind: "work", tools, revision, actionId: id, ...(objection ? { objection } : {}) };
 					}
 				}
@@ -266,6 +285,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
 				const { tools, objection } = await options.plan(frame);
 				planned(frame.view.work?.request ? "escalation" : "written");
+				onward(frame, tools);
 				return { kind: "work", tools, revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.
@@ -314,16 +334,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 		// frame is kept because the next intent check reads what changed.
 		observe(frame) {
 			latest = frame;
-			// The opponent's turn has begun: prepare ours, once, from what can be seen now.
+			// The opponent's turn has begun: prepare ours, once, from what can be seen now, unless it is already being prepared.
 			const at = frame.view.window, work = frame.view.work;
-			if (options.prepare && at.kind === "turn" && at.active !== frame.seat && work?.eachTurn && work.accepted !== undefined && preparation?.turn !== at.turn + 1) {
-				const job: NonNullable<typeof preparation> = { turn: at.turn + 1, from: frame, plan: options.prepare(frame).catch(() => undefined) };
-				preparation = job;
-				void job.plan.then(() => { job.ready = true; });
-				const challenge = options.challenge;
-				if (challenge) void job.plan.then((prepared) => prepared && preparation === job ? challenge(frame, prepared, (errors) => { job.criticism = errors; return preparation === job; }) : undefined)
-					.then((revised) => { if (revised) job.revised = revised; }, () => undefined);
-			}
+			if (at.kind === "turn" && at.active !== frame.seat && work?.eachTurn && work.accepted !== undefined) begin(frame, at.turn + 1);
 		},
 
 		close() {

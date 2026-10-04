@@ -32,7 +32,8 @@ import { reasoner, type Reasoner, type Stream } from "./reason.ts";
 import { rule } from "./ruling.ts";
 import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
-import { aiSeat, type Planned } from "./seat.ts";
+import { aiSeat, type Planned, type Prepared } from "./seat.ts";
+import type { Frame } from "../core/types.ts";
 import { recap, type Recap } from "./summary.ts";
 import { challengePlan, planWork, prepareTurn, reviewPlan } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
@@ -146,12 +147,16 @@ export async function seat(
 			onGap: (note) => void table.gaps.push(note),
 			onDial: (route) => void (dialled[route] = (dialled[route] ?? 0) + 1),
 			onPlanned: (one) => void planned.push(one),
-			...(planning ? {
-				plan: (frame) => planWork(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
-				prepare: (frame) => prepareTurn(frame, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
-				challenge: (frame, prepared, criticized) => challengePlan(frame, prepared, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning, criticized),
-				review: (frame, prepared, changed) => reviewPlan(frame, prepared, changed, { brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe }, planning),
-			} : {}),
+			...(planning ? (() => {
+				// What every writer session reads beside the position: the brief, the recaps, and the cards and rules to look up.
+				const context = () => ({ brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe, ...(options.rules ? { rules: options.rules } : {}) });
+				return {
+					plan: (frame: Frame) => planWork(frame, context(), planning),
+					prepare: (frame: Frame) => prepareTurn(frame, context(), planning),
+					challenge: (frame: Frame, prepared: Prepared, criticized: (errors: string[]) => boolean) => challengePlan(frame, prepared, context(), planning, criticized),
+					review: (frame: Frame, prepared: Prepared, changed: string[]) => reviewPlan(frame, prepared, changed, context(), planning),
+				};
+			})() : {}),
 		});
 	}
 

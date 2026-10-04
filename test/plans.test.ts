@@ -26,6 +26,7 @@ import { lifted, type Plan } from "../src/core/language.ts";
 import { NOTEBOOK_LIMIT } from "../src/core/work-language.ts";
 import type { Frame } from "../src/core/types.ts";
 import { load as loadCards } from "../src/core/cards.ts";
+import { load as loadRules } from "../src/core/rules.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
 import { seat as seatTable, run } from "../src/context/sit.ts";
 import { CEILING, tally } from "../src/context/spend.ts";
@@ -109,6 +110,8 @@ test("the table flies the plan: one fitting option is taken, silence passes, and
 	assert.ok(carried.every((row) => row.by === "engine"), "each step had one fitting option, so the table took it without asking");
 	assert.ok(carried.slice(0, 3).every((row) => row.why === "delegated"), "the plan settled those; the last was the only option left");
 	assert.deepEqual(workFrame(table, 0).view.done, [0, 1, 2, 3]);
+	assert.deepEqual(workFrame(table, 0).view.worked!.map((one) => one.label), line.steps.map((step) => step.label), "what was carried out, with its syntax, for the writer to reuse");
+	assert.deepEqual(workFrame(table, 0).view.worked![1]!.action, line.steps[1]!.action);
 	const kinds = new Set(asked.map((frame) => frame.decision!.options.some((option) => option.id.startsWith("discard:")) ? "discard" : frame.decision!.situation));
 	assert.deepEqual([...kinds].sort(), ["discard", "pregame", "resolution"], "the seat chose only its hand, its search and its discard: every silent window passed without it");
 	assert.ok(table.ledger.some((row) => row.seat === 0 && row.picked === "attack:done" && table.cursor.turn > 5 && row.why === "delegated"),
@@ -231,7 +234,7 @@ test("strategy plans before a seat first acts and at each of its turns after the
 		{ role: "pregame" as const, pattern: "off", off: true },
 		{ role: "strategy" as const, pattern: "fixture", model: chat },
 	];
-	const prompts: { user: string; system?: string; ceiling?: number }[] = [];
+	const prompts: { user: string; task?: string; system?: string; ceiling?: number }[] = [];
 	const inference = {
 		classify: (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string> }> }) => ({
 			api: "typesafe-system-one", provider: "typesafe", model: "jev-latest", stopReason: "stop", timestamp: 0,
@@ -242,7 +245,7 @@ test("strategy plans before a seat first acts and at each of its turns after the
 			})),
 		})) as never,
 		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
-			prompts.push({ user: context.messages[0]!.content, system: context.systemPrompt, ceiling: options.maxTokens });
+			prompts.push({ user: context.messages[0]!.content, task: context.messages[1]?.content, system: context.systemPrompt, ceiling: options.maxTokens });
 			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { plan: { objective: "Develop.", guidance: "Play lands.",
 				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } } }], stopReason: "toolUse" }) };
 		}) as never,
@@ -252,7 +255,9 @@ test("strategy plans before a seat first acts and at each of its turns after the
 	assert.equal(prompts.length, 0, "seating spends no strategy before a decision");
 	assert.ok(await run(table, seated, inference, undefined));
 	assert.equal(table.gaps.length, 0);
-	const sessions = prompts.map((prompt) => JSON.parse(prompt.user) as { seat: number; view: { window: { kind: string; turn: number; active: number; step: string } } });
+	// Turn plans, not the preparation of a later turn or its challenge, which run in the background.
+	const sessions = prompts.filter((prompt) => !/PREPARE YOUR NEXT TURN|CHALLENGE THE PREPARED PLAN|REVISE THE PREPARED PLAN/.test(prompt.task ?? ""))
+		.map((prompt) => JSON.parse(prompt.user) as { seat: number; view: { window: { kind: string; turn: number; active: number; step: string } } });
 	for (const seat of [0, 1]) {
 		const own = sessions.filter((session) => session.seat === seat && session.view.window.kind === "turn" && session.view.window.active === seat);
 		assert.deepEqual(own.map((session) => session.view.window.turn), [...new Set(own.map((session) => session.view.window.turn))], "at most one plan per own turn");
@@ -805,4 +810,34 @@ test("the notebook is kept across plans, merged edit by edit, journaled, replaye
 	assert.match(seen[1]!, /Noted \\"lessons\\"\. The notebook is \d+ of 200000 characters/);
 	editWork(table, 0, tools, "planned-with-notes");
 	assert.deepEqual(table.work[0]!.notebook, [{ ...opponent, since: 3 }, { topic: "lessons", note: "The Passage before the land lost a landfall.", since: 5 }]);
+});
+
+test("our turn's plan going in starts the next preparation, and a stop with notes is answered as maintenance with the tools at hand", async () => {
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+	main(table, 0, 5);
+	const started: Frame[] = [];
+	const next: Plan = { objective: "Turn five.", guidance: "g", steps: [] };
+	const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
+		plan: async () => ({ tools: [{ do: "plan.put", plan: next }, { do: "notebook.edit", edits: [{ topic: "engine", note: "Hydra plus lands." }] }] }),
+		prepare: async (frame) => { started.push(frame); return { plan: next }; } });
+	await seat.answer(workFrame(table, 0));
+	assert.equal(started.length, 1, "the turn's plan is answered, and the next own turn is already being prepared");
+	assert.equal(started[0]!.view.work!.plan!.objective, "Turn five.", "from the position with that plan in place");
+	assert.deepEqual(started[0]!.view.work!.notebook!.map((one) => one.topic), ["engine"], "and its notes");
+	seat.observe(workFrame(table, 0));
+	assert.equal(started.length, 1, "one job per turn");
+
+	// A stop, with notes kept: maintenance, with the note, card and rule tools, and the turns named.
+	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "opponent", note: "Red holds burn." }] }, { do: "plan.request", reason: "Stop: The Hydra died" }], "stop");
+	const seen: { messages: string; tools: string[] }[] = [];
+	const stream: Stream = (_model, request) => { seen.push({ messages: JSON.stringify(request.messages), tools: (request.tools ?? []).map((tool: { name: string }) => tool.name) });
+		return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: line } }], stopReason: "toolUse" }) }; };
+	const rules = loadRules("rules/cr.tsv");
+	await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.match(seen[0]!.messages, /This is maintenance, not a new analysis/);
+	assert.match(seen[0]!.messages, /Note under \\"stop on turn 5\\"/);
+	assert.match(seen[0]!.messages, /Your turns are 5, 7, 9…; the opponent's are 6, 8, 10…/);
+	assert.deepEqual(seen[0]!.tools.sort(), ["card", "note", "rule", "submit"]);
 });

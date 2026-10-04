@@ -10,6 +10,7 @@ import type { SeenObject, Workspace } from "./work.ts";
 import type { Combat, Mana, Note, Resolution } from "./table.ts";
 import type { Happened } from "./selectors.ts";
 import type { Printed } from "./printed.ts";
+import type { PlanOption } from "./language.ts";
 
 export type SeatId = number;
 export type ObjectRef = { id: string; incarnation: number };
@@ -105,6 +106,8 @@ export type SeatView = {
 	 * ledger row, in public words: what an objection names.
 	 */
 	actions?: { row: number; seat: SeatId; what: string[] }[];
+	/** This seat's own plan steps and branches carried out this game, the latest ten distinct, with their syntax: what worked, to reuse. */
+	worked?: { label: string; action: PlanOption["action"] }[];
 	/** Life, and how many cards each hand and library holds: public, though the cards are not (402.3, 401.2). */
 	players?: { id: SeatId; life: number; hand?: number; library?: number }[];
 	/** The public notepad: labels, registrations added after entry, links, permissions. */
