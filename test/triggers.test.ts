@@ -463,3 +463,17 @@ test("combat damage to a player is dealt by the attacker's controller, and that 
 	assert.equal(table.waiting.length, 1, "Green's creature dealt it, so a watch for damage by Green triggers");
 	assert.equal(table.waiting[0]!.event.player, 1, "and that player is Red");
 });
+
+test("a delayed trigger that lasts while its source remains ends when the source leaves", () => {
+	// Not printed: "For as long as this creature remains on the battlefield, whenever a land you control enters, you gain 1 life."
+	const table = matchup("while-source");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", []);
+	main(table, 0);
+	announce(table, { claim: "Watch", basis: "{0}: For as long as this creature remains on the battlefield, whenever a land you control enters, you gain 1 life.",
+		source: { zones: ["battlefield"], controller: "self", card: "Sazh's Chocobo" }, timing: "stack",
+		instructions: [{ do: "delay", until: "while-source", event: { on: "enters", of: { types: ["land"], controller: "you" } }, effect: { instructions: [{ do: "life", who: "you", amount: 1 }] } }] });
+	resolveTop(table);
+	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 1, "the delayed trigger is created");
+	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" }], "resolve");
+	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 0, "and ends with its source");
+});

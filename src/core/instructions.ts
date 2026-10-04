@@ -188,7 +188,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			if (!source) return one("No source to delay a trigger for", []);
 			const note: Omit<Extract<Note, { kind: "delay" }>, "id" | "written"> = { kind: "delay", by: controller, until: (instruction.until ?? "indefinite") as Until, event: structuredClone(instruction.event),
 				effect: structuredClone(instruction.effect), fixed: { source, targets: structuredClone(scope.targets ?? []), bound: structuredClone(pending.bound), ...(scope.x !== undefined ? { x: scope.x } : {}) },
-				once: !instruction.until };
+				once: !instruction.until, ...(instruction.until === "while-source" ? { source } : {}) };
 			return one("Create a delayed trigger", [{ do: "note", note }]);
 		}
 		case "reflect": {
