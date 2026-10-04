@@ -14,7 +14,7 @@ import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
 import { characteristics } from "../src/core/characteristics.ts";
-import { editWork } from "../src/core/work-tools.ts";
+import { editWork, planProblems, workFrame } from "../src/core/work-tools.ts";
 import { describe, project } from "../src/core/view.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import type { Procedure, Registration } from "../src/core/language.ts";
@@ -476,4 +476,20 @@ test("a delayed trigger that lasts while its source remains ends when the source
 	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 1, "the delayed trigger is created");
 	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 0, "and ends with its source");
+});
+
+test("a permanent spell other than an Aura is cast with no targets; its abilities target once it is on the battlefield", () => {
+	const table = matchup("no-targets");
+	const chocobo = establish(table, 0, "Sazh's Chocobo", []);
+	place(table, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
+	place(table, 0, "hand", "Mightform Harmonizer");
+	main(table, 0);
+	const cast = (targets?: Procedure["targets"]): Procedure => ({ claim: "Cast Mightform Harmonizer", basis: "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+		source: { zones: ["hand"], controller: "self", card: "Mightform Harmonizer" }, timing: "spell", ...(targets ? { targets } : {}), instructions: [] });
+	const aimed = cast([{ object: { types: ["creature"], controller: "you" } }]);
+	assert.equal(offered(table, aimed).length, 0, "never offered with its trigger's target");
+	assert.match(planProblems(workFrame(table, 0), { objective: "o", guidance: "g", steps: [{ label: "Cast it", when: { active: "self" }, action: { procedure: aimed } }] }).join(" "), /permanent spell, which has no targets/);
+	const plain = offered(table, cast())[0]!;
+	const smuggled = { ...structuredClone(plain.activation), slots: [{ object: { types: ["creature"], controller: "you" } }], targets: [[{ id: chocobo.id, incarnation: chocobo.incarnation }]] };
+	assert.throws(() => activationChanges(table, smuggled as never), /has no targets/, "and an announcement that carries one is refused");
 });

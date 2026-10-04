@@ -60,3 +60,10 @@ export function intrinsicMana(printed?: Printed): Mana["color"][] {
 /** A permanent spell other than an Aura, with a cost of generic and colored symbols only. */
 export const permanentSpell = (printed?: Printed) => !!printed && !isLand(printed) && !!manaCost(printed) &&
 	/\b(Artifact|Battle|Creature|Enchantment|Planeswalker)\b/.test(printed.type.split("—")[0]!) && !/\bAura\b/.test(printed.type.split("—")[1] ?? "");
+
+/** A permanent spell other than an Aura has no targets: only an Aura spell targets what it will enchant (115.1b, 303.4a, 601.2c). */
+export const targetless = (types: readonly string[], subtypes: readonly string[]) =>
+	types.some((type) => ["artifact", "battle", "creature", "enchantment", "planeswalker"].includes(type.toLowerCase())) && !subtypes.some((one) => one.toLowerCase() === "aura");
+/** The same, read from a printed type line. */
+export const printedTargetless = (printed?: Printed) => !!printed &&
+	targetless(printed.type.split("—")[0]!.trim().split(/\s+/), (printed.type.split("—")[1] ?? "").trim().split(/\s+/).filter(Boolean));

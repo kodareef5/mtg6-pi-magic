@@ -1,4 +1,5 @@
 /** The writer for private seat equipment. Card motion has its own commit boundary. */
+import { printedTargetless } from "./printed.ts";
 import { nextDecision } from "./decisions.ts";
 import { project } from "./view.ts";
 import { STEPS } from "./steps.ts";
@@ -36,6 +37,9 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 		const action = one.action;
 		if ("procedure" in action) {
 			try { checkProcedure(action.procedure); } catch (error) { found.push(`${where} (${one.label}): ${error instanceof Error ? error.message : String(error)}`); }
+			const card = action.procedure.source.card;
+			if (action.procedure.timing === "spell" && action.procedure.targets?.length && card && printedTargetless(frame.view.printed?.[card]))
+				found.push(`${where} (${one.label}): ${card} is a permanent spell, which has no targets; leave targets out of casting it, and give them to the triggered ability in its package`);
 			for (const ref of action.procedure.source.refs ?? []) if (!visible(ref)) found.push(`${where} (${one.label}): object ${ref.id}@${ref.incarnation} is not in your view.`);
 		} else {
 			if (!action.option && !action.prefix && !action.objects) found.push(`${where} (${one.label}): name an option id, a prefix, or objects.`);

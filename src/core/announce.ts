@@ -8,6 +8,7 @@
  * option, never removed: the table guides and does not restrain.
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
+import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
@@ -151,6 +152,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		// Timing: a spell's from its type line unless it claims flash; an activation's own restriction.
 		const instant = procedure.timing === "spell" && (source.traits?.types.includes("instant") || procedure.speed === "instant" || flashed(world, frame.seat, source));
 		if (procedure.timing === "spell" && !instant && !mainWindow(frame)) continue;
+		// Targets belong to an Aura spell, or to the permanent's abilities once it is on the battlefield.
+		if (procedure.timing === "spell" && procedure.targets?.length && source.traits && targetless(source.traits.types, source.traits.subtypes)) continue;
 		if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= allowance(world, frame.seat).lands)) continue;
 		// A card is played from hand unless a permission says otherwise.
 		if (fromHand && !playable(world, frame.seat, source, frame.view.window.kind === "turn" ? frame.view.window.turn : 0, procedure.timing === "land")) continue;
