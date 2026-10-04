@@ -88,9 +88,8 @@ export const ROLES: Record<
 		suggested: "gpt-6-luna:low",
 		why:
 			"Rare: only an objection reaches it. Luna while the game is being built; a wrong " +
-			"ruling changes a game, so it is the first role to move to a stronger model. The " +
-			"decision model narrows the rules first, so this reads a few rules rather than " +
-			"three thousand.",
+			"ruling changes a game, so it is the first role to move to a stronger model. It " +
+			"looks up the rules it needs on disk rather than reading three thousand.",
 	},
 	summary: {
 		does: "say what happened this turn in two sentences, as the commentator",

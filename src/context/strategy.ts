@@ -8,6 +8,7 @@ import { nextDecision } from "../core/decisions.ts";
 import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
 import type { WorkCommand } from "../core/work-language.ts";
+import type { Objection } from "../core/player.ts";
 import { planProblems } from "../core/work-tools.ts";
 import { lifted, PlanSchema, problems, type Plan, type Registration } from "../core/language.ts";
 import type { Brief } from "./brief.ts";
@@ -49,8 +50,11 @@ export function syntaxReference(): string {
  */
 const SUBMIT = {
 	name: "submit",
-	description: "Submit your whole plan for this seat. Call it once; if it reports problems, fix them and call it again with the whole corrected plan.",
-	parameters: JSON.parse(JSON.stringify({ type: "object", properties: { plan: { $ref: "Plan" } }, required: ["plan"], additionalProperties: false,
+	description: "Submit your whole plan for this seat, and an objection only if one of the opponent's listed actions broke a rule. Call it once; if it reports problems, fix them and call it again with the whole corrected answer.",
+	parameters: JSON.parse(JSON.stringify({ type: "object", properties: { plan: { $ref: "Plan" },
+		objection: { type: "object", description: "Only for an opponent action, by its row under actions, that broke a rule or misread a card.",
+			properties: { row: { type: "integer" }, claim: { type: "string", minLength: 1 }, rule: { type: "string" } }, required: ["row", "claim"], additionalProperties: false } },
+		required: ["plan"], additionalProperties: false,
 		$defs: (PlanSchema as unknown as { $defs: object }).$defs }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
 };
 
@@ -91,6 +95,8 @@ const SYSTEM = [
 	"- Option ids are matched by option or prefix and objects, never by label. Turn numbers in when are the table's global turns.",
 	"- when.step is one of: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end. Leave step out to match every step; when.active is self, opponent or any.",
 	"- Copy the card's own words into basis. Do not replace card text with an invented simpler effect.",
+	"",
+	"OBJECTING. view.actions lists the opponent's actions since your last plan, by row. The table does not police them. If one broke a rule or misread a card, such as a blocker without flying or reach on a flier, or a land that says it enters tapped entering untapped, add objection {row, claim, rule} beside your plan, citing the rule number. A judge decides; an upheld objection takes the game back to just before that action, and you plan again from there. Never object to play you merely think is poor.",
 	"",
 	"HOW TO ANSWER. Call the submit tool once with your whole plan. Nothing you write as text is read.",
 	"If submit reports problems, fix every one of them and call submit again with the whole corrected plan.",
@@ -165,6 +171,14 @@ function misregistered(plan: Plan): string[] {
 	return found;
 }
 
+/** An objection names one of the opponent's listed actions and says why. */
+function objected(objection: unknown, frame: Frame): string[] {
+	const rows = (frame.view.actions ?? []).map((one) => one.row);
+	const { row, claim } = (objection ?? {}) as { row?: unknown; claim?: unknown };
+	if (typeof row === "number" && rows.includes(row) && typeof claim === "string" && claim) return [];
+	return [`objection names row ${JSON.stringify(row)}, but an objection names one of the opponent's actions under view.actions${rows.length ? ` (rows ${rows.join(", ")})` : ", and there are none"} and says why; leave it out if nothing broke a rule`];
+}
+
 /**
  * What the seat can spend this turn, worked out rather than left to the writer:
  * its untapped mana sources and whether a land play and a land remain.
@@ -179,7 +193,7 @@ function mana(frame: Frame): string {
 		`${play ? `, plus a land from hand (${[...new Set(lands.map((one) => one.card))].join(", ")})` : lands.length ? "; your land play is used" : "; no land in hand"}. A spell must be paid with this; check each step's cost against it.`;
 }
 
-export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<WorkCommand[]> {
+export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe }, reasoner: Pick<Reasoner, "work">): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
 	const { work, done, objects: _objects, printed: _printed, ...view } = frame.view;
@@ -202,8 +216,8 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		"Answer now by calling submit once with your whole plan. Keep labels, guidance and objective to a sentence or two each.",
 	].join("\n");
 	const submit = { ...SUBMIT, check: (args: Record<string, unknown>) => {
-		// Fields of the plan written beside it, as when the plan object is closed too early, belong inside it.
-		const { plan: written, ...beside } = args;
+		// Fields of the plan written beside it, as when the plan object is closed too early, belong inside it. An objection is its own.
+		const { plan: written, objection, ...beside } = args;
 		args.plan = tidy({ ...beside, ...(written as object) });
 		for (const key of Object.keys(beside)) delete args[key];
 		const shape = problems(PlanSchema, args.plan);
@@ -211,12 +225,13 @@ export async function planWork(frame: Frame, context: { brief?: Brief; recaps?: 
 		const plan = args.plan as Plan;
 		const idle = at.kind === "turn" && at.active === frame.seat && !plan.steps.length && !plan.may?.length
 			? ["the plan has no steps and no branches, so the table would pass every window of your turn; if that is what you mean, add a step {\"label\": \"Pass the turn\", \"when\": {\"active\": \"self\"}, \"action\": {\"option\": \"pass\"}}"] : [];
-		const found = [...planProblems(frame, plan), ...misregistered(plan), ...idle];
+		const found = [...planProblems(frame, plan), ...misregistered(plan), ...idle, ...(objection === undefined ? [] : objected(objection, frame))];
 		return found.length ? `${found.length} problem${found.length === 1 ? "" : "s"}: ${found.join("; ")}.${hints(found)}` : null;
 	} };
 	// Named by why it was asked, so the bill tells a turn's plan from an escalation.
 	const why = !frame.view.work?.request ? "turn plan" : frame.view.work.accepted === undefined ? "opening plan" : request.startsWith("Stop:") ? "plan after a stop"
 		: request.startsWith("The pilot asked") ? "plan after help" : "plan on request";
 	const answer = await reasoner.work(why, { system: SYSTEM, user, task }, { submit });
-	return [{ do: "plan.put", plan: answer.plan as Plan }];
+	const objection = answer.objection as Objection | undefined;
+	return { tools: [{ do: "plan.put", plan: answer.plan as Plan }], ...(objection ? { objection } : {}) };
 }

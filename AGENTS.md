@@ -26,8 +26,8 @@ Future remote, human and MCP adapters use the same core interface without
 loading decision-model context.
 
 The player interface is intended to offer the same capabilities to every seat.
-Listed picks, table talk and prepared procedures work today. Raw declarations,
-free-form delegation, concession handling and objections still need handlers.
+Listed picks, table talk, prepared procedures and objections work today. Raw
+declarations, free-form delegation and concession handling still need handlers.
 Context supplies decision facts and guidance; the player chooses.
 
 ## What the table enforces, and what it only offers
@@ -53,8 +53,9 @@ play; tests build their positions from those decks, never from invented lists.
 
 **Rules legality is offered.** The move list is help, so a player need not know
 the rules and misses nothing. Prepared procedures record the motion and the accepted claim without certifying
-that a card permits it. Raw declarations and objections with remedies remain
-part of the intended interface, not working alternatives yet.
+that a card permits it. A seat that thinks another broke a rule objects, and
+the judge rules. Raw declarations remain part of the intended interface, not a
+working alternative yet.
 
 **Nothing is done for a player.** Untap, the draw step and state-based actions
 are the rules and happen. A card's instruction belongs to the seat resolving it:
@@ -129,10 +130,13 @@ request, at most two a turn. A phase change alone spends nothing.
 `worthPlanning` retains the old mechanical estimate for comparison, but does
 not initiate calls.
 
-**`judge` runs only on an objection,** in two calls. The decision model scores
-candidate rules for relevance, then the reasoner rules on the few that survive
-and names the remedy. It stops at the verdict, because carrying a remedy out
-needs rollback and that is unwritten.
+**`judge` runs only on an objection.** The strategy writer may object to one
+of the opponent's actions since its last plan, beside its plan. The judge looks
+up the rules on disk, rules legal or not with a cited rule, and names the
+remedy: the action stands, or the game rolls back to just before it. The judge
+decides; no seat is asked to agree. A rollback is a journal line, the lines it
+rolled past stay in the file, and every seat plans again (`src/context/ruling.ts`,
+`journal.rollback`).
 
 ### Cloning a game
 
@@ -454,10 +458,6 @@ verify every carried field against the source and refuse to pass on a mismatch.
   doubles exercise how the table and jev fly it. No live run has yet measured
   playing strength; the pregame wave and the turn analysts are planned in the
   prompting overhaul.
-- The judge's remedy. `ruling.rule` holds the two-call pipeline and stops at the
-  verdict, because rollback is unwritten and a ruling with no remedy changes no
-  game. A ruling also makes the phase plan stale, which is a consequence of one
-  rather than a step in it.
 - Widening routes. `more-options`, `better-targets` and `replan` need machinery
   that does not exist, so nothing advertises them. The rules routes in
   `src/context/dial.ts` are the ones that work, because the rules are on disk
@@ -472,10 +472,7 @@ verify every carried field against the source and refuse to pass on a mismatch.
   other creatures' damage in the same step toward trample's lethal (702.19b).
 - The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
   and the replacement-hand spread are named with their invariants and unwritten.
-- The judge and declaring. A game finishes without them.
-- Rollback. `journal.ts` holds the file, the replay, the clone and the export;
-  `rollback` is the one left, because it needs every remaining seat to agree and
-  nothing holds that conversation. `docs/STATE.md` holds the reasoning.
+- Declaring, and `judge.playOn`. A game finishes without them.
 - More resolution choices. The table now holds the remaining instruction and
   count while a choice is pending, and distinguishes continuation from a
   state-based checkpoint. Multiple or restricted targets, bindings between instructions and

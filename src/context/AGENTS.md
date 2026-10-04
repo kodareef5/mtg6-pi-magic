@@ -54,8 +54,9 @@ reaches a decision is a short plan plus the facts.
   in front of the model, and the examples test keeps it true to the schema.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
-- **judge** runs only on an objection: the classifier narrows the rules, then
-  the reasoner rules on the few that survive.
+- **judge** runs only on an objection, which the strategy writer raises beside
+  its plan: one reasoner session with the rules to look up, a cited rule, and a
+  remedy, stand or rollback, that the loop carries out.
 
 Every call goes through `spend.ts` and carries an output ceiling. The ceiling is
 a price and not a style, because some routes charge against the maximum asked

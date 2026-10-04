@@ -144,8 +144,8 @@ const QUESTIONS = {
 	challenge: "CHALLENGE. Find the mistakes a competent player of this deck is likely to make in this matchup: wrong shortcuts, missed response windows, resource conflicts, trigger order, and plays that look automatic but lose.",
 } as const;
 
-/** The tools an analyst may use. A miss answers "not found", so a lookup never ends the work. */
-function lookups(universe: Universe, rules?: Rules): Lookup[] {
+/** The tools an analyst or the judge may use. A miss answers "not found", so a lookup never ends the work. */
+export function lookups(universe: Universe, rules?: Rules): Lookup[] {
 	const card: Lookup = { name: "card", description: "Look up a Standard card's text by its exact name.",
 		parameters: { type: "object", properties: { name: { type: "string" } }, required: ["name"], additionalProperties: false },
 		answer: (args) => { const found = universe.cards.get(String(args.name)); return found ? `${found.name}  ${found.mana}  ${found.type}  ${found.stats}\n${found.oracle}` : `No Standard card is named ${String(args.name)}.`; } };

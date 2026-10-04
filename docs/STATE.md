@@ -1,7 +1,7 @@
 # Game state, replay, and export
 
-`src/core/journal.ts` writes, replays, clones and exports games. Agreed rollback,
-remote hosting and bulk simulation are unfinished.
+`src/core/journal.ts` writes, replays, clones and exports games, and rolls one
+back when the judge rules. Remote hosting and bulk simulation are unfinished.
 
 ## The file
 
@@ -86,13 +86,16 @@ Only a public projection belongs on a spectator URL. A future odds reader must
 use the viewer's public counts and earned knowledge, never the actual hidden
 arrangement. Odds arithmetic is not implemented yet.
 
-## Rollback still needs agreement
+## A rollback is a ruling
 
-Replay supplies reconstruction, but it does not supply consent. A live rollback
-must ask every remaining seat, record the agreed point, and retain the fact
-that the rollback happened. A seat cannot unlearn a card revealed before the
-rollback. `rollback` still throws because that agreement and remedy flow do not
-exist.
+Replay supplies reconstruction; the judge supplies the decision. When the judge
+rules an action illegal and the remedy is a rollback, the table is rebuilt in
+place from a fresh start and the decisions before the action. No seat is asked
+to agree. The ruling is kept on the table and written as a journal line at the
+version the game went back to. On read, that line drops the lines before it
+with a later version from the game; they stay in the file, so a reader can see
+what was rolled past. A seat cannot unlearn a card revealed before the
+rollback, and every seat's view says the rollback happened.
 
 ## Hosting later
 

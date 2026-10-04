@@ -19,7 +19,7 @@ import { happened } from "./selectors.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
 import { characteristics } from "./characteristics.ts";
-import type { Frame, SeatView, Viewer, Window } from "./types.ts";
+import type { Frame, SeatId, SeatView, Viewer, Window } from "./types.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
@@ -152,7 +152,19 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(at.kind === "turn" ? { visit: table.cursor.visit } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
+		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
+}
+
+/** The other seats' actions since this seat's plan was accepted, the last twelve that did something visible. */
+function actions(table: Table, viewer: SeatId): NonNullable<SeatView["actions"]> {
+	const after = table.work[viewer]?.accepted ?? 0;
+	const rows = table.ledger.filter((row) => row.seat !== viewer && (row.clock ?? 0) > after);
+	const found = rows.flatMap((row) => {
+		const what = table.log.filter((receipt) => receipt.at === row.seq + 1).map((receipt) => describe(table, receipt)).filter(Boolean);
+		return what.length ? [{ row: row.seq, seat: row.seat, what }] : [];
+	});
+	return found.slice(-12);
 }
 
 /**

@@ -100,6 +100,11 @@ export type SeatView = {
 	/** The remaining instruction cursor, without any hidden library identities. */
 	resolution?: Resolution;
 	/** Seats still playing and their life. */
+	/**
+	 * The other seats' recorded actions since this seat's plan was accepted, by
+	 * ledger row, in public words: what an objection names.
+	 */
+	actions?: { row: number; seat: SeatId; what: string[] }[];
 	/** Life, and how many cards each hand and library holds: public, though the cards are not (402.3, 401.2). */
 	players?: { id: SeatId; life: number; hand?: number; library?: number }[];
 	/** The public notepad: labels, registrations added after entry, links, permissions. */

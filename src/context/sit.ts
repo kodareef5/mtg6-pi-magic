@@ -19,7 +19,8 @@ import type { Universe } from "../core/cards.ts";
 import type { Rules } from "../core/rules.ts";
 import { keep, save, type Journal } from "../core/journal.ts";
 import type { Intent } from "../core/intent.ts";
-import { play, type Watcher } from "../core/loop.ts";
+import { play, type Judge, type Watcher } from "../core/loop.ts";
+import { start } from "../core/commit.ts";
 import type { Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
 import type { Outcome, SeatId } from "../core/types.ts";
@@ -27,7 +28,8 @@ import { brief, current, emptyBrief, type Brief } from "./brief.ts";
 import { decisionApi, type Classify } from "./model.ts";
 import type { Chronicle } from "./packet.ts";
 import { startingIntent } from "./plan.ts";
-import { reasoner, type Stream } from "./reason.ts";
+import { reasoner, type Reasoner, type Stream } from "./reason.ts";
+import { rule } from "./ruling.ts";
 import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
 import { aiSeat } from "./seat.ts";
@@ -47,6 +49,8 @@ export type Seated = {
 	picks: () => number;
 	/** Routes followed, by route id. Beside the bill, because a dial is a request. */
 	dials: Record<string, number>;
+	/** The table's judge, when a judge role resolved and the rules are on disk to cite. */
+	judge?: { reasoner: Reasoner; rules: Rules; universe: Universe };
 };
 
 const pick = (parts: Cast[], role: Role) => parts.find((part) => part.role === role);
@@ -185,6 +189,8 @@ export async function seat(
 		}),
 	);
 
+	// The judge is the table's: the first seat's roster that names a chat model for it.
+	const judging = table.seats.map((at) => pick(parts.get(at.id)!, "judge")).find((part) => part && !part.off && part.model && part.model.type !== "classifier");
 	return {
 		players,
 		intents,
@@ -192,6 +198,8 @@ export async function seat(
 		tally: counted,
 		picks: () => counted.spent().filter((spend) => spend.role === "decide").length,
 		dials: dialled,
+		...(judging && options.rules ? { judge: { reasoner: reasoner({ role: "judge", stream: inference.stream, model: judging.model as Model<Api>, tally: counted,
+			...(judging.thinkingLevel ? { thinking: judging.thinkingLevel } : {}) }), rules: options.rules, universe } } : {}),
 	};
 }
 
@@ -244,6 +252,12 @@ export async function run(
 		seated.chronicle.recaps.splice(at < 0 ? seated.chronicle.recaps.length : at, 0, said);
 	};
 
+	// A rollback rebuilds from a fresh table for the same seats, decks and seed, after saving what the game has recorded.
+	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
+	const judging = seated.judge;
+	const judge: Judge | undefined = judging && { rule: (now, open) => rule(now, open, judging.reasoner, judging), restart: () => start(table.format, entrants, table.rng.seed, judging.universe),
+		flush: () => { if (journal) save(journal, table); } };
+
 	const flight: Promise<void>[] = [];
 	const outcome = await play(table, seated.players, seated.intents, watch, (turn, active, from) => {
 		// A reasoner that has given up is one problem, not one per turn. The gap
@@ -271,7 +285,7 @@ export async function run(
 					);
 				}),
 		);
-	});
+	}, undefined, judge);
 
 	// The game is saved first and the commentary is waited on after. A recap is
 	// not part of the game, so a recap that never answers must not be able to

@@ -8,7 +8,7 @@
  * Past 150 lines to keep the question beside its navigation and answer handling.
  */
 
-import type { Answer, Player } from "../core/player.ts";
+import type { Answer, Objection, Player } from "../core/player.ts";
 import type { Rules } from "../core/rules.ts";
 import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
@@ -50,7 +50,7 @@ export type AiSeatOptions = {
 	 */
 	onAsk?(packet: Packet): void;
 	/** Writes this seat's plan when one is wanted. Without it, the seat cannot ask for help. */
-	plan?(frame: Frame): Promise<WorkCommand[]>;
+	plan?(frame: Frame): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
 };
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
@@ -143,7 +143,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const revision = frame.view.work?.revision ?? 0;
 			if (reason) {
 				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
-				return { kind: "work", tools: await options.plan(frame), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}` };
+				const { tools, objection } = await options.plan(frame);
+				return { kind: "work", tools, revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.
 			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));

@@ -197,7 +197,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 		return { result: async () => ({ content: [{ type: "toolCall", id: `call-${seen.length}`, name: "submit", arguments: args }], stopReason: "toolUse" }) };
 	};
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
-	const tools = await planWork(frame, {}, writer);
+	const { tools } = await planWork(frame, {}, writer);
 	assert.deepEqual(tools, [{ do: "plan.put", plan: line }]);
 	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
@@ -212,7 +212,7 @@ test("the writer's habits with one meaning are read as meant: an untap step, an 
 	// The plan closed too early: its branches written beside it.
 	const { may, ...early } = habits;
 	const stream: Stream = () => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: structuredClone(early), may: structuredClone(may) } }], stopReason: "toolUse" }) });
-	const [put] = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	const { tools: [put] } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.ok(put?.do === "plan.put");
 	assert.deepEqual(put.plan.steps.map((step) => step.label), ["Play a Forest"], "the table untaps for the seat");
 	assert.deepEqual(put.plan.may![0], { label: "Pass while they hold three cards", when: {}, action: { option: "pass" },

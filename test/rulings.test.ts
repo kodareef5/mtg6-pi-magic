@@ -20,6 +20,14 @@ import type { Answer, Player } from "../src/core/player.ts";
 import type { Table } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
 import { project } from "../src/core/view.ts";
+import { load as loadCards } from "../src/core/cards.ts";
+import { load as loadRules } from "../src/core/rules.ts";
+import { editWork, workFrame } from "../src/core/work-tools.ts";
+import { reasoner, type Stream } from "../src/context/reason.ts";
+import { rule } from "../src/context/ruling.ts";
+import { tally } from "../src/context/spend.ts";
+import { planWork } from "../src/context/strategy.ts";
+import { main, matchup } from "./play.ts";
 
 const made: Header = {
 	id: "ruled", format: standard.name, seed: "ruled",
@@ -85,4 +93,34 @@ test("a ruling that lets the action stand is recorded and play goes on; without 
 	await playThrough(alone, { 0: steady("A"), 1: objector(alone, asked) }, undefined, 4);
 	assert.deepEqual(alone.rulings, []);
 	assert.ok(alone.gaps.some((gap) => gap.includes("this game has no judge")));
+});
+
+/** A model that answers each call with the next prepared tool call, and keeps what it was sent. */
+const scripted = (replies: Record<string, unknown>[], seen: string[] = []): Stream => (_model, request) => {
+	seen.push(JSON.stringify(request.messages));
+	const args = replies.shift()!;
+	return { result: async () => ({ content: [{ type: "toolCall", id: `call-${seen.length}`, name: "submit", arguments: args }], stopReason: "toolUse" }) };
+};
+const offline = (role: "strategy" | "judge", stream: Stream) => reasoner({ role, stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
+
+test("the writer objects only to an action the opponent took since its last plan, and the judge cites a rule on disk", async () => {
+	const table = matchup("objecting");
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	const frame = workFrame(table, 0);
+	const theirs = frame.view.actions!.find((one) => one.seat === 1)!;
+	assert.ok(theirs.what.length, "Red's actions are listed in public words");
+	const plan = { objective: "o", guidance: "g", steps: [{ label: "Pass", when: { active: "self" }, action: { option: "pass" } }] };
+	const seen: string[] = [];
+	const answer = await planWork(frame, {}, offline("strategy", scripted([{ plan, objection: { row: 9999, claim: "x" } }, { plan, objection: { row: theirs.row, claim: "That land enters tapped.", rule: "614.1c" } }], seen)));
+	assert.match(seen[1]!, /objection names row 9999/, "a row that is not listed is refused");
+	assert.deepEqual(answer.objection, { row: theirs.row, claim: "That land enters tapped.", rule: "614.1c" });
+
+	const verdicts: string[] = [];
+	const ruling = await rule(table, { row: theirs.row, raisedBy: 0, claim: "That land enters tapped.", rule: "614.1c" },
+		offline("judge", scripted([{ legal: false, rule: "999.99", remedy: "rollback", because: "It enters tapped." }, { legal: false, rule: "614.1c", remedy: "rollback", because: "It enters tapped." }], verdicts)),
+		{ rules: loadRules("rules/cr.tsv"), universe: loadCards("cards/standard.tsv") });
+	assert.match(verdicts[0]!, /614\.1c/, "the judge is shown the rule the objection cites");
+	assert.match(verdicts[1]!, /999\.99.*not an entry/, "a rule that is not on disk is refused");
+	assert.deepEqual(ruling, { legal: false, rule: "614.1c", remedy: "rollback", because: "It enters tapped." });
 });
