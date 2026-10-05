@@ -58,6 +58,8 @@ export type Option = {
 	use?: Activation;
 	/** Restrictions, entry facts and plan annotations, independent of the rendered description. */
 	notes?: string[];
+	/** Public components of a compound choice. Inspecting one does not commit it. */
+	parameters?: Record<string, string | number>;
 };
 
 /** Options are canonically ordered, so a seed plus the picks replays the game. */

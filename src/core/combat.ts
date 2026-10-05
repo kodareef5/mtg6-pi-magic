@@ -87,7 +87,9 @@ export function declareBlockers(table: Table): Pending {
 	const moves: Move[] = able.flatMap((blocker) => attackers.map((attacker): Move => {
 		const marks = conflicts(table, blocker, attacker, blocking(attacker));
 		return { option: { id: `block:${blocker.id}:${attacker.id}`, label: `Block ${name(attacker)} (${body(traitsOf(table, attacker))}${words(traitsOf(table, attacker))}) with ${name(blocker)} (${body(traitsOf(table, blocker))}${words(traitsOf(table, blocker))})`,
-			objects: [ref(blocker), ref(attacker)], ...(marks.length ? { shows: marks.join(" ") } : {}) },
+			objects: [ref(blocker), ref(attacker)],
+			parameters: { Blocker: `${name(blocker)} (${blocker.id}@${blocker.incarnation})`, Attacker: `${name(attacker)} (${attacker.id}@${attacker.incarnation})` },
+			...(marks.length ? { shows: marks.join(" ") } : {}) },
 			changes: [{ do: "combat", action: "choose", pick: { blocker: ref(blocker), attacker: ref(attacker) } }], reason: "combat" };
 	}));
 	const declared = new Map<string, { blocker: Thing; blocking: ObjectRef[] }>();
@@ -168,6 +170,7 @@ function assign(table: Table, attacker: Thing, walls: Thing[], defending: SeatId
 	const describe = (to: Chosen) => "player" in to ? `seat ${to.player}` : name(table.things.get(to.id)!);
 	const moves: Move[] = legal.map((parts) => ({
 		option: { id: `assign:${attacker.id}:${parts.join("-")}`, label: `${name(attacker)} assigns ${recipients.map((to, at) => `${parts[at]} to ${describe(to)}`).join(", ")}`,
+			parameters: Object.fromEntries(recipients.map((to, at) => [`Damage to ${describe(to)}${"id" in to ? ` (${to.id}@${to.incarnation})` : ""}`, parts[at]!])),
 			shows: walls.map((wall) => `${name(wall)} ${body(traitsOf(table, wall))}, ${wall.damage} marked, lethal ${lethal(wall)}.`).join(" "), objects: [ref(attacker), ...walls.map(ref)] },
 		changes: [{ do: "combat", action: "assign", source: ref(attacker), division: recipients.map((to, at) => ({ to, amount: parts[at]! })).filter((part) => part.amount > 0) }],
 		reason: "combat",

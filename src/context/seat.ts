@@ -16,8 +16,8 @@ import type { Answer, Objection, Player } from "../core/player.ts";
 import type { Rules } from "../core/rules.ts";
 import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
-import { follow } from "./dial.ts";
-import { asState, chose, type DecisionApi, type Question } from "./model.ts";
+import { dial, follow } from "./dial.ts";
+import { asState, chose, CHOICE_LIMIT, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
@@ -163,6 +163,8 @@ export function question(packet: Packet, help: boolean): Question {
 		"Choose one listed id using the supplied facts and this seat's preparation. Acceptance does not certify card meaning or rules legality.",
 		"options describes the choices; uses holds shared source, timing, effect, target-slot terms and notes; payments holds costs and paid mana ids; funding holds the referenced mana abilities, while pools names existing mana and its restrictions. Read these references together. Printed cards and current characteristics are separate.",
 		...(stage ? [stage === "use" ? "Choose the prepared use that applies now. An inspect choice asks about its alternatives and moves nothing."
+			: stage === "component" ? "Inspect the named component or inclusive range. inspection.path records earlier filters; these are not committed choices. A later question asks for a complete original action. Backtracking restores alternatives."
+			: stage === "choice" ? "Choose a complete original action. parameters names its components. Earlier inspection filters committed nothing; the selected action includes every listed component."
 			: stage === "binding" ? "Choose the targets and X for this prepared use. Inspection declares no targets and spends nothing."
 			: "Choose a complete original move with these bindings and a payment that preserves the plan's commitments. Back returns to all uses without acting."] : []),
 		...(packet.opening ? ["Apply the opening policy to this hand and its remaining obligation. For bottom choices, retained shows the hand after each choice; preserve the policy's resource requirements."] : []),
@@ -286,13 +288,15 @@ export function aiSeat(options: AiSeatOptions): Player {
 				const items = checklist(frame);
 				const ready = items.some((item) => item.kind !== "phase" && item.kind !== "response" && item.judgment?.verdict === "act" && item.options.some((id) => !["pass", "attack:done", "block:done"].includes(id)));
 				const reviewing = ready && frame.view.work?.finishReview !== frame.version ? undefined : items.find((item) => !item.judgment);
-				const menu = reviewing ? undefined : inspect(decisionChoices(frame), navigation.selected);
+				const rules = options.rules && walked.length < budget ? options.rules : undefined;
+				const capacity = CHOICE_LIMIT - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
+				const menu = reviewing ? undefined : inspect(decisionChoices(frame), navigation.selected, capacity);
 				const whole = focus(frame, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
 					...(seated ? { recaps: seated.recaps } : {}),
-					...(options.rules && walked.length < budget ? { rules: options.rules } : {}),
+					...(rules ? { rules } : {}),
 					...(learned.length ? { learned } : {}),
-					...(reviewing ? { review: reviewing } : { inspection: navigation.selected }),
+					...(reviewing ? { review: reviewing } : { inspection: navigation.selected, capacity }),
 				});
 				// A route already followed is not offered again. Its answer is
 				// already in front of the seat, and offering it twice spends the

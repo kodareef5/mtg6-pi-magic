@@ -34,6 +34,9 @@ export type Question = ClassifierQuestion;
 export type Answer = ClassifierAnswer;
 export type DecisionRequest = ClassifierContext;
 
+/** Observed System One provider boundary; navigation reserves room for help and rules. */
+export const CHOICE_LIMIT = 255;
+
 /**
  * What a seat calls. One method, because every decision is one request.
  *
@@ -81,6 +84,10 @@ export function decisionApi(
 	return {
 		named,
 		async ask(request, about = "pick") {
+			for (const [key, question] of Object.entries(request.questions)) {
+				if (question.type === "choice" && Object.keys(question.criteria).length > CHOICE_LIMIT)
+					throw new PlayerUnavailable(`${named}: ${key} exceeds the ${CHOICE_LIMIT}-choice capacity. The decision needs further inspection; no request was sent.`);
+			}
 			const began = Date.now();
 			const finish = meter(options.tally, { role: "decide", seat: options.seat, about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began });
 			let result: ClassifierResult;

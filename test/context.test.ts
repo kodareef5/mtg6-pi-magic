@@ -8,14 +8,17 @@ import { standard } from "../src/core/format.ts";
 import type { Intent } from "../src/core/intent.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
-import { start } from "../src/core/commit.ts";
+import { commit, start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 import { abilityExercise } from "../tools/ability-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { choices, inspect, type Inspection } from "../src/context/choices.ts";
 import { aiSeat } from "../src/context/seat.ts";
-import { example, main, matchup, offered, place } from "./play.ts";
+import { establish, example, main, matchup, offered, place } from "./play.ts";
 import { workFrame } from "../src/core/work-tools.ts";
+import { combatDamage, declareBlockers } from "../src/core/combat.ts";
+import { CHOICE_LIMIT, decisionApi } from "../src/context/model.ts";
+import { tally } from "../src/context/spend.ts";
 
 test("context preserves the seat's options, shows the plan the seat flies, and carries neither deck lists nor registrations", async () => {
 	const table = start(standard, [
@@ -120,6 +123,82 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	assert.deepEqual(choiceFrame, originalChoices, "factoring and every inspection leave the original offers intact");
 	const entered = inspect(facts, inspect(facts, {}).enter["inspect:use:0"]!);
 	assert.deepEqual(inspect(facts, entered.enter["inspect:back"]!).options, inspect(facts, {}).options, "backtracking restores all choices");
+});
+
+test("inspection preserves every complete choice within provider capacity and never commits a partial action", async () => {
+	const table = matchup("large-inspection");
+	const hydra = establish(table, 0, "Mossborn Hydra");
+	const elf = establish(table, 0, "Llanowar Elves", []);
+	const blockers = [establish(table, 1, "Hired Claw", []), establish(table, 1, "Hired Claw", [])];
+	main(table, 0, 3, "begin-combat");
+	const ref = (one: typeof hydra) => ({ id: one.id, incarnation: one.incarnation });
+	commit(table, [
+		{ do: "counters", what: hydra.id, kind: "+1/+1", amount: 48 },
+		{ do: "counters", what: blockers[1]!.id, kind: "+1/+1", amount: 1 },
+		{ do: "attack", attackers: [hydra, elf].map((one) => ({ ...ref(one), defending: 1 })) },
+		{ do: "block", blockers: blockers.map((one) => ({ ...ref(one), blocking: [ref(hydra)] })) },
+	], "game-setup");
+	const { moves, ...pending } = combatDamage(table)!;
+	const decision = { ...pending, options: moves.map((one) => one.option) };
+	assert.equal(decision.options.length, 1040, "the same size as the stopped game's damage decision");
+	const frame = { ...workFrame(table, 0), decision }, before = structuredClone(table);
+	frame.view.work = { revision: 0 };
+	const paths = (facts: ReturnType<typeof choices>, capacity: number) => {
+		const found = new Map<string, string[]>(), visited = new Set<string>();
+		const walk = (selected: Inspection, path: string[]) => {
+			const key = JSON.stringify(selected);
+			if (visited.has(key)) return; visited.add(key);
+			const menu = inspect(facts, selected, capacity);
+			assert.ok(menu.options.length <= capacity);
+			assert.equal(new Set(menu.options.map((one) => one.id)).size, menu.options.length);
+			for (const option of menu.options) {
+				if (Object.hasOwn(menu.enter, option.id)) walk(menu.enter[option.id]!, [...path, option.id]);
+				else if (!found.has(option.id)) found.set(option.id, [...path, option.id]);
+			}
+		};
+		walk({}, []);
+		assert.deepEqual([...found.keys()].sort(), facts.options.map((one) => one.id).sort());
+		return found;
+	};
+	const facts = choices(decision.options), capacity = CHOICE_LIMIT - 1;
+	const routes = paths(facts, capacity);
+	assert.match(inspect(facts, {}, capacity).field!, /^Damage to /);
+	const packet = focus(frame, startingIntent(0), { inspection: {}, capacity });
+	assert.match(packet.inspection!.facts!.join(" "), /lethal 2/);
+	assert.match(packet.inspection!.facts!.join(" "), /lethal 3/);
+	// Domain ranges and multiple filters must also work when the provider has
+	// fewer slots than one recipient has possible amounts. No first-N shortcut.
+	paths(facts, 8);
+	paths(choices(decision.options.map(({ parameters: _, ...one }) => one)), capacity);
+	const selected = decision.options.at(-1)!, path = [...routes.get(selected.id)!];
+	const pilot = aiSeat({ name: "Large inspection", intent: startingIntent(0), onGap: assert.fail,
+		plan: async () => { throw new Error("Inspection cannot invoke strategy"); },
+		api: { named: "fixture", async ask(request) {
+			assert.deepEqual(table, before);
+			const question = request.questions.pick!;
+			assert.equal(question.type, "choice"); if (question.type !== "choice") assert.fail();
+			assert.ok(Object.keys(question.criteria).length <= CHOICE_LIMIT);
+			assert.ok(Object.hasOwn(question.criteria, "ask:help"), "capacity includes the help route");
+			const choice = path.shift()!;
+			assert.ok(Object.hasOwn(question.criteria, choice));
+			return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
+		} } });
+	const answer = await pilot.answer(frame);
+	assert.equal(answer.kind, "pick"); if (answer.kind !== "pick") assert.fail();
+	assert.equal(answer.option, selected.id); assert.equal(path.length, 0);
+	await pilot.close();
+	assert.deepEqual(table, before);
+	// Blocks share the same inspection: one blocker, then the complete block.
+	const blocks = choices(declareBlockers(table).moves.map((one) => one.option));
+	assert.equal(blocks.options.length, 5);
+	assert.equal(inspect(blocks, {}, 4).field, "Blocker");
+	paths(blocks, 4);
+	const counted = tally();
+	const api = decisionApi(async () => { throw new Error("An oversized request reached the provider"); },
+		{ id: "fixture", provider: "offline", api: "typesafe-system-one" } as never, { tally: counted });
+	await assert.rejects(api.ask({ state: {}, questions: { pick: { type: "choice", instructions: "Choose a complete action.",
+		criteria: Object.fromEntries(decision.options.map((one) => [one.id, one.label])) } } }), /255-choice capacity/);
+	assert.equal(counted.spent().length, 0, "local refusal is not billed as a model request");
 });
 
 test("a retry packet differs from the first only by the refusal it carries", async () => {

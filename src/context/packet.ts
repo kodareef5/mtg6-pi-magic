@@ -18,7 +18,7 @@ import { viewWorld } from "../core/selectors.ts";
 import { sources } from "../core/funding.ts";
 import { openingHand } from "../core/pregame.ts";
 import { activeWatches } from "../core/triggers.ts";
-import { choices, inspect, type Choice, type Inspection, type Payment, type Use, type Funding } from "./choices.ts";
+import { choices, inspect, type Choice, type Inspection, type Menu, type Payment, type Use, type Funding } from "./choices.ts";
 import { decisionFacts } from "./decision-facts.ts";
 
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
@@ -44,7 +44,7 @@ export type Packet = {
 	guidance: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
 	history?: SeatView["history"]; resolution?: SeatView["resolution"]; checklist?: ReviewItem[]; combat?: SeatView["combat"];
 	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
-	inspection?: { stage: string; selected?: Use };
+	inspection?: Pick<Menu, "stage" | "selected" | "field" | "path" | "facts">;
 };
 
 const seen = (object: SeenObject): Seen => {
@@ -70,7 +70,7 @@ function inPlanOrder<T extends { id: string }>(options: readonly T[], state: Ret
 /** The same canonical grouping drives inspection and the question's facts. */
 export function decisionChoices(frame: Frame) { return choices(inPlanOrder(frame.decision?.options ?? [], planState(frame))); }
 
-export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; review?: ReviewItem; inspection?: Inspection };
+export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; review?: ReviewItem; inspection?: Inspection; capacity?: number };
 /** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
 export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet {
 	const { decision, seat, view, version, refused } = frame;
@@ -90,9 +90,10 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;
 	const all = inPlanOrder(decision.options, state);
-	const factored = choices(all), menu = context.inspection ? inspect(factored, context.inspection) : undefined;
+	const factored = choices(all), menu = context.inspection ? inspect(factored, context.inspection, context.capacity) : undefined;
+	const inspected = menu?.scope && new Set(menu.scope);
 	const offered = review && review.kind !== "response" ? all.filter((one) => review.options.includes(one.id))
-		: context.inspection?.use ? all.filter((one, at) => factored.options[at]?.use === context.inspection!.use || !one.use) : all;
+		: inspected ? all.filter((one) => inspected.has(one.id)) : all;
 	const data = review ? choices(offered) : factored;
 	const scoped = decisionFacts(frame, offered, review), names = new Set(scoped.objects.flatMap((one) => one.card ? [one.card] : []));
 	for (const option of offered) for (const card of option.cards ?? []) names.add(card);
@@ -116,7 +117,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const itemList = review ? [review] : checklist(frame);
 	const listed = menu?.options ?? data.options;
 	const used = new Set(listed.flatMap((one) => one.use ? [one.use] : []));
-	const paid = new Set(listed.flatMap((one) => [one.payment, ...(one.alternatives ?? []).map((variant) => variant.payment)].filter((id): id is string => !!id)));
+	const paid = new Set(listed.flatMap((one) => one.payment ? [one.payment] : []));
 	const taps = new Set([...paid].flatMap((id) => data.payments[id]?.funding ?? []));
 	const retained = selection ? offered.map((option) => ({ option: option.id,
 		hand: openingHand({ ...view, objects: view.objects?.filter((one) => !option.objects?.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation)) }, seat) })) : undefined;
@@ -128,7 +129,8 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		options: listed, uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
 		payments: Object.fromEntries(Object.entries(data.payments).filter(([id]) => paid.has(id))),
 		funding: Object.fromEntries(Object.entries(data.funding).filter(([id]) => taps.has(id))), pools: structuredClone(view.pools),
-		...(menu ? { inspection: { stage: menu.stage, ...(menu.selected ? { selected: menu.selected } : {}) } } : {}),
+		...(menu ? { inspection: { stage: menu.stage, ...(menu.selected ? { selected: menu.selected } : {}),
+			...(menu.field ? { field: menu.field, facts: menu.facts } : {}), ...(menu.path ? { path: menu.path } : {}) } } : {}),
 		resources: view.resolution ? [] : [...view.yours, ...(view.window.kind === "turn" ? [
 			`Land plays left: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. A resolving effect putting a land onto the battlefield does not use a land play.`,
 			`Mana sources usable now: ${available.join("; ") || "none"}.`] : [])],

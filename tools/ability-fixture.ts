@@ -73,7 +73,7 @@ export async function abilityExercise() {
 			const entries = Object.entries(question.criteria);
 			// Take what the plan marks, else pass, else the first real option.
 			const packet = request.state as unknown as Packet;
-			const marked = (id: string) => { const one = packet.options.find((one) => one.id === id); return /Plan (step|branch)/.test(JSON.stringify([one?.notes, one?.shows, one?.alternatives, one?.use && packet.uses[one.use]?.notes])); };
+			const marked = (id: string) => { const one = packet.options.find((one) => one.id === id); return /Plan (step|branch)/.test(JSON.stringify([one?.notes, one?.shows, one?.use && packet.uses[one.use]?.notes])); };
 			const choice = entries.find(([id]) => marked(id))?.[0] ?? entries.find(([id]) => ["pass", "attack:done", "block:done"].includes(id))?.[0] ?? entries.find(([id]) => id !== "ask:help")![0];
 			return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }];
 		}));

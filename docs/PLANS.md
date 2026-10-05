@@ -64,11 +64,15 @@ interpretation, or an impossible required step. Those must not collapse to skip.
 1. [x] Record the approved contract and preserve the previous experiments.
    Separate current decisions from historical run logs. Identify which current
    requirements this version replaces; do not claim the migration is complete.
-2. [ ] Make inspection reversible and provider-sized for every decision kind.
+2. [x] Make inspection reversible and provider-sized for every decision kind.
    Re-entering a use must work. Damage, blocks, search, targets and payments must
    remain reachable without an oversized request. Test real saved positions and
    compare the reachable leaves with the original offered ids. No table changes
    occur during inspection and no navigation limit chooses an action for a seat.
+   Verified against the stopped turn: all 1,040 assignments are reachable through
+   51 inspection menus, each with at most 50 choices. Compound actions expose
+   named components; a large single domain uses inclusive ranges. Target and
+   payment stages carry their own facts instead of every combination at once.
 3. [ ] Simplify card meaning around shared mechanics and explicit readiness.
    Start with the uses above. Add canonical vocabulary where it removes repeated
    expressions. Separate standing terms from deferred uses and remove mandatory
