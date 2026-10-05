@@ -128,6 +128,11 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 		const question = request.questions.pick!;
 		if (question.type !== "choice") throw new Error("Expected a choice");
 		const packet = request.state as unknown as Packet;
+		if (Object.hasOwn(question.criteria, "review:hold")) {
+			const choice = Object.hasOwn(question.criteria, "review:act") ? "review:act" : "review:skip";
+			return { api: model.api, provider: model.provider, model: model.id, stopReason: "stop", timestamp: 0,
+				answers: { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } } };
+		}
 		// Every option, the plan's step first.
 		assert.deepEqual(packet.options.map((option) => option.id).sort(), frame.decision!.options.map((option) => option.id).sort());
 		assert.match(packet.options[0]!.id, /^plan:/);
@@ -146,7 +151,8 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 			answers: { pick: { type: "choice", choice: chosen, probabilities: { [chosen]: 1 }, confidence: 1 } } };
 	};
 	const player = aiSeat({ name: "A", api: decisionApi(classify, { id: "fixture", provider: "offline", api: "typesafe-system-one" } as never), intent: startingIntent(0), onGap: assert.fail });
-	const answer = await player.answer(frame);
+	let answer = await player.answer(frame);
+	while (answer.kind === "work") { frame.view.work = prepareWork(frame, answer.tools); answer = await player.answer(frame); }
 	assert.equal(answer.kind, "pick");
 	assert.equal(calls, 1);
 	assert.ok(answer.kind === "pick" && answer.option.startsWith(`plan:${frame.view.work!.planned}:s0:`), "the pick names the plan's step");

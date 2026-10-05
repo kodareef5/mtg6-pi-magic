@@ -376,6 +376,10 @@ rather than adding a test for each branch.
 - **Assessed.** Model-written terms cover a card before play, reject missing
   source paragraphs, provide its casts and abilities without a turn-plan edit,
   and survive version-zero cloning and replay. Refused preparation starts no game.
+- **Considered.** A pilot reviews unfinished uses, including unavailable steps,
+  before choosing a move. Private judgments neither move cards nor complete
+  steps; they survive replay at that decision and expire when the position or
+  plan changes. Every listed move stays available to the seat.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -410,6 +414,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   work-language.ts   the checked JSON tool vocabulary, not model-written code
   work-tools.ts      atomic equipment edits and plan checks, separate from motion
   planning.ts        where a seat is in its plan: due steps, branches, stops, holds
+  review.ts          the current decision's checklist and the seat's recorded judgments
   query.ts           whether a window is now, and which projected objects a query names
   printed.ts         type line, mana cost and power/toughness from the card file
   decks.ts           a deck, its registration for a game, and the kept collection

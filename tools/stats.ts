@@ -69,9 +69,9 @@ for (const run of runs) {
 			(group.some((one) => one.failed) ? `; ${group.filter((one) => one.failed).length} failed sessions` : ""));
 	}
 	for (const line of table(run.calls, run.elapsedMs)) console.log(`  ${line}`);
-	// What each chat call was for: pregame analysts and synthesis, turn plans and escalations.
+	// What each call was for, including pilot reviews separately from physical picks.
 	const kinds = new Map<string, Call[]>();
-	for (const call of run.calls.filter((call) => call.role !== "decide")) kinds.set(`${call.role}: ${call.about ?? "?"}`, [...(kinds.get(`${call.role}: ${call.about ?? "?"}`) ?? []), call]);
+	for (const call of run.calls) kinds.set(`${call.role}: ${call.about ?? "?"}`, [...(kinds.get(`${call.role}: ${call.about ?? "?"}`) ?? []), call]);
 	for (const [kind, calls] of [...kinds].sort()) console.log(`  ${kind.padEnd(34)} ${String(calls.length).padStart(4)} calls, median ${seconds(quantile(calls.map((call) => call.ms), 0.5))}`);
 }
 if (runs.length > 1) {

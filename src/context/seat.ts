@@ -29,6 +29,7 @@ import { holds, viewWorld } from "../core/selectors.ts";
 import { matches, select } from "../core/query.ts";
 import { STEPS } from "../core/steps.ts";
 import { putting } from "./strategy.ts";
+import { reviewCommand, reviewQuestion } from "./review.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -157,9 +158,7 @@ export function question(packet: Packet, help: boolean): Question {
 	const plan = packet.plan;
 	const lines = [
 		packet.obligation,
-		"",
-		...packet.known,
-		...(packet.resources.length ? ["", ...packet.resources] : []),
+		"Read known, resources and lately in the supplied state for the position and recent events.",
 		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
 		...(plan ? ["", `Your strategy: ${plan.objective}`,
 			...(plan.script ? [...plan.script.goal.map((goal) => `This phase: ${goal}`), ...plan.script.guidance,
@@ -170,6 +169,8 @@ export function question(packet: Packet, help: boolean): Question {
 			...plan.held.map((hold) => `Held: ${hold}.`),
 			...(plan.stops.length ? [`The plan said to stop if: ${plan.stops.join("; ")}.`] : [])] : []),
 		...(packet.guidance.length ? ["", "Notes for this window:", ...packet.guidance] : []),
+		...(packet.checklist?.length ? ["", "checklist holds your judgments for this position; it does not report completed actions.",
+			"Before passing or ending a declaration, account for every use marked Use now. Take it, or explicitly choose to leave it unfinished because the visible facts prevent it. Holding or skipping an item does not perform it."] : []),
 		...(packet.learned?.length ? ["", "Rules you asked for:", ...packet.learned] : []),
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
 		"",
@@ -302,12 +303,14 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
+				const reviewing = packet.checklist?.find((item) => !item.judgment);
+				const ask = reviewing ? reviewQuestion(packet, reviewing, help) : question(packet, help);
 				asked += 1;
 				options.onAsk?.(packet);
 				const answers = await options.api.ask({
 					state: asState(packet),
-					questions: { [KEY]: question(packet, help) },
-				});
+					questions: { [KEY]: ask },
+				}, reviewing ? "review" : "pick");
 
 				const answer = chose(answers, KEY);
 				if (typeof answer === "string") {
@@ -318,9 +321,14 @@ export function aiSeat(options: AiSeatOptions): Player {
 					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 				}
 				if (answer.choice === HELP && help) {
-					const due = packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";
-					return { kind: "work", tools: [{ do: "plan.request", reason: `The pilot asked for help: ${frame.decision.question}${due} No listed option fit the plan.` }],
+					const due = reviewing ? ` Checklist item: ${reviewing.label}.` : packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";
+					return { kind: "work", tools: [{ do: "plan.request", reason: `The pilot asked for help: ${frame.decision.question}${due} Review the conflict with the current position and repair the unfinished line.` }],
 						revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
+				}
+				if (reviewing) {
+					const tool = reviewCommand(reviewing, answer.choice);
+					if (!tool || !(ask.type === "choice" && Object.hasOwn(ask.criteria, answer.choice))) throw new Error(`No review answer ${answer.choice}; choose one of the listed review judgments.`);
+					return { kind: "work", tools: [tool], revision, actionId: `${options.name}-${frame.version}-${revision}-review-${asked}` };
 				}
 				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
 				if (!route) return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;

@@ -6,6 +6,8 @@ import type { Package, Plan } from "./language.ts";
 
 /** A projected object, with its characteristics as they are now. A face-down object has none. */
 export type SeenObject = Omit<Thing, "card"> & { card?: string; traits?: Traits };
+/** A seat's judgment at a particular decision, not a claim that an action was performed. */
+export type Review = { item: string; verdict: "act" | "hold" | "skip"; reason: string; at: number; plan?: number };
 export type Workspace = {
 	revision: number;
 	/** The plan the seat flies. Its progress is read from the ledger, never stored here. */
@@ -24,6 +26,8 @@ export type Workspace = {
 	request?: string;
 	/** The strategist's own notes, kept across plans so each call builds on the last. Never shown to the pilot. */
 	notebook?: Notebook;
+	/** Considered uses in the current position. The checklist ignores judgments from another physical revision or plan. */
+	reviews?: Review[];
 };
 export type WorkEntry = {
 	seq: number;

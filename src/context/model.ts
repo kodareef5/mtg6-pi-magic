@@ -43,7 +43,7 @@ export type DecisionRequest = ClassifierContext;
 export interface DecisionApi {
 	/** Named for the gap text and the run report, not for a decision. */
 	readonly named: string;
-	ask(request: DecisionRequest): Promise<Record<string, Answer>>;
+	ask(request: DecisionRequest, about?: string): Promise<Record<string, Answer>>;
 }
 
 /**
@@ -79,9 +79,9 @@ export function decisionApi(
 	const named = `${model.provider}/${model.id}`;
 	return {
 		named,
-		async ask(request) {
+		async ask(request, about = "pick") {
 			const began = Date.now();
-			const base = { role: "decide" as const, about: options.about ?? "pick", model: named, ceiling: CEILING.decide, at: began };
+			const base = { role: "decide" as const, about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began };
 			let result: ClassifierResult;
 			try {
 				// classify never rejects, so the stop reason is the error channel.

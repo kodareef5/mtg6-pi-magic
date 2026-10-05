@@ -193,7 +193,7 @@ test("a branch and a held resource are marked on the options they touch, and not
 	const state = planState(frame)!;
 	assert.deepEqual(state.branches.map((one) => one.label), ["Veil a targeted creature"]);
 	const marked = annotate(frame.decision!.options, state);
-	assert.ok(marked.some((option) => option.id === "pass" && !option.shows), "pass stays, unmarked");
+	assert.ok(marked.some((option) => option.id === "pass" && !option.shows?.includes("Plan")), "pass stays without a plan mark");
 	const veil = marked.filter((option) => option.id.startsWith(`plan:${frame.view.work!.planned}:b0:`));
 	assert.ok(veil.length > 0 && veil.every((option) => /Plan branch: Veil a targeted creature/.test(option.shows!)));
 	assert.ok(veil.some((option) => /Uses Forest, held: green for Veil/.test(option.shows!)), "spending the held Forest is marked, not refused");
@@ -329,7 +329,8 @@ test("the pilot's packet stays small: the plan, the options and the public posit
 	const decision = { ...frame.decision!, options: annotate(frame.decision!.options, state) };
 	const packet = focus({ ...frame, decision }, startingIntent(0));
 	const size = JSON.stringify(asState(packet)).length + question(packet, true).instructions.length + JSON.stringify(question(packet, true).criteria).length;
-	assert.ok(size < 9000, `a pilot request is ${size} characters`);
+	// The checklist also carries printed text for hand cards with no affordable use yet.
+	assert.ok(size < 12000, `a pilot request is ${size} characters`);
 	assert.equal(packet.plan?.due, "Play a Forest");
 	assert.equal(JSON.stringify(packet).includes("registers"), false);
 });

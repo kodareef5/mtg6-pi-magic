@@ -15,6 +15,7 @@ import { planState } from "../core/planning.ts";
 import { matches } from "../core/query.ts";
 import type { SeenObject } from "../core/work.ts";
 import type { Printed } from "../core/printed.ts";
+import { checklist, type ReviewItem } from "../core/review.ts";
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -73,6 +74,8 @@ export type Packet = {
 	/** Why the answers already sent for this decision were not taken. Present only on a retry. */
 	refused?: string[];
 	resolution?: SeatView["resolution"];
+	/** Considered, deferred and still-unreviewed uses. An assessment does not count as execution. */
+	checklist?: ReviewItem[];
 };
 
 const seen = (object: SeenObject): Seen => {
@@ -142,14 +145,16 @@ export function focus(
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []),
 		} } : {}),
 	};
-	const scripted = !!plan?.script;
+	const scripted = !!plan?.script, review = checklist(frame);
 	const relevant = new Set((view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack" || (view.window.kind === "opening" && object.zone === "hand") ||
 		decision.options.some((option) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation)))
 		.flatMap((object) => object.card ? [object.card] : []));
+	for (const item of review) for (const card of item.cards) relevant.add(card);
 	return {
 		actor: seat, window: structuredClone(view.window), version,
 		obligation: decision.question,
 		...(plan ? { plan } : {}),
+		...(review.length ? { checklist: review } : {}),
 		options: inPlanOrder(decision.options, state).map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),
 		resources: [...view.yours],
 		known: [...view.table, ...view.since],

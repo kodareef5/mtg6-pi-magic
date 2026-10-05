@@ -1,4 +1,6 @@
-/** The writer for private seat equipment. Card motion has its own commit boundary. */
+/** The writer for private seat equipment. Card motion has its own commit boundary.
+ * Past 150 lines to keep validation and atomic acceptance of the seat's tools together.
+ */
 import { printedTargetless, quotes } from "./printed.ts";
 import { nextDecision } from "./decisions.ts";
 import { project } from "./view.ts";
@@ -12,6 +14,7 @@ import type { Package, Plan, PlanOption, Registration } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
 import { matches } from "./query.ts";
 import { assessmentProblems } from "./assessment.ts";
+import { checklist } from "./review.ts";
 
 export function workFrame(table: Table, seat: SeatId): Frame {
 	const decision = nextDecision(table);
@@ -138,6 +141,7 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				if (waiting.length) work.unarmed = waiting; else delete work.unarmed;
 				work.packages = withPackages(work.packages, tool.plan.packages);
 				work.accepted = frame.version;
+				delete work.reviews;
 				delete work.request;
 				break;
 			}
@@ -145,6 +149,16 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				const wrong = packageProblem(frame, tool.package);
 				if (wrong) throw new Error(wrong);
 				work.packages = withPackages(work.packages, [tool.package]);
+				delete work.reviews;
+				break;
+			}
+			case "review.record": {
+				const item = checklist({ ...frame, view: { ...frame.view, work } }).find((one) => one.id === tool.item);
+				if (!item) throw new Error(`No checklist item ${tool.item} in this decision.`);
+				if (item.judgment) throw new Error(`Checklist item ${tool.item} was already reviewed in this position.`);
+				if (tool.verdict === "act" && item.kind !== "response" && !item.options.length) throw new Error(`Checklist item ${tool.item} has no current option; defer it or ask for help.`);
+				work.reviews = [...(work.reviews ?? []).filter((one) => one.at === frame.version && one.plan === work.planned),
+					{ item: tool.item, verdict: tool.verdict, reason: tool.reason, at: frame.version, ...(work.planned === undefined ? {} : { plan: work.planned }) }];
 				break;
 			}
 			case "notebook.edit": {

@@ -8,11 +8,17 @@ import { project } from "./view.ts";
 import { tableWorld } from "./selectors.ts";
 import { allowance, playable } from "./permits.ts";
 import type { Frame, SeatId } from "./types.ts";
+import { STEPS } from "./steps.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
 export function priorityMoves(table: Table, holder: SeatId): Move[] {
+	const waiting = cardsIn(table, "stack");
+	const current = table.cursor.steps[0]!, next = table.cursor.steps[1];
+	const ends = !next || STEPS[current].phase !== STEPS[next].phase ? `${STEPS[current].phase} phase` : `${current} step`;
 	const moves: Move[] = [
-		{ option: { id: "pass", label: "Pass" }, changes: [], reason: "game-setup" },
+		{ option: { id: "pass", label: "Pass", shows: waiting.length
+			? "Take no response now. If every seat passes in succession, the top stack object begins resolving."
+			: `Take no further action now. If every seat passes in succession, the ${ends} ends.` }, changes: [], reason: "game-setup" },
 	];
 
 	// Playing a land: one move per land in hand, when this seat has played fewer

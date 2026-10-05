@@ -25,7 +25,7 @@ Core accepts a complete `PlanSchema` plan; the strategist can write a short upda
    the plan passes its checks and a live step or branch covers the draw. Otherwise
    the same planner amends it for the changes and the revealed draw. If preparation
    is still running, wait for that job. If it failed, plan from the current frame.
-4. **Fly the turn.** Jev takes the steps and standing responses. A phase change
+4. **Fly the turn.** Jev reviews unfinished uses, then chooses an action or pass. A phase change
    spends no strategy call. A stop or a request for help uses the same planner to
    change the unfinished line.
 
@@ -127,6 +127,25 @@ Progress is read from ledger rows carrying `execution: {plan, step}` or
 and clones read the exact accepted terms and progress from their prefix.
 
 ## Jev's context and timing
+
+At priority and combat declarations, `core/review.ts` lists the phase strategy,
+unfinished steps and branches for this window, other cards with offered uses,
+cards still in hand during the seat's main phase, and a pending stack
+response. An unavailable planned use stays on that list. Jev answers one narrow
+review question per item: use now, hold for later, no use in this position, or ask
+strategy for help. The subsequent move question keeps every offered action and
+shows those judgments. Both seats separately review a stack response and choose
+their own pass. The pass says whether unanimous passes would resolve the stack
+or end the current step or phase.
+
+`review.record` is a private seat tool, available to every player adapter. It
+records a judgment and its reason at the current physical revision; it moves
+nothing and never completes a plan step. Reviews survive a clone or resume at
+that decision. A physical action or a changed plan requires fresh review. The
+checklist is derived from the projected position and accepted work, so it cannot
+inspect a hidden card or certify a card's interpretation. A seat can still pass
+or take any listed move directly. The model adapter guides review before making
+that choice; core does not force a strategy on the seat.
 
 In a scripted phase Jev sees the objective, that phase's decisions and ordered
 steps, applicable branches, holds, options and projected facts. It sees no
