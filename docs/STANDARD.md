@@ -95,12 +95,14 @@ from ordinary setup. No live inference was run for the October 5 changes.
 ## Run the matchup
 
 ```
-npm run matchup -- --turns 2
+npm run matchup -- --prepare
+npm run matchup -- --resume <prepared-journal> --version 0 --turns 2
 ```
 
-This is an opt-in paid run through Pi. It assesses cards, prepares briefs, deals
-normally and stops at an outcome, a gap, or the turn limit. A version-zero clone
-reuses accepted preparation. Older positions without complete assessments can
+These are opt-in paid runs through Pi. The first assesses cards and prepares
+briefs, then saves version zero without playing. Review its accepted terms before
+the second command deals normally and stops at an outcome, a gap, or the turn
+limit. The version-zero clone reuses preparation. Older positions without complete assessments can
 still replay but cannot resume play under the new preparation requirement.
 
 The earlier scripted Elf/Shock probe established payment, response and replay
