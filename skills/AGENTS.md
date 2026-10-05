@@ -36,6 +36,8 @@ identities and library order are not.
 
 The classifier receives the plan's objective, the current phase's decisions and
 steps, live branches, holds and stops, and the options marked with the plan.
-Procedure bodies and card registrations stay with strategy. Strategy receives
+Jev also receives full printed text for visible cards relevant to the decision,
+beside their current characteristics. Full procedure bodies and private card
+packages stay with strategy. Strategy receives
 the unfinished plan, reusable actions and projected facts, then writes only the
 changes. Context expands them into a complete plan before core accepts it.

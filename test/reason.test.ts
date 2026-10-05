@@ -68,6 +68,7 @@ const table = () => start(standard, [
 	{ name: "A", deck: deck("Green Stompy") },
 	{ name: "B", deck: deck("Dimir Control") },
 ], "reasoning");
+const turnTable = () => start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "reasoning");
 
 /** What an analyst submits, and what the synthesis submits, in the shape the pregame checks. */
 const FINDINGS = { conclusions: [{ claim: "Develop the Elves before anything else.", evidence: ["4 Llanowar Elves", "16 one-drops"], assumptions: ["no early removal"],
@@ -288,7 +289,7 @@ test("a phase is planned only when it has a choice that could be lost", () => {
 });
 
 test("the whole table is seated, briefed and played, and the recaps do not block it", async () => {
-	const built = table();
+	const built = turnTable();
 
 	// A commentator held until released. Nothing in the game may be waiting on
 	// it, so the game runs on and the recaps pile up unanswered. Proving that
@@ -383,11 +384,11 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	assert.match(reading, /summary/);
 	assert.match(reading, /picks     \d+ decision-model calls/);
 	const [, forced, chosen] = reading.match(/forced (\d+)  delegated \d+  chosen (\d+)/)!;
-	assert.ok(Number(forced) > 5 * Number(chosen), "the table takes far more decisions than it asks");
+	assert.ok(Number(forced) > 0 && Number(chosen) > 1000, "rules perform compulsory work while both pilots answer voluntary windows");
 	assert.match(reading, /forced    \d+\.\d%/);
 
 	// A role switched off is a decision, not a gap.
-	const quiet = table();
+	const quiet = turnTable();
 	const seatedQuiet = await seatTable(
 		quiet,
 		async () => [parts[0]!, { role: "pregame" as const, pattern: "off", off: true }],
@@ -407,7 +408,7 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 
 test("a carried brief keeps its failures, and a stuck recap cannot lose a saved game", async () => {
 	const dir = mkdtempSync(join(tmpdir(), "magic-carried-"));
-	const built = table();
+	const built = turnTable();
 	const jev = { type: "classifier" as const, id: "jev-latest", name: "Jev", api: "typesafe-system-one",
 		provider: "typesafe", baseUrl: "x", input: ["text" as const],
 		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 64000 };
@@ -510,7 +511,7 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 
 	// One: a fresh game, played and saved. Its pregame writes two briefs, which
 	// is what used to cost it the first two receipts.
-	const first = start(standard, [{ deck: deck("Green Stompy") }, { deck: deck("Dimir Control") }], "life");
+	const first = start(standard, [{ deck: deck("Forest turns") }, { deck: deck("Island turns") }], "life");
 	const parentPath = join(dir, "parent.jsonl");
 	const parentJournal = open(parentPath, header("parent", first));
 	const seated = await seatTable(first, async () => parts, inference, universe, {

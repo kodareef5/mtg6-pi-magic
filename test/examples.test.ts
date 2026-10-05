@@ -76,8 +76,11 @@ test("strategy reads the syntax and can fetch every indexed example without load
 		if (rounds === 1) {
 			const example = request.tools!.find((tool) => tool.name === "example")!;
 			assert.deepEqual((example.parameters as { properties: { file: { enum: string[] } } }).properties.file.enum, listed);
-			const schema = request.tools!.find((tool) => tool.name === "submit")!.parameters as { $defs: Record<string, unknown> };
-			for (const [, ref] of JSON.stringify(schema).matchAll(/"\$ref":"#\/\$defs\/([^"]+)"/g)) assert.ok(schema.$defs[ref!], `${ref} resolves from the tool root`);
+			const schema = JSON.stringify(request.tools!.find((tool) => tool.name === "submit")!.parameters);
+			assert.doesNotMatch(schema, /\$ref|\$defs/, "providers receive no recursive tool definitions");
+			assert.ok(schema.length < 3000, `${schema.length} characters in the advertised schema`);
+			assert.match(request.systemPrompt!, /The complete update schema below is checked locally/);
+			assert.match(request.systemPrompt!, /\$defs/, "the writer still receives the complete nested vocabulary");
 			return { result: async () => ({ stopReason: "toolUse", content: listed.map((file, at) => ({ type: "toolCall", id: `e${at}`, name: "example", arguments: { file } })) }) };
 		}
 		const messages = JSON.stringify(request.messages);

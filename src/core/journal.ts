@@ -121,13 +121,22 @@ export function reopen(path: string, header: Header, already: Table): Journal {
 	// A crash inside a decision group can leave a receipt without its row, or
 	// omit a setup group that replay derives. Reconcile to the durable decisions
 	// before appending rather than skipping or duplicating reconstructed entries.
-	// Each ruling goes back after the lines of its version, where it rolls nothing past.
+	// Keep every historical branch through the last rollback. Only the current
+	// continuation is reconstructed, so repairing a torn decision cannot erase
+	// the actions an earlier judge rolled past.
 	const reconciled = back.truncated || recorded.length !== rebuilt.length;
-	const rulings = back.lines.filter((line) => "ruling" in line);
-	const merged = [...rebuilt.map((line, at) => ({ line, at, v: line.v })), ...rulings.map((line, at) => ({ line, at, v: line.v + 0.5 }))].sort((a, b) => a.v - b.v || a.at - b.at).map(({ line }) => line);
-	if (reconciled) writeFileSync(path, [JSON.stringify({ header }),
-		...back.lines.filter((line) => "prepared" in line).map((line) => JSON.stringify(line)),
-		...merged.map((line) => JSON.stringify(line))].join("\n") + "\n");
+	if (reconciled) {
+		const raw: Line[] = readFileSync(path, "utf8").trimEnd().split("\n").slice(1).filter(Boolean).map((line) => JSON.parse(line) as Line);
+		const cut = raw.findLastIndex((line) => "ruling" in line && line.ruling.kept !== undefined);
+		const last = raw[cut];
+		const kept = last && "ruling" in last ? last.ruling.kept! : 0;
+		const prefix = raw.slice(0, cut + 1);
+		const tail = raw.slice(cut + 1);
+		const rulings = tail.filter((line) => "ruling" in line);
+		const merged = [...rebuilt.slice(kept).map((line, at) => ({ line, at, v: line.v })), ...rulings.map((line, at) => ({ line, at, v: line.v + 0.5 }))]
+			.sort((a, b) => a.v - b.v || a.at - b.at).map(({ line }) => line);
+		writeFileSync(path, [JSON.stringify({ header }), ...[...prefix, ...tail.filter((line) => "prepared" in line), ...merged].map((line) => JSON.stringify(line))].join("\n") + "\n");
+	}
 	const repaired = [torn, reconciled ? back.truncated ?? "Reconstructed missing derived journal entries." : null].filter(Boolean).join(" ");
 	return { path, header, saved: rebuilt.length, ruled: already.rulings.length, ...(repaired ? { repaired } : {}) };
 }
@@ -210,7 +219,7 @@ export function read(path: string): { header: Header; lines: Line[]; truncated?:
 	let lines: Line[] = [];
 	// A rollback leaves the game it rolled past in the file and out of the game.
 	const take = (line: Line) => {
-		if ("ruling" in line && line.ruling.kept !== undefined) lines = lines.filter((one) => one.v <= line.v || "prepared" in one);
+		if ("ruling" in line && line.ruling.kept !== undefined) lines = lines.filter((one) => one.v <= line.v || "prepared" in one || "ruling" in one);
 		lines.push(line);
 	};
 	for (const [at, row] of rows.entries()) {
@@ -234,7 +243,7 @@ export function read(path: string): { header: Header; lines: Line[]; truncated?:
 		if (line) take(line);
 	}
 	const durable = lines.reduce((last, line) => "row" in line ? Math.max(last, line.row.seq + 1) : last, 0);
-	const complete = lines.filter((line) => line.v <= durable);
+	const complete = lines.filter((line) => "ruling" in line || line.v <= durable);
 	if (complete.length !== lines.length) truncated = [truncated, `${path} ends before its decision group completed. Uncommitted entries were dropped.`].filter(Boolean).join(" ");
 	return { header: opening.header, lines: complete, ...(truncated ? { truncated } : {}) };
 }
@@ -284,9 +293,16 @@ export function restoreWork(table: Table, lines: Line[], upTo?: number): void {
  * with a declaration is not fully reliveable, and that is a gap rather than a
  * silent approximation.
  */
-export function relive(table: Table, rows: LedgerRow[]): Table {
-	let next = 0;
+export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry[] = []): Table {
+	let next = 0, edited = 0;
 	while (table.outcome === null) {
+		// Payment menus distinguish sources the seat held at this moment. Restore
+		// accepted equipment before listing the decision, not after the game.
+		while (work[edited] && work[edited]!.at <= table.ledger.length && work[edited]!.clock <= table.cursor.clock) {
+			const entry = structuredClone(work[edited++]!);
+			table.workLog.push(entry);
+			table.work[entry.seat] = structuredClone(entry.workspace);
+		}
 		const decision = nextDecision(table);
 		if (decision === null) {
 			advance(table);
@@ -323,7 +339,7 @@ export function relive(table: Table, rows: LedgerRow[]): Table {
  */
 export function rollback(table: Table, ruled: Pick<Ruled, "case" | "ruling">, restart: () => Table): void {
 	const to = ruled.case.row;
-	const fresh = relive(restart(), table.ledger.slice(0, to));
+	const fresh = relive(restart(), table.ledger.slice(0, to), table.workLog.filter((entry) => entry.at <= to));
 	fresh.workLog = table.workLog.filter((entry) => entry.at <= to).map((entry) => structuredClone(entry));
 	fresh.work = {};
 	for (const entry of fresh.workLog) fresh.work[entry.seat] = structuredClone(entry.workspace);
@@ -364,7 +380,8 @@ export function replay(
 		].filter(Boolean);
 		if (drift.length) throw new Error(`${path} cannot be replayed here: ${drift.join("; ")}`);
 	}
-	const table = relive(start(header), rowsOf(lines, upTo));
+	const work = lines.flatMap((line) => "work" in line && (upTo === undefined || line.v <= upTo) ? [line.work] : []);
+	const table = relive(start(header), rowsOf(lines, upTo), work);
 	restoreWork(table, lines, upTo);
 	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
 	table.rulings = lines.flatMap((line) => "ruling" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.ruling)] : []);
@@ -439,8 +456,7 @@ export function exportGame(
 	if (how.mode === "full") {
 		return [JSON.stringify({ header }), ...lines.filter((line) => line.v <= at).map((line) => JSON.stringify(line))].join("\n") + "\n";
 	}
-	const table = relive(start(header), rowsOf(lines, at));
-	restoreWork(table, lines, at);
+	const table = replay(path, start, at).table;
 	const view = project(table, how.mode === "seat" ? how.seat : "spectator");
 	return [stamp, ...view.table, ...view.yours,
 		...(view.decks ?? []).map((deck) => `Registered deck for seat ${deck.seat}: ${JSON.stringify(deck.cards)}`),

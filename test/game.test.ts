@@ -76,12 +76,16 @@ test("a game finishes, and somebody decks out", async () => {
 	assert.equal(built.gaps.length, 0);
 });
 
-test("forced: far more decisions are taken by the table than asked of a seat", async () => {
+test("forced: compulsory actions ask nobody; each seat answers its priority and combat windows", async () => {
 	const built = table();
 	await finish(built);
 	const by = (why: string) => built.ledger.filter((r) => r.why === why).length;
 	assert.equal(by("fallback"), 0);
-	assert.ok(by("forced") > by("chosen") * 2, `${by("forced")} forced, ${by("chosen")} chosen`);
+	assert.ok(by("forced") > 0);
+	const voluntary = built.ledger.filter((row) => row.situation === "priority" || row.picked === "attack:done" || row.picked === "block:done");
+	assert.ok(voluntary.length > 1000, "both seats answer throughout the game");
+	assert.ok(voluntary.every((row) => row.why === "chosen"));
+	for (const seat of built.seats) assert.ok(voluntary.some((row) => row.seat === seat.id && row.picked === "pass"));
 	// Every row names what was offered, so a recorded game is a test corpus.
 	for (const row of built.ledger) assert.ok(row.offered.includes(row.picked));
 
@@ -92,7 +96,11 @@ test("forced: far more decisions are taken by the table than asked of a seat", a
 		.map((c) => ({ do: "move", what: c.id, to: "hand", reason: "draw" })), "game-setup");
 	const strict = policy("strict");
 	const answer = strict.answer;
-	strict.answer = (frame) => { assert.ok(frame.decision!.options.length > 1); return answer(frame); };
+	strict.answer = (frame) => {
+		const decision = frame.decision!;
+		assert.ok(decision.situation === "priority" || decision.options.some((one) => one.id === "attack:done" || one.id === "block:done") || decision.options.length > 1);
+		return answer(frame);
+	};
 	await play(limited, { 0: strict, 1: strict }, {});
 	assert.equal(limited.ledger[0]!.why, "forced");
 	assert.ok(limited.ledger.some((r) => r.picked.startsWith("bottom:") && r.why === "forced"));

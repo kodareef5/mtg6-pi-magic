@@ -11,6 +11,7 @@ import { checkProcedure } from "./procedures.ts";
 import type { Package, Plan, PlanOption, Registration } from "./language.ts";
 import { holds, viewWorld } from "./selectors.ts";
 import { matches } from "./query.ts";
+import { assessmentProblems } from "./assessment.ts";
 
 export function workFrame(table: Table, seat: SeatId): Frame {
 	const decision = nextDecision(table);
@@ -93,7 +94,6 @@ const PLACES: { prefix: string; steps?: string[]; active?: "self" | "opponent"; 
 	{ prefix: "block:", steps: ["declare-blockers"], active: "opponent" },
 	{ prefix: "assign:", steps: ["combat-damage"] },
 	{ prefix: "land:", steps: ["precombat-main", "postcombat-main"], active: "self" },
-	{ prefix: "cast:", steps: ["precombat-main", "postcombat-main"], active: "self" },
 ];
 function placement(id: string, when: When): string | null {
 	const place = PLACES.find((one) => id.startsWith(one.prefix));
@@ -109,12 +109,17 @@ function packageProblem(frame: Frame, pack: Package): string | null {
 	const printed = frame.view.printed?.[pack.card];
 	if (!frame.view.decks?.find((deck) => deck.seat === frame.seat)?.cards[pack.card] && !printed) return `package ${pack.card}: that card is not in your view or registered list.`;
 	if (!printed) return null;
+	const standing = frame.view.work?.packages?.find((one) => one.card === pack.card);
+	if (pack.assessed || standing?.assessed) {
+		const missing = assessmentProblems(printed, { ...standing, ...pack });
+		if (missing.length) return `package ${pack.card}: ${missing.join("; ")}`;
+	}
 	const all = (registrations: Registration[]): Registration[] => registrations.flatMap((one) => [one, ...(one.kind === "continuous" && one.change.registers ? all(one.change.registers) : [])]);
 	const foreign = all(pack.registers).filter((one) => !quotes(printed, one.basis));
 	return foreign.length ? `package ${pack.card}: ${foreign.map((one) => JSON.stringify(one.basis)).join(", ")} ${foreign.length === 1 ? "is" : "are"} not on ${pack.card}; each registration quotes the card's own text word for word, and a card registers only abilities it has` : null;
 }
 const withPackages = (current: Package[] = [], added: Package[] = []) =>
-	[...current.filter((entry) => !added.some((one) => one.card === entry.card)), ...structuredClone(added)];
+	[...current.filter((entry) => !added.some((one) => one.card === entry.card)), ...added.map((pack) => structuredClone({ ...current.find((one) => one.card === pack.card), ...pack }))];
 
 /** Build an accepted next workspace without writing anything. Refusals are atomic. */
 export function prepareWork(frame: Frame, input: unknown): Workspace {

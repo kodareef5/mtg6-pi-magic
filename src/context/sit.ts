@@ -35,6 +35,7 @@ import { aiSeat, type Planned } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
 import { planWork, prepareTurn } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
+import { assessCard } from "./assess.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
 export type Inference = { classify: Classify; stream: Stream };
@@ -63,9 +64,9 @@ const pick = (parts: Cast[], role: Role) => parts.find((part) => part.role === r
  * resolve has nothing to answer it, and a game that starts anyway spends its
  * first decision finding that out.
  *
- * A seat whose `pregame` role did not resolve plays with no brief. That is a
- * quality cost and not a reason to refuse: a missing plan loses a seat some
- * edge, and a refused game loses it everything.
+ * Cards with rules text need accepted assessments before play. A carried
+ * assessment needs no model. A missing brief alone still costs quality rather
+ * than refusing the game.
  */
 export async function seat(
 	table: Table,
@@ -159,6 +160,37 @@ export async function seat(
 			})() : {}),
 		});
 	}
+
+	// Card meaning precedes play. Every seat needs the registered universe,
+	// including cards it may gain control of. Accepted work survives a retry or
+	// a version-zero clone; a resumed position must already carry its assessment.
+	const jobs = table.seats.flatMap((at) => Object.entries(table.printed).filter(([card, printed]) => printed.text &&
+		!table.work[at.id]?.packages?.some((pack) => pack.card === card && pack.assessed)).map(([card, printed]) => ({ seat: at.id, card, printed })));
+	const refuse = async (message: string): Promise<never> => {
+		if (options.journal) save(options.journal, table);
+		await Promise.all(Object.values(players).map((player) => player.close()));
+		throw Object.assign(new Error([message, ...bill(counted.spent())].join("\n")), { spends: counted.spent() });
+	};
+	if (jobs.length && table.ledger.length) return refuse("This position predates complete card assessment. Replay remains available; start from prepared version zero to play.");
+	const assessors = new Map<SeatId, Reasoner>();
+	for (const seat of new Set(jobs.map((job) => job.seat))) {
+		const role = pick(parts.get(seat)!, "pregame");
+		if (!role?.model || role.off || role.model.type === "classifier") return refuse(`Seat ${seat} needs a pregame model to assess its cards before play, or a clone carrying complete assessments.`);
+		assessors.set(seat, reasoner({ role: "pregame", stream: inference.stream, model: role.model as Model<Api>, tally: counted,
+			...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}) }));
+	}
+	let next = 0;
+	const failed: string[] = [];
+	await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, async () => {
+		for (let job = jobs[next++]; job; job = jobs[next++]) {
+			try {
+				const pack = await assessCard(job.card, job.printed, assessors.get(job.seat)!, universe, options.rules);
+				editWork(table, job.seat, [{ do: "package.put", package: pack }], `assess-${job.seat}-${job.card}`);
+			} catch (error) { failed.push(`Seat ${job.seat}: ${String(error)}`); }
+		}
+	}));
+	if (failed.length) return refuse(`Card assessment is incomplete; play has not started. ${failed.join("\n")}`);
+	if (options.journal) save(options.journal, table);
 
 	// Every seat prepares at once: its analysts together, then its synthesis.
 	await Promise.all(

@@ -5,6 +5,9 @@
  * (608.2b), and what each instruction reads is read as it applies.
  */
 import { strict as assert } from "node:assert";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import { commit } from "../src/core/commit.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
@@ -12,6 +15,7 @@ import { type ProcedureOption } from "../src/core/procedures.ts";
 import { characteristics } from "../src/core/characteristics.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { project } from "../src/core/view.ts";
+import { open, save, replay, fork, exportGame } from "../src/core/journal.ts";
 import { cardsIn } from "../src/core/table.ts";
 import type { Procedure } from "../src/core/language.ts";
 import { announce, finish, main, matchup, offered, passBoth, place, step } from "./play.ts";
@@ -175,6 +179,34 @@ test("targets that partly fail, labels, fight, tokens, each player, and counter 
 	assert.deepEqual(tax.options.map((option) => option.label), ["Pay 2 life. ", "Do not pay; it is countered"]);
 	apply(table, tax.options[1]!.id, "model", "chosen");
 	assert.equal(table.things.get(cub.id)!.zone, "graveyard");
+
+	// A reserved Forest is a distinct payment from a free Forest. Replay must
+	// restore the hold before listing pay:0/pay:1, including at a clone point.
+	const setup = () => { const game = matchup("tax-hold"); place(game, 0, "battlefield", "Forest", "Forest", "Forest"); place(game, 0, "hand", "Sazh's Chocobo"); return game; };
+	for (const payment of [0, 1]) {
+		const game = setup(); main(game, 0);
+		apply(game, nextDecision(game)!.options.find((one) => one.id.startsWith("cast:") && one.label.includes("Sazh's Chocobo"))!.id, "model", "chosen");
+		const free = cardsIn(game, "battlefield", 0).filter((one) => !one.tapped).sort((a, b) => a.id.localeCompare(b.id));
+		assert.equal(free.length, 2);
+		editWork(game, 0, [{ do: "plan.put", plan: { objective: "Reserve one source.", guidance: "Use the free Forest.", steps: [],
+			holds: [{ objects: { refs: [{ id: free[0]!.id, incarnation: free[0]!.incarnation }] }, purpose: "Next spell" }] } }], "hold");
+		announce(game, { ...ability("Mana tax", [{ do: "counter", what: "target:0", unless: { who: "controller:target:0", pays: { mana: "{1}" } } }],
+			[{ object: { zones: ["stack"], types: ["creature"] } }]), cost: {} });
+		passBoth(game);
+		const decision = nextDecision(game)!;
+		assert.equal(decision.options.length, 3, "two payments and a refusal");
+		const directory = mkdtempSync(join(tmpdir(), "magic-tax-"));
+		const journal = open(join(directory, "game.jsonl"), { id: "tax", format: game.format.name, seed: game.rng.seed, seats: game.seats.map(({ id, name, deck }) => ({ id, name, deck })),
+			cards: { path: "cards/standard.tsv", generated: "fixture" }, rules: { path: "rules/cr.tsv", effective: "fixture" }, created: "fixture" });
+		save(journal, game);
+		const child = join(directory, "child.jsonl"); fork(journal.path, game.ledger.length, "child", child);
+		assert.deepEqual(nextDecision(replay(child, setup).table), decision, "the pending payment survives a clone");
+		apply(game, decision.options[payment]!.id, "model", "chosen"); save(journal, game);
+		const back = replay(journal.path, setup).table;
+		assert.deepEqual(back.ledger, game.ledger);
+		assert.deepEqual(back.things, game.things, "each payment spends the same source after replay");
+		assert.doesNotThrow(() => exportGame(journal.path, { mode: "seat", seat: 0 }, setup));
+	}
 });
 
 test("a target can depend on an earlier one, a card enters with its new controller's package, a reveal is public, and choosing zero picks nothing", () => {

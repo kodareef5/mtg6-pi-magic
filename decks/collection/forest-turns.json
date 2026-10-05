@@ -1,0 +1,7 @@
+{
+  "name": "Forest turns",
+  "format": "standard",
+  "source": "Practice deck for turn, priority, model adapter and journal invariants. Its only card behavior is intrinsic basic-land mana.",
+  "main": { "Forest": 60 },
+  "sideboard": {}
+}

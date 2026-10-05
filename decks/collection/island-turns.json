@@ -1,0 +1,7 @@
+{
+  "name": "Island turns",
+  "format": "standard",
+  "source": "Practice opponent for turn, priority, model adapter and journal invariants. Its only card behavior is intrinsic basic-land mana.",
+  "main": { "Island": 60 },
+  "sideboard": {}
+}

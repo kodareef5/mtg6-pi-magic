@@ -6,7 +6,7 @@ import { planDue } from "../core/planning.ts";
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
-	Type.Object({ reuse: Type.String({ pattern: "^(step|may|worked):[0-9]+$" }) }, { additionalProperties: false })]);
+	Type.Object({ reuse: Type.String({ pattern: "^(step|may|worked|prepared):[0-9]+$" }) }, { additionalProperties: false })]);
 const { Plan: planFields, ...definitions } = PlanDefs;
 export const ChangesSchema = Type.Cyclic({ ...definitions,
 	Option: Type.Object({ ...PlanDefs.Option.properties, action: Action }, { additionalProperties: false }),
@@ -20,6 +20,7 @@ export function actions(frame: Frame, prepared?: Plan): Record<string, { label: 
 		...(plan?.steps ?? []).map((one, at) => [`step:${at}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at}`, { label: one.label, action: one.action }]),
 		...(frame.view.worked ?? []).map((one, at) => [`worked:${at}`, { label: one.label, action: one.action }]),
+		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at}`, { label: procedure.claim, action: { procedure } }]),
 	]);
 }
 

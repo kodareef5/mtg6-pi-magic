@@ -324,6 +324,6 @@ export function render(frame: Frame): string {
 		if (option.shows) out.push(`      ${option.shows}`);
 	}
 	out.push("", "Answer with one listed option id. The view may be stale; an accepted pick is not a resolved effect.");
-	out.push("Prepared procedures can execute and delegate unique continuations. Raw declarations, objections, free-form delegation and option widening remain unwritten.");
+	out.push("Prepared procedures execute accepted terms without certifying card meaning. Explicit delegation covers unique resolution continuations. Objections can ask the judge to rewind; raw declarations, free-form delegation and option widening remain unwritten.");
 	return out.join("\n");
 }

@@ -12,7 +12,7 @@
  */
 
 import { applyDeclared, begin, nextOpening, mulligansSettled } from "./pregame.ts";
-import { priorityMoves, defaultCasts, legal } from "./priority.ts";
+import { priorityMoves, defaultCasts, legal, preparedMoves } from "./priority.ts";
 import { advanceTurn, turnBased } from "./turn.ts";
 import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
@@ -81,7 +81,7 @@ function pending(table: Table): Pending | null {
 			seat: holder,
 			question: "You have priority.",
 			fallback: "pass",
-			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, holder)],
+			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, holder), ...preparedMoves(table, holder)],
 		};
 	}
 

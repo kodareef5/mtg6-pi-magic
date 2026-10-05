@@ -282,7 +282,10 @@ test("the real seat loop delegates a unique effect continuation and asks for eac
 	const loots = run.table.ledger.filter((row) => row.activation?.timing === "stack");
 	assert.equal(loots.length, 2);
 	assert.deepEqual(loots.map((row) => [row.seat, row.execution]), [[0, { plan: run.table.work[0]!.planned, step: 0 }], [1, { plan: run.table.work[1]!.planned, branch: 0 }]], "a step and a branch, each recorded");
-	assert.deepEqual(loots.map((row) => row.by), ["engine", "model"], "a step only one option fits is taken by the table; the branch is the pilot's");
+	assert.deepEqual(loots.map((row) => row.by), ["model", "model"], "the pilot chooses both the due step and the response");
+	const response = run.exchange.find((frame) => frame.seat === 1 && frame.decision?.options.some((one) => /Plan branch/.test(one.shows ?? "")));
+	assert.ok(response, "the opponent receives the response window with the plan's action");
+	assert.match(response.view.since.join("\n"), /Qiqirn Merchant/, "passive observations do not consume the opponent action before Jev reads it");
 	assert.deepEqual(run.paused.map((pause) => pause.seat), [1, 0]);
 	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "delegated").length, 4, "each draw and each move of the chosen card");
 	assert.equal(run.table.ledger.filter((row) => row.situation === "resolution" && row.why === "chosen").length, 2);
@@ -415,5 +418,6 @@ test("permanents are cast for their printed cost, register their seat's package 
 	assert.equal(Object.keys(rebuilt.work).length, 0, "replay reads no private work");
 	assert.deepEqual(rebuilt.log, table.log, "entries replay from their recorded rows, change for change");
 	assert.deepEqual([...rebuilt.things], [...table.things]);
+
 });
 const thingOf = (table: Table, id: string) => table.things.get(id)!;

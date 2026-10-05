@@ -30,6 +30,12 @@ Cursor-only transitions write no receipt. Replay derives them from the ledger
 through the normal dispatcher. This keeps the log about game events while
 preserving priority and turn progression.
 
+Card assessments are private equipment at version zero, alongside the briefs.
+Replay restores equipment at each original decision boundary, before listing
+payments or actions. Frozen entry registrations and announced instructions keep
+their accepted terms even if a later plan corrects a package. Rulings and rolled
+past actions remain in the file, including when resume repairs a torn continuation.
+
 Each write ends with a newline. A reader drops a torn final line and refuses a
 torn middle one. Resume repairs a dropped fragment before appending; otherwise
 the next write would turn the fragment into a corrupt middle line.

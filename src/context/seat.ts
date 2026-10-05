@@ -174,12 +174,13 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
 		"",
 		"Answer with one listed id.",
+		"cards holds printed card text; objects holds current characteristics after effects. Check the current objects and option restrictions before following a planned action. A listed option is not a ruling that it obeys every card.",
 		...(plan ? [
-			"Take the option marked as the due plan step. Take an option marked as a plan branch when its situation is in front of you.",
+			"Follow the due step when its conditions still hold. Use a marked branch for the situation it names. Choose pass when you have no action or response to take; every seat answers its own priority window.",
 			"An option that uses a held resource spends what the plan is keeping; take it only when the plan says so.",
 			// Asking is rare: a script names what justifies it, and anything else in the window is normal play.
 			...(help ? [plan.script?.reevaluate.length
-				? `Choose ${HELP} only if one of these has happened: ${plan.script.reevaluate.join("; ")}; or if no listed option can carry out the phase. Anything else is normal play: play the phase as written.`
+				? `Choose ${HELP} if one of these has happened: ${plan.script.reevaluate.join("; ")}; if card text or an option's restriction conflicts with the planned action; or if no listed option can carry out the phase. Otherwise follow the phase guidance.`
 				: `If no option carries out the plan, or the position no longer fits it, choose ${HELP}. Do not invent a new line.`] : []),
 		] : []),
 		...(packet.routes.length ? ["Some ids are asks rather than moves: an ask shows the rules it names, changes nothing, and brings this decision back.",

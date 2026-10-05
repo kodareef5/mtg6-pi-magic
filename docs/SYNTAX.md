@@ -217,21 +217,27 @@ happened to, `by` who did it, `from` and `to` the zones, `step` and `whose` the
 step, `player` combat damage to a player, and `batch` one trigger for "one or
 more".
 
-**Packages.** A seat prepares, per card name, what that permanent registers when
-it enters. This is not a pass over the deck. Strategy writes a package for a
-permanent its plan expects to put onto the battlefield, the way a player rereads
-a card before casting it.
+**Packages.** Before play, the model assesses each registered card with rules
+text. A package holds `card`, `registers`, reusable `procedures` and `assessed:
+true`. It covers normal and alternative casts, activated abilities, keywords,
+triggers, static effects, replacements and entry behavior. The table never
+interprets Oracle prose. Missing source paragraphs stop setup; source coverage
+and schema validation do not prove that the model interpreted the card correctly.
 
-- The table attaches the package however the permanent enters: cast, played,
-  put onto the battlefield by an effect. It never offers an action from one.
+- The table attaches registrations however the permanent enters: cast, played,
+  put onto the battlefield by an effect. Assessed procedures are offered at
+  priority with their source, timing, payment and target checks.
 - Attaching is part of the entering motion. Its own `enters` registration
   applies as it enters (614.12). The applied package is frozen into the ledger
-  row that caused the entry, so replay never reads private work.
+  row that caused the entry. Replay restores private work at its original
+  decision boundary and applies those frozen registrations.
 - The attachment is public and open to objection.
-- A permanent with printed text and no package never enters silently. Its
-  controller announces that it enters with nothing registered, or asks strategy
-  first. Mossborn Hydra entering without its counter changes the game, so that
-  choice is recorded.
+- The model adapter refuses to start or resume play with missing assessments.
+  Low-level tables can still accept partial packages and show an entry warning;
+  those are useful for isolated mechanics tests, not evidence of a prepared game.
+- Packages survive turn-plan replacement. Corrections must retain complete
+  source coverage. Changing a future package does not rewrite an existing
+  permanent's registrations or an already announced spell.
 - Tokens carry their registrations in their spec.
 
 ## Plans
@@ -249,7 +255,7 @@ A **plan** is what jev flies.
   the table then asks strategy for a new plan, at most twice a turn.
 - `holds`: resources kept for a purpose (`objects`, `purpose`, an optional
   `releaseWhen`). An option that spends one is marked, never removed.
-- `packages`: what this plan's permanents register when they enter.
+- `packages`: corrections to the seat's prepared registrations and procedures.
 
 `docs/PLANS.md` says how the table flies a plan.
 
@@ -262,7 +268,8 @@ needs an object id in advance.
 |---|---|
 | `pass` | pass priority |
 | `land:<object>` | play a land |
-| `cast:<object>` | cast a permanent spell for its printed cost, with nothing on resolution |
+| `cast:...` | cast a spell using its assessed procedure; the suffix names the source, payment and targets |
+| `use:...` | activate an assessed procedure |
 | `attack:<object>`, `attack:done` | add an attacker; finish declaring |
 | `block:<blocker>:<attacker>`, `block:done` | add a block; finish declaring |
 | `trigger:<id>` | put that waiting trigger on the stack next, with its targets |
@@ -339,8 +346,8 @@ ordinary event in the game:
    sees it.
 2. The table returns to that point. What each seat saw stays seen: the rollback
    note records it.
-3. The offending seat's strategy proposes how play continues from there. Every
-   seat and the judge must agree to that plan before play resumes.
+3. Every seat plans again from the restored position. The judge decides the
+   remedy; players are not asked to approve it.
 
 There is no other remedy machinery.
 

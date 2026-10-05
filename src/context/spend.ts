@@ -46,6 +46,9 @@ export const CEILING: Record<Role, number> = {
 	summary: 200,
 };
 
+/** A card assessment may include several casting modes, registrations and their full source quotes. */
+export const ASSESSMENT_CEILING = 4000;
+
 /** One request. */
 export type Spend = {
 	role: Role;

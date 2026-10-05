@@ -31,20 +31,23 @@ const docs = join(import.meta.dirname, "..", "..", "docs");
 const examples = [...readFileSync(join(docs, "examples", "README.md"), "utf8").matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
 /** The language's semantics stay in the cached prefix; worked examples are fetched only when needed. */
 export const syntaxReference = (): string => readFileSync(join(docs, "SYNTAX.md"), "utf8").trim();
-const reference: Lookup = {
+export const exampleReference: Lookup = {
 	name: "example", description: "Read a worked use of the syntax. Examples describe accepted terms, not certified card interpretations.",
 	parameters: { type: "object", properties: { file: { type: "string", enum: examples } }, required: ["file"], additionalProperties: false },
 	answer: (args) => examples.includes(String(args.file)) ? readFileSync(join(docs, "examples", String(args.file)), "utf8") : `Choose one of: ${examples.join(", ")}.`,
 };
 
-const { Changes: fields, ...definitions } = JSON.parse(JSON.stringify(ChangesSchema)).$defs;
+// Recursive JSON Schema belongs in local validation and prompt text. Advertising
+// it as a tool schema caused the provider to count over 430,000 input tokens.
 const SUBMIT = {
 	name: "submit",
 	description: "Update the base plan with only changed fields. Omitted fields stay; lists replace whole lists and [] clears one, except packages join by card name. {} keeps the base. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
-	parameters: JSON.parse(JSON.stringify({ type: "object", properties: {
-		...fields.properties, notes: NoteEditsSchema,
+	parameters: { type: "object", properties: {
+		objective: { type: "string" }, guidance: { type: "string" },
+		...Object.fromEntries(["steps", "may", "askWhen", "holds", "phases", "packages"].map((name) => [name, { type: "array", items: { type: "object" } }])),
+		notes: NoteEditsSchema,
 		objection: { type: "object", properties: { row: { type: "integer" }, claim: { type: "string", minLength: 1 }, rule: { type: "string" } }, required: ["row", "claim"], additionalProperties: false },
-	}, $defs: definitions, additionalProperties: false }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
+	}, additionalProperties: false },
 };
 
 const SYSTEM = [
@@ -54,8 +57,8 @@ const SYSTEM = [
 	"",
 	"YOUR ANSWER",
 	"- base is your plan to update. Submit changed fields directly: no plan or changes wrapper. Omitted fields stay, a list replaces that list, [] clears it. Packages join by card name instead. Keep sound objective, guidance, phases and responses. Your new turn's base has no ordered steps; write the line for this turn. A midturn base already omits completed steps. Do not put them back.",
-	"- actions holds syntax you already wrote. A step's action can be {\"reuse\":\"worked:0\"} or another listed key. It copies that action exactly, including selectors and costs. Check that it still means what you want. For a changed effect or selector, write the action. There is no card program or automatically offered repertoire.",
-	"- packages persist in private work. Write only new or corrected packages for permanents you expect to enter. Their registrations quote the card's own text. A package does not choose an activated ability: announce that as a procedure when you intend to pay for it; mana abilities can be registered.",
+	"- actions holds accepted card procedures from preparation, your current line and earlier executed actions. A step's action can be {\"reuse\":\"prepared:0\"}, {\"reuse\":\"worked:0\"} or another listed key. It copies that action exactly, including selectors and costs. Choose among the prepared uses; write a changed action only when its targets, cost or effect actually differ. These are model-authored terms, not certified card interpretations.",
+	"- packages persist in private work. Card abilities are assessed before play, including flying, haste, mana, entry counters, triggers and static permissions. Use that accepted equipment. Submit a corrected package only when its interpretation was wrong; changing a strategic line does not change a card's abilities. Registrations quote the card's own text. A package does not choose an activated ability: announce that as a procedure when you intend to pay for it; mana abilities can be registered.",
 	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
 	"",
 	"WHAT JEV NEEDS",
@@ -68,10 +71,13 @@ const SYSTEM = [
 	"- Combat is sequential: attack: or block: per creature, then attack:done or block:done. Jev handles listed trigger, resolution and damage choices with your phase guidance. It escalates if the plan cannot answer them.",
 	"",
 	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
-	'An example of the answer shape: {"guidance":"Play the land before the permanent.","steps":[{"label":"Play Forest","when":{"active":"self","step":"precombat-main"},"action":{"prefix":"land:","objects":{"zones":["hand"],"controller":"self","card":"Forest"}}},{"label":"Cast Llanowar Elves","when":{"active":"self","step":"precombat-main"},"action":{"prefix":"cast:","objects":{"zones":["hand"],"controller":"self","card":"Llanowar Elves"}}}]}. These are printed-cost defaults, not card-specific effects; choose cards and steps for your actual hand and resources.',
+	'An example of the answer shape: {"guidance":"Play the land before the permanent.","steps":[{"label":"Play Forest","when":{"active":"self","step":"precombat-main"},"action":{"prefix":"land:","objects":{"zones":["hand"],"controller":"self","card":"Forest"}}},{"label":"Cast Llanowar Elves","when":{"active":"self","step":"precombat-main"},"action":{"prefix":"cast:","objects":{"zones":["hand"],"controller":"self","card":"Llanowar Elves"}}}]}. Choose steps for your actual hand and resources. The accepted card package already supplies the mana ability.',
 	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Keep the answer short because Jev reads the conclusions, not your analysis.",
 	"",
 	syntaxReference(),
+	"",
+	"The complete update schema below is checked locally. The tool advertises only its top-level fields. Follow these definitions for nested terms; a schema match does not certify card meaning.",
+	JSON.stringify(ChangesSchema),
 ].join("\n");
 
 /** An activated ability may be announced, but cannot register as a watch or static. */
@@ -119,7 +125,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			accepted = { plan, ...(edits.length ? { edits } : {}), ...(objection ? { objection } : {}) };
 			return null;
 		} },
-		lookups: [reference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
+		lookups: [exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");

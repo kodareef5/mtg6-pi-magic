@@ -14,6 +14,7 @@ import type { Recap } from "./summary.ts";
 import { planState } from "../core/planning.ts";
 import { matches } from "../core/query.ts";
 import type { SeenObject } from "../core/work.ts";
+import type { Printed } from "../core/printed.ts";
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -59,6 +60,8 @@ export type Packet = {
 	resources: string[];
 	known: string[];
 	objects: Seen[];
+	/** Source text for visible cards involved in this decision, kept apart from current traits. */
+	cards: Record<string, Printed>;
 	/** The pregame snippets that apply here: this window's, and a note for each card an option names. */
 	guidance: string[];
 	/** The public turn recaps: three sentences about the last three turns, not two hundred receipts. */
@@ -140,6 +143,9 @@ export function focus(
 		} } : {}),
 	};
 	const scripted = !!plan?.script;
+	const relevant = new Set((view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack" || (view.window.kind === "opening" && object.zone === "hand") ||
+		decision.options.some((option) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation)))
+		.flatMap((object) => object.card ? [object.card] : []));
 	return {
 		actor: seat, window: structuredClone(view.window), version,
 		obligation: decision.question,
@@ -148,6 +154,7 @@ export function focus(
 		resources: [...view.yours],
 		known: [...view.table, ...view.since],
 		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),
+		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => relevant.has(name)).map(([name, card]) => [name, structuredClone(card)])),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		guidance: scripted ? [] : guidance,
 		lately: scripted ? [] : [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),

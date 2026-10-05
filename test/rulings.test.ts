@@ -11,9 +11,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { start } from "../src/core/commit.ts";
+import { advance, nextDecision } from "../src/core/decisions.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { open, reopen, replay, save, type Header } from "../src/core/journal.ts";
+import { append, open, reopen, replay, rollback, save, type Header } from "../src/core/journal.ts";
 import { play, type Judge } from "../src/core/loop.ts";
 import type { Ruling } from "../src/core/judge.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -50,7 +51,8 @@ function objector(table: Table, contested: { row?: number }): Player {
 }
 const stop = new Error("stop");
 async function playThrough(table: Table, players: Record<number, Player>, judge: Judge | undefined, turn: number) {
-	try { await play(table, players, {}, undefined, () => { if (table.cursor.turn > turn) throw stop; }, 32, judge); } catch (error) { if (error !== stop) throw error; }
+	try { await play(table, players, {}, () => { if (table.cursor.turn > turn) throw stop; }, undefined, 32, judge); } catch (error) { if (error !== stop) throw error; }
+	while (!table.outcome && !nextDecision(table)) advance(table);
 }
 const physical = (table: Table) => JSON.stringify({ ledger: table.ledger, log: table.log, things: [...table.things], cursor: table.cursor, rulings: table.rulings });
 
@@ -80,6 +82,15 @@ test("an upheld objection takes the game back to just before the action, and the
 	const resumed = reopen(journal.path, made, back);
 	assert.equal(save(resumed, back), 0);
 	assert.equal(physical(replay(journal.path, dealt).table), physical(table));
+
+	// A crash after a receipt but before its decision row repairs only the
+	// current continuation. The rolled-past action and ruling remain on disk.
+	append(resumed, { v: back.ledger.length + 1, receipt: { ...back.log.at(-1)!, at: back.ledger.length + 1 } });
+	const repaired = reopen(journal.path, made, replay(journal.path, dealt).table);
+	assert.ok(repaired.repaired);
+	const rowsAfterRepair = readFileSync(journal.path, "utf8").trim().split("\n").slice(1).map((line) => JSON.parse(line) as { row?: { seq: number } });
+	assert.equal(rowsAfterRepair.filter((line) => line.row?.seq === contested.row).length, 2, "repair retains the rejected action as well as its replacement");
+	assert.equal(physical(replay(journal.path, dealt).table), physical(table));
 });
 
 test("a ruling that lets the action stand is recorded and play goes on; without a judge the objection is a gap", async () => {
@@ -88,6 +99,14 @@ test("a ruling that lets the action stand is recorded and play goes on; without 
 	await playThrough(table, { 0: steady("A"), 1: objector(table, contested) }, stands, 4);
 	assert.deepEqual(table.rulings.map((one) => [one.case.row, one.kept]), [[contested.row, undefined]]);
 	assert.ok(table.ledger.length > contested.row! + 1, "play went on from where it was");
+	const dir = mkdtempSync(join(tmpdir(), "magic-ruling-history-"));
+	const journal = open(join(dir, "game.jsonl"), made);
+	save(journal, table);
+	rollback(table, { case: { row: contested.row!, raisedBy: 1, claim: "A later objection reaches an earlier action." },
+		ruling: { legal: false, rule: "614.1c", remedy: "rollback", because: "Rewind the action." } }, dealt);
+	save(journal, table);
+	assert.equal(table.rulings.length, 2);
+	assert.deepEqual(replay(journal.path, dealt).table.rulings, table.rulings, "a rollback retains the earlier stand ruling even beyond the new durable version");
 
 	const alone = dealt(), asked: { row?: number } = {};
 	await playThrough(alone, { 0: steady("A"), 1: objector(alone, asked) }, undefined, 4);

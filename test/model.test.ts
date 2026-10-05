@@ -153,10 +153,11 @@ test("a model-backed seat plays a whole game and is asked only what is not force
 	assert.deepEqual(picks, chosen.map((row) => row.picked));
 	for (const [at, request] of seen.entries()) assert.deepEqual(request.criteria, chosen[at]!.offered);
 
-	// A forced decision costs no call, which is the whole economics of this.
+	// Compulsory work costs no call; every voluntary window still reaches Jev.
 	const forced = built.ledger.filter((row) => row.why === "forced").length;
-	assert.ok(forced > calls * 5, `${forced} forced against ${calls} calls`);
-	assert.ok(calls > 50, `${calls} calls`);
+	assert.ok(forced > 0);
+	assert.ok(calls > 1000, `${calls} calls`);
+	assert.ok(built.ledger.filter((row) => row.situation === "priority").every((row) => row.why === "chosen"));
 });
 
 test("a refused answer reaches the next request, and a wrong answer kind becomes a gap", async () => {
@@ -186,11 +187,11 @@ test("a refused answer reaches the next request, and a wrong answer kind becomes
 	assert.match(other.gaps.join(" "), /typesafe\/jev-latest/);
 
 	// It stops rather than finishing. Keeping and passing have terminators, so
-	// the game runs on fallbacks until a mandatory discard, which has none, and
-	// then the table waits instead of discarding a card nobody chose.
+	// the game runs on fallbacks until a combat declaration, which has none.
+	// The table waits rather than deciding that the seat attacks with nothing.
 	assert.ok(other.ledger.every((row) => row.why === "forced" || row.why === "fallback"));
 	assert.equal(nextDecision(other)?.situation, "turn-based");
-	assert.match(nextDecision(other)!.question, /Discard/);
+	assert.match(nextDecision(other)!.question, /Declare attackers/);
 	assert.equal(nextDecision(other)!.fallback, undefined);
 	assert.match(other.gaps.at(-1)!, /no terminating option/);
 });

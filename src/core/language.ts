@@ -295,19 +295,20 @@ export const ProcedureSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef },
 export const LabelSchema = Type.Cyclic({ ...Defs, Label: object({ text, until: Duration, change: Type.Optional(Type.Ref("Modification")) }) }, "Label");
 export type Label = Static<typeof LabelSchema>;
 
-/** What a seat's permanent registers when it enters, by card name. Private until it is used. */
-export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("Registration")) });
-export const PackageSchema = Type.Cyclic({ ...Defs, Package: PackageDef }, "Package");
+/** Accepted registrations and reusable procedures for one card. Private until used. */
+export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("Registration")),
+	procedures: Type.Optional(Type.Array(Type.Ref("Procedure"))), assessed: Type.Optional(Type.Literal(true)) });
+export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Package: PackageDef }, "Package");
 
 /**
  * A seat's plan for a stretch of play, and the only thing strategy writes.
  * `steps` is the line, in the order the table will ask; the pilot takes the
- * step that is due and the table takes a step that only one option fits.
+ * step that is due, including when only one option fits.
  * `may` holds standing branches, such as reactions and blocks, taken when
  * their window and `if` hold. `askWhen` names visible facts that mean the plan
  * no longer fits, so the seat asks for a new one instead of improvising.
  * `holds` names resources kept for a purpose; an option that spends one is
- * marked, never removed. `packages` is what each permanent registers as it enters.
+ * marked, never removed. `packages` corrects accepted card registrations and procedures.
  * `phases` is the pilot's script for each window, which it reads while the window is open.
  * A step marked `essential` is one the line cannot do without: when it cannot be
  * taken where it should be, the table asks for a new plan rather than passing.

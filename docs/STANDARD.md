@@ -12,86 +12,111 @@ Standard card snapshot. The pin records SHA-256 hashes of that file and the
 Comprehensive Rules effective September 25, 2026. This establishes deck
 legality at the pinned date, not correctness of any gameplay interpretation.
 
+## October 5 review and work order
+
+The October 4 Codex and Claude conversations, current code, and the saved
+`real-standard-9-1791191035650` run show a coherent vocabulary for physical
+play, but a broken division of work between preparation, strategy and Jev.
+A completed game with zero recorded gaps did not establish correct card play.
+
+The saved run ended on turn 20 after 25.8 minutes. Strategy waiting accounted
+for 23.9 minutes, or 92.4% of elapsed time. It made 88 strategy calls and only
+28 Jev calls. All 16 accepted prepared plans were amended; 30 of 32 amendment
+answers rewrote phase scripts. Those figures describe the old policy.
+
+Three causes explain the mismatch:
+
+- Core and strategy had Oracle text, but Jev's compact packet omitted it.
+  Several permanents entered without their abilities, including Nova Hellkite
+  and Icetill Explorer. A ground block lacked the warning flying should supply.
+- The loop executed unique plan matches and passed silently for seats whose
+  plans said nothing. This bypassed Jev's action and response decisions.
+- A recursive tool schema expanded at the provider to more than 430,000 input
+  tokens in an isolated probe. Rewriting short answers could not fix that input.
+
+The implementation now follows this order:
+
+1. **Assess cards before play.** The pregame model prepares each registered
+   card's full ability terms and casting or activation procedures. Every seat
+   has its own equipment for both public lists and sideboards. At most four
+   assessments run at once. Missing source coverage, invalid syntax or an
+   explicitly unsupported operation stops setup before dealing. Accepted work
+   is saved even if another card fails, so retries keep completed preparation.
+   Version-zero clones carry it without new calls. Core still never interprets
+   Oracle text. Source coverage is a structural check, not a semantic ruling.
+2. **Make that equipment usable.** Entry attaches the accepted registrations;
+   priority lists the prepared casts and activations. Strategy selects and
+   sequences those uses through `prepared:N` references. Jev receives relevant
+   full card text beside current characteristics and chooses actions, targets,
+   payments, attacks, blocks and each seat's priority passes. Only compulsory
+   rules operations and explicitly delegated resolution instructions bypass it.
+3. **Keep planning bounded.** Preserve opponent-turn preparation, after-draw
+   acceptance or amendment, and stops that change the unfinished line. Advertise
+   shallow tool schemas and validate the complete schema locally. Measure actual
+   waits and amendments; a provider latency improvement remains unmeasured.
+4. **Preserve the position.** Replay now restores equipment before it lists each
+   decision, including distinct payments for held resources. Repeated planning
+   failures at the same physical revision have distinct recovery ids. Rollback
+   and crash repair retain earlier rulings and the historical rejected branch.
+5. **Validate components before live games.** Tests cover omitted-ability
+   refusal, normal and warp cast menus, flying, haste, enters damage, opposing
+   instant windows, failure before play, version-zero clones and replay. Existing
+   invariants cover costs, targets, triggers, layers, combat, plans, visibility
+   and journal lifecycle. These are offline doubles and controlled positions;
+   they do not establish model interpretation quality or playing strength.
+
+## Remaining readiness checks
+
+Do not run a full live game to discover missing machinery. Complete these checks
+in order, retaining the accepted assessment and position for any failure:
+
+- Audit the model-produced assessment for every card in both lists against its
+  full text and cited rules, especially optional costs, timing, intervening
+  conditions and permissions. A quoted paragraph can still have wrong terms.
+  An unrepresentable ability must stop preparation with the missing operation.
+- Exercise each assessed use from a controlled position: its costs, choices,
+  responses, resolution and departure. Extend the existing invariant tests,
+  including interactions among cards, without adding per-card code to core.
+  Cleanup triggers, replacement ordering and delayed-trigger lifetimes need
+  particular attention where an assessed card depends on them.
+- Check strategy and pilot packets at each meaningful window: a prepared line
+  that survives the draw, one that needs an amendment, a held response, combat,
+  and an opponent action that invalidates the line. Inspect chosen passes as
+  well as actions. No target count of model calls substitutes for this review.
+- Replay and clone those prefixes, including a pending choice and a ruling.
+  Then try one bounded live opening with the prepared version-zero journal.
+  Inspect assessment quality, actual prompt sizes, decisions, legality and
+  waiting time before extending the run. A complete game comes last.
+
+The next implementation work should follow failures in these checks. Broadening
+formats, a bulk runner and model comparisons wait until these two lists work
+from ordinary setup. No live inference was run for the October 5 changes.
+
 ## Run the matchup
 
 ```
-npm run matchup
+npm run matchup -- --turns 2
 ```
 
-`npm run matchup` plays both lists live through Pi from ordinary setup, with no
-scripted line, and stops at an outcome, the first gap, or `--turns`. The table
-offers land plays and printed-cost casts of permanent spells; everything a card
-does beyond entering comes from a seat's plan in the syntax. The machinery for
-triggers, statics, combat and the wider instructions is being built in stages;
-until then the run plays lands and vanilla bodies only.
+This is an opt-in paid run through Pi. It assesses cards, prepares briefs, deals
+normally and stops at an outcome, a gap, or the turn limit. A version-zero clone
+reuses accepted preparation. Older positions without complete assessments can
+still replay but cannot resume play under the new preparation requirement.
 
-An earlier version of this tool scripted Forest, Llanowar Elves, Mountain and
-Shock as a prescribed probe, with an authored offline mode. Both are gone: the
-probe dictated the line, and the offline mode was a second path that could
-disagree with the live one. The observations below come from that probe.
-
-## What this opening added
-
-Prepared procedures now carry spell timing, a destination and one announced
-creature or player target. Printed type, cost and power/toughness come from
-the pinned card file, not from the claim.
-Literal damage uses that target. Menus expose source, target, payment and
-remaining instructions; replay uses the accepted terms without interpreting
-the card again. No card compiler or separate casting engine was added.
-
-These terms cover the Elf/Shock exchange. They do not implement all targets
-allowed by Shock, which can also hit planeswalkers and battles. The current
-creature check uses printed toughness; modifiers, indestructible and
-damage replacement effects are not implemented. Giving Mossborn Hydra its
-printed 0/0 without its entry counter would be incorrect play.
-
-Tests exercise unpaid and stale announcements, target departure before
-resolution, cancellation of the whole targeted effect, summoning sickness,
-damage before the state check, conservation of all 120 cards, and a clone
-that keeps the paid cost and pending response.
-
-## Live observations
-
-The October 4, 2026 Pi run used `gpt-6.1-sol:low` for preparation and
-`typesafe/jev-latest` for decisions. Three initial attempts missed the line.
-The first exposed an invented land-option prefix and an adoption review with
-no recipe attached. The next two exposed ordinary land plays bypassing draft
-progress, including a play made before adoption.
-
-Strategy now receives printed creature stats and explicit selector and review
-instructions. Adoption menus show the recipe's guidance and step labels;
-ordinary plays say that they do not adopt or advance a draft. The alternatives
-remain selectable. Executable recipes stay out of the classifier packet.
-
-Continuing a prefix with both live-authored plans then completed the exchange.
-Recipes, drafts and reviews were later replaced by one plan per seat
-(`docs/PLANS.md`); these observations describe the earlier machinery.
-The final verification used 31 additional classifier calls, no fresh strategy
-calls, 7.1 seconds and $0.0045 at recorded catalog prices. These figures cover
-the continuation, not preparation or the failed attempts. Its full ledger has
-28 forced, 2 delegated, 4 chosen and 4 declared decisions, with no fallbacks or
-engine gaps. Both cards reached the graveyard; all 120 registered main-deck
-cards remained accounted for. Replay matched objects, receipts, ledger,
-equipment, resolution and cursor.
-
-The broader replay check initially found a monitor boundary mismatch: live
-observation stopped immediately after the Elf died, while replay had already
-granted the next priority. The monitor now reaches that same next-decision
-boundary without answering it. No physical action was missing or repeated.
-
-The failures and successful continuations remain separate local journals and
-call traces. This is evidence that the prescribed exchange executes, and also
-evidence that navigating preparation needs further evaluation.
+The earlier scripted Elf/Shock probe established payment, response and replay
+mechanics only. Its 31-call continuation and the later 28-call full game used
+obsolete execution policies; neither is a target for current call counts.
 
 ## Card review
 
 Every card in both lists, checked against `docs/SYNTAX.md`. "Uses" are the ways a
 player actually plays the card; each needs only the shapes listed. Nothing here
-is a per-card handler: these are the procedures and packages a seat writes when
-it plans to use the card. Examples are in `docs/examples/`.
+is a per-card handler: these are the procedures and packages the pregame model must assess before
+play. The table below is a syntax inventory, not a completed semantic audit. Examples are in `docs/examples/`.
 
 A card no shape could express would grow the syntax, or go on
-`cards/unsupported.txt`. None does.
+`cards/unsupported.txt`. The inventory found candidate shapes for every card;
+acceptance and interaction tests must still check the exact terms.
 
 ### Mono-Green Landfall
 

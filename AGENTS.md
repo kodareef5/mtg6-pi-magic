@@ -91,18 +91,25 @@ switches a role off, which is a decision and not a gap.
 A pattern that does not resolve is reported, never substituted, including when
 Pi has a configured default: a game played by a model nobody chose is a result
 that cannot be compared with another. A seat with no `decide` model refuses to
-start. A seat with no `pregame` model plays with no brief, because a missing
-plan costs some quality and a refused game costs everything.
+start. A seat with no `pregame` model can reuse carried card assessments and
+play without a brief. Missing card assessments stop setup before play.
 
 ### What each call is for
 
-**`pregame` runs once per seat, and is the deepest thinking a seat gets.** Four
-analysts work at once on separate questions (deck and resources, the matchup,
+**`pregame` prepares card meaning, then each seat's brief.** Before dealing,
+the model assesses every registered card with rules text into registrations
+and reusable procedures. Each seat holds terms for both public lists and their
+sideboards. Four card jobs run at most at once. Every source paragraph must be
+covered; missing or unsupported meaning stops setup. Syntax and source checks
+do not certify the model's interpretation. The accepted equipment is journaled
+at version zero and carried by clones. Core never interprets Oracle prose.
+
+Four analysts work at once on separate questions (deck and resources, the matchup,
 the opening, a challenger looking for traps), with both registered lists, exact
 opening-hand odds computed in code, and tools to look up a rule or a card. One
 synthesis then reconciles them into the brief; a failed analyst reaches it as a
 failure, never as an invented answer. Both seats prepare at the same time, so the
-wall time is the slowest analyst plus one synthesis. The brief is filed by where
+brief's wall time is the slowest analyst plus one synthesis. The brief is filed by where
 it is read: strategy reads it all; the pilot reads the opening policy while it
 mulligans, the note for its phase on whose turn it is, and notes for the cards
 its options name. A decision about blocking does not want the mulligan reasoning.
@@ -163,7 +170,9 @@ carrying another game's briefs was neither of those things.
 
 ### What a game costs
 
-Measured on one game of basic lands, 108 turns, with the suggested defaults:
+Historical measurement before October 5's explicit priority decisions: one
+game of basic lands, 108 turns, with the then-suggested defaults. These counts
+are not the current execution policy or a target forced ratio:
 
 ```
 decide    109 calls   one per asked decision, 95.4% of decisions are forced
@@ -206,7 +215,8 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    cursor without writing an event, because a replay derives them; opening
    completion is derived from its obligations. **Running against a real decision
    model:** `/magic play` finishes a game through Pi's classifier API. Measured
-   live at 108 turns, 2357 decisions, 95.4% forced, 109 model calls, 0 gaps.
+   under the former auto-pass policy at 108 turns, 2357 decisions, 95.4% forced,
+   109 model calls, 0 gaps. Jev now chooses priority passes for both seats.
    The bulk runner is still unwritten.
 2. **Spells and activated abilities through prepared procedures.** The first experiment
    binds visible sources, pays tap and unrestricted mana costs, resolves two
@@ -215,12 +225,12 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    assumed supported; `cards/unsupported.txt` lists the ones that are not, and
    a deck containing one is refused. Cards are not compiled: a seat uses a card
    through the syntax in `docs/SYNTAX.md`, as procedures it announces and
-   packages its permanents register as they enter. The table offers any land
-   and casts a non-Aura permanent spell for its printed cost with no card text,
-   paying by tapping lands and registered mana abilities during casting
-   (601.2g). A seat that plans each turn plans once per turn of its own, after
-   drawing, before any automatic pass. `npm run matchup` plays the pinned lists
-   live and stops at the first gap.
+   packages its permanents register as they enter. Model-backed setup assesses
+   those terms before play; priority offers their casts and activations to any
+   player adapter. Lands and registered mana abilities pay during casting
+   (601.2g). Strategy prepares during the opponent's turn and accepts or amends
+   after the draw. Jev chooses every voluntary action and pass. `npm run matchup`
+   plays the pinned lists live and stops at the first gap.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard. **Implemented:** `commit` reads each group's events
    (enters, leaves, dies, cast, targeted, attacks, combat damage, step
@@ -269,11 +279,13 @@ checked against an enumeration before anything moves. Printed type line, mana
 cost and power/toughness are structured fields, not text, so the table reads
 those from the pinned card file rather than trusting a claim.
 
-A decision with one legal option is not a decision. Take it, record it as
-forced, ask nobody. This saves calls on physical decisions. Strategy calls and
-escalations add no physical decision, so the forced ratio must be read beside
-total calls, tokens, cost, and elapsed time. A unique continuation authorized by
-the seat's plan, or a pass where the plan is silent, is delegated, not forced.
+A compulsory rules operation with one option is forced. A priority pass or
+combat declaration belongs to the seat even when only one option is listed.
+Jev selects every voluntary action and pass, including a unique planned action;
+silence in a plan grants no permission to pass. A resolving card instruction
+can be delegated with that seat's explicit authorization. Strategy calls and
+escalations add no physical decision. Read reasons beside total calls, tokens,
+cost and elapsed time; the forced ratio is not a gameplay target.
 
 Never decide for a seat by accident. An unusable answer is asked once more, then
 the table takes the terminating option, records `fallback`, and writes a gap. A
@@ -301,8 +313,8 @@ rather than adding a test for each branch.
   fallback replays as a fallback. The log holds events only; a control
   transition is derived rather than stored. A frame's version is the table's
   revision, so anything that commits moves it.
-- **Forced.** Far more decisions are taken by the table than asked of a seat,
-  and no row is a `fallback`.
+- **Forced.** Compulsory single-option rules operations are automatic. Priority
+  passes and combat declarations reach the seat, and no row is a `fallback`.
 - **Idempotent.** The same `actionId` applied twice changes the game once.
 - **Pure.** Listing a decision changes no state, including pending losses.
 - **Simultaneous.** The outcome accounts for every loss in a committed group.
@@ -356,11 +368,14 @@ rather than adding a test for each branch.
   ask, never as a move, and says what it does not show. A walked route is not
   offered again and the budget ends the walk.
 - **Planned.** A plan is accepted whole or refused whole with every problem
-  named, and accepting it moves nothing. The table takes a step only one option
-  fits, passes where the plan is silent, raises a stop once a turn within the
-  budget, and marks options with the plan without removing any. Progress is
+  named, and accepting it moves nothing. The table raises a stop once a turn
+  within the budget and marks options without removing any. Jev chooses the
+  action or pass. Progress is
   read from the ledger rows that carried each step out, so replay and clones
   hold exactly the progress of their prefix.
+- **Assessed.** Model-written terms cover a card before play, reject missing
+  source paragraphs, provide its casts and abilities without a turn-plan edit,
+  and survive version-zero cloning and replay. Refused preparation starts no game.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -416,6 +431,7 @@ src/context/           questions for a decision model. Its own AGENTS.md
   model.ts, reason.ts  the two adapters onto Pi: classifier, and chat
   spend.ts             what every call cost, and the output ceiling per role
   brief.ts             the pregame wave, and the snippets it files by use
+  assess.ts            model-authored card meaning, completed before dealing
   summary.ts           the turn in two sentences, from the spectator view
   strategy.ts          a turn's plan, and reconsideration on an escalation
   plan-edit.ts         short strategy updates expanded into complete accepted plans

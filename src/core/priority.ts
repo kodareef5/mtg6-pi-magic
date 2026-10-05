@@ -57,12 +57,25 @@ export function defaultCasts(table: Table, holder: SeatId): Move[] {
 	const world = tableWorld(table);
 	// From hand, and from another zone where a permission names the card ("you may cast it from exile").
 	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
+		!table.work[holder]?.packages?.some((pack) => pack.card === card.card && pack.assessed) &&
 		(card.zone === "hand" ? card.owner === holder : playable(world, holder, card, table.cursor.turn, false)));
 	const sources = [...new Set(castable.map((card) => `${card.zone}|${card.card}`))].sort().map((key) => key.split("|") as ["hand" | "exile" | "graveyard", string]);
 	return sources.flatMap(([zone, name]) => offers({ source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name }, claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost`,
 		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
 		const note = entering(table, holder, name);
 		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
+	}));
+}
+
+/** Assessed card uses are ordinary prepared procedures, offered to every holder of the seat. */
+export function preparedMoves(table: Table, holder: SeatId): Move[] {
+	const frame: Frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
+	return (table.work[holder]?.packages ?? []).flatMap((pack, card) => !pack.assessed ? [] : (pack.procedures ?? []).flatMap((procedure, at) => {
+		const prefix = procedure.timing === "spell" ? "cast" : "use";
+		return offers(procedure, frame, `${prefix}:${card}:${at}`).map(({ option, activation }) => {
+			const note = procedure.timing === "spell" && permanentSpell(table.printed[pack.card]) ? entering(table, holder, pack.card) : "";
+			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
+		});
 	}));
 }
 

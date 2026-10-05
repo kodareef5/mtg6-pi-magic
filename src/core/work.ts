@@ -14,7 +14,7 @@ export type Workspace = {
 	planned?: number;
 	/** Stops that held when the plan was accepted. Each arms once it has been false, so a stop fires on a change. */
 	unarmed?: string[];
-	/** What this seat's permanents register when they enter, by card name, kept across plans. Private until one is used. */
+	/** Accepted card registrations and procedures, kept across plans. Private until used. */
 	packages?: Package[];
 	/** The clock when this seat last accepted a plan. */
 	accepted?: number;

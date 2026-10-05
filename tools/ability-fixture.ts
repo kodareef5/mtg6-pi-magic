@@ -51,6 +51,7 @@ export async function abilityExercise() {
 	const basis = card(universe, "Qiqirn Merchant").oracle.split("\n")[0]!;
 	let plans = 0, exchangeCalls = 0;
 	const paused: { version: number; seat: number; frame: Frame }[] = [];
+	const exchange: Frame[] = [];
 	const upkeep = (active: "self" | "opponent") => ({ active, step: "upkeep" as const, fromTurn: 3, throughTurn: 3 });
 	const thinking: Pick<Reasoner, "work"> = { async work(_about, prompt, { submit }) {
 		plans += 1;
@@ -70,7 +71,7 @@ export async function abilityExercise() {
 			if (question.type !== "choice") throw new Error("The fixture expects choices.");
 			const entries = Object.entries(question.criteria);
 			// Take what the plan marks, else pass, else the first real option.
-			const choice = entries.find(([, text]) => /Plan (step|branch)/.test(text))?.[0] ?? entries.find(([id]) => id === "pass")?.[0] ?? entries.find(([id]) => id !== "ask:help")![0];
+			const choice = entries.find(([, text]) => /Plan (step|branch)/.test(text))?.[0] ?? entries.find(([id]) => ["pass", "attack:done", "block:done"].includes(id))?.[0] ?? entries.find(([id]) => id !== "ask:help")![0];
 			return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }];
 		}));
 		if (!exchangeCalls && table.ledger.filter((row) => row.activation?.timing === "stack").length === 2 && !cardsIn(table, "stack").length) exchangeCalls = counted.spent().length;
@@ -82,10 +83,15 @@ export async function abilityExercise() {
 		const player = aiSeat({ name: seat.name, api: decisionApi(classify, model, { tally: counted }), intent: startingIntent(seat.id), dials: 0,
 			plan: (frame) => planWork(frame, { cards: universe }, thinking), onGap: (gap) => table.gaps.push(gap) });
 		return [seat.id, { ...player, async answer(frame: Frame) {
+			if (frame.view.window.kind === "turn" && frame.view.window.turn === 3 && frame.view.window.step === "upkeep") exchange.push(structuredClone(frame));
 			if (frame.decision?.situation === "resolution") paused.push({ version: table.ledger.length, seat: seat.id, frame: structuredClone(frame) });
 			return player.answer(frame);
 		} }];
 	}));
-	const outcome = await play(table, players, Object.fromEntries(table.seats.map((seat) => [seat.id, startingIntent(seat.id)])));
-	return { table, outcome, paused, plans, exchangeCalls, calls: counted.spent().length };
+	// This fixture explicitly delegates the unique draws and moves in its loot.
+	const intents = Object.fromEntries(table.seats.map((seat) => {
+		const intent = startingIntent(seat.id); intent.deck.delegates = ["resolution"]; return [seat.id, intent];
+	}));
+	const outcome = await play(table, players, intents);
+	return { table, outcome, paused, exchange, plans, exchangeCalls, calls: counted.spent().length };
 }

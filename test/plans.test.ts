@@ -1,7 +1,7 @@
 /**
- * Planned. A seat's plan is accepted whole and atomically; the table flies it:
- * it takes a step only one listed option fits, passes when the plan is silent,
- * raises a stop the plan named, and records each step on the ledger row that
+ * Planned. A seat's plan is accepted whole and atomically. The pilot chooses
+ * each action and pass. The table marks fitting options, raises a stop the
+ * plan named, and records each step on the ledger row that
  * carried it out, so replay and clones read progress without equipment edits.
  * The pilot sees the plan's marks on its options; nothing is removed.
  * Past 150 lines because each invariant plays a real position.
@@ -62,13 +62,14 @@ function position() {
 	place(table, 0, "hand", "Forest");
 	return table;
 }
-/** A seat that answers the few things only it can: its hand, and its searches. It records every ask. */
+/** An offline pilot that follows due steps, chooses Forest for searches, then passes. */
 function pilot(asked: Frame[]): Player {
 	return { name: "Green", observe() {}, close() {}, async answer(frame): Promise<Answer> {
 		asked.push(frame);
 		const options = frame.decision!.options;
+		const due = planState(frame)?.due.find((one) => one.candidates.length)?.candidates[0];
 		const pick = frame.decision!.situation === "pregame" ? options.find((option) => option.id === "keep")
-			: options.find((option) => /Choose Forest/.test(option.label)) ?? quiet(options);
+			: due ?? options.find((option) => /Choose Forest/.test(option.label)) ?? quiet(options);
 		return { kind: "pick", option: pick!.id, actionId: `green-${asked.length}` };
 	} };
 }
@@ -105,22 +106,22 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.match(planProblems(workFrame(table, 0), { ...line, phases: [{ when: { step: "precombat-main", phase: "combat" }, guidance: "Wrong window." }] }).join(" "), /phases\[0\]/);
 });
 
-test("the table flies the plan: one fitting option is taken, silence passes, and progress lives on the ledger", async () => {
+test("the pilot flies the plan: actions and passes are chosen, and progress lives on the ledger", async () => {
 	const table = position();
 	editWork(table, 0, [{ do: "plan.put", plan: line }], "plan");
 	const asked: Frame[] = [];
 	await playUntil(table, { 0: pilot(asked), 1: opponent }, 5);
 	const carried = table.ledger.filter((row) => row.seat === 0 && row.execution);
 	assert.deepEqual(carried.map((row) => row.execution!.step), [0, 1, 2, 3], "every step, in order");
-	assert.ok(carried.every((row) => row.by === "engine"), "each step had one fitting option, so the table took it without asking");
-	assert.ok(carried.slice(0, 3).every((row) => row.why === "delegated"), "the plan settled those; the last was the only option left");
+	assert.ok(carried.every((row) => row.by === "model" && row.why === "chosen"), "the pilot answers even when one option fits the plan");
 	assert.deepEqual(workFrame(table, 0).view.done, [0, 1, 2, 3]);
 	assert.deepEqual(workFrame(table, 0).view.worked!.map((one) => one.label), line.steps.map((step) => step.label), "what was carried out, with its syntax, for the writer to reuse");
 	assert.deepEqual(workFrame(table, 0).view.worked![1]!.action, line.steps[1]!.action);
 	const kinds = new Set(asked.map((frame) => frame.decision!.options.some((option) => option.id.startsWith("discard:")) ? "discard" : frame.decision!.situation));
-	assert.deepEqual([...kinds].sort(), ["discard", "pregame", "resolution"], "the seat chose only its hand, its search and its discard: every silent window passed without it");
-	assert.ok(table.ledger.some((row) => row.seat === 0 && row.picked === "attack:done" && table.cursor.turn > 5 && row.why === "delegated"),
-		"on a later turn the plan is silent in combat, so the table attacks with nothing");
+	assert.deepEqual([...kinds].sort(), ["discard", "pregame", "priority", "resolution", "turn-based"]);
+	assert.ok(asked.some((frame) => frame.decision!.options.length === 1 && frame.decision!.options[0]!.id === "attack:done"),
+		"the pilot ends the declaration even when there is nobody to attack with");
+	assert.ok(table.ledger.filter((row) => row.situation === "priority").every((row) => row.why === "chosen"), "both seats answer every priority window");
 	assert.equal(cardsIn(table, "battlefield", 0).find((one) => one.card === "Sazh's Chocobo")!.counters["+1/+1"], 2, "both land entries triggered");
 
 	// Replay rebuilds progress from the rows; a clone continues from where it stood.
@@ -158,6 +159,8 @@ test("a stop asks for a new plan once, a stop that already holds waits for a cha
 		const work = frame.view.work!;
 		if (work.request) { requests.push(work.request); return { kind: "work", tools: [{ do: "plan.put", plan: quiet_ }], revision: work.revision, actionId: `plan-${requests.length}` }; }
 		if (frame.refused?.length) { refusal ||= frame.refused[0]!; return { kind: "pick", option: quiet(frame.decision!.options).id, actionId: `pick-${frame.version}` }; }
+		const due = planState(frame)?.due.find((one) => one.candidates.length)?.candidates[0];
+		if (due) return { kind: "pick", option: due.id, actionId: `pick-${frame.version}` };
 		return { kind: "work", tools: [{ do: "plan.request", reason: "The pilot asked for help." }], revision: work.revision, actionId: `help-${frame.version}-${work.revision}` };
 	} };
 	await playUntil(table, { 0: planner, 1: opponent }, 3);
@@ -219,6 +222,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[1]!, /is not an option id; use prefix/, "an invented action shorthand is refused before it bypasses the resource forecast");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
+
 });
 
 test("a short amendment retains phase guidance and packages, reuses accepted syntax and never repeats a completed step", async () => {
@@ -283,7 +287,7 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
 		}) as never,
 	};
-	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "work");
+	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "work");
 	const seated = await seatTable(table, roster, inference, universe, { format: standard.name });
 	assert.equal(prompts.length, 0, "seating spends no strategy before a decision");
 	assert.ok(await run(table, seated, inference, undefined));
@@ -374,10 +378,30 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 		// Every answer is malformed: steps that are not a list.
 		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "o", guidance: "g", steps: null } }], stopReason: "toolUse" }) })) as never,
 	};
-	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "unplanned");
+	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "unplanned");
 	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
 	assert.ok(outcome, "the game reaches an outcome");
 	assert.ok(table.gaps.some((gap) => gap.includes("/steps must be array") && gap.endsWith("The standing plan is kept. Play goes on.")), "each failed session is a gap that names why");
+
+	// An initial request and an essential stop can both fail before a card moves.
+	// Recovery must use distinct work ids and leave the physical choice to Jev.
+	const retry = matchup("failed-twice"); main(retry, 0, 3);
+	for (const card of cardsIn(retry, "hand", 0)) commit(retry, [{ do: "move", what: card.id, to: "library", reason: "game-setup" }], "game-setup");
+	editWork(retry, 0, [{ do: "plan.put", plan: { objective: "Cast Hydra.", guidance: "Cast it first.", steps: [{ label: "Cast Hydra", essential: true,
+		when: { active: "self", step: "precombat-main" }, action: { prefix: "cast:", objects: { card: "Mossborn Hydra", zones: ["hand"] } } }] } },
+		{ do: "plan.request", reason: "Review the turn." }], "setup");
+	let failures = 0;
+	const failing: Player = { ...opponent, async answer(frame) {
+		if (frame.view.work?.request) { failures++; throw new Error("offline planner unavailable"); }
+		return opponent.answer(frame);
+	} };
+	await playUntil(retry, { 0: failing, 1: opponent }, 3);
+	assert.equal(failures, 4, "both requests retry once");
+	const kept = retry.workLog.filter((entry) => entry.tools?.some((tool) => tool.do === "plan.keep"));
+	assert.equal(kept.length, 2);
+	assert.equal(kept[0]!.clock, kept[1]!.clock, "no physical action was needed for recovery");
+	assert.notEqual(kept[0]!.actionId, kept[1]!.actionId);
+	assert.equal(retry.gaps.filter((gap) => gap.includes("standing plan is kept")).length, 2);
 });
 
 test("a stop is watched in its window, and its window and bounds are read as written", async () => {
@@ -487,7 +511,7 @@ test("an essential step that cannot be taken where it belongs asks for a new pla
 	}
 });
 
-test("a step is carried out with a payment that spares what the plan holds, and the table takes it", async () => {
+test("the pilot can select the payment that spares what the plan holds", async () => {
 	const table = matchup("sparing");
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest");
@@ -500,7 +524,7 @@ test("a step is carried out with a payment that spares what the plan holds, and 
 	assert.ok(!due.candidates[0]!.objects!.some((ref) => ref.id === kept!.id));
 	await playUntil(table, { 0: pilot([]), 1: opponent }, 3);
 	assert.equal(table.things.get(kept!.id)!.tapped, false, "the held Forest is still untapped");
-	assert.ok(table.ledger.some((row) => row.picked.startsWith("cast:") && row.why === "delegated"), "and the table took the cast itself");
+	assert.ok(table.ledger.some((row) => row.picked.startsWith("cast:") && row.why === "chosen"), "the pilot selected the marked cast");
 });
 
 test("in a scripted window the pilot reads the script and nothing else of the plan, and asks only for what the script names", () => {
@@ -517,7 +541,8 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	assert.deepEqual([packet.guidance, packet.lately], [[], []], "nor the brief's notes or the recaps");
 	const asked = question(packet, true).instructions;
 	assert.match(asked, /This phase: Grow the Chocobo twice\.\nLand first, then the Passage\.\nIts steps, in order:\n- Now: Play a Forest\n- Then: Crack Fabled Passage/);
-	assert.match(asked, /Choose ask:help only if one of these has happened: Red flashes in a blocker; or if no listed option can carry out the phase\. Anything else is normal play/);
+	assert.match(asked, /Choose ask:help if one of these has happened: Red flashes in a blocker/);
+	assert.match(asked, /card text or an option's restriction conflicts with the planned action/);
 	// A window without a script keeps today's view of the plan.
 	editWork(table, 0, [{ do: "plan.put", plan: line }], "unscripted");
 	const plain = focus(workFrame(table, 0), startingIntent(0), { brief });
@@ -653,7 +678,7 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	const conditional = { ...hydra, label: "Cast Mossborn Hydra if a third land arrives", if: { amount: { count: { types: ["land" as const], controller: "you" as const } }, atLeast: 3 } };
 	assert.deepEqual(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
 	const seen: string[] = [];
-	const plan = { objective: "o", guidance: "g", steps: [hydra] };
+	const plan = { objective: "o", guidance: "g", steps: [hydra], packages: [{ card: "Mossborn Hydra", registers: pack("Mossborn Hydra") }] };
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: plan }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.equal(seen.length, 2, "refused once, then accepted");
@@ -709,7 +734,7 @@ test("a plan the writer was told about once goes through the table, and a schema
 	place(table, 0, "battlefield", "Forest");
 	place(table, 0, "hand", "Mossborn Hydra");
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
-	const plan = { objective: "o", guidance: "g", steps: [{ label: "Cast Mossborn Hydra", when: { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 },
+	const plan = { objective: "o", guidance: "g", packages: [{ card: "Mossborn Hydra", registers: pack("Mossborn Hydra") }], steps: [{ label: "Cast Mossborn Hydra", when: { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 },
 		action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } }] };
 	const replies: Record<string, unknown>[] = [{ objective: "o" }, plan, plan];
 	const seen: string[] = [];
@@ -720,7 +745,7 @@ test("a plan the writer was told about once goes through the table, and a schema
 	assert.doesNotThrow(() => prepareWork(workFrame(table, 0), tools), "the table takes what the writer let through");
 });
 
-test("an essential step waits while a spell resolves, and a pass forced past it is recorded", async () => {
+test("an essential step waits while a spell resolves; an impossible line returns to the pilot after one stop", async () => {
 	const table = matchup("waiting");
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
@@ -743,6 +768,7 @@ test("an essential step waits while a spell resolves, and a pass forced past it 
 	for (const card of cardsIn(bare, "hand", 0)) commit(bare, [{ do: "move", what: card.id, to: "library", reason: "game-setup" }], "game-setup");
 	const impossible: Plan = { objective: "o", guidance: "g", steps: [{ label: "Cast the Hydra", when: window, essential: true, action: { prefix: "cast:", objects: { zones: ["hand"], card: "Mossborn Hydra" } } }] };
 	editWork(bare, 0, [{ do: "plan.put", plan: impossible }], "plan");
+	const from = bare.ledger.length;
 	let asked = 0;
 	const writer: Player = { name: "Green", observe() {}, close() {}, async answer(frame): Promise<Answer> {
 		const work = frame.view.work!;
@@ -751,7 +777,8 @@ test("an essential step waits while a spell resolves, and a pass forced past it 
 	} };
 	await playUntil(bare, { 0: writer, 1: opponent }, 3);
 	assert.equal(asked, 1, "the stop is raised once");
-	assert.ok(bare.gaps.some((gap) => /turn 3: Step 1 cannot be taken now: Cast the Hydra, and the table passed\. Play goes on\./.test(gap)), bare.gaps.join(" | "));
+	assert.ok(bare.ledger.slice(from).filter((row) => row.situation === "priority").every((row) => row.why === "chosen"), "the seat can pass after seeing the unfinished line");
+	assert.equal(bare.gaps.length, 0);
 });
 
 test("a counter on a permanent is a change, and a draw is covered only by a step or branch that takes it", () => {

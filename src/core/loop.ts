@@ -47,11 +47,10 @@ export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promis
 /**
  * When the table may act without asking, and why.
  *
- * The table owns the turn. Untapping, drawing for the turn, state based actions
- * and a priority window with nothing in it but a pass belong to the rules, and
- * taking them silently decides nothing a seat would want back. That is
- * `forced`, and it is most decisions in a game, which is the difference between
- * a game costing cents and one costing dollars.
+ * Untapping, the turn draw and state-based actions follow the rules. Priority
+ * belongs to the seat, even when the offered list contains only a pass: the
+ * seat can ask for help or object before passing. A plan guides its choices;
+ * a unique match in that plan does not authorize the table to choose.
  *
  * A card's instruction belongs to the seat resolving it. If a seat is to draw a
  * card from an effect and does not, that is its business. The table could have
@@ -61,11 +60,10 @@ export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promis
  * same claim.
  */
 function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" | null {
+	if (decision.situation === "priority" || decision.options.some((one) => one.id === "attack:done" || one.id === "block:done")) return null;
 	if (decision.options.length !== 1) return null;
 	if (decision.delegated) return "delegated";
-	const only = decision.options[0]!;
 	if (["turn-based", "state-based", "pregame", "trigger-order"].includes(decision.situation)) return "forced";
-	if (decision.situation === "priority" && only.id === "pass") return "forced";
 	if (intent?.deck.delegates?.includes(decision.situation)) return "delegated";
 	return null;
 }
@@ -104,40 +102,25 @@ export async function play(
 				// Every seat sees the new turn begin, however its decisions go: forced and delegated play asks nobody.
 				for (const one of table.seats) {
 					const view = project(table, one.id, seen[one.id] ?? 0);
-					seen[one.id] = table.log.length;
 					players[one.id]?.observe({ seat: one.id, version: table.cursor.clock, view });
 				}
 			}
 			continue;
 		}
 
-		// A seat with a plan: strategy when it is wanted, a stop when the plan no
-		// longer fits, the table's own move when the plan settles it, else ask.
+		// Strategy maintains the plan. The player executes its voluntary actions.
 		const current = table.work[decision.seat] ? workFrame(table, decision.seat) : undefined;
 		const attention = !!current && planReason(current) !== undefined;
 		const state = current && !attention ? planState(current) : null;
 		if (state && raiseStop(table, decision, state)) continue;
-		// A lone pass is not forced while the plan offers an announcement beside it.
+		// Planning and announcements must remain available beside compulsory work.
 		const why = attention || state?.procedures.length ? null : automatic(decision, intents[decision.seat]);
 		if (why) {
-			// A pass forced past an essential step the plan could not take: the stop was spent, and the record says the line failed.
-			const passed = state?.unmet !== undefined ? `Seat ${decision.seat}, turn ${table.cursor.turn}: ${state.stops.at(-1)}, and the table passed. Play goes on.` : undefined;
-			if (passed && !table.gaps.includes(passed)) table.gaps.push(passed);
 			// A forced move can still be the step the plan named; the row says so.
 			apply(table, decision.options[0]!.id, "engine", why, state ? execution(state, decision.options[0]!.id) : undefined);
 			told = report(table, told, watch);
 			continue;
 		}
-		const settled = state && settledBy(table, decision, state);
-		if (settled) {
-			const procedure = state.procedures.find((choice) => choice.option.id === settled);
-			const carried = execution(state, settled);
-			if (procedure) activate(table, procedure.activation, { picked: settled, offered: [settled], by: "engine", why: "delegated", ...(carried ? { execution: carried } : {}) });
-			else apply(table, settled, "engine", "delegated", carried);
-			told = report(table, told, watch);
-			continue;
-		}
-
 		const version = table.cursor.clock;
 		if (walk?.version !== version) walk = { version, edits: table.workLog.filter((entry) => entry.clock === version && entry.seat === decision.seat && entry.tools).length };
 		if (walk.edits >= workBudget) {
@@ -146,9 +129,9 @@ export async function play(
 			report(table, told, watch);
 			return null;
 		}
-		const frame = (seat: SeatId): Frame => {
+		const frame = (seat: SeatId, answering = false): Frame => {
 			const view = project(table, seat, seen[seat] ?? 0);
-			seen[seat] = table.log.length;
+			if (answering) seen[seat] = table.log.length;
 			return { seat, version, view };
 		};
 
@@ -164,7 +147,7 @@ export async function play(
 		// Asking the identical question twice is one question, not two. A plan's
 		// announcements join the listed options, each marked with what the plan says.
 		const offered: Decision = state ? { ...decision, options: annotate(decision.options, state) } : decision;
-		const asked = { ...frame(decision.seat), decision: offered };
+		const asked = { ...frame(decision.seat, !attention), decision: offered };
 		let answer: Answer | undefined;
 		const failures: string[] = [];
 		for (let attempt = 0; attempt < 2; attempt++) {
@@ -188,7 +171,9 @@ export async function play(
 		if (!answer && attention) {
 			// Strategy gave nothing usable: the game goes on under the plan already standing, and the gap says so.
 			table.gaps.push(`Seat ${decision.seat}, strategy: ${failures.join(" Then: ")} The standing plan is kept. Play goes on.`);
-			editWork(table, decision.seat, [{ do: "plan.keep", reason: failures.at(-1) ?? "no plan" }], `keep-${version}`);
+			editWork(table, decision.seat, [{ do: "plan.keep", reason: failures.at(-1) ?? "no plan" }], `keep-${decision.seat}-${version}-${table.work[decision.seat]?.revision ?? 0}`);
+			walk.edits += 1;
+			told = report(table, told, watch);
 			continue;
 		}
 		if (!answer) {
@@ -308,26 +293,6 @@ function raiseStop(table: Table, decision: Decision, state: PlanState): boolean 
 		return true;
 	}
 	return false;
-}
-
-/**
- * The option the plan settles without asking, if any. Silent at priority:
- * pass. Silent while declaring our own attackers: attack with nothing. The
- * first due step has exactly one fitting option and no branch applies: that
- * option, at priority or while declaring our own attackers. Blocks, discards,
- * resolution choices and trigger order are never defaulted.
- */
-function settledBy(table: Table, decision: Decision, state: PlanState): string | undefined {
-	if (state.branches.length) return undefined;
-	const step = state.due.find((one) => one.candidates.length), silent = !step;
-	const listed = (id: string) => decision.options.some((option) => option.id === id);
-	const attacking = decision.situation === "turn-based" && table.cursor.steps[0] === "declare-attackers" && decision.seat === table.cursor.active;
-	// An essential step comes first and cannot be taken: neither passing nor a later step is the table's to choose. The pilot sees why.
-	if (state.unmet !== undefined) return undefined;
-	if (silent && decision.situation === "priority" && listed("pass")) return "pass";
-	if (silent && attacking && listed("attack:done")) return "attack:done";
-	if (decision.situation !== "priority" && !attacking) return undefined;
-	return step?.candidates.length === 1 ? step.candidates[0]!.id : undefined;
 }
 
 /**

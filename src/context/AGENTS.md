@@ -38,7 +38,9 @@ result that cannot be compared with another.
 The classifier executes. The thinking happens in the other four roles, and what
 reaches a decision is a short plan plus the facts.
 
-- **pregame** runs once per seat: four analysts at once (deck and resources,
+- **pregame** first assesses complete card meaning for every registered name
+  with rules text. It saves accepted registrations and procedures before play;
+  clones reuse them. Then four analysts run per seat (deck and resources,
   matchup, opening, a challenger), each able to look up rules and cards, then one
   synthesis that files the brief by where it is read. Both seats prepare at the
   same time. Strategy reads the whole brief; the pilot reads only the slice for
@@ -50,7 +52,7 @@ reaches a decision is a short plan plus the facts.
   Optional notebook edits belong in that answer, not separate rounds. The cached
   system prompt carries the syntax semantics and the real schema; an example
   lookup supplies worked uses when needed. No challenger or timeout replacement
-  plan runs beside it. A phase boundary spends nothing. docs/PLANS.md holds the
+  plan runs beside it. A phase boundary spends no strategy call. docs/PLANS.md holds the
   lifecycle and its cancellation rules.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
@@ -80,7 +82,8 @@ choose it in one judgment is the failure this split exists to prevent.
 Use the projected window to select context. Mulligan questions need counts,
 declarations and bottom obligations; turn questions need their phase and step.
 Do not infer the phase from prose, and do not attach opening instructions to a
-combat or upkeep question. A phase change alone is not a reason for a model call.
+combat or upkeep question. A phase change alone needs no strategy session;
+Jev still answers each seat's priority windows.
 
 `focus(frame, intent)` assembles a decision packet without a model
 call. It copies offered ids, separates assumptions from projected facts, and
@@ -123,8 +126,8 @@ advertise an executable route whose handler does not exist.
 
 Widen mechanically first. The playable space is always larger than the
 shortlist, and a shortlist of one is not proof that a choice was forced. Record
-automatic execution as forced, delegated by an adopted plan, or equivalent, and
-keep the three apart.
+compulsory rules operations as forced and explicitly authorized card
+continuations as delegated. Voluntary actions and passes go to Jev.
 
 When a widened list still has nothing usable, record the gap and play on.
 

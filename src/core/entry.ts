@@ -30,7 +30,7 @@ const pack = (table: Table, seat: SeatId, card: string) => table.work[seat]?.pac
 /** What an option says about a permanent it puts onto the battlefield. An entry is never silent. */
 export function entering(table: Table, seat: SeatId, card: string): string {
 	const registers = pack(table, seat, card);
-	if (registers) return `It enters registering: ${registers.map((registration) => registration.basis).join(" / ")}.`;
+	if (registers) return registers.length ? `It enters registering: ${registers.map((registration) => registration.basis).join(" / ")}.` : "It enters with no ongoing abilities registered.";
 	return table.printed[card]?.text ? "No package is prepared: it enters with nothing registered." : "";
 }
 

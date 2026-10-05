@@ -6,7 +6,12 @@ Core accepts a complete `PlanSchema` plan; the strategist can write a short upda
 
 ## The planning loop
 
-1. **Setup.** Four pregame analysts study resources, the matchup, opening hands
+1. **Setup.** Before dealing, the pregame model assesses every registered card
+   with rules text. Each seat keeps complete packages for both public lists,
+   including their sideboards, so taking control does not lose a card's meaning.
+   Four assessment jobs run at most at once. Accepted terms are saved at version
+   zero; missing text or unsupported operations stop setup. Four pregame analysts
+   then study resources, the matchup, opening hands
    and likely mistakes. A synthesis writes the brief. Its step decisions become
    the initial phase scripts, and its short objective supplies Jev's strategy
    line. The brief also supplies the mulligan and upkeep
@@ -47,11 +52,13 @@ private work need no repetition. Existing bounded response and phase windows are
 shifted to the next pair of turns; the writer sees that base before updating it.
 Prefer `active` and `step` to unnecessary absolute turn numbers.
 
-The writer also receives `actions`: its current steps, branches and earlier
-executed actions, each with a key, label and full syntax. A new step may use
-`"action": {"reuse": "worked:0"}`. That copies the exact action, including its
+The writer also receives `actions`: prepared card procedures, its current steps,
+branches and earlier executed actions, each with a key, label and full syntax.
+A new step may use `"action": {"reuse": "prepared:0"}` or `"worked:0"`.
+That copies the exact action, including its
 selectors, targets and costs. A changed action must be written again. These are
-seat-authored terms, not card programs or an automatically offered repertoire.
+seat-authored terms. Core offers assessed procedures whenever their timing,
+sources, targets and resources fit. A turn plan chooses a line from that repertoire.
 
 `src/context/plan-edit.ts` merges the answer and expands reuse keys. The result
 goes through the ordinary atomic `plan.put` writer. Core and the journal hold
@@ -67,10 +74,13 @@ Reusing accepted syntax does not certify its interpretation.
 | `askWhen` | Visible facts that make the line impossible. |
 | `holds` | Resources kept for a purpose and the condition that releases them. |
 | `phases` | The current window's goal, decisions, and reasons to re-evaluate. |
-| `packages` | New or corrected entry registrations; they persist in private work. |
+| `packages` | Corrections to assessed card registrations and procedures; they persist in private work. |
 
 `docs/examples/turn-plan.md` shows a complete plan. The writer always receives
-`docs/SYNTAX.md` and the real schema. The `example` tool reads worked examples
+`docs/SYNTAX.md` and the real schema as prompt text. The advertised tool schema
+stays shallow: provider expansion of recursive definitions made a measured
+strategy request exceed 430,000 input tokens. Exact local validation still checks
+every nested term. The `example` tool reads worked examples
 when needed, instead of resending every example in every session. Card, rule and
 odds lookups remain available. A session has up to three replies for a needed
 lookup and correction, rather than eight rounds of notebook work.
@@ -87,14 +97,22 @@ write a note each turn or fill that allowance.
 ## Execution and checks
 
 Core reads the plan at each decision: due steps, applicable branches, held
-resources and stops. A unique fitting continuation is delegated. When the plan
-settles nothing at priority, it delegates a pass; attacks, blocks, trigger targets
-and resolution choices use their existing handlers. Every physical option remains
-available, marked and ordered for Jev rather than hidden.
+resources and stops. Jev chooses every voluntary action, priority pass and
+attacker or blocker declaration, including choosing none. Both seats receive
+their priority windows. Silence in a plan grants no permission to pass, and a
+unique planned action still goes to Jev. Every physical option remains available,
+marked and ordered by the plan.
+
+Compulsory single-option rules operations remain forced. A unique instruction
+while resolving a card is delegated only with that seat's explicit authorization;
+the model adapter no longer supplies blanket delegation. Call counts must be
+read by decision kind, alongside time, spend and gaps. A high forced ratio is
+not a gameplay target.
 
 An essential step that cannot be taken where it belongs asks for another plan,
 within the escalation budget. A resolving spell is allowed to finish first.
-If the stop is spent and the table passes it, the gap records that failed line.
+If the stop is spent, Jev still chooses the action or pass; the table does not
+invent a decision on the seat's behalf.
 `askWhen` also raises a request when its named visible condition becomes true.
 
 The writer checks the expanded plan with the same core validation before
@@ -112,16 +130,21 @@ and clones read the exact accepted terms and progress from their prefix.
 
 In a scripted phase Jev sees the objective, that phase's decisions and ordered
 steps, applicable branches, holds, options and projected facts. It sees no
-notebook or whole card procedures. Outside a script, the brief's matching notes
+notebook or whole card procedures. It does see full printed text for visible
+battlefield and stack cards and the sources and targets its options name.
+Printed text and current characteristics are separate: losing flying changes the
+latter, not the source text. Hidden object identities remain absent.
+Outside a script, the brief's matching notes
 and recent recaps remain available. `ask:help` covers a named unexpected event or
-a plan that cannot be carried out; it is not permission to improvise strategy.
+a plan that cannot be carried out, including a conflict with card text or a
+restriction; it is not permission to improvise strategy.
 
 `planned` records the actual decision-boundary wait, readiness, result and failed
 sessions. `tools/stats.ts` separates prepared, amended, written and escalation
 plans. Call durations and cancelled preparations remain in the bill; overlapping
 background time is not the same as time waiting for a turn plan.
 
-The next live check is one short monitored run: inspect each plan's output,
-corrections, strategy wait, Jev decisions and legality before extending it.
-Offline checks establish the mechanics, not a twelve-second response time or
-expert playing strength.
+Before another live run, finish the component checks in `docs/STANDARD.md`:
+assessment, entry and resolution, priority, planning, projection, and replay.
+Then inspect one bounded live opening before extending a game. Offline checks
+establish mechanics, not provider latency or expert playing strength.

@@ -1,9 +1,9 @@
 # Alternative costs: warp
 
 Warp is a second way to cast the card from your hand (702.185). It is a separate
-procedure with the warp cost and its own aftermath. The ordinary cast needs no
-procedure at all when the card does nothing on resolution but enter: the table
-offers it for the printed cost.
+procedure with the warp cost and its own aftermath. The assessed package also
+includes an ordinary casting procedure with no alternative cost or aftermath.
+Its source includes hand, graveyard and exile; the table checks play permissions.
 
 Instructions on a permanent spell run after it enters, with `this` the
 permanent. Warp's delayed trigger is created there. Refs inside a `delay`, such
