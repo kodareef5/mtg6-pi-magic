@@ -164,6 +164,10 @@ against the changed position. Waiting for resolution alone does not need a
 strategy repair; other conflicts can still justify asking for help.
 Reviews also name actions already recorded for the plan. An unused card in
 hand is a use to consider, not an obligation to perform it.
+For a phase with explicit steps in this window, the checklist names its
+remaining unrecorded actions. An empty list means those actions were taken;
+pending effects, responses and further phase instructions still need review.
+It does not declare the phase over or certify that its strategic goal succeeded.
 
 `review.record` is a private seat tool, available to every player adapter. It
 records a judgment and its reason at the current physical revision; it moves

@@ -50,6 +50,7 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	const items = checklist(workFrame(table, 0));
 	assert.ok(items.some((one) => one.label === "Cast Hydra" && !one.options.length), "an unavailable planned use stays visible");
 	assert.ok(items.some((one) => one.kind === "phase"), "the phase strategy itself receives a judgment");
+	assert.deepEqual(items.find((one) => one.kind === "phase")!.remaining, ["Play Forest", "Cast Hydra"]);
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:1", verdict: "act", reason: "Use Hydra" }], "unavailable"), /has no current option/);
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "made-up", verdict: "skip", reason: "Skip" }], "unknown"), /No checklist item/);
 	assert.equal(JSON.stringify(items).includes('"zone":"library"'), false);
@@ -89,6 +90,7 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	assert.ok(checklist(workFrame(table, 0)).every((one) => !one.judgment), "an action invalidates judgments from the old position");
 	const afterLand = focus(workFrame(table, 0), startingIntent(0));
 	assert.match(reviewQuestion(afterLand, afterLand.checklist![0]!, true).instructions!, /Recorded plan actions: Play Forest/, "reviews carry execution progress alongside the unchanged phase guidance");
+	assert.deepEqual(afterLand.checklist!.find((one) => one.kind === "phase")!.remaining, ["Cast Hydra"], "an unavailable unfinished action is not counted as complete");
 	const unused = afterLand.checklist!.find((one) => one.kind === "card" && one.cards.includes("Forest") && !one.options.length)!;
 	assert.ok(unused, "the spare Forest stays on the checklist after spending the land play");
 	assert.match(reviewQuestion(afterLand, unused, true).instructions!, /not itself an unfinished plan step/, "a card review does not invent an obligation to use it");
@@ -101,11 +103,12 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	main(response, 1, 2);
 	editWork(response, 1, [{ do: "plan.put", plan: { objective: "Use Shock before the land play.", guidance: "Let Shock resolve, then play Mountain. Keep the other Shock for a response.", steps: [
 		{ label: "Play Mountain", when: { active: "self", step: "precombat-main" }, action: { prefix: "land:", objects: { card: "Mountain", zones: ["hand"] } } },
-	], may: [{ label: "Respond with Shock", when: { active: "any" }, action: { procedure: example("Cast Shock") } }] } }], "land-after-spell");
+	], may: [{ label: "Respond with Shock", when: { active: "any" }, action: { procedure: example("Cast Shock") } }],
+	phases: [{ when: { active: "self", step: "precombat-main" }, guidance: "Play Mountain after Shock resolves. Keep the other Shock for a response." }] } }], "land-after-spell");
 	editWork(response, 0, [{ do: "plan.put", plan: { objective: "Keep resources.", guidance: "Respond if needed.", steps: [] } }], "respond");
 	announce(response, example("Cast Shock"), (one) => one.activation.targets[0]!.some((target) => "player" in target && target.player === 0));
 	const waiting = focus(workFrame(response, 1), startingIntent(1)), land = waiting.checklist!.find((one) => one.id === "step:0")!;
-	assert.equal(waiting.checklist![0]!.kind, "response", "consider the stack before the next land play");
+	assert.ok(waiting.checklist!.findIndex((one) => one.kind === "response") < waiting.checklist!.indexOf(land), "consider the stack before the next land play");
 	assert.deepEqual(land.options, [], "the land stays unfinished while the spell is on the stack");
 	assert.ok(waiting.checklist!.some((one) => one.kind === "branch" && one.options.length), "an instant response remains available");
 	assert.match(reviewQuestion(waiting, land, true).instructions!, /absence alone does not require a new plan/);
@@ -125,6 +128,12 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	assert.ok(cleared.checklist!.find((one) => one.id === land.id)?.options.length, "resolution restores the land use without a new plan");
 	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.judgment, undefined, "waiting is reassessed against the new position");
 	assert.doesNotMatch(moveQuestion(cleared, true).instructions!, /absence alone does not require a new plan/, "empty-stack passes still end the step or phase");
+	const playLand = cleared.checklist!.find((one) => one.id === land.id)!.options[0]!;
+	apply(response, playLand, "model", "chosen", execution(planState(workFrame(response, 1))!, playLand));
+	const complete = focus(workFrame(response, 1), startingIntent(1)), phase = complete.checklist!.find((one) => one.kind === "phase")!;
+	assert.deepEqual(phase.remaining, [], "phase progress comes from recorded actions");
+	assert.match(reviewQuestion(complete, phase, true).instructions!, /Every listed action for this phase window is recorded/);
+	assert.ok(complete.checklist!.some((one) => one.kind === "branch" && one.options.length), "completing the line does not remove response uses");
 
 	const fetch = matchup("review-fetch");
 	place(fetch, 0, "battlefield", "Fabled Passage"); main(fetch, 0);

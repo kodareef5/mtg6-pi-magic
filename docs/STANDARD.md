@@ -266,9 +266,26 @@ Repeating that continuation in `real-standard-9-1791211038183` took 58.5 seconds
 with 43 reviews, 27 picks, no gaps or fallbacks, and matching replay. The stack
 wait no longer caused a repair. After the counter resolved, Jev still asked to
 revise the completed phase; Luna used one call and added a second Elf paid from
-the new Forest, preserving the original Elf for Veil. One unnecessary completed-phase
-repair remains to isolate. Both runs also started background preparation, so
+the new Forest, preserving the original Elf for Veil. That completed-phase
+repair was isolated next. Both runs also started background preparation, so
 their total strategy time overlaps play and is not their wall time.
+
+The completed-phase position was frozen before that help request. The checklist
+now supplies remaining unrecorded actions for the current phase window, with
+different review wording for phase work and individual card uses. At the same
+position, `decision-review-1791211328625` reviewed the completed phase and four
+cards, then chose pass: six Jev calls, 1.3 seconds of call time, no repair.
+The probe applied only private review judgments and left the physical pick
+unapplied. An empty remaining list still requires checking pending effects and
+responses; it does not end the phase for the seat.
+
+The final repeat, `real-standard-9-1791211422708`, completed the saved high plan
+in 15.5 seconds: 35 Jev reviews and 23 picks, no help requests, no gaps or
+fallbacks, and matching replay. Chocobo had its counter, the new Forest and
+original Elf stayed untapped, and Veil remained in hand. Each seat chose its
+passes. Two background preparations were cancelled at the turn limit; neither
+returned a plan. This checks execution from an accepted plan, not the time to
+prepare that plan or the quality of a whole game.
 
 Full games remain behind the readiness checks above. Next probes should keep
 the same saved decision when comparing context, inspect accepted card terms,

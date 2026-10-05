@@ -11,13 +11,15 @@ export function reviewQuestion(packet: Packet, item: ReviewItem, help: boolean):
 	return {
 		type: "choice",
 		instructions: [
-			`Review this use before choosing a move: ${item.label}.`,
+			item.kind === "phase" ? `Review the remaining work for this phase: ${item.label}.` : `Review this use before choosing a move: ${item.label}.`,
 			"This question records your assessment only. It does not move a card, complete a plan step, pass priority, or establish legality.",
 			"Read its printed card text, current characteristics, costs and restrictions beside the phase guidance. Account for mana already spent, the current summoningSick value, targets and responses. Execute the strategist's line; ask for help if it conflicts with those facts.",
 			"known, resources and lately in the supplied state hold the current facts and recent events.",
 			"watches lists registered triggers on the battlefield now. A permanent cannot see events that finished before it entered; its own entry can trigger it. Ask for help if the planned order depends on a missed trigger.",
 			...(packet.plan ? [`Objective: ${packet.plan.objective}`, ...(packet.plan.script?.guidance ?? [packet.plan.guidance ?? ""]), ...packet.plan.held.map((one) => `Held: ${one}`)] : packet.guidance),
 			...(packet.plan?.done.length ? [`Recorded plan actions: ${packet.plan.done.join("; ")}. Do not repeat these actions. Their effects may still be on the stack.`] : []),
+			...(item.remaining ? [item.remaining.length ? `Actions still unrecorded in this window: ${item.remaining.join("; ")}.`
+				: "Every listed action for this phase window is recorded. Check pending effects, responses and any further instructions in the phase guidance. If none needs action now, choose review:skip. Completed actions do not need a strategy repair."] : []),
 			...(packet.objects.some((one) => one.zone === "stack") ? [STACK_PRIORITY] : []),
 			...(item.kind === "response" ? ["The stack is still waiting. Decide whether you need a response before it resolves; each seat will separately choose its priority pass."]
 				: options.length ? options.map((one) => `${one.label}: ${one.shows ?? ""}`)
@@ -30,7 +32,8 @@ export function reviewQuestion(packet: Packet, item: ReviewItem, help: boolean):
 			...(options.length || (item.kind === "response" && packet.options.some((one) => one.id !== "pass"))
 				? { "review:act": "Take an available action for this item now; the following move question will choose the exact action, targets and payment." } : {}),
 			"review:hold": "Keep this use for a later window or response under the plan; take no action for it now.",
-			"review:skip": "No action for this item in the current position: its condition is unmet, its use is unavailable, or the plan calls for no use now.",
+			"review:skip": item.kind === "phase" ? "The phase's work is complete or needs no action now. Continue reviewing individual uses and responses before choosing whether to pass."
+				: "No action for this item in the current position: its condition is unmet, its use is unavailable, or the plan calls for no use now.",
 			...(help ? { "ask:help": "This item conflicts with the position or card restrictions, or its required use is missing. Ask strategy to repair the unfinished line." } : {}),
 		},
 	};

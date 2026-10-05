@@ -10,6 +10,8 @@ export type ReviewItem = {
 	kind: "step" | "branch" | "card" | "response" | "phase";
 	options: string[];
 	cards: string[];
+	/** Unrecorded actions in a phase's current window; absent if it has no explicit steps. */
+	remaining?: string[];
 	judgment?: Review;
 };
 
@@ -19,27 +21,28 @@ export function checklist(frame: Frame): ReviewItem[] {
 	if (view.window.kind !== "turn" || !decision || !view.work ||
 		!(decision.situation === "priority" || decision.options.some((one) => ["attack:done", "block:done"].includes(one.id)))) return [];
 	const items: ReviewItem[] = [], state = planState(frame), covered = new Set<string>(), sources = new Set<string>(), named = new Set<string>();
-	const objects = view.objects ?? [];
-	const add = (id: string, label: string, kind: ReviewItem["kind"], options: Option[], names: string[] = []) => {
+	const objects = view.objects ?? [], done = new Set(view.done ?? []);
+	const add = (id: string, label: string, kind: ReviewItem["kind"], options: Option[], names: string[] = [], remaining?: string[]) => {
 		const visible = new Set(objects.flatMap((object) => object.card ? [object.card] : []));
 		const cards = [...new Set([...names, ...options.flatMap((one) => one.objects?.flatMap((ref) => {
 			const card = objects.find((object) => object.id === ref.id && object.incarnation === ref.incarnation)?.card;
 			return card ? [card] : [];
 		}) ?? [])])].filter((card) => visible.has(card));
 		const judgment = view.work?.reviews?.find((one) => one.item === id && one.at === frame.version && one.plan === view.work?.planned);
-		items.push({ id, label, kind, options: options.map((one) => one.id), cards, ...(judgment ? { judgment } : {}) });
+		items.push({ id, label, kind, options: options.map((one) => one.id), cards, ...(remaining ? { remaining } : {}), ...(judgment ? { judgment } : {}) });
 		if (kind !== "phase") {
 			options.forEach((one) => { covered.add(one.id); if (one.objects?.[0]) sources.add(`${one.objects[0].id}@${one.objects[0].incarnation}`); });
 			if (kind === "step" || kind === "branch") names.forEach((name) => named.add(name));
 		}
 	};
+	const steps = state?.plan.steps.flatMap((one, at) => matches(one.when, frame) ? [{ at, label: one.label }] : []) ?? [];
 	(state?.plan.phases ?? []).forEach((one, at) => {
 		if (matches(one.when, frame)) add(`phase:${at}`, `Phase strategy: ${one.goal ?? one.guidance}`, "phase",
-			decision.options.filter((one) => !["pass", "attack:done", "block:done"].includes(one.id)));
+			decision.options.filter((one) => !["pass", "attack:done", "block:done"].includes(one.id)), [],
+			steps.length ? steps.filter((one) => !done.has(one.at)).map((one) => one.label) : undefined);
 	});
 	const stack = objects.filter((one) => one.zone === "stack");
 	if (decision.situation === "priority" && stack.length) add("response", "Respond to the stack or let it resolve", "response", [], stack.flatMap((one) => one.card ? [one.card] : []));
-	const done = new Set(view.done ?? []);
 	for (const [kind, list] of [["step", state?.plan.steps ?? []], ["branch", state?.plan.may ?? []]] as const) list.forEach((one, at) => {
 		if ((kind === "step" && done.has(at)) || !matches(one.when, frame)) return;
 		const fit = (kind === "step" ? state?.due : state?.branches)?.find((one) => one.at === at);
