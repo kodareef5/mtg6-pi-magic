@@ -111,6 +111,15 @@ because an opponent's unseen answer is not a known future event.
 Every fact that changes what is legal, including the inconvenient ones. Small is
 a retrieval discipline, not permission to drop a standing restriction.
 
+Build context for the question before rendering it. Do not fit a request by
+clipping strings, cutting card paragraphs, taking the first N options or dropping
+required facts. A large request needs an explanation of its contents and a
+complete way to inspect the decision in smaller questions. Preserve original
+move ids, visible restrictions and access to every choice. Inspection moves
+nothing. Record capacity failures as infrastructure failures, never as a seat's
+wish to pass. The planned implementation is in `docs/PLANS.md`, "Next round:
+focused Jev context"; the current adapter does not yet satisfy that plan.
+
 An ordered priority, not a mood. Take an available win, otherwise prevent the
 identified loss, otherwise keep the engine and the named response, otherwise
 develop. Each option says which of those it serves.

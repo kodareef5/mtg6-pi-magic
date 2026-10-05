@@ -383,7 +383,9 @@ the provider failure, Village payment, declined search, repeated Curator use,
 stale repair, opening bottom choice and Smaug combat. They preserve the games'
 private information and stay out of the package.
 
-The next work follows these saved positions:
+The next work follows these saved positions. The detailed builder contracts,
+capacity handling and acceptance checks are in
+[Next round: focused Jev context](PLANS.md#next-round-focused-jev-context).
 
 1. Bound Jev's request size by removing repeated option descriptions and sharing
    common action terms. Preserve every choice and its targets and payment;
