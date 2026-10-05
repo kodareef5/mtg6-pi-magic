@@ -227,6 +227,8 @@ export type Cursor = {
 	priority: SeatId | null;
 	/** Whether this step's turn-based action has been performed. */
 	stepDone: boolean;
+	/** 514.3a opened priority in this cleanup; another cleanup is owed after the stack and passes finish. */
+	cleanupPriority?: true;
 	/** Turns begun, starting at 1. */
 	turn: number;
 	/** Consecutive passes with nothing waiting. A phase ends by consensus. */

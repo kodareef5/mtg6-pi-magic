@@ -52,7 +52,9 @@ function pending(table: Table): Pending | null {
 
 	// 3. The loop applies the whole group, then asks again for cascading actions.
 	//    Listing the group must not execute it.
-	const automatic = stateBased(table);
+	// Cleanup discards and expires temporary effects before its first check.
+	const cleanup = table.cursor.steps[0] === "cleanup";
+	const automatic = cleanup && !table.cursor.stepDone ? null : stateBased(table);
 	if (automatic) return automatic;
 
 	// 4. A replacement applies to a pending event: which applies first. Only one
@@ -63,8 +65,8 @@ function pending(table: Table): Pending | null {
 	if (due) return due;
 
 	// 5. Triggers waiting to go on the stack, before anyone receives priority.
-	//    A step without priority (untap, cleanup) leaves them waiting.
-	if (table.waiting.length && table.cursor.stepDone && STEPS[table.cursor.steps[0]!]?.priority) {
+	//    Untap leaves them waiting. In cleanup they open the 514.3a exception.
+	if (table.waiting.length && table.cursor.stepDone && (cleanup || STEPS[table.cursor.steps[0]!]?.priority)) {
 		const window = triggerWindow(table);
 		if (window) return window;
 	}
@@ -158,6 +160,8 @@ function take(
 /** A listed action and its bookkeeping are one committed event. */
 function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 	const id = move.option.id;
+	if (table.cursor.steps[0] === "cleanup" && table.cursor.stepDone && !table.cursor.cleanupPriority &&
+		(p.situation === "state-based" || p.situation === "trigger-order")) return [{ do: "turn", action: "priority" }];
 	if (p.situation === "priority") {
 		const changes: Change[] = [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
 		const top = cardsIn(table, "stack")[0];

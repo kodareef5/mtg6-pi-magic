@@ -148,6 +148,12 @@ do not claim that the first untap step has started.
 Opening completion is derived from kept seats and outstanding bottom choices.
 There is no second `done` flag to keep in step with those facts.
 
+Cleanup finishes its discards, then removes damage and temporary effects together.
+Its state-based actions or waiting triggers open priority for both seats and
+create an obligation for another cleanup. A resolving effect cannot restart
+discards in the current cleanup. The repeated step handles them after the stack
+empties and both seats pass (514.3a).
+
 ## Projection is the only reader
 
 `project` in view.ts is the only thing that reads the table on a seat's behalf.

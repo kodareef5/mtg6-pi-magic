@@ -238,8 +238,9 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    the battlefield looks back to before the group. Triggers wait on the table
    and go on the stack, active player first, before the next priority.
    Intervening "if", "you may", "once each turn", reflexive triggers and
-   suppression work. Triggers during cleanup (514.3a) are not handled yet: they
-   wait for the next upkeep.
+   suppression work. Cleanup expires damage and temporary effects together,
+   then handles state-based actions and waiting triggers. Either exception
+   gives both seats priority and requires another cleanup (514.3a).
 4. **Static abilities and the layer walk.** The hardest part. `docs/COMBAT.md`
    has the sublayers, taken from 613.4. **Implemented:** `characteristics.ts`
    walks types, abilities and power/toughness from registrations, labels and

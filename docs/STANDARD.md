@@ -77,8 +77,9 @@ in order, retaining the accepted assessment and position for any failure:
 - Exercise each assessed use from a controlled position: its costs, choices,
   responses, resolution and departure. Extend the existing invariant tests,
   including interactions among cards, without adding per-card code to core.
-  Cleanup triggers, replacement ordering and delayed-trigger lifetimes need
-  particular attention where an assessed card depends on them.
+  Replacement ordering and delayed-trigger lifetimes need particular attention
+  where an assessed card depends on them. Cleanup now has focused coverage for
+  waiting triggers, expiring effects, response priority and repeated discards.
 - Check strategy and pilot packets at each meaningful window: a prepared line
   that survives the draw, one that needs an amendment, a held response, combat,
   and an opponent action that invalidates the line. Inspect chosen passes as
@@ -144,11 +145,24 @@ strategist. It also mulliganed a playable seven down to five, so these runs
 cannot compare strategist strength. The opening packet had combined play,
 draw, keep and bottom advice. New briefs now separate those policies and the
 packet supplies projected hand counts; old carried briefs keep their original
-notes. The change is covered offline and has not yet been measured live.
+notes. A subsequent isolated probe compared the carried policy and a new Luna
+brief at four saved opening decisions, using eight Jev calls in 1.7 seconds.
+Both policies kept the original playable seven. The new policy also kept a
+two-land hand without early development that the carried policy mulliganed.
+The result is mixed: shorter guidance helps focus, but "early action" still
+leaves the classifier to infer which cards qualify.
 
 Full games remain behind the readiness checks above. Next probes should keep
 the same saved decision when comparing context, inspect accepted card terms,
 and check completed effects and chosen passes, not just call counts.
+
+The cleanup component review fixed a separate timing failure. Damage and
+temporary effects now expire together after discarding, before the state
+check. A state-based action or waiting trigger opens priority for both seats;
+after the stack empties and both pass, another cleanup begins (514.3a).
+The regression checks that drawing cards in this window waits for the repeated
+cleanup's discards, a legal instant response is offered, and replay restores
+the same position. This is a rules operation, not a card-text interpreter.
 
 ## Run the matchup
 

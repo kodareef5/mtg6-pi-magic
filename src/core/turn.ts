@@ -103,7 +103,7 @@ export function advanceTurn(table: Table): void {
 
 	const step = cursor.steps[0];
 	if (!step) throw new Error("A live turn needs a step");
-	const grants = STEPS[step].priority;
+	const grants = STEPS[step].priority || !!cursor.cleanupPriority;
 
 	// 117.3a: the active player receives priority after the turn-based actions.
 	if (grants && cursor.priority === null) {
@@ -123,6 +123,7 @@ export function endingPhase(table: Table): boolean {
 	const { steps, stepDone, priority, passes } = table.cursor;
 	const step = steps[0], next = steps[1];
 	if (table.outcome || !mulligansSettled(table) || !step || !stepDone) return false;
+	if (step === "cleanup" && table.cursor.cleanupPriority) return false;
 	if (STEPS[step].priority && (priority === null || passes < playing(table).length)) return false;
 	return !next || STEPS[step].phase !== STEPS[next].phase;
 }

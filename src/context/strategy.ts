@@ -7,7 +7,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Table } from "../core/table.ts";
 import { nextDecision } from "../core/decisions.ts";
-import { STEPS } from "../core/steps.ts";
 import type { Frame } from "../core/types.ts";
 import { NoteEditsSchema, type NoteEdit, type WorkCommand } from "../core/work-language.ts";
 import type { Prepared } from "./seat.ts";
@@ -23,8 +22,8 @@ import { facts, chancing, initialPlan, nextMana, type Context } from "./strategy
 
 /** Retained for comparing call policies; it does not start a session. */
 export function worthPlanning(table: Table): boolean {
-	const step = table.cursor.steps[0];
-	return !!step && !table.outcome && !!STEPS[step].priority && (nextDecision(table)?.options.length ?? 0) > 1;
+	const decision = nextDecision(table);
+	return decision?.situation === "priority" && decision.options.length > 1;
 }
 
 const docs = join(import.meta.dirname, "..", "..", "docs");

@@ -27,8 +27,8 @@ import type { Seat } from "../core/table.ts";
 import type { SeatId, SeatView } from "../core/types.ts";
 import type { Lookup, Reasoner, Submission } from "./reason.ts";
 
-/** The steps a note can be written for: the ones with priority, by the table's own names. */
-const STEPS = ["upkeep", "draw", "precombat-main", "begin-combat", "declare-attackers", "declare-blockers", "combat-damage", "end-of-combat", "postcombat-main", "end"] as const satisfies readonly Step[];
+/** Steps with seat choices, including cleanup discards and exceptional priority. */
+const STEPS = ["upkeep", "draw", "precombat-main", "begin-combat", "declare-attackers", "declare-blockers", "combat-damage", "end-of-combat", "postcombat-main", "end", "cleanup"] as const satisfies readonly Step[];
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
 /** A sentence, or a small structure of short sentences: a strong writer organizes a matchup by threat, and that structure is worth keeping. */
@@ -253,7 +253,7 @@ const SYNTHESIS = [
 	"- route: the main route to a win. recovery: the route when its key dependency fails. Read by the strategist.",
 	"- matchup: both clocks, the opponent's threats with their last answer windows, and how to deny their key cards' conditions. Read by the strategist.",
 	"- opening: play and draw each hold keep and bottom. Each field is at most three short sentences, read alone for that decision. keep gives ordered keep/mulligan conditions and how they change after a mulligan. bottom gives the cards to preserve and the order to return others. Keep supporting analysis in route or traps.",
-	"- steps: keyed by these step names only: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end. Each holds own and opponent notes, for your turn and theirs, only where there is something to do or avoid. Read by the pilot in that step.",
+	"- steps: keyed by these step names only: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end, cleanup. Each holds own and opponent notes, for your turn and theirs, only where there is something to do or avoid. Cleanup normally offers only discards; a state-based action or waiting trigger opens priority and requires another cleanup. Read by the pilot in that step.",
 	"- cards: keyed by exact card name, from either deck: notes only for cards with a real choice or trap, such as when to play it, what to hold it for, or how to play around it. Read by the pilot when an option names the card.",
 	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",
 	"Every default comes with the visible condition that reverses it. Name cards and numbers. No preamble.",

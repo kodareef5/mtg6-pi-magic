@@ -24,7 +24,7 @@ export function workFrame(table: Table, seat: SeatId): Frame {
 
 /** Check step, phase and turn bounds. An action needs priority; guidance can cover a mandatory choice. */
 export function checkWhen(when: When, action = true): string | null {
-	if (action && when.step && !STEPS[when.step as keyof typeof STEPS].priority) return `${when.step} has no priority, so nothing can be done in it.`;
+	if (action && when.step === "untap") return "untap has no priority, so nothing can be done in it.";
 	if (when.step && when.phase && STEPS[when.step as keyof typeof STEPS].phase !== when.phase) return `${when.step} belongs to a different phase than ${when.phase}.`;
 	if (when.fromTurn !== undefined && when.throughTurn !== undefined && when.fromTurn > when.throughTurn) return "the window ends before it starts.";
 	return null;
@@ -107,7 +107,7 @@ const PLACES: { prefix: string; steps?: string[]; active?: "self" | "opponent"; 
 	{ prefix: "keep", never: "the mulligan is decided before any plan, from the brief's opening policy" },
 	{ prefix: "mulligan", never: "the mulligan is decided before any plan, from the brief's opening policy" },
 	{ prefix: "bottom", never: "the mulligan is decided before any plan, from the brief's opening policy" },
-	{ prefix: "discard:", never: "discarding to hand size happens in cleanup, which has no priority" },
+	{ prefix: "discard:", never: "discarding to hand size is a compulsory cleanup operation, not a priority action" },
 	{ prefix: "attack:", steps: ["declare-attackers"], active: "self" },
 	{ prefix: "block:", steps: ["declare-blockers"], active: "opponent" },
 	{ prefix: "assign:", steps: ["combat-damage"] },

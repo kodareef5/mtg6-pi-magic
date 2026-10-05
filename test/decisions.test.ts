@@ -6,6 +6,10 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { cardsIn } from "../src/core/table.ts";
+import { relive } from "../src/core/journal.ts";
+import { endingPhase } from "../src/core/turn.ts";
+import { example, main, matchup, passBoth, place, step } from "./play.ts";
+import { editWork, workFrame } from "../src/core/work-tools.ts";
 
 const table = () => start(standard, [
 	{ name: "A", deck: deck("Green Stompy") },
@@ -71,4 +75,73 @@ test("cleanup keeps the discard obligation pending until the hand fits", () => {
 	assert.equal(nextDecision(built), null);
 	advance(built);
 	assert.equal(built.cursor.active, 1);
+
+	// 514.2 removes damage and temporary effects together. 514.3a checks
+	// afterward, opens priority for either exception, and repeats cleanup.
+	for (const exception of ["trigger", "state"] as const) {
+		const setup = () => {
+			const table = matchup(`cleanup-${exception}`);
+			const [elf] = place(table, 0, "battlefield", "Llanowar Elves");
+			place(table, 1, "battlefield", "Mountain"); place(table, 1, "hand", "Shock");
+			editWork(table, 1, [{ do: "package.put", package: { card: "Shock", registers: [], procedures: [example("Cast Shock")], assessed: true } },
+				{ do: "plan.put", plan: { objective: "Keep the response.", guidance: "Shock if needed during cleanup priority.", steps: [],
+					may: [{ label: "Shock", when: { step: "cleanup" }, action: { procedure: example("Cast Shock") } }] } }], "shock");
+			const on = { id: elf!.id, incarnation: elf!.incarnation };
+			commit(table, [{ do: "note", note: { kind: "label", by: 0, on, until: "end-of-turn", text: "temporary protection",
+				change: exception === "trigger" ? { words: ["indestructible"] } : { power: 1, toughness: 1 } } },
+				exception === "trigger" ? { do: "damage", source: elf!.id, target: on, amount: 1 } : { do: "counters", what: elf!.id, kind: "-1/-1", amount: 1 },
+				...(exception === "trigger" ? [{ do: "note" as const, note: { kind: "delay" as const, by: 0, until: "indefinite" as const,
+					event: { on: "step" as const, step: "cleanup" as const }, once: true,
+					effect: { instructions: [{ do: "draw" as const, who: "you", count: 2 }] }, fixed: { source: on, targets: [], bound: {} } } }] : []),
+			], "game-setup");
+			return table;
+		};
+		const table = setup(), elf = cardsIn(table, "battlefield")[0]!;
+		main(table, 0, 1, "end"); passBoth(table); advance(table);
+		assert.equal(table.cursor.steps[0], "cleanup");
+		assert.equal(nextDecision(table), null, "cleanup's turn-based operation precedes its exception check");
+		advance(table);
+		assert.equal(table.things.get(elf.id)!.damage, 0);
+		assert.equal(table.notes.some((one) => one.until === "end-of-turn"), false);
+		const before = structuredClone(table), pending = nextDecision(table)!;
+		assert.deepEqual(table, before, "discovering the exception changes nothing");
+		assert.equal(pending.situation, exception === "trigger" ? "trigger-order" : "state-based");
+		apply(table, pending.options[0]!.id, "engine", "forced");
+		assert.equal(nextDecision(table)!.situation, "priority");
+		assert.equal(nextDecision(table)!.seat, 0, "the active seat receives the cleanup exception's first priority");
+		if (exception === "trigger") {
+			passBoth(table);
+			while (table.resolution) step(table);
+			assert.equal(cardsIn(table, "hand", 0).length, 9);
+			assert.equal(table.things.get(elf.id)!.zone, "battlefield", "damage expired together with indestructible");
+			assert.equal(nextDecision(table), null, "drawing in cleanup does not restart discards in the current step");
+			advance(table);
+		} else assert.equal(table.things.get(elf.id)!.zone, "graveyard", "the temporary toughness expired before the state check");
+		assert.match(nextDecision(table)!.options.find((one) => one.id === "pass")!.shows!, /another cleanup step/);
+		apply(table, "pass", "model", "chosen");
+		const response = nextDecision(table)!;
+		assert.equal(response.seat, 1);
+		assert.ok(response.options.some((one) => one.label.startsWith("Cast Shock")), "the nonactive seat can respond in cleanup");
+		assert.ok(response.options.every((one) => !one.id.startsWith("land:")), "cleanup priority is not a main phase");
+		assert.equal(workFrame(table, 1).view.work!.plan!.may![0]!.when.step, "cleanup", "strategy may prepare an exceptional cleanup response");
+		apply(table, "pass", "model", "chosen");
+		assert.equal(endingPhase(table), false, "the ending phase is not over while a cleanup is owed");
+		const visit = table.cursor.visit;
+		advance(table);
+		assert.equal(table.cursor.steps[0], "cleanup");
+		assert.equal(table.cursor.turn, 1);
+		assert.equal(table.cursor.visit, visit + 1, "the repeated cleanup is a new window");
+		for (const size of exception === "trigger" ? [9, 8] : []) {
+			assert.equal(cardsIn(table, "hand", 0).length, size);
+			const discard = nextDecision(table)!;
+			assert.match(discard.question, /^Discard /);
+			apply(table, discard.options[0]!.id, "model", "chosen");
+		}
+		while (!nextDecision(table)) advance(table);
+		assert.equal(table.cursor.turn, 2, "quiet cleanup ends without priority or another repeat");
+		const restored = relive(setup(), table.ledger);
+		assert.deepEqual(restored.things, table.things);
+		assert.deepEqual(restored.cursor, table.cursor);
+		assert.deepEqual(restored.waiting, table.waiting);
+	}
 });

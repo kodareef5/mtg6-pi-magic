@@ -472,19 +472,24 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 		case "complete":
 			cursor.stepDone = cursor.steps[0] !== "cleanup" ||
 				cardsIn(table, "hand", cursor.active).length <= table.format.maxHandSize;
+			// 514.2: after the final discard, expire effects and damage together,
+			// before checking for state-based actions or waiting triggers.
+			if (cursor.steps[0] === "cleanup" && cursor.stepDone) {
+				for (const thing of table.things.values()) { thing.damage = 0; delete thing.deathtouched; }
+				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
+			}
 			return;
 		case "priority":
 			cursor.priority = cursor.active;
 			cursor.passes = 0;
+			if (cursor.steps[0] === "cleanup") cursor.cleanupPriority = true;
 			return;
 		case "end": {
 			const step = cursor.steps.shift();
 			cursor.visit += 1;
 			for (const s of table.seats) s.pool = s.pool.filter((mana) => mana.persists);
-			if (step === "cleanup") {
-				for (const thing of table.things.values()) { thing.damage = 0; delete thing.deathtouched; }
-				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
-			}
+			if (step === "cleanup" && cursor.cleanupPriority) cursor.steps.unshift("cleanup");
+			delete cursor.cleanupPriority;
 			// 511.3: everything is removed from combat as the end of combat step ends.
 			if (step === "end-of-combat") { table.notes = table.notes.filter((note) => note.until !== "end-of-combat"); table.combat = null; }
 			// Each damage step divides afresh.
