@@ -1,7 +1,7 @@
 /** Check an accepted card assessment's coverage. This does not interpret its rules. */
 import type { Package } from "./language.ts";
 import { checkProcedure } from "./procedures.ts";
-import { isLand, quotes, type Printed } from "./printed.ts";
+import { isLand, permanentSpell, quotes, type Printed } from "./printed.ts";
 
 /** Ignore typography and reminder text when comparing the model's quoted source. */
 const plain = (text: string) => text.replace(/\([^)]*\)/g, " ").replace(/^\s*•\s*/gm, "").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " ").trim().toLowerCase();
@@ -10,7 +10,8 @@ const plain = (text: string) => text.replace(/\([^)]*\)/g, " ").replace(/^\s*•
 export function assessmentProblems(printed: Printed, pack: Package): string[] {
 	const problems: string[] = [];
 	const claims = [...pack.registers, ...(pack.procedures ?? [])];
-	if (!isLand(printed) && !pack.procedures?.some((one) => one.timing === "spell")) problems.push(`${pack.card} has no prepared casting procedure.`);
+	if (pack.printedCast && !permanentSpell(printed)) problems.push(`${pack.card} cannot use the shared printed cast: it needs a targetless permanent and a fixed mana cost.`);
+	if (!isLand(printed) && !pack.printedCast && !pack.procedures?.some((one) => one.timing === "spell")) problems.push(`${pack.card} has no prepared casting procedure.`);
 	for (const claim of claims) if (!quotes(printed, claim.basis)) problems.push(`The basis ${JSON.stringify(claim.basis)} is not on ${pack.card}.`);
 	// An empty normal cast merely pays the printed cost. Quoting the whole card
 	// there cannot stand in for assessing its abilities.

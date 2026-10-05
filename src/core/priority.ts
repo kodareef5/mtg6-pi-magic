@@ -9,6 +9,7 @@ import { tableWorld } from "./selectors.ts";
 import { allowance, playable } from "./permits.ts";
 import type { Frame, SeatId } from "./types.ts";
 import { STEPS } from "./steps.ts";
+import { printedCast } from "./procedures.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
 export function priorityMoves(table: Table, holder: SeatId): Move[] {
@@ -64,11 +65,12 @@ export function defaultCasts(table: Table, holder: SeatId): Move[] {
 	const world = tableWorld(table);
 	// From hand, and from another zone where a permission names the card ("you may cast it from exile").
 	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
-		!table.work[holder]?.packages?.some((pack) => pack.card === card.card && pack.assessed) &&
+		!table.work[holder]?.packages?.some((pack) => pack.card === card.card && pack.assessed && !pack.printedCast) &&
 		(card.zone === "hand" ? card.owner === holder : playable(world, holder, card, table.cursor.turn, false)));
 	const sources = [...new Set(castable.map((card) => `${card.zone}|${card.card}`))].sort().map((key) => key.split("|") as ["hand" | "exile" | "graveyard", string]);
-	return sources.flatMap(([zone, name]) => offers({ source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name }, claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost`,
-		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
+	return sources.flatMap(([zone, name]) => offers({ ...printedCast(name, table.printed[name]!),
+		source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name },
+		claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost` }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
 		const note = entering(table, holder, name);
 		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
 	}));

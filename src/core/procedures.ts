@@ -4,7 +4,7 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
-import { targetless } from "./printed.ts";
+import { permanentSpell, targetless, type Printed } from "./printed.ts";
 import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
 import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
@@ -18,6 +18,13 @@ import type { Frame, ObjectRef } from "./types.ts";
 import type { Change } from "./syntax.ts";
 
 export type { ProcedureOption } from "./announce.ts";
+
+/** Shared ordinary casting, accepted by the model through package.printedCast. No Oracle parsing. */
+export function printedCast(card: string, printed: Printed): Procedure {
+	if (!permanentSpell(printed)) throw new Error(`${card} needs a prepared casting procedure.`);
+	return { source: { card, zones: ["hand", "graveyard", "exile"], controller: "any" },
+		claim: "Cast for its printed cost", basis: `Printed ${printed.type}, ${printed.mana}`, timing: "spell", instructions: [] };
+}
 
 /** Shape, then the structure the schema cannot say: refs that point somewhere, timing that fits. */
 export function checkProcedure(value: unknown): Procedure {

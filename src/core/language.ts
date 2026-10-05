@@ -297,7 +297,9 @@ export type Label = Static<typeof LabelSchema>;
 
 /** Accepted registrations and reusable procedures for one card. Private until used. */
 export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("Registration")),
-	procedures: Type.Optional(Type.Array(Type.Ref("Procedure"))), assessed: Type.Optional(Type.Literal(true)) });
+	procedures: Type.Optional(Type.Array(Type.Ref("Procedure"))), assessed: Type.Optional(Type.Literal(true)),
+	/** The model accepts the shared targetless permanent cast at its printed cost, with no extra instructions or spell properties. */
+	printedCast: Type.Optional(Type.Boolean()) });
 export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Package: PackageDef }, "Package");
 
 /**

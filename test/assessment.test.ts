@@ -14,6 +14,7 @@ import { registrationProblems } from "../src/context/strategy.ts";
 import { seat } from "../src/context/sit.ts";
 import { assessmentProblems } from "../src/core/assessment.ts";
 import { checkProcedure } from "../src/core/procedures.ts";
+import { commit } from "../src/core/commit.ts";
 import type { Package, Procedure } from "../src/core/language.ts";
 import { editWork, planProblems, workFrame } from "../src/core/work-tools.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
@@ -48,6 +49,11 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const clock = table.cursor.clock;
 	const printed = table.printed[pack.card]!;
 	assert.deepEqual(assessmentProblems(printed, pack), []);
+	const shared: Package = { ...pack, printedCast: true, procedures: pack.procedures!.slice(1) };
+	assert.deepEqual(assessmentProblems(printed, shared), [], "the shared cast needs no empty per-card program");
+	assert.match(assessmentProblems(printed, { ...shared, registers: [] }).join("; "), /Unassessed text.*flying/,
+		"selecting a shared cast does not supply the permanent's abilities");
+	assert.match(assessmentProblems(table.printed.Shock!, { card: "Shock", registers: [], printedCast: true }).join("; "), /targetless permanent/);
 	const kellan = example("Kellan becomes a Detective");
 	assert.doesNotThrow(() => checkProcedure(kellan), "a granted trigger binds and uses its own card");
 	assert.throws(() => checkProcedure({ ...kellan, instructions: [...kellan.instructions, { do: "move", what: "bound:card", to: "hand", reason: "bounce" }] }), /bound:card is used before/,
@@ -96,6 +102,11 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const accepted = await assessCard(pack.card, printed, reasoner({ role: "pregame", stream, model: { id: "fixture", provider: "offline" } as never, tally: counted }), universe);
 	assert.equal(rounds, 2);
 	assert.deepEqual(accepted, pack);
+	const sharedAssessment = await assessCard(pack.card, printed, { work: async (_about, _prompt, tools) => {
+		assert.equal(tools.submit.check({ registers: shared.registers, procedures: shared.procedures, printedCast: true, unsupported: [] }), null);
+		return {};
+	} }, universe);
+	assert.deepEqual(sharedAssessment, shared);
 	editWork(table, 1, [{ do: "package.put", package: accepted }], "prepared-hellkite");
 	const before = structuredClone(table);
 	assert.throws(() => editWork(table, 1, [{ do: "package.put", package: { card: pack.card, registers: [] } }], "erase-abilities"), /Unassessed text/);
@@ -111,6 +122,36 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const { table: clone } = replay(join(dir, "clone.jsonl"), () => matchTable(table.rng.seed));
 	assert.deepEqual(clone.work, table.work);
 	assert.equal(clone.ledger.length, 0, "version zero owns accepted meaning, with no opening decisions");
+	const sharedParent = structuredClone(table);
+	editWork(sharedParent, 1, [{ do: "package.put", package: shared }], "shared-cast");
+	const correctedCast = structuredClone(sharedParent);
+	editWork(correctedCast, 1, [{ do: "package.put", package: { ...pack, printedCast: false } }], "replace-shared-cast");
+	assert.equal(correctedCast.work[1]!.packages![0]!.printedCast, false, "a correction can withdraw the shared casting claim");
+	const sharedJournal = open(join(dir, "shared-parent.jsonl"), { ...header, id: "shared-parent" });
+	save(sharedJournal, sharedParent);
+	fork(sharedJournal.path, 0, "shared-clone", join(dir, "shared-clone.jsonl"));
+	const { table: sharedClone } = replay(join(dir, "shared-clone.jsonl"), () => matchTable(table.rng.seed));
+	assert.deepEqual(sharedClone.work, sharedParent.work);
+	assert.ok(actions(workFrame(sharedClone, 1))[`printed:${pack.card}`], "strategy reuses the same shared mechanic");
+	for (const zone of ["hand", "graveyard", "exile"] as const) {
+		const position = matchTable(`shared-${zone}`);
+		editWork(position, 1, [{ do: "package.put", package: shared }], "shared-cast");
+		const [card] = place(position, 1, zone, pack.card);
+		place(position, 1, "battlefield", ...Array(5).fill("Mountain"));
+		main(position, 1);
+		const casts = () => nextDecision(position)!.options.filter((one) => one.use?.source.id === card!.id);
+		if (zone !== "hand") {
+			assert.equal(casts().length, 0, "a shared cast does not grant permission to play another zone");
+			commit(position, [{ do: "note", note: { kind: "permit", by: 1, until: "indefinite",
+				on: { id: card!.id, incarnation: card!.incarnation }, who: 1, fromTurn: position.cursor.turn } }], "game-setup");
+		}
+		assert.equal(casts().length, zone === "hand" ? 2 : 1, "one shared normal cast, plus warp only from hand");
+		const ordinary = casts().find((one) => !one.use!.instructions.length)!;
+		assert.ok(ordinary);
+		apply(position, ordinary.id, "model", "chosen"); passBoth(position); finish(position);
+		assert.equal(card!.zone, "battlefield");
+		assert.deepEqual(characteristics(position, card!)!.words.sort(), ["flying", "haste"]);
+	}
 
 	// An established position tests card mechanics; the journal test below uses ordinary dealing.
 	const [nova] = place(table, 1, "hand", "Nova Hellkite");
@@ -166,21 +207,25 @@ test("assessment covers the whole card before play, and accepted terms supply en
 		{ label: "Shock", when: { active: "opponent" }, action: { prefix: "cast:", objects: { card: "Shock" } } },
 	] }), [], "cast prefixes include instants and flash spells on the opponent's turn");
 
-	// Same terms, ordinary opening and lands, stopping as soon as the cast enters.
-	for (let guard = 0; guard < 1000; guard++) {
-		const decision = nextDecision(clone);
-		if (!decision) { advance(clone); continue; }
-		const discard = decision.options.find((one) => one.label.startsWith("Discard ") && !/Nova Hellkite|Mountain/.test(one.label));
-		const choice = decision.options.find((one) => one.label.startsWith("Cast Nova Hellkite")) ?? decision.options.find((one) => one.label === "Play Mountain") ?? discard ?? quiet(decision.options);
-		apply(clone, decision.situation === "pregame" ? "keep" : choice.id, "model", "chosen");
-		if ([...clone.things.values()].some((one) => one.card === pack.card && one.zone === "battlefield")) break;
+	// Both old programs and the shared mechanic survive an ordinary opening,
+	// casting, and replay without asking a model to reinterpret the card.
+	for (const [index, played] of [clone, sharedClone].entries()) {
+		for (let guard = 0; guard < 1000; guard++) {
+			const decision = nextDecision(played);
+			if (!decision) { advance(played); continue; }
+			const discard = decision.options.find((one) => one.label.startsWith("Discard ") && !/Nova Hellkite|Mountain/.test(one.label));
+			const cast = decision.options.find((one) => one.use && played.things.get(one.use.source.id)?.card === pack.card && !one.use.instructions.length);
+			const choice = cast ?? decision.options.find((one) => one.label === "Play Mountain") ?? discard ?? quiet(decision.options);
+			apply(played, decision.situation === "pregame" ? "keep" : choice.id, "model", "chosen");
+			if ([...played.things.values()].some((one) => one.card === pack.card && one.zone === "battlefield")) break;
+		}
+		assert.ok([...played.things.values()].some((one) => one.card === pack.card && one.zone === "battlefield"));
+		const child = open(join(dir, `played-${index}.jsonl`), { ...header, id: `played-${index}` }); save(child, played);
+		const { table: again } = replay(child.path, () => matchTable(played.rng.seed));
+		assert.deepEqual(again.work, played.work);
+		assert.deepEqual(again.ledger, played.ledger);
+		assert.deepEqual(again.things, played.things);
 	}
-	assert.ok(clone.ledger.some((row) => row.activation?.claim === "Cast Nova Hellkite"));
-	const child = open(join(dir, "played.jsonl"), { ...header, id: "played" }); save(child, clone);
-	const { table: again } = replay(child.path, () => matchTable(clone.rng.seed));
-	assert.deepEqual(again.work, clone.work);
-	assert.deepEqual(again.ledger, clone.ledger);
-	assert.deepEqual(again.things, clone.things);
 
 	const unready = matchTable("assessment-missing-model");
 	await assert.rejects(seat(unready, async () => [{ role: "decide", pattern: "fixture", model: { id: "fixture", type: "classifier" } as never }, { role: "pregame", pattern: "off", off: true }],

@@ -223,11 +223,21 @@ step, `player` combat damage to a player, and `batch` one trigger for "one or
 more".
 
 **Packages.** Before play, the model assesses each registered card with rules
-text. A package holds `card`, `registers`, reusable `procedures` and `assessed:
-true`. It covers normal and alternative casts, activated abilities, keywords,
+text. A package holds `card`, `registers`, reusable `procedures`, optional
+`printedCast: true`, and `assessed: true`. It covers normal and alternative casts, activated abilities, keywords,
 triggers, static effects, replacements and entry behavior. The table never
 interprets Oracle prose. Missing source paragraphs stop setup; source coverage
 and schema validation do not prove that the model interpreted the card correctly.
+
+`printedCast: true` selects the shared ordinary permanent cast. The model uses
+it only when paying the printed fixed mana cost is enough, with no targets,
+additional costs, casting restrictions, spell properties or extra instructions.
+Core checks the structured card type and cost, and the current zone permission.
+It does not certify that the model's claim matches the rules text. Entry abilities
+still come from registrations. Alternative costs remain separate procedures.
+Set `printedCast: false` when a correction replaces that shared cast with a procedure.
+This removes the repeated empty cast program; deferred interpretation and scoped
+readiness are the next migration step in `PLANS.md`.
 
 - The table attaches registrations however the permanent enters: cast, played,
   put onto the battlefield by an effect. Assessed procedures are offered at

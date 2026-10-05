@@ -4,6 +4,7 @@ import { PlanDefs, PlanSchema, problems, type Plan, type PlanOption } from "../c
 import type { Frame } from "../core/types.ts";
 import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
+import { printedCast } from "../core/procedures.ts";
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
@@ -22,6 +23,8 @@ export function actions(frame: Frame, prepared?: Plan): Record<string, { label: 
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(frame.view.worked ?? []).map((one, at) => [`worked:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),
+		...(frame.view.work?.packages ?? []).filter((pack) => pack.printedCast && frame.view.printed?.[pack.card]).map((pack) =>
+			[`printed:${pack.card}`, { label: `Cast ${pack.card} for its printed cost`, action: { procedure: printedCast(pack.card, frame.view.printed![pack.card]!) } }]),
 	]);
 }
 

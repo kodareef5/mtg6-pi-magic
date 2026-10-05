@@ -80,6 +80,10 @@ interpretation, or an impossible required step. Those must not collapse to skip.
    before the affected operation; it cannot silently drop an ability or an option.
    Preserve old accepted journal terms. Test hand, battlefield, exile and graveyard
    uses, source coverage, delayed effects, control changes and clone parity.
+   First increment: `printedCast` selects the shared ordinary permanent cast.
+   Hand, permitted exile and graveyard casts, entry abilities, corrections and
+   replay are tested. Complete assessment remains required until scoped readiness
+   can account for deferred uses.
 4. [ ] Refocus Jev on executing prepared instructions.
    Replace duplicate review-then-pick questions with a direct execution question
    when the plan and facts settle the purpose. Keep necessary completion and
