@@ -60,15 +60,15 @@ export const ROLES: Record<
 			"which is the most frequent call in the game. It executes; it does not strategise.",
 	},
 	pregame: {
-		does: "read the deck and write the snippets a later decision reads",
+		does: "assess every registered card, then write the deck and matchup brief",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6-luna:low",
+		suggested: "gpt-6.1-sol:low",
 		why:
-			"Luna while the game is being built: testing wants cheap and fast. A game that " +
-			"plays well on luna plays better on a stronger model. Four analysts per seat at " +
-			"once, then one synthesis, once per game; the deepest thinking a seat gets.",
-		instead: "gpt-6.1-sol:low or gpt-6-astra:low, slower and stronger. Benchmark it before paying for it",
+			"Card meaning must be complete before play. In the October 5 assessment run, " +
+			"Luna omitted restrictions and effects and refused supported abilities. Sol " +
+			"prepared both lists after a validator fix. Saved preparation is reused by " +
+			"clones; syntax acceptance still needs a semantic review.",
 	},
 	strategy: {
 		does: "advance the pregame strategy: prepare during the opponent's turn, amend after the draw, and answer stops",

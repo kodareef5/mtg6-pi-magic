@@ -90,7 +90,27 @@ in order, retaining the accepted assessment and position for any failure:
 
 The next implementation work should follow failures in these checks. Broadening
 formats, a bulk runner and model comparisons wait until these two lists work
-from ordinary setup. No live inference was run for the October 5 changes.
+from ordinary setup.
+
+## Preparation measurements
+
+The first live assessment with `gpt-6-luna:low` accepted 37 of 78 card jobs
+(39 names with rules text for each seat), using 159 calls in 271 seconds.
+Inspection found missing payment restrictions and effects in accepted answers,
+as well as refusals of abilities the syntax supports. That preparation is not
+suitable for play.
+
+With `gpt-6.1-sol:low`, 76 jobs passed in 300 seconds and 128 calls. Both Kellan
+jobs exposed a validator bug: a granted trigger's local binding was checked in
+the granting procedure's scope. After fixing that, a version-zero clone reused
+the 76 assessments and completed Kellan plus both briefs in 14 calls. Replay
+matched with no physical decisions and no gaps. The accepted preparation is
+saved privately as `real-standard-9-1791200644612`. Sol is now the suggested
+pregame model; a chosen roster is never silently replaced.
+
+These counts include lookup and correction calls. Syntax acceptance does not
+establish correct card meaning. Review of the accepted terms and a bounded live
+opening continue below the full-game readiness threshold.
 
 ## Run the matchup
 

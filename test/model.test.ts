@@ -50,7 +50,7 @@ test("a roster resolves patterns the way a reader would type them", () => {
 
 	// The suggested defaults resolve against a catalogue that has them.
 	assert.equal(of("decide").model?.id, "jev-latest");
-	assert.equal(of("pregame").model?.id, "gpt-6-luna");
+	assert.equal(of("pregame").model?.id, "gpt-6.1-sol");
 	assert.equal(of("pregame").thinkingLevel, "low");
 	assert.equal(of("judge").model?.id, "gpt-6-luna");
 	assert.equal(of("summary").model?.id, "gpt-6-luna");
