@@ -202,10 +202,11 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	main(table, 0);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const frame = workFrame(table, 0);
-	const broken = { ...line, steps: [{ label: "Attack in the end step", when: { step: "end" }, action: { prefix: "attack:" } }, { label: "Nothing", when: {}, action: {} }],
+	const broken = { ...line, steps: [{ label: "Attack in the end step", when: { step: "end" }, action: { prefix: "attack:" } }, { label: "Nothing", when: {}, action: {} },
+		{ label: "A shorthand is not an id", when: { step: "precombat-main" }, action: { option: "land", objects: { card: "Forest" } } }],
 		packages: [{ card: "Hired Claw", registers: [{ basis: "{1}{R}: Put a +1/+1 counter on this creature.", kind: "watch", event: { on: "step", step: "end" },
 			effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } }] }] };
-	const replies = [{ changes: broken }, { changes: line }];
+	const replies = [broken, line];
 	const seen: string[] = [];
 	const stream: Stream = (_model, context) => {
 		seen.push(JSON.stringify(context.messages));
@@ -216,6 +217,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	const { tools } = await planWork(frame, {}, writer);
 	assert.deepEqual(tools, [{ do: "plan.put", plan: line }]);
 	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
+	assert.match(seen[1]!, /is not an option id; use prefix/, "an invented action shorthand is refused before it bypasses the resource forecast");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
 });
 
@@ -231,7 +233,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  const seen: { messages: string; tools: string[] }[] = [];
  const stream: Stream = (_model, request) => {
   seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((one) => one.name) });
-  return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: { changes: { guidance: "Hold the Chocobo back." } } }], stopReason: "toolUse" }) };
+  return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: { guidance: "Hold the Chocobo back." } }], stopReason: "toolUse" }) };
  };
  const result = await planWork(frame, {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
  assert.equal(seen.length, 1, "no note-only or full-plan rewrite round");
@@ -277,8 +279,8 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 		})) as never,
 		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
 			prompts.push({ user: context.messages[0]!.content, task: context.messages[1]?.content, system: context.systemPrompt, ceiling: options.maxTokens });
-			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { changes: { objective: "Develop.", guidance: "Play lands.",
-				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } } }], stopReason: "toolUse" }) };
+			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { objective: "Develop.", guidance: "Play lands.",
+				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
 		}) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "work");
@@ -370,7 +372,7 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 			answers: Object.fromEntries(Object.entries(request.questions).map(([key, question]) => { const ids = Object.keys(question.criteria); const choice = ids.find((id) => id === "keep") ?? ids[0]!;
 				return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }]; })) })) as never,
 		// Every answer is malformed: steps that are not a list.
-		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { changes: { objective: "o", guidance: "g", steps: null } } }], stopReason: "toolUse" }) })) as never,
+		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "o", guidance: "g", steps: null } }], stopReason: "toolUse" }) })) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "unplanned");
 	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
@@ -407,7 +409,7 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	main(table, 0, 3);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }, { do: "package.put", package: { card: "Forest", registers: [] } }], "request");
 	const seen: string[] = [];
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { changes: line } }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: line }], stopReason: "toolUse" }) }; };
 	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.match(seen[0]!, /Mana now: Forest \(0-\d+\) makes G; Forest \(0-\d+\) makes G/);
 	assert.match(seen[0]!, /Land plays left this turn: 1\. In hand: .*Forest: enters untapped, makes G/);
@@ -568,7 +570,7 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
 	main(table, 1, 4);
 	const seen: string[] = [];
-	const replies: Record<string, unknown>[] = [{ changes: { objective: "Next turn.", guidance: "g", steps: [], phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] } }];
+	const replies: Record<string, unknown>[] = [{ objective: "Next turn.", guidance: "g", steps: [], phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] }];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const prepared = await prepareTurn(workFrame(table, 0), {}, writer);
@@ -576,7 +578,7 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	assert.equal(prepared.plan.objective, "Next turn.");
 
 	main(table, 0, 5);
-	replies.push({ changes: {} });
+	replies.push({});
 	const kept = await planWork(workFrame(table, 0), {}, writer, prepared, ["you drew Forest"]);
 	assert.match(seen[1]!, /you drew Forest/);
 	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: prepared.plan }]);
@@ -652,7 +654,7 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	assert.deepEqual(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
 	const seen: string[] = [];
 	const plan = { objective: "o", guidance: "g", steps: [hydra] };
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { changes: plan } }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: plan }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.equal(seen.length, 2, "refused once, then accepted");
 	assert.match(seen[1]!, /costs \{2\}\{G\}/);
@@ -709,7 +711,7 @@ test("a plan the writer was told about once goes through the table, and a schema
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const plan = { objective: "o", guidance: "g", steps: [{ label: "Cast Mossborn Hydra", when: { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 },
 		action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } }] };
-	const replies: Record<string, unknown>[] = [{ changes: { objective: "o" } }, { changes: plan }, { changes: plan }];
+	const replies: Record<string, unknown>[] = [{ objective: "o" }, plan, plan];
 	const seen: string[] = [];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
@@ -835,7 +837,7 @@ test("the notebook is kept across plans, merged edit by edit, journaled, replaye
 	// Useful notes go in with the plan, with no separate tool round.
 	const seen: string[] = [];
 	const replies: { name: string; arguments: Record<string, unknown> }[][] = [
-		[{ name: "submit", arguments: { changes: line, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
+		[{ name: "submit", arguments: { ...line, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); const calls = replies.shift()!;
 		return { result: async () => ({ content: calls.map((one, at) => ({ type: "toolCall", id: `c${seen.length}-${at}`, ...one })), stopReason: "toolUse" }) }; };
 	main(table, 0, 5);
@@ -865,7 +867,8 @@ test("preparation starts on the opponent's turn, not before our line has played,
  editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "opponent", note: "Red holds burn." }] }, { do: "plan.request", reason: "Stop: The Hydra died" }], "stop");
  const seen: { messages: string; tools: string[] }[] = [];
  const stream: Stream = (_model, request) => { seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((tool) => tool.name) });
-  return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { changes: { objective: "Recover." } } }], stopReason: "toolUse" }) }; };
+  return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "Recover." } }], stopReason: "toolUse" }) };
+ };
  await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules: loadRules("rules/cr.tsv") }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
  assert.match(seen[0]!.messages, /Advance the pregame strategy/);
  assert.deepEqual(seen[0]!.tools.sort(), ["card", "example", "odds", "rule", "submit"]);

@@ -34,9 +34,10 @@ this loop. The pregame challenge remains part of setup.
 
 ## Short answers, complete plans
 
-The writer's `submit` tool takes `changes`, optional `notes`, and an optional
-`objection`. Omitted plan fields keep the supplied `base`; lists replace their
-whole lists, and `[]` clears one. `changes: {}` keeps the base.
+The writer's `submit` tool takes changed plan fields directly, optional `notes`,
+and an optional `objection`. Omitted fields keep the supplied `base`; lists replace
+their whole lists, and `[]` clears one. `{}` keeps the base. There is no outer
+`plan` or `changes` object.
 Packages join by card name instead: a new package must not drop a package still
 waiting in preparation, and an empty package list does not remove accepted work.
 

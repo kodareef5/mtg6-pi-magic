@@ -37,18 +37,15 @@ const reference: Lookup = {
 	answer: (args) => examples.includes(String(args.file)) ? readFileSync(join(docs, "examples", String(args.file)), "utf8") : `Choose one of: ${examples.join(", ")}.`,
 };
 
+const { Changes: fields, ...definitions } = JSON.parse(JSON.stringify(ChangesSchema)).$defs;
 const SUBMIT = {
 	name: "submit",
-	description: "Update the base plan. Omitted fields stay; lists replace whole lists and [] clears one, except packages join by card name. changes: {} keeps the base. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
+	description: "Update the base plan with only changed fields. Omitted fields stay; lists replace whole lists and [] clears one, except packages join by card name. {} keeps the base. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
 	parameters: JSON.parse(JSON.stringify({ type: "object", properties: {
-		changes: ChangesSchema, notes: NoteEditsSchema,
+		...fields.properties, notes: NoteEditsSchema,
 		objection: { type: "object", properties: { row: { type: "integer" }, claim: { type: "string", minLength: 1 }, rule: { type: "string" } }, required: ["row", "claim"], additionalProperties: false },
-	}, required: ["changes"], additionalProperties: false }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
+	}, $defs: definitions, additionalProperties: false }).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"')) as object,
 };
-// Move the cyclic definitions to the tool root, where its rewritten pointers resolve.
-const parameters = SUBMIT.parameters as { properties: { changes: { $defs?: object } }; $defs?: object };
-parameters.$defs = parameters.properties.changes.$defs;
-delete parameters.properties.changes.$defs;
 
 const SYSTEM = [
 	"You strategize for one Magic seat. A small, fast pilot, Jev, executes your plan. The pregame brief is your matchup analysis: build on it instead of researching the deck again.",
@@ -56,21 +53,22 @@ const SYSTEM = [
 	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
 	"",
 	"YOUR ANSWER",
-	"- base is your plan to update. Submit changes only: omitted fields stay, a list replaces that list, [] clears it. Packages join by card name instead. Keep sound objective, guidance, phases and responses. Your new turn's base has no ordered steps; write the line for this turn. A midturn base already omits completed steps. Do not put them back.",
+	"- base is your plan to update. Submit changed fields directly: no plan or changes wrapper. Omitted fields stay, a list replaces that list, [] clears it. Packages join by card name instead. Keep sound objective, guidance, phases and responses. Your new turn's base has no ordered steps; write the line for this turn. A midturn base already omits completed steps. Do not put them back.",
 	"- actions holds syntax you already wrote. A step's action can be {\"reuse\":\"worked:0\"} or another listed key. It copies that action exactly, including selectors and costs. Check that it still means what you want. For a changed effect or selector, write the action. There is no card program or automatically offered repertoire.",
 	"- packages persist in private work. Write only new or corrected packages for permanents you expect to enter. Their registrations quote the card's own text. A package does not choose an activated ability: announce that as a procedure when you intend to pay for it; mana abilities can be registered.",
 	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
 	"",
 	"WHAT JEV NEEDS",
-	"- steps: ordered actions, each with label, when and action. Use listed option/prefix and objects when sufficient, otherwise a procedure. Write lands, spells, attacks, blocks and responses; prose alone does not offer an action. Essential means the line fails if that step cannot be taken.",
+	"- steps: ordered actions, each with label, when and action. option is an exact listed id such as pass or attack:done. prefix matches ids beginning with land:, cast:, attack: or block:, with objects selecting the card. land and cast are not ids. Write lands, spells, attacks, blocks and responses; prose alone does not offer an action. Essential means the line fails if that step cannot be taken.",
 	"- phases: [{when, goal, guidance, reevaluate}]. Give the current main phases, combat and the opponent's turn clear decisions and sequencing, including trigger targets and searches. Keep unchanged scripts. reevaluate names only an unexpected threat or opportunity that changes the line; routine events belong in guidance or branches.",
 	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
 	"- Use active self/opponent and step names for windows. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
 	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
-	"- A procedure states source, claim, basis, timing, any alternative or added cost, targets and instructions. Copy basis from the card. Do not invent a simpler effect. Look up a rule or example only when needed to resolve uncertainty.",
+	"- cards already gives the full text of the cards in this position and registered lists. Do not look those cards up again. A procedure states source, claim, basis, timing, any alternative or added cost, targets and instructions. Copy basis from the card. Do not invent a simpler effect. Look up a rule or example only when needed to resolve uncertainty.",
 	"- Combat is sequential: attack: or block: per creature, then attack:done or block:done. Jev handles listed trigger, resolution and damage choices with your phase guidance. It escalates if the plan cannot answer them.",
 	"",
 	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
+	'An example of the answer shape: {"guidance":"Play the land before the permanent.","steps":[{"label":"Play Forest","when":{"active":"self","step":"precombat-main"},"action":{"prefix":"land:","objects":{"zones":["hand"],"controller":"self","card":"Forest"}}},{"label":"Cast Llanowar Elves","when":{"active":"self","step":"precombat-main"},"action":{"prefix":"cast:","objects":{"zones":["hand"],"controller":"self","card":"Llanowar Elves"}}}]}. These are printed-cost defaults, not card-specific effects; choose cards and steps for your actual hand and resources.',
 	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Keep the answer short because Jev reads the conclusions, not your analysis.",
 	"",
 	syntaxReference(),
@@ -103,15 +101,15 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task }, {
 		submit: { ...SUBMIT, check(args) {
-			if (Object.keys(args).some((key) => !["changes", "notes", "objection"].includes(key))) return "Submit changes, optional notes and optional objection only.";
+			const { notes, objection: raised, ...changes } = args;
 			let plan: Plan;
-			try { plan = changedPlan(base, args.changes, available); } catch (error) { return String(error); }
-			const objection = args.objection as Objection | undefined;
-			const edits = [...carried, ...(Array.isArray(args.notes) ? args.notes as NoteEdit[] : [])];
+			try { plan = changedPlan(base, changes, available); } catch (error) { return String(error); }
+			const objection = raised as Objection | undefined;
+			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
 			const wrong = [...planProblems(frame, plan), ...misregistered(plan)];
 			if (!frame.view.work?.plan && !options.prepared && !plan.steps.length && !plan.may?.length)
 				wrong.push('The initial plan has no actions. Write the line, or explicitly choose passing with a step whose action is {"option":"pass"}.');
-			if (args.notes !== undefined && !Array.isArray(args.notes)) wrong.push("notes is a list of {topic, note} edits.");
+			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");
 			if (objection && (!Number.isInteger(objection.row) || !frame.view.actions?.some((one) => one.row === objection.row) || typeof objection.claim !== "string" || !objection.claim || (objection.rule !== undefined && typeof objection.rule !== "string"))) wrong.push("An objection names a row under view.actions and says why it broke a rule.");
 			if (options.nextTurn && objection) wrong.push("Preparation cannot object to an action; raise it from the current decision.");
 			// Core validates the same complete answer, including notebook capacity.

@@ -83,7 +83,7 @@ test("strategy reads the syntax and can fetch every indexed example without load
 		const messages = JSON.stringify(request.messages);
 		for (const file of listed) assert.ok(messages.includes(JSON.stringify(readFileSync(join(DIR, file), "utf8")).slice(1, -1)), `${file} is answered by the real lookup`);
 		return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "done", name: "submit", arguments: {
-			changes: { objective: "Pass.", guidance: "Keep resources.", steps: [{ label: "Pass", when: {}, action: { option: "pass" } }] } } }] }) };
+			objective: "Pass.", guidance: "Keep resources.", steps: [{ label: "Pass", when: {}, action: { option: "pass" } }] } }] }) };
 	};
 	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally() }));
 	assert.equal(rounds, 2);

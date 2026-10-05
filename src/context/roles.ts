@@ -71,14 +71,14 @@ export const ROLES: Record<
 		instead: "gpt-6.1-sol:low or gpt-6-astra:low, slower and stronger. Benchmark it before paying for it",
 	},
 	strategy: {
-		does: "write each seat's plan: at the opening, at each of its turns, and when the plan stops fitting",
+		does: "advance the pregame strategy: prepare during the opponent's turn, amend after the draw, and answer stops",
 		kind: "chat",
 		whose: "seat",
 		suggested: "gpt-6-luna:low",
 		why:
-			"Plans each turn and answers escalations, and the game waits for it. Luna while the " +
-			"game is being built: a sol call took 50 to 95 seconds a turn. A game that plays well " +
-			"on luna plays better on a stronger model.",
+			"Prepares before the turn and submits short updates. The seat waits after its draw " +
+			"when that work is unfinished. Luna is the chosen baseline for cost and speed; " +
+			"playing strength still needs measurement.",
 		instead: "gpt-6.1-sol:low or gpt-6-astra:low, when prepared plans measure better for the extra time",
 	},
 	judge: {

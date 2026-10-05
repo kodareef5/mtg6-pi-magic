@@ -45,6 +45,8 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 			for (const ref of action.procedure.source.refs ?? []) if (!visible(ref)) found.push(`${where} (${one.label}): object ${ref.id}@${ref.incarnation} is not in your view.`);
 		} else {
 			if (!action.option && !action.prefix && !action.objects) found.push(`${where} (${one.label}): name an option id, a prefix, or objects.`);
+			if (action.option && ["land", "cast", "attack", "block", "land:", "cast:", "attack:", "block:"].includes(action.option))
+				found.push(`${where} (${one.label}): ${JSON.stringify(action.option)} is not an option id; use prefix ${JSON.stringify(action.option.replace(/:$/, "") + ":")} with objects, or an exact listed id.`);
 			const misplaced = placement(action.option ?? action.prefix ?? "", one.when);
 			if (misplaced) found.push(`${where} (${one.label}): ${misplaced}`);
 			for (const ref of action.objects?.refs ?? []) if (!visible(ref)) found.push(`${where} (${one.label}): object ${ref.id}@${ref.incarnation} is not in your view.`);

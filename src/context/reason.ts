@@ -253,7 +253,7 @@ export function reasoner(options: {
 						let problem: string | null;
 						try { problem = tools.submit.check(used.arguments); } catch (error) { problem = `The answer could not be read: ${error instanceof Error ? error.message : String(error)}.`; }
 						if (!problem) return used.arguments;
-						answer = `Not accepted: ${problem} Fix that and call ${tools.submit.name} again with the whole corrected answer.`;
+						answer = `Not accepted: ${problem} Fix that and call ${tools.submit.name} again with corrected arguments.`;
 						problems.push(problem);
 					}
 					results.push({ role: "toolResult", toolCallId: used.id, toolName: used.name, content: [{ type: "text", text: answer }], isError: !lookup, timestamp: Date.now() });
