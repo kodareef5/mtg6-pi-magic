@@ -204,6 +204,7 @@ export async function play(
 		// An objection is ruled on before anything else in the answer: a rollback leaves nothing for it to apply to.
 		const objection = answer.kind === "object" ? answer : answer.kind === "work" ? answer.objection : undefined;
 		if (objection && await object(table, { row: objection.row, raisedBy: decision.seat, claim: objection.claim, ...(objection.rule ? { rule: objection.rule } : {}) }, judge)) {
+			for (const player of Object.values(players)) player.reset?.();
 			told = table.log.length;
 			for (const one of table.seats) seen[one.id] = table.log.length;
 			continue;

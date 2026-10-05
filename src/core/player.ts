@@ -124,7 +124,9 @@ export interface Player {
 	 * is not the same thing, and the difference is a known limit.
 	 */
 	interject?(frame: Frame): Promise<Answer | null>;
-	close(): void;
+	/** A rewind invalidates private work that was started from the superseded history. */
+	reset?(): void;
+	close(): void | Promise<void>;
 }
 
 /** A seat that plays a fixed list of ids. For tests and for replaying a ledger. */

@@ -430,7 +430,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("session_shutdown", async () => {
-		for (const player of Object.values(seated?.players ?? {})) player.close();
+		await Promise.all(Object.values(seated?.players ?? {}).map((player) => player.close()));
 		table = null;
 		seated = null;
 	});

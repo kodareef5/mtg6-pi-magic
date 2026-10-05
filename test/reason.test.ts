@@ -592,6 +592,24 @@ test("work takes its answer only through submit, and tells the model what was wr
 
 	const stubborn = reasoner({ role: "strategy", stream: () => ({ result: async () => ({ content: [{ type: "text", text: "Prose." }], stopReason: "stop" }) }), model: sol, tally: tally(), backoffMs: 0 });
 	await assert.rejects(stubborn.work("seat plan", { system: "S", user: "facts" }, { submit, turns: 2 }), /did not submit an accepted answer/);
+
+	// Cancelling speculative work is not a failed configuration, never retries,
+	// and leaves the same reasoner usable for the real decision.
+	const cancelled = tally(), controller = new AbortController();
+	let calls = 0;
+	const cancellable = reasoner({ role: "strategy", model: sol, tally: cancelled, backoffMs: 0, stream: (_model, _context, options) => {
+		calls++;
+		if (calls === 1) { assert.ok(options?.signal); return { result: () => new Promise(() => {}) }; }
+		return { result: async () => ({ content: [{ type: "toolCall", id: "ready", name: "submit", arguments: { commands: ["plan"] } }], stopReason: "toolUse" }) };
+	} });
+	const pending = cancellable.work("preparation", { system: "S", user: "old" }, { submit, signal: controller.signal });
+	controller.abort(new Error("superseded"));
+	await assert.rejects(pending, /superseded/);
+	assert.equal(calls, 1);
+	assert.equal(cancelled.spent()[0]!.cancelled, true);
+	assert.equal(cancellable.broken(), null);
+	assert.deepEqual(await cancellable.work("turn", { system: "S", user: "now" }, { submit }), { commands: ["plan"] });
+	assert.equal(calls, 2);
 });
 
 test("opening-hand splits are exact: they match counting every hand", () => {

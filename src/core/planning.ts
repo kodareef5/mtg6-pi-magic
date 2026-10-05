@@ -131,14 +131,13 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 
 /**
  * A seat that asked to plan each turn plans once per turn of its own, after it
- * has drawn: no plan accepted since its turn began. Before its first plan it
- * waits for an explicit request.
+ * has drawn: no plan accepted since its turn began, including its first turn.
  */
 export function planDue(frame: Frame): boolean {
 	const work = frame.view.work, at = frame.view.window;
 	// After the untap and the draw: the seat's first priority of its turn, outside the upkeep.
-	return !!work?.eachTurn && work.accepted !== undefined && at.kind === "turn" && at.active === frame.seat && !["untap", "upkeep"].includes(at.step) &&
-		(!frame.decision || frame.decision.situation === "priority") && work.accepted < (frame.view.began ?? 0);
+	return !!work?.eachTurn && at.kind === "turn" && at.active === frame.seat && !["untap", "upkeep"].includes(at.step) &&
+		(!frame.decision || frame.decision.situation === "priority") && (work.accepted === undefined || work.accepted < (frame.view.drawnAt ?? frame.view.began ?? 0));
 }
 
 /**

@@ -1,0 +1,121 @@
+/** The strategist's projected position, resources and reference tools. No hidden order is read. */
+import type { Frame } from "../core/types.ts";
+import type { SeenObject } from "../core/work.ts";
+import type { Selector } from "../core/language.ts";
+import type { Universe } from "../core/cards.ts";
+import type { Rules } from "../core/rules.ts";
+import { say, type Brief } from "./brief.ts";
+import type { Plan } from "../core/language.ts";
+import type { Step } from "../core/steps.ts";
+import type { Recap } from "./summary.ts";
+import type { Lookup } from "./reason.ts";
+import { intrinsic } from "../core/characteristics.ts";
+import { sources } from "../core/funding.ts";
+import { entersTapped } from "../core/budget.ts";
+import { allowance } from "../core/permits.ts";
+import { viewWorld } from "../core/selectors.ts";
+import { odds, within } from "../core/odds.ts";
+
+/** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
+const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => object.zone !== "library").map((object) => ({
+	id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim, zone: object.zone, owner: object.owner, controller: object.controller,
+	...(object.tapped ? { tapped: true } : {}), ...(object.faceDown ? { faceDown: true } : {}),
+	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
+	...(object.traits ? { traits: object.traits } : {}), ...(object.attached ? { attached: object.attached } : {}),
+	...(object.entered === undefined ? {} : { entered: object.entered }), ...(object.position === undefined ? {} : { position: object.position }),
+	...(object.ability ? { ability: object.ability } : {}),
+}));
+
+function mana(frame: Frame): string {
+	const only = (selector: Selector) => selector.types || selector.subtypes ? `only to cast a ${[...(selector.subtypes ?? []), ...(selector.types ?? [])].join(" or ")} spell` : `only on ${JSON.stringify(selector)}`;
+	const describe = (yields: ReturnType<typeof sources>[number]["yields"]) => [...new Set(yields.map((one) =>
+		`${one.colors.join("")}${one.spendOnly ? ` (${only(one.spendOnly)})` : ""}${one.sacrifice ? " (sacrificing it)" : ""}`))].join(" or ");
+	const now = sources(frame);
+	const floating = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? [];
+	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
+		`${floating.length ? `; floating ${floating.map((one) => one.color).join("")}` : ""}.`];
+	const left = Math.max(0, allowance(viewWorld(frame.view), frame.seat).lands - (frame.view.landsPlayed ?? 0));
+	const lands = (frame.view.objects ?? []).filter((object) => object.controller === frame.seat && object.zone === "hand" && object.traits?.types.includes("land"));
+	const land = (object: SeenObject) => {
+		const card = object.card!, colors = intrinsic(object.traits);
+		const registers = frame.view.work?.packages?.find((pack) => pack.card === card)?.registers;
+		const entry = entersTapped(frame, object, registers);
+		if (entry === "unknown") return `${card}: no package, so how it enters and what it makes are unknown until you write one`;
+		const makes = [...colors, ...(registers ?? []).flatMap((one) => one.kind === "mana" ? [one.colors?.join("") ?? `any ${one.any ?? 1}`] : [])];
+		return `${card}: ${entry === "conditional" ? "enters tapped under a condition" : `enters ${entry}`}, ${makes.length ? `makes ${makes.join(" or ")}` : "makes no mana itself"}`;
+	};
+	lines.push(left ? `Land plays left this turn: ${left}. In hand: ${[...new Map(lands.map((one) => [one.card, one])).values()].map(land).join("; ") || "no land"}.`
+		: "No land play left this turn.");
+	lines.push("Each step's cost is paid from these; a source you hold for a response is not spent before it. A land that enters tapped makes nothing this turn.");
+	return lines.join(" ");
+}
+
+export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules };
+
+/** Pregame decisions are the initial phase defaults, not paragraphs to rewrite on turn one. */
+export function initialPlan(brief: Brief): Plan {
+	return { objective: brief.objective ?? [say(brief.role), say(brief.route)].filter(Boolean).join(" "),
+		guidance: say(brief.matchup) || say(brief.route), steps: [],
+		phases: Object.entries(brief.steps ?? {}).flatMap(([step, sides]) => (["own", "opponent"] as const).flatMap((side) => {
+			const guidance = say(sides?.[side]);
+			return guidance ? [{ when: { active: side === "own" ? "self" as const : "opponent" as const, step: step as Step }, guidance }] : [];
+		})) };
+}
+
+/** A forecast, separate from current facts: normal untap and no resource-changing reply. */
+export function nextMana(frame: Frame): string {
+	return mana({ ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0,
+		objects: (frame.view.objects ?? []).map((one) => one.controller === frame.seat && one.zone === "battlefield" ? { ...one, tapped: false } : one),
+		pools: (frame.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => mana.persists) })) } });
+}
+
+/** Whose turns are whose, by number: the table's global turns alternate, and a window on the wrong seat's turn never opens. */
+function turns(frame: Frame): string {
+	const at = frame.view.window;
+	if (at.kind !== "turn" || (frame.view.players?.length ?? 2) !== 2) return "";
+	const mine = at.active === frame.seat ? at.turn : at.turn + 1, next = (from: number) => [from, from + 2, from + 4].join(", ");
+	return `Your turns are ${next(mine)}…; the opponent's are ${next(mine === at.turn ? at.turn + 1 : at.turn)}….`;
+}
+
+/**
+ * Draw odds from this seat's view, as a tool: a named card, or every card of a type word, in our library or the
+ * opponent's unknown cards. Library order is not tracked, and the answer says so.
+ */
+export function chancing(frame: Frame): Lookup {
+	return {
+		name: "odds",
+		description: "Chances from what you can see. whose you: a card or type drawn within your next draws. whose opponent: a card or type in their hand now, and their next draw.",
+		parameters: { type: "object", additionalProperties: false, required: ["whose"], properties: {
+			whose: { type: "string", enum: ["you", "opponent"] }, card: { type: "string", description: "A card's exact name." },
+			type: { type: "string", description: "A type or subtype word, such as land, creature, instant, Dragon." }, draws: { type: "integer", minimum: 1, maximum: 20 } } },
+		answer(args) {
+			const owner = args.whose === "opponent" ? frame.view.players?.find((one) => one.id !== frame.seat)?.id : frame.seat;
+			const found = owner === undefined ? {} : odds(frame, owner), mine = owner === frame.seat;
+			const word = String(args.type ?? "").toLowerCase();
+			const names = args.card ? [String(args.card)] : word ? Object.keys(found).filter((name) => (frame.view.printed?.[name]?.type ?? "").toLowerCase().split(/[\s—-]+/).includes(word)) : [];
+			const first = Object.values(found)[0];
+			if (!first) return "There is no registered list to count from.";
+			if (!names.length || names.some((name) => !found[name])) return `Name a card on ${mine ? "your" : "their"} list, or a type word that one of its cards has.`;
+			const draws = Number(args.draws ?? 1), percent = (chance: number) => `${(100 * chance).toFixed(1)}%`;
+			const line = (name: string) => `${name}: ${found[name]!.remaining} unaccounted` + (mine ? `, ${percent(within(found, [name], first.pool, draws))} within ${draws} draw${draws === 1 ? "" : "s"}`
+				: `, ${percent(found[name]!.inHand)} in hand now, ${percent(found[name]!.draw)} their next draw`);
+			const any = names.length > 1 ? [`Any of them: ${mine ? `${percent(within(found, names, first.pool, draws))} within ${draws} draw${draws === 1 ? "" : "s"}`
+				: `${percent(within(found, names, first.pool, first.hand))} in hand now`}.`] : [];
+			return [...names.slice(0, 15).map(line), ...any, `Basis: ${first.basis}.`].join("\n");
+		},
+	};
+}
+
+export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}): string {
+	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, ...view } = frame.view;
+	return JSON.stringify({
+		seat: frame.seat, turns: turns(frame), notebook: work?.notebook ?? [], mana: mana(frame), view, objects: objects(frame),
+		...more,
+		packages: (work?.packages ?? []).map((pack) => pack.card),
+		options: frame.decision?.options, brief: context.brief,
+		cards: [...new Set([...(frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []),
+			...(frame.view.decks ?? []).flatMap((deck) => Object.keys(deck.cards))])]
+			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
+		recaps: context.recaps?.slice(-3), refused: frame.refused,
+	});
+}

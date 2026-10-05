@@ -23,14 +23,11 @@ export const NoteEditsSchema = Type.Array(object({ topic: Type.String({ minLengt
 export type NoteEdit = Static<typeof NoteEditsSchema>[number];
 /** About 50k tokens of notes, in characters. */
 export const NOTEBOOK_LIMIT = 200_000;
-/** Where the strategist is asked to compact: about 40k tokens. */
-export const NOTEBOOK_COMPACT = 160_000;
 export const notebookSize = (notebook: Notebook = []) => notebook.reduce((sum, one) => sum + one.topic.length + one.note.length, 0);
 
 /**
  * A notebook with edits applied: a topic written replaces that topic in place or joins at the end, an empty
- * note retires it. A changed note carries `turn`. Edits merge into whatever the notebook holds when they
- * land, so writers working at once each keep their own topics.
+ * note retires it. A changed note carries `turn`. Edits merge into whatever the notebook holds when accepted.
  */
 export function noteEdits(notebook: Notebook = [], edits: readonly NoteEdit[], turn: number): Notebook {
 	const notes = [...notebook];

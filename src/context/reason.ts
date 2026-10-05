@@ -77,7 +77,7 @@ export type Reasoner = {
 	 * prose, cut off, or fails `check` goes back to the model with the problem
 	 * named, up to `turns` replies in all. Returns the accepted arguments.
 	 */
-	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number }, ceiling?: number): Promise<Record<string, unknown>>;
+	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number; signal?: AbortSignal }, ceiling?: number): Promise<Record<string, unknown>>;
 	/**
 	 * Why this reasoner stopped answering, or null while it is working.
 	 *
@@ -126,7 +126,9 @@ export function reasoner(options: {
 	let gaveUp: string | null = null;
 
 	/** One request. Recorded whether it worked, because a failed call still costs. */
-	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[]): Promise<Reply> {
+	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[], taskSignal?: AbortSignal): Promise<Reply> {
+		taskSignal?.throwIfAborted();
+		options.signal?.throwIfAborted();
 		const began = Date.now();
 		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
 		const base = {
@@ -143,7 +145,8 @@ export function reasoner(options: {
 		const limit = new AbortController();
 		const timer = setTimeout(() => limit.abort(new Error(`timed out after ${TIMEOUT[options.role] / 1000}s`)), TIMEOUT[options.role]);
 		timer.unref();
-		const signal = options.signal ? AbortSignal.any([options.signal, limit.signal]) : limit.signal;
+		const signal = AbortSignal.any([limit.signal, ...[options.signal, taskSignal].filter((one): one is AbortSignal => !!one)]);
+		let aborted: (() => void) | undefined;
 		try {
 			const pending = options
 				.stream(
@@ -160,12 +163,18 @@ export function reasoner(options: {
 					},
 				)
 				.result();
-			reply = await Promise.race([pending, new Promise<never>((_, reject) => signal.addEventListener("abort", () => reject(signal.reason), { once: true }))]);
+			reply = await Promise.race([pending, new Promise<never>((_, reject) => {
+				aborted = () => reject(signal.reason);
+				signal.addEventListener("abort", aborted, { once: true });
+				if (signal.aborted) aborted();
+			})]);
 		} catch (error) {
-			options.tally.record({ ...base, ms: Date.now() - began, failed: String(error) });
+			options.tally.record({ ...base, ms: Date.now() - began,
+				...(taskSignal?.aborted ? { cancelled: true } : { failed: String(error) }) });
 			throw error;
 		} finally {
 			clearTimeout(timer);
+			if (aborted) signal.removeEventListener("abort", aborted);
 		}
 
 		const usage = reply.usage as { input: number } | undefined;
@@ -184,7 +193,7 @@ export function reasoner(options: {
 	}
 
 	/** Try a request again while its failure is transient; give up on a settled one. */
-	async function retried<T>(about: string, request: () => Promise<T>): Promise<T> {
+	async function retried<T>(about: string, request: () => Promise<T>, signal?: AbortSignal): Promise<T> {
 		if (gaveUp) throw new Error(`${named} stopped answering: ${gaveUp}`);
 		const failures: string[] = [];
 		for (let attempt = 1; attempt <= attempts; attempt++) {
@@ -193,6 +202,8 @@ export function reasoner(options: {
 				consecutive = 0;
 				return answer;
 			} catch (error) {
+				signal?.throwIfAborted();
+				options.signal?.throwIfAborted();
 				const why = String(error);
 				failures.push(why);
 				// A settled problem gives the same answer every time. Stop now,
@@ -225,7 +236,8 @@ export function reasoner(options: {
 				...(prompt.task ? [{ role: "user", content: prompt.task, timestamp: Date.now() }] : [])];
 			const problems: string[] = [];
 			for (let turn = 1; turn <= (tools.turns ?? 3); turn++) {
-				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, specs));
+				tools.signal?.throwIfAborted();
+				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, specs, tools.signal), tools.signal);
 				messages.push(reply);
 				const calls = reply.content.filter((part): part is { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> } =>
 					(part as { type?: unknown }).type === "toolCall");

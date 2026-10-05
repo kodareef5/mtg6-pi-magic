@@ -143,7 +143,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	// Visible cards, and every card on a registered list: those lists are public, and a package for a card still in the library is checked against it.
 	const listed = table.format.decksRegistered ? table.seats.flatMap(({ deck }) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]) : [];
 	const names = [...new Set([...objects.flatMap((object) => "card" in object && object.card ? [object.card] : []), ...listed])].sort();
-	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], landsPlayed: seat(table, viewer).landsPlayed } : {}),
+	const draw = viewer !== "spectator" ? table.ledger.findLast((row) => row.seat === viewer && row.situation === "turn-based" && row.picked === "draw" && (row.clock ?? 0) > (table.cursor.began[viewer] ?? 0))?.clock : undefined;
+	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
 		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id, name: deck.name,
 			cards: Object.fromEntries(Object.entries(deck.main).sort(([a], [b]) => a.localeCompare(b))),
@@ -180,7 +181,8 @@ function actions(table: Table, viewer: SeatId): NonNullable<SeatView["actions"]>
 	const rows = table.ledger.filter((row) => row.seat !== viewer && (row.clock ?? 0) > after);
 	const found = rows.flatMap((row) => {
 		const what = table.log.filter((receipt) => receipt.at === row.seq + 1).map((receipt) => describe(table, receipt)).filter(Boolean);
-		return what.length ? [{ row: row.seq, seat: row.seat, what }] : [];
+		return what.length ? [{ row: row.seq, seat: row.seat, what,
+			...(row.situation === "turn-based" && row.picked === "draw" ? { turnDraw: true as const } : {}) }] : [];
 	});
 	return found.slice(-12);
 }

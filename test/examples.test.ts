@@ -12,7 +12,11 @@ import { join } from "node:path";
 import { check, PackageSchema, PlanSchema, ProcedureSchema, type Package, type Plan, type Procedure } from "../src/core/language.ts";
 import { load } from "../src/core/cards.ts";
 import { decks } from "../tools/matchup-fixture.ts";
-import { syntaxReference } from "../src/context/strategy.ts";
+import { planWork, syntaxReference } from "../src/context/strategy.ts";
+import { workFrame, editWork } from "../src/core/work-tools.ts";
+import { reasoner, type Stream } from "../src/context/reason.ts";
+import { tally } from "../src/context/spend.ts";
+import { main, matchup } from "./play.ts";
 
 const DIR = join(import.meta.dirname, "..", "docs", "examples");
 const SCHEMAS = { procedure: ProcedureSchema, package: PackageSchema, plan: PlanSchema };
@@ -58,10 +62,29 @@ test("every example block parses and quotes its card", () => {
 	assert.ok(outside * 2 >= named.size, `${outside} of ${named.size} example cards come from outside the matchup`);
 });
 
-test("strategy reads the syntax and every example, in the index's order", () => {
+test("strategy reads the syntax and can fetch every indexed example without loading them all", async () => {
 	const listed = [...readFileSync(join(DIR, "README.md"), "utf8").matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
 	assert.deepEqual([...listed].sort(), readdirSync(DIR).filter((file) => file.endsWith(".md") && file !== "README.md").sort(), "the index lists every example file");
 	const reference = syntaxReference();
 	assert.ok(reference.startsWith(readFileSync(join(DIR, "..", "SYNTAX.md"), "utf8").trim().slice(0, 200)));
-	for (const file of listed) assert.ok(reference.includes(readFileSync(join(DIR, file), "utf8").trim()), `${file} is in the reference`);
+	assert.equal(reference, readFileSync(join(DIR, "..", "SYNTAX.md"), "utf8").trim());
+	const table = matchup("example-tools"); main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	let rounds = 0;
+	const stream: Stream = (_model, request) => {
+		rounds++;
+		if (rounds === 1) {
+			const example = request.tools!.find((tool) => tool.name === "example")!;
+			assert.deepEqual((example.parameters as { properties: { file: { enum: string[] } } }).properties.file.enum, listed);
+			const schema = request.tools!.find((tool) => tool.name === "submit")!.parameters as { $defs: Record<string, unknown> };
+			for (const [, ref] of JSON.stringify(schema).matchAll(/"\$ref":"#\/\$defs\/([^"]+)"/g)) assert.ok(schema.$defs[ref!], `${ref} resolves from the tool root`);
+			return { result: async () => ({ stopReason: "toolUse", content: listed.map((file, at) => ({ type: "toolCall", id: `e${at}`, name: "example", arguments: { file } })) }) };
+		}
+		const messages = JSON.stringify(request.messages);
+		for (const file of listed) assert.ok(messages.includes(JSON.stringify(readFileSync(join(DIR, file), "utf8")).slice(1, -1)), `${file} is answered by the real lookup`);
+		return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "done", name: "submit", arguments: {
+			changes: { objective: "Pass.", guidance: "Keep resources.", steps: [{ label: "Pass", when: {}, action: { option: "pass" } }] } } }] }) };
+	};
+	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally() }));
+	assert.equal(rounds, 2);
 });

@@ -61,9 +61,9 @@ export async function abilityExercise() {
 			: { objective: "Answer the opponent's loot with our own before theirs resolves.", guidance: "Respond only while their ability is on the stack.", steps: [],
 				may: [{ label: "Loot in response", when: upkeep("opponent"), if: { amount: { count: { zones: ["stack"], controller: "opponent" } }, atLeast: 1 },
 					action: { procedure: lootProcedure(basis) } }] };
-		const problem = submit.check({ plan });
+		const problem = submit.check({ changes: plan });
 		if (problem) throw new Error(problem);
-		return { plan };
+		return { changes: plan };
 	} };
 	const classify: Classify = async (_model, request) => {
 		const answers = Object.fromEntries(Object.entries(request.questions).map(([key, question]) => {

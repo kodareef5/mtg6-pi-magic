@@ -17,7 +17,7 @@ import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { play } from "../src/core/loop.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
-import { annotate, planState } from "../src/core/planning.ts";
+import { annotate, planDue, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget } from "../src/core/budget.ts";
@@ -33,9 +33,11 @@ import { seat as seatTable, run } from "../src/context/sit.ts";
 import { CEILING, tally } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
 import { emptyBrief } from "../src/context/brief.ts";
+import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { planWork, prepareTurn, reviewPlan, syntaxReference } from "../src/context/strategy.ts";
+import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
+import { actions, basePlan, changedPlan } from "../src/context/plan-edit.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -99,6 +101,8 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 		(error: Error) => /4 problems/.test(error.message) && /untap has no priority/.test(error.message) && /name an option id/.test(error.message) && /Lightning Bolt/.test(error.message));
 	assert.deepEqual(table, accepted, "a refused plan changes nothing");
 	assert.throws(() => editWork(table, 0, [{ do: "plan.put", plan: line }], "stale", 0), /equipment changed/);
+	assert.deepEqual(planProblems(workFrame(table, 0), { ...line, phases: [{ when: { step: "cleanup" }, guidance: "Discard the redundant land." }] }), [], "phase guidance can cover mandatory choices without offering an action there");
+	assert.match(planProblems(workFrame(table, 0), { ...line, phases: [{ when: { step: "precombat-main", phase: "combat" }, guidance: "Wrong window." }] }).join(" "), /phases\[0\]/);
 });
 
 test("the table flies the plan: one fitting option is taken, silence passes, and progress lives on the ledger", async () => {
@@ -174,6 +178,11 @@ test("a branch and a held resource are marked on the options they touch, and not
 	const decision = nextDecision(table)!;
 	assert.equal(decision.seat, 0);
 	const frame = workFrame(table, 0);
+	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[] };
+	for (const object of frame.view.objects!) {
+		assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.traits, object.traits, "the writer keeps current types and active registrations, including changes from the layer walk");
+		if (object.ability) assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.ability, object.ability, "an unresolved spell keeps its accepted cost, targets and effect");
+	}
 	frame.view.work = prepareWork(frame, [{ do: "plan.put", plan: { objective: "Keep the Chocobo.", guidance: "Veil it if it is targeted.", steps: [],
 		may: [{ label: "Veil a targeted creature", when: { active: "opponent" }, if: { amount: { count: { zones: ["stack"], controller: "opponent", targeting: { types: ["creature"], controller: "you" } } }, atLeast: 1 },
 			action: { procedure: example("Cast Snakeskin Veil") } }],
@@ -196,7 +205,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	const broken = { ...line, steps: [{ label: "Attack in the end step", when: { step: "end" }, action: { prefix: "attack:" } }, { label: "Nothing", when: {}, action: {} }],
 		packages: [{ card: "Hired Claw", registers: [{ basis: "{1}{R}: Put a +1/+1 counter on this creature.", kind: "watch", event: { on: "step", step: "end" },
 			effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } }] }] };
-	const replies = [{ plan: broken }, { plan: line }];
+	const replies = [{ changes: broken }, { changes: line }];
 	const seen: string[] = [];
 	const stream: Stream = (_model, context) => {
 		seen.push(JSON.stringify(context.messages));
@@ -210,23 +219,44 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
 });
 
-test("the writer's habits with one meaning are read as meant: an untap step, an action inside its if, bounds inside an amount, fields beside the plan", async () => {
-	const table = position();
-	main(table, 0);
-	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
-	const habits = { objective: "o", guidance: "g", steps: [{ label: "Untap", when: { step: "untap" }, action: { option: "pass" } }, line.steps[0]],
-		may: [{ label: "Pass while they hold three cards", when: {}, if: { amount: { count: { zones: ["hand"], controller: "opponent" }, atLeast: 3 }, action: { option: "pass" } } }] };
-	// The plan closed too early: its branches written beside it.
-	const { may, ...early } = habits;
-	const stream: Stream = () => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: structuredClone(early), may: structuredClone(may) } }], stopReason: "toolUse" }) });
-	const { tools: [put] } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
-	assert.ok(put?.do === "plan.put");
-	assert.deepEqual(put.plan.steps.map((step) => step.label), ["Play a Forest"], "the table untaps for the seat");
-	assert.deepEqual(put.plan.may![0], { label: "Pass while they hold three cards", when: {}, action: { option: "pass" },
-		if: { amount: { count: { zones: ["hand"], controller: "opponent" } }, atLeast: 3 } });
+test("a short amendment retains phase guidance and packages, reuses accepted syntax and never repeats a completed step", async () => {
+ const table = position(); main(table, 0, 3);
+ editWork(table, 0, [{ do: "plan.put", plan: line }], "line");
+ const first = planState(workFrame(table, 0))!.due[0]!.candidates[0]!;
+ apply(table, first.id, "engine", "delegated", { plan: table.work[0]!.planned!, step: 0 });
+ editWork(table, 0, [{ do: "plan.request", reason: "The pilot asked for a changed combat line." }], "request");
+ const frame = workFrame(table, 0), base = basePlan(frame), available = actions(frame);
+ assert.equal(base.steps[0]!.label, "Crack Fabled Passage", "the played land is already omitted");
+ assert.equal(base.packages, undefined, "accepted packages need no repetition");
+ const seen: { messages: string; tools: string[] }[] = [];
+ const stream: Stream = (_model, request) => {
+  seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((one) => one.name) });
+  return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: { changes: { guidance: "Hold the Chocobo back." } } }], stopReason: "toolUse" }) };
+ };
+ const result = await planWork(frame, {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+ assert.equal(seen.length, 1, "no note-only or full-plan rewrite round");
+ const work = prepareWork(frame, result.tools);
+ assert.equal(work.plan!.guidance, "Hold the Chocobo back.");
+ assert.deepEqual(work.plan!.steps, base.steps);
+ assert.deepEqual(work.packages, table.work[0]!.packages);
+ assert.ok(!seen[0]!.tools.includes("note"));
+ const reused = changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:1" } }] }, available);
+ assert.deepEqual(reused.steps[0]!.action, line.steps[1]!.action);
+ assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:999" } }] }, available), /No reusable action/);
+ // Core sees ordinary terms, so replay and execution need no new language.
+	assert.doesNotThrow(() => prepareWork(frame, [{ do: "plan.put", plan: reused }]));
+	assert.ok(!JSON.stringify(reused).includes('"reuse"'));
+	const pending = changedPlan(line, { packages: [{ card: "Forest", registers: [] }] }, available);
+	assert.deepEqual(pending.packages!.map((one) => one.card), ["Sazh's Chocobo", "Forest"], "a new draw's package keeps the preparation's pending registrations");
+	assert.deepEqual(changedPlan(pending, { packages: [] }, available).packages, pending.packages, "empty package edits remove neither pending nor accepted work");
+	const brief = { ...emptyBrief(0), role: "Develop.", route: "Grow the Chocobo.", matchup: "Keep Veil mana.", steps: { "precombat-main": { own: "Creature before land; keep protection." } } };
+	const defaults = initialPlan(brief);
+	assert.equal(defaults.phases![0]!.guidance, "Creature before land; keep protection.");
+	assert.equal(changedPlan(defaults, { steps: [line.steps[0]] }, {}).objective, "Develop. Grow the Chocobo.", "turn one builds on pregame instead of rewriting its decisions");
+	assert.equal(initialPlan({ ...brief, objective: "Grow the Chocobo, keep protection." }).objective, "Grow the Chocobo, keep protection.", "the pilot receives the pregame's short objective, not all its reasoning");
 });
 
-test("strategy plans before a seat first acts and at each of its turns after the draw, with one cached prompt", async () => {
+test("strategy plans after the draw, with no extra opening strategy call, with one cached prompt", async () => {
 	const universe = loadCards("cards/standard.tsv");
 	const model = { type: "classifier", id: "jev-latest", provider: "typesafe", api: "typesafe-system-one" } as never;
 	const chat = { id: "fixture", provider: "offline", type: "chat" } as never;
@@ -247,7 +277,7 @@ test("strategy plans before a seat first acts and at each of its turns after the
 		})) as never,
 		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
 			prompts.push({ user: context.messages[0]!.content, task: context.messages[1]?.content, system: context.systemPrompt, ceiling: options.maxTokens });
-			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { plan: { objective: "Develop.", guidance: "Play lands.",
+			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { changes: { objective: "Develop.", guidance: "Play lands.",
 				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } } }], stopReason: "toolUse" }) };
 		}) as never,
 	};
@@ -256,13 +286,13 @@ test("strategy plans before a seat first acts and at each of its turns after the
 	assert.equal(prompts.length, 0, "seating spends no strategy before a decision");
 	assert.ok(await run(table, seated, inference, undefined));
 	assert.equal(table.gaps.length, 0);
-	// Turn plans, not the preparation of a later turn or its challenge, which run in the background.
-	const sessions = prompts.filter((prompt) => !/PREPARE YOUR NEXT TURN|CHALLENGE THE PREPARED PLAN|REVISE THE PREPARED PLAN/.test(prompt.task ?? ""))
+	// Turn plans, not the background preparation of a later turn.
+	const sessions = prompts.filter((prompt) => !/PREPARE YOUR NEXT TURN/.test(prompt.task ?? ""))
 		.map((prompt) => JSON.parse(prompt.user) as { seat: number; view: { window: { kind: string; turn: number; active: number; step: string } } });
 	for (const seat of [0, 1]) {
 		const own = sessions.filter((session) => session.seat === seat && session.view.window.kind === "turn" && session.view.window.active === seat);
 		assert.deepEqual(own.map((session) => session.view.window.turn), [...new Set(own.map((session) => session.view.window.turn))], "at most one plan per own turn");
-		assert.ok(own.every((session) => session.view.window.step !== "upkeep" || session.view.window.turn === 1), "a turn's plan waits for the draw; the first turn has none");
+		assert.ok(own.every((session) => session.view.window.step !== "upkeep"), "even the first plan waits for the draw window");
 	}
 	assert.equal(sessions.filter((session) => session.view.window.kind === "opening").length, 0, "no plan during the mulligan: the brief's opening policy decides it");
 	for (const seat of [0, 1]) assert.ok(sessions.find((session) => session.seat === seat), `seat ${seat} planned once the game began`);
@@ -274,6 +304,14 @@ test("strategy plans before a seat first acts and at each of its turns after the
 		assert.ok(sent.objects.every((object) => object.zone !== "library" && (object.zone !== "hand" || object.controller === sent.seat)), "nothing hidden from the seat");
 		assert.ok(sent.cards.length > 0 && sent.cards.every((fact) => fact.oracle === universe.cards.get(fact.name)!.oracle), "the writer reads the actual card text");
 	}
+	// An upkeep escalation has no revealed draw to plan from yet.
+	const early = matchup("upkeep-planning"); main(early, 0, 3, "upkeep");
+	editWork(early, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "Hold.", guidance: "Await the draw.", steps: [] } }], "upkeep");
+	assert.equal(planDue(workFrame(early, 0)), false);
+	main(early, 0, 3);
+	assert.equal(planDue(workFrame(early, 0)), true, "a plan accepted in upkeep does not suppress the post-draw update");
+	editWork(early, 0, [{ do: "plan.put", plan: { objective: "Hold.", guidance: "The draw is covered.", steps: [] } }], "after-draw");
+	assert.equal(planDue(workFrame(early, 0)), false);
 });
 
 test("the pilot's packet stays small: the plan, the options and the public position", () => {
@@ -332,7 +370,7 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 			answers: Object.fromEntries(Object.entries(request.questions).map(([key, question]) => { const ids = Object.keys(question.criteria); const choice = ids.find((id) => id === "keep") ?? ids[0]!;
 				return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }]; })) })) as never,
 		// Every answer is malformed: steps that are not a list.
-		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: { objective: "o", guidance: "g", steps: null } } }], stopReason: "toolUse" }) })) as never,
+		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { changes: { objective: "o", guidance: "g", steps: null } } }], stopReason: "toolUse" }) })) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Green Stompy") }, { name: "B", deck: deck("Dimir Control") }], "unplanned");
 	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
@@ -369,11 +407,15 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	main(table, 0, 3);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }, { do: "package.put", package: { card: "Forest", registers: [] } }], "request");
 	const seen: string[] = [];
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: line } }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { changes: line } }], stopReason: "toolUse" }) }; };
 	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.match(seen[0]!, /Mana now: Forest \(0-\d+\) makes G; Forest \(0-\d+\) makes G/);
 	assert.match(seen[0]!, /Land plays left this turn: 1\. In hand: .*Forest: enters untapped, makes G/);
 	assert.match(seen[0]!, /Ba Sing Se: no package, so how it enters and what it makes are unknown/, "a land with no package is not guessed at");
+	const elf = establish(table, 0, "Llanowar Elves");
+	commit(table, [{ do: "tap", what: elf.id }], "resolve");
+	main(table, 1, 4);
+	assert.match(nextMana(workFrame(table, 0)), /Llanowar Elves \(0-\d+\) makes G/, "next-turn preparation sees mana after an ordinary untap and sickness ends, as a forecast");
 });
 
 test("the plan's arithmetic: costs from what the steps before leave, holds kept, land plays counted with what the plan permits", () => {
@@ -481,32 +523,34 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	assert.deepEqual(plain.guidance, ["Develop before combat."]);
 });
 
-test("the turn before ours prepares our next one; a quiet turn offers it as it is, a changed one asks for a review", async () => {
+test("the turn before ours prepares our next one; a quiet turn offers it as it is, a changed one uses the same planner for a short amendment", async () => {
 	for (const changed of [false, true]) {
 		const table = position();
 		main(table, 0, 3);
 		editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
 		main(table, 1, 4);
 		// Every card Green could draw is named by a branch, so any draw is covered.
+		// Red has passed without playing cards; keep its hand below cleanup size
+		// so a public discard does not turn the quiet case into new information.
+		commit(table, cardsIn(table, "hand", 1).slice(6).map((one) => ({ do: "move" as const, what: one.id, to: "library" as const, reason: "game-setup" })), "game-setup");
 		const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
 		const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self", step: "precombat-main" },
 			if: { amount: { count: { zones: ["hand"], controller: "you", name } }, atLeast: 1 }, action: { objects: { zones: ["hand"], card: name } } })) };
-		const calls = { prepare: 0, review: [] as string[][], plan: 0 };
+		const calls = { prepare: 0, amendments: [] as string[][] };
 		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call expected"); } } as never, intent: startingIntent(0), onGap() {},
-			plan: async () => { calls.plan += 1; return { tools: [] }; },
-			prepare: async () => { calls.prepare += 1; return { plan: prepared }; },
-			review: async (_frame, made, lines) => { calls.review.push(lines); return { tools: [{ do: "plan.put", plan: made.plan }] }; } });
+			plan: async (_frame, made, lines) => { calls.amendments.push(lines ?? []); return { tools: [{ do: "plan.put", plan: made!.plan }] }; },
+			prepare: async () => { calls.prepare += 1; return { plan: prepared }; }, });
 		seat.observe(workFrame(table, 0));
 		seat.observe(workFrame(table, 0));
+		await new Promise((resolve) => setImmediate(resolve));
 		assert.equal(calls.prepare, 1, "one preparation for the turn ahead");
 		if (changed) commit(table, [{ do: "change-life", who: 0, amount: -3, reason: "resolve" }], "resolve");
 		main(table, 0, 5);
 		const answer = await seat.answer(workFrame(table, 0));
 		assert.equal(answer.kind, "work");
 		assert.deepEqual((answer as Extract<Answer, { kind: "work" }>).tools, [{ do: "plan.put", plan: prepared }]);
-		assert.equal(calls.plan, 0, "no plan written from scratch");
-		if (changed) assert.ok(calls.review.length === 1 && calls.review[0]!.includes("your life went from 20 to 17"), "a change is reviewed, and named");
-		else assert.equal(calls.review.length, 0, "nothing changed but the draw: no call");
+		if (changed) assert.ok(calls.amendments.length === 1 && calls.amendments[0]!.includes("your life went from 20 to 17"), "a change is reviewed, and named");
+		else assert.equal(calls.amendments.length, 0, "nothing changed but the draw: no call");
 	}
 });
 
@@ -518,23 +562,23 @@ test("every seat sees each turn begin, even a turn of only forced play", async (
 	assert.ok(seen.includes("2:untap"), `Green saw Red's turn begin: ${seen.slice(0, 6).join(", ")}`);
 });
 
-test("preparation asks for the next turn window by window, and a review may keep the prepared plan in one short answer", async () => {
+test("preparation makes a turn plan, and the same writer can keep it with an empty update", async () => {
 	const table = position();
 	main(table, 0, 3);
 	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
 	main(table, 1, 4);
 	const seen: string[] = [];
-	const replies: Record<string, unknown>[] = [{ plan: { objective: "Next turn.", guidance: "g", steps: [], phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] } }];
+	const replies: Record<string, unknown>[] = [{ changes: { objective: "Next turn.", guidance: "g", steps: [], phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] } }];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const prepared = await prepareTurn(workFrame(table, 0), {}, writer);
-	assert.match(seen[0]!, /PREPARE YOUR NEXT TURN\. It is the opponent's turn 4; yours, turn 5/);
+	assert.match(seen[0]!, /PREPARE YOUR NEXT TURN, 5, during the opponent's turn 4/);
 	assert.equal(prepared.plan.objective, "Next turn.");
 
 	main(table, 0, 5);
-	replies.push({ accept: true });
-	const kept = await reviewPlan(workFrame(table, 0), prepared, ["you drew Forest"], {}, writer);
-	assert.match(seen[1]!, /Since you prepared it: you drew Forest/);
+	replies.push({ changes: {} });
+	const kept = await planWork(workFrame(table, 0), {}, writer, prepared, ["you drew Forest"]);
+	assert.match(seen[1]!, /you drew Forest/);
 	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: prepared.plan }]);
 });
 
@@ -572,24 +616,28 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
 });
 
-test("a challenger's revision is used when it is ready, and the turn never waits for one that is not", async () => {
-	for (const ready of [true, false]) {
-		const table = position();
-		main(table, 0, 3);
-		editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
-		main(table, 1, 4);
-		const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
-		const covering = names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self" as const, step: "precombat-main" as const },
-			if: { amount: { count: { zones: ["hand" as const], controller: "you" as const, name } }, atLeast: 1 }, action: { objects: { zones: ["hand" as const], card: name } } }));
-		const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: covering }, revised: Plan = { ...prepared, objective: "Revised." };
-		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
-			prepare: async () => ({ plan: prepared }), challenge: () => ready ? Promise.resolve({ plan: revised }) : new Promise<Prepared>(() => {}) });
-		seat.observe(workFrame(table, 0));
-		await new Promise((resolve) => setImmediate(resolve));
-		main(table, 0, 5);
-		const answer = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
-		assert.deepEqual(answer.tools, [{ do: "plan.put", plan: ready ? revised : prepared }]);
-	}
+test("one unfinished preparation is awaited at the draw without a second planner or note race", async () => {
+ const table = position(); main(table, 0, 3);
+ editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+ main(table, 1, 4);
+ let finish: (value: Prepared) => void = () => {};
+ let amended = 0, resolved = false;
+ const waits: { ready?: boolean; waitedMs: number }[] = [];
+ const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+  prepare: () => new Promise((resolve) => { finish = resolve; }),
+  plan: async (_frame, made) => { amended++; assert.equal(made!.plan.objective, "Ready."); return { tools: [{ do: "plan.put", plan: made!.plan }] }; },
+  onPlanned: (one) => waits.push(one) });
+ seat.observe(workFrame(table, 0));
+ await new Promise((resolve) => setImmediate(resolve));
+ main(table, 0, 5);
+ const answer = seat.answer(workFrame(table, 0)).then((value) => { resolved = true; return value; });
+ await new Promise((resolve) => setImmediate(resolve));
+ assert.equal(resolved, false); assert.equal(amended, 0, "unfinished work does not start a competing writer");
+ finish({ plan: { objective: "Ready.", guidance: "Pass", steps: [] } });
+ assert.equal((await answer).kind, "work");
+ assert.equal(amended, 1, "the uncovered draw gets one amendment");
+ assert.equal(waits[0]!.ready, false); assert.ok(waits[0]!.waitedMs >= 0);
+ await seat.close();
 });
 
 test("the arithmetic is refused once and then left to the pilot, and a conditional step is not counted", async () => {
@@ -604,7 +652,7 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	assert.deepEqual(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
 	const seen: string[] = [];
 	const plan = { objective: "o", guidance: "g", steps: [hydra] };
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { plan } }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { changes: plan } }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.equal(seen.length, 2, "refused once, then accepted");
 	assert.match(seen[1]!, /costs \{2\}\{G\}/);
@@ -661,7 +709,7 @@ test("a plan the writer was told about once goes through the table, and a schema
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const plan = { objective: "o", guidance: "g", steps: [{ label: "Cast Mossborn Hydra", when: { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 },
 		action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } }] };
-	const replies: Record<string, unknown>[] = [{ plan: { objective: "o" } }, { plan }, { plan }];
+	const replies: Record<string, unknown>[] = [{ changes: { objective: "o" } }, { changes: plan }, { changes: plan }];
 	const seen: string[] = [];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
@@ -721,46 +769,33 @@ test("a counter on a permanent is a change, and a draw is covered only by a step
 	const taken: Plan = { ...named, may: [{ label: "Shock a blocker", when: { active: "self", step: "declare-blockers" }, if: { amount: { count: { zones: ["hand"], controller: "you", name: "Shock" } }, atLeast: 1 },
 		action: { objects: { zones: ["hand"], card: "Shock" } } }] };
 	assert.equal(settled(frame, taken, draw), true, "a branch that takes it does");
+	taken.may![0]!.when.phase = "combat";
+	assert.equal(settled(frame, taken, draw), true, "the future step is checked in its own phase, rather than the current main phase");
 });
 
-test("a preparation closed or taken starts nothing more, and a challenge's errors outlive a failed revision", async () => {
-	// Closed while preparing: the challenger is never asked.
-	{
-		const table = position();
-		main(table, 0, 3);
-		editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
-		main(table, 1, 4);
-		let finish: (plan: Plan) => void = () => {};
-		let challenged = 0;
-		const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
-			prepare: () => new Promise((resolve) => { finish = (plan) => resolve({ plan }); }), challenge: async () => { challenged += 1; return undefined; } });
-		seat.observe(workFrame(table, 0));
-		seat.close();
-		finish({ objective: "late", guidance: "g", steps: [] });
-		await new Promise((resolve) => setImmediate(resolve));
-		assert.equal(challenged, 0);
-	}
-	// The challenge found an error and its revision failed: the turn reviews the plan with the error, and does not take it as it is.
-	const table = position();
-	main(table, 0, 3);
-	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
-	main(table, 1, 4);
-	const names = [...new Set(cardsIn(table, "library", 0).map((one) => one.card!))];
-	const prepared: Plan = { objective: "Prepared.", guidance: "g", steps: [], may: names.map((name) => ({ label: `If I draw ${name}`, when: { active: "self" as const, step: "precombat-main" as const },
-		if: { amount: { count: { zones: ["hand" as const], controller: "you" as const, name } }, atLeast: 1 }, action: { objects: { zones: ["hand" as const], card: name } } })) };
-	const reviewed: string[][] = [];
-	const planned: string[] = [];
-	const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
-		prepare: async () => ({ plan: prepared }),
-		challenge: async (_frame, _plan, criticized) => { criticized(["The Chocobo attacks into an untapped blocker."]); throw new Error("revision failed"); },
-		review: async (_frame, made, lines) => { reviewed.push(lines); return { tools: [{ do: "plan.put", plan: made.plan }] }; },
-		onPlanned: (one) => void planned.push(`${one.how}:${one.ready}`) });
-	seat.observe(workFrame(table, 0));
-	await new Promise((resolve) => setImmediate(resolve));
-	main(table, 0, 5);
-	await seat.answer(workFrame(table, 0));
-	assert.ok(reviewed.length === 1 && reviewed[0]!.includes("a challenge of the prepared plan found: The Chocobo attacks into an untapped blocker."), JSON.stringify(reviewed));
-	assert.deepEqual(planned, ["reviewed:true"], "the table waited on a review of a plan that was ready");
+test("reset and close cancel preparation; superseded notes and plans never arrive", async () => {
+ const table = position(); main(table, 0, 3);
+ editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "old", guidance: "g", steps: [] } }], "planned");
+ main(table, 1, 4);
+ const signals: AbortSignal[] = [];
+ const finishes: ((value: Prepared) => void)[] = [];
+ let amended = 0;
+ const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+  prepare: (_frame, signal) => { signals.push(signal); return new Promise((resolve) => { finishes.push(resolve); }); },
+  plan: async (_frame, made) => { amended++; assert.equal(made, undefined); return { tools: [{ do: "plan.put", plan: line }] }; } });
+ seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
+ seat.reset!(); assert.equal(signals[0]!.aborted, true);
+ finishes[0]!({ plan: line, edits: [{ topic: "stale", note: "superseded" }] });
+ await new Promise((resolve) => setImmediate(resolve));
+ main(table, 0, 5);
+ const answer = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
+ assert.equal(amended, 1); assert.ok(!JSON.stringify(answer.tools).includes("stale"));
+ main(table, 1, 6);
+ seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
+ const closing = seat.close(); assert.equal(signals[1]!.aborted, true);
+ finishes[1]!({ plan: line }); await closing;
+ seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
+ assert.equal(signals.length, 2, "closed seats start nothing more");
 });
 
 test("a package registers only what its card says: Elven Passage is refused Ba Sing Se's mana ability", () => {
@@ -773,16 +808,16 @@ test("a package registers only what its card says: Elven Passage is refused Ba S
 		if: { amount: { count: { types: ["land"], supertypes: ["basic"], controller: "you" } }, atMost: 0 } }] } }], "ba-sing-se"), true, "its own text, line breaks and all");
 });
 
-test("the notebook is kept across plans, merged edit by edit, journaled, replayed and cloned, and written through a tool", async () => {
+test("the notebook is kept across plans, merged edit by edit, journaled, replayed and cloned, and included in the same strategy answer", async () => {
 	const table = position();
 	main(table, 0, 3);
 	const opponent = { topic: "opponent", note: "Red is the beatdown: haste threats and burn for blockers." };
 	editWork(table, 0, [{ do: "plan.put", plan: line }, { do: "notebook.edit", edits: [opponent] }], "noted");
 	editWork(table, 0, [{ do: "plan.put", plan: { ...line, objective: "Next." } }], "replanned");
 	assert.deepEqual(table.work[0]!.notebook, [{ ...opponent, since: 3 }], "a plan without edits keeps the notebook");
-	// Two writers at once each keep their own topic: edits merge into the notebook as it stands.
-	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "challenge of turn 5", note: "The Chocobo attacks into an untapped blocker." }] }], "challenger");
-	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "watching", note: "Shock for the Chocobo." }, { topic: "challenge of turn 5", note: "" }] }], "review");
+	// A new conclusion can be retired later without replacing unrelated topics.
+	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "combat", note: "The Chocobo attacks into an untapped blocker." }] }], "combat-note");
+	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "watching", note: "Shock for the Chocobo." }, { topic: "combat", note: "" }] }], "changed-notes");
 	assert.deepEqual(table.work[0]!.notebook!.map((one) => one.topic), ["opponent", "watching"], "a topic retired, another joined, the first kept");
 	assert.throws(() => editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "everything", note: "x".repeat(NOTEBOOK_LIMIT) }] }], "full"), /over its 200000; compact it/);
 
@@ -797,50 +832,43 @@ test("the notebook is kept across plans, merged edit by edit, journaled, replaye
 	fork(journal.path, table.ledger.length, "child", childPath);
 	assert.deepEqual(replay(childPath, () => position()).table.work[0]!.notebook, notebook, "cloned");
 
-	// The writer reads its notes first, writes topics with the note tool as it works, then submits; the edits go in with the plan.
+	// Useful notes go in with the plan, with no separate tool round.
 	const seen: string[] = [];
 	const replies: { name: string; arguments: Record<string, unknown> }[][] = [
-		[{ name: "note", arguments: { topic: "lessons", note: "The Passage before the land lost a landfall." } }, { name: "note", arguments: { topic: "watching", note: "" } }],
-		[{ name: "submit", arguments: { plan: line } }]];
+		[{ name: "submit", arguments: { changes: line, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); const calls = replies.shift()!;
 		return { result: async () => ({ content: calls.map((one, at) => ({ type: "toolCall", id: `c${seen.length}-${at}`, ...one })), stopReason: "toolUse" }) }; };
 	main(table, 0, 5);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.match(seen[0]!, /\\"notebook\\":\[\{\\"topic\\":\\"opponent\\"/);
-	assert.match(seen[1]!, /Noted \\"lessons\\"\. The notebook is \d+ of 200000 characters/);
+ assert.equal(seen.length, 1, "notes do not cost another model round");
 	editWork(table, 0, tools, "planned-with-notes");
 	assert.deepEqual(table.work[0]!.notebook, [{ ...opponent, since: 3 }, { topic: "lessons", note: "The Passage before the land lost a landfall.", since: 5 }]);
 });
 
-test("our turn's plan going in starts the next preparation, and a stop with notes is answered as maintenance with the tools at hand", async () => {
-	const table = position();
-	main(table, 0, 3);
-	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
-	main(table, 0, 5);
-	const started: Frame[] = [];
-	const next: Plan = { objective: "Turn five.", guidance: "g", steps: [] };
-	const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {},
-		plan: async () => ({ tools: [{ do: "plan.put", plan: next }, { do: "notebook.edit", edits: [{ topic: "engine", note: "Hydra plus lands." }] }] }),
-		prepare: async (frame) => { started.push(frame); return { plan: next }; } });
-	await seat.answer(workFrame(table, 0));
-	assert.equal(started.length, 1, "the turn's plan is answered, and the next own turn is already being prepared");
-	assert.equal(started[0]!.view.work!.plan!.objective, "Turn five.", "from the position with that plan in place");
-	assert.deepEqual(started[0]!.view.work!.notebook!.map((one) => one.topic), ["engine"], "and its notes");
-	seat.observe(workFrame(table, 0));
-	assert.equal(started.length, 1, "one job per turn");
-
-	// A stop, with notes kept: maintenance, with the note, card and rule tools, and the turns named.
-	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "opponent", note: "Red holds burn." }] }, { do: "plan.request", reason: "Stop: The Hydra died" }], "stop");
-	const seen: { messages: string; tools: string[] }[] = [];
-	const stream: Stream = (_model, request) => { seen.push({ messages: JSON.stringify(request.messages), tools: (request.tools ?? []).map((tool: { name: string }) => tool.name) });
-		return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { plan: line } }], stopReason: "toolUse" }) }; };
-	const rules = loadRules("rules/cr.tsv");
-	await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
-	assert.match(seen[0]!.messages, /This is maintenance, not a new analysis/);
-	assert.match(seen[0]!.messages, /Note under \\"stop on turn 5\\"/);
-	assert.match(seen[0]!.messages, /Your turns are 5, 7, 9…; the opponent's are 6, 8, 10…/);
-	assert.deepEqual(seen[0]!.tools.sort(), ["card", "note", "odds", "rule", "submit"]);
+test("preparation starts on the opponent's turn, not before our line has played, and stops use the same short writer", async () => {
+ const table = position(); main(table, 0, 3);
+ editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+ main(table, 0, 5);
+ const started: Frame[] = [];
+ const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+  plan: async () => ({ tools: [{ do: "plan.put", plan: line }] }),
+  prepare: async (frame) => { started.push(frame); return { plan: line }; } });
+ await seat.answer(workFrame(table, 0));
+ assert.equal(started.length, 0, "no forecast from before our own actions");
+ main(table, 1, 6);
+ seat.observe(workFrame(table, 0)); seat.observe(workFrame(table, 0));
+ await new Promise((resolve) => setImmediate(resolve));
+ assert.equal(started.length, 1);
+ await seat.close();
+ editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "opponent", note: "Red holds burn." }] }, { do: "plan.request", reason: "Stop: The Hydra died" }], "stop");
+ const seen: { messages: string; tools: string[] }[] = [];
+ const stream: Stream = (_model, request) => { seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((tool) => tool.name) });
+  return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { changes: { objective: "Recover." } } }], stopReason: "toolUse" }) }; };
+ await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules: loadRules("rules/cr.tsv") }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+ assert.match(seen[0]!.messages, /Advance the pregame strategy/);
+ assert.deepEqual(seen[0]!.tools.sort(), ["card", "example", "odds", "rule", "submit"]);
 });
 
 test("odds count from what the seat can name: our library exactly, the opponent's hand and library together", () => {
@@ -861,25 +889,18 @@ test("odds count from what the seat can name: our library exactly, the opponent'
 	assert.match(theirs.Shock!.basis, /library order is not tracked/);
 });
 
-test("a preparation not done in its grace is not waited for, and its notes still go in with the next answer", async () => {
-	const table = position();
-	main(table, 0, 3);
-	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
-	main(table, 1, 4);
-	const finish: ((made: Prepared) => void)[] = [];
-	let written = 0;
-	const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {}, grace: 10,
-		prepare: () => new Promise((resolve) => { finish.push(resolve); }),
-		plan: async () => { written += 1; return { tools: [{ do: "plan.put", plan: line }] }; } });
-	seat.observe(workFrame(table, 0));
-	main(table, 0, 5);
-	const first = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
-	assert.equal(written, 1, "planned without the preparation");
-	assert.deepEqual(first.tools, [{ do: "plan.put", plan: line }]);
-	assert.equal(finish.length, 2, "and the next turn's preparation has started");
-	finish[0]!({ plan: line, edits: [{ topic: "opponent", note: "Red holds burn." }] });
-	await new Promise((resolve) => setImmediate(resolve));
-	editWork(table, 0, [{ do: "plan.request", reason: "Stop: The Hydra died" }], "stop");
-	const next = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
-	assert.deepEqual(next.tools.at(-1), { do: "notebook.edit", edits: [{ topic: "opponent", note: "Red holds burn." }] }, "the late preparation's notes arrive with the next answer");
+test("a failed preparation falls back once to current information and failed planning still records its wait", async () => {
+ const table = position(); main(table, 0, 3);
+ editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+ main(table, 1, 4);
+ let written = 0;
+ const waited: { failed?: boolean; waitedMs: number }[] = [];
+ const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+  prepare: async () => { throw new Error("preparation failed"); },
+  plan: async () => { written++; throw new Error("writer failed"); }, onPlanned: (one) => waited.push(one) });
+ seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
+ main(table, 0, 5);
+ await assert.rejects(seat.answer(workFrame(table, 0)), /writer failed/);
+ assert.equal(written, 1); assert.equal(waited[0]!.failed, true);
+ await seat.close();
 });

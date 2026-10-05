@@ -122,13 +122,14 @@ game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
 into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
-**`strategy` writes each seat's plan: before it first acts, once per turn of its
-own after it draws, and when the plan stops fitting.** The plan covers the
-opponent's next turn too. Between sessions jev flies it and the table takes what
-it settles (`docs/PLANS.md`). A stop the plan named, or jev's `ask:help`, is a
-request, at most two a turn. A phase change alone spends nothing.
-`worthPlanning` retains the old mechanical estimate for comparison, but does
-not initiate calls.
+**`strategy` advances the pregame setup.** One planner prepares during the
+opponent's turn, then accepts or amends after its own draw. Jev flies the phase
+scripts and ordered actions between sessions; a stop or help request changes
+only the unfinished line. Short updates expand to complete accepted plans.
+Notebook edits are optional parts of that answer, not separate calls. There is
+no extra opening strategy session before the draw and no challenger or timeout
+replacement planner. docs/PLANS.md explains the lifecycle. A phase change alone
+spends nothing.
 
 **`judge` runs only on an objection.** The strategy writer may object to one
 of the opponent's actions since its last plan, beside its plan. The judge looks
@@ -417,7 +418,9 @@ src/context/           questions for a decision model. Its own AGENTS.md
   brief.ts             the pregame wave, and the snippets it files by use
   summary.ts           the turn in two sentences, from the spectator view
   strategy.ts          a turn's plan, and reconsideration on an escalation
-  ruling.ts            the judge's two calls. Pipeline written, stops at verdict
+  plan-edit.ts         short strategy updates expanded into complete accepted plans
+  strategy-facts.ts    projected position, resource forecasts and reference tools
+  ruling.ts            an objection, its cited rule and remedy
   dial.ts              the routes a seat can ask for, answered from the rules
   packet.ts, seat.ts   one decision's context, and the seat that answers it
   sit.ts               seating a whole table, so one command cannot differ
@@ -455,28 +458,24 @@ verify every carried field against the source and refuse to pass on a mismatch.
 ## Not built yet
 
 - Strategic quality. `strategy.planWork` writes a checked plan, and offline
-  doubles exercise how the table and jev fly it. No live run has yet measured
-  playing strength; the pregame wave and the turn analysts are planned in the
-  prompting overhaul.
+  doubles exercise how the table and Jev fly it. Pregame analysis and background
+  turn preparation work. Live games and replay matching have not measured playing
+  strength; legality audits and controlled comparisons remain necessary.
 - Widening routes. `more-options`, `better-targets` and `replan` need machinery
   that does not exist, so nothing advertises them. The rules routes in
   `src/context/dial.ts` are the ones that work, because the rules are on disk
   and answering one costs no model call.
-- General declaring, delegating and objecting. A model-backed seat can execute
+- General declaring and delegating. A model-backed seat can execute
   prepared procedures and delegate unique continuations for its own seat. Raw
-  `declare`, free-form delegation, and `judge.rule` still throw or leave the
-  decision pending. Conservation and the judge must carry the weight that a
-  fully informed move list would.
+  `declare` and free-form delegation still throw or leave the decision pending.
+  Objections and the judge's rewind work through the core loop.
 - Parts of combat no card in the matchup needs: attacking a planeswalker or
   battle, a creature blocking more than one attacker, lifelink, and counting
   other creatures' damage in the same step toward trample's lethal (702.19b).
-- The derived facts. `summary`, `manaCurve`, the knowledge transitions, the odds
-  and the replacement-hand spread are named with their invariants and unwritten.
+- The derived facts. `summary`, `manaCurve`, knowledge transitions and the
+  replacement-hand spread are unwritten. Registered-count odds use projected
+  facts; remembering reveals and private reorders still needs knowledge transitions.
 - Declaring, and `judge.playOn`. A game finishes without them.
-- More resolution choices. The table now holds the remaining instruction and
-  count while a choice is pending, and distinguishes continuation from a
-  state-based checkpoint. Multiple or restricted targets, bindings between instructions and
-  simultaneous multi-card choices still need machinery.
 - Provenance beyond the accepted claim. The journal now carries each executed
   procedure's basis, instructions, payment and delegation. Replay uses those
   accepted terms. Model and interpreter version attribution still needs work.

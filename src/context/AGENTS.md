@@ -33,7 +33,7 @@ A pattern that does not resolve is reported. Do not fall back to another model,
 including Pi's configured default: a game played by a model nobody chose is a
 result that cannot be compared with another.
 
-## Four calls, and what each is for
+## Four thinking roles
 
 The classifier executes. The thinking happens in the other four roles, and what
 reaches a decision is a short plan plus the facts.
@@ -43,15 +43,15 @@ reaches a decision is a short plan plus the facts.
   synthesis that files the brief by where it is read. Both seats prepare at the
   same time. Strategy reads the whole brief; the pilot reads only the slice for
   its window, never the whole of it.
-- **strategy** writes the seat's plan before it first acts, once per turn of its
-  own after it draws, and on a request: a stop the plan named or jev's
-  `ask:help`. A phase boundary is not a reason to spend money. Its system prompt
-  carries the planning checklist, `docs/SYNTAX.md` and every example in
-  `docs/examples/`, and its submit tool carries the plan schema; both are
-  identical on every call so a provider caches them, and the call sends a cache
-  key so it does. It answers only through `submit`, and a refused plan comes back
-  with every problem named. No file tools: the reference is small enough to be
-  in front of the model, and the examples test keeps it true to the schema.
+- **strategy** advances the pregame reasoning with one planner per seat. It
+  prepares during the opponent's turn, then accepts or amends after the draw,
+  and answers stops or requests for help. It submits changed fields and reuses
+  its own accepted actions; context expands these into a complete plan for core.
+  Optional notebook edits belong in that answer, not separate rounds. The cached
+  system prompt carries the syntax semantics and the real schema; an example
+  lookup supplies worked uses when needed. No challenger or timeout replacement
+  plan runs beside it. A phase boundary spends nothing. docs/PLANS.md holds the
+  lifecycle and its cancellation rules.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
 - **judge** runs only on an objection, which the strategy writer raises beside
@@ -144,7 +144,7 @@ steps, routes, gaps, tokens, cost and elapsed time. Focus makes no model call.
 The pilot's packet carries the plan's objective, the due step, the next two,
 live branches, holds and stops, and what is done. It does not carry the deck
 lists, card registrations, procedure bodies or the brief's matchup reading;
-those are strategy's. Strategy receives the whole current plan with its
-progress, the visible objects with what they registered, the public registered
+those are strategy's. Strategy receives the unfinished plan and reusable actions,
+the visible objects with their current characteristics and accepted stack terms, the public registered
 lists and their card text. Neither sees hidden arrangements or another seat's
 equipment. Shape checking proves neither the rules nor the quality of the plan.

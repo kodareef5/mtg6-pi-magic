@@ -10,8 +10,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-type Call = { role: string; about?: string; at?: number; ms: number; failed?: string; usage?: { input: number; output: number; cacheRead?: number; reasoning?: number; cost?: { total: number } } };
-type Planned = { seat: number; turn: number; how: string; waitedMs: number; ready?: boolean };
+type Call = { role: string; about?: string; at?: number; ms: number; failed?: string; cancelled?: boolean; usage?: { input: number; output: number; cacheRead?: number; reasoning?: number; cost?: { total: number } } };
+type Planned = { seat: number; turn: number; how: string; waitedMs: number; ready?: boolean; failed?: boolean };
 type Interruptions = { stops: number; essential: number; help: number; rulings: number; upheld: number };
 type Result = { seed: string; turn: number; outcome: unknown; elapsedMs: number; replayMatches: boolean; gaps: string[]; calls: Call[]; planned?: Planned[]; interruptions?: Interruptions };
 
@@ -46,10 +46,11 @@ const span = (calls: Call[]) => { const timed = calls.filter((call) => call.at !
 for (const run of runs) {
 	const turns = Math.max(1, run.turn - 1);
 	const failed = run.calls.filter((call) => call.failed).length;
+	const cancelled = run.calls.filter((call) => call.cancelled).length;
 	const pregame = span(run.calls.filter((call) => call.role === "pregame"));
 	console.log(`\n${run.file}`);
 	console.log(`  seed ${run.seed}, ${run.outcome ? "finished" : "stopped"} on turn ${run.turn}, ${seconds(run.elapsedMs)} wall, ` +
-		`replay ${run.replayMatches ? "matched" : "MISMATCH"}, ${run.gaps.length} gaps${failed ? `, ${failed} failed calls` : ""}`);
+		`replay ${run.replayMatches ? "matched" : "MISMATCH"}, ${run.gaps.length} gaps${failed ? `, ${failed} failed calls` : ""}${cancelled ? `, ${cancelled} cancelled preparations` : ""}`);
 	// How often play stopped for strategy or the judge, and why: fewer is better prepared.
 	const stopped = run.interruptions;
 	if (stopped) {
@@ -64,7 +65,8 @@ for (const run of runs) {
 	for (const how of hows) {
 		const group = planned.filter((one) => one.how === how), ready = group.filter((one) => one.ready).length;
 		console.log(`  plans ${how.padEnd(10)} ${String(group.length).padStart(4)}, waited median ${seconds(quantile(group.map((one) => one.waitedMs), 0.5))}, total ${seconds(group.reduce((sum, one) => sum + one.waitedMs, 0))}` +
-			(group.some((one) => one.ready !== undefined) ? `; preparation ready at the turn ${ready} of ${group.length}` : ""));
+			(group.some((one) => one.ready !== undefined) ? `; preparation ready at the turn ${ready} of ${group.length}` : "") +
+			(group.some((one) => one.failed) ? `; ${group.filter((one) => one.failed).length} failed sessions` : ""));
 	}
 	for (const line of table(run.calls, run.elapsedMs)) console.log(`  ${line}`);
 	// What each chat call was for: pregame analysts and synthesis, turn plans and escalations.

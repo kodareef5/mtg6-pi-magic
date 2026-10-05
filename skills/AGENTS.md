@@ -19,7 +19,7 @@ that makes every seat prefer the same move.
 
 Describe listed picks first. Keep every id unchanged. Prepared procedures and
 unique delegated continuations work; raw declarations, free-form delegation,
-option widening and objections with remedies remain unfinished. Do not
+and option widening remain unfinished. Objections can invoke the judge's rewind. Do not
 advertise an executable route whose handler does not exist.
 
 ## Show the payment
@@ -34,7 +34,8 @@ Keep every fact needed for the decision, including restrictions and unresolved
 public stack instructions. Registered deck counts are public; hidden object
 identities and library order are not.
 
-The classifier receives the plan's objective, the due step, the next two, live
-branches, holds and stops, and the options marked with the plan. Procedure
-bodies and card registrations stay with strategy, which receives the whole plan
-and its progress when it writes the next one.
+The classifier receives the plan's objective, the current phase's decisions and
+steps, live branches, holds and stops, and the options marked with the plan.
+Procedure bodies and card registrations stay with strategy. Strategy receives
+the unfinished plan, reusable actions and projected facts, then writes only the
+changes. Context expands them into a complete plan before core accepts it.

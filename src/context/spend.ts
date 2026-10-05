@@ -38,7 +38,7 @@ export const CEILING: Record<Role, number> = {
 	decide: 0,
 	/** One analyst's findings; the brief asks for more where the synthesis writes every field. */
 	pregame: 2000,
-	/** One plan: its steps, branches, stops, holds and packages. Thinking counts against it too. */
+	/** A plan update and any new instructions. Thinking counts against it too. */
 	strategy: 4000,
 	/** A verdict, the rule it rests on, and the remedy. */
 	judge: 700,
@@ -66,6 +66,8 @@ export type Spend = {
 	truncated?: boolean;
 	/** Set when the call failed. The caller decides what that means. */
 	failed?: string;
+	/** Pending preparation was deliberately discarded, rather than a model failure. */
+	cancelled?: true;
 };
 
 export type Tally = {

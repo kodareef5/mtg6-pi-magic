@@ -5,8 +5,8 @@
  * the decision packet without inference.
  *
  * While the opponent plays, it prepares its own next turn in the background,
- * and when that turn begins it offers the prepared plan: as it is when nothing
- * that matters changed, or after a short review.
+ * and at the draw it uses the prepared plan or amends it for what changed.
+ * There is one planner per seat, no challenger or parallel replacement plan.
  *
  * Raw declarations and free-form delegation still lack game handlers.
  * Past 150 lines to keep the question beside its navigation and answer handling.
@@ -21,12 +21,14 @@ import { asState, chose, type DecisionApi, type Question } from "./model.ts";
 import { focus, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
-import { planProblems, prepareWork } from "../core/work-tools.ts";
+import { planProblems } from "../core/work-tools.ts";
 import type { Plan, PlanOption } from "../core/language.ts";
 import type { SeenObject } from "../core/work.ts";
 import { budget } from "../core/budget.ts";
 import { holds, viewWorld } from "../core/selectors.ts";
-import { select } from "../core/query.ts";
+import { matches, select } from "../core/query.ts";
+import { STEPS } from "../core/steps.ts";
+import { putting } from "./strategy.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -59,35 +61,17 @@ export type AiSeatOptions = {
 	 * counting on the way back reported an attempted call as no call at all.
 	 */
 	onAsk?(packet: Packet): void;
-	/** Writes this seat's plan when one is wanted. Without it, the seat cannot ask for help. */
-	plan?(frame: Frame): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
-	/** Prepares this seat's next turn while the opponent plays. Without it the turn is planned when it begins. */
-	prepare?(frame: Frame): Promise<Prepared>;
-	/**
-	 * Challenges a prepared plan in the background, and revises it once if it found errors. Never waited on.
-	 * The errors are passed to `criticized` as soon as they are found, so a revision still running, or failed, does not lose them;
-	 * it answers whether a revision is still wanted.
-	 */
-	challenge?(frame: Frame, prepared: Prepared, criticized: (errors: string[]) => boolean): Promise<Prepared | undefined>;
-	/** Checks a prepared plan when the turn begins, given what changed since it was prepared. */
-	review?(frame: Frame, prepared: Prepared, changed: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
-	/** How long the turn waits for a preparation still running before it plans without it. */
-	grace?: number;
-	/** Called each time the seat waited on strategy for its plan: how the plan came, how long the table waited, and whether a preparation was ready. */
+	/** The same planner handles a new turn, an amendment and a stop. */
+	plan?(frame: Frame, prepared?: Prepared, changed?: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
+	/** One cancellable preparation during the opponent's turn. */
+	prepare?(frame: Frame, signal: AbortSignal): Promise<Prepared>;
+	/** Actual wait at the decision boundary, including unsuccessful planning. */
 	onPlanned?(planned: Planned): void;
 };
 
-/** How long the turn waits for an unfinished preparation, in milliseconds: about what writing the plan anew would cost. */
-const GRACE = 20_000;
-
-/** A prepared turn: the plan, and the notebook edits the preparation and its challenger made, not yet at the table. */
+/** Private pending work; nothing reaches core until the turn's draw is accessible. */
 export type Prepared = { plan: Plan; edits?: NoteEdit[] };
-
-/** The work that puts a prepared turn in place: its plan, and its notebook edits. */
-export const putting = (prepared: Prepared): WorkCommand[] => [{ do: "plan.put", plan: prepared.plan }, ...(prepared.edits?.length ? [{ do: "notebook.edit" as const, edits: prepared.edits }] : [])];
-
-/** How a seat's plan came: a prepared plan as it was, after a review, written at the time, or written for a stop or a request. */
-export type Planned = { seat: number; turn: number; how: "prepared" | "reviewed" | "written" | "escalation"; waitedMs: number; ready?: boolean };
+export type Planned = { seat: number; turn: number; how: "prepared" | "amended" | "written" | "escalation"; waitedMs: number; ready?: boolean; failed?: boolean };
 
 /**
  * What changed between the frame a plan was prepared from and the turn it is for,
@@ -121,6 +105,8 @@ export function changes(from: Frame, now: Frame): { lines: string[]; drawn: Seen
 		...gone("hand", true).map((object) => `${name(object)} left your hand`),
 		...[true, false].flatMap((mine) => life(from, mine) !== life(now, mine) ? [`${mine ? "your" : "the opponent's"} life went from ${life(from, mine)} to ${life(now, mine)}`] : []),
 		...(JSON.stringify(from.view.notes ?? []) !== JSON.stringify(now.view.notes ?? []) ? ["the table's notes changed"] : []),
+		...(JSON.stringify(from.view.pools ?? []) !== JSON.stringify(now.view.pools ?? []) ? ["the mana pools changed"] : []),
+		...(now.view.actions?.some((one) => !one.turnDraw && one.what.some((line) => !["no attackers", "no blockers"].includes(line)) && !from.view.actions?.some((earlier) => earlier.row === one.row)) ? ["the opponent took new actions; inspect view.actions"] : []),
 		...(from.view.work?.planned !== now.view.work?.planned ? ["your standing plan was replaced since you prepared, by a stop, a request for help or a judge's ruling"] : []),
 	];
 	return { lines: [...lines, ...drawn.map((object) => `you drew ${name(object)}`)], drawn, quiet: !lines.length };
@@ -136,6 +122,11 @@ export function settled(frame: Frame, prepared: Plan, changed: ReturnType<typeof
 	if (!changed.quiet || planProblems(frame, prepared).length || budget(frame, prepared).length) return false;
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	const takes = (one: PlanOption, card: SeenObject) => {
+		const at = frame.view.window;
+		if (at.kind !== "turn") return false;
+		const step = one.when.step ?? "precombat-main";
+		const window = { ...at, step, phase: STEPS[step].phase };
+		if (!matches(one.when, { ...frame, view: { ...frame.view, window } })) return false;
 		if (one.if && !holds(scope, one.if)) return false;
 		const action = one.action;
 		if ("procedure" in action) return select({ ...action.procedure.source, zones: action.procedure.source.zones ?? ["hand"] }, frame).some((object) => object.id === card.id);
@@ -206,36 +197,29 @@ export function question(packet: Packet, help: boolean): Question {
 }
 
 export function aiSeat(options: AiSeatOptions): Player {
-	let latest: Frame | undefined;
 	let asked = 0;
-	// The next own turn being prepared, from the frame it was prepared from. A failed preparation is undefined and the turn is planned as usual.
-	// A challenger's revision replaces it only if it is already done when the turn begins; its errors, once found, are kept either way.
-	// A job is current only while it is this variable: one taken, replaced or closed starts nothing more and is never used.
-	let preparation: { turn: number; from: Frame; plan: Promise<Prepared | undefined>; ready?: true; criticism?: string[]; revised?: Prepared } | undefined;
+	let closed = false;
+	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true } | undefined;
+	let began: string | undefined;
 	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
-	// Notes from a preparation that finished after its turn was planned without it: they go in with the seat's next answer.
-	const late: NoteEdit[] = [];
-	const noted = (tools: WorkCommand[]): WorkCommand[] => {
-		if (!late.length) return tools;
-		const edits = late.splice(0);
-		return [...tools, { do: "notebook.edit", edits }];
+	const cancel = () => {
+		const old = preparation;
+		preparation = undefined;
+		old?.controller.abort(new Error("Preparation discarded."));
+		return old?.plan;
 	};
-
-	// Start preparing own turn `turn` from this frame, once: a job for that turn already running is kept.
-	const begin = (frame: Frame, turn: number) => {
-		if (!options.prepare || preparation?.turn === turn) return;
-		const job: NonNullable<typeof preparation> = { turn, from: frame, plan: options.prepare(frame).catch(() => undefined) };
+	const begin = (frame: Frame) => {
+		const at = frame.view.window;
+		if (closed || !options.prepare || at.kind !== "turn" || at.active === frame.seat || !frame.view.work?.eachTurn || frame.view.work.request) return;
+		const key = `${at.turn + 1}:${frame.view.work.planned ?? 0}`;
+		if (began === key) return;
+		const cancelled = cancel();
+		began = key;
+		const controller = new AbortController();
+		const job: NonNullable<typeof preparation> = { turn: at.turn + 1, from: frame, controller,
+			plan: Promise.resolve(cancelled).then(() => { controller.signal.throwIfAborted(); return options.prepare!(frame, controller.signal); }).catch(() => undefined) };
 		preparation = job;
 		void job.plan.then(() => { job.ready = true; });
-		const challenge = options.challenge;
-		if (challenge) void job.plan.then((prepared) => prepared && preparation === job ? challenge(frame, prepared, (errors) => { job.criticism = errors; return preparation === job; }) : undefined)
-			.then((revised) => { if (revised) job.revised = revised; }, () => undefined);
-	};
-	// Our turn's plan is going in: start on the next one now, from the position with that plan and its notes in place.
-	const onward = (frame: Frame, tools: WorkCommand[]) => {
-		const at = frame.view.window;
-		if (at.kind !== "turn" || at.active !== frame.seat || frame.view.work?.request || !frame.view.work?.eachTurn) return;
-		try { begin({ ...frame, view: { ...frame.view, work: prepareWork(frame, tools) } }, at.turn + 2); } catch { /* the table will refuse it too; the opponent's turn starts preparation */ }
 	};
 
 	return {
@@ -256,7 +240,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 		 */
 		async answer(frame) {
 			if (!frame.decision) throw new Error(`${options.name} was asked a frame with no decision`);
-			latest = frame;
+			if (closed) throw new Error(`${options.name} is closed.`);
 
 			// Preparation changes only on a recorded request. A phase change
 			// alone is not a reason for a model call.
@@ -267,42 +251,41 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const reason = planReason(frame);
 			const revision = frame.view.work?.revision ?? 0;
 			const at = frame.view.window;
-			// The turn's plan, prepared during the opponent's turn: offered as it is, or after a short review.
-			const started = Date.now(), turn = at.kind === "turn" ? at.turn : 0;
-			const planned = (how: Planned["how"], ready?: boolean) => options.onPlanned?.({ seat: frame.seat, turn, how, waitedMs: Date.now() - started, ...(ready === undefined ? {} : { ready }) });
-			if (reason && !frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
-				const job = preparation, ready = !!job.ready;
-				preparation = undefined;
-				// A preparation not done by now gets a short grace, then the turn is planned without it; its notes still arrive later.
-				const made = ready ? await job.plan : await Promise.race([job.plan, new Promise<"late">((resolve) => setTimeout(() => resolve("late"), options.grace ?? GRACE))]);
-				if (made === "late") void job.plan.then((done) => { if (done?.edits?.length) late.push(...done.edits); });
-				else {
-				// A challenge whose revision did not finish still goes into the notebook, where the review reads it.
-				const prepared = job.revised ?? (made && job.criticism ? { ...made, edits: [...(made.edits ?? []), { topic: `challenge of turn ${at.kind === "turn" ? at.turn : 0}`, note: job.criticism.join(" ") }] } : made);
-				if (prepared) {
-					const changed = changes(job.from, frame), id = `${options.name}-${frame.version}-${revision}-prepared-${++asked}`;
-					// A challenge's errors that no finished revision answered stand against the plan until the writer has read them.
-					const criticism = job.revised ? [] : (job.criticism ?? []).map((error) => `a challenge of the prepared plan found: ${error}`);
-					if (!criticism.length && settled(frame, prepared.plan, changed)) {
-						planned("prepared", ready);
-						onward(frame, putting(prepared));
-						return { kind: "work", tools: noted(putting(prepared)), revision, actionId: id };
-					}
-					if (options.review) {
-						const { tools, objection } = await options.review(frame, prepared, [...changed.lines, ...criticism]);
-						planned("reviewed", ready);
-						onward(frame, tools);
-						return { kind: "work", tools: noted(tools), revision, actionId: id, ...(objection ? { objection } : {}) };
-					}
-				}
-				}
-			}
 			if (reason) {
-				if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
-				const { tools, objection } = await options.plan(frame);
-				planned(frame.view.work?.request ? "escalation" : "written");
-				onward(frame, tools);
-				return { kind: "work", tools: noted(tools), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
+				const started = Date.now(), turn = at.kind === "turn" ? at.turn : 0;
+				let how: Planned["how"] = frame.view.work?.request ? "escalation" : "written";
+				let ready: boolean | undefined, failed = true;
+				try {
+					let made: Prepared | undefined, changed: string[] | undefined;
+					if (!frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
+						const job = preparation;
+						ready = !!job.ready;
+						// Wait for this job rather than starting another planner beside it.
+						made = await job.plan;
+						if (closed) throw new Error(`${options.name} closed while planning.`);
+						if (preparation === job) {
+							preparation = undefined;
+							if (made) {
+								const delta = changes(job.from, frame);
+								if (settled(frame, made.plan, delta)) {
+									how = "prepared";
+									failed = false;
+									return { kind: "work", tools: putting(made), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}` };
+								}
+								changed = delta.lines;
+								how = "amended";
+							}
+						} else made = undefined;
+					} else await cancel();
+					if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
+					const { tools, objection } = await options.plan(frame, made, changed);
+					if (closed) throw new Error(`${options.name} closed while planning.`);
+					failed = false;
+					return { kind: "work", tools, revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
+				} finally {
+					options.onPlanned?.({ seat: frame.seat, turn, how, waitedMs: Date.now() - started,
+						...(ready === undefined ? {} : { ready }), ...(failed ? { failed: true } : {}) });
+				}
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.
 			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
@@ -346,19 +329,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 			}
 		},
 
-		// Watching is free and reacting is not, so nothing is asked here. The
-		// frame is kept because the next intent check reads what changed.
 		observe(frame) {
-			latest = frame;
-			// The opponent's turn has begun: prepare ours, once, from what can be seen now, unless it is already being prepared.
-			const at = frame.view.window, work = frame.view.work;
-			if (at.kind === "turn" && at.active !== frame.seat && work?.eachTurn && work.accepted !== undefined) begin(frame, at.turn + 1);
+			if (preparation && (frame.version < preparation.from.version || frame.view.work?.planned !== preparation.from.view.work?.planned)) cancel();
+			begin(frame);
 		},
-
-		close() {
-			latest = undefined;
-			preparation = undefined;
-			void latest;
-		},
+		reset() { cancel(); began = undefined; navigation = undefined; },
+		close() { closed = true; return cancel()?.then(() => {}); },
 	};
 }

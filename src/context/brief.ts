@@ -37,6 +37,8 @@ const Side = object({ own: Type.Optional(Note), opponent: Type.Optional(Note) })
 
 /** Where a brief is read, by field. */
 const BriefSchema = object({
+	/** A sentence for the pilot; the reasoning stays in the fields below. */
+	objective: Type.Optional(text),
 	/** Strategy: who must force the exchange at the start, and what changes that. */
 	role: Note,
 	/** Strategy: the main route to a win, and the route when its key dependency fails. */
@@ -131,6 +133,7 @@ const SYSTEM = [
 	"Both registered deck lists are public and given in full. They give composition, never a hand or the library order. Do not assume any other card.",
 	"Think like a strong player preparing a matchup: roles and clocks, threats and their last answer windows, scarce resources, and plays that look automatic but are wrong here.",
 	"Teach each default with the visible condition that reverses it. Never write a bare slogan such as always save removal.",
+	"This is setup for later short turn updates. Settle the deck's normal sequencing, mana commitments, protection priorities, trigger targets and combat decisions now. Later sessions should revise these defaults for the board and draw, not derive the matchup again.",
 	"Every conclusion gives the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Say what you are unsure of instead of inventing certainty.",
 	"",
 	"Every card's text in both decks is above, so do not look cards up. Look a rule up only when you are unsure of it, at most two lookups,",
@@ -233,6 +236,7 @@ const SYNTHESIS = [
 	"A missing or failed analyst stays missing: do not invent its part.",
 	"",
 	"The fields, and who reads them:",
+	"- objective: one sentence giving the role and route to a win, for the pilot. Keep the supporting analysis in the fields below.",
 	"- role: who must force the exchange at the start, and the visible facts that change it. Read by the strategist.",
 	"- route: the main route to a win. recovery: the route when its key dependency fails. Read by the strategist.",
 	"- matchup: both clocks, the opponent's threats with their last answer windows, and how to deny their key cards' conditions. Read by the strategist.",
@@ -241,6 +245,7 @@ const SYNTHESIS = [
 	"- cards: keyed by exact card name, from either deck: notes only for cards with a real choice or trap, such as when to play it, what to hold it for, or how to play around it. Read by the pilot when an option names the card.",
 	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",
 	"Every default comes with the visible condition that reverses it. Name cards and numbers. No preamble.",
+	"Your step notes become Jev's initial phase scripts. Give ordered decisions with mana kept, trigger and search choices, attack and block policy, and the exception that changes the line. Write decisions the pilot can follow, not a reminder to think about the phase. The turn strategist will change only what the position requires.",
 	"Any field may be a sentence or a small structure of short sentences, such as one entry per threat with its answer window.",
 	"",
 	"Call submit once with the brief. Nothing you write as text is read.",

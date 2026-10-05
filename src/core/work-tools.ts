@@ -18,9 +18,9 @@ export function workFrame(table: Table, seat: SeatId): Frame {
 		...(decision?.seat === seat ? { decision } : {}) };
 }
 
-/** A window a plan can use: a step that has priority, in its own phase, in a turn range that does not end before it starts. */
-export function checkWhen(when: When): string | null {
-	if (when.step && !STEPS[when.step as keyof typeof STEPS].priority) return `${when.step} has no priority, so nothing can be done in it.`;
+/** Check step, phase and turn bounds. An action needs priority; guidance can cover a mandatory choice. */
+export function checkWhen(when: When, action = true): string | null {
+	if (action && when.step && !STEPS[when.step as keyof typeof STEPS].priority) return `${when.step} has no priority, so nothing can be done in it.`;
 	if (when.step && when.phase && STEPS[when.step as keyof typeof STEPS].phase !== when.phase) return `${when.step} belongs to a different phase than ${when.phase}.`;
 	if (when.fromTurn !== undefined && when.throughTurn !== undefined && when.fromTurn > when.throughTurn) return "the window ends before it starts.";
 	return null;
@@ -55,6 +55,7 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 	const at = frame.view.window;
 	const whose = (turn: number) => at.kind === "turn" && (frame.view.players?.length ?? 2) === 2 ? ((turn - at.turn) % 2 === 0 ? at.active : 1 - at.active) : undefined;
 	const named = [...plan.steps.map((one, n) => [`steps[${n}]`, one] as const), ...(plan.may ?? []).map((one, n) => [`may[${n}]`, one] as const),
+		...(plan.phases ?? []).map((one, n) => [`phases[${n}]`, { label: one.goal ?? one.guidance, when: one.when }] as const),
 		...(plan.askWhen ?? []).flatMap((one, n) => one.when ? [[`askWhen[${n}]`, { label: one.label, when: one.when }] as const] : [])];
 	for (const [where, one] of named) {
 		const { active, fromTurn, throughTurn } = one.when;
@@ -69,6 +70,10 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 		if (window) found.push(`askWhen "${stop.label}": ${window}`);
 	}
 	(plan.may ?? []).forEach((branch, at) => option(branch, `may[${at}]`));
+	for (const [n, phase] of (plan.phases ?? []).entries()) {
+		const wrong = checkWhen(phase.when, false);
+		if (wrong) found.push(`phases[${n}]: ${wrong}`);
+	}
 	for (const pack of plan.packages ?? []) { const wrong = packageProblem(frame, pack); if (wrong) found.push(wrong); }
 	return found;
 }

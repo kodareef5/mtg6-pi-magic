@@ -8,9 +8,8 @@
  * The order is the cost order. The pregame runs once, concurrently across every
  * seat and every question. The decision model runs per asked decision. The
  * commentator runs once per turn that had anything in it. A seat with a
- * strategist plans before it first acts and at each of its turns, and again
- * when its plan stops fitting. The judge still stops at a verdict because its
- * remedy is unwritten.
+ * strategist prepares during the opponent's turn and accepts or amends after
+ * the draw, and when its plan stops fitting. The judge can rewind an action.
  */
 
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
@@ -32,10 +31,9 @@ import { reasoner, type Reasoner, type Stream } from "./reason.ts";
 import { rule } from "./ruling.ts";
 import type { Cast, Role } from "./roles.ts";
 import { bill, tally, type Spend, type Tally } from "./spend.ts";
-import { aiSeat, type Planned, type Prepared } from "./seat.ts";
-import type { Frame } from "../core/types.ts";
+import { aiSeat, type Planned } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
-import { challengePlan, planWork, prepareTurn, reviewPlan } from "./strategy.ts";
+import { planWork, prepareTurn } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
@@ -132,11 +130,15 @@ export async function seat(
 		const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
 			? reasoner({ role: "strategy", stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
 				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
-		// A seat with a strategist plans: once before it first acts, then each of its turns.
+		// The brief handles the opening and upkeep. Strategy is due after the first draw window.
 		if (planning && !table.work[at.id]) {
-			editWork(table, at.id, [{ do: "plan.request", reason: "Plan the opening: your first turn and the opponent's first turn." },
-				{ do: "plan.each-turn" }], `planning-${at.id}`);
+			editWork(table, at.id, [{ do: "plan.each-turn" }], `planning-${at.id}`);
 		}
+		// Older version-zero clones carried this automatic opening request.
+		// Retire it without discarding their brief, packages or human requests.
+		if (planning && table.ledger.length === 0 && table.work[at.id]?.accepted === undefined &&
+			table.work[at.id]?.request === "Plan the opening: your first turn and the opponent's first turn.")
+			editWork(table, at.id, [{ do: "plan.keep", reason: "The brief covers the opening; strategy follows the draw." }], `opening-covered-${at.id}`);
 		players[at.id] = aiSeat({
 			name: at.name,
 			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted }),
@@ -151,10 +153,8 @@ export async function seat(
 				// What every writer session reads beside the position: the brief, the recaps, and the cards and rules to look up.
 				const context = () => ({ brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe, ...(options.rules ? { rules: options.rules } : {}) });
 				return {
-					plan: (frame: Frame) => planWork(frame, context(), planning),
-					prepare: (frame: Frame) => prepareTurn(frame, context(), planning),
-					challenge: (frame: Frame, prepared: Prepared, criticized: (errors: string[]) => boolean) => challengePlan(frame, prepared, context(), planning, criticized),
-					review: (frame: Frame, prepared: Prepared, changed: string[]) => reviewPlan(frame, prepared, changed, context(), planning),
+					plan: (frame, prepared, changed) => planWork(frame, context(), planning, prepared, changed),
+					prepare: (frame, signal) => prepareTurn(frame, context(), planning, signal),
 				};
 			})() : {}),
 		});
@@ -282,7 +282,8 @@ export async function run(
 
 	const judge = judgeFor(table, seated, journal);
 	const flight: Promise<void>[] = [];
-	const outcome = await play(table, seated.players, seated.intents, watch, (turn, active, from) => {
+	let outcome: Outcome | null;
+	try { outcome = await play(table, seated.players, seated.intents, watch, (turn, active, from) => {
 		// A reasoner that has given up is one problem, not one per turn. The gap
 		// it wrote on the way down says the rest of the game ran without recaps.
 		if (!talking || talking.broken()) return;
@@ -308,7 +309,8 @@ export async function run(
 					);
 				}),
 		);
-	}, undefined, judge);
+	}, undefined, judge); }
+	finally { await Promise.all(Object.values(seated.players).map((player) => player.close())); }
 
 	// The game is saved first and the commentary is waited on after. A recap is
 	// not part of the game, so a recap that never answers must not be able to

@@ -75,6 +75,8 @@ export type Decision = {
 export type SeatView = {
 	/** This viewer's most recent turn start, for tap-cost availability. */
 	began?: number;
+	/** The rules draw in this viewer's current turn, derived from its ledger row. */
+	drawnAt?: number;
 	/** Lands this viewer has played this turn. */
 	landsPlayed?: number;
 	/** Printed facts for the names of visible objects. Public, from the pinned card file. */
@@ -105,7 +107,7 @@ export type SeatView = {
 	 * The other seats' recorded actions since this seat's plan was accepted, by
 	 * ledger row, in public words: what an objection names.
 	 */
-	actions?: { row: number; seat: SeatId; what: string[] }[];
+	actions?: { row: number; seat: SeatId; what: string[]; turnDraw?: true }[];
 	/** This seat's own plan steps and branches carried out this game, the latest ten distinct, with their syntax: what worked, to reuse. */
 	worked?: { label: string; action: PlanOption["action"] }[];
 	/** Life, and how many cards each hand and library holds: public, though the cards are not (402.3, 401.2). */
