@@ -228,6 +228,48 @@ syntax. It still chose the weaker landfall order, and the attack translation
 exhausted its three replies on invalid conditions. That extra call is not part
 of the implementation. All of these probes stop at planning; they play no turns.
 
+Changing only Luna's thinking level improved the same saved repairs:
+
+| Position | Effort | Calls | Call wall time | Result |
+|---|---|---:|---:|---|
+| Chocobo before land, version 49 | medium | 2 | 33.9s | Still played land first. |
+| Chocobo before land, version 49 | high | 1 | 36.7s | Cast with the existing Forest, then play Forest; keep Elf for Veil. |
+| Same version 49, repeated | high | 1 | 50.8s | Repeated the correct order. |
+| Hired Claw attack, version 91 | high | 1 | 27.9s | Attack and trigger; no cast from Village alone. |
+
+The high probes are `plan-review-49-1791210024476`,
+`plan-review-49-1791210293542` and `plan-review-91-1791210024476`.
+Each cost $0.0015 to $0.0022 at Pi's recorded catalogue price; the repeat used
+cached input. Low and medium reported no reasoning tokens in these probes;
+high reported 939 to 2,134. The suggested strategy is now `gpt-6-luna:high`.
+Explicit roster choices still win. These small probes measure sequencing,
+not playing strength.
+
+A new main-phase repair at version 75 exposed a remaining weakness: Luna high
+planned to spend its only Shock, then mentioned Shock as a response on the next
+turn. Its physical actions were affordable, but future guidance did not account
+for the spent card. Resource accounting across the whole proposed line and the
+opponent's turn remains a strategy-quality check.
+
+The first bounded continuation of the high plan, `real-standard-9-1791210293742`,
+completed Chocobo, Forest and the landfall counter while keeping the Elf untapped.
+It took 80.9 seconds with 45 Jev reviews and 24 picks, no gaps or fallbacks, and
+matching replay. Jev asked for a repair merely because the land play was absent
+while Chocobo was on the stack. That session spent three Luna calls. Later review
+questions also repeated completed instructions without naming recorded progress.
+The checklist now considers the stack response before later uses, and both
+review and move questions distinguish waiting for resolution from a broken line.
+Reviews name recorded plan actions and do not treat every card left in hand as
+an unfinished obligation. Both seats still choose their own responses and passes.
+
+Repeating that continuation in `real-standard-9-1791211038183` took 58.5 seconds,
+with 43 reviews, 27 picks, no gaps or fallbacks, and matching replay. The stack
+wait no longer caused a repair. After the counter resolved, Jev still asked to
+revise the completed phase; Luna used one call and added a second Elf paid from
+the new Forest, preserving the original Elf for Veil. One unnecessary completed-phase
+repair remains to isolate. Both runs also started background preparation, so
+their total strategy time overlaps play and is not their wall time.
+
 Full games remain behind the readiness checks above. Next probes should keep
 the same saved decision when comparing context, inspect accepted card terms,
 and check completed effects and chosen passes, not just call counts.

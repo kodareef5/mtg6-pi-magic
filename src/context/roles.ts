@@ -41,7 +41,7 @@ export const ROLES: Record<
 		suggested: string;
 		/** Why this one. A reader overruling a default should know what it was for. */
 		why: string;
-		/** The step up, and what it buys. */
+		/** An alternative and the tradeoff to measure. */
 		instead?: string;
 	}
 > = {
@@ -74,12 +74,13 @@ export const ROLES: Record<
 		does: "advance the pregame strategy: prepare during the opponent's turn, amend after the draw, and answer stops",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6-luna:low",
+		suggested: "gpt-6-luna:high",
 		why:
 			"Prepares before the turn and submits short updates. The seat waits after its draw " +
-			"when that work is unfinished. Luna is the chosen baseline for cost and speed; " +
-			"playing strength still needs measurement.",
-		instead: "gpt-6.1-sol:low or gpt-6-astra:low, when prepared plans measure better for the extra time",
+			"when that work is unfinished. In the October 5 saved-position probes, Luna high " +
+			"twice cast Chocobo before the land; low and medium lost that landfall counter. " +
+			"High took 28 to 51 seconds per isolated repair. These few positions do not establish playing strength.",
+		instead: "gpt-6-luna:low or gpt-6-luna:medium, to compare latency and completed lines at the same saved position",
 	},
 	judge: {
 		does: "rule on an objection, citing the rules on disk",

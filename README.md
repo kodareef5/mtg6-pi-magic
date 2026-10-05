@@ -15,9 +15,10 @@ state.
 AI playing in real time is slow and expensive. A 1v1 Standard game can take
 hours and cost tens to hundreds of dollars of frontier inference.
 
-Here, Luna on low reasoning effort is enough to plan the strategy, and a
-Jev-style pilot carries it out. The goal is five-minute games for under a
-dollar.
+Luna writes the strategy, and a Jev-style pilot carries it out. The current
+strategy default uses high reasoning effort after short sequencing probes;
+playing strength is still being measured. The goal is five-minute games for
+under a dollar.
 
 Pi configures your inference providers, and pi-magic uses those connections
 for AI-driven play.

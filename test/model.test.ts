@@ -52,6 +52,8 @@ test("a roster resolves patterns the way a reader would type them", () => {
 	assert.equal(of("decide").model?.id, "jev-latest");
 	assert.equal(of("pregame").model?.id, "gpt-6.1-sol");
 	assert.equal(of("pregame").thinkingLevel, "low");
+	assert.equal(of("strategy").model?.id, "gpt-6-luna");
+	assert.equal(of("strategy").thinkingLevel, "high");
 	assert.equal(of("judge").model?.id, "gpt-6-luna");
 	assert.equal(of("summary").model?.id, "gpt-6-luna");
 	assert.equal(of("summary").thinkingLevel, "low");
