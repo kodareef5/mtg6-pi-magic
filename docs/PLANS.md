@@ -73,17 +73,18 @@ interpretation, or an impossible required step. Those must not collapse to skip.
    51 inspection menus, each with at most 50 choices. Compound actions expose
    named components; a large single domain uses inclusive ranges. Target and
    payment stages carry their own facts instead of every combination at once.
-3. [ ] Simplify card meaning around shared mechanics and explicit readiness.
+3. [x] Simplify card meaning around shared mechanics and explicit readiness.
    Start with the uses above. Add canonical vocabulary where it removes repeated
    expressions. Separate standing terms from deferred uses and remove mandatory
    whole-card compilation from setup. Missing relevant meaning requests work
    before the affected operation; it cannot silently drop an ability or an option.
    Preserve old accepted journal terms. Test hand, battlefield, exile and graveyard
    uses, source coverage, delayed effects, control changes and clone parity.
-   First increment: `printedCast` selects the shared ordinary permanent cast.
-   Hand, permitted exile and graveyard casts, entry abilities, corrections and
-   replay are tested. Complete assessment remains required until scoped readiness
-   can account for deferred uses.
+   `printedCast` selects the shared ordinary permanent cast. Standing terms and
+   a source-backed inventory precede dealing; `deferred` uses need bodies when a
+   visible source enters their accepted scope. A separate strategy-role call
+   interprets them before a priority action or pass. This conservative gate does
+   not yet test affordability or timing. Old complete assessments remain usable.
 4. [ ] Refocus Jev on executing prepared instructions.
    Replace duplicate review-then-pick questions with a direct execution question
    when the plan and facts settle the purpose. Keep necessary completion and

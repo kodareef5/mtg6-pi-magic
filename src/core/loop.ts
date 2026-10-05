@@ -163,6 +163,8 @@ export async function play(
 			try {
 				const received = await player.answer(failures.length ? { ...asked, refused: [...failures] } : asked);
 				let why = refuse(received, offered);
+				if (why === null && decision.preparation?.length && (received as Answer).kind === "pick")
+					why = `Prepare the known uses of ${decision.preparation.map((one) => one.card).join(", ")} with seat work before choosing an action or passing.`;
 				if (why === null && (received as Answer).kind === "work") {
 					const valid = received as Extract<Answer, { kind: "work" }>;
 					const delivered = table.workLog.find((entry) => entry.seat === decision.seat && entry.actionId === valid.actionId);
@@ -181,6 +183,11 @@ export async function play(
 				}
 				failures.push(String(error));
 			}
+		}
+		if (!answer && decision.preparation?.length) {
+			table.gaps.push(`Seat ${decision.seat}, card preparation: ${failures.join(" Then: ")} Decision remains pending; no action was chosen.`);
+			report(table, told, watch);
+			return null;
 		}
 		if (!answer && attention) {
 			// Strategy gave nothing usable: the game goes on under the plan already standing, and the gap says so.

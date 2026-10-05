@@ -40,9 +40,11 @@ npm run matchup -- --resume <prepared-journal> --version 0 --turns 2
 These are opt-in paid runs through Pi. The first assesses cards and prepares
 briefs, then saves version zero without playing. Review its accepted terms before
 the second command deals normally and stops at an outcome, a gap, or the turn
-limit. The version-zero clone reuses preparation. Older positions without complete assessments can
-still replay but cannot resume play under the current preparation requirement. The next-version plan replaces that requirement
-with scoped readiness; it is not implemented at this checkpoint.
+limit. The version-zero clone reuses preparation. Standing terms and identified
+uses precede dealing; executable cast and activation bodies can be prepared when
+a visible source enters their accepted scope. Older positions without those
+assessments can still replay but cannot resume play. Existing complete assessments
+remain usable without reinterpretation.
 
 The earlier scripted Elf/Shock probe established payment, response and replay
 mechanics only. Its 31-call continuation and the later 28-call full game used

@@ -26,6 +26,8 @@ import { activate } from "./procedures.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { triggerWindow } from "./triggers.ts";
 import { STEPS } from "./steps.ts";
+import { preparation } from "./readiness.ts";
+import { project } from "./view.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
@@ -78,12 +80,14 @@ function pending(table: Table): Pending | null {
 	// Without that check the chain restarts on the first seat forever.
 	const holder = table.cursor.priority;
 	if (holder !== null && table.cursor.passes < playing(table).length) {
+		const frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
+		const needed = preparation(frame);
 		return {
 			situation: "priority",
 			seat: holder,
 			question: "You have priority.",
-			fallback: "pass",
-			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, holder), ...preparedMoves(table, holder)],
+			...(needed.length ? { preparation: needed } : { fallback: "pass" }),
+			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, frame), ...preparedMoves(table, frame)],
 		};
 	}
 
@@ -114,6 +118,7 @@ export function apply(
 ): void {
 	const p = pending(table);
 	if (p === null) throw new Error("apply was called with nothing pending");
+	if (p.preparation?.length) throw new Error(`Prepare the known uses of ${p.preparation.map((one) => one.card).join(", ")} before choosing an action or passing.`);
 	const move = p.moves.find((candidate) => candidate.option.id === optionId);
 	if (!move) {
 		throw new Error(

@@ -224,7 +224,7 @@ more".
 
 **Packages.** Before play, the model assesses each registered card with rules
 text. A package holds `card`, `registers`, reusable `procedures`, optional
-`printedCast: true`, and `assessed: true`. It covers normal and alternative casts, activated abilities, keywords,
+`printedCast: true`, `deferred` uses, and `assessed: true`. It covers normal and alternative casts, activated abilities, keywords,
 triggers, static effects, replacements and entry behavior. The table never
 interprets Oracle prose. Missing source paragraphs stop setup; source coverage
 and schema validation do not prove that the model interpreted the card correctly.
@@ -236,8 +236,23 @@ Core checks the structured card type and cost, and the current zone permission.
 It does not certify that the model's claim matches the rules text. Entry abilities
 still come from registrations. Alternative costs remain separate procedures.
 Set `printedCast: false` when a correction replaces that shared cast with a procedure.
-This removes the repeated empty cast program; deferred interpretation and scoped
-readiness are the next migration step in `PLANS.md`.
+This removes the repeated empty cast program.
+
+`deferred` identifies a cast or nonmana activation by `claim`, its complete
+source `basis`, a `source` query naming the card, zones and controller, and
+`timing` (`spell` or `stack`). It supplies no executable effect. Standing
+abilities, mana, entry behavior, replacements and triggers must be registered
+before dealing. A delayed effect created by a use belongs to that procedure.
+
+At priority, a deferred use whose source is visible and in its accepted scope
+appears in `Decision.preparation`. Casting also requires permission to play
+the card from that zone. This is a conservative readiness check: it does not
+require affordable payment, legal targets or the right casting speed yet.
+The seat supplies procedures through `package.put`, preserving standing terms
+and clearing the corresponding deferred entries. No action or fallback pass
+can proceed until that work is accepted. The model adapter asks its strategy
+model to interpret the card in a separate call, before Jev's physical choice.
+New games with that role off prepare complete uses in pregame instead.
 
 - The table attaches registrations however the permanent enters: cast, played,
   put onto the battlefield by an effect. Assessed procedures are offered at

@@ -4,7 +4,6 @@ import { cardsIn, seat, type Table } from "./table.ts";
 import { facts, isLand, permanentSpell } from "./printed.ts";
 import { offers } from "./announce.ts";
 import { entering } from "./entry.ts";
-import { project } from "./view.ts";
 import { tableWorld } from "./selectors.ts";
 import { allowance, playable } from "./permits.ts";
 import type { Frame, SeatId } from "./types.ts";
@@ -60,8 +59,8 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
  * X cost needs a number, so both wait for a seat's own procedure, as does
  * anything the card does beyond entering.
  */
-export function defaultCasts(table: Table, holder: SeatId): Move[] {
-	const frame: Frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
+export function defaultCasts(table: Table, frame: Frame): Move[] {
+	const holder = frame.seat;
 	const world = tableWorld(table);
 	// From hand, and from another zone where a permission names the card ("you may cast it from exile").
 	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
@@ -77,12 +76,11 @@ export function defaultCasts(table: Table, holder: SeatId): Move[] {
 }
 
 /** Assessed card uses are ordinary prepared procedures, offered to every holder of the seat. */
-export function preparedMoves(table: Table, holder: SeatId): Move[] {
-	const frame: Frame = { seat: holder, version: table.cursor.clock, view: project(table, holder) };
-	return (table.work[holder]?.packages ?? []).flatMap((pack, card) => !pack.assessed ? [] : (pack.procedures ?? []).flatMap((procedure, at) => {
+export function preparedMoves(table: Table, frame: Frame): Move[] {
+	return (table.work[frame.seat]?.packages ?? []).flatMap((pack, card) => !pack.assessed ? [] : (pack.procedures ?? []).flatMap((procedure, at) => {
 		const prefix = procedure.timing === "spell" ? "cast" : "use";
 		return offers(procedure, frame, `${prefix}:${card}:${at}`).map(({ option, activation }) => {
-			const note = procedure.timing === "spell" && permanentSpell(table.printed[pack.card]) ? entering(table, holder, pack.card) : "";
+			const note = procedure.timing === "spell" && permanentSpell(table.printed[pack.card]) ? entering(table, frame.seat, pack.card) : "";
 			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
 		});
 	}));

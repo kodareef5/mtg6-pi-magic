@@ -12,7 +12,7 @@
  * Past 150 lines to keep the question beside its navigation and answer handling.
  */
 
-import type { Answer, Objection, Player } from "../core/player.ts";
+import { PlayerUnavailable, type Answer, type Objection, type Player } from "../core/player.ts";
 import type { Rules } from "../core/rules.ts";
 import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
@@ -22,7 +22,7 @@ import { focus, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
 import { planProblems } from "../core/work-tools.ts";
-import type { Plan, PlanOption } from "../core/language.ts";
+import type { Package, Plan, PlanOption } from "../core/language.ts";
 import type { SeenObject } from "../core/work.ts";
 import { budget } from "../core/budget.ts";
 import { holds, viewWorld } from "../core/selectors.ts";
@@ -44,6 +44,8 @@ export type AiSeatOptions = {
 	 * is a seat playing with no plan, which still plays.
 	 */
 	chronicle?: Chronicle;
+	/** Prepare one identified card's uses; the core records the returned equipment before any pick. */
+	interpret?(frame: Frame): Promise<Package>;
 	/**
 	 * The rules, so the seat can answer its own route. Absent is a seat with no
 	 * dialer, which still plays: `dial` offers nothing it cannot answer.
@@ -235,6 +237,13 @@ export function aiSeat(options: AiSeatOptions): Player {
 		async answer(frame) {
 			if (!frame.decision) throw new Error(`${options.name} was asked a frame with no decision`);
 			if (closed) throw new Error(`${options.name} is closed.`);
+			if (frame.decision.preparation?.length) {
+				if (!options.interpret) throw new PlayerUnavailable("Known card uses need preparation, but this seat has no interpreter.");
+				const pack = await options.interpret(frame);
+				if (closed) throw new PlayerUnavailable("Seat closed during card interpretation.");
+				return { kind: "work", tools: [{ do: "package.put", package: pack }], revision: frame.view.work?.revision ?? 0,
+					actionId: `${options.name}-${frame.version}-interpret-${++asked}` };
+			}
 
 			// Preparation changes only on a recorded request. A phase change
 			// alone is not a reason for a model call.

@@ -4,8 +4,9 @@ A Pi package that owns a table of Magic.
 
 The approved next-version contract and commit checklist are in `docs/PLANS.md`.
 Complete executable card programs are no longer a setup requirement to preserve.
-The migration must establish explicit readiness before affected operations; it
-must not remove the old preparation check and let missing abilities disappear.
+Standing terms and a source-backed inventory precede dealing. Deferred casts
+and activations become required seat work when a visible source enters their
+accepted scope, before a priority action or pass can hide missing meaning.
 Keep Jev as the interface pilot. Many calls are acceptable; extra deliberation
 and strategic work without a prepared policy are the problems to remove.
 
@@ -104,8 +105,9 @@ A pattern that does not resolve is reported, never substituted, including when
 Pi has a configured default: a game played by a model nobody chose is a result
 that cannot be compared with another. A seat with no `decide` model refuses to
 start. A seat with no `pregame` model can reuse carried card assessments and
-play without a brief. The current implementation still stops setup on missing
-complete assessments; milestone 3 replaces that requirement with scoped readiness.
+play without a brief. Missing standing terms or an incomplete use inventory
+stop setup. A carried deferred use needs the strategy role as its runtime
+interpreter; a new game with that role off prepares complete uses in pregame.
 
 ### What each call is for
 
@@ -114,10 +116,14 @@ understanding does not require a complete executable program for every mode of
 every registered card. Models supply source-backed standing terms before an
 affected event and particular uses when needed. Core executes shared mechanics
 and never interprets Oracle prose. Accepted terms remain journaled and reusable.
-The current `assess.ts` path still compiles whole cards before dealing. Replace
-it through the readiness and replay checks in `docs/PLANS.md`, rather than
-silently bypassing interpretation. Syntax and source checks do not certify the
-model's interpretation.
+`assess.ts` prepares standing registrations and identifies every cast and
+activation. `printedCast` selects the shared ordinary permanent cast; other
+uses can be deferred. `interpret.ts` uses the selected strategy model in a
+separate call to prepare an identified use, preserving standing terms. The
+call is billed as strategy with purpose `interpret <card>`. Core records the
+answer as equipment before asking for a physical choice. Source visibility and
+zone permission trigger readiness, even if payment or targets are unavailable.
+Syntax and source checks do not certify the model's interpretation.
 
 Four analysts work at once on separate questions (deck and resources, the matchup,
 the opening, a challenger looking for traps), with both registered lists, exact
@@ -241,8 +247,8 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    a deck containing one is refused. A seat uses a card
    through the syntax in `docs/SYNTAX.md`, as procedures it announces and
    packages its permanents register as they enter. Model-backed setup assesses
-   complete terms before play today; the next version scopes readiness to uses
-   and standing abilities. Priority offers casts and activations to any
+   standing terms and identifies uses before play. Priority requires an
+   interpretation of deferred uses with visible, permitted sources, then offers casts and activations to any
    player adapter. Lands and registered mana abilities pay during casting
    (601.2g). Strategy prepares during the opponent's turn and accepts or amends
    after the draw. Jev chooses every voluntary action and pass. `npm run matchup`
@@ -390,11 +396,13 @@ rather than adding a test for each branch.
   action or pass. Progress is
   read from the ledger rows that carried each step out, so replay and clones
   hold exactly the progress of their prefix.
-- **Assessed.** Model-written terms name their source and survive replay and
-  cloning. The next version distinguishes understanding from executable use:
-  missing relevant meaning keeps the affected operation pending rather than
-  erasing an ability. Until that migration passes, the whole-card setup test
-  remains the implementation's guard.
+- **Assessed.** Model-written terms cover their source and survive replay and
+  cloning. Shared casts need no empty per-card program. Standing abilities are
+  present on entry, and accepted procedures survive later plan edits.
+- **Ready.** Identified casts and activations need no executable body until a
+  visible source enters their accepted scope. Unpermitted zones and another
+  seat's hidden hand create no work. Required interpretation blocks actions
+  and fallback passes, moves nothing, and survives replay without reinference.
 - **Considered.** A pilot reviews unfinished uses, including unavailable steps,
   before choosing a move. Private judgments neither move cards nor complete
   steps; they survive replay at that decision and expire when the position or
@@ -455,7 +463,8 @@ src/context/           questions for a decision model. Its own AGENTS.md
   model.ts, reason.ts  the two adapters onto Pi: classifier, and chat
   spend.ts             what every call cost, and the output ceiling per role
   brief.ts             the pregame wave, and the snippets it files by use
-  assess.ts            model-authored card meaning, completed before dealing
+  assess.ts            standing terms and the inventory of uses before dealing
+  interpret.ts         deferred uses prepared through the selected strategy model
   summary.ts           the turn in two sentences, from the spectator view
   strategy.ts          a turn's plan, and reconsideration on an escalation
   plan-edit.ts         short strategy updates expanded into complete accepted plans

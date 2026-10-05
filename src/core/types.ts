@@ -10,7 +10,7 @@ import type { SeenObject, Workspace } from "./work.ts";
 import type { Activation, Combat, Mana, Note, Resolution } from "./table.ts";
 import type { Happened } from "./selectors.ts";
 import type { Printed } from "./printed.ts";
-import type { PlanOption } from "./language.ts";
+import type { DeferredUse, PlanOption } from "./language.ts";
 
 export type SeatId = number;
 export type ObjectRef = { id: string; incarnation: number };
@@ -72,6 +72,8 @@ export type Decision = {
 	fallback?: string;
 	/** Accepted permission for a unique effect continuation, never rules force. */
 	delegated?: boolean;
+	/** Known uses with visible sources. Prepare them before answering this physical decision. */
+	preparation?: { card: string; uses: DeferredUse[] }[];
 };
 
 /**

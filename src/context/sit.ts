@@ -36,6 +36,7 @@ import { recap, type Recap } from "./summary.ts";
 import { planWork, prepareTurn } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
 import { assessCard } from "./assess.ts";
+import { interpret } from "./interpret.ts";
 import type { RunTiming } from "./report.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
@@ -161,6 +162,7 @@ export async function seat(
 				// What every writer session reads beside the position: the brief, the recaps, and the cards and rules to look up.
 				const context = () => ({ brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe, ...(options.rules ? { rules: options.rules } : {}) });
 				return {
+					interpret: (frame) => interpret(frame, planning, universe, options.rules),
 					plan: (frame, prepared, changed) => planWork(frame, context(), planning, prepared, changed),
 					prepare: (frame, signal) => prepareTurn(frame, context(), planning, signal),
 				};
@@ -178,11 +180,11 @@ export async function seat(
 		await Promise.all(Object.values(players).map((player) => player.close()));
 		throw Object.assign(new Error([message, ...bill(counted.spent())].join("\n")), { spends: counted.spent(), timing: { ...timing, finishedAt: Date.now() }, problem: message });
 	};
-	if (jobs.length && table.ledger.length) return refuse("This position predates complete card assessment. Replay remains available; start from prepared version zero to play.");
+	if (jobs.length && table.ledger.length) return refuse("This position lacks standing card assessments and use inventories. Replay remains available; start from prepared version zero to play.");
 	const assessors = new Map<SeatId, Reasoner>();
 	for (const seat of new Set(jobs.map((job) => job.seat))) {
 		const role = pick(parts.get(seat)!, "pregame");
-		if (!role?.model || role.off || role.model.type === "classifier") return refuse(`Seat ${seat} needs a pregame model to assess its cards before play, or a clone carrying complete assessments.`);
+		if (!role?.model || role.off || role.model.type === "classifier") return refuse(`Seat ${seat} needs a pregame model to assess its cards before play, or a clone carrying standing assessments and use inventories.`);
 		assessors.set(seat, reasoner({ role: "pregame", seat, stream: inference.stream, model: role.model as Model<Api>, tally: counted,
 			...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}) }));
 	}
@@ -191,12 +193,19 @@ export async function seat(
 	await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, async () => {
 		for (let job = jobs[next++]; job; job = jobs[next++]) {
 			try {
-				const pack = await assessCard(job.card, job.printed, assessors.get(job.seat)!, universe, options.rules);
+				const strategy = pick(parts.get(job.seat)!, "strategy");
+				const scope = strategy?.model && !strategy.off && strategy.model.type !== "classifier" ? "standing" : "complete";
+				const pack = await assessCard(job.card, job.printed, assessors.get(job.seat)!, universe, options.rules, scope);
 				editWork(table, job.seat, [{ do: "package.put", package: pack }], `assess-${job.seat}-${job.card}`);
 			} catch (error) { failed.push(`Seat ${job.seat}: ${String(error)}`); }
 		}
 	}));
 	if (failed.length) return refuse(`Card assessment is incomplete; play has not started. ${failed.join("\n")}`);
+	for (const at of table.seats) {
+		const strategy = pick(parts.get(at.id)!, "strategy");
+		if (table.work[at.id]?.packages?.some((pack) => pack.deferred?.length) && (!strategy?.model || strategy.off || strategy.model.type === "classifier"))
+			return refuse(`Seat ${at.id} carries deferred card uses but has no strategy model to interpret them. Use a roster with an interpreter or a clone with those uses prepared.`);
+	}
 	if (options.journal) save(options.journal, table);
 
 	// Every seat prepares at once: its analysts together, then its synthesis.

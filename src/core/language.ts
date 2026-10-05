@@ -295,9 +295,13 @@ export const ProcedureSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef },
 export const LabelSchema = Type.Cyclic({ ...Defs, Label: object({ text, until: Duration, change: Type.Optional(Type.Ref("Modification")) }) }, "Label");
 export type Label = Static<typeof LabelSchema>;
 
-/** Accepted registrations and reusable procedures for one card. Private until used. */
+/** A known cast or activation whose executable procedure has not yet been prepared. */
+export const DeferredUseSchema = object({ claim: text, basis: text, source: QuerySchema, timing: one("spell", "stack") });
+export type DeferredUse = Static<typeof DeferredUseSchema>;
+/** Accepted registrations, shared mechanics and known uses for one card. Private until used. */
 export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("Registration")),
 	procedures: Type.Optional(Type.Array(Type.Ref("Procedure"))), assessed: Type.Optional(Type.Literal(true)),
+	deferred: Type.Optional(Type.Array(DeferredUseSchema)),
 	/** The model accepts the shared targetless permanent cast at its printed cost, with no extra instructions or spell properties. */
 	printedCast: Type.Optional(Type.Boolean()) });
 export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Package: PackageDef }, "Package");

@@ -60,19 +60,19 @@ export const ROLES: Record<
 			"which is the most frequent call in the game. It executes; it does not strategise.",
 	},
 	pregame: {
-		does: "assess every registered card, then write the deck and matchup brief",
+		does: "prepare standing abilities and identify card uses, then write the deck and matchup brief",
 		kind: "chat",
 		whose: "seat",
 		suggested: "gpt-6.1-sol:high",
 		why:
-			"Card meaning must be complete before play. In the October 5 assessment run, " +
-			"Luna omitted restrictions and effects and refused supported abilities. Sol " +
-			"prepared both lists after a validator fix. The testing roster uses Sol 6.1 high " +
-			"for pregame planning. Saved preparation is reused by clones; syntax acceptance " +
-			"still needs a semantic review.",
+			"Standing abilities and a complete use inventory precede dealing; particular " +
+			"cast and activation procedures can be prepared later. The testing roster " +
+			"uses Sol 6.1 high for that assessment and the deck's strategic preparation. " +
+			"Clones reuse accepted preparation. Syntax and source coverage still need " +
+			"a semantic review.",
 	},
 	strategy: {
-		does: "advance the pregame strategy: prepare during the opponent's turn, amend after the draw, and answer stops",
+		does: "advance the pregame strategy and, in separate calls, interpret identified card uses",
 		kind: "chat",
 		whose: "seat",
 		suggested: "gpt-6-luna:low",

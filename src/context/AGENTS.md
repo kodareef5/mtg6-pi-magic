@@ -39,10 +39,11 @@ result that cannot be compared with another.
 The classifier executes. The thinking happens in the other four roles, and what
 reaches a decision is a short plan plus the facts.
 
-- **pregame** prepares understanding and a reusable strategic playbook. Its
-  current whole-card assessment requirement is being replaced under the approved
-  `docs/PLANS.md` checklist. Standing terms must exist before affected operations;
-  particular uses can be prepared when needed. Source coverage does not certify
+- **pregame** prepares understanding and a reusable strategic playbook. It
+  prepares standing terms and identifies every cast and activation. Particular
+  uses can remain deferred until a visible source enters their accepted scope.
+  The strategy model then interprets them in a separate call before priority
+  continues. With strategy off, pregame prepares complete uses. Source coverage does not certify
   interpretation. Policies cover opening, sequencing, resources, responses,
   combat and recovery, with priorities, worked examples and reversing conditions.
   The implementation still uses four analysts and a synthesis; measure its wall
