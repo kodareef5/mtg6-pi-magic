@@ -11,7 +11,7 @@ export function reviewQuestion(packet: Packet, item: ReviewItem, help: boolean):
 		instructions: [
 			`Review this use before choosing a move: ${item.label}.`,
 			"This question records your assessment only. It does not move a card, complete a plan step, pass priority, or establish legality.",
-			"Read its printed card text, current characteristics, costs and restrictions beside the phase guidance. Account for mana already spent, summoning sickness, targets and responses. Execute the strategist's line; ask for help if it conflicts with those facts.",
+			"Read its printed card text, current characteristics, costs and restrictions beside the phase guidance. Account for mana already spent, the current summoningSick value, targets and responses. Execute the strategist's line; ask for help if it conflicts with those facts.",
 			"known, resources and lately in the supplied state hold the current facts and recent events.",
 			"watches lists registered triggers on the battlefield now. A permanent cannot see events that finished before it entered; its own entry can trigger it. Ask for help if the planned order depends on a missed trigger.",
 			...(packet.plan ? [`Objective: ${packet.plan.objective}`, ...(packet.plan.script?.guidance ?? [packet.plan.guidance ?? ""]), ...packet.plan.held.map((one) => `Held: ${one}`)] : packet.guidance),

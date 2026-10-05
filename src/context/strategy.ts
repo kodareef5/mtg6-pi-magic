@@ -54,6 +54,7 @@ const SYSTEM = [
 	"You strategize for one Magic seat. A small, fast pilot, Jev, executes your plan. The pregame brief is your matchup analysis: build on it instead of researching the deck again.",
 	"Choose the best line from the current position. Check both clocks, the opponent's best reply, and the last window to answer its threats. Compare developing now with keeping a response. Use registered counts and earned knowledge for odds, never assume a hidden card or order.",
 	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
+	"Each visible creature's summoningSick is the current restriction, read from its controller's turn and haste. False does not establish that an attack is legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
 	"watches lists registered triggers on visible permanents now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source. Distinguish forecasts from events already recorded in view.history.",
 	"",
 	"YOUR ANSWER",
@@ -111,7 +112,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
 	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, actions: available,
-		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
+		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task }, {
 		submit: { ...SUBMIT, check(args) {
 			const { notes, objection: raised, ...changes } = args;

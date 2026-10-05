@@ -184,6 +184,7 @@ export function question(packet: Packet, help: boolean): Question {
 			"Choosing no card on an optional search deliberately finds nothing. It is not a pass. Putting a land onto the battlefield by this effect does not use a land play.",
 		] : []),
 		"cards holds printed card text; objects holds current characteristics after effects. Check the current objects and option restrictions before following a planned action. A listed option is not a ruling that it obeys every card.",
+		"summoningSick is the creature's current restriction; false alone does not make an attack legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
 		"watches lists registered battlefield triggers now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source.",
 		...(plan ? [
 			"Follow the due step when its conditions still hold. Use a marked branch for the situation it names. Choose pass when you have no action or response to take; every seat answers its own priority window.",

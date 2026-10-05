@@ -127,6 +127,7 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	assert.deepEqual(characteristics(table, nova!)!.words.sort(), ["flying", "haste"]);
 	assert.ok(focus(workFrame(table, 1), startingIntent(1)).watches.some((one) => one.source.name === pack.card && one.event.on === "enters"), "entry activates the accepted watch without a strategy edit");
 	assert.equal(sick(workFrame(table, 1), project(table, 1).objects!.find((one) => one.id === nova!.id)!), false, "prepared haste permits attacking on entry");
+	for (const viewer of [0, 1] as const) assert.equal(project(table, viewer).objects!.find((one) => one.id === nova!.id)!.summoningSick, false, "both seats see the current effect of haste");
 	assert.equal(nextDecision(table)!.situation, "trigger-order", "the enters ability did not depend on a turn-plan edit");
 	apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen");
 	passBoth(table); finish(table);

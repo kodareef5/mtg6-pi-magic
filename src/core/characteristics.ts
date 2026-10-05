@@ -175,7 +175,6 @@ const KEYWORD_COUNTERS = new Set(["flying", "first strike", "double strike", "de
 /** Has this word now, such as haste or indestructible. */
 export const has = (traits: Traits | undefined, word: string) => !!traits?.words.includes(word);
 /** A creature that has not been its controller's since their turn began, and has no haste (302.6). */
-export const sick = (table: Table, object: Thing) => {
-	const traits = characteristics(table, object);
+export const sick = (table: Table, object: Thing, traits = characteristics(table, object)) => {
 	return !!traits?.types.includes("creature") && !has(traits, "haste") && (object.entered ?? 0) >= (table.cursor.began[object.controller] ?? 0);
 };

@@ -23,6 +23,7 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 	...(object.tapped ? { tapped: true } : {}), ...(object.faceDown ? { faceDown: true } : {}),
 	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
 	...(object.traits ? { traits: object.traits } : {}), ...(object.attached ? { attached: object.attached } : {}),
+	...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
 	...(object.entered === undefined ? {} : { entered: object.entered }), ...(object.position === undefined ? {} : { position: object.position }),
 	...(object.ability ? { ability: object.ability } : {}),
 }));

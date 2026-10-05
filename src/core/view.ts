@@ -18,7 +18,7 @@ import { cardsIn, playing, seat, type Receipt, type Table, type Thing } from "./
 import { happened } from "./selectors.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
-import { characteristics } from "./characteristics.ts";
+import { characteristics, sick } from "./characteristics.ts";
 import type { Frame, SeatId, SeatView, Viewer, Window } from "./types.ts";
 import type { Plan } from "./language.ts";
 
@@ -121,7 +121,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			const { card, ...seen } = structuredClone(item);
 			// Read through the layers on every projection, never stored on the object.
 			const traits = characteristics(table, item);
-			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}) };
+			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}),
+				...(item.zone === "battlefield" && traits?.types.includes("creature") ? { summoningSick: sick(table, item, traits) } : {}) };
 		});
 	if (table.combat) {
 		const combat = table.combat, named = (one: { id: string }) => publicName(table.things.get(one.id));

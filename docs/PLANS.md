@@ -165,6 +165,12 @@ notebook or whole card procedures. It does see full printed text for visible
 battlefield and stack cards and the sources and targets its options name.
 Printed text and current characteristics are separate: losing flying changes the
 latter, not the source text. Hidden object identities remain absent.
+Visible creatures carry their current summoning sickness, computed against their
+controller's turn and haste. Both seats read that same fact. Registered watches
+name their source and the visible objects matching their selector now; a match
+is neither an event nor a promise that a future trigger will happen. Next-turn
+preparation separately states its assumption that retained creatures lose
+summoning sickness when that turn begins.
 Outside a script, the brief's matching notes
 and recent recaps remain available. `ask:help` covers a named unexpected event or
 a plan that cannot be carried out, including a conflict with card text or a

@@ -176,9 +176,28 @@ two failures that those counters cannot detect:
   creature, choosing the marked continuation, and gaining hexproof during an
   effect without restarting its target check.
 
-The next strategy review should address Hired Claw's trigger, declined attacks,
-and repeated help requests at those saved positions. More calls alone did not
-produce a coherent line.
+The declined attack came from guidance calling Hired Claw summoning-sick after
+that restriction had ended. Projection now reports the current restriction to
+both seats, alongside the existing physical eligibility checks. Pilot packets
+also retain current types and subtypes, and watches list visible objects that
+match their selectors. At version 91, a fresh Jev review noticed the false
+sickness claim and requested repair. The unmodified clone kept its historical
+reviews and still chose no attackers; changing code does not erase seat memory.
+
+Two isolated planner reviews used that same version and the same request:
+
+| Strategy | Calls | Wall time | Cost | Observed repair |
+|---|---:|---:|---:|---|
+| Luna low | 2 | 25.8s | $0.0045 | Chose an attack, but spent one Village twice, scheduled a cast in a completed phase, and denied Claw's Lizard subtype. |
+| Sol 6.1 low | 1 | 20.5s | $0.0714 | Chose Claw's attack, accounted for its trigger and possible block, and preserved the mana restrictions. |
+
+Both answers passed structural validation and their accepted plans replayed.
+With Sol's plan, three Jev calls reviewed the phase and use, then selected the
+attack. That probe applied no physical move. This one position does not measure
+playing strength or justify silently replacing a chosen model. Luna remains the
+strategy default. The next checks should compare planner quality at the same
+saved positions and trace repeated help requests, rather than count more calls
+as progress.
 
 Full games remain behind the readiness checks above. Next probes should keep
 the same saved decision when comparing context, inspect accepted card terms,

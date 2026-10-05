@@ -4,8 +4,8 @@ import type { Traits } from "./characteristics.ts";
 import type { Notebook, WorkCommand } from "./work-language.ts";
 import type { Package, Plan } from "./language.ts";
 
-/** A projected object, with its characteristics as they are now. A face-down object has none. */
-export type SeenObject = Omit<Thing, "card"> & { card?: string; traits?: Traits };
+/** A projected object with current characteristics. Only visible battlefield creatures carry derived summoning sickness. A face-down object has neither. */
+export type SeenObject = Omit<Thing, "card"> & { card?: string; traits?: Traits; summoningSick?: boolean };
 /** A seat's judgment at a particular decision, not a claim that an action was performed. */
 export type Review = { item: string; verdict: "act" | "hold" | "skip"; reason: string; at: number; plan?: number };
 export type Workspace = {

@@ -180,6 +180,8 @@ export function activeWatches(frame: Frame) {
 	return watches(world, world.objects).flatMap(({ object, controller, registration }) => registration.kind === "watch" ? [{
 		source: { ...ref(object), name: object.card ?? object.token?.name ?? "unknown", controller },
 		basis: registration.basis, event: structuredClone(registration.event),
+		...(registration.event.of ? { matchingNow: world.objects.filter((candidate) => matches({ world, controller, source: object }, candidate, registration.event.of!))
+			.map((candidate) => ({ ...ref(candidate), name: candidate.card ?? candidate.token?.name ?? "unknown" })) } : {}),
 		...(registration.if ? { if: structuredClone(registration.if) } : {}),
 	}] : []);
 }

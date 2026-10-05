@@ -50,7 +50,7 @@ export type PlanSlice = {
 };
 
 /** An object as a pilot reads it: what it is and its state, without its registrations. */
-export type Seen = { id: string; name: string; controller: SeatId; zone: string; tapped?: true; body?: string; counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[] };
+export type Seen = { id: string; name: string; controller: SeatId; zone: string; tapped?: true; summoningSick?: boolean; types?: string[]; subtypes?: string[]; body?: string; counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[] };
 
 export type Packet = {
 	actor: SeatId;
@@ -96,6 +96,8 @@ const seen = (object: SeenObject): Seen => {
 		...(object.tapped ? { tapped: true as const } : {}), ...(traits?.power !== undefined ? { body: `${traits.power}/${traits.toughness}` } : {}),
 		...(Object.keys(object.counters).length ? { counters: { ...object.counters } } : {}), ...(object.damage ? { damage: object.damage } : {}),
 		...(traits?.words.length ? { words: [...traits.words] } : {}),
+		...(traits ? { types: [...traits.types], subtypes: [...traits.subtypes] } : {}),
+		...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
 		...(object.ability ? { effect: [object.ability.basis, ...object.ability.instructions.map(summary)] } : {}) };
 };
 

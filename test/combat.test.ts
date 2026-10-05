@@ -14,6 +14,11 @@ import { matches, tableWorld } from "../src/core/selectors.ts";
 import type { Table, Thing } from "../src/core/table.ts";
 import type { Decision } from "../src/core/types.ts";
 import type { Registration } from "../src/core/language.ts";
+import { workFrame } from "../src/core/work-tools.ts";
+import { activeWatches } from "../src/core/triggers.ts";
+import { focus } from "../src/context/packet.ts";
+import { startingIntent } from "../src/context/plan.ts";
+import { facts } from "../src/context/strategy-facts.ts";
 import { establish, finish, matchup, pack, quiet } from "./play.ts";
 
 /** Answer quietly until the table asks this step's turn-based question on this turn. */
@@ -42,7 +47,18 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	const table = matchup("attack");
 	const claws = [establish(table, 1, "Hired Claw", [CLAW]), establish(table, 1, "Hired Claw", [CLAW])];
 	const kellan = establish(table, 1, "Kellan, Planar Trailblazer", []);
+	for (const viewer of [0, 1] as const) assert.equal(project(table, viewer).objects!.find((one) => one.id === claws[0]!.id)!.summoningSick, true);
 	reach(table, "declare-attackers", 2);
+	const before = structuredClone(table), frame = workFrame(table, 1);
+	for (const viewer of [0, 1] as const) {
+		assert.equal(project(table, viewer).objects!.find((one) => one.id === claws[0]!.id)!.summoningSick, false, "both seats read sickness against the creature's controller, not the viewer's turn");
+		const watches = activeWatches(workFrame(table, viewer));
+		assert.deepEqual(watches[0]!.matchingNow!.map((one) => one.id).sort(), claws.map((one) => one.id).sort(), "the Claws match their own Lizard watch, Kellan does not");
+	}
+	const pilot = focus(frame, startingIntent(1)).objects.find((one) => one.id === claws[0]!.id)!;
+	assert.equal(pilot.summoningSick, false); assert.ok(pilot.subtypes!.includes("Lizard"));
+	assert.equal(JSON.parse(facts(frame, {})).objects.find((one: { id: string }) => one.id === claws[0]!.id).summoningSick, false);
+	assert.deepEqual(table, before, "projecting readiness and watch matches moves nothing and stores no derived value");
 	label(table, kellan, "vigilance until end of turn", ["vigilance"]);
 	pick(table, `attack:${claws[0]!.id}`);
 	assert.equal(table.things.get(claws[0]!.id)!.tapped, false, "a pick moves nothing");
