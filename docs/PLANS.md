@@ -213,200 +213,518 @@ establish mechanics, not provider latency or expert playing strength.
 
 ## Next round: focused Jev context
 
-This is the October 5 implementation plan, not a description of work already
-shipped. Keep Jev as pilot, Luna low for strategy, judge and summary, and Sol
-6.1 high for pregame. The three games in `docs/STANDARD.md` supply the failures.
-This round changes how a decision is prepared and inspected. It does not widen
-formats, replace the planner, or teach core to interpret Oracle text.
+Design the preferred use first: representative situations, actual questions and
+answers, then the preparation needed to make those questions answerable. Review
+coverage before choosing builder boundaries or changing prompts. Existing
+requests are evidence for regression checks, not the specification to prune.
 
-### What the audit found
+This section is a proposed usage contract, not a shipped interface or a claim
+of optimal play. The longer worked sequences stay here so a reader can check
+what passes between pregame, strategy and Jev without reconstructing it from
+separate prompt fragments. Syntax examples in `docs/examples/` describe today's
+accepted terms; the new inspection and preparation forms below are design work.
+Keep Jev as pilot, Luna low for strategy, judge and summary, and Sol 6.1 high for
+pregame. Core continues to receive model-assessed card meaning before play.
 
-The audit classified all 3,190 Jev requests from the three runs, including 1,886
-reviews. These are serialized request bytes, not token estimates:
+### Classes of questions
 
-| Question | Calls | Median bytes | Largest request |
-|---|---:|---:|---:|
-| Card review | 767 | 15,098 | 54,513 |
-| Phase review | 605 | 11,147 | 84,628 |
-| Step review | 231 | 11,188 | 55,854 |
-| Response review | 204 | 12,065 | 39,589 |
-| Branch review | 79 | 14,385 | 36,580 |
-| Priority pick | 1,039 | 11,672 | 88,548 |
-| Resolution | 140 | 11,399 | 20,326 |
-| Attack | 70 | 11,272 | 19,409 |
-| Block | 21 | 11,555 | 24,424 |
-| Trigger order | 22 | 17,802 | 23,962 |
-| Keep or mulligan | 9 | 6,015 | 6,751 |
-| Opening bottom | 3 | 7,784 | 8,942 |
+Group by the judgment being asked, then vary the position's complexity. A card
+name or a phase is not a new question class. One phase can require several
+classes, and one class can serve several phases.
 
-`seat.ts` builds the whole packet before selecting the review question, then
-sends that same packet for a card review, a response review or a move. Card
-reviews averaged 10.4 printed card texts. One unavailable-step review carried
-35 options, none for that step. Phase reviews repeat option descriptions in
-instructions; move questions repeat them in classifier criteria. This is
-broader than the failing 88 KB request. The preceding 84.6 KB phase review
-succeeded and reported 30,996 input tokens, so byte counts alone do not identify
-the provider's token limit.
+| Class | Question the example must answer | Simple case | More demanding case |
+|---|---|---|---|
+| Apply a policy | Which listed choice satisfies this prepared policy here? | Keep a playable hand | Bottom several cards while preserving a functional retained hand |
+| Review a use | Is this use ready, waiting, unnecessary or outside the plan? | Play the due land | Distinguish a missing prerequisite from an effect already pending |
+| Bind an action | Which source, mode, targets and payment carry out this use? | Cast a creature with one payment | Shared mana, restricted mana, X, additional costs and dependent targets |
+| Continue a sequence | What is the next unfinished action, and what must happen first? | Land, then creature | Creature, landfall, fetch, more triggers, protection and combat |
+| Answer an interruption | Does a prepared response apply to this event? | Pass on an irrelevant spell | Protect the threatened object while another response is pending |
+| Resolve an instruction | Which choice carries out the accepted use's purpose? | Find the intended basic land | Optional choices, earlier bindings, vanished targets and delegated steps |
+| Arrange simultaneous work | What order and bindings give the intended resolution order? | Two independent triggers | Targeted and reflexive triggers, different controllers, changing conditions |
+| Declare combat | Which declarations and damage assignments execute this combat plan? | Attack with one creature | Evasion, menace, multiple blockers, trample and separate damage steps |
+| Finish a window | What remains, and what would this seat's pass actually do? | Empty upkeep | Held uses, pending effects, remaining obligations and another seat's response |
+| Revise or clarify | What fact, rule or broken assumption needs another answer? | Look up a timing rule | Uncovered draw, lost resource, contradictory guidance, objection or rollback |
 
-Useful structure is lost before Jev reads it. `announce.ts` has a source,
-targets, costs and payments, but `Option` exposes mostly `label` and `shows`.
-`packet.ts` removes object incarnation, stack position, target bindings and
-structured combat assignments. It carries every battlefield and stack card's
-text, all active watches and the full checklist. Resolution repeats instructions
-in several forms but inherits only the plan's broad objective. The current size
-test checks one small position against 12,000 characters; it does not exercise
-the growth seen in these games.
+Every class needs contrasting examples. Vary whose turn it is; empty versus
+occupied stack; one versus several choices; known versus conditional outcomes;
+shared resources; prior selections; and unchanged versus invalidated guidance.
+An example needs a reason its context is sufficient, not a target character count.
 
-Private audit data is in `.pi/jev-context-review-20261005/profile.json` and
-`requests.json`. Exact failures and replay-checked prefixes remain in
-`.pi/luna-three-low-20261005/positions/index.json`.
+### What each writer prepares
 
-### Build the question before its context
+Start with the Jev question and work out what its producers must supply. Do not
+ask the strategist to write prose that happens to resemble today's option
+labels. The following are content contracts, not new JSON fields.
 
-Keep one small dispatcher and shared fact readers, with builders grouped by
-the decisions they serve. Each builder declares its question, required facts,
-guidance source and possible answers. Select by typed decision, window, review
-item and instruction cursor, never by parsing labels or option ids.
+| Producer | Supplies | Must leave to its consumer |
+|---|---|---|
+| Card assessment | Complete accepted uses, timing, costs and restrictions, target relationships, registrations and resolution obligations, with source coverage | A matchup preference, a live target or an assertion that acceptance proves legality |
+| Pregame analysts and synthesis | Opening policies; normal sequences; response priorities and last useful windows; resource reservations; resolution purposes; combat roles; the visible conditions that reverse each default | Hidden arrangements, future draws, live object ids and a fixed turn script regardless of the board |
+| Strategist | The applicable default, current goal, ordered uses, concrete bindings or selection policy, resource commitments, expected completion evidence and covered alternatives | Card meaning already assessed, invented offers, or an unresolved strategic choice disguised as "use wisely" |
+| Core and context | Projected facts, derived comparisons, actual offers, progress and the preparation applicable to this question | A new strategic preference, a hidden fact or an automatic voluntary choice |
+| Jev | An offered review answer, inspection choice or move id that applies the preparation to this position | A new multi-turn strategy or a fabricated action |
 
-| Builder | What it must establish |
-|---|---|
-| Keep or mulligan | Current hand, mana sources, named opening policy, mulligans and retained hand size. |
-| Bottom or discard | Remaining obligation, cards already selected, and the hand and resource counts each candidate would leave. |
-| Phase, step, branch or card review | The named item, its real action, conditions, availability reasons, held resources and recorded progress. A phase review compares uses without enumerating every payment. |
-| Response and priority | Ordered stack with named targets, relevant responses, what is already pending, and the consequence of this seat's pass. Empty-stack development has its own focus. |
-| Attack, block or assign damage | Current declarations by object incarnation, defenders, characteristics, marked damage, conflicts, named offensive and defensive commitments, and conditional damage arithmetic. |
-| Trigger order and targets | Waiting triggers, controller, cause, source, target dependencies and what will resolve first. |
-| Resolve an instruction | The accepted use, paid costs, originating intent, current instruction, locked targets, earlier bindings, remaining choices and what declining would leave undone. |
-| Other rules choices | The actual obligation and affected objects, including replacement order, legend choices and repeated cleanup. Unsupported decision kinds must be reported. |
+For each prepared use, the examples must settle: why take it; when; with which
+source, targets and resources; what to preserve; what its later choices should
+accomplish; what shows it is pending or complete; when to wait, use a covered
+alternative or ask for a revision. Shared policies need one home. A step should
+refer to its protection policy rather than copy it into contradictory prose.
+These requirements need not become one new schema or a wrapper around every use.
 
-Each includes only the dependencies of that question: the relevant sources,
-candidate targets, payment sources, attachments, restrictions, permissions and
-registered effects that can alter them. Follow those relationships through the
-projected view. A global effect may require a broad set; a builder must explain
-that inclusion rather than assume other permanents irrelevant. Unresolved
-dependencies are a reason to inspect more, not evidence that no restriction
-exists. Keep full printed text for the cards the question needs, once per card.
+A useful pregame direction is: "For each recurring decision, give a preferred
+use, its assumptions, the visible condition that changes it, and instructions
+for the choices it creates later. Name unresolved alternatives for strategy."
+A useful strategy direction is: "Bind those policies to this position. Resolve
+resource conflicts and choose the line before asking Jev to execute it. A change
+to an action also changes its affected guidance, holds and continuation purpose."
+Neither direction promises a legal or winning line merely because it was accepted.
 
-Derive game facts in core where a human seat would want them too. Context selects
-and renders those facts; it does not read the unprojected table or raw move
-changes. Record why a fact was included in diagnostic output outside the model
-request. Do not add a generic retrieval framework or ports around local readers.
+### Worked question sequences
 
-Separate facts from authored intent. Name the writer and applicable window of
-guidance. Render the concrete action from its structured terms instead of using
-a free-form step label as its description. A review judgment, an announcement,
-a pending effect and a completed effect are different facts. Read progress from
-the ledger, stack and resolution cursor, including across plan replacement;
-do not create a second stored completion flag. An unplanned action in an earlier
-window is still visible history, not automatic completion of a later plan step.
+These are preferred interactions using cards in the pinned matchup. They are
+constructed positions for design, not new game results or complete registered
+deck lists. Later fixtures must build them from the kept registered decks.
+Named objects such as Forest A denote one projected object and incarnation;
+actual requests use the original offered ids, never these aliases as an API.
 
-### Represent choices without repeating their whole descriptions
+Each example states preparation, facts, an actual preferred question and the
+answer's consequence. Quoted questions are proposed wording. Card names refer
+to the pinned complete card records; a real request includes the relevant full
+printed text once, current characteristics separately, and applicable registered
+effects. The examples do not authorize clipping that material. Choices below
+illustrate the decision; any other real offered action remains accessible.
+Each request must stand alone: carry the applicable preparation, current facts
+and earlier bindings it needs. The model is not assumed to remember the preceding
+question or the rest of this document. Proposed inspection answers remain separate
+from physical move ids until the final pick.
 
-Expose projected structured option facts where core builds the offer. Preserve
-source incarnation, use or mode, X, target slots and bindings, every cost,
-payment sources, remaining resources, conflicts and plan marks. Additional
-costs must name the sacrificed, discarded or exiled objects, including held
-resources they consume. Never reconstruct these facts by decoding an id or
-parsing `shows`. Never expose hidden execution changes through this metadata.
+#### 1. An ordinary pass
 
-Share the common source, accepted effect and printed text across variants;
-each variant supplies its actual targets and payment. Render each fact once.
-Use one request builder for both state and criteria so their descriptions
-cannot silently diverge or duplicate one another.
+**Preparation:** Pregame has no upkeep use for this position. The current plan
+holds resources for the main phase. **Facts:** It is Green's upkeep; Green has
+priority; the stack is empty; no trigger, instruction or applicable use waits.
+The only physical offer is pass.
 
-When choices have several dimensions, let Jev inspect a use, then its modes,
-targets and payment. Keep the relation among complete offered choices: selecting
-a target must expose only payments belonging to a real original option, rather
-than inventing combinations from independent lists. Let Jev return to another
-use or inspect why one is unavailable. Compare relevant costs and consequences
-before narrowing, including resources held for a different use.
+**Question:** "Pass priority in this upkeep? No prepared use is due and no response
+is needed. Your pass gives Red priority; if Red also
+passes without acting, upkeep ends."
 
-Intermediate selections move nothing and pay nothing. The final move question
-chooses an original offered id, even when only one remains. The core's offered
-menu stays intact. Every original option must be reachable, and pass and help
-remain available in their proper windows. Bind inspection to the physical
-revision, equipment revision and decision; discard it on a changed frame or
-rollback. Independent questions may share a call, but an answer cannot depend
-on a sibling answer in that call.
+**Answer and continuation:** Jev chooses the original pass id. Red gets its own
+question from Red's projected facts and preparation. Neither pass is forced.
+**Changed case:** In Red's upkeep, a Smaug trigger waiting on the stack makes
+this a response question about that trigger. Passing does not end upkeep.
 
-### Handle size before dispatch
+#### 2. Keep, then choose the hand to retain
 
-Measure the complete request, including question instructions and criteria.
-Record its builder, stage, frame, plan revision, fact counts, option dimensions,
-largest contributors, requested output ceiling and actual provider token usage
-when returned. Keep those diagnostics beside the private trace, with counts
-reported separately for reviews, inspection and final picks.
+**Preparation:** For this example, pregame's play-side policy keeps two green
+sources with early development; when bottoming, preserve those sources and the
+Chocobo/Curator start, then retain Ascension ahead of a redundant three-drop.
+This is an attributed matchup policy, not a rule shared by every deck.
 
-Use Pi's resolved model capabilities and provider request contract for capacity
-checks. An exact tokenizer or provider estimator must be identified as such;
-JSON bytes and a guessed characters-per-token ratio are not a guarantee.
-Missing or conflicting capacity information is an explicit diagnostic to
-resolve against saved requests. Do not invent a token limit from one failure.
+**Facts:** After two mulligans, Green sees Forest A, Forest B, Chocobo, Curator,
+Ascension, Hydra and Veil. Keeping will require two bottom choices and leave five.
+**Question:** "Keep this seven to form a five-card hand under the opening policy,
+or mulligan?" The packet shows the retained-hand requirements beside the cards.
+The replacement hand is unknown; any odds must name their projected-count basis.
 
-Ordinary construction should already share repeated facts and separate decision
-dimensions. If a complete question is still too large, inspect why and use the
-appropriate smaller question or explicit fact lookup. Every original choice
-must remain reachable. The final question must carry the facts needed to choose
-that action; a known restriction cannot be left behind an optional lookup.
-If no complete representation can be submitted, record a typed capacity failure
-and leave this exact decision pending for resume. Core needs a generic way to
-represent an unavailable player, without importing a model or provider.
-This changes the current capacity-error path,
-which retries the same oversized question and eventually applies a fallback
-pass. Keep malformed-answer retry and fallback accounting distinct.
+After keep, **question:** "Which card goes on the bottom first? Two must leave;
+preserve both Forests and the Chocobo/Curator start." The policy permits removing
+Veil, then Hydra. The second question shows the first selection, one remaining
+obligation, and the hand and mana sources each candidate would leave:
 
-No string clipping, partial Oracle paragraphs, first-N options, shortest-option
-sampling, silent fact dropping or stronger-model substitution. An inspection
-budget exhausted by repeated navigation also leaves the decision pending; it
-does not authorize a pass. Audit the existing next-two-step and last-three-recap
-slices against the question's dependencies rather than replacing them with new
-numeric cutoffs. Current state and relevant event history must be sufficient
-without recaps. Do not change review expiry merely to lower call counts.
+| Second bottom choice | Green sources retained | Change to the prepared opening |
+|---|---:|---|
+| Forest A or Forest B, each with its own offered id | 1 | Lose the second source needed for Curator |
+| Chocobo | 2 | Lose the planned one-mana development |
+| Curator | 2 | Lose the planned two-mana development |
+| Ascension | 2 | Retain Hydra instead of the preferred three-drop |
+| Hydra | 2 | Retain the prepared five-card hand |
 
-### Build order and acceptance
+These are facts relative to this policy, not labels claiming that other hands
+are bad. The question does not reuse the original seven-card analysis.
 
-1. **Make the audit repeatable.** Extend trace/statistics support to report the
-   complete request by decision kind and component. Retain normal and failing
-   examples from all three games. Fill missing coverage with existing registered
-   deck fixtures for cleanup, legend choices, damage assignment and rule lookup;
-   these were not all exercised by the live batch.
-2. **Preserve structured facts.** Change `core/types.ts`, offer builders and
-   `core/view.ts` to expose safe option details, ordered stack bindings, combat
-   declarations and action history. Extend no-leak, replay, resolution and
-   payment invariants. Reassess Village's faulty spending restriction through
-   model-authored preparation and test its accepted terms separately.
-3. **Replace the shared packet by task.** Refactor `context/packet.ts`,
-   `review.ts` and the question construction in `seat.ts`. Start with response
-   and resolution, then reviews, priority, combat and opening choices. Preserve
-   original ids and mandatory facts while removing duplicated renderings.
-   Replace the single small-position size assertion with sufficiency, relevance
-   and growth checks. Delete the superseded construction paths.
-4. **Add complete inspection and capacity handling.** Extend the existing
-   navigation loop and generic player failure path. Test reachability of every
-   original option, dependent targets and payments, backtracking, stale frames,
-   retry, capacity failure without motion, resume and exact final application.
-   Every additional Jev request belongs in the bill; no new inference role is
-   needed. Direct small decisions retain a direct path.
-5. **Repair the guidance feeding those questions.** Preserve an accepted use's
-   purpose through resolution, including fetch searches. Amend affected phase
-   guidance with changed actions instead of carrying stale prose. Simplify
-   Luna's ordinary action references and condition input using the 128 recorded
-   submission-repair calls. Keep complex card terms in pregame preparation.
-   Test retained-hand choices and combat commitments against their named
-   resource and threat facts. Core must not decide what the seat should keep,
-   fetch or attack with.
+**Changed case:** With only one green source, this policy's keep condition does
+not hold. Jev must apply the separately prepared one-source policy or ask about
+the uncovered case, rather than claim that two lands are present. With no
+planner available during opening, an uncovered case must be reported honestly.
 
-Each commit passes `npm test` and `npm run check`. Extend the existing invariant
-tests rather than adding a test per card. Compare packets from the same saved
-decision before and after a change. Required facts and option reachability
-must pass independently of whether Jev makes a good choice; smaller requests
-alone do not pass. Adding irrelevant facts must not inflate a focused question,
-while adding a relevant global restriction must bring that restriction in.
+#### 3. Pay for development without spending the response
 
-After offline checks, make isolated live Jev probes at the saved failures,
-including successful comparison searches and ordinary passes. Check the actual
-choice, request size, calls, latency, help requests and provider refusals. Then
-resume a bounded continuation from before game two's failure and inspect one
-ordinary opening with corrected preparation. Full games wait until those
-checks show complete context and coherent execution. No new full games are
-needed to discover the already-recorded defects again.
+**Assessment:** Village's accepted red mana is restricted to casting a creature
+spell. Its unrestricted ability produces colorless. **Strategy:** "Cast Hired
+Claw now. Preserve Mountain A for Shock on the opponent's turn."
+**Facts:** Empty stack, Red's main phase; Village and Mountain A are untapped;
+Claw and Shock are in hand. Both sources can fund Claw's red cost. Only Mountain
+A can fund Shock's red cost afterward.
+
+**Review question:** "Is the planned Claw use ready while retaining Shock?"
+**Payment question:** "Which offered payment casts Claw and preserves the named
+response: Village's creature-only red, or Mountain A's unrestricted red?"
+Both alternatives show what remains usable, not just "one mana left."
+
+| Payment | Untapped source afterward | Can that source pay for Shock? |
+|---|---|---|
+| Village's creature-only red | Mountain A | Yes, unrestricted red |
+| Mountain A's red | Village | No, colorless or creature-only red |
+
+**Final question:** "Cast Claw with Village's red using this offered move, inspect
+another use, or pass?" Jev chooses the original move id; review paid nothing.
+
+**Changed case:** A tapped Village makes the preferred payment unavailable.
+The context names the conflict with the Shock hold. It does not silently spend
+Mountain A. A standing effect that turns Village into a Mountain must be included
+because it changes the comparison; printed text alone is insufficient.
+
+#### 4. A sequence with dependent actions
+
+**Pregame:** Landfall payoffs should be in play before the lands intended to grow
+them. A creature spell on the stack has not entered. **Strategy:** "Cast Hydra
+with Forest A, Forest B and the Elves. After it resolves, play Forest C from hand,
+then fetch with Passage. Preserve Forest C for Veil. Attack with the established
+Chocobo after the growth resolves."
+**Facts:** The named permanents are available, Elves can tap, the land play is
+unused, and no known effect changes this sequence.
+
+**First review:** "Is Hydra ready before either land use, with Forest C reserved
+for protection after it enters?" The action question compares actual payments.
+After casting, **next review:** "Hydra is on the stack. Its cast is recorded;
+its entry is pending. Is a response required, or should priority be passed?"
+The land step is waiting, not a missing legal action that requires a repair.
+
+After Hydra enters with one counter, Jev chooses Forest C. Its landfall triggers
+must be ordered and resolved; the observed result includes two Hydra counters. The
+Passage activation then creates a search choice (example 6), and the fetched
+land creates another trigger. Four counters are an expected result conditional
+on those events, not a completion flag set when the sequence was planned.
+
+**Changed case:** If Hydra is countered, the planned benefit of spending Passage
+is gone. Use an explicitly prepared alternative or ask strategy about that loss.
+Do not continue the sequence merely because later steps still have legal offers.
+
+#### 5. Protect the named object in a response window
+
+**Strategy:** "Use the reserved Forest and Veil to protect Hydra from targeted
+removal. Do not spend that protection on unrelated damage."
+**Facts:** Red's Shock is on top of the stack, bound to Green's 1/1 Hydra H.
+Forest C is untapped; Veil is in Green's hand. Red may still have a response;
+its hidden cards are not known.
+
+**Review question:** "Does the protection response apply to Shock targeting
+Hydra H? If Shock resolves on H now, two damage is lethal."
+**Action question:** "Cast Veil targeting H with Forest C, choose another offered
+response, or pass?" The candidate says which object it protects and which
+reservation it spends. All Veil targets remain inspectable.
+
+After the cast, the stack reads top first: Veil targeting H; Shock targeting H.
+A subsequent response review shows protection pending, not protection already
+granted. If Veil resolves, the next question reads the new counter and hexproof.
+The remaining Shock is handled against its actual targets at resolution.
+**Changed case:** Shock targets Green instead. That does not satisfy this branch;
+Jev follows another covered response or passes, without recasting the whole plan.
+
+#### 6. Resolve a search for its accepted purpose
+
+**Pregame:** A fetch use must say what the searched land accomplishes. **Strategy:**
+"Use Passage to add a Forest and get the second landfall on Hydra."
+**Facts:** Continuing example 4, Passage was sacrificed as payment. Three Forests
+remain on the battlefield. Its ability is resolving. A Forest is offered;
+finding no card is also offered. No player has priority mid-search.
+
+**Question:** "Which search choice carries out the accepted fetch? Choosing Forest
+puts it onto the battlefield tapped, then shuffles. With these three lands still
+present, it becomes the fourth and Passage untaps it. Finding nothing adds no
+land and produces no landfall."
+**Answer:** Choose Forest under this purpose. The cost is already paid and cannot
+be undone by declining. Later instructions receive their bindings and remaining
+obligations. Each continuation still needs a pick unless this seat explicitly
+authorized its delegation. A new trigger waits until resolution finishes.
+
+**Changed case:** No eligible land remains, or the seat intentionally prepared a
+fail-to-find use. Declining remains a real choice. A missing binding must never
+turn the purpose into an invented Forest or a mandatory search result.
+
+#### 7. Order triggers by the resolution they should produce
+
+**Strategy:** "Resolve Hydra's doubling before Chocobo's growth, to improve the
+Hydra's toughness as soon as possible." **Facts:** A land entered with Hydra
+at two counters and Chocobo present. Both landfall triggers are waiting under
+Green's control. The stack resolves last in, first out.
+
+**Question:** "Which waiting trigger should go onto the stack first so Hydra's
+trigger will resolve first? Put Chocobo's trigger below Hydra's trigger."
+The alternatives preview stack order and resulting resolution order explicitly.
+After each pick, the next question shows the remaining triggers and current
+order. It does not ask which should "go first" without naming the operation.
+
+Both seats still receive priority before resolution. Hydra reaching four
+counters is conditional on its trigger resolving with the relevant objects and
+conditions intact. **Changed case:** A target must be bound, another controller
+has waiting triggers, or Ascension produces a reflexive trigger after a counter
+is added. Ask at the correct new obligation; do not select future targets or
+interleave the controllers' ordering rounds by preference.
+
+#### 8. Combat is a sequence of different questions
+
+**Pregame:** Name which threat held blockers actually answer. **Strategy:** In
+this constructed position, "Attack with both; holding these ground creatures
+cannot stop Smaug's next attack."
+**Facts:** Green is at 4, Red at 10. Green's attack-ready Chocobo is 9/10 with
+trample until end of turn from Ascension; Hydra is 4/4 with trample. Red's sole
+blocker is an untapped 4/3 Smaug with flying; Red has no Treasures. Green has no
+flying or reach blocker. Current layers and marked damage are shown separately.
+
+**Attack question:** "Which creature do you add to this declaration under the
+attack-with-both plan? Chocobo and Hydra are eligible; neither can block Smaug
+on the return attack." Jev selects each, then explicitly finishes attacking.
+Show the whole developing declaration, not just the last selected creature.
+
+The comparison is conditional: if Smaug blocks Hydra and nothing else changes,
+Red takes 9 and Smaug dies; if Smaug blocks Chocobo, assigning 3 to Smaug and 6
+to Red plus Hydra's 4 can be lethal. Smaug can block a ground attacker. Its flying
+does not make it irrelevant to the attack calculation.
+
+**Block variant:** Green faces Zhao and Kellan, with a 2/3 Chocobo and an Elf.
+A plan to preserve the Elf and block Kellan asks "Block Kellan with Chocobo, add
+another assignment, or finish?" Each pair names both creatures. A lone block on
+Zhao conflicts with menace; a double block is a different complete declaration.
+
+**Damage question:** "How should the blocked 9-power trampler assign its damage
+under the face-damage plan?" Show all blockers, lethal requirements, marked
+damage and the offered distributions. Keep assignment, simultaneous damage,
+and later priority separate. **Changed case:** Removal, a pump, lost trample or
+a first-strike step requires fresh facts and may invalidate the combat plan.
+
+#### 9. Several modes, targets and payments
+
+**Strategy:** "Use Abrade's damage mode on the opposing 3/3 Curator before it gains
+its bonus. Preserve Mountain A for Shock and the Treasure for Smaug's attack."
+**Facts:** Red has untapped Mountains A, B and C, Smaug and one Treasure; Abrade
+and Shock are in hand. Green has Curator and Elves. Abrade's damage targets
+include all three creatures; its artifact mode can target the Treasure. Payments
+can consume different Mountains or the Treasure. The prepared payment is B and C.
+
+The preferred sequence is: "Which prepared use applies now?" then "Which mode
+and target carry out that use?" then "Which offered payment preserves Shock
+and the Treasure's planned attack damage?"
+Shared source text and effects appear once; alternatives state the changing
+bindings and resources. The final question names the complete original move.
+Skip a separate inspection question when it makes no further judgment possible;
+still ask Jev to choose the voluntary move. A unique prepared line is not forced.
+
+These are reversible inspections of the same decision. Selecting Abrade does
+not cast it; selecting a target does not target anything in the game. Jev can
+return to other uses. Every original choice remains reachable. Dependent target
+slots, X and additional sacrifice/discard/exile costs must preserve the complete
+relation among offers; separate menus must not fabricate a new combination.
+
+**Changed case:** Curator is now 7/7. The original reason for Abrade no longer
+holds. Ask about a covered alternative or revise the line before binding a
+payment. Fitting the request cannot justify hiding that changed characteristic.
+
+#### 10. Preparation, covered changes and a broken assumption
+
+**Pregame:** Develop while preserving protection. **Background strategy:** With
+three Forests expected next turn and Hydra, Chocobo and Veil in hand, prepare:
+"If the draw supplies an available fourth untapped green source, play it, cast
+Hydra and leave one Forest for Veil. Otherwise develop Chocobo and hold Veil."
+It does not assume the next card is a Forest or inspect the library order.
+
+After an actual Forest draw and unchanged board, the preparation can cover the
+position. **Review question:** "The fourth-source branch applies. Is its land
+use ready, with the later Hydra payment and Veil reservation still compatible?"
+Drawing another Veil selects the prepared alternative; Jev does not invent one.
+An uncovered change goes to the existing strategist at the appropriate stage.
+
+**Broken case:** A different accepted plan has no smaller development branch.
+An opponent's action removes a required resource. **Help request:** "The Hydra
+line needs three spendable mana plus one
+reserved green. Only three remain. No prepared alternative releases the hold.
+Revise the unfinished line and its protection instruction. Nothing was cast."
+The strategist returns coherent actions, guidance and holds. A refused submission
+changes none of them. A pending effect is evidence to wait, not this kind of loss.
+
+**Duplicate-use case:** Curator already has an activation on the stack targeting
+Abrade to supply the fourth distinct card type in its linked exile. The review
+states the binding, paid mana and pending result. It asks whether an interruption
+requires a response, not whether to pay again to start the same use.
+
+#### 11. Obligatory choices and cleanup
+
+**Preparation:** The late-turn discard policy preserves the named response and
+the next turn's sources. **Facts:** Green has nine cards and must discard two;
+its hand contains three Forests, Chocobo, Curator, Hydra, Veil, Ascension and
+Explorer. For this example the plan retains two Forests and the cheaper line.
+
+**Question:** "Which card do you discard now? Two discards remain." The packet
+shows the hand and resource commitments each candidate would leave. Under this
+plan the third Forest and Explorer can leave. After one pick, recompute the
+remaining hand and one-card obligation. Discard is a zone change, not an opening bottom choice.
+Ordinary cleanup has no priority pass. If its state-based actions or triggers
+open exceptional priority, both seats answer before another cleanup.
+
+**Legend variant:** Two Smaugs under one controller require a choice of which
+incarnation to keep. Show counters, damage, attachments, tapped state and the
+plan's need for a blocker. Ask "Which Smaug do you keep for that purpose?" This
+is not a priority response; one mandatory operation being automatic does not
+make a genuine choice between permanents forced.
+
+#### 12. Review completion and close the right window
+
+**Strategy:** The main-phase line is complete when the named development has
+resolved; Passage may be held for the opponent's end step; Veil remains reserved.
+**Facts:** Land play recorded, creature resolved, stack empty, no remaining
+instruction; Passage's hold and Veil's response are still applicable.
+
+**Review question:** "Is any use still due in this main phase? Development is
+complete; Passage is held for the named later window, and Veil is a response."
+A held card is accounted for, not forgotten and not required to be spent now.
+**Final question:** "Pass priority with this work reviewed, or inspect another
+use? If Red also passes without acting, precombat main ends."
+
+Reviewing completion does not pass. Red answers separately. If Red acts, Jev
+receives the new response situation and later reviews completion against the
+changed facts. **Changed case:** The creature is still on the stack, or a search
+is unanswered. Announcement is not completion; the next question concerns that
+pending work and cannot claim that the phase is over.
+
+### Phase and stage coverage
+
+The same examples serve both seats, with each seat's own knowledge and intent.
+For every row, review entry obligations, interruptions, repeated decisions and
+exit conditions. Skipped or inserted steps use the actual window, not an assumed
+position in a fixed turn script.
+
+| Window | Active seat | Other seat | Question classes and examples |
+|---|---|---|---|
+| Deck registration and card assessment | Both seats prepare before dealing; reject missing card meaning | Public lists, private equipment | Preparation contract; restricted payment in 3 and continuation in 6 |
+| Pregame analysis and synthesis | Both seats prepare policies, sequences, threats and exceptions | No hidden hands or order inferred | Apply policy, sequence and response; 2, 4, 5, 8, 10 |
+| Opening | Declare keep/mulligan, then satisfy own bottom obligations | Answer own obligations in the table's order | Apply policy; 2. Card-granted opening actions remain unsupported |
+| Untap | Automatic applicable rules operations | No ordinary priority | Show resulting facts to the next question, not an invented consent call |
+| Upkeep | Handle triggers, then own uses and priority | Review responses and last pre-draw opportunities | Order, response, pass; 1, 5, 7 |
+| Draw | Draw when required; accept or amend preparation afterward | Respond only in actual priority windows | Covered change, response; 5, 10. Respect the starting player's skipped first draw |
+| Precombat main | Develop, pay, sequence, finish | Respond to each action when priority reaches it | Review, bind, sequence, resolve, close; 3-7, 9, 12 |
+| Begin combat | Apply planned last pre-attack actions | Apply pre-attack responses | Review timing and response; 5, 8. A later attack declaration is not already made |
+| Declare attackers | Choose attackers and finish, then handle attack triggers and priority | Receive priority after declarations and triggers as appropriate | Combat, order, response; 5, 7, 8 |
+| Declare blockers | Respond after the defender's declaration | Choose blocks and finish; own later responses | Combat and response; 5, 8 |
+| Combat damage, including extra step | Make required assignments; simultaneous damage then checkpoints | Make own required assignments and later responses | Damage and order; 7, 8. No priority between assignment and dealing |
+| End combat | Remaining combat effects and last combat uses | Own responses | Resolve, respond, finish; 5, 6, 12 |
+| Postcombat main | Reconcile actual combat results; develop with remaining resources | Own responses | Sequence, changed assumptions, finish; 3, 4, 10, 12 |
+| End step | End triggers, delayed effects and final priority | Held end-step uses such as a fetch | Order, response, resolve, finish; 5-7, 12 |
+| Cleanup | Repeated required discards, expiry, state-based actions | No ordinary priority; answer exceptional priority | Obligations and response; 11. Repeat cleanup after the exception |
+| Any priority checkpoint | State-based choices and waiting triggers precede priority | Answer the controller's actual obligation | Order, obligatory choice; 7, 11 |
+| Mid-resolution | The instruction's assigned seat answers | No ordinary priority; may be assigned an instruction | Resolve; 6. `may`, `unless`, bindings and target changes need distinct examples |
+| Rewind, clone or resume | Rebuild the same pending question from recorded facts and accepted work | Each seat reads its own projection again | Revise or clarify; 10. Discard stale inspections, not historical decisions |
+
+| Planning stage or situation | Required preparation or question | What follows |
+|---|---|---|
+| Initial brief | Opening policy and first upkeep directions before the first draw | Jev applies them without an extra opening strategy session |
+| Opponent-turn preparation | Current projected position, next-turn resource assumptions, unknown draw and opponent changes | A conditional candidate plan; no action and no invented future facts |
+| After own draw | Actual draw and changes since preparation; which branch covers them? | Adopt if covered and valid, otherwise amend with the same planner |
+| Due use | Applicable policy, prerequisite facts, concrete choices and resource commitments | Review, inspect if needed, then an original move id |
+| Several applicable branches | Prepared precedence and conditions releasing holds | Apply that precedence; unresolved strategic conflicts go to the writer |
+| Ordinary wait | Name the pending effect and the use it blocks | Answer the current response or resolution question; no repair just for waiting |
+| Uncovered event or lost assumption | Changed fact, affected uses, remaining resources and earlier recorded work | Revise the unfinished line, its guidance and commitments together |
+| Rejected submission | Each validation problem; unchanged physical position and accepted plan | Correct the proposed plan, never pretend it executed |
+| Rule uncertainty | The actual timing or rules question and affected facts | A cited lookup without motion, then the same decision |
+| Suspected opponent violation | A recorded opponent action, claimed conflict and relevant public facts | Strategy raises an objection; the judge decides, with replanning after rollback |
+| New phase with the same line | The new window and the preparation applicable there | Jev's next question; no strategy session solely for the phase change |
+| Clone, resume or ruling | Recorded preparation and progress for that prefix | Rebuild the pending question; discard inspections bound to a different frame |
+
+A rule lookup is not a replan, a replan is not a physical move, and disagreement
+with guidance is not automatically an objection. Capacity failure is an
+infrastructure outcome, not a request by the seat to change its strategy.
+
+### Review the examples before building
+
+This first set covers the principal chains. The remaining variants belong to
+these same classes. Work each into a concrete position before its builder or
+planner direction is considered covered:
+
+| Variation to develop | Preferred question | Preparation and facts required |
+|---|---|---|
+| Dependent target slots | "Which second target belongs to this first target and accepted mode?" | The relationship and complete valid bindings, not two independent target lists |
+| X and additional costs | "Which offered X and payment achieves the named use while retaining its commitments?" | Strategy's chosen purpose; actual mana, sacrificed/discarded/exiled objects and consequences |
+| Optional or `unless` choice | "Take this instruction's option, pay its stated cost, or decline under the prepared policy?" | The exact current instruction, actor, costs already paid and remaining alternatives |
+| Explicit delegation | "Does this remaining instruction match the continuation this seat authorized?" | Authorization scope and a unique matching continuation; a broad goal is not authorization |
+| Intervening condition or reflexive trigger | "Which current obligation exists after this event and condition check?" | Engine-derived waiting work and fresh conditions; no speculative future target selection |
+| First or double strike | "Which assignment carries out the plan in this damage step?" | Eligible participants, previous-step results and damage still to come |
+| Temporary permission | "Use this available card before permission expires, or follow the prepared hold?" | The permitted zone, timing, expiry and remaining resources; expiry creates no automatic cast |
+| Control change or re-entry | "Does the prepared use still refer to this object and controller?" | Incarnation, ownership/control, applicable registrations and changed availability |
+
+Mark unsupported mechanics separately, such as ordering overlapping replacements,
+rather than advertise a usable question. Deriving waiting work or matching an
+explicit delegation can require no Jev call; do not turn every explanatory
+question in this table into an inference request.
+
+For each example, review these points in order:
+
+1. **Gameplay.** Are the position, timing, costs and conditional outcomes correct
+   against the pinned card data and rules? Does the example distinguish an
+   accepted interpretation from proof of legality?
+2. **Preparation.** Did pregame settle the reusable policy? Did strategy resolve
+   the live tradeoff and name when the choice reverses? No unexplained "best"
+   target or "good" payment may reach Jev as its strategic task.
+3. **Question.** Is one judgment being asked with the facts needed for it?
+   Would the changed-position case lead to a different supported answer?
+4. **Continuation.** Does the answer change only what it claims? Are next
+   obligations, pending work, both seats' priority and completion evidence clear?
+5. **Information and choice.** No hidden facts; every offered move remains
+   reachable; known restrictions accompany the choice they affect. A model's
+   preference never silently removes the other moves.
+
+Then group the reviewed examples into shared content builders and choose the
+smallest preparation vocabulary that serves them. Adapt the pregame analyst and
+synthesis instructions, strategy submission guidance and example lookup together.
+Give each role the examples it must produce or consume. Load complete relevant
+examples on demand; do not paste the whole catalogue into every prompt. Keep
+current syntax examples distinct from proposed interfaces until handlers exist.
+
+### Implementation and validation after the design review
+
+Build in this order: representative question fixtures; the missing projected
+facts and accepted intent they require; preparation and planner instructions;
+focused question builders and pure inspection; then trace diagnostics and
+capacity handling across the whole request. Derive game facts in core, select
+and render them in context. Keep the physical offer list intact. Delete replaced
+construction paths. Do not add a framework or ports around local functions.
+
+For a large decision, first identify the dimensions the seat actually compares.
+Share common source text and effects; inspect a use, its targets and its payment
+when those are separate judgments. Preserve dependent combinations, backtracking
+and a final choice of an original move id, even if only one remains. Bind all
+inspection to the decision and physical/equipment revisions. No intermediate
+selection pays a cost, declares a target or advances the table.
+
+Measure the complete request: instructions, state, criteria, requested output
+ceiling, fact provenance, repeated components and actual provider usage. Use
+Pi's resolved capabilities and provider contract for capacity checks; name any
+tokenizer or estimator and its limits. JSON bytes are not tokens. If a complete
+question still cannot be submitted, record an infrastructure failure and leave
+that exact decision pending. Do not retry an unchanged oversized request until
+it turns into a fallback pass. Keep malformed-answer accounting distinct.
+
+No string clipping, partial card text, first-N options, silent omission or
+stronger-model substitution. Replace existing fixed history/step slices only
+after the examples establish what that question needs. Necessary facts must be
+present at the final choice, not merely available behind an optional lookup.
+More focused Jev calls are useful when each settles a real part of the decision;
+neither a low call count nor a small packet proves good context.
+
+Only now use the three games to challenge the design. Their 3,190 Jev requests
+include 1,886 reviews; card reviews averaged 10.4 printed card texts, and one
+unavailable-step review carried 35 move options with none matching the step.
+The largest failed retry was 88,548 serialized bytes. Those observations locate
+regressions; they do not say which content the preferred question requires.
+The audit is under `.pi/jev-context-review-20261005/`; seven saved cases under
+`.pi/luna-three-low-20261005/positions/index.json` cover payment, search, pending
+Curator use, stale guidance, bottoming, combat and provider refusal. Village's
+assessment needs model-authored correction before its example can run faithfully.
+
+Extend existing invariant tests for sufficiency, relevant changes, no leakage,
+choice reachability, dependent payments, stale inspection, replay and resume.
+Use doubles to test question construction and transitions, not to assert that a
+real model will make the expected judgment. Each commit passes `npm test` and
+`npm run check`. After offline coverage, probe the worked cases with the fixed
+live roster, then bounded continuations and an ordinary opening. Full games
+follow coherent component behavior; no new full game is needed to design these
+questions.

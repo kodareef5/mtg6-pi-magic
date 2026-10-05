@@ -120,6 +120,13 @@ nothing. Record capacity failures as infrastructure failures, never as a seat's
 wish to pass. The planned implementation is in `docs/PLANS.md`, "Next round:
 focused Jev context"; the current adapter does not yet satisfy that plan.
 
+Design from preferred uses before editing those builders or planner prompts.
+Write representative simple and complex question sequences, including changed
+positions, then review every phase, seat and planning stage against them. Those
+examples define what pregame and strategy must prepare for Jev. Existing packets
+and failed games are later regression evidence, not the shape to trim into a
+specification. `docs/PLANS.md` holds the question classes and first worked set.
+
 An ordered priority, not a mood. Take an available win, otherwise prevent the
 identified loss, otherwise keep the engine and the named response, otherwise
 develop. Each option says which of those it serves.

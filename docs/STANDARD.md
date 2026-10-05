@@ -383,21 +383,21 @@ the provider failure, Village payment, declined search, repeated Curator use,
 stale repair, opening bottom choice and Smaug combat. They preserve the games'
 private information and stay out of the package.
 
-The next work follows these saved positions. The detailed builder contracts,
-capacity handling and acceptance checks are in
+Design the next round from preferred question sequences and their preparation.
+Use these saved positions afterward to challenge its coverage. The worked
+examples, phase and stage map, capacity handling and acceptance checks are in
 [Next round: focused Jev context](PLANS.md#next-round-focused-jev-context).
 
-1. Bound Jev's request size by removing repeated option descriptions and sharing
-   common action terms. Preserve every choice and its targets and payment;
-   verify the saved failing request before another full run.
-2. Validate context-sensitive assessment terms and repair Village through
-   model-authored preparation. Exercise the accepted terms before dealing.
-3. Carry named stack targets and action progress into the decision packet.
-   Repair the unfinished line and its guidance together. Test pending,
-   completed and later-window uses separately, including optional searches.
-4. Simplify Luna's planning input and submission syntax around the observed
-   refusals. Then test concrete retained-hand and combat plans on the saved
-   positions, including whether a proposed blocker can stop the named threat.
+1. Review example classes from ordinary passes through dependent actions and
+   interruptions. Specify the desired question, facts, preparation, answers and
+   continuation, including a changed-position case.
+2. Cover both seats, every phase and each planning stage. Use that coverage to
+   choose shared builders and directions for pregame and strategy.
+3. Implement the required facts, preparation, focused questions and complete
+   option inspection. Repair Village through model-authored preparation.
+4. Check the design against these recorded failures, then probe the worked
+   cases. Preserve choices and required facts when handling large requests;
+   fewer bytes alone do not establish good context.
 
 Keep Luna low and Sol 6.1 high fixed while testing these changes. Passing the
 saved component cases is the next gate; these three games are not a playing
