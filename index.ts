@@ -15,7 +15,7 @@
  * shared game, roster and journal lifecycle can be read in one file.
  */
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -35,7 +35,7 @@ import {
 	type Role,
 } from "./src/context/roles.ts";
 import { degraded, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
-import { gameResult, report, preparationFailure } from "./src/context/report.ts";
+import { gameResult, report, preparationFailure, saveReport } from "./src/context/report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
 import { deck } from "./src/core/decks.ts";
 import { start } from "./src/core/commit.ts";
@@ -190,8 +190,8 @@ export default function (pi: ExtensionAPI) {
 		}).catch((error) => {
 			const result = preparationFailure(opened, error, began, { journal: journal.path });
 			const path = join(GAMES, `${header.id}-${began}.result.json`);
-			writeFileSync(path, JSON.stringify(result, null, 2) + "\n");
-			ctx.ui.notify(`${report(result).join("\n")}\nresult    ${path}`, "warning");
+			const paths = saveReport(path, result);
+			ctx.ui.notify([...report(result), ...paths].join("\n"), "warning");
 			throw error;
 		});
 		table = opened;
@@ -314,10 +314,10 @@ export default function (pi: ExtensionAPI) {
 				); } catch (error) { failure = error; } finally { running = false; }
 				const result = gameResult(opened, seated!, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
 				const resultPath = join(GAMES, `${seed}-${seated!.timing.startedAt}.result.json`);
-				writeFileSync(resultPath, JSON.stringify(result, null, 2) + "\n");
+				const paths = saveReport(resultPath, result);
 				ctx.ui.notify(
 					`${verb === "resume" ? "Resumed" : "Seed"} ${seed}.\n` +
-						report(result).join("\n") + `\nresult    ${resultPath}`,
+						[...report(result), ...paths].join("\n"),
 					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
 				return;

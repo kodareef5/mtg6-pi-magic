@@ -40,7 +40,8 @@
     "smoke": "node tools/smoke.ts",
     "matchup": "node tools/matchup.ts",
     "stats": "node tools/stats.ts",
-    "pregame": "node tools/pregame.ts"
+    "pregame": "node tools/pregame.ts",
+    "timeline": "node tools/timeline.ts"
   },
   "dependencies": {
     "ws": "^8.20.0",

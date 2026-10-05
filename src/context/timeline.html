@@ -1,0 +1,83 @@
+<!doctype html>
+<!-- The offline viewer stays together past 150 lines so exported pages need no server or assets. -->
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magic game timeline</title>
+<style>
+:root { color-scheme:dark; --bg:#0d1117; --panel:#151c26; --line:#2b3546; --muted:#9aaac0; --ink:#edf3fc}
+
+* { box-sizing:border-box}
+body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui,sans-serif}
+header,main { max-width:1800px; margin:auto; padding:24px 30px}
+header { padding-bottom:12px}
+.eyebrow { color:#9eaeff; font-size:12px; letter-spacing:.12em; text-transform:uppercase}
+h1 { font-size:26px; line-height:1.2; margin:8px 0; overflow-wrap:anywhere}
+p { color:var(--muted); margin:6px 0}
+button,select,input { font:inherit; color:var(--ink); background:#1c2635; border:1px solid #39485e; border-radius:6px; padding:7px 11px}
+button { cursor:pointer}
+button:hover,select:hover { border-color:#b2c1f6}
+button:focus-visible,select:focus-visible,input:focus-visible { outline:2px solid #b6c5ff; outline-offset:3px}
+button.active { background:#354566; border-color:#c0ceff}
+.metrics { display:flex; flex-wrap:wrap; gap:30px; margin-top:20px}
+.metric strong { display:block; font:24px/1.4 ui-monospace,monospace; font-weight:500}
+.metric span { color:var(--muted); font-size:12px}
+.toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px}
+.legend { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0}
+.legend button { font-size:12px; padding:5px 9px}
+.legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px}
+.legend button[aria-pressed=false] { opacity:.45}
+.layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:16px; align-items:start}
+.chart { background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; min-width:0}
+.canvas-wrap { overflow:auto; max-height:75vh}
+canvas { display:block; width:100%; touch-action:none; cursor:crosshair}
+.pan { display:flex; align-items:center; gap:14px; padding:10px 16px; border-top:1px solid var(--line)}
+.pan input { padding:0; flex:1; min-width:80px}
+#range { font:12px ui-monospace,monospace; color:#c8d4e7}
+aside { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; position:sticky; top:12px; overflow-wrap:anywhere}
+aside h2 { font-size:16px; margin:0 0 12px}
+dl { margin:0}
+dt { color:var(--muted); font-size:12px; margin-top:10px}
+dd { margin:1px 0 0; font:13px/1.5 ui-monospace,monospace; white-space:pre-wrap}
+.note { font-size:12px; max-width:1200px; margin-top:12px}
+.call-nav { display:flex; gap:8px; margin-top:16px}
+.call-nav button { font-size:12px}
+.status { font-size:12px; color:#d3dbee}
+.hint { font-size:12px; margin-left:auto}
+#selection { padding:10px 16px; font:12px ui-monospace,monospace; color:#b7c6dc; border-top:1px solid var(--line)}
+@media(max-width:950px) { .layout { grid-template-columns:1fr}
+aside { position:static}
+header,main { padding:18px}
+.metrics { gap:18px}
+.hint { width:100%; margin:0}
+}
+
+
+</style>
+<header>
+<div class="eyebrow">pi-magic · game timeline</div><h1 id="name"></h1><p id="outcome"></p>
+<div class="metrics" id="metrics"></div>
+</header>
+<main>
+<div class="toolbar">
+<button id="fit">Whole run</button><button id="play">Play only</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button>
+<label>Turn <select id="turn"><option value="">Choose a turn</option></select></label>
+<span class="hint">Scroll to zoom · drag to pan · Shift-drag to zoom a range · click a call to pin details</span>
+</div>
+<div class="legend" id="legend" aria-label="Visible roles"></div>
+<div class="layout">
+<section class="chart" aria-label="Calls over elapsed time">
+<div class="canvas-wrap"><canvas id="chart" tabindex="0" aria-label="Call timeline. Use zoom buttons and turn selector, or arrow keys to pan. Call details are available with the previous and next call buttons."></canvas></div>
+<div class="pan"><span id="range"></span><input id="pan" type="range" min="0" max="1000" value="0" aria-label="Pan across the run"></div>
+<div id="selection"></div>
+</section>
+<aside aria-live="polite"><h2 id="detail-title">Inspect a call</h2><p id="detail-hint">Hover for details. Click to keep a call selected.</p><dl id="detail"></dl><div class="call-nav"><button id="previous">Previous call</button><button id="next">Next call</button><button id="unpin">Unpin</button></div></aside>
+</div>
+<p class="note" id="provenance"></p>
+<p class="note">Each bar is one request, including retries and tool continuations. Rows within a role separate concurrent requests; they do not imply a call stack. The concurrency chart includes all roles. Blank time has no recorded request. Input includes cached tokens; reasoning is part of output. Missing usage is unknown. This file contains call metrics, not prompts or replies.</p>
+</main>
+<script id="game" type="application/json"><!--GAME_DATA--></script>
+<script>
+<!--GAME_SCRIPT-->
+</script>
+</html>

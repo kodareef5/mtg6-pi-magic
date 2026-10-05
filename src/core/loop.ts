@@ -25,6 +25,7 @@ import { describe, project } from "./view.ts";
 import { annotate, execution, planReason, planState, type PlanState } from "./planning.ts";
 import { editWork, prepareWork, recordWork, workFrame } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
+import { mulligansSettled } from "./pregame.ts";
 
 export type Watcher = (line: string) => void;
 
@@ -77,6 +78,8 @@ export async function play(
 	onTurn?: TurnWatcher,
 	workBudget = 32,
 	judge?: Judge,
+	/** Presentation only, called as a turn begins, including the first turn after the opening. */
+	onTurnStart?: (turn: number, active: SeatId) => void,
 ): Promise<Outcome | null> {
 	if (!Number.isSafeInteger(workBudget) || workBudget < 1) throw new Error("The work edit budget must be a positive integer.");
 	// What each seat has already been shown, so a frame's "since" is the part it
@@ -86,8 +89,14 @@ export async function play(
 	let told = 0;
 	let began = table.log.length;
 	let walk: { version: number; edits: number } | undefined;
+	let observedTurn: string | undefined;
 
 	while (table.outcome === null) {
+		const turn = `${table.cursor.turn}:${table.cursor.active}`;
+		if (onTurnStart && turn !== observedTurn && mulligansSettled(table)) {
+			observedTurn = turn;
+			tell(table, onTurnStart, table.cursor.turn, table.cursor.active, table.log.length);
+		}
 		const decision = nextDecision(table);
 
 		if (decision === null) {

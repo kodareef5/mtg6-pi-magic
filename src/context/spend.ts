@@ -52,6 +52,7 @@ export const ASSESSMENT_CEILING = 4000;
 /** One request. */
 export type Spend = {
 	role: Role;
+	seat?: number;
 	/** What the request was for, so two pregame calls are tellable apart. */
 	about: string;
 	/** provider/id of the model that answered, which is not always the one asked for. */

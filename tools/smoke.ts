@@ -24,7 +24,7 @@ import { open, reopen, replay, save, type Header } from "../src/core/journal.ts"
 import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
-import { gameResult, report, preparationFailure } from "../src/context/report.ts";
+import { gameResult, report, preparationFailure, saveReport } from "../src/context/report.ts";
 import { traceInference } from "../src/context/trace.ts";
 
 const { values: a } = parseArgs({
@@ -145,8 +145,8 @@ const seated = await seatTable(
 	},
 ).catch((error) => {
 	const result = preparationFailure(table, error, began, { journal: journal.path, trace: tracePath });
-	writeFileSync(resultPath, JSON.stringify(result, null, 2) + "\n");
-	console.error(report(result).join("\n"));
+	const paths = saveReport(resultPath, result);
+	console.error([...report(result), ...paths].join("\n"));
 	process.exit(1);
 });
 
@@ -162,9 +162,9 @@ const outcome = await run(
 ).catch((error) => { failure = error; return null; });
 
 const result = gameResult(table, seated, { journal: journal.path, trace: tracePath, ...(failure ? { error: String(failure) } : {}) });
-writeFileSync(resultPath, JSON.stringify(result, null, 2) + "\n");
+const paths = saveReport(resultPath, result);
 console.log(`\n${report(result).join("\n")}`);
-console.log(`result    ${resultPath}`);
+console.log(paths.join("\n"));
 console.log(`journal   ${journal.path}`);
 console.log(`clone     node tools/smoke.ts --from ${seed}   (continues this game)`);
 // Non-zero when the result is not comparable: a game that finished with half its

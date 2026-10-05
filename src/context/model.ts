@@ -75,14 +75,14 @@ export type Classify = (
 export function decisionApi(
 	classify: Classify,
 	model: ClassifierModel<ClassifierApi>,
-	options: { signal?: AbortSignal; tally?: Tally; about?: string } = {},
+	options: { signal?: AbortSignal; tally?: Tally; about?: string; seat?: number } = {},
 ): DecisionApi {
 	const named = `${model.provider}/${model.id}`;
 	return {
 		named,
 		async ask(request, about = "pick") {
 			const began = Date.now();
-			const finish = meter(options.tally, { role: "decide", about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began });
+			const finish = meter(options.tally, { role: "decide", seat: options.seat, about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began });
 			let result: ClassifierResult;
 			try {
 				// classify never rejects, so the stop reason is the error channel.

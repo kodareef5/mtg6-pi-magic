@@ -98,7 +98,7 @@ export async function seat(
 		prepared?: { seat: SeatId; made: unknown }[];
 	},
 ): Promise<Seated> {
-	const timing: RunTiming = { startedAt: Date.now() };
+	const timing: RunTiming = { startedAt: Date.now(), turns: [] };
 	const fromVersion = table.ledger.length;
 	const counted = tally();
 	const dialled: Record<string, number> = {};
@@ -136,7 +136,7 @@ export async function seat(
 		intents[at.id] = startingIntent(at.id);
 		const strategy = pick(parts.get(at.id)!, "strategy");
 		const planning = strategy && !strategy.off && strategy.model && strategy.model.type !== "classifier"
-			? reasoner({ role: "strategy", stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
+			? reasoner({ role: "strategy", seat: at.id, stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
 				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
 		// The brief handles the opening and upkeep. Strategy is due after the first draw window.
 		if (planning && !table.work[at.id]) {
@@ -149,7 +149,7 @@ export async function seat(
 			editWork(table, at.id, [{ do: "plan.keep", reason: "The brief covers the opening; strategy follows the draw." }], `opening-covered-${at.id}`);
 		players[at.id] = aiSeat({
 			name: at.name,
-			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted }),
+			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted, seat: at.id }),
 			intent: intents[at.id]!,
 			chronicle,
 			...(options.rules ? { rules: options.rules } : {}),
@@ -183,7 +183,7 @@ export async function seat(
 	for (const seat of new Set(jobs.map((job) => job.seat))) {
 		const role = pick(parts.get(seat)!, "pregame");
 		if (!role?.model || role.off || role.model.type === "classifier") return refuse(`Seat ${seat} needs a pregame model to assess its cards before play, or a clone carrying complete assessments.`);
-		assessors.set(seat, reasoner({ role: "pregame", stream: inference.stream, model: role.model as Model<Api>, tally: counted,
+		assessors.set(seat, reasoner({ role: "pregame", seat, stream: inference.stream, model: role.model as Model<Api>, tally: counted,
 			...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}) }));
 	}
 	let next = 0;
@@ -233,6 +233,7 @@ export async function seat(
 			// A reasoner per call, so one analyst's failures cannot stop its siblings or the synthesis.
 			const written = await brief(at, others, universe, () => reasoner({
 				role: "pregame",
+				seat: at.id,
 				stream: inference.stream,
 				model: role.model as Model<Api>,
 				...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
@@ -356,7 +357,7 @@ export async function run(
 					);
 				}),
 		);
-	}, undefined, judge); }
+	}, undefined, judge, (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" })); }
 	finally {
 		seated.timing.playEndedAt = Date.now();
 		await Promise.all(Object.values(seated.players).map((player) => player.close()));

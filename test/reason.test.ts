@@ -9,7 +9,7 @@
 
 import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
-import { appendFileSync, mkdtempSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -21,8 +21,9 @@ import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
 import { degraded, run, seat as seatTable } from "../src/context/sit.ts";
-import { gameResult, report, preparationFailure } from "../src/context/report.ts";
+import { gameResult, report, preparationFailure, saveReport } from "../src/context/report.ts";
 import { totals, usageReport } from "../src/context/metrics.ts";
+import { timeline, timelineData } from "../src/context/timeline.ts";
 import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
@@ -419,6 +420,9 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	assert.ok(result.timing!.playStartedAt! <= result.timing!.playEndedAt!);
 	assert.ok(result.timing!.playEndedAt! <= result.timing!.finishedAt!);
 	assert.equal(result.elapsedMs, result.timing!.finishedAt! - result.timing!.startedAt);
+	assert.equal(result.timing!.turns![0]!.turn, 1, "the first turn is recorded after the opening");
+	assert.ok(result.timing!.turns!.every((mark, i) => mark.source === "recorded" && mark.turn === i + 1));
+	assert.equal(result.timing!.turns!.at(-1)!.turn, built.cursor.turn, "the unfinished last turn is also timed");
 	assert.match(reading, /pregame/);
 	assert.match(reading, /summary/);
 	assert.match(reading, /jev       \d+ calls/);
@@ -480,6 +484,22 @@ test("a game bill counts attempts and separates overlapping time, role, model an
 	const reading = report({ ...failed, error: undefined, interruptions: { stops: 0, essential: 0, help: 0, rulings: 1, upheld: 0 }, judged: { cases: 1, failed: 0 } }).join("\n");
 	assert.match(reading, /judge\s+3 calls\s+1 cases this run.*1 game rulings\s+0 rollbacks/);
 	assert.match(reading, /unmetered 3 calls lack usage/);
+	const plotted = { ...failed, calls: [base, { ...base, at: 500 }, { ...base, at: 1500, ms: 200 }] };
+	const chart = timelineData(plotted, [{ at: 700, turn: 1, active: 0, source: "first-observed" }]);
+	assert.equal(chart.peak, 2);
+	assert.equal(chart.groups[0]!.lanes, 2, "concurrent calls in one role occupy separate rows");
+	assert.deepEqual(chart.groups[0]!.calls.map((call) => call.lane), [0, 1, 0], "rows are reused after a request ends");
+	assert.equal(chart.turns[0]!.source, "first-observed", "trace-derived turns never claim exact starts");
+	assert.equal(timelineData({ ...plotted, timing: { startedAt: 0, finishedAt: 4500, turns: [{ at: 650, turn: 1, active: 0, source: "recorded" }] } }, chart.turns).turns[0]!.at, 650);
+	const seed = '</script><script>throw Error("injection")</script> $&';
+	const html = timeline({ ...plotted, seed });
+	assert.ok(!html.includes('</script><script>throw'), "saved text cannot escape the data block");
+	assert.equal(JSON.parse(html.match(/<script id="game" type="application\/json">([\s\S]*?)<\/script>/)![1]!).seed, seed);
+	const path = join(mkdtempSync(join(tmpdir(), "magic-report-")), "game.result.json");
+	assert.equal(saveReport(path, plotted).length, 2, "the same run saves its JSON and standalone HTML");
+	assert.equal(JSON.parse(readFileSync(path, "utf8")).calls.length, 3);
+	assert.ok(readFileSync(path.replace(".result.json", ".timeline.html"), "utf8").includes("function draw()"), "the viewer script is embedded");
+	assert.throws(() => timelineData({ ...plotted, calls: [{ ...base, at: undefined }], timing: undefined }), /no request timestamps/);
 });
 
 test("a carried brief keeps its failures, and a stuck recap cannot lose a saved game", async () => {

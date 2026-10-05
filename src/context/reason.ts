@@ -111,6 +111,7 @@ export function reasoner(options: {
 	model: Model<Api>;
 	thinking?: ThinkingLevel;
 	tally: Tally;
+	seat?: number;
 	signal?: AbortSignal;
 	/** Attempts per question, including the first. */
 	attempts?: number;
@@ -134,6 +135,7 @@ export function reasoner(options: {
 		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
 		const finish = meter(options.tally, {
 			role: options.role,
+			seat: options.seat,
 			about,
 			model: named,
 			ceiling,

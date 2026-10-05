@@ -1,12 +1,15 @@
 /** One saved result and one rendering for matchup, smoke and /magic. No prompts or hidden card data. */
+import { writeFileSync } from "node:fs";
 import type { Table } from "../core/table.ts";
 import type { Outcome } from "../core/types.ts";
 import type { Planned } from "./seat.ts";
 import type { Seated } from "./sit.ts";
 import type { Spend } from "./spend.ts";
 import { bill, duration, usageReport } from "./metrics.ts";
+import { timeline } from "./timeline.ts";
 
-export type RunTiming = { startedAt: number; preparedAt?: number; playStartedAt?: number; playEndedAt?: number; finishedAt?: number };
+export type TurnMark = { at: number; turn: number; active: number; source: "recorded" | "first-observed" };
+export type RunTiming = { startedAt: number; preparedAt?: number; playStartedAt?: number; playEndedAt?: number; finishedAt?: number; turns?: TurnMark[] };
 export type GameResult = {
 	/** Absent on older matchup results, which remain readable. */
 	schema?: 1;
@@ -23,6 +26,15 @@ export type GameResult = {
 	llm?: ReturnType<typeof usageReport>;
 };
 
+/** Keep the compact report's measurements and its interactive view beside the journal. */
+export function saveReport(path: string, result: GameResult): string[] {
+	writeFileSync(path, JSON.stringify(result, null, 2) + "\n");
+	if (!result.calls.some((call) => call.at !== undefined)) return [`result    ${path}`];
+	const html = path.replace(/(?:\.result)?\.json$/, "") + ".timeline.html";
+	writeFileSync(html, timeline(result));
+	return [`result    ${path}`, `timeline  ${html}`];
+}
+
 /** Calls and timings belong to this run. Decisions and rulings describe the retained game prefix. */
 export function gameResult(table: Table, seated: Seated, extra: Pick<GameResult, "replayMatches" | "journal" | "trace" | "error"> = {}): GameResult {
 	const now = seated.timing.finishedAt ?? Date.now();
@@ -31,7 +43,7 @@ export function gameResult(table: Table, seated: Seated, extra: Pick<GameResult,
 	return {
 		schema: 1, seed: table.rng.seed, turn: table.cursor.turn, outcome: table.outcome, gaps: [...table.gaps],
 		seats: table.seats.map(({ id, name }) => ({ id, name })), fromVersion: seated.fromVersion, version: table.ledger.length,
-		timing: { ...seated.timing }, elapsedMs: now - seated.timing.startedAt, calls, planned: [...seated.planned],
+		timing: structuredClone(seated.timing), elapsedMs: now - seated.timing.startedAt, calls, planned: [...seated.planned],
 		reasons: Object.fromEntries(["forced", "delegated", "chosen", "declared", "fallback"].map((why) => [why, table.ledger.filter((row) => row.why === why).length])),
 		interruptions: {
 			stops: requests.filter((reason) => reason.startsWith("Stop:") && !/^Stop: Step \d+ cannot be taken now/.test(reason)).length,
