@@ -17,7 +17,7 @@ import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
-import { ChangesSchema, actions, basePlan, changedPlan } from "./plan-edit.ts";
+import { ChangesSchema, actions, basePlan, changedPlan, equipment } from "./plan-edit.ts";
 import { facts, chancing, initialPlan, nextMana, type Context } from "./strategy-facts.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
@@ -29,8 +29,15 @@ export function worthPlanning(table: Table): boolean {
 const docs = join(import.meta.dirname, "..", "..", "docs");
 export const exampleIndex = readFileSync(join(docs, "examples", "README.md"), "utf8").trim();
 const examples = [...exampleIndex.matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
-/** The language's semantics stay in the cached prefix; worked examples are fetched only when needed. */
+/** Card assessment reads the full semantics. Strategy fetches them when changing accepted terms. */
 export const syntaxReference = (): string => readFileSync(join(docs, "SYNTAX.md"), "utf8").trim();
+export const syntaxLookup: Lookup = {
+	name: "syntax", description: "Read the full card procedure language before changing a procedure or package. Ordinary plans and conditions are already defined in your prompt; reusing accepted actions needs no lookup. Shape validation does not certify a card's interpretation.",
+	parameters: { type: "object", properties: {}, additionalProperties: false },
+	answer: () => `${syntaxReference()}\n${JSON.stringify(ChangesSchema)}`,
+};
+const planReference = { $ref: ChangesSchema.$ref, $defs: { Changes: ChangesSchema.$defs.Changes, Option: ChangesSchema.$defs.Option,
+	Condition: ChangesSchema.$defs.Condition, Amount: ChangesSchema.$defs.Amount, Selector: ChangesSchema.$defs.Selector } };
 export const exampleReference: Lookup = {
 	name: "example", description: "Read a worked use of the syntax. Examples describe accepted terms, not certified card interpretations.",
 	parameters: { type: "object", properties: { file: { type: "string", enum: examples } }, required: ["file"], additionalProperties: false },
@@ -53,13 +60,14 @@ const SUBMIT = {
 const SYSTEM = [
 	"You strategize for one Magic seat. A small, fast pilot, Jev, executes your plan. The pregame brief is your matchup analysis: build on it instead of researching the deck again.",
 	"Choose the best line from the current position. Check both clocks, the opponent's best reply, and the last window to answer its threats. Compare developing now with keeping a response. Use registered counts and earned knowledge for odds, never assume a hidden card or order.",
+	"Read view.window, view.remainingSteps, objects, mana and options first. They describe now. base is earlier intent and can be wrong. Completed windows cannot be used again this turn unless remainingSteps contains them. Repair contradictions across guidance, steps, phase scripts and holds together; do not preserve prose about an action already resolved or a restriction that has ended.",
 	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
 	"Each visible creature's summoningSick is the current restriction, read from its controller's turn and haste. False does not establish that an attack is legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
 	"watches lists registered triggers on visible permanents now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source. Distinguish forecasts from events already recorded in view.history.",
 	"",
 	"YOUR ANSWER",
 	"- base is your plan to update. Submit changed fields directly: no plan or changes wrapper. Omitted fields stay, a list replaces that list, [] clears it. Packages join by card name instead. Keep sound objective, guidance, phases and responses. Your new turn's base has no ordered steps; write the line for this turn. A midturn base already omits completed steps. Do not put them back.",
-	"- actions holds accepted card procedures from preparation, your current line and earlier executed actions. A step's action can be {\"reuse\":\"prepared:0\"}, {\"reuse\":\"worked:0\"} or another listed key. It copies that action exactly, including selectors and costs. Choose among the prepared uses; write a changed action only when its targets, cost or effect actually differ. These are model-authored terms, not certified card interpretations.",
+	"- actions holds accepted uses whose named cards are visible, plus generic actions. Set action.reuse to the exact listed key, including its readable name. Check that name against the step you intend: reusing a land play does not cast a creature. It copies the action's selectors and costs unchanged. equipment reads accepted uses for another named card. These terms were prepared by a model, not certified as correct.",
 	"- packages persist in private work. Card abilities are assessed before play, including flying, haste, mana, entry counters, triggers and static permissions. Use that accepted equipment. Submit a corrected package only when its interpretation was wrong; changing a strategic line does not change a card's abilities. Registrations quote the card's own text. A package does not choose an activated ability: announce that as a procedure when you intend to pay for it; mana abilities can be registered.",
 	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
 	"",
@@ -69,16 +77,14 @@ const SYSTEM = [
 	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
 	"- Use active self/opponent and step names for windows. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
 	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
-	"- cards already gives the full text of the cards in this position and registered lists. Do not look those cards up again. A procedure states source, claim, basis, timing, any alternative or added cost, targets and instructions. Copy basis from the card. Do not invent a simpler effect. Look up a rule or example only when needed to resolve uncertainty.",
+	"- cards gives the full text of visible cards. Registered lists remain in view.decks; use card or equipment for an absent card when it matters. Use syntax only before changing a procedure or package; ordinary sequencing and conditions are defined below and need no card reinterpretation.",
 	"- Combat is sequential: attack: or block: per creature, then attack:done or block:done. Jev handles listed trigger, resolution and damage choices with your phase guidance. It escalates if the plan cannot answer them.",
 	"",
 	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
 	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Keep the answer short because Jev reads the conclusions, not your analysis.",
 	"",
-	syntaxReference(),
-	"",
-	"The complete update schema below is checked locally. The tool advertises only its top-level fields. Follow these definitions for nested terms; a schema match does not certify card meaning.",
-	JSON.stringify(ChangesSchema),
+	"The definitions below cover ordinary plans and conditions. Procedure and Package definitions are available through syntax when you need to change card terms. The complete schema is checked locally.",
+	JSON.stringify(planReference),
 ].join("\n");
 
 /** Interpreter checks: activated effects need procedures, and cast selectors must reach the stack. */
@@ -108,10 +114,15 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const base = !options.prepared && !frame.view.work?.plan && context.brief ? initialPlan(context.brief)
 		: basePlan(frame, options.prepared?.plan, options.nextTurn);
 	const available = actions(frame, options.prepared?.plan);
+	const visible = new Set((frame.view.objects ?? []).flatMap((one) => one.card ? [one.card] : []));
+	const relevant = Object.fromEntries(Object.entries(available).filter(([, one]) => {
+		const card = "procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card;
+		return !card || visible.has(card);
+	}));
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
-	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, actions: available,
+	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, actions: relevant,
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task }, {
 		submit: { ...SUBMIT, check(args) {
@@ -129,11 +140,11 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			// Core validates the same complete answer, including notebook capacity.
 			try { prepareWork(frame, putting({ plan, ...(edits.length ? { edits } : {}) })); } catch (error) { wrong.push(String(error)); }
 			if (!wrong.length && !forecastTold) { const conflicts = budget(frame, plan); if (conflicts.length) { forecastTold = true; wrong.push(...conflicts); } }
-			if (wrong.length) return `${wrong.length} problems: ${[...new Set(wrong)].join("; ")}.`;
+			if (wrong.length) return `${wrong.length} problems: ${[...new Set(wrong)].join("; ")}. These describe your proposed plan. No action was executed; the position and resources in the request are unchanged.`;
 			accepted = { plan, ...(edits.length ? { edits } : {}), ...(objection ? { objection } : {}) };
 			return null;
 		} },
-		lookups: [exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
+		lookups: [syntaxLookup, equipment(frame, available), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");
@@ -147,7 +158,7 @@ export const putting = (made: Prepared): WorkCommand[] => [{ do: "plan.put", pla
 export async function planWork(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">, prepared?: Prepared, changed?: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
-	const task = `YOUR TASK: ${request}\n${prepared ? "Amend the prepared base for the revealed draw and the changes. Keep what still fits." : "Advance the pregame strategy from this position; write only what changes."}\nSubmit the line, mana commitments and phase decisions through the opponent's next turn. Check them together before submitting.`;
+	const task = `YOUR TASK: ${request}\n${prepared ? "Amend the prepared base for the revealed draw and the changes. Keep what still fits." : frame.view.work?.request && frame.view.work.plan ? "Repair the unfinished line from the current window. Replace stale guidance and affected phase decisions along with the actions; keep only what still agrees with the position." : "Advance the pregame strategy from this position; write only what changes."}\nSubmit the line, mana commitments and phase decisions through the opponent's next turn. Check them together before submitting.`;
 	const about = frame.view.work?.request ? "plan on request" : prepared ? "turn amendment" : "turn plan";
 	const made = await write(frame, context, reasoner, task, about, { ...(prepared ? { prepared } : {}), ...(changed ? { changed } : {}) });
 	return { tools: putting(made), ...(made.objection ? { objection: made.objection } : {}) };

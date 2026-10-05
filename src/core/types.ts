@@ -84,6 +84,8 @@ export type SeatView = {
 	/** Printed facts for the names of visible objects. Public, from the pinned card file. */
 	printed?: Record<string, Printed>;
 	window: Window;
+	/** Current and remaining steps in this turn, including inserted or repeated steps. */
+	remainingSteps?: Step[];
 	/** Public facts, one line each, same order every time so two frames diff. */
 	table: string[];
 	/** What only this seat knows. */

@@ -199,6 +199,35 @@ strategy default. The next checks should compare planner quality at the same
 saved positions and trace repeated help requests, rather than count more calls
 as progress.
 
+## Luna repair context
+
+The next review kept Luna and the saved positions. The attack repair's original
+request carried 68 reusable actions and 61,352 characters of system instructions,
+including the entire card procedure language. Its base still claimed Shock was
+on the stack and Hired Claw could not attack. Those were earlier intentions,
+despite appearing beside the current physical facts.
+
+Ordinary planning now receives the plan and condition definitions, visible card
+text and relevant accepted actions. Wider equipment and syntax remain available
+through lookups. The attack request fell from 33,290 to 13,617 input tokens on its
+first call, with 22 actions. Reuse keys contain action names; an earlier probe
+had labelled a reused land play as a Chocobo cast. The view supplies the actual
+remaining steps, mana context names the current ceiling and tapped sources,
+and refusal feedback distinguishes proposed-plan errors from performed actions.
+
+With that context, `plan-review-91-1791209674431` repaired the attack in two Luna
+low calls, 27.4 seconds and $0.0019. It accounted for the Claw trigger and stopped
+trying to cast Challenger or Shock from Village alone. The landfall repair
+`plan-review-49-1791209674583` took one call, 15.4 seconds and $0.0016. It selected
+the right card and no longer invented a counter, but still chose land before
+Chocobo despite having enough mana for the better order. Both accepted plans
+replayed; neither result establishes strong play.
+
+A private two-stage experiment asked Luna to choose the line before writing
+syntax. It still chose the weaker landfall order, and the attack translation
+exhausted its three replies on invalid conditions. That extra call is not part
+of the implementation. All of these probes stop at planning; they play no turns.
+
 Full games remain behind the readiness checks above. Next probes should keep
 the same saved decision when comparing context, inspect accepted card terms,
 and check completed effects and chosen passes, not just call counts.

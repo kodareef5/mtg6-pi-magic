@@ -55,10 +55,12 @@ private work need no repetition. Existing bounded response and phase windows are
 shifted to the next pair of turns; the writer sees that base before updating it.
 Prefer `active` and `step` to unnecessary absolute turn numbers.
 
-The writer also receives `actions`: prepared card procedures, its current steps,
-branches and earlier executed actions, each with a key, label and full syntax.
-A new step may use `"action": {"reuse": "prepared:0"}` or `"worked:0"`.
-That copies the exact action, including its
+The writer also receives `actions`: prepared procedures, current steps, branches
+and earlier executed actions for visible cards, plus generic actions. Each has
+a key containing its name, a label and full accepted syntax. A step's `reuse`
+copies that complete key, such as `"worked:0 Play Forest"`, from the supplied
+dictionary. The name helps distinguish a cast from a land play before selecting
+it. This copies the exact action, including its
 selectors, targets and costs. A changed action must be written again. These are
 seat-authored terms. Core offers assessed procedures whenever their timing,
 sources, targets and resources fit. A turn plan chooses a line from that repertoire.
@@ -66,7 +68,10 @@ sources, targets and resources fit. A turn plan chooses a line from that reperto
 `src/context/plan-edit.ts` merges the answer and expands reuse keys. The result
 goes through the ordinary atomic `plan.put` writer. Core and the journal hold
 complete terms, so replay needs neither the model nor the update vocabulary.
-Reusing accepted syntax does not certify its interpretation.
+Reusing accepted syntax does not certify its interpretation. The `equipment`
+lookup reads another named card's accepted package and actions with the same
+keys, including cards not currently visible. Neither lookup nor plan acceptance
+performs an action.
 
 | Plan field | Purpose |
 |---|---|
@@ -79,14 +84,23 @@ Reusing accepted syntax does not certify its interpretation.
 | `phases` | The current window's goal, decisions, and reasons to re-evaluate. |
 | `packages` | Corrections to assessed card registrations and procedures; they persist in private work. |
 
-`docs/examples/turn-plan.md` shows a complete plan. The writer always receives
-`docs/SYNTAX.md` and the real schema as prompt text. The advertised tool schema
-stays shallow: provider expansion of recursive definitions made a measured
-strategy request exceed 430,000 input tokens. Exact local validation still checks
-every nested term. The `example` tool reads worked examples
-when needed, instead of resending every example in every session. Card, rule and
-odds lookups remain available. A session has up to three replies for a needed
-lookup and correction, rather than eight rounds of notebook work.
+`docs/examples/turn-plan.md` shows a complete plan. The writer receives the real
+plan and condition definitions, current card text and the whole pregame brief.
+The `syntax` tool supplies `docs/SYNTAX.md` and the complete nested schema when
+changing a procedure or package. The `example` tool supplies worked uses.
+The advertised tool schema stays shallow: provider expansion of recursive
+definitions made a measured strategy request exceed 430,000 input tokens.
+Exact local validation still checks every nested term. Card, equipment, rule
+and odds lookups remain available. A session has up to three replies for a
+needed lookup and correction.
+
+A repair starts at the current window and reads the table's remaining steps,
+including repeats and insertions. Its base is earlier intent, not a source of
+physical facts. The writer repairs guidance, actions, affected phase scripts
+and holds together. Mana context counts each untapped source once, marks tapped
+permanents unavailable for tap costs, and preserves spending restrictions.
+A refused submission describes a proposed plan; its feedback states that no
+action occurred and the supplied position is unchanged.
 
 ## Memory
 

@@ -10,6 +10,7 @@ import { relive } from "../src/core/journal.ts";
 import { endingPhase } from "../src/core/turn.ts";
 import { example, main, matchup, passBoth, place, step } from "./play.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
+import { project } from "../src/core/view.ts";
 
 const table = () => start(standard, [
 	{ name: "A", deck: deck("Green Stompy") },
@@ -21,6 +22,9 @@ test("listing a decision never changes the table, including pending losses", () 
 	const inspect = () => {
 		const before = structuredClone(built);
 		const first = nextDecision(built);
+		const view = project(built, 0);
+		assert.deepEqual(view.remainingSteps, view.window.kind === "turn" ? built.cursor.steps : undefined);
+		if (view.remainingSteps) { view.remainingSteps.length = 0; assert.deepEqual(built.cursor.steps, before.cursor.steps); }
 		assert.deepEqual(nextDecision(built), first);
 		assert.deepEqual(built, before);
 		return first;

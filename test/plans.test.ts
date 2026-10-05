@@ -37,7 +37,7 @@ import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
-import { actions, basePlan, changedPlan } from "../src/context/plan-edit.ts";
+import { actions, basePlan, changedPlan, equipment } from "../src/context/plan-edit.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -233,15 +233,22 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 
 test("a short amendment retains phase guidance and packages, reuses accepted syntax and never repeats a completed step", async () => {
  const table = position(); main(table, 0, 3);
+ editWork(table, 0, [{ do: "package.put", package: { card: "Shock", registers: [], procedures: [example("Cast Shock")] } }], "other-equipment");
  editWork(table, 0, [{ do: "plan.put", plan: line }], "line");
  const first = planState(workFrame(table, 0))!.due[0]!.candidates[0]!;
  apply(table, first.id, "engine", "delegated", { plan: table.work[0]!.planned!, step: 0 });
  editWork(table, 0, [{ do: "plan.request", reason: "The pilot asked for a changed combat line." }], "request");
  const frame = workFrame(table, 0), base = basePlan(frame), available = actions(frame);
+ const shockKey = Object.keys(available).find((key) => available[key]!.label === "Cast Shock")!;
+ assert.ok(shockKey && !frame.view.objects!.some((one) => one.card === "Shock"));
+ assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Shock" })).actions[shockKey], available[shockKey], "absent card equipment keeps its exact reusable key and accepted terms");
  assert.equal(base.steps[0]!.label, "Crack Fabled Passage", "the played land is already omitted");
  assert.equal(base.packages, undefined, "accepted packages need no repetition");
  const seen: { messages: string; tools: string[] }[] = [];
  const stream: Stream = (_model, request) => {
+  const sent = JSON.parse((request.messages[0] as { content: string }).content);
+  assert.equal(sent.actions[shockKey], undefined, "an absent card's procedure is fetched when needed, not sent with every repair");
+  assert.deepEqual(sent.view.remainingSteps, table.cursor.steps, "the writer sees the real remaining turn windows");
   seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((one) => one.name) });
   return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: { guidance: "Hold the Chocobo back." } }], stopReason: "toolUse" }) };
  };
@@ -252,7 +259,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  assert.deepEqual(work.plan!.steps, base.steps);
  assert.deepEqual(work.packages, table.work[0]!.packages);
  assert.ok(!seen[0]!.tools.includes("note"));
- const reused = changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:1" } }] }, available);
+ const reused = changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: `step:1 ${line.steps[1]!.label}` } }] }, available);
  assert.deepEqual(reused.steps[0]!.action, line.steps[1]!.action);
  assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:999" } }] }, available), /No reusable action/);
  // Core sees ordinary terms, so replay and execution need no new language.
@@ -310,7 +317,7 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 	for (const seat of [0, 1]) assert.ok(sessions.find((session) => session.seat === seat), `seat ${seat} planned once the game began`);
 	assert.ok(prompts.every((prompt) => prompt.ceiling === CEILING.strategy));
 	assert.equal(new Set(prompts.map((prompt) => prompt.system)).size, 1, "every call sends the same system prompt, so it can be cached");
-	assert.ok(prompts[0]!.system!.includes(syntaxReference()), "the syntax and its examples are in it");
+	assert.ok(!prompts[0]!.system!.includes(syntaxReference()), "card procedure semantics stay behind the syntax lookup until needed");
 	for (const prompt of prompts) {
 		const sent = JSON.parse(prompt.user) as { seat: number; objects: { zone: string; controller: number }[]; cards: { name: string; oracle: string }[] };
 		assert.ok(sent.objects.every((object) => object.zone !== "library" && (object.zone !== "hand" || object.controller === sent.seat)), "nothing hidden from the seat");
@@ -904,8 +911,8 @@ test("preparation starts on the opponent's turn, not before our line has played,
   return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "Recover." } }], stopReason: "toolUse" }) };
  };
  await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules: loadRules("rules/cr.tsv") }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
- assert.match(seen[0]!.messages, /Advance the pregame strategy/);
- assert.deepEqual(seen[0]!.tools.sort(), ["card", "example", "odds", "rule", "submit"]);
+ assert.match(seen[0]!.messages, /Repair the unfinished line from the current window/);
+ assert.deepEqual(seen[0]!.tools.sort(), ["card", "equipment", "example", "odds", "rule", "submit", "syntax"]);
 });
 
 test("odds count from what the seat can name: our library exactly, the opponent's hand and library together", () => {

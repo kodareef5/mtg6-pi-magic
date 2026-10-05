@@ -66,7 +66,7 @@ test("every example block parses and quotes its card", () => {
 	assert.ok(outside * 2 >= named.size, `${outside} of ${named.size} example cards come from outside the matchup`);
 });
 
-test("strategy reads the syntax and can fetch every indexed example without loading them all", async () => {
+test("strategy can fetch the full syntax and every indexed example without loading them all", async () => {
 	const listed = [...readFileSync(join(DIR, "README.md"), "utf8").matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
 	assert.deepEqual([...listed].sort(), readdirSync(DIR).filter((file) => file.endsWith(".md") && file !== "README.md").sort(), "the index lists every example file");
 	const reference = syntaxReference();
@@ -83,11 +83,16 @@ test("strategy reads the syntax and can fetch every indexed example without load
 			const schema = JSON.stringify(request.tools!.find((tool) => tool.name === "submit")!.parameters);
 			assert.doesNotMatch(schema, /\$ref|\$defs/, "providers receive no recursive tool definitions");
 			assert.ok(schema.length < 3000, `${schema.length} characters in the advertised schema`);
-			assert.match(request.systemPrompt!, /The complete update schema below is checked locally/);
-			assert.match(request.systemPrompt!, /\$defs/, "the writer still receives the complete nested vocabulary");
-			return { result: async () => ({ stopReason: "toolUse", content: listed.map((file, at) => ({ type: "toolCall", id: `e${at}`, name: "example", arguments: { file } })) }) };
+			assert.ok(!request.systemPrompt!.includes(reference), "ordinary planning does not load the whole card procedure language");
+			assert.match(request.systemPrompt!, /\$defs/, "ordinary planning definitions remain in the prompt");
+			assert.ok(request.systemPrompt!.length < 18000, "planning leaves room for the position instead of resending all card instructions");
+			assert.ok(request.tools!.some((tool) => tool.name === "syntax"));
+			return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "syntax", name: "syntax", arguments: {} },
+				...listed.map((file, at) => ({ type: "toolCall", id: `e${at}`, name: "example", arguments: { file } }))] }) };
 		}
 		const messages = JSON.stringify(request.messages);
+		assert.ok(messages.includes(JSON.stringify(reference).slice(1, -1)), "the full semantics reach the same planner when requested");
+		assert.match(messages, /Instruction/, "the lookup also supplies the complete nested schema");
 		for (const file of listed) assert.ok(messages.includes(JSON.stringify(readFileSync(join(DIR, file), "utf8")).slice(1, -1)), `${file} is answered by the real lookup`);
 		return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "done", name: "submit", arguments: {
 			objective: "Pass.", guidance: "Keep resources.", steps: [{ label: "Pass", when: {}, action: { option: "pass" } }] } }] }) };

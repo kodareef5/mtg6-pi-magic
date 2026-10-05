@@ -117,11 +117,12 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const frame = workFrame(table, 1), available = actions(frame);
 	assert.equal(focus(frame, startingIntent(1)).watches.some((one) => one.source.name === pack.card), false, "a prepared card still in hand supplies no active watch");
 	assert.equal(JSON.parse(strategyFacts(frame, {})).watches.some((one: { source: { name: string } }) => one.source.name === pack.card), false, "the writer reads the same battlefield facts");
-	assert.deepEqual(available["prepared:0"]!.action, { procedure: pack.procedures![0] });
+	const preparedKey = `prepared:0 ${pack.procedures![0]!.claim}`;
+	assert.deepEqual(available[preparedKey]!.action, { procedure: pack.procedures![0] });
 	const plan = changedPlan({ objective: "Attack in the air.", guidance: "Cast before combat.", steps: [] }, {
-		steps: [{ label: "Cast Nova", when: {}, action: { reuse: "prepared:0" } }],
+		steps: [{ label: "Cast Nova", when: {}, action: { reuse: preparedKey } }],
 	}, available);
-	assert.deepEqual(plan.steps[0]!.action, available["prepared:0"]!.action);
+	assert.deepEqual(plan.steps[0]!.action, available[preparedKey]!.action);
 	apply(table, offered.find((one) => one.label.startsWith("Cast Nova"))!.id, "model", "chosen");
 	passBoth(table); finish(table);
 	assert.deepEqual(characteristics(table, nova!)!.words.sort(), ["flying", "haste"]);

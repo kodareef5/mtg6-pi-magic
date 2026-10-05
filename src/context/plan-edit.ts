@@ -3,10 +3,11 @@ import { Type } from "typebox";
 import { PlanDefs, PlanSchema, problems, type Plan, type PlanOption } from "../core/language.ts";
 import type { Frame } from "../core/types.ts";
 import { planDue } from "../core/planning.ts";
+import type { Lookup } from "./reason.ts";
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
-	Type.Object({ reuse: Type.String({ pattern: "^(step|may|worked|prepared):[0-9]+$" }) }, { additionalProperties: false })]);
+	Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false })]);
 const { Plan: planFields, ...definitions } = PlanDefs;
 export const ChangesSchema = Type.Cyclic({ ...definitions,
 	Option: Type.Object({ ...PlanDefs.Option.properties, action: Action }, { additionalProperties: false }),
@@ -17,11 +18,20 @@ export const ChangesSchema = Type.Cyclic({ ...definitions,
 export function actions(frame: Frame, prepared?: Plan): Record<string, { label: string; action: PlanOption["action"] }> {
 	const plan = prepared ?? frame.view.work?.plan;
 	return Object.fromEntries([
-		...(plan?.steps ?? []).map((one, at) => [`step:${at}`, { label: one.label, action: one.action }]),
-		...(plan?.may ?? []).map((one, at) => [`may:${at}`, { label: one.label, action: one.action }]),
-		...(frame.view.worked ?? []).map((one, at) => [`worked:${at}`, { label: one.label, action: one.action }]),
-		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at}`, { label: procedure.claim, action: { procedure } }]),
+		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
+		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
+		...(frame.view.worked ?? []).map((one, at) => [`worked:${at} ${one.label}`, { label: one.label, action: one.action }]),
+		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),
 	]);
+}
+
+/** Read accepted equipment beyond the current position without changing it or certifying its interpretation. */
+export function equipment(frame: Frame, available: ReturnType<typeof actions>): Lookup {
+	return { name: "equipment", description: "Read this seat's accepted package and reusable actions for a named card, including registered cards absent from the position. These terms may contain interpretation errors; reading them neither prepares nor uses a card.",
+		parameters: { type: "object", properties: { card: { type: "string" } }, required: ["card"], additionalProperties: false },
+		answer: ({ card }) => JSON.stringify({ card, package: frame.view.work?.packages?.find((one) => one.card === card),
+			actions: Object.fromEntries(Object.entries(available).filter(([, one]) => ("procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card) === card)) }),
+	};
 }
 
 /**

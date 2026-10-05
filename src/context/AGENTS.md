@@ -52,8 +52,9 @@ reaches a decision is a short plan plus the facts.
   and answers stops or requests for help. It submits changed fields and reuses
   its own accepted actions; context expands these into a complete plan for core.
   Optional notebook edits belong in that answer, not separate rounds. The cached
-  system prompt carries the syntax semantics and the real schema; an example
-  lookup supplies worked uses when needed. No challenger or timeout replacement
+  system prompt defines ordinary plans and conditions. Visible cards supply their
+  full text and accepted actions; equipment, syntax and example lookups supply
+  wider card terms when needed. No challenger or timeout replacement
   plan runs beside it. A phase boundary spends no strategy call. docs/PLANS.md holds the
   lifecycle and its cancellation rules.
 - **summary** runs beside the game, never awaited inside the loop, and is built
@@ -157,6 +158,7 @@ The pilot's packet carries the plan's objective, the due step, the next two,
 live branches, holds and stops, and what is done. It does not carry the deck
 lists, card registrations, procedure bodies or the brief's matchup reading;
 those are strategy's. Strategy receives the unfinished plan and reusable actions,
-the visible objects with their current characteristics and accepted stack terms, the public registered
-lists and their card text. Neither sees hidden arrangements or another seat's
+the visible objects with their current characteristics, accepted stack terms and
+card text. Public registered lists remain available, with lookups for absent cards.
+Neither sees hidden arrangements or another seat's
 equipment. Shape checking proves neither the rules nor the quality of the plan.

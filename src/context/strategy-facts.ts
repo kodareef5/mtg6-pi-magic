@@ -36,6 +36,9 @@ function mana(frame: Frame): string {
 	const floating = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? [];
 	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
 		`${floating.length ? `; floating ${floating.map((one) => one.color).join("")}` : ""}.`];
+	lines.push(`Maximum mana from these sources and the pool now: ${floating.length + now.reduce((n, one) => n + Math.max(...one.yields.map((yielded) => yielded.colors.length)), 0)}; colors and spending restrictions still apply.`);
+	const tapped = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && one.controller === frame.seat && one.tapped);
+	if (tapped.length) lines.push(`Already tapped, so unavailable for tap costs: ${tapped.map((one) => `${one.card ?? one.token?.name ?? "unknown"} (${one.id})`).join(", ")}.`);
 	const left = Math.max(0, allowance(viewWorld(frame.view), frame.seat).lands - (frame.view.landsPlayed ?? 0));
 	const lands = (frame.view.objects ?? []).filter((object) => object.controller === frame.seat && object.zone === "hand" && object.traits?.types.includes("land"));
 	const land = (object: SeenObject) => {
@@ -48,7 +51,7 @@ function mana(frame: Frame): string {
 	};
 	lines.push(left ? `Land plays left this turn: ${left}. In hand: ${[...new Map(lands.map((one) => [one.card, one])).values()].map(land).join("; ") || "no land"}.`
 		: "No land play left this turn.");
-	lines.push("Each step's cost is paid from these; a source you hold for a response is not spent before it. A land that enters tapped makes nothing this turn.");
+	lines.push("Tap each source once: its yields are alternatives, not added together. Each step spends what earlier steps leave. A held source stays available for its response. A land that enters tapped makes nothing this turn.");
 	return lines.join(" ");
 }
 
@@ -115,8 +118,7 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		...more,
 		packages: (work?.packages ?? []).map((pack) => pack.card),
 		options: frame.decision?.options, brief: context.brief,
-		cards: [...new Set([...(frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []),
-			...(frame.view.decks ?? []).flatMap((deck) => Object.keys(deck.cards))])]
+		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]
 			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
 		recaps: context.recaps?.slice(-3), refused: frame.refused,
 	});

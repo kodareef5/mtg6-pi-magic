@@ -156,7 +156,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
-		...(at.kind === "turn" ? { visit: table.cursor.visit } : {}),
+		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer) } : {}),
