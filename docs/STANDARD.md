@@ -288,9 +288,9 @@ passes. Two background preparations were cancelled at the turn limit; neither
 returned a plan. This checks execution from an accepted plan, not the time to
 prepare that plan or the quality of a whole game.
 
-Full games remain behind the readiness checks above. Next probes should keep
-the same saved decision when comparing context, inspect accepted card terms,
-and check completed effects and chosen passes, not just call counts.
+Those bounded probes left assessment and decision quality unproven. Comparing
+context still needs the same saved decision, inspection of accepted card terms,
+and checks of completed effects and chosen passes alongside call counts.
 
 The cleanup component review fixed a separate timing failure. Damage and
 temporary effects now expire together after discarding, before the state
@@ -299,6 +299,107 @@ after the stack empties and both pass, another cleanup begins (514.3a).
 The regression checks that drawing cards in this window waits for the repeated
 cleanup's discards, a legal instant response is offered, and replay restores
 the same position. This is a rules operation, not a card-text interpreter.
+
+## Three fresh games with Luna low
+
+The October 5 batch used seeds `luna-coherence-20261005-1`, `-2` and `-3`,
+ordinary shuffled openings, and gameplay code from `1abef88`. Commit `e989e6c`
+restored the chosen testing roster: Sol 6.1 high for pregame planning and Luna
+low for strategy and judge, with Jev choosing moves and reviews. Summaries
+remained off in the matchup runner. The three earlier runs started with the
+wrong roster were stopped and excluded.
+
+Each game reused the 39 card assessments per seat from
+`review-prepared-1791202094448`, originally assessed with Sol low, and prepared
+fresh Sol high deck and matchup briefs. No turn plans or physical decisions
+were carried. No gameplay code or accepted card terms changed during the batch.
+The runs stopped at an outcome, the first non-continuing gap, or turn 40.
+
+| Seed suffix | Result | Jev reviews / picks | Strategy calls | Prep / play minutes | Reported cost |
+|---|---|---:|---:|---:|---:|
+| `-1` | Red won, turn 12 | 383 / 362 | 85 | 10.8 / 15.9 | $0.8463 |
+| `-2` | Stopped at a provider failure, turn 20 | 1004 / 582 | 136 | 11.2 / 30.0 | $1.2380 |
+| `-3` | Red won, turn 12 | 499 / 360 | 87 | 20.4 / 16.7 | $1.0195 |
+
+All three replays matched. Games one and three had no recorded gaps or fallback
+choices. Game two recorded one gap and one fallback pass after two Jev requests
+failed with `max_tokens_exceeded`; it has no outcome. Physical ledger reasons
+were respectively 352/38, 571/54 and 348/42 chosen/forced, plus that one
+fallback. None were delegated or declared. Jev reviews are private judgments;
+pick-call counts also include asks and retries, so neither count is a count of
+physical actions. There were no judge calls.
+
+Pregame made 15, 14 and 25 calls, including nine timed-out attempts across the
+batch. The 3,552 total requests reported 20,937,522 input tokens, 3,005,056 cached
+input tokens and 630,670 output tokens, costing $3.1037. Some aborted requests
+reported no usage, so this is the recorded cost, not a complete invoice. The
+runs overlapped. Strategy waits consumed 80%, 75% and 76% of each game's play
+time, excluding pregame. Of 308 strategy calls, 128 followed a refused plan
+submission. Changing the model's effort would change this baseline.
+
+The runs exercised ordinary casting, opposing priority, prowess, landfall,
+earthbending and its return trigger, graveyard land plays, reflexive triggers,
+flying attacks and target disappearance during resolution. Matching replay and
+an empty gap list still do not certify legal or good play. Inspection found:
+
+- **The pilot request can exceed the provider's limit.** Game two's request
+  1718 had 51 move options and 54 classifier criteria. Its JSON was 88,111 bytes;
+  options occupied 32,423 bytes and criteria repeated 31,515 bytes of largely
+  the same detail. Shock targets and alternative payments for Smaug and
+  Soulstone Sanctuary supplied most of the variants. The retry was larger and
+  failed too. The provider did not report a numeric token limit.
+- **An accepted assessment can suppress a valid use.** Rockface Village's red
+  mana had `spendOnly: {types: ["creature"]}`. The selector defaults to the
+  battlefield, while casting checks the spell on the stack. At game two,
+  version 75, Hired Claw had no cast option. Adding `zones: ["stack"]` to a
+  copied frame's restriction produced the correct Village-funded option.
+  This diagnostic changed neither the live game nor its journal.
+- **Pending effects lose their actual targets in the pilot packet.** At game
+  two, turn 13, Curator targeted Abrade four times before any activation
+  resolved, spending all four mana. Only one resolved. Jev saw `target:0`
+  rather than its binding to Abrade. The activations happened during the draw
+  step, before the planned main-phase use, so the line also showed no progress.
+- **Repairs retain stale instructions.** In game three, a repair removed the
+  completed Curator activation from the steps but kept guidance to activate it.
+  Jev repeatedly asked for help through later windows. Other accepted plans
+  labelled a pass as a cast, or named a different land in prose and action.
+  Structural plan acceptance does not establish agreement among these fields.
+- **Resolution and opening choices still lose their purpose.** Games one and
+  two each sacrificed two fetch lands and then declined to find Forest, even
+  though it was offered. Ascension searches succeeded, as did game three's
+  Promising Vein search. In game three's opening, Jev bottomed two Forests and
+  kept one Forest with three spells despite a policy to preserve two sources.
+- **Defensive plans can ignore the threat that matters.** On game two's turn
+  19, Green held a 9/10 trampling Chocobo and 4/4 trampling Hydra as blockers
+  while Smaug supplied flying damage. The pilot packet carried flying and the
+  creatures' current traits. Jev followed an explicit plan to attack with
+  nothing. This needs a better combat plan, beyond packet completeness.
+
+Private results, traces, metrics and seven replay-checked journal prefixes are
+under `.pi/luna-three-low-20261005/`. The run suffixes are `1791212124804`,
+`1791212124823` and `1791212124820`. `positions/index.json` names each parent,
+decision version and exact saved request where applicable. The prefixes cover
+the provider failure, Village payment, declined search, repeated Curator use,
+stale repair, opening bottom choice and Smaug combat. They preserve the games'
+private information and stay out of the package.
+
+The next work follows these saved positions:
+
+1. Bound Jev's request size by removing repeated option descriptions and sharing
+   common action terms. Preserve every choice and its targets and payment;
+   verify the saved failing request before another full run.
+2. Validate context-sensitive assessment terms and repair Village through
+   model-authored preparation. Exercise the accepted terms before dealing.
+3. Carry named stack targets and action progress into the decision packet.
+   Repair the unfinished line and its guidance together. Test pending,
+   completed and later-window uses separately, including optional searches.
+4. Simplify Luna's planning input and submission syntax around the observed
+   refusals. Then test concrete retained-hand and combat plans on the saved
+   positions, including whether a proposed blocker can stop the named threat.
+
+Keep Luna low and Sol 6.1 high fixed while testing these changes. Passing the
+saved component cases is the next gate; these three games are not a playing
+strength comparison or evidence that the matchup is complete.
 
 ## Run the matchup
 
