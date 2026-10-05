@@ -241,9 +241,10 @@ The high probes are `plan-review-49-1791210024476`,
 `plan-review-49-1791210293542` and `plan-review-91-1791210024476`.
 Each cost $0.0015 to $0.0022 at Pi's recorded catalogue price; the repeat used
 cached input. Low and medium reported no reasoning tokens in these probes;
-high reported 939 to 2,134. The suggested strategy is now `gpt-6-luna:high`.
-Explicit roster choices still win. These small probes measure sequencing,
-not playing strength.
+high reported 939 to 2,134. These were effort-comparison probes, not the testing
+baseline. The user specified `gpt-6-luna:low` for strategy, judge and summary,
+and `gpt-6.1-sol:high` for pregame planning. The temporary high strategy default
+was reverted. These small probes measure sequencing, not playing strength.
 
 A new main-phase repair at version 75 exposed a remaining weakness: Luna high
 planned to spend its only Shock, then mentioned Shock as a response on the next

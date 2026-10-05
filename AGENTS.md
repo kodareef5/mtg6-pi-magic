@@ -81,6 +81,11 @@ other four roles and what reaches a decision is a short plan plus the facts.
 Handing the classifier everything known about the game is the failure the split
 exists to prevent: it is smart, and it is not going to work out a line.
 
+The testing roster is Jev for `decide`, `gpt-6.1-sol:high` for `pregame`, and
+`gpt-6-luna:low` for `strategy`, `judge` and `summary`. Keep that baseline while
+improving gameplay. A stronger model or higher effort is a different experiment,
+not a substitute for fixing its context; change it only when explicitly asked.
+
 `src/context/roles.ts` holds the roles, the suggested patterns, the resolution
 and why each default is what it is. `/magic models` reads the roster and says
 what each pattern resolved to, `/magic models why` says what each default was

@@ -63,24 +63,24 @@ export const ROLES: Record<
 		does: "assess every registered card, then write the deck and matchup brief",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6.1-sol:low",
+		suggested: "gpt-6.1-sol:high",
 		why:
 			"Card meaning must be complete before play. In the October 5 assessment run, " +
 			"Luna omitted restrictions and effects and refused supported abilities. Sol " +
-			"prepared both lists after a validator fix. Saved preparation is reused by " +
-			"clones; syntax acceptance still needs a semantic review.",
+			"prepared both lists after a validator fix. The testing roster uses Sol 6.1 high " +
+			"for pregame planning. Saved preparation is reused by clones; syntax acceptance " +
+			"still needs a semantic review.",
 	},
 	strategy: {
 		does: "advance the pregame strategy: prepare during the opponent's turn, amend after the draw, and answer stops",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6-luna:high",
+		suggested: "gpt-6-luna:low",
 		why:
 			"Prepares before the turn and submits short updates. The seat waits after its draw " +
-			"when that work is unfinished. In the October 5 saved-position probes, Luna high " +
-			"twice cast Chocobo before the land; low and medium lost that landfall counter. " +
-			"High took 28 to 51 seconds per isolated repair. These few positions do not establish playing strength.",
-		instead: "gpt-6-luna:low or gpt-6-luna:medium, to compare latency and completed lines at the same saved position",
+			"when that work is unfinished. Luna low is the chosen testing baseline. Improve " +
+			"the context and turn guidance against its failures; changing reasoning effort " +
+			"changes the experiment and requires an explicit roster choice.",
 	},
 	judge: {
 		does: "rule on an objection, citing the rules on disk",
