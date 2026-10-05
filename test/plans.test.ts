@@ -104,6 +104,12 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.throws(() => editWork(table, 0, [{ do: "plan.put", plan: line }], "stale", 0), /equipment changed/);
 	assert.deepEqual(planProblems(workFrame(table, 0), { ...line, phases: [{ when: { step: "cleanup" }, guidance: "Discard the redundant land." }] }), [], "phase guidance can cover mandatory choices without offering an action there");
 	assert.match(planProblems(workFrame(table, 0), { ...line, phases: [{ when: { step: "precombat-main", phase: "combat" }, guidance: "Wrong window." }] }).join(" "), /phases\[0\]/);
+	for (const ref of ["this", "target:0", "event:object", "bound:card"]) {
+		const wrong = planProblems(workFrame(table, 0), { ...line, may: [{ ...line.steps[0]!, if: { is: ref, matches: { types: ["creature"] } } }] });
+		assert.match(wrong.join("; "), /has no binding in a plan condition/, "a plan cannot silently wait on a reference that only exists during an effect");
+	}
+	const conditional = { ...line, steps: [{ ...line.steps[0]!, if: { amount: { history: "cast" as const, of: { name: "Llanowar Elves" } }, atLeast: 1 } }] };
+	assert.match(planProblems(workFrame(table, 0), conditional).join("; "), /cast history selectors need zones/);
 });
 
 test("the pilot flies the plan: actions and passes are chosen, and progress lives on the ledger", async () => {

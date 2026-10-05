@@ -36,8 +36,21 @@ export function checkWhen(when: When, action = true): string | null {
  */
 export function planProblems(frame: Frame, plan: Plan): string[] {
 	const found: string[] = [];
+	// Plan conditions read the position before choosing an action. They have
+	// no resolving source, chosen target, event or instruction-local binding.
+	const condition = (value: unknown, where: string): void => {
+		if (!value || typeof value !== "object") return;
+		const term = value as { history?: string; of?: { zones?: string[] } };
+		if (term.history === "cast" && term.of && !term.of.zones?.includes("stack")) found.push(`${where}: cast history selectors need zones ["stack"]; omitted zones mean battlefield.`);
+		for (const [key, part] of Object.entries(value)) {
+			if (["is", "on", "power", "toughness", "by", "controller", "owner", "attachedTo"].includes(key) && typeof part === "string" && /^(?:(?:controller|owner):)?(?:this$|target:|event:|bound:)/.test(part))
+				found.push(`${where}: ${part} has no binding in a plan condition. Test visible objects with a count or selector; sources, targets and event references belong inside a procedure.`);
+			condition(part, where);
+		}
+	};
 	const visible = (ref: { id: string; incarnation: number }) => (frame.view.objects ?? []).some((object) => object.id === ref.id && object.incarnation === ref.incarnation);
 	const option = (one: PlanOption, where: string) => {
+		condition(one.if, `${where}.if`);
 		const when = checkWhen(one.when);
 		if (when) found.push(`${where} (${one.label}): ${when}`);
 		const action = one.action;
@@ -71,10 +84,12 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 	}
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	for (const stop of plan.askWhen ?? []) {
+		condition(stop.if, `askWhen "${stop.label}"`);
 		try { holds(scope, stop.if); } catch (error) { found.push(`askWhen "${stop.label}": ${error instanceof Error ? error.message : String(error)}`); }
 		const window = stop.when && checkWhen(stop.when);
 		if (window) found.push(`askWhen "${stop.label}": ${window}`);
 	}
+	for (const hold of plan.holds ?? []) condition(hold.releaseWhen, `hold "${hold.purpose}"`);
 	(plan.may ?? []).forEach((branch, at) => option(branch, `may[${at}]`));
 	for (const [n, phase] of (plan.phases ?? []).entries()) {
 		const wrong = checkWhen(phase.when, false);
