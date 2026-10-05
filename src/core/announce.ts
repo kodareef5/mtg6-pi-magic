@@ -187,6 +187,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 							option: {
 								id: `${prefix}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => tap.source.id), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
 								label: `${procedure.claim} (${name(source)})`,
+								notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
 								shows: [
 									`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
 									procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
@@ -194,7 +195,9 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
 									...aiming(targets, world, frame.seat), ...procedure.instructions.map(summary), `Claimed basis: ${procedure.basis}`,
 								].filter(Boolean).join(" "),
-								objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
+								objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...extra.uses.filter((id) => id !== source.id).flatMap((id) => {
+									const object = frame.view.objects?.find((one) => one.id === id); return object ? [ref(object)] : [];
+								}), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 							},
 							activation: { source: ref(source), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 								...(procedure.speed ? { speed: procedure.speed } : {}),
@@ -208,5 +211,5 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 			}
 		}
 	}
-	return offered;
+	return offered.map(({ option, activation }) => ({ option: { ...option, use: structuredClone(activation) }, activation }));
 }

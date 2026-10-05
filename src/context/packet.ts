@@ -1,10 +1,6 @@
-/**
- * What a decision model is shown for one decision.
- *
- * Nothing here writes to the table.
- * Past 150 lines to keep the packet contract beside the projection that fills it.
+/** Question-specific projected context. Builders share facts, never table mutation.
+ * Past 150 lines to keep the packet contract beside its projection and scope rules.
  */
-
 import type { Rules } from "../core/rules.ts";
 import type { Frame, SeatId, SeatView, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
@@ -22,86 +18,47 @@ import { viewWorld } from "../core/selectors.ts";
 import { sources } from "../core/funding.ts";
 import { openingHand } from "../core/pregame.ts";
 import { activeWatches } from "../core/triggers.ts";
+import { choices, inspect, type Choice, type Inspection, type Payment, type Use, type Funding } from "./choices.ts";
+import { decisionFacts } from "./decision-facts.ts";
 
-/**
- * What the pregame and the commentator left behind, shared by every seat.
- *
- * One object for the whole table, held by reference, because the recaps grow as
- * the game runs and a seat that copied them at the start would read a stale
- * game. The briefs are per seat and a seat reads only its own.
- */
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
-
-/** The part of the seat's plan this decision needs: what it is for, what is due, and what would make it wrong. */
 export type PlanSlice = {
-	objective: string;
-	/** The plan's whole guidance, where no phase script covers the window. */
-	guidance?: string;
-	/** The step due now, if any, then the next two waiting. */
-	due?: string;
-	next: string[];
-	branches: string[];
-	held: string[];
-	/** Facts the plan named as reasons to stop, holding now. */
-	stops: string[];
-	done: string[];
-	/** The phase script for this window: its goal, its decisions, its steps in order, and what justifies asking strategy again. */
+	objective: string; guidance?: string; due?: string; next: string[]; branches: string[]; held: string[]; stops: string[]; done: string[];
 	script?: { goal: string[]; guidance: string[]; steps: string[]; reevaluate: string[] };
 };
-
-/** An object as a pilot reads it: what it is and its state, without its registrations. */
-export type Seen = { id: string; name: string; controller: SeatId; zone: string; tapped?: true; summoningSick?: boolean; types?: string[]; subtypes?: string[]; body?: string; counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[] };
-
+export type Seen = {
+	id: string; incarnation: number; name: string; controller: SeatId; zone: string; position?: number;
+	tapped?: true; summoningSick?: boolean; types?: string[]; subtypes?: string[]; body?: string;
+	counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[];
+	targets?: NonNullable<SeenObject["ability"]>["targets"]; source?: NonNullable<SeenObject["ability"]>["source"];
+};
 export type Packet = {
-	actor: SeatId;
-	/** Opening and turn context are distinct; no phase is inferred from prose. */
-	window: Window;
-	/** The table revision this was built from. A later answer against it is stale. */
-	version: number;
-	/** The remaining obligation in one sentence: what still has to be settled. */
-	obligation: string;
-	/** Current hand counts and the keep/bottom obligation, without inferred future draws. */
-	opening?: NonNullable<SeatView["opening"]> & { hand: ReturnType<typeof openingHand> };
+	actor: SeatId; window: Window; version: number; obligation: string;
+	kind: string;
+	opening?: NonNullable<SeatView["opening"]> & { hand: ReturnType<typeof openingHand>; retained?: { option: string; hand: ReturnType<typeof openingHand> }[] };
+	retained?: { option: string; hand: ReturnType<typeof openingHand> }[];
 	plan?: PlanSlice;
-	/** Every option, at equal detail, already marked with what the plan says about it. */
-	options: { id: string; label: string; shows?: string }[];
-	/** What is available to spend, with each source's own restrictions kept. */
-	resources: string[];
-	known: string[];
-	objects: Seen[];
-	/** Registered watches on the battlefield now; neither pending nor predicted triggers. */
-	watches: ReturnType<typeof activeWatches>;
-	/** Source text for visible cards involved in this decision, kept apart from current traits. */
-	cards: Record<string, Printed>;
-	/** The pregame snippets that apply here: this window's, and a note for each card an option names. */
-	guidance: string[];
-	/** The public turn recaps: three sentences about the last three turns, not two hundred receipts. */
-	lately: string[];
-	/** The ways out that only change what this seat knows. Empty when nothing is answerable. */
-	routes: Route[];
-	/** What this seat asked for on this decision and was given. */
-	learned?: string[];
-	/** Why the answers already sent for this decision were not taken. Present only on a retry. */
-	refused?: string[];
-	resolution?: SeatView["resolution"];
-	/** Considered, deferred and still-unreviewed uses. An assessment does not count as execution. */
-	checklist?: ReviewItem[];
-	/** The accepted use being completed, separate from the next phase's strategy. */
-	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string };
+	options: Choice[]; uses: Record<string, Use>; payments: Record<string, Payment>; funding: Record<string, Funding>; pools: SeatView["pools"];
+	resources: string[]; known: string[]; objects: Seen[];
+	watches: ReturnType<typeof activeWatches>; cards: Record<string, Printed>;
+	guidance: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
+	history?: SeatView["history"]; resolution?: SeatView["resolution"]; checklist?: ReviewItem[]; combat?: SeatView["combat"];
+	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
+	inspection?: { stage: string; selected?: Use };
 };
 
 const seen = (object: SeenObject): Seen => {
 	const traits = object.traits;
-	return { id: object.id, name: object.card ?? object.token?.name ?? object.ability?.claim ?? "unknown", controller: object.controller, zone: object.zone,
+	return { id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim ?? "unknown", controller: object.controller, zone: object.zone,
+		...(object.zone === "stack" ? { position: object.position } : {}),
 		...(object.tapped ? { tapped: true as const } : {}), ...(traits?.power !== undefined ? { body: `${traits.power}/${traits.toughness}` } : {}),
 		...(Object.keys(object.counters).length ? { counters: { ...object.counters } } : {}), ...(object.damage ? { damage: object.damage } : {}),
-		...(traits?.words.length ? { words: [...traits.words] } : {}),
-		...(traits ? { types: [...traits.types], subtypes: [...traits.subtypes] } : {}),
+		...(traits?.words.length ? { words: [...traits.words] } : {}), ...(traits ? { types: [...traits.types], subtypes: [...traits.subtypes] } : {}),
 		...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
-		...(object.ability ? { effect: [object.ability.basis, ...object.ability.instructions.map(summary)] } : {}) };
+		...(object.ability ? { effect: [object.ability.basis, ...object.ability.instructions.map(summary)],
+			targets: structuredClone(object.ability.targets), source: { ...object.ability.source } } : {}) };
 };
 
-/** The due step's options first, then the live branches', then the rest: every option, in the order the plan wants them. */
 function inPlanOrder<T extends { id: string }>(options: readonly T[], state: ReturnType<typeof planState>): T[] {
 	if (!state) return [...options];
 	const rank = new Map<string, number>();
@@ -110,113 +67,86 @@ function inPlanOrder<T extends { id: string }>(options: readonly T[], state: Ret
 	return [...options].sort((a, b) => (rank.get(a.id) ?? 2) - (rank.get(b.id) ?? 2));
 }
 
-/**
- * Build the packet.
- *
- * What goes in: the obligation, the options marked with the plan, the part of
- * the plan this window needs, and the public facts. What stays out: the deck
- * lists, card registrations, analysis the plan already settled, and anything
- * this seat has not earned. Equal detail per option, so a preference is never
- * manufactured by how an option is described.
- *
- * `context` is optional because a seat with no brief still has to be able to play.
- */
-export function focus(
-	frame: Frame,
-	intent: Intent,
-	context: { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[] } = {},
-): Packet {
+/** The same canonical grouping drives inspection and the question's facts. */
+export function decisionChoices(frame: Frame) { return choices(inPlanOrder(frame.decision?.options ?? [], planState(frame))); }
+
+export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; review?: ReviewItem; inspection?: Inspection };
+/** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
+export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet {
 	const { decision, seat, view, version, refused } = frame;
-	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) {
-		throw new Error("A packet needs a decision and intent for its own seat");
-	}
+	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) throw new Error("A packet needs a decision and intent for its own seat");
 	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
-
-	// This window's snippet, and a note for each card an option names: the note is wanted where the card is a choice.
-	const brief = context.brief;
-	const named = decision.options.map((option) => `${option.label} ${option.shows ?? ""}`).join("\n");
-	const step = view.window.kind === "turn" ? brief?.steps?.[view.window.step as keyof Brief["steps"]] : undefined;
-	const guidance = [
-		view.window.kind === "opening" ? openingGuidance(brief, view, seat) : say(step?.[view.window.kind === "turn" && view.window.active === seat ? "own" : "opponent"]),
-		...Object.entries(brief?.cards ?? {}).filter(([card]) => named.includes(card)).map(([card, note]) => `${card}: ${say(note)}`),
-	].filter((line) => line.length > 0);
-
-	const state = planState(frame);
-	// The window's script, when the plan has one: then the pilot reads it and not the whole plan, the brief or the recaps.
+	const state = planState(frame), review = context.review;
 	const scripts = (state?.plan.phases ?? []).filter((one) => matches(one.when, frame));
 	const dueAt = state?.due.find((one) => one.candidates.length)?.at, done = new Set(view.done ?? []);
 	const plan = state && !view.resolution ? {
-		objective: state.plan.objective,
-		...(scripts.length ? {} : { guidance: state.plan.guidance }),
+		objective: state.plan.objective, ...(scripts.length ? {} : { guidance: state.plan.guidance }),
 		...(dueAt !== undefined ? { due: state.plan.steps[dueAt]!.label } : {}),
-		next: state.waiting.slice(0, 2).map((one) => one.label),
-		branches: state.branches.map((one) => one.label),
-		held: state.held.map((hold) => `${hold.objects.map((object) => object.card ?? object.id).join(", ")}: ${hold.purpose}`),
-		stops: state.stops,
-		done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
-		...(scripts.length ? { script: {
-			goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
+		next: state.waiting.map((one) => one.label), branches: state.branches.map((one) => one.label),
+		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
+		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
+		...(scripts.length ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
 			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : at === dueAt ? "Now" : "Then"}: ${step.label}`] : []),
-			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []),
-		} } : {}),
+			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;
-	const scripted = !!plan?.script, review = checklist(frame);
-	const relevant = new Set((view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack" || (view.window.kind === "opening" && object.zone === "hand") ||
-		decision.options.some((option) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation)))
-		.flatMap((object) => object.card ? [object.card] : []));
-	for (const item of review) for (const card of item.cards) relevant.add(card);
-	// A sacrificed source is no longer on the battlefield, but its public
-	// ability and source text still belong to the response and resolution.
-	for (const object of view.objects ?? []) if (object.ability) {
-		const card = view.objects?.find((one) => one.id === object.ability!.source.id)?.card;
-		if (card) relevant.add(card);
+	const all = inPlanOrder(decision.options, state);
+	const factored = choices(all), menu = context.inspection ? inspect(factored, context.inspection) : undefined;
+	const offered = review && review.kind !== "response" ? all.filter((one) => review.options.includes(one.id))
+		: context.inspection?.use ? all.filter((one, at) => factored.options[at]?.use === context.inspection!.use || !one.use) : all;
+	const data = review ? choices(offered) : factored;
+	const scoped = decisionFacts(frame, offered, review), names = new Set(scoped.objects.flatMap((one) => one.card ? [one.card] : []));
+	for (const option of offered) for (const card of option.cards ?? []) names.add(card);
+	const watches = view.window.kind === "opening" ? [] : activeWatches(frame);
+	// A proposed action can cause new triggers. Their full source text and
+	// watches belong to action/review questions, before those events happen.
+	if (!view.resolution) for (const watch of watches) names.add(watch.source.name);
+	for (const object of scoped.objects) if (object.ability) {
+		const name = view.objects?.find((one) => one.id === object.ability!.source.id)?.card;
+		if (name) names.add(name);
 	}
-	const resolving = view.resolution && view.objects?.find((one) => one.id === view.resolution!.object)?.ability;
-	const available = sources(frame).map(({ object, yields }) => `${object.card ?? object.token?.name ?? object.id}: ${[...new Set(yields.map((one) =>
-		`${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`);
+	const step = view.window.kind === "turn" ? context.brief?.steps?.[view.window.step as keyof Brief["steps"]] : undefined;
+	const guidance = [view.window.kind === "opening" ? openingGuidance(context.brief, view, seat)
+		: say(step?.[view.window.kind === "turn" && view.window.active === seat ? "own" : "opponent"]),
+		...Object.entries(context.brief?.cards ?? {}).filter(([card]) => names.has(card)).map(([card, note]) => `${card}: ${say(note)}`)].filter(Boolean);
+	const ability = view.resolution && view.objects?.find((one) => one.id === view.resolution!.object)?.ability;
+	const purpose = view.purposes?.find((one) => one.object.id === view.resolution?.object);
+	const selection = view.window.kind === "opening" && view.window.action === "bottom" || decision.situation === "turn-based" && view.window.kind === "turn" && view.window.step === "cleanup";
+	const available = !view.resolution && view.window.kind === "turn" ? sources(frame).map(({ object, yields }) =>
+		`${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}): ${[...new Set(yields.map((one) => `${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`) : [];
+	const itemList = review ? [review] : checklist(frame);
+	const listed = menu?.options ?? data.options;
+	const used = new Set(listed.flatMap((one) => one.use ? [one.use] : []));
+	const paid = new Set(listed.flatMap((one) => [one.payment, ...(one.alternatives ?? []).map((variant) => variant.payment)].filter((id): id is string => !!id)));
+	const taps = new Set([...paid].flatMap((id) => data.payments[id]?.funding ?? []));
+	const retained = selection ? offered.map((option) => ({ option: option.id,
+		hand: openingHand({ ...view, objects: view.objects?.filter((one) => !option.objects?.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation)) }, seat) })) : undefined;
 	return {
-		actor: seat, window: structuredClone(view.window), version,
-		obligation: decision.question,
-		...(view.window.kind === "opening" && view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat) } } : {}),
-		...(plan ? { plan } : {}),
-		...(review.length ? { checklist: review } : {}),
-		options: inPlanOrder(decision.options, state).map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),
-		resources: [...view.yours, ...(view.window.kind === "turn" ? [
-			`Land plays left this turn: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. Putting a land onto the battlefield by an effect does not use a land play.`,
-			`Mana sources usable now: ${available.join("; ") || "none"}.`,
-		] : [])],
-		known: [...view.table, ...view.since],
-		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),
-		watches: activeWatches(frame),
-		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => relevant.has(name)).map(([name, card]) => [name, structuredClone(card)])),
+		actor: seat, window: structuredClone(view.window), version, obligation: decision.question,
+		kind: review ? `review:${review.kind}` : view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
+		...(view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
+		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: structuredClone(itemList) } : {}),
+		options: listed, uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
+		payments: Object.fromEntries(Object.entries(data.payments).filter(([id]) => paid.has(id))),
+		funding: Object.fromEntries(Object.entries(data.funding).filter(([id]) => taps.has(id))), pools: structuredClone(view.pools),
+		...(menu ? { inspection: { stage: menu.stage, ...(menu.selected ? { selected: menu.selected } : {}) } } : {}),
+		resources: view.resolution ? [] : [...view.yours, ...(view.window.kind === "turn" ? [
+			`Land plays left: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. A resolving effect putting a land onto the battlefield does not use a land play.`,
+			`Mana sources usable now: ${available.join("; ") || "none"}.`] : [])],
+		known: [...(view.players ?? []).map((one) => `Seat ${one.id}: ${one.life} life, ${one.hand ?? "unknown"} cards in hand, ${one.library ?? "unknown"} in library.`), ...view.since,
+			...(decision.situation === "trigger-order" ? view.table : [])],
+		objects: scoped.objects.map(seen).sort((a, b) => a.zone === "stack" && b.zone === "stack" ? (a.position ?? 0) - (b.position ?? 0) : 0),
+		watches: view.resolution ? watches.filter((one) => names.has(one.source.name)) : watches,
+		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => names.has(name)).map(([name, card]) => [name, structuredClone(card)])),
+		...(view.window.kind === "turn" ? { history: structuredClone(view.history ?? []) } : {}),
+		...(view.combat ? { combat: structuredClone(view.combat) } : {}),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
-		...(resolving ? { resolving: { claim: resolving.claim, basis: resolving.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),
-			...(state ? { objective: state.plan.objective } : {}) } } : {}),
-		guidance: scripted || resolving ? [] : guidance,
-		lately: scripted || resolving ? [] : [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
-		routes: dial(decision, context.rules),
-		...(context.learned?.length ? { learned: [...context.learned] } : {}),
-		...(refused?.length ? { refused: [...refused] } : {}),
+		...(ability ? { resolving: { claim: ability.claim, basis: ability.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),
+			...(purpose ? { objective: purpose.objective, purpose: purpose.use, guidance: purpose.guidance } : state ? { objective: state.plan.objective } : {}) } } : {}),
+		guidance: plan?.script || ability ? [] : guidance, lately: [], routes: dial(decision, context.rules),
+		...(context.learned?.length ? { learned: [...context.learned] } : {}), ...(refused?.length ? { refused: [...refused] } : {}),
 	};
 }
 
-/**
- * Whether to put conceding in front of a decision model.
- *
- * It is always available to the seat. Whether it is listed is a separate
- * question, and listing it when the game is live is how a model learns to quit
- * instead of think.
- *
- * List it when the result is already settled and only the stepping through is
- * left: a sequence on the table that ends the game whatever this seat does,
- * with several resolutions already passed and no seat objecting, or a loop with
- * no exit this seat can take. A model may then concede the way a chess player
- * resigns, to save the other seats the clicking.
- *
- * Leave it out otherwise. Another seat can still play badly, so a position that
- * merely looks lost is not lost, and the cheaper answer is to let the decision
- * model do the work.
- */
 export function offerConcede(packet: Packet): boolean {
 	void packet;
 	throw new Error("offerConcede is unwritten: settled sequence or inescapable loop only.");

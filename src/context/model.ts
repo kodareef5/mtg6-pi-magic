@@ -28,6 +28,7 @@ import type {
 } from "@earendil-works/pi-ai";
 
 import { CEILING, type Tally } from "./spend.ts";
+import { PlayerUnavailable } from "../core/player.ts";
 
 export type Question = ClassifierQuestion;
 export type Answer = ClassifierAnswer;
@@ -88,7 +89,7 @@ export function decisionApi(
 				result = await classify(model, request, options);
 			} catch (error) {
 				options.tally?.record({ ...base, ms: Date.now() - began, failed: String(error) });
-				throw error;
+				throw new PlayerUnavailable(String(error));
 			}
 			const wrong =
 				result.stopReason === "stop"
@@ -100,7 +101,7 @@ export function decisionApi(
 				...(result.usage ? { usage: result.usage } : {}),
 				...(wrong ? { failed: wrong } : {}),
 			});
-			if (wrong) throw new Error(wrong);
+			if (wrong) throw new PlayerUnavailable(wrong);
 			return result.answers;
 		},
 	};

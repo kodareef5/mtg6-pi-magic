@@ -73,6 +73,11 @@ const SYSTEM = [
 	"",
 	"WHAT JEV NEEDS",
 	"- steps: ordered actions, each with label, when and action. option is an exact listed id such as pass or attack:done. prefix matches ids beginning with land:, cast:, attack: or block:, with objects selecting the card. land and cast are not ids. Write lands, spells, attacks, blocks and responses; prose alone does not offer an action. Essential means the line fails if that step cannot be taken.",
+	"- Give a step or response a purpose when its later choices need direction: for a fetch, name the land and intended landfall; for removal, name the threatened object and desired result. purpose is preserved for resolution even if you amend the plan afterward. An announcement is recorded before its effect resolves.",
+	"- Bind payments to the resources you reserve. Example: cast Claw with Village's creature-only red and keep Mountain for Shock; a remaining Village alone cannot pay Shock's red. If a resource is lost, name the covered alternative before requesting another plan.",
+	"- Sequence prerequisites and continuations explicitly. Example: Hydra resolves before a land play; its landfall triggers are ordered and resolved; a fetch chooses Forest under its accepted purpose. Waiting for that stack to resolve is not a broken line. Do not repeat an activation already pending on the same target.",
+	"- Give opening bottom, combat, search and optional-instruction choices a policy with a visible exception. Compare the hand left after bottoming. A ground blocker cannot stop a flying threat without flying or reach; a flying defender can still block a ground attacker. Use current characteristics.",
+	"- Repair the unfinished line and its guidance together. history names actions already taken this turn; do not reintroduce them when the new base omits completed steps. Phase instructions should say what to do while an effect is pending and after it resolves, not keep ordering an already completed activation.",
 	"- phases: [{when, goal, guidance, reevaluate}]. Give the current main phases, combat and the opponent's turn clear decisions and sequencing, including trigger targets and searches. Keep unchanged scripts. reevaluate names only an unexpected threat or opportunity that changes the line; routine events belong in guidance or branches.",
 	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
 	"- Use active self/opponent and step names for windows. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
@@ -92,7 +97,9 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 	const found: string[] = [];
 	const selectors = (value: unknown, card: string): void => {
 		if (!value || typeof value !== "object") return;
-		const term = value as { on?: string; history?: string; of?: { zones?: string[] } };
+		const term = value as { on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] } };
+		if (term.spendOnly && !term.spendOnly.zones?.length)
+			found.push(`package ${card}: spendOnly needs explicit zones. Casting checks the spell on the stack; activation checks its source. Omitted zones silently select battlefield.`);
 		if ((term.on === "cast" || term.history === "cast") && term.of && !term.of.zones?.includes("stack"))
 			found.push(`package ${card}: a cast ${term.on ? "event" : "history"} selector needs zones ["stack"]. Omitted zones mean battlefield, so this selector matches no cast spell.`);
 		Object.values(value).forEach((one) => selectors(one, card));

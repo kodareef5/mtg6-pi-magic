@@ -117,8 +117,8 @@ required facts. A large request needs an explanation of its contents and a
 complete way to inspect the decision in smaller questions. Preserve original
 move ids, visible restrictions and access to every choice. Inspection moves
 nothing. Record capacity failures as infrastructure failures, never as a seat's
-wish to pass. The planned implementation is in `docs/PLANS.md`, "Next round:
-focused Jev context"; the current adapter does not yet satisfy that plan.
+wish to pass. `docs/PLANS.md`, "Focused Jev context", records the implemented
+builders, their worked examples and the variations still awaiting coverage.
 
 Design from preferred uses before editing those builders or planner prompts.
 Write representative simple and complex question sequences, including changed
@@ -170,7 +170,7 @@ steps, routes, gaps, tokens, cost and elapsed time. Focus makes no model call.
 
 `aiSeat` returns equipment commands to the core loop. It never writes the table.
 
-The pilot's packet carries the plan's objective, the due step, the next two,
+The pilot's packet carries the plan's objective, the due step, waiting steps,
 live branches, holds and stops, and what is done. It does not carry the deck
 lists, card registrations, procedure bodies or the brief's matchup reading;
 those are strategy's. Strategy receives the unfinished plan and reusable actions,

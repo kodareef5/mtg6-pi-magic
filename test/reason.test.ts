@@ -223,14 +223,14 @@ test("a brief snippet reaches the decision and a card note only when its card is
 	assert.equal(packet.guidance.some((line) => line.startsWith("Cavern")), false, "an absent card costs nothing");
 	assert.equal(JSON.stringify(packet).includes("Green Stompy curves out"), false, "the deck reading is strategy's, not the pilot's");
 	assert.equal(JSON.stringify(packet).includes("behind on everything"), false, "so is the matchup");
-	assert.deepEqual(packet.lately, ["Turn 1: A played a Forest."]);
+	assert.deepEqual(packet.lately, [], "the pilot reads current turn events and prepared guidance, not an arbitrary tail of recaps");
+	assert.deepEqual(packet.history, project(built, decision.seat).history);
 	assert.deepEqual(recent(recaps), ["Turn 1: A played a Forest."]);
 
 	const asked = question(packet, false);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
-	assert.match(asked.instructions, /Notes for this window:/);
-	assert.match(asked.instructions, /Recently:/);
+	assert.match(asked.instructions, /supplied facts and this seat's preparation/);
 	assert.equal("ask:help" in asked.criteria, false, "no planner, no help to ask for");
 
 	// A packet with no brief still builds. A missing plan costs quality; refusing
@@ -395,6 +395,7 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 		assert.ok(traces.indexOf(request) < traces.findIndex((event) => event.id === request.id && event.event === "reply"));
 		assert.ok(request.model.includes("/"));
 		assert.equal("baseUrl" in request, false);
+		assert.equal(request.size.bytes, Buffer.byteLength(JSON.stringify(request.request)), "diagnostics report exact serialized bytes without a token estimate");
 		if (request.kind === "classify") {
 			const sent = request.request as { state: { actor: number; options: { id: string }[] }; questions: { pick: { criteria: Record<string, string> } } };
 			assert.ok([0, 1].includes(sent.state.actor));

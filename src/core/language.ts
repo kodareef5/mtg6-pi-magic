@@ -316,6 +316,7 @@ export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Pac
 export const PlanDefs = { ...Defs,
 	Option: object({
 		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")), essential: Type.Optional(Type.Literal(true)),
+		purpose: Type.Optional(text),
 		/** A listed table option by id or prefix and objects, or a procedure to announce. */
 		action: Type.Union([
 			object({ option: Type.Optional(text), prefix: Type.Optional(text), objects: Type.Optional(QuerySchema) }),

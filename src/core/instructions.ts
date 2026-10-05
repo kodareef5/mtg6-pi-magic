@@ -18,7 +18,7 @@ import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 
-export type Choice = { id: string; label: string; changes: Change[]; pick?: ObjectRef; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef };
+export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: ObjectRef; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef };
 export type Step = { actor: SeatId; question: string; choices: Choice[] };
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -116,7 +116,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			// Once the count is met there is nothing left to pick, even when it is zero.
 			const choices: Choice[] = picked.length >= count ? [] : pool.map((object) => {
 				const last = picked.length + 1 >= count;
-				return { id: object.id, label: `Choose ${name(object)} (${object.zone})`, changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
+				return { id: object.id, label: `Choose ${name(object)} (${object.zone})`, objects: [ref(object)], ...(object.card ? { cards: [object.card] } : {}), changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
 					...(last ? finish([ref(object)]) : { pick: ref(object) }) };
 			});
 			// Up to, a hidden-zone search, and running out are all ways to stop short (701.23b).

@@ -14,6 +14,7 @@ import type { Procedure } from "../src/core/work-language.ts";
 import type { Plan } from "../src/core/language.ts";
 import { aiSeat } from "../src/context/seat.ts";
 import { decisionApi, type Classify } from "../src/context/model.ts";
+import type { Packet } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork } from "../src/context/strategy.ts";
 import type { Reasoner } from "../src/context/reason.ts";
@@ -71,7 +72,9 @@ export async function abilityExercise() {
 			if (question.type !== "choice") throw new Error("The fixture expects choices.");
 			const entries = Object.entries(question.criteria);
 			// Take what the plan marks, else pass, else the first real option.
-			const choice = entries.find(([, text]) => /Plan (step|branch)/.test(text))?.[0] ?? entries.find(([id]) => ["pass", "attack:done", "block:done"].includes(id))?.[0] ?? entries.find(([id]) => id !== "ask:help")![0];
+			const packet = request.state as unknown as Packet;
+			const marked = (id: string) => { const one = packet.options.find((one) => one.id === id); return /Plan (step|branch)/.test(JSON.stringify([one?.notes, one?.shows, one?.alternatives, one?.use && packet.uses[one.use]?.notes])); };
+			const choice = entries.find(([id]) => marked(id))?.[0] ?? entries.find(([id]) => ["pass", "attack:done", "block:done"].includes(id))?.[0] ?? entries.find(([id]) => id !== "ask:help")![0];
 			return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }];
 		}));
 		if (!exchangeCalls && table.ledger.filter((row) => row.activation?.timing === "stack").length === 2 && !cardsIn(table, "stack").length) exchangeCalls = counted.spent().length;

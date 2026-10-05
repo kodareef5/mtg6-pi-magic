@@ -20,7 +20,7 @@ import { decisionApi, type Classify } from "../src/context/model.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { assign, cast, load, readRoster, readWhy, rosterFor, save, suggested } from "../src/context/roles.ts";
 import { aiSeat, question } from "../src/context/seat.ts";
-import { focus } from "../src/context/packet.ts";
+import { focus, type Packet } from "../src/context/packet.ts";
 import { start } from "../src/core/commit.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
@@ -104,12 +104,12 @@ test("a seat roster overrides every, and the file refuses an invented role", () 
 
 /** Pi's classify, as a double. `answer` decides what comes back per request. */
 function fake(answer: (criteria: string[], instructions: string) => Record<string, unknown>) {
-	const seen: { instructions: string; criteria: string[] }[] = [];
+	const seen: { instructions: string; criteria: string[]; state: Packet }[] = [];
 	const classify: Classify = async (model, request) => {
 		const asked = request.questions.pick;
 		if (!asked || asked.type !== "choice") throw new Error("Expected one choice question named pick");
 		const criteria = Object.keys(asked.criteria);
-		seen.push({ instructions: asked.instructions, criteria });
+		seen.push({ instructions: asked.instructions, criteria, state: request.state as unknown as Packet });
 		return {
 			api: model.api, provider: model.provider, model: model.id,
 			answers: answer(criteria, asked.instructions) as ClassifierResult["answers"],
@@ -154,7 +154,10 @@ test("a model-backed seat plays a whole game and is asked only what is not force
 	assert.equal(seen.length, chosen.length);
 	assert.equal(calls, chosen.length);
 	assert.deepEqual(picks, chosen.map((row) => row.picked));
-	for (const [at, request] of seen.entries()) assert.deepEqual(request.criteria, chosen[at]!.offered);
+	for (const [at, request] of seen.entries()) {
+		assert.ok(request.criteria.includes(chosen[at]!.picked));
+		assert.ok(request.criteria.every((id) => id.startsWith("inspect:") || chosen[at]!.offered.includes(id)), "the menu adds only pure inspection routes");
+	}
 
 	// Compulsory work costs no call; every voluntary window still reaches Jev.
 	const forced = built.ledger.filter((row) => row.why === "forced").length;
@@ -174,7 +177,7 @@ test("a refused answer reaches the next request, and a wrong answer kind becomes
 		return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 0.5 } };
 	});
 	assert.ok(await play(built, seatsOf(built, classify, built.gaps), {}));
-	assert.match(seen[1]!.instructions, /No option "not-an-option"/);
+	assert.match(seen[1]!.state.refused![0]!, /No option "not-an-option"/);
 	assert.equal(seen[0]!.instructions.includes("not taken"), false);
 	assert.deepEqual(seen[0]!.criteria, seen[1]!.criteria, "the same question, asked again");
 	assert.equal(built.ledger.filter((row) => row.why === "fallback").length, 0, "a retry that works is not a fallback");
@@ -197,6 +200,20 @@ test("a refused answer reaches the next request, and a wrong answer kind becomes
 	assert.match(nextDecision(other)!.question, /Declare attackers/);
 	assert.equal(nextDecision(other)!.fallback, undefined);
 	assert.match(other.gaps.at(-1)!, /no terminating option/);
+
+	const unavailable = table(); advance(unavailable);
+	const before = structuredClone(unavailable), pending = nextDecision(unavailable);
+	let failedCalls = 0;
+	const capacity: Classify = async (model) => {
+		failedCalls++;
+		return { api: model.api, provider: model.provider, model: model.id, answers: {}, stopReason: "error", errorMessage: "max_tokens_exceeded", timestamp: 0 };
+	};
+	assert.equal(await play(unavailable, seatsOf(unavailable, capacity, unavailable.gaps), {}), null);
+	assert.equal(failedCalls, 1, "a capacity failure is not retried as an invalid pick");
+	assert.deepEqual(unavailable.ledger, before.ledger, "provider failure records neither a choice nor a fallback");
+	assert.deepEqual(unavailable.things, before.things);
+	assert.deepEqual(nextDecision(unavailable), pending, "the same physical decision remains pending");
+	assert.match(unavailable.gaps.at(-1)!, /max_tokens_exceeded.*Decision remains pending/);
 });
 
 test("the question says what is true and never what is good", () => {

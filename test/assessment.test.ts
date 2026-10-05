@@ -74,6 +74,11 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	assert.equal(registrationProblems([lizard]).length, 2, "both the watch and the history count must match stack objects");
 	const corrected = JSON.parse(JSON.stringify(lizard).replaceAll('"of":{"not"', '"of":{"zones":["stack"],"not"')) as Package;
 	assert.deepEqual(registrationProblems([corrected]), [], "the model can correct the selectors without core interpreting prose");
+	const restricted: Package = { card: "Rockface Village", registers: [{ kind: "mana", basis: "{T}: Add {R}. Spend this mana only to cast a creature spell.", cost: { tap: true }, colors: ["R"], spendOnly: { types: ["creature"] } }] };
+	assert.match(registrationProblems([restricted]).join("; "), /spendOnly needs explicit zones/);
+	if (restricted.registers[0]!.kind !== "mana") assert.fail();
+	restricted.registers[0]!.spendOnly!.zones = ["stack"];
+	assert.deepEqual(registrationProblems([restricted]), [], "the interpreter checks explicit scope, not the meaning of card prose");
 	assert.match(assessmentProblems(printed, { ...pack, registers: [], procedures: [normal(pack.card, printed.oracle)] }).join("; "), /Unassessed text.*flying/,
 		"a bare cast quoting the whole card cannot stand in for its abilities");
 	let rounds = 0;

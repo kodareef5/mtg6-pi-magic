@@ -85,7 +85,7 @@ test("strategy can fetch the full syntax and every indexed example without loadi
 			assert.ok(schema.length < 3000, `${schema.length} characters in the advertised schema`);
 			assert.ok(!request.systemPrompt!.includes(reference), "ordinary planning does not load the whole card procedure language");
 			assert.match(request.systemPrompt!, /\$defs/, "ordinary planning definitions remain in the prompt");
-			assert.ok(request.systemPrompt!.length < 18000, "planning leaves room for the position instead of resending all card instructions");
+			assert.doesNotMatch(request.systemPrompt!, /"Instruction":|"Registration":/, "ordinary planning omits the recursive card-language definitions, which its tools can fetch");
 			assert.ok(request.tools!.some((tool) => tool.name === "syntax"));
 			return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "syntax", name: "syntax", arguments: {} },
 				...listed.map((file, at) => ({ type: "toolCall", id: `e${at}`, name: "example", arguments: { file } }))] }) };

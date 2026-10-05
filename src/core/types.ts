@@ -7,7 +7,7 @@
 
 import type { Phase, Step } from "./steps.ts";
 import type { SeenObject, Workspace } from "./work.ts";
-import type { Combat, Mana, Note, Resolution } from "./table.ts";
+import type { Activation, Combat, Mana, Note, Resolution } from "./table.ts";
 import type { Happened } from "./selectors.ts";
 import type { Printed } from "./printed.ts";
 import type { PlanOption } from "./language.ts";
@@ -52,6 +52,12 @@ export type Option = {
 	shows?: string;
 	/** Visible objects this option binds. Ids are opaque; consumers never parse them. */
 	objects?: ObjectRef[];
+	/** Card identities exposed by this choice, such as an authorized library search. */
+	cards?: string[];
+	/** Accepted announcement facts built from this seat's view, never executable changes. */
+	use?: Activation;
+	/** Restrictions, entry facts and plan annotations, independent of the rendered description. */
+	notes?: string[];
 };
 
 /** Options are canonically ordered, so a seed plus the picks replays the game. */
@@ -106,6 +112,8 @@ export type SeatView = {
 	pools?: { seat: SeatId; mana: Mana[] }[];
 	/** The remaining instruction cursor, without any hidden library identities. */
 	resolution?: Resolution;
+	/** This viewer's original intent for its pending announcements, read from recorded work. */
+	purposes?: { object: ObjectRef; row: number; objective: string; use?: string; guidance: string }[];
 	/** Seats still playing and their life. */
 	/**
 	 * The other seats' recorded actions since this seat's plan was accepted, by

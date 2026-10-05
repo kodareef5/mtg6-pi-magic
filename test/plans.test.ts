@@ -554,9 +554,9 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	assert.equal(packet.plan!.guidance, undefined, "the whole plan's guidance is not repeated");
 	assert.deepEqual([packet.guidance, packet.lately], [[], []], "nor the brief's notes or the recaps");
 	const asked = question(packet, true).instructions;
-	assert.match(asked, /This phase: Grow the Chocobo twice\.\nLand first, then the Passage\.\nIts steps, in order:\n- Now: Play a Forest\n- Then: Crack Fabled Passage/);
-	assert.match(asked, /Choose ask:help if one of these has happened: Red flashes in a blocker/);
-	assert.match(asked, /card text or an option's restriction conflicts with the planned action/);
+	assert.equal(asked.includes("Land first, then the Passage."), false, "the script is carried once in state, not repeated in instructions");
+	assert.deepEqual(packet.plan!.script!.reevaluate, ["Red flashes in a blocker"]);
+	assert.match(asked, /position contradicts the line/);
 	// A window without a script keeps today's view of the plan.
 	editWork(table, 0, [{ do: "plan.put", plan: line }], "unscripted");
 	const plain = focus(workFrame(table, 0), startingIntent(0), { brief });

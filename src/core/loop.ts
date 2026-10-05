@@ -17,7 +17,7 @@ import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Intent } from "./intent.ts";
 import type { Case, Ruling } from "./judge.ts";
 import { rollback } from "./journal.ts";
-import { refuse, type Answer, type Player } from "./player.ts";
+import { refuse, PlayerUnavailable, type Answer, type Player } from "./player.ts";
 import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
@@ -165,6 +165,11 @@ export async function play(
 				if (why === null) { answer = received as Answer; break; }
 				failures.push(why);
 			} catch (error) {
+				if (error instanceof PlayerUnavailable) {
+					table.gaps.push(`Seat ${decision.seat} unavailable: ${error.message} Decision remains pending; no action was chosen.`);
+					report(table, told, watch);
+					return null;
+				}
 				failures.push(String(error));
 			}
 		}

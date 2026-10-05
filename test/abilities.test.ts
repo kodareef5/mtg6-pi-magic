@@ -133,18 +133,24 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 			return { api: model.api, provider: model.provider, model: model.id, stopReason: "stop", timestamp: 0,
 				answers: { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } } };
 		}
-		// Every option, the plan's step first.
-		assert.deepEqual(packet.options.map((option) => option.id).sort(), frame.decision!.options.map((option) => option.id).sort());
-		assert.match(packet.options[0]!.id, /^plan:/);
-		const steps = Object.entries(question.criteria).filter(([, text]) => text.includes("Plan step 1: Loot with a Merchant"));
-		assert.equal(steps.length, 2, "two payments for one source: identical Merchants are one choice");
-		assert.equal(new Set(steps.map(([, text]) => text)).size, 2);
-		assert.ok(steps.some(([, text]) => text.includes("{G} (green, persists)")));
-		const [chosen, description] = steps.find(([, text]) => text.includes("{U} (blue, expires at step end)"))!;
-		assert.match(description, /Cost: 1 generic\. Tap the source\./);
-		assert.match(description, /Put the ability on the stack/);
-		assert.match(description, /you draws 1\./);
-		assert.match(description, /you chooses 1 of \{"zones":\["hand"\],"owner":"you"\} as discard\. Put bound:discard into graveyard \(discard\)\./);
+		// The use and its original payments remain separate questions.
+		const use = Object.values(packet.uses)[0]!;
+		assert.match(use.notes!.join(" "), /Plan step 1: Loot with a Merchant/);
+		assert.equal(use.timing, "stack");
+		assert.match(use.effects.join(" "), /you draws 1\./);
+		assert.match(use.effects.join(" "), /you chooses 1 of \{"zones":\["hand"\],"owner":"you"\} as discard\. Put bound:discard into graveyard \(discard\)\./);
+		assert.deepEqual(packet.pools, frame.view.pools, "payment ids retain color, restrictions and persistence");
+		let chosen: string;
+		if (packet.inspection?.stage === "use") chosen = packet.options.find((one) => one.id.startsWith("inspect:use:"))!.id;
+		else {
+			assert.deepEqual(packet.options.filter((one) => !one.id.startsWith("inspect:")).map((one) => one.id).sort(), frame.decision!.options.map((one) => one.id).sort());
+			const steps = packet.options.filter((one) => one.use);
+			assert.equal(steps.length, 2, "two payments for one source: identical Merchants are one choice");
+			const option = steps.find((one) => packet.payments[one.payment!]!.paid.includes("blue"))!;
+			assert.equal(packet.payments[option.payment!]!.cost.generic, 1);
+			assert.equal(packet.payments[option.payment!]!.cost.tap, true);
+			chosen = option.id;
+		}
 		assert.equal(packet.plan?.due, "Loot with a Merchant");
 		calls += 1;
 		return { api: model.api, provider: model.provider, model: model.id, stopReason: "stop", timestamp: 0,
@@ -154,7 +160,7 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 	let answer = await player.answer(frame);
 	while (answer.kind === "work") { frame.view.work = prepareWork(frame, answer.tools); answer = await player.answer(frame); }
 	assert.equal(answer.kind, "pick");
-	assert.equal(calls, 1);
+	assert.equal(calls, 2);
 	assert.ok(answer.kind === "pick" && answer.option.startsWith(`plan:${frame.view.work!.planned}:s0:`), "the pick names the plan's step");
 });
 

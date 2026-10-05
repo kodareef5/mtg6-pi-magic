@@ -252,7 +252,9 @@ A **plan** is what jev flies.
 - `objective` and `guidance`: what this stretch is for.
 - `steps`: the line, in order. Each option has a label, a window (`when`), an
   optional `if`, and an action: a listed table option by id, prefix or objects,
-  or a procedure to announce.
+  or a procedure to announce. Optional `purpose` carries the intended later
+  resolution choice, such as which basic land to find. It authorizes no automatic
+  action. The announcing seat's purpose survives later plan changes.
 - `may`: standing alternatives jev may take without asking when their window and
   `if` hold. "If they Shock my Chocobo, Veil it."
 - `askWhen`: visible facts that mean the plan no longer fits, as conditions,

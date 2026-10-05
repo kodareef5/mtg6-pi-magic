@@ -30,11 +30,11 @@ const table = () => start(standard, [
 
 /** Pi's classify, as a double. Answers with whatever the rule says, in order. */
 function classifier(reply: (ids: string[], nth: number) => string) {
-	const sent: { ids: string[]; instructions: string }[] = [];
-	const classify = (async (_model: unknown, request: { questions: Record<string, { criteria: Record<string, string>; instructions: string }> }) => {
+	const sent: { ids: string[]; instructions: string; learned?: string[]; refused?: string[] }[] = [];
+	const classify = (async (_model: unknown, request: { state: { learned?: string[]; refused?: string[] }; questions: Record<string, { criteria: Record<string, string>; instructions: string }> }) => {
 		const asked = request.questions.pick!;
 		const ids = Object.keys(asked.criteria);
-		sent.push({ ids, instructions: asked.instructions });
+		sent.push({ ids, instructions: asked.instructions, learned: request.state.learned, refused: request.state.refused });
 		const choice = reply(ids, sent.length - 1);
 		return {
 			api: "typesafe-system-one", provider: "typesafe", model: "jev-latest",
@@ -126,10 +126,10 @@ test("following a route changes what the seat knows and nothing else", async () 
 	assert.deepEqual(moves(asked.sent[1]!.ids), moves(asked.sent[0]!.ids));
 
 	// The rule arrived, with its number and its text, and it is labelled as asked for.
-	assert.match(asked.sent[1]!.instructions, /Rules you asked for:/);
-	assert.match(asked.sent[1]!.instructions, /305\.2/);
-	assert.match(asked.sent[1]!.instructions, /one land during their turn/);
-	assert.equal(asked.sent[0]!.instructions.includes("305.2"), false, "not before it was asked for");
+	assert.match(asked.sent[1]!.instructions, /learned contains the cited rules you asked/);
+	assert.match(asked.sent[1]!.learned!.join(" "), /305\.2/);
+	assert.match(asked.sent[1]!.learned!.join(" "), /one land during their turn/);
+	assert.equal(asked.sent[0]!.learned, undefined, "not before it was asked for");
 
 	// A route already followed is not offered again.
 	assert.equal(asked.sent[1]!.ids.includes("rules:land"), false);
@@ -143,8 +143,8 @@ test("following a route changes what the seat knows and nothing else", async () 
 	await retrySeat.answer({ ...frame, refused: ["not-offered was not a move"] });
 	assert.equal(retrying.sent.length, 3);
 	assert.equal(retrying.sent[2]!.ids.some((id) => id.startsWith("rules:")), false);
-	assert.match(retrying.sent[2]!.instructions, /305\.2/);
-	assert.match(retrying.sent[2]!.instructions, /not-offered was not a move/);
+	assert.match(retrying.sent[2]!.learned!.join(" "), /305\.2/);
+	assert.match(retrying.sent[2]!.refused!.join(" "), /not-offered was not a move/);
 	assert.deepEqual(built, before);
 });
 
@@ -189,8 +189,8 @@ test("a route reads as an ask and never as a move, and the budget ends the walk"
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
 	assert.match(asked.criteria["rules:priority"]!, /Acts on nothing/);
-	assert.match(asked.instructions, /an ask shows the rules it names, changes nothing/);
-	assert.match(asked.instructions, /may not be among them/);
+	assert.match(asked.instructions, /Rule asks show the named rule and return to this decision without acting/);
+	assert.match(asked.instructions, /Acceptance does not certify card meaning or rules legality/);
 	// And it still never says what is good.
 	for (const word of ["should", "best", "recommend"]) {
 		assert.equal(asked.instructions.toLowerCase().includes(word), false, word);

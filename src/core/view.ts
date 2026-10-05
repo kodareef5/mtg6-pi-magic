@@ -21,6 +21,7 @@ import { STEPS } from "./steps.ts";
 import { characteristics, sick } from "./characteristics.ts";
 import type { Frame, SeatId, SeatView, Viewer, Window } from "./types.ts";
 import type { Plan } from "./language.ts";
+import { purposes } from "./purpose.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
@@ -154,6 +155,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			sideboard: Object.fromEntries(Object.entries(deck.sideboard).sort(([a], [b]) => a.localeCompare(b))),
 		})) } : {}),
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
+		...(viewer !== "spectator" ? { purposes: purposes(table, viewer) } : {}),
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps] } : {}),

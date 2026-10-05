@@ -30,6 +30,10 @@ import { matches, select } from "../core/query.ts";
 import { STEPS } from "../core/steps.ts";
 import { putting } from "./strategy.ts";
 import { reviewCommand, reviewQuestion, STACK_PRIORITY } from "./review.ts";
+import { checklist } from "../core/review.ts";
+import { PlayerUnavailable } from "../core/player.ts";
+import { inspect, type Inspection } from "./choices.ts";
+import { decisionChoices } from "./packet.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -155,60 +159,34 @@ export const HELP = "ask:help";
  * hide the alternatives the packet just spent its space listing.
  */
 export function question(packet: Packet, help: boolean): Question {
-	const plan = packet.plan;
-	const lines = [
-		packet.obligation,
-		...(packet.options.some((one) => one.id === "pass") && packet.objects.some((one) => one.zone === "stack") ? [STACK_PRIORITY] : []),
-		"Read known, resources and lately in the supplied state for the position and recent events.",
-		...(packet.opening ? ["opening holds your mulligans, remaining bottom obligation and hand counts. Apply the policy for this decision to these cards. Printed mana costs do not prove that a spell is castable; use its card text and available colors."] : []),
-		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
-		...(plan ? ["", `Your strategy: ${plan.objective}`,
-			...(plan.script ? [...plan.script.goal.map((goal) => `This phase: ${goal}`), ...plan.script.guidance,
-				...(plan.script.steps.length ? ["Its steps, in order:", ...plan.script.steps.map((step) => `- ${step}`)] : ["No step of this phase is left."])]
-				: [plan.guidance ?? "", ...(plan.done.length ? [`Done: ${plan.done.join("; ")}.`] : []), plan.due ? `Due now: ${plan.due}.` : "No step is due now.",
-					...(plan.next.length ? [`Later: ${plan.next.join("; ")}.`] : [])]),
-			...(plan.branches.length ? [`Branches that apply now: ${plan.branches.join("; ")}.`] : []),
-			...plan.held.map((hold) => `Held: ${hold}.`),
-			...(plan.stops.length ? [`The plan said to stop if: ${plan.stops.join("; ")}.`] : [])] : []),
-		...(packet.guidance.length ? ["", "Notes for this window:", ...packet.guidance] : []),
-		...(packet.checklist?.length ? ["", "checklist holds your judgments for this position; it does not report completed actions.",
-			"Before passing or ending a declaration, account for every use marked Use now. Take it, or explicitly choose to leave it unfinished because the visible facts prevent it. Holding or skipping an item does not perform it."] : []),
-		...(packet.learned?.length ? ["", "Rules you asked for:", ...packet.learned] : []),
-		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
-		"",
-		"Answer with one listed id.",
-		...(packet.resolving ? [
-			`Complete the announced use: ${packet.resolving.claim}. Source text: ${packet.resolving.basis}`,
-			...(packet.resolving.objective ? [`Objective for the choices within this effect: ${packet.resolving.objective}`] : []),
-			"The use is already resolving and its costs were paid. Review target restrictions before executing the remaining instructions; if every target is illegal, none of the effect resolves. This is an instruction choice, not priority or a new cast. A completed announcement does not mean its effect is complete.",
-			...packet.resolving.remaining,
-			"Choosing no card on an optional search deliberately finds nothing. It is not a pass. Putting a land onto the battlefield by this effect does not use a land play.",
-		] : []),
-		"cards holds printed card text; objects holds current characteristics after effects. Check the current objects and option restrictions before following a planned action. A listed option is not a ruling that it obeys every card.",
-		"summoningSick is the creature's current restriction; false alone does not make an attack legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
-		"watches lists registered battlefield triggers now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source.",
-		...(plan ? [
-			"Follow the due step when its conditions still hold. Use a marked branch for the situation it names. Choose pass when you have no action or response to take; every seat answers its own priority window.",
-			"An option that uses a held resource spends what the plan is keeping; take it only when the plan says so.",
-			// Asking is rare: a script names what justifies it, and anything else in the window is normal play.
-			...(help ? [plan.script?.reevaluate.length
-				? `Choose ${HELP} if one of these has happened: ${plan.script.reevaluate.join("; ")}; if card text or an option's restriction conflicts with the planned action; or if a required use is missing when its timing allows it. Otherwise follow the phase guidance.`
-				: `If the position contradicts the line or a required use is missing when its timing allows it, choose ${HELP}. Waiting for resolution or a later window alone does not need a new plan. Do not invent a new line.`] : []),
-		] : []),
-		...(packet.routes.length ? ["Some ids are asks rather than moves: an ask shows the rules it names, changes nothing, and brings this decision back.",
-			"The rule that decides this may not be among them."] : []),
-	];
-	return {
-		type: "choice",
-		instructions: lines.join("\n"),
-		criteria: Object.fromEntries([
-			...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.some((one) => !one.judgment)
-				? "Review the remaining uses before ending. This requests a completion review; you will confirm the pass or declaration afterwards."
-				: [option.label, option.shows].filter(Boolean).join(". ")]),
-			...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing and returns to this decision.`]),
-			...(help ? [[HELP, "The plan does not fit this position: ask strategy for a new plan. Moves nothing."]] : []),
-		]),
-	};
+	const stage = packet.inspection?.stage;
+	const instructions = [packet.obligation,
+		"Choose one listed id using the supplied facts and this seat's preparation. Acceptance does not certify card meaning or rules legality.",
+		"options describes the choices; uses holds shared source, timing, effect, target-slot terms and notes; payments holds costs and paid mana ids; funding holds the referenced mana abilities, while pools names existing mana and its restrictions. Read these references together. Printed cards and current characteristics are separate.",
+		...(stage ? [stage === "use" ? "Choose the prepared use that applies now. An inspect choice asks about its alternatives and moves nothing."
+			: stage === "binding" ? "Choose the targets and X for this prepared use. Inspection declares no targets and spends nothing."
+			: "Choose a complete original move with these bindings and a payment that preserves the plan's commitments. Back returns to all uses without acting."] : []),
+		...(packet.opening ? ["Apply the opening policy to this hand and its remaining obligation. For bottom choices, retained shows the hand after each choice; preserve the policy's resource requirements."] : []),
+		...(packet.retained ? ["retained shows the hand after each discard. Apply the prepared retention policy to the remaining cards and resources."] : []),
+		...(packet.combat ? ["combat shows the developing declaration and assignments. Compare the plan with current flying, reach, menace, sickness and damage. Finish the declaration explicitly; selecting a creature is not finishing combat."] : []),
+		...(packet.resolving ? ["Complete the accepted use under resolving.purpose and its original guidance. Its costs are already paid. This is an instruction choice, not priority. Declining a search deliberately finds nothing; it is not a pass.",
+			"resolution holds the current instruction and earlier bindings. Resolve against the actual locked targets, including their legality; a completed announcement is not a completed effect."] : []),
+		...(packet.objects.some((one) => one.zone === "stack") && !packet.resolving ? [STACK_PRIORITY,
+			"Read named stack targets and order before responding. An effect already pending on a target has not resolved; paying again starts another use."] : []),
+		...(packet.plan ? ["Follow the current plan and phase guidance. A held resource can be spent only under its release policy. A waiting prerequisite is not an unavailable line; a contradicted assumption may need a covered alternative or a revision."] : []),
+		...(packet.checklist?.length ? ["checklist records assessments, not execution. Before ending, review any unanswered uses. A completion review moves nothing; the following question asks for the actual pass or declaration."] : []),
+		...(help ? ["Ask for help when the position contradicts the line and no prepared alternative covers it. Explain the conflict through the supplied use, targets, payments and remaining work; do not invent a strategy."] : []),
+		...(packet.routes.length ? ["Rule asks show the named rule and return to this decision without acting."] : []),
+		...(packet.learned?.length ? ["learned contains the cited rules you asked to see; they are reference text, not actions."] : []),
+		...(packet.refused?.length ? ["refused explains the previous unusable answer. The physical decision is unchanged."] : []),
+	].join("\n");
+	return { type: "choice", instructions, criteria: Object.fromEntries([
+		...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.some((one) => !one.judgment)
+			? "Request the remaining completion reviews, then confirm this ending separately."
+			: `Select the option with this id: ${option.label}. Read its bindings, payment and notes in options.`]),
+		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
+		...(help ? [[HELP, "Request a revision of the unfinished line. Moves nothing."]] : []),
+	]) };
 }
 
 export function aiSeat(options: AiSeatOptions): Player {
@@ -216,7 +194,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let closed = false;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true } | undefined;
 	let began: string | undefined;
-	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
+	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection; visited: Set<string> } | undefined;
 	const cancel = () => {
 		const old = preparation;
 		preparation = undefined;
@@ -261,7 +239,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 			// alone is not a reason for a model call.
 			const seated = options.chronicle;
 			const budget = options.dials ?? 2;
-			if (navigation?.version !== frame.version) navigation = { version: frame.version, learned: [], walked: [] };
+			if (navigation?.version !== frame.version || navigation.revision !== (frame.view.work?.revision ?? 0)) navigation = { version: frame.version, revision: frame.view.work?.revision ?? 0, learned: [], walked: [], selected: {}, visited: new Set() };
 			const { learned, walked } = navigation;
 			const reason = planReason(frame);
 			const revision = frame.view.work?.revision ?? 0;
@@ -306,11 +284,16 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
 			for (;;) {
+				const items = checklist(frame);
+				const ready = items.some((item) => item.kind !== "phase" && item.kind !== "response" && item.judgment?.verdict === "act" && item.options.some((id) => !["pass", "attack:done", "block:done"].includes(id)));
+				const reviewing = ready && frame.view.work?.finishReview !== frame.version ? undefined : items.find((item) => !item.judgment);
+				const menu = reviewing ? undefined : inspect(decisionChoices(frame), navigation.selected);
 				const whole = focus(frame, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
 					...(seated ? { recaps: seated.recaps } : {}),
 					...(options.rules && walked.length < budget ? { rules: options.rules } : {}),
 					...(learned.length ? { learned } : {}),
+					...(reviewing ? { review: reviewing } : { inspection: navigation.selected }),
 				});
 				// A route already followed is not offered again. Its answer is
 				// already in front of the seat, and offering it twice spends the
@@ -318,9 +301,6 @@ export function aiSeat(options: AiSeatOptions): Player {
 				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
 				// Review the next use, execute it, then reconsider the changed
 				// position. Later steps need not be affordable before this one.
-				const ready = packet.checklist?.some((item) => item.kind !== "phase" && item.kind !== "response" && item.judgment?.verdict === "act" &&
-					item.options.some((id) => !["pass", "attack:done", "block:done"].includes(id)));
-				const reviewing = ready && frame.view.work?.finishReview !== frame.version ? undefined : packet.checklist?.find((item) => !item.judgment);
 				const ask = reviewing ? reviewQuestion(packet, reviewing, help) : question(packet, help);
 				asked += 1;
 				options.onAsk?.(packet);
@@ -336,6 +316,12 @@ export function aiSeat(options: AiSeatOptions): Player {
 					// would lose the difference between a choice and a fallback.
 					options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
 					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
+				}
+				if (menu && Object.hasOwn(menu.enter, answer.choice)) {
+					const key = JSON.stringify([navigation.selected, answer.choice]);
+					if (navigation.visited.has(key)) throw new PlayerUnavailable("Repeated the same option inspection without a changed decision. No move was chosen.");
+					navigation.visited.add(key); navigation.selected = menu.enter[answer.choice]!;
+					continue;
 				}
 				if (answer.choice === HELP && help) {
 					const due = reviewing ? ` Checklist item: ${reviewing.label}.` : packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";

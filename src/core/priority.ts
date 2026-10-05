@@ -70,7 +70,7 @@ export function defaultCasts(table: Table, holder: SeatId): Move[] {
 	return sources.flatMap(([zone, name]) => offers({ source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name }, claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost`,
 		basis: `Printed ${table.printed[name]!.type}, ${table.printed[name]!.mana}`, timing: "spell", instructions: [] }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
 		const note = entering(table, holder, name);
-		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
+		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
 	}));
 }
 
@@ -81,7 +81,7 @@ export function preparedMoves(table: Table, holder: SeatId): Move[] {
 		const prefix = procedure.timing === "spell" ? "cast" : "use";
 		return offers(procedure, frame, `${prefix}:${card}:${at}`).map(({ option, activation }) => {
 			const note = procedure.timing === "spell" && permanentSpell(table.printed[pack.card]) ? entering(table, holder, pack.card) : "";
-			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}` } : {}) }, activation, changes: [], reason: "cast" as const };
+			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
 		});
 	}));
 }

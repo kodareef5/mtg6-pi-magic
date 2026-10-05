@@ -125,7 +125,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 			const spent = hold.objects.filter((object) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
 			if (spent.length) marks.push(`Uses ${spent.map((object) => object.card ?? object.id).join(", ")}, held: ${hold.purpose}.`);
 		}
-		return marks.length ? { ...option, shows: [option.shows, ...marks].filter(Boolean).join(" ") } : option;
+		return marks.length ? { ...option, notes: [...(option.notes ?? []), ...marks], shows: [option.shows, ...marks].filter(Boolean).join(" ") } : option;
 	});
 }
 

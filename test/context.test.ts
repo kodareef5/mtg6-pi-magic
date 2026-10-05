@@ -12,6 +12,10 @@ import { start } from "../src/core/commit.ts";
 import { project } from "../src/core/view.ts";
 import { abilityExercise } from "../tools/ability-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
+import { choices, inspect, type Inspection } from "../src/context/choices.ts";
+import { aiSeat } from "../src/context/seat.ts";
+import { example, main, matchup, offered, place } from "./play.ts";
+import { workFrame } from "../src/core/work-tools.ts";
 
 test("context preserves the seat's options, shows the plan the seat flies, and carries neither deck lists nor registrations", async () => {
 	const table = start(standard, [
@@ -48,8 +52,10 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	const compact = focus(paused, startingIntent(paused.seat));
 	assert.deepEqual(compact.options.map((option) => option.id), paused.decision!.options.map((option) => option.id));
 	assert.deepEqual(compact.resolution, paused.view.resolution);
-	assert.deepEqual(compact.objects.map((object) => object.id).sort(),
-		paused.view.objects!.filter((object) => object.zone === "battlefield" || object.zone === "stack").map((object) => object.id).sort(), "public objects, with or without a plan");
+	for (const object of compact.objects) assert.ok(paused.view.objects!.some((one) => one.id === object.id && one.incarnation === object.incarnation), "every decision fact comes from the seat's projection");
+	for (const option of paused.decision!.options) for (const ref of option.objects ?? [])
+		if (paused.view.objects!.some((one) => one.id === ref.id && one.incarnation === ref.incarnation))
+			assert.ok(compact.objects.some((one) => one.id === ref.id && one.incarnation === ref.incarnation), "every offered selection keeps its visible object facts");
 	assert.equal(JSON.stringify(compact.objects).includes("registrations"), false, "registrations stay with strategy");
 	for (const object of compact.objects) if (paused.view.printed?.[object.name])
 		assert.deepEqual(compact.cards[object.name], paused.view.printed[object.name], "public permanents and stack objects retain their source text");
@@ -61,6 +67,59 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	compact.objects[0]!.name = "Consumer edit";
 	Object.values(compact.cards)[0]!.oracle = "Consumer edit";
 	assert.deepEqual(paused, original, "the compact packet does not share mutable state");
+
+	const targets = matchup("focused-payments");
+	place(targets, 1, "hand", "Shock", "Abrade");
+	place(targets, 1, "battlefield", "Mountain", "Mountain");
+	place(targets, 0, "battlefield", "Llanowar Elves");
+	main(targets, 1, 2);
+	const offers = offered(targets, example("Cast Shock"));
+	assert.ok(offers.length > 2, "the fixture compares actual target and payment combinations");
+	const sourceFrame = workFrame(targets, 1);
+	const decision = { ...sourceFrame.decision!, options: [...offers.map((one) => one.option), { id: "pass", label: "Pass priority" }] };
+	const choiceFrame = { ...sourceFrame, decision };
+	const originalChoices = structuredClone(choiceFrame), facts = choices(decision.options);
+	const paths = new Map<string, string[]>(), visited = new Set<string>();
+	const walk = (selected: Inspection, path: string[]) => {
+		const key = JSON.stringify(selected);
+		if (visited.has(key)) return; visited.add(key);
+		const menu = inspect(facts, selected);
+		for (const option of menu.options) {
+			if (Object.hasOwn(menu.enter, option.id)) walk(menu.enter[option.id]!, [...path, option.id]);
+			else if (!paths.has(option.id)) paths.set(option.id, [...path, option.id]);
+		}
+	};
+	walk({}, []);
+	assert.deepEqual([...paths.keys()].sort(), decision.options.map((one) => one.id).sort(), "every original move and pass stays reachable");
+	for (const offer of offers) {
+		const path = [...paths.get(offer.option.id)!], physical = structuredClone(targets);
+		const pilot = aiSeat({ name: "Inspection", intent: startingIntent(1), onGap: assert.fail, api: { named: "fixture", async ask(request) {
+			assert.deepEqual(targets, physical, "inspection never moves the table or edits equipment");
+			const packet = request.state as unknown as Packet, choice = path.shift()!;
+			const question = request.questions.pick!;
+			assert.equal(question.type, "choice");
+			if (question.type !== "choice") assert.fail();
+			assert.ok(Object.hasOwn(question.criteria, choice));
+			const option = packet.options.find((one) => one.id === choice)!;
+			assert.ok(packet.cards.Shock);
+			assert.equal(packet.cards.Abrade, undefined, "an unrelated card in hand contributes no card text");
+			if (!choice.startsWith("inspect:")) {
+				assert.deepEqual(option.targets, offer.activation.targets);
+				assert.deepEqual(packet.payments[option.payment!]!.paid, offer.activation.paid);
+				assert.deepEqual(packet.payments[option.payment!]!.funding?.map((id) => packet.funding[id]), offer.activation.funding);
+			}
+			return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
+		} } });
+		const answer = await pilot.answer(choiceFrame);
+		assert.equal(answer.kind, "pick");
+		if (answer.kind !== "pick") assert.fail();
+		assert.equal(answer.option, offer.option.id);
+		assert.equal(path.length, 0, "even a single final payment requires its own answer");
+		await pilot.close();
+	}
+	assert.deepEqual(choiceFrame, originalChoices, "factoring and every inspection leave the original offers intact");
+	const entered = inspect(facts, inspect(facts, {}).enter["inspect:use:0"]!);
+	assert.deepEqual(inspect(facts, entered.enter["inspect:back"]!).options, inspect(facts, {}).options, "backtracking restores all choices");
 });
 
 test("a retry packet differs from the first only by the refusal it carries", async () => {

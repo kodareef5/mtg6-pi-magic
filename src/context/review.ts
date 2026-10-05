@@ -14,15 +14,14 @@ export function reviewQuestion(packet: Packet, item: ReviewItem, help: boolean):
 			item.kind === "phase" ? `Review the remaining work for this phase: ${item.label}.` : `Review this use before choosing a move: ${item.label}.`,
 			"This question records your assessment only. It does not move a card, complete a plan step, pass priority, or establish legality.",
 			"Read its printed card text, current characteristics, costs and restrictions beside the phase guidance. Account for mana already spent, the current summoningSick value, targets and responses. Execute the strategist's line; ask for help if it conflicts with those facts.",
-			"known, resources and lately in the supplied state hold the current facts and recent events.",
+			"known, resources and history in the supplied state hold the current facts and recorded turn events. uses and payments hold shared terms referenced by options.",
 			"watches lists registered triggers on the battlefield now. A permanent cannot see events that finished before it entered; its own entry can trigger it. Ask for help if the planned order depends on a missed trigger.",
-			...(packet.plan ? [`Objective: ${packet.plan.objective}`, ...(packet.plan.script?.guidance ?? [packet.plan.guidance ?? ""]), ...packet.plan.held.map((one) => `Held: ${one}`)] : packet.guidance),
-			...(packet.plan?.done.length ? [`Recorded plan actions: ${packet.plan.done.join("; ")}. Do not repeat these actions. Their effects may still be on the stack.`] : []),
+			"The state holds the applicable plan, held resources and recorded actions. An action already pending on the named target must not be mistaken for an unused ability.",
 			...(item.remaining ? [item.remaining.length ? `Actions still unrecorded in this window: ${item.remaining.join("; ")}.`
 				: "Every listed action for this phase window is recorded. Check pending effects, responses and any further instructions in the phase guidance. If none needs action now, choose review:skip. Completed actions do not need a strategy repair."] : []),
 			...(packet.objects.some((one) => one.zone === "stack") ? [STACK_PRIORITY] : []),
 			...(item.kind === "response" ? ["The stack is still waiting. Decide whether you need a response before it resolves; each seat will separately choose its priority pass."]
-				: options.length ? options.map((one) => `${one.label}: ${one.shows ?? ""}`)
+				: options.length ? ["options names the available variants for this item; read shared use terms, target bindings, payment and restrictions there. This review does not select a variant."]
 				: [item.kind === "card" ? "No use of this card is offered now. Check timing, land plays, costs and targets. A card remaining in hand is not itself an unfinished plan step."
 					: item.kind === "phase" ? "No action is offered for this phase item now. Read the recorded actions and current facts before deciding whether anything remains."
 					: "No option currently carries this item out. It is unfinished, not completed. Check whether its condition is false, it belongs later, or the plan needs repair."]),

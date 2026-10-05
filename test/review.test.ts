@@ -16,6 +16,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { reviewQuestion } from "../src/context/review.ts";
 import { announce, example, finish, main, matchup, passBoth, place } from "./play.ts";
 import { question as moveQuestion } from "../src/context/seat.ts";
+import { activate } from "../src/core/procedures.ts";
 
 test("a pilot reviews unfinished uses before acting, with private judgments that expire and replay", async () => {
 	const position = () => {
@@ -89,7 +90,7 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	apply(table, answer.option, "model", "chosen", execution(planState(frame)!, answer.option));
 	assert.ok(checklist(workFrame(table, 0)).every((one) => !one.judgment), "an action invalidates judgments from the old position");
 	const afterLand = focus(workFrame(table, 0), startingIntent(0));
-	assert.match(reviewQuestion(afterLand, afterLand.checklist![0]!, true).instructions!, /Recorded plan actions: Play Forest/, "reviews carry execution progress alongside the unchanged phase guidance");
+	assert.deepEqual(afterLand.plan!.done, ["Play Forest"], "reviews carry execution progress in state alongside the phase guidance");
 	assert.deepEqual(afterLand.checklist!.find((one) => one.kind === "phase")!.remaining, ["Cast Hydra"], "an unavailable unfinished action is not counted as complete");
 	const unused = afterLand.checklist!.find((one) => one.kind === "card" && one.cards.includes("Forest") && !one.options.length)!;
 	assert.ok(unused, "the spare Forest stays on the checklist after spending the land play");
@@ -135,16 +136,33 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	assert.match(reviewQuestion(complete, phase, true).instructions!, /Every listed action for this phase window is recorded/);
 	assert.ok(complete.checklist!.some((one) => one.kind === "branch" && one.options.length), "completing the line does not remove response uses");
 
-	const fetch = matchup("review-fetch");
-	place(fetch, 0, "battlefield", "Fabled Passage"); main(fetch, 0);
-	editWork(fetch, 0, [{ do: "plan.put", plan: { objective: "Develop.", guidance: "Stale guidance about preserving a Forest in hand.", steps: [] } }], "old-plan");
-	announce(fetch, example("Crack Fabled Passage for a basic land")); passBoth(fetch);
+	const fetchPosition = () => { const table = matchup("review-fetch"); place(table, 0, "battlefield", "Fabled Passage"); return table; };
+	const fetch = fetchPosition(); main(fetch, 0);
+	editWork(fetch, 0, [{ do: "plan.put", plan: { objective: "Develop.", guidance: "Find the basic land after paying for Passage.", steps: [
+		{ label: "Fetch a basic", purpose: "Choose Forest to supply the next green spell.", when: { active: "self", step: "precombat-main" }, action: { procedure: example("Crack Fabled Passage for a basic land") } },
+	] } }], "old-plan");
+	const fetchFrame = workFrame(fetch, 0), fetchState = planState(fetchFrame)!, fetchUse = fetchState.procedures[0]!;
+	assert.ok(fetchUse);
+	activate(fetch, fetchUse.activation, { picked: fetchUse.option.id, offered: [fetchUse.option.id], by: "model", why: "chosen", execution: execution(fetchState, fetchUse.option.id) });
+	const originalPurpose = project(fetch, 0).purposes;
+	assert.equal(originalPurpose?.[0]?.use, "Choose Forest to supply the next green spell.");
+	assert.deepEqual(project(fetch, 1).purposes, [], "another seat cannot read the use's private purpose");
+	assert.equal(project(fetch, "spectator").purposes, undefined);
+	editWork(fetch, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Stale guidance about preserving a Forest in hand.", steps: [] } }], "new-plan");
+	assert.deepEqual(project(fetch, 0).purposes, originalPurpose, "replanning does not rewrite an announced use's purpose");
+	passBoth(fetch);
 	const resolving = focus(workFrame(fetch, 0), startingIntent(0));
 	assert.ok(resolving.cards["Fabled Passage"], "a sacrificed source keeps its card text in the resolving decision");
+	assert.ok(resolving.cards.Forest, "an authorized search choice carries full card text without exposing library order");
+	assert.equal(resolving.resolving?.purpose, "Choose Forest to supply the next green spell.");
+	const fetchJournal = open(join(dir, "fetch.jsonl"), { ...header, id: "fetch", seed: fetch.rng.seed }); save(fetchJournal, fetch);
+	assert.deepEqual(project(replay(fetchJournal.path, fetchPosition).table, 0).purposes, originalPurpose, "replay recovers the announcement's purpose");
+	fork(fetchJournal.path, fetch.ledger.length, "fetch-child", join(dir, "fetch-child.jsonl"));
+	assert.deepEqual(project(replay(join(dir, "fetch-child.jsonl"), fetchPosition).table, 0).purposes, originalPurpose, "a clone carries only its prefix's purpose");
 	assert.match(resolving.resolving!.basis, /Search your library/);
 	assert.ok(resolving.objects.some((one) => one.effect?.some((line) => line.includes("Search your library"))), "accepted stack instructions survive compact projection");
 	assert.equal(resolving.plan, undefined, "a new turn's casting guidance cannot displace an already resolving use");
-	assert.match(moveQuestion(resolving, false).instructions, /already resolving and its costs were paid/);
+	assert.match(moveQuestion(resolving, false).instructions, /costs are already paid/);
 	assert.doesNotMatch(moveQuestion(resolving, false).instructions, /Stale guidance/);
 	assert.ok(resolving.options.some((one) => one.label.includes("Decline")), "declining the search remains the seat's choice");
 });

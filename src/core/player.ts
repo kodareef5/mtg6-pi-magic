@@ -20,6 +20,9 @@ import type { Change } from "./syntax.ts";
 import type { Decision, Frame } from "./types.ts";
 import { commands, type WorkCommand } from "./work-language.ts";
 
+/** The adapter cannot answer now. This is not an unusable selection or a pass. */
+export class PlayerUnavailable extends Error {}
+
 export type Answer =
 	/** Take one of the moves the table listed. The cheap path, and the common one. */
 	| { kind: "pick"; option: string; actionId: string }

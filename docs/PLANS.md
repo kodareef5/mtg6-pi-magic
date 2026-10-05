@@ -211,20 +211,42 @@ assessment, entry and resolution, priority, planning, projection, and replay.
 Then inspect one bounded live opening before extending a game. Offline checks
 establish mechanics, not provider latency or expert playing strength.
 
-## Next round: focused Jev context
+## Focused Jev context
 
 Design the preferred use first: representative situations, actual questions and
 answers, then the preparation needed to make those questions answerable. Review
 coverage before choosing builder boundaries or changing prompts. Existing
 requests are evidence for regression checks, not the specification to prune.
 
-This section is a proposed usage contract, not a shipped interface or a claim
-of optimal play. The longer worked sequences stay here so a reader can check
+The first builders implement this contract: opening and retained-hand facts,
+one-item reviews, shared use and payment terms, reversible target/payment
+inspection, named stack bindings, combat facts and resolution purpose. The
+longer worked sequences stay here so a reader can check
 what passes between pregame, strategy and Jev without reconstructing it from
-separate prompt fragments. Syntax examples in `docs/examples/` describe today's
-accepted terms; the new inspection and preparation forms below are design work.
+separate prompt fragments. The examples specify preferred play, not measured
+playing strength. The advanced variations below still need worked coverage.
 Keep Jev as pilot, Luna low for strategy, judge and summary, and Sol 6.1 high for
 pregame. Core continues to receive model-assessed card meaning before play.
+
+`choices.ts` factors exact accepted uses and payments and partitions original
+offers by use, then complete target/X bindings, then payment. Inspection changes
+no table state, back restores the full menu, and the final original id still
+needs a pick. Reviews scope their facts before rendering. Card text is complete;
+no string, paragraph or option-count cut is used. Standing effects and pending
+stack objects remain dependencies. Search choices explicitly name the card
+identities that the resolving instruction permits the actor to see.
+
+A plan step or branch can include `purpose`, describing later instruction
+choices. Core recovers the announcing seat's original purpose from its work and
+ledger history, so a later plan cannot rewrite it. That purpose is private to
+the seat. Ordinary guidance remains the fallback for older plans.
+
+The private call trace records the question class, inspection stage and exact
+serialized bytes by field. Bytes are not token estimates; the model catalog's
+context window is recorded separately. A classifier transport or capacity
+failure stops with the decision pending, with no fallback move. Larger or
+repetitive requests must be diagnosed from these sections before extending the
+builders; these stages do not prove that every possible position fits a route.
 
 ### Classes of questions
 
