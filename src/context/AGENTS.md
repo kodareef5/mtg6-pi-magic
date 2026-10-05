@@ -15,7 +15,8 @@ legality. `src/core/loop.ts` is the only loop. If anything here starts stepping
 the game forward, stop and move it.
 
 Not the rules. The core owns the motion vocabulary and accepted card meaning.
-There is no per-card compilation. Read `docs/SYNTAX.md` and `docs/PLANS.md`
+The next-version contract replaces mandatory whole-card compilation with shared
+mechanics and scoped readiness. Read `docs/SYNTAX.md` and `docs/PLANS.md`
 for the current direction.
 
 Not required. A seat answered over p2p, by a person or through MCP loads none of
@@ -38,15 +39,14 @@ result that cannot be compared with another.
 The classifier executes. The thinking happens in the other four roles, and what
 reaches a decision is a short plan plus the facts.
 
-- **pregame** first assesses complete card meaning for every registered name
-  with rules text. It saves accepted registrations and procedures before play;
-  clones reuse them. Then four analysts run per seat (deck and resources,
-  matchup, opening, a challenger), each able to look up rules and cards, then one
-  synthesis that files the brief by where it is read. Both seats prepare at the
-  same time. Strategy reads the whole brief; the pilot reads only the slice for
-  its window, never the whole of it. New opening policies separate keep from
-  bottom and play from draw. The pilot reads one, alongside its current hand
-  counts. Older free-form policies carried by journals remain whole.
+- **pregame** prepares understanding and a reusable strategic playbook. Its
+  current whole-card assessment requirement is being replaced under the approved
+  `docs/PLANS.md` checklist. Standing terms must exist before affected operations;
+  particular uses can be prepared when needed. Source coverage does not certify
+  interpretation. Policies cover opening, sequencing, resources, responses,
+  combat and recovery, with priorities, worked examples and reversing conditions.
+  The implementation still uses four analysts and a synthesis; measure its wall
+  time and repairs before claiming that a larger brief improves gameplay.
 - **strategy** advances the pregame reasoning with one planner per seat. It
   prepares during the opponent's turn, then accepts or amends after the draw,
   and answers stops or requests for help. It submits changed fields and reuses
@@ -117,15 +117,15 @@ required facts. A large request needs an explanation of its contents and a
 complete way to inspect the decision in smaller questions. Preserve original
 move ids, visible restrictions and access to every choice. Inspection moves
 nothing. Record capacity failures as infrastructure failures, never as a seat's
-wish to pass. `docs/PLANS.md`, "Focused Jev context", records the implemented
-builders, their worked examples and the variations still awaiting coverage.
+wish to pass. `docs/history/2026-10-05-plans.md`, "Focused Jev context", preserves the earlier
+builders and examples. `docs/PLANS.md` records the approved replacement contract.
 
 Design from preferred uses before editing those builders or planner prompts.
 Write representative simple and complex question sequences, including changed
 positions, then review every phase, seat and planning stage against them. Those
 examples define what pregame and strategy must prepare for Jev. Existing packets
 and failed games are later regression evidence, not the shape to trim into a
-specification. `docs/PLANS.md` holds the question classes and first worked set.
+specification. `docs/PLANS.md` names the representative uses and links the earlier worked set.
 
 An ordered priority, not a mood. Take an available win, otherwise prevent the
 identified loss, otherwise keep the engine and the named response, otherwise

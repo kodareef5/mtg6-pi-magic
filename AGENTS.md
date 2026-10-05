@@ -2,6 +2,13 @@
 
 A Pi package that owns a table of Magic.
 
+The approved next-version contract and commit checklist are in `docs/PLANS.md`.
+Complete executable card programs are no longer a setup requirement to preserve.
+The migration must establish explicit readiness before affected operations; it
+must not remove the old preparation check and let missing abilities disappear.
+Keep Jev as the interface pilot. Many calls are acceptable; extra deliberation
+and strategic work without a prepared policy are the problems to remove.
+
 The table has a game type, seats in turn order, and a deck and zones per seat.
 It carries the rules, offers moves and physical operations, and logs what happened.
 It does not know who answers a seat.
@@ -97,17 +104,20 @@ A pattern that does not resolve is reported, never substituted, including when
 Pi has a configured default: a game played by a model nobody chose is a result
 that cannot be compared with another. A seat with no `decide` model refuses to
 start. A seat with no `pregame` model can reuse carried card assessments and
-play without a brief. Missing card assessments stop setup before play.
+play without a brief. The current implementation still stops setup on missing
+complete assessments; milestone 3 replaces that requirement with scoped readiness.
 
 ### What each call is for
 
-**`pregame` prepares card meaning, then each seat's brief.** Before dealing,
-the model assesses every registered card with rules text into registrations
-and reusable procedures. Each seat holds terms for both public lists and their
-sideboards. Four card jobs run at most at once. Every source paragraph must be
-covered; missing or unsupported meaning stops setup. Syntax and source checks
-do not certify the model's interpretation. The accepted equipment is journaled
-at version zero and carried by clones. Core never interprets Oracle prose.
+**`pregame` prepares card understanding and the strategic playbook.** Card
+understanding does not require a complete executable program for every mode of
+every registered card. Models supply source-backed standing terms before an
+affected event and particular uses when needed. Core executes shared mechanics
+and never interprets Oracle prose. Accepted terms remain journaled and reusable.
+The current `assess.ts` path still compiles whole cards before dealing. Replace
+it through the readiness and replay checks in `docs/PLANS.md`, rather than
+silently bypassing interpretation. Syntax and source checks do not certify the
+model's interpretation.
 
 Four analysts work at once on separate questions (deck and resources, the matchup,
 the opening, a challenger looking for traps), with both registered lists, exact
@@ -228,10 +238,11 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    draw/discard abilities in stack order, and clones during a pending discard.
    Accepted claims and instructions are journaled. Every legal card is
    assumed supported; `cards/unsupported.txt` lists the ones that are not, and
-   a deck containing one is refused. Cards are not compiled: a seat uses a card
+   a deck containing one is refused. A seat uses a card
    through the syntax in `docs/SYNTAX.md`, as procedures it announces and
    packages its permanents register as they enter. Model-backed setup assesses
-   those terms before play; priority offers their casts and activations to any
+   complete terms before play today; the next version scopes readiness to uses
+   and standing abilities. Priority offers casts and activations to any
    player adapter. Lands and registered mana abilities pay during casting
    (601.2g). Strategy prepares during the opponent's turn and accepts or amends
    after the draw. Jev chooses every voluntary action and pass. `npm run matchup`
@@ -379,9 +390,11 @@ rather than adding a test for each branch.
   action or pass. Progress is
   read from the ledger rows that carried each step out, so replay and clones
   hold exactly the progress of their prefix.
-- **Assessed.** Model-written terms cover a card before play, reject missing
-  source paragraphs, provide its casts and abilities without a turn-plan edit,
-  and survive version-zero cloning and replay. Refused preparation starts no game.
+- **Assessed.** Model-written terms name their source and survive replay and
+  cloning. The next version distinguishes understanding from executable use:
+  missing relevant meaning keeps the affected operation pending rather than
+  erasing an ability. Until that migration passes, the whole-card setup test
+  remains the implementation's guard.
 - **Considered.** A pilot reviews unfinished uses, including unavailable steps,
   before choosing a move. Private judgments neither move cards nor complete
   steps; they survive replay at that decision and expire when the position or
