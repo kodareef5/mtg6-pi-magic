@@ -133,7 +133,10 @@ unfinished steps and branches for this window, other cards with offered uses,
 cards still in hand during the seat's main phase, and a pending stack
 response. An unavailable planned use stays on that list. Jev answers one narrow
 review question per item: use now, hold for later, no use in this position, or ask
-strategy for help. The subsequent move question keeps every offered action and
+strategy for help. Once a reviewed step or card has an action to take, Jev
+chooses it before reviewing later steps that depend on it. If Jev instead asks
+to end the window, `review.finish` requests the remaining reviews, followed by
+a fresh confirmation. That request is not a pass. The move question keeps every offered action and
 shows those judgments. Both seats separately review a stack response and choose
 their own pass. The pass says whether unanimous passes would resolve the stack
 or end the current step or phase.
@@ -146,6 +149,12 @@ checklist is derived from the projected position and accepted work, so it cannot
 inspect a hidden card or certify a card's interpretation. A seat can still pass
 or take any listed move directly. The model adapter guides review before making
 that choice; core does not force a strategy on the seat.
+
+A resolving use has a different question. Jev receives the accepted claim,
+source text, remaining instructions and the plan's objective for its choices.
+The next phase's casting guidance is left out. A sacrificed source still
+supplies its public card text, and stack objects describe their accepted
+effects. Completing an announcement never counts as completing its resolution.
 
 In a scripted phase Jev sees the objective, that phase's decisions and ordered
 steps, applicable branches, holds, options and projected facts. It sees no

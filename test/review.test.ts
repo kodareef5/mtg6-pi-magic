@@ -13,7 +13,8 @@ import { aiSeat } from "../src/context/seat.ts";
 import { focus, type Packet } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { reviewQuestion } from "../src/context/review.ts";
-import { announce, example, main, matchup, place } from "./play.ts";
+import { announce, example, main, matchup, passBoth, place } from "./play.ts";
+import { question as moveQuestion } from "../src/context/seat.ts";
 
 test("a pilot reviews unfinished uses before acting, with private judgments that expire and replay", async () => {
 	const position = () => {
@@ -36,7 +37,12 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 		prompts.push(question.instructions ?? "");
 		const packet = request.state as unknown as Packet;
 		const pending = packet.checklist?.find((one) => !one.judgment);
-		const choice = pending ? pending.options.length ? "review:act" : "review:skip" : packet.options.find((one) => one.id.startsWith("land:"))!.id;
+		const review = Object.hasOwn(question.criteria, "review:hold");
+		if (!review && pending) {
+			assert.ok(packet.checklist!.some((one) => one.label === "Play Forest" && one.judgment?.verdict === "act"));
+			assert.ok(packet.checklist!.some((one) => one.label === "Cast Hydra" && !one.judgment), "the first action is offered before reviewing a later unavailable step");
+		}
+		const choice = review ? pending!.options.length ? "review:act" : "review:skip" : pending ? "pass" : packet.options.find((one) => one.id.startsWith("land:"))!.id;
 		assert.ok(Object.hasOwn(question.criteria, choice));
 		return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
 	} } });
@@ -46,7 +52,8 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:1", verdict: "act", reason: "Use Hydra" }], "unavailable"), /has no current option/);
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "made-up", verdict: "skip", reason: "Skip" }], "unknown"), /No checklist item/);
 	assert.equal(JSON.stringify(items).includes('"zone":"library"'), false);
-	for (let at = 0; at < items.length; at++) {
+	for (let at = 0; checklist(workFrame(table, 0)).some((one) => !one.judgment); at++) {
+		assert.ok(at <= items.length, "reviews and one completion request are finite");
 		const answer = await pilot.answer(workFrame(table, 0));
 		assert.equal(answer.kind, "work");
 		if (answer.kind !== "work") assert.fail();
@@ -56,6 +63,7 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 		assert.deepEqual(nextDecision(table), offered, "every physical option remains available");
 	}
 	assert.equal(checklist(workFrame(table, 0)).filter((one) => !one.judgment).length, 0);
+	assert.equal(table.work[0]!.finishReview, table.cursor.clock, "asking to pass first requests completion review");
 	assert.deepEqual(workFrame(table, 0).view.done, [], "a review never completes a step");
 	assert.equal(project(table, 1).work?.reviews, undefined, "another seat cannot read these judgments");
 	assert.equal(project(table, "spectator").work, undefined);
@@ -75,7 +83,7 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	const answer = await pilot.answer(frame);
 	assert.equal(answer.kind, "pick");
 	if (answer.kind !== "pick") assert.fail();
-	assert.equal(prompts.length, items.length + 1, "one call per review, then a separate physical choice");
+	assert.equal(prompts.length, items.length + 2, "one call per review, a completion request, then a separate physical choice");
 	apply(table, answer.option, "model", "chosen");
 	assert.ok(checklist(workFrame(table, 0)).every((one) => !one.judgment), "an action invalidates judgments from the old position");
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Retain the cards.", steps: [] } }], "amend");
@@ -95,4 +103,17 @@ test("a pilot reviews unfinished uses before acting, with private judgments that
 	assert.deepEqual(response.cursor, pending.cursor, "agreeing in the review does not pass priority");
 	assert.deepEqual(response.ledger, pending.ledger);
 	assert.match(nextDecision(response)!.options.find((one) => one.id === "pass")!.shows!, /top stack object begins resolving/);
+
+	const fetch = matchup("review-fetch");
+	place(fetch, 0, "battlefield", "Fabled Passage"); main(fetch, 0);
+	editWork(fetch, 0, [{ do: "plan.put", plan: { objective: "Develop.", guidance: "Stale guidance about preserving a Forest in hand.", steps: [] } }], "old-plan");
+	announce(fetch, example("Crack Fabled Passage for a basic land")); passBoth(fetch);
+	const resolving = focus(workFrame(fetch, 0), startingIntent(0));
+	assert.ok(resolving.cards["Fabled Passage"], "a sacrificed source keeps its card text in the resolving decision");
+	assert.match(resolving.resolving!.basis, /Search your library/);
+	assert.ok(resolving.objects.some((one) => one.effect?.some((line) => line.includes("Search your library"))), "accepted stack instructions survive compact projection");
+	assert.equal(resolving.plan, undefined, "a new turn's casting guidance cannot displace an already resolving use");
+	assert.match(moveQuestion(resolving, false).instructions, /already resolving and its costs were paid/);
+	assert.doesNotMatch(moveQuestion(resolving, false).instructions, /Stale guidance/);
+	assert.ok(resolving.options.some((one) => one.label.includes("Decline")), "declining the search remains the seat's choice");
 });

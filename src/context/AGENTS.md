@@ -74,6 +74,13 @@ for rather than the reply returned.
 - **Pick** returns one id from the prepared list. It never plans, never widens
   the list and never writes a move.
 
+Before a pick, Jev reviews the current phase strategy, the next unfinished use,
+and relevant cards through core's checklist. A use marked for action reaches a
+move question before later steps are assessed. Asking to end requests the
+remaining reviews and a separate confirmation. Judgments are private equipment,
+not physical decisions. Resolution receives the already accepted effect and
+its remaining instructions, rather than the next phase's casting guidance.
+
 Asking one model to find the rules, work out the payment, invent a line and
 choose it in one judgment is the failure this split exists to prevent.
 

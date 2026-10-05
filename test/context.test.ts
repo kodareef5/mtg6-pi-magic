@@ -47,7 +47,8 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	assert.equal(JSON.stringify(compact.objects).includes("registrations"), false, "registrations stay with strategy");
 	for (const object of compact.objects) if (paused.view.printed?.[object.name])
 		assert.deepEqual(compact.cards[object.name], paused.view.printed[object.name], "public permanents and stack objects retain their source text");
-	assert.equal(compact.plan?.objective, paused.view.work!.plan!.objective);
+	assert.equal(compact.resolving?.objective, paused.view.work!.plan!.objective);
+	assert.equal(compact.plan, undefined, "resolution carries its purpose, not the next phase's casting line");
 	const withoutWork = focus({ ...paused, view: { ...paused.view, work: undefined } }, startingIntent(paused.seat));
 	assert.equal(withoutWork.plan, undefined);
 	assert.deepEqual(withoutWork.objects, compact.objects);

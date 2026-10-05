@@ -16,6 +16,10 @@ import { matches } from "../core/query.ts";
 import type { SeenObject } from "../core/work.ts";
 import type { Printed } from "../core/printed.ts";
 import { checklist, type ReviewItem } from "../core/review.ts";
+import { summary } from "../core/announce.ts";
+import { allowance } from "../core/permits.ts";
+import { viewWorld } from "../core/selectors.ts";
+import { sources } from "../core/funding.ts";
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -44,7 +48,7 @@ export type PlanSlice = {
 };
 
 /** An object as a pilot reads it: what it is and its state, without its registrations. */
-export type Seen = { id: string; name: string; controller: SeatId; zone: string; tapped?: true; body?: string; counters?: Record<string, number>; damage?: number; words?: string[] };
+export type Seen = { id: string; name: string; controller: SeatId; zone: string; tapped?: true; body?: string; counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[] };
 
 export type Packet = {
 	actor: SeatId;
@@ -76,6 +80,8 @@ export type Packet = {
 	resolution?: SeatView["resolution"];
 	/** Considered, deferred and still-unreviewed uses. An assessment does not count as execution. */
 	checklist?: ReviewItem[];
+	/** The accepted use being completed, separate from the next phase's strategy. */
+	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string };
 };
 
 const seen = (object: SeenObject): Seen => {
@@ -83,7 +89,8 @@ const seen = (object: SeenObject): Seen => {
 	return { id: object.id, name: object.card ?? object.token?.name ?? object.ability?.claim ?? "unknown", controller: object.controller, zone: object.zone,
 		...(object.tapped ? { tapped: true as const } : {}), ...(traits?.power !== undefined ? { body: `${traits.power}/${traits.toughness}` } : {}),
 		...(Object.keys(object.counters).length ? { counters: { ...object.counters } } : {}), ...(object.damage ? { damage: object.damage } : {}),
-		...(traits?.words.length ? { words: [...traits.words] } : {}) };
+		...(traits?.words.length ? { words: [...traits.words] } : {}),
+		...(object.ability ? { effect: [object.ability.basis, ...object.ability.instructions.map(summary)] } : {}) };
 };
 
 /** The due step's options first, then the live branches', then the rest: every option, in the order the plan wants them. */
@@ -130,7 +137,7 @@ export function focus(
 	// The window's script, when the plan has one: then the pilot reads it and not the whole plan, the brief or the recaps.
 	const scripts = (state?.plan.phases ?? []).filter((one) => matches(one.when, frame));
 	const dueAt = state?.due.find((one) => one.candidates.length)?.at, done = new Set(view.done ?? []);
-	const plan = state && {
+	const plan = state && !view.resolution ? {
 		objective: state.plan.objective,
 		...(scripts.length ? {} : { guidance: state.plan.guidance }),
 		...(dueAt !== undefined ? { due: state.plan.steps[dueAt]!.label } : {}),
@@ -144,25 +151,39 @@ export function focus(
 			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : at === dueAt ? "Now" : "Then"}: ${step.label}`] : []),
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []),
 		} } : {}),
-	};
+	} : undefined;
 	const scripted = !!plan?.script, review = checklist(frame);
 	const relevant = new Set((view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack" || (view.window.kind === "opening" && object.zone === "hand") ||
 		decision.options.some((option) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation)))
 		.flatMap((object) => object.card ? [object.card] : []));
 	for (const item of review) for (const card of item.cards) relevant.add(card);
+	// A sacrificed source is no longer on the battlefield, but its public
+	// ability and source text still belong to the response and resolution.
+	for (const object of view.objects ?? []) if (object.ability) {
+		const card = view.objects?.find((one) => one.id === object.ability!.source.id)?.card;
+		if (card) relevant.add(card);
+	}
+	const resolving = view.resolution && view.objects?.find((one) => one.id === view.resolution!.object)?.ability;
+	const available = sources(frame).map(({ object, yields }) => `${object.card ?? object.token?.name ?? object.id}: ${[...new Set(yields.map((one) =>
+		`${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`);
 	return {
 		actor: seat, window: structuredClone(view.window), version,
 		obligation: decision.question,
 		...(plan ? { plan } : {}),
 		...(review.length ? { checklist: review } : {}),
 		options: inPlanOrder(decision.options, state).map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),
-		resources: [...view.yours],
+		resources: [...view.yours, ...(view.window.kind === "turn" ? [
+			`Land plays left this turn: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. Putting a land onto the battlefield by an effect does not use a land play.`,
+			`Mana sources usable now: ${available.join("; ") || "none"}.`,
+		] : [])],
 		known: [...view.table, ...view.since],
 		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),
 		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => relevant.has(name)).map(([name, card]) => [name, structuredClone(card)])),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
-		guidance: scripted ? [] : guidance,
-		lately: scripted ? [] : [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
+		...(resolving ? { resolving: { claim: resolving.claim, basis: resolving.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),
+			...(state ? { objective: state.plan.objective } : {}) } } : {}),
+		guidance: scripted || resolving ? [] : guidance,
+		lately: scripted || resolving ? [] : [...(context.recaps ?? [])].slice(-3).map((recap) => `Turn ${recap.turn}: ${recap.line}`),
 		routes: dial(decision, context.rules),
 		...(context.learned?.length ? { learned: [...context.learned] } : {}),
 		...(refused?.length ? { refused: [...refused] } : {}),

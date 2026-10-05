@@ -28,6 +28,8 @@ export type Workspace = {
 	notebook?: Notebook;
 	/** Considered uses in the current position. The checklist ignores judgments from another physical revision or plan. */
 	reviews?: Review[];
+	/** The seat asked to finish reviewing this decision before confirming a pass or declaration. */
+	finishReview?: number;
 };
 export type WorkEntry = {
 	seq: number;

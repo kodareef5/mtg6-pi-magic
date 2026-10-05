@@ -50,7 +50,7 @@ export function checklist(frame: Frame): ReviewItem[] {
 	for (const object of objects) {
 		if (sources.has(`${object.id}@${object.incarnation}`) || (object.card && named.has(object.card))) continue;
 		const options = uses.filter((one) => one.objects?.[0]?.id === object.id && one.objects[0].incarnation === object.incarnation);
-		const inHand = object.zone === "hand" && object.owner === frame.seat && view.window.active === frame.seat &&
+		const inHand = !stack.length && object.zone === "hand" && object.owner === frame.seat && view.window.active === frame.seat &&
 			["precombat-main", "postcombat-main"].includes(view.window.step);
 		if (options.length || inHand) add(`card:${object.id}@${object.incarnation}`, `Consider ${object.card ?? object.token?.name ?? "this object"}`, "card", options, object.card ? [object.card] : []);
 	}

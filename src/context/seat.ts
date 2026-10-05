@@ -175,6 +175,13 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.refused?.length ? ["", "An earlier answer was not taken:", ...packet.refused] : []),
 		"",
 		"Answer with one listed id.",
+		...(packet.resolving ? [
+			`Complete the announced use: ${packet.resolving.claim}. Source text: ${packet.resolving.basis}`,
+			...(packet.resolving.objective ? [`Objective for the choices within this effect: ${packet.resolving.objective}`] : []),
+			"The use is already resolving and its costs were paid. This is an instruction choice, not priority or a new cast. Finish the accepted sequence, making its choices; a completed announcement does not mean its effect is complete.",
+			...packet.resolving.remaining,
+			"Choosing no card on an optional search deliberately finds nothing. It is not a pass. Putting a land onto the battlefield by this effect does not use a land play.",
+		] : []),
 		"cards holds printed card text; objects holds current characteristics after effects. Check the current objects and option restrictions before following a planned action. A listed option is not a ruling that it obeys every card.",
 		...(plan ? [
 			"Follow the due step when its conditions still hold. Use a marked branch for the situation it names. Choose pass when you have no action or response to take; every seat answers its own priority window.",
@@ -191,7 +198,9 @@ export function question(packet: Packet, help: boolean): Question {
 		type: "choice",
 		instructions: lines.join("\n"),
 		criteria: Object.fromEntries([
-			...packet.options.map((option) => [option.id, [option.label, option.shows].filter(Boolean).join(". ")]),
+			...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.some((one) => !one.judgment)
+				? "Review the remaining uses before ending. This requests a completion review; you will confirm the pass or declaration afterwards."
+				: [option.label, option.shows].filter(Boolean).join(". ")]),
 			...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing and returns to this decision.`]),
 			...(help ? [[HELP, "The plan does not fit this position: ask strategy for a new plan. Moves nothing."]] : []),
 		]),
@@ -303,7 +312,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
-				const reviewing = packet.checklist?.find((item) => !item.judgment);
+				// Review the next use, execute it, then reconsider the changed
+				// position. Later steps need not be affordable before this one.
+				const ready = packet.checklist?.some((item) => item.kind !== "phase" && item.kind !== "response" && item.judgment?.verdict === "act" &&
+					item.options.some((id) => !["pass", "attack:done", "block:done"].includes(id)));
+				const reviewing = ready && frame.view.work?.finishReview !== frame.version ? undefined : packet.checklist?.find((item) => !item.judgment);
 				const ask = reviewing ? reviewQuestion(packet, reviewing, help) : question(packet, help);
 				asked += 1;
 				options.onAsk?.(packet);
@@ -330,6 +343,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 					if (!tool || !(ask.type === "choice" && Object.hasOwn(ask.criteria, answer.choice))) throw new Error(`No review answer ${answer.choice}; choose one of the listed review judgments.`);
 					return { kind: "work", tools: [tool], revision, actionId: `${options.name}-${frame.version}-${revision}-review-${asked}` };
 				}
+				if (["pass", "attack:done", "block:done"].includes(answer.choice) && packet.checklist?.some((item) => !item.judgment))
+					return { kind: "work", tools: [{ do: "review.finish" }], revision, actionId: `${options.name}-${frame.version}-${revision}-finish-${asked}` };
 				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
 				if (!route) return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
 				walked.push(route.id);
