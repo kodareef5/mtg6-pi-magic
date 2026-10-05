@@ -386,7 +386,7 @@ private information and stay out of the package.
 Design the next round from preferred question sequences and their preparation.
 Use these saved positions afterward to challenge its coverage. The worked
 examples, phase and stage map, capacity handling and acceptance checks are in
-[Next round: focused Jev context](PLANS.md#next-round-focused-jev-context).
+[Focused Jev context](PLANS.md#focused-jev-context).
 
 1. Review example classes from ordinary passes through dependent actions and
    interruptions. Specify the desired question, facts, preparation, answers and
@@ -402,6 +402,177 @@ examples, phase and stage map, capacity handling and acceptance checks are in
 Keep Luna low and Sol 6.1 high fixed while testing these changes. Passing the
 saved component cases is the next gate; these three games are not a playing
 strength comparison or evidence that the matchup is complete.
+
+## Focused context gate and three further games
+
+The next October 5 batch tested the focused builders from `f326a70` and the
+preparation repair in `28d4ab2`. All gameplay used `28d4ab2`: Jev for choices and
+reviews, Luna low for strategy and judge, Sol 6.1 high for pregame, and summaries
+off. The gate finished with matching replay, no gaps and no fallback decisions;
+the three further games then ran concurrently on new seeds.
+
+| Game | Result | Jev reviews / picks | Strategy calls | Prep / play minutes | Reported cost |
+|---|---|---:|---:|---:|---:|
+| Gate | Green won, turn 19 | 727 / 759 | 121 | 12.4 / 27.0 | $1.5525 |
+| `regular-1` | Stopped at choice limit, turn 13 | 673 / 686 | 66 | 19.7 / 16.1 | $1.0187 |
+| `regular-2` | Red won, turn 16 | 587 / 475 | 102 | 7.2 / 19.9 | $1.0220 |
+| `regular-3` | Red won, turn 18 | 830 / 757 | 104 | 15.1 / 25.9 | $1.2292 |
+
+All four replays matched. Only game one recorded a gap; no game made a fallback
+move. Chosen/forced physical operations were 732/62, 664/54, 459/50 and 735/72,
+with no delegation or declaration. Jev made 5,494 calls; reviews, inspection,
+help and retries mean those calls are not a count of physical actions.
+
+The four runs made 5,978 calls and reported 33,592,606 input tokens, 3,755,520
+cached input tokens and 812,930 output tokens, costing $4.8223. Their 88 pregame
+calls included nine timed-out attempts; strategy had one timeout. All recovered.
+Some aborted requests reported no usage, so these costs are not a complete
+invoice. Strategy waits consumed 74%, 61%, 75% and 71% of play time. Of 393
+strategy calls, 156 followed refused submissions. No recorded reply was
+truncated. Request byte medians were 10,648, 12,111, 9,997 and 14,055; maxima were
+44,854, 535,917, 20,804 and 58,874. Bytes are not token counts.
+
+The first gate preparation stopped before play. Seventy-two of 78 card jobs
+submitted accepted terms; six spent all three replies looking up references.
+Numbered rule lookups now return their subrules, and the final tool-session
+reply reserves submission within the same three-reply budget. The continuation
+kept the accepted terms and completed the missing six. This failed preparation
+cost a reported $0.8684 across 155 calls and is separate from the completed game.
+Including that attempt, the batch reported $5.6907.
+
+Green won the gate with a 31-power trampling Explorer. The further games used
+seeds `jev-focused-20261005-regular-1`, `-2` and `-3`, ordinary shuffled openings
+and fresh Sol high briefs. They carried only the gate's accepted card
+assessments, with no briefs, turn plans or physical
+decisions. The engine and accepted terms stayed fixed through the batch. Each run
+stopped at an outcome or its first non-continuing gap; none reached the turn-40
+limit. The gate and game two declined no searches; game one declined one and
+game three declined two.
+
+Game three made three judge calls for one objection, with no rollback. The
+older Sanctuary (`1-50`) attacked; a second copy (`1-52`) had just entered.
+The judge let the attack stand under 302.6, consistent with the journal, but
+incorrectly said the animation happened before that turn. The relevant fact is
+continuous control of the permanent, not how long it has been a creature.
+Judge context needs the identified object's history at the disputed action,
+alongside the current table and rendered action descriptions.
+
+The gate's successful searches found their intended Forests; none declined.
+The run exercised restricted Village mana, named spell targets and responses,
+warp, flying combat, lands played from the graveyard, extra land plays,
+earthbending, layered power changes and trample assignment. These observations
+establish execution examples, not a complete legality audit or playing strength.
+The completed gate also exposed several poor choices:
+
+- **Waiting needs its own review question.** At requests 252 and 256, Green
+  asked for help while a Chocobo trigger awaited resolution. Even the repaired
+  guidance said to pass first, but phase review presented unfinished actions
+  beside zero available non-pass actions. A waiting prerequisite, a failed
+  condition and a broken plan need distinct facts and answers.
+- **Protection needs a named coverage comparison.** At request 587, Burst
+  targeted Llanowar Elves. Jev exiled Nursery for indestructibility that covered
+  Treefolk and Forests; the Elf died. The request contained the actual Elf
+  target, full Nursery text, its structured selector and a reservation limited
+  to threats against Forest or Treefolk creatures. The missing preparation is
+  the comparison between the threatened object and the objects the response
+  affects, not more card text.
+- **The planner needs upcoming opportunities across zones.** On turn 18,
+  Red had five untapped lands and normal Hellkite casts from exile against
+  Green at four life. The draw-step planner considered the Challenger in hand;
+  Jev then spent two mana on it. Request 1407 already listed all four exile
+  casts. Prepare the next main phase's usable cards and resources, not just
+  immediate options in the draw window.
+- **Sequence growth before the combat it should improve.** On turn 17,
+  Green attacked with a 2/4 Explorer, then repeatedly played and sacrificed
+  Passage after combat. Harmonizer triggers grew the tapped Explorer to 128
+  power. On turn 19, growth before combat produced the win. Earlier Chocobo
+  and Hydra turns also spent land entries before a beneficiary entered or
+  after its attack. Game one's turn-five sequence gives a successful contrast:
+  cast the second Chocobo, play and sacrifice Passage, then attack with the
+  older Chocobo after both landfall events.
+- **Opening policy must compare the retained hands.** Request 41 bottomed
+  Sanctuary while keeping Frenzy without a supporting curve, although the opening policy
+  put that Frenzy earlier in its return order. Full retained-hand counts and
+  card text were present. Review the policy's ordering and the extra in-game
+  card advice supplied during bottoming.
+- **Phase review still carries action variants.** The largest gate request,
+  1605, was 44,854 serialized bytes with 96 options. Options occupied 17,595
+  bytes and the checklist another 4,036. Payments and funding were shared.
+  Design the phase question around uses and remaining work; preserve every
+  original move for its final action choice. This is not a reason to clip text
+  or discard variants.
+
+The further games located additional failures in the contract between a plan
+and its execution:
+
+- Game one stopped at combat damage on turn 13. Request 1444 listed 1,040
+  assignments for a 49-power trampling Chocobo blocked by Claw and Sanctuary,
+  plus help: 1,041 classifier choices and 535,917 serialized bytes. The provider
+  refused more than 255 choices. Inspection grouped procedure uses but left
+  these damage assignments flat. The decision stayed pending, with one gap,
+  no fallback and matching replay. This game has no winner.
+- In game two, requests 25 and 29 reviewed a Chocobo step guarded by the
+  invented binding `green-source-available`. The physical cast was available.
+  The first repair retained the false condition; the second removed it.
+  `planProblems` rejects some instruction-local references but misses the
+  `bound` condition form. A later blocking script still said no creature was
+  present after its planned Elf had resolved.
+- At game two's request 1020, Jev cast Resolve through the ordinary assessed
+  offer. The plan had copied that procedure into a separately named offer;
+  progress matches option ids, so it never credited the actual cast. The fight
+  completed, yet later reviews kept asking for the cast. Reusing preparation
+  needs a shared action identity, not another copy of the procedure. Match
+  accepted terms and bindings, never just card names or claim text.
+- In game three, the planned Passage activation at requests 282 and 304
+  carried a find-Forest purpose and succeeded. After earthbend returned the
+  land, an upkeep activation at request 432 fell outside the remaining steps.
+  Its resolution carried only stale combat guidance, and request 437 declined
+  the offered Forests. Purpose must cover available uses outside a named plan
+  step, and triggered continuations, before their costs are paid.
+- Game three's request 203 blocked a 2/2 Challenger with a 1/1 Hydra at
+  20 life. The accepted repair called it a trade while saying Hydra dies and
+  Challenger survives. Game two's request 751 took no blocks against Nova,
+  Zhao and Claw, although Explorer could kill Claw; its guidance focused on
+  the flyer it could not block. Compare each legal block's damage and surviving
+  objects under an explicit no-further-effects assumption. Strategy still
+  chooses whether preserving a creature or preventing damage matters more.
+
+Design the next changes around these paired examples, then extend the existing
+invariants before another live batch:
+
+1. Add complete, reversible damage-assignment inspection from structured
+   recipients and amounts. Every original assignment stays reachable, dependent
+   combinations stay intact and the final physical choice remains explicit.
+   Check each submitted question against the provider's actual choice limit;
+   do not keep only the first 255 choices or automatically pick a lethal line.
+2. One prepared use keeps one identity through planning, inspection, payment,
+   execution and purpose capture. Test an ordinary offered cast carrying out
+   its planned use, and a genuinely different use that must not complete it.
+3. Review readiness as ready, waiting on a named prerequisite, condition false,
+   completed or contradicted. Reject unbound plan conditions. Future guidance
+   gives conditional intent rather than repeating a past board description.
+4. Prepare a purpose for planned and unplanned uses and their continuations.
+   Contrast the two Passage searches; retain the actor's ability to choose no
+   card without making that answer resemble a priority pass.
+5. Build concrete comparisons for combat, response coverage and the next main
+   phase's resources and playable zones. Include the Hydra block, the mixed
+   ground/flying attack, Nursery versus the targeted Elf and the exile Hellkite.
+   Add game three's requests 988 and 992 for damage across two strike steps:
+   Kellan assigned all six to a 7-toughness Elf while a 6-toughness Explorer also
+   blocked it. Both blockers survived. The comparison needs damage already
+   marked and damage available in the remaining strike step.
+6. Refine opening retention and phase review from their question classes.
+   Game three's five-land, two-Challenger keep adds a high-land boundary case
+   absent from its explicit mulligan instructions. Keep every action reachable
+   while inspecting its targets and payment at the stage that needs them.
+
+All 176 offline tests and the type check passed. Seventeen saved journal
+prefixes replayed to the same tables and preparation as their parents.
+Private traces, results, measurements and replay-checked prefixes are under
+`.pi/jev-focused-20261005/`. `positions/index.json` names each source, decision
+version and exact saved request and reply. A prefix includes equipment filed at
+that decision count; the saved exchange preserves the earlier private review
+context. No live replay is needed to inspect these examples.
 
 ## Run the matchup
 
