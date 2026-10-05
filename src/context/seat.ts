@@ -29,7 +29,7 @@ import { holds, viewWorld } from "../core/selectors.ts";
 import { matches, select } from "../core/query.ts";
 import { STEPS } from "../core/steps.ts";
 import { putting } from "./strategy.ts";
-import { reviewCommand, reviewQuestion } from "./review.ts";
+import { reviewCommand, reviewQuestion, STACK_PRIORITY } from "./review.ts";
 
 export type AiSeatOptions = {
 	name: string;
@@ -158,6 +158,7 @@ export function question(packet: Packet, help: boolean): Question {
 	const plan = packet.plan;
 	const lines = [
 		packet.obligation,
+		...(packet.resolution === undefined && packet.objects.some((one) => one.zone === "stack") ? [STACK_PRIORITY] : []),
 		"Read known, resources and lately in the supplied state for the position and recent events.",
 		...(packet.opening ? ["opening holds your mulligans, remaining bottom obligation and hand counts. Apply the policy for this decision to these cards. Printed mana costs do not prove that a spell is castable; use its card text and available colors."] : []),
 		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
@@ -191,8 +192,8 @@ export function question(packet: Packet, help: boolean): Question {
 			"An option that uses a held resource spends what the plan is keeping; take it only when the plan says so.",
 			// Asking is rare: a script names what justifies it, and anything else in the window is normal play.
 			...(help ? [plan.script?.reevaluate.length
-				? `Choose ${HELP} if one of these has happened: ${plan.script.reevaluate.join("; ")}; if card text or an option's restriction conflicts with the planned action; or if no listed option can carry out the phase. Otherwise follow the phase guidance.`
-				: `If no option carries out the plan, or the position no longer fits it, choose ${HELP}. Do not invent a new line.`] : []),
+				? `Choose ${HELP} if one of these has happened: ${plan.script.reevaluate.join("; ")}; if card text or an option's restriction conflicts with the planned action; or if a required use is missing when its timing allows it. Otherwise follow the phase guidance.`
+				: `If the position contradicts the line or a required use is missing when its timing allows it, choose ${HELP}. Waiting for resolution or a later window alone does not need a new plan. Do not invent a new line.`] : []),
 		] : []),
 		...(packet.routes.length ? ["Some ids are asks rather than moves: an ask shows the rules it names, changes nothing, and brings this decision back.",
 			"The rule that decides this may not be among them."] : []),

@@ -158,6 +158,13 @@ shows those judgments. Both seats separately review a stack response and choose
 their own pass. The pass says whether unanimous passes would resolve the stack
 or end the current step or phase.
 
+While the stack waits, its response review precedes unfinished uses. Jev holds
+land plays and sorcery-speed uses until the stack clears, then reassesses them
+against the changed position. Waiting for resolution alone does not need a
+strategy repair; other conflicts can still justify asking for help.
+Reviews also name actions already recorded for the plan. An unused card in
+hand is a use to consider, not an obligation to perform it.
+
 `review.record` is a private seat tool, available to every player adapter. It
 records a judgment and its reason at the current physical revision; it moves
 nothing and never completes a plan step. Reviews survive a clone or resume at

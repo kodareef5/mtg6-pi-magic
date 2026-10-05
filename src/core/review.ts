@@ -37,6 +37,8 @@ export function checklist(frame: Frame): ReviewItem[] {
 		if (matches(one.when, frame)) add(`phase:${at}`, `Phase strategy: ${one.goal ?? one.guidance}`, "phase",
 			decision.options.filter((one) => !["pass", "attack:done", "block:done"].includes(one.id)));
 	});
+	const stack = objects.filter((one) => one.zone === "stack");
+	if (decision.situation === "priority" && stack.length) add("response", "Respond to the stack or let it resolve", "response", [], stack.flatMap((one) => one.card ? [one.card] : []));
 	const done = new Set(view.done ?? []);
 	for (const [kind, list] of [["step", state?.plan.steps ?? []], ["branch", state?.plan.may ?? []]] as const) list.forEach((one, at) => {
 		if ((kind === "step" && done.has(at)) || !matches(one.when, frame)) return;
@@ -44,8 +46,6 @@ export function checklist(frame: Frame): ReviewItem[] {
 		const card = "procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card;
 		add(`${kind}:${at}`, one.label, kind, fit?.candidates ?? [], card ? [card] : []);
 	});
-	const stack = objects.filter((one) => one.zone === "stack");
-	if (decision.situation === "priority" && stack.length) add("response", "Respond to the stack or let it resolve", "response", [], stack.flatMap((one) => one.card ? [one.card] : []));
 	const uses = decision.options.filter((one) => !covered.has(one.id) && !["pass", "attack:done", "block:done"].includes(one.id));
 	for (const object of objects) {
 		if (sources.has(`${object.id}@${object.incarnation}`) || (object.card && named.has(object.card))) continue;

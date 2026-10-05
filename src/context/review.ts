@@ -4,6 +4,8 @@ import type { WorkCommand } from "../core/work-language.ts";
 import type { Packet } from "./packet.ts";
 import type { Question } from "./model.ts";
 
+export const STACK_PRIORITY = "The stack is waiting. Land plays and uses at sorcery speed need an empty stack. Hold those uses and reassess after resolution; their absence alone does not require a new plan. Check available responses separately. Passing here lets the top object resolve after every seat passes; it does not end the phase or guarantee the planned use will become available.";
+
 export function reviewQuestion(packet: Packet, item: ReviewItem, help: boolean): Question {
 	const options = packet.options.filter((one) => item.options.includes(one.id));
 	return {
@@ -15,8 +17,13 @@ export function reviewQuestion(packet: Packet, item: ReviewItem, help: boolean):
 			"known, resources and lately in the supplied state hold the current facts and recent events.",
 			"watches lists registered triggers on the battlefield now. A permanent cannot see events that finished before it entered; its own entry can trigger it. Ask for help if the planned order depends on a missed trigger.",
 			...(packet.plan ? [`Objective: ${packet.plan.objective}`, ...(packet.plan.script?.guidance ?? [packet.plan.guidance ?? ""]), ...packet.plan.held.map((one) => `Held: ${one}`)] : packet.guidance),
+			...(packet.plan?.done.length ? [`Recorded plan actions: ${packet.plan.done.join("; ")}. Do not repeat these actions. Their effects may still be on the stack.`] : []),
+			...(packet.objects.some((one) => one.zone === "stack") ? [STACK_PRIORITY] : []),
 			...(item.kind === "response" ? ["The stack is still waiting. Decide whether you need a response before it resolves; each seat will separately choose its priority pass."]
-				: options.length ? options.map((one) => `${one.label}: ${one.shows ?? ""}`) : ["No option currently carries this item out. It is unfinished, not completed. Check whether its condition is false, it belongs later, or the plan needs repair."]),
+				: options.length ? options.map((one) => `${one.label}: ${one.shows ?? ""}`)
+				: [item.kind === "card" ? "No use of this card is offered now. Check timing, land plays, costs and targets. A card remaining in hand is not itself an unfinished plan step."
+					: item.kind === "phase" ? "No action is offered for this phase item now. Read the recorded actions and current facts before deciding whether anything remains."
+					: "No option currently carries this item out. It is unfinished, not completed. Check whether its condition is false, it belongs later, or the plan needs repair."]),
 			...(packet.refused ?? []),
 		].join("\n"),
 		criteria: {
