@@ -65,6 +65,12 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	assert.match(registrationProblems([{ card: "Rockface Village", registers: [{ kind: "continuous", basis: universe.cards.get("Rockface Village")!.oracle.split("\n").at(-1)!,
 		affects: { types: ["creature"], controller: "you" }, change: { power: 1, words: ["haste"] } }] }]).join("; "), /activated ability/,
 		"the same interpreter lint refuses activated effects registered as free static bonuses");
+	const lizard: Package = { card: "Magebane Lizard", registers: [{ kind: "watch", basis: universe.cards.get("Magebane Lizard")!.oracle,
+		event: { on: "cast", of: { not: { types: ["creature"] } }, by: "any" },
+		effect: { instructions: [{ do: "damage", to: "event:player", amount: { history: "cast", by: "event:player", of: { not: { types: ["creature"] } } } }] } }] };
+	assert.equal(registrationProblems([lizard]).length, 2, "both the watch and the history count must match stack objects");
+	const corrected = JSON.parse(JSON.stringify(lizard).replaceAll('"of":{"not"', '"of":{"zones":["stack"],"not"')) as Package;
+	assert.deepEqual(registrationProblems([corrected]), [], "the model can correct the selectors without core interpreting prose");
 	assert.match(assessmentProblems(printed, { ...pack, registers: [], procedures: [normal(pack.card, printed.oracle)] }).join("; "), /Unassessed text.*flying/,
 		"a bare cast quoting the whole card cannot stand in for its abilities");
 	let rounds = 0;

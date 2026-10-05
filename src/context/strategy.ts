@@ -81,9 +81,16 @@ const SYSTEM = [
 	JSON.stringify(ChangesSchema),
 ].join("\n");
 
-/** An activated ability may be announced, but cannot register as a watch or static. */
+/** Interpreter checks: activated effects need procedures, and cast selectors must reach the stack. */
 export function registrationProblems(packages: readonly Package[]): string[] {
 	const found: string[] = [];
+	const selectors = (value: unknown, card: string): void => {
+		if (!value || typeof value !== "object") return;
+		const term = value as { on?: string; history?: string; of?: { zones?: string[] } };
+		if ((term.on === "cast" || term.history === "cast") && term.of && !term.of.zones?.includes("stack"))
+			found.push(`package ${card}: a cast ${term.on ? "event" : "history"} selector needs zones ["stack"]. Omitted zones mean battlefield, so this selector matches no cast spell.`);
+		Object.values(value).forEach((one) => selectors(one, card));
+	};
 	const visit = (registrations: Registration[], card: string) => {
 		for (const one of registrations) {
 			if (one.kind !== "mana" && /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/.test(one.basis))
@@ -91,7 +98,7 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 			if (one.kind === "continuous" && one.change.registers) visit(one.change.registers, card);
 		}
 	};
-	for (const pack of packages) visit(pack.registers, pack.card);
+	for (const pack of packages) { visit(pack.registers, pack.card); selectors(pack, pack.card); }
 	return found;
 }
 
