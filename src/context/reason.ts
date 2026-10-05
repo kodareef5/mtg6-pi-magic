@@ -75,7 +75,8 @@ export type Reasoner = {
 	 * One task in a short conversation with tools. The model may call lookups,
 	 * which are answered, and finishes by calling `submit`. An answer that is
 	 * prose, cut off, or fails `check` goes back to the model with the problem
-	 * named, up to `turns` replies in all. Returns the accepted arguments.
+	 * named, up to `turns` replies in all. The final reply offers only submit,
+	 * so reference lookups cannot consume the delivery slot. Returns accepted arguments.
 	 */
 	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number; signal?: AbortSignal }, ceiling?: number): Promise<Record<string, unknown>>;
 	/**
@@ -237,13 +238,16 @@ export function reasoner(options: {
 			const problems: string[] = [];
 			for (let turn = 1; turn <= (tools.turns ?? 3); turn++) {
 				tools.signal?.throwIfAborted();
-				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, specs, tools.signal), tools.signal);
+				const finishing = turn === (tools.turns ?? 3) && !!tools.lookups?.length;
+				if (finishing) messages.push({ role: "user", content: `This session's final reply is for ${tools.submit.name}. Reference lookups are closed. Submit your answer using the facts already returned; state any unresolved limitation in the answer's supported fields. Acceptance still depends on validation.`, timestamp: Date.now() });
+				const available = finishing ? specs.filter((one) => one.name === tools.submit.name) : specs;
+				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, available, tools.signal), tools.signal);
 				messages.push(reply);
 				const calls = reply.content.filter((part): part is { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> } =>
 					(part as { type?: unknown }).type === "toolCall");
 				const results: unknown[] = [];
 				for (const used of calls) {
-					const lookup = tools.lookups?.find((one) => one.name === used.name);
+					const lookup = !finishing && tools.lookups?.find((one) => one.name === used.name);
 					let answer: string;
 					if (lookup) answer = lookup.answer(used.arguments);
 					else if (used.name !== tools.submit.name) answer = `There is no tool named ${used.name}.`;

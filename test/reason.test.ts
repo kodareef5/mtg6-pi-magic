@@ -158,7 +158,7 @@ test("the analysts read both lists and computed odds, look rules up, and a faile
 		};
 		return { asking, answered: () => answers.join("\n") };
 	};
-	for (const [name, args, expected] of [["rule", { query: "702.19b" }, /702\.19b/], ["rule", { query: "no such words anywhere" }, /Nothing in the rules matches/],
+	for (const [name, args, expected] of [["rule", { query: "702.19b" }, /702\.19b/], ["rule", { query: "701.66" }, /701\.66a.*701\.66b/], ["rule", { query: "no such words anywhere" }, /Nothing in the rules matches/],
 		["card", { name: "Snakeskin Veil" }, /hexproof/], ["card", { name: "Not A Card" }, /No Standard card is named/]] as const) {
 		const probe = lookup(name, args);
 		await brief(built.seats[0]!, [built.seats[1]!], universe, () => reasoner({ role: "pregame", stream: probe.asking, model: sol, tally: tally(), backoffMs: 0 }), { format: standard.name, rules });
@@ -616,6 +616,17 @@ test("work takes its answer only through submit, and tells the model what was wr
 	assert.match(third, /Rule 302.6: summoning sickness/, "a lookup is answered");
 	assert.match(third, /Not accepted: The commands are empty/, "a refused answer says why");
 	assert.match(JSON.stringify(seen[0]), /"facts".*"Plan now."/, "the task comes after the facts");
+	let researching = 0;
+	const researcher = reasoner({ role: "pregame", model: sol, tally: tally(), stream: (_model, context) => {
+		researching++;
+		if (researching < 3) return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: `read-${researching}`, name: "lookup", arguments: { rule: "701.66a" } }] }) };
+		assert.deepEqual(context.tools!.map((one) => one.name), ["submit"], "the final reply reserves delivery rather than another lookup");
+		assert.match(JSON.stringify(context.messages.at(-1)), /final reply is for submit/);
+		assert.match(JSON.stringify(context.messages), /Rule 701\.66a/, "reference answers survive into submission");
+		return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "answer", name: "submit", arguments: { commands: ["prepared"] } }] }) };
+	} });
+	assert.deepEqual(await researcher.work("assess card", { system: "S", user: "card" }, { submit, lookups: [lookup], turns: 3 }), { commands: ["prepared"] });
+	assert.equal(researching, 3, "reserving submission does not raise the session's call budget");
 
 	const stubborn = reasoner({ role: "strategy", stream: () => ({ result: async () => ({ content: [{ type: "text", text: "Prose." }], stopReason: "stop" }) }), model: sol, tally: tally(), backoffMs: 0 });
 	await assert.rejects(stubborn.work("seat plan", { system: "S", user: "facts" }, { submit, turns: 2 }), /did not submit an accepted answer/);

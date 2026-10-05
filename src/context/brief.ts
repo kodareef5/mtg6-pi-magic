@@ -167,12 +167,14 @@ export function lookups(universe: Universe, rules?: Rules): Lookup[] {
 		parameters: { type: "object", properties: { name: { type: "string" } }, required: ["name"], additionalProperties: false },
 		answer: (args) => { const found = universe.cards.get(String(args.name)); return found ? `${found.name}  ${found.mana}  ${found.type}  ${found.stats}\n${found.oracle}` : `No Standard card is named ${String(args.name)}.`; } };
 	if (!rules) return [card];
-	const rule: Lookup = { name: "rule", description: "Look up a Comprehensive Rules entry by number (such as 702.19b) or search it by words (such as trample).",
+	const rule: Lookup = { name: "rule", description: "Read a numbered Comprehensive Rules entry, including its subrules when naming a section, or search by words. A retrieved rule is reference text, not a ruling on the current game.",
 		parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"], additionalProperties: false },
 		answer: (args) => {
 			const query = String(args.query).trim();
 			const exact = rules.byRef.get(query) ?? term(rules, query);
-			const hits = exact ? [exact] : search(rules, query, 5);
+			const numbered = exact && /^\d{3}(?:\.\d+)?$/.test(query);
+			const hits = numbered ? rules.entries.filter((entry) => entry.kind !== "term" && (entry.ref === query || entry.ref.startsWith(`${query}.`) ||
+				entry.ref.startsWith(query) && /^[a-z]+$/.test(entry.ref.slice(query.length)))) : exact ? [exact] : search(rules, query, 5);
 			return hits.length ? hits.map((entry) => `${entry.ref}  ${entry.text}`).join("\n") : `Nothing in the rules matches ${query}.`;
 		} };
 	return [card, rule];

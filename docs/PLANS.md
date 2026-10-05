@@ -248,6 +248,12 @@ failure stops with the decision pending, with no fallback move. Larger or
 repetitive requests must be diagnosed from these sections before extending the
 builders; these stages do not prove that every possible position fits a route.
 
+The first fresh assessment run exposed a preparation failure before any play:
+six card jobs used all three replies for references and never submitted. Rule
+lookups now return the subrules of a requested numbered section, and a tool
+session reserves its final reply for submission. The reply budget is unchanged.
+Already accepted assessments remain in the version-zero journal for continuation.
+
 ### Classes of questions
 
 Group by the judgment being asked, then vary the position's complexity. A card
