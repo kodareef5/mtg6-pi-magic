@@ -6,7 +6,7 @@ import { PackageSchema, problems, type Package } from "../core/language.ts";
 import { assessmentProblems } from "../core/assessment.ts";
 import { lookups } from "./brief.ts";
 import type { Reasoner } from "./reason.ts";
-import { exampleReference, syntaxReference } from "./strategy.ts";
+import { exampleIndex, exampleReference, registrationProblems, syntaxReference } from "./strategy.ts";
 import { ASSESSMENT_CEILING } from "./spend.ts";
 
 const SYSTEM = [
@@ -15,11 +15,13 @@ const SYSTEM = [
 	"registers describes ongoing abilities and entry behavior. A keyword such as flying is a continuous registration affecting this object with change.words. The table does not infer any keyword from card prose.",
 	"procedures describes every normal cast, alternative cast and nonmana activated ability. Include a casting procedure for every nonland card, even an ordinary permanent. Use the exact card name in source.card; never use game object ids. For normal casts, use zones hand, graveyard and exile with controller any: the table checks ownership and earned play permissions. Alternative costs may restrict their source zones. Each mode or optional cost can have its own procedure.",
 	"For a normal cast, omit cost.mana: the printed cost is read from the card. A non-Aura permanent's normal casting procedure has no instructions or targets; its package supplies its abilities as it enters. Put spell properties such as can't be countered in procedure.words. A triggered ability's targets belong in its registration. Ordinary land plays need no procedure.",
-	"Quote the complete source ability in each basis, including its conditions and restrictions. Each source paragraph must be covered by at least one registration or procedure. Several terms may quote the same paragraph.",
-	"Do not simplify an effect to fit. If the syntax cannot represent an ability, put its quoted text and the missing operation in unsupported. An incomplete assessment stops setup. Empty registers or procedures are fine when the card needs none of that kind.",
+	"A nonmana activated ability is a procedure with timing stack and source zones battlefield, controller self. It needs no registration kind. Its cost and instructions supply the ability. Mana abilities can register as mana.",
+	"Quote the complete source ability in each basis, including its conditions and restrictions. Each source paragraph must be covered by at least one registration or procedure. Several terms may quote the same paragraph. A normal permanent cast may quote one source paragraph as its basis but does not cover that ability by itself. Do not use the card name or your claim as a source quote. Join separated quotations with literal ' ... ', rather than inventing a contiguous quotation.",
+	"Do not simplify an effect to fit. Before declaring an ability unsupported, read the relevant worked examples from the index below. Fetch several relevant examples in one reply if needed. They cover composed effects such as earthbend, behold, warp, search and linked exile. If an operation is still missing, put the quoted text and that operation in unsupported. An incomplete assessment stops setup. Empty registers or procedures are fine when the card needs none of that kind.",
 	"Acceptance checks structured syntax and source coverage. It does not prove that your interpretation follows the rules. Check timing, intervening conditions, targets, durations, payment restrictions and references. Look up a rule when needed.",
 	"Call submit with registers, procedures and unsupported. No text answer is read. Correct all named problems together after a refusal.",
 	syntaxReference(),
+	exampleIndex,
 	"The complete package schema is checked locally; the tool uses a shallow schema to avoid recursive expansion by providers.",
 	JSON.stringify(PackageSchema),
 ].join("\n\n");
@@ -42,7 +44,7 @@ export async function assessCard(card: string, printed: Printed, writer: Pick<Re
 				const shape = problems(PackageSchema, pack);
 				if (shape.length) return shape.join("; ");
 				const checked = pack as Package;
-				const wrong = assessmentProblems(printed, checked);
+				const wrong = [...assessmentProblems(printed, checked), ...registrationProblems([checked])];
 				if (wrong.length) return wrong.join("; ");
 				accepted = structuredClone(checked); return null;
 			},

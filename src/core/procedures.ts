@@ -26,17 +26,34 @@ export function checkProcedure(value: unknown): Procedure {
 	if (procedure.timing !== "spell" && procedure.timing !== "land" && !procedure.cost) throw new Error("An activated ability states its cost.");
 	if (procedure.timing === "mana" && (procedure.targets?.length || procedure.instructions.some((instruction) => instruction.do !== "mana" || !instruction.colors)))
 		throw new Error("A mana ability has no targets and only adds mana of stated colors (605.1a).");
-	const slots = procedure.targets?.length ?? 0, bound = new Set(["player"]);
-	const visit = (instructions: Instruction[]) => {
-		for (const instruction of instructions) {
-			const text = JSON.stringify({ ...instruction, ...("effect" in instruction ? { effect: undefined } : {}), ...("instructions" in instruction ? { instructions: undefined } : {}) });
-			for (const [, slot] of text.matchAll(/"target:(\d+)"/g)) if (Number(slot) >= slots) throw new Error(`target:${slot} names a target slot the procedure does not have.`);
-			for (const [, name] of text.matchAll(/"bound:([a-z][a-z0-9-]*)"/g)) if (!bound.has(name!)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
-			if (instruction.as) bound.add(instruction.as);
-			if ("instructions" in instruction) visit(instruction.instructions);
+	// A granted registration has its own target slots and local bindings. A
+	// delayed or reflexive effect captures current bindings, but cannot bind a
+	// name for the program that creates it.
+	const refs = (value: unknown, slots: number, bound: Set<string>): void => {
+		if (typeof value === "string") {
+			const target = value.match(/^(?:(?:controller|owner):)?target:(\d+)$/), name = value.match(/^bound:([a-z][a-z0-9-]*)$/)?.[1];
+			if (target && Number(target[1]) >= slots) throw new Error(`target:${target[1]} names a target slot the procedure does not have.`);
+			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
+		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
+		else if (value && typeof value === "object") {
+			for (const [key, one] of Object.entries(value)) {
+				if (key === "registers" || key === "registration") refs(one, 0, new Set());
+				else if (key === "effect") {
+					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
+					const ownSlots = effect.targets?.length || ((value as { do?: string }).do === "delay" ? slots : 0);
+					refs(effect.targets, ownSlots, bound); visit(effect.instructions, ownSlots, new Set(bound));
+				} else if (key !== "instructions") refs(one, slots, bound);
+			}
 		}
 	};
-	visit(procedure.instructions);
+	const visit = (instructions: Instruction[], slots: number, bound: Set<string>) => {
+		for (const instruction of instructions) {
+			refs(instruction, slots, bound);
+			if (instruction.do === "each") visit(instruction.instructions, slots, new Set([...bound, "player"]));
+			if (instruction.as) bound.add(instruction.as);
+		}
+	};
+	visit(procedure.instructions, procedure.targets?.length ?? 0, new Set());
 	return procedure;
 }
 

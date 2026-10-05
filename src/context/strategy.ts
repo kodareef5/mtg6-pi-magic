@@ -13,7 +13,7 @@ import { NoteEditsSchema, type NoteEdit, type WorkCommand } from "../core/work-l
 import type { Prepared } from "./seat.ts";
 import type { Objection } from "../core/player.ts";
 import { planProblems, prepareWork } from "../core/work-tools.ts";
-import { type Plan, type Registration } from "../core/language.ts";
+import { type Package, type Plan, type Registration } from "../core/language.ts";
 import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
@@ -28,7 +28,8 @@ export function worthPlanning(table: Table): boolean {
 }
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
-const examples = [...readFileSync(join(docs, "examples", "README.md"), "utf8").matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
+export const exampleIndex = readFileSync(join(docs, "examples", "README.md"), "utf8").trim();
+const examples = [...exampleIndex.matchAll(/^\| `([^`]+\.md)` \|/gm)].map((match) => match[1]!);
 /** The language's semantics stay in the cached prefix; worked examples are fetched only when needed. */
 export const syntaxReference = (): string => readFileSync(join(docs, "SYNTAX.md"), "utf8").trim();
 export const exampleReference: Lookup = {
@@ -81,7 +82,7 @@ const SYSTEM = [
 ].join("\n");
 
 /** An activated ability may be announced, but cannot register as a watch or static. */
-function misregistered(plan: Plan): string[] {
+export function registrationProblems(packages: readonly Package[]): string[] {
 	const found: string[] = [];
 	const visit = (registrations: Registration[], card: string) => {
 		for (const one of registrations) {
@@ -90,7 +91,7 @@ function misregistered(plan: Plan): string[] {
 			if (one.kind === "continuous" && one.change.registers) visit(one.change.registers, card);
 		}
 	};
-	for (const pack of plan.packages ?? []) visit(pack.registers, pack.card);
+	for (const pack of packages) visit(pack.registers, pack.card);
 	return found;
 }
 
@@ -112,7 +113,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			try { plan = changedPlan(base, changes, available); } catch (error) { return String(error); }
 			const objection = raised as Objection | undefined;
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
-			const wrong = [...planProblems(frame, plan), ...misregistered(plan)];
+			const wrong = [...planProblems(frame, plan), ...registrationProblems(plan.packages ?? [])];
 			if (!frame.view.work?.plan && !options.prepared && !plan.steps.length && !plan.may?.length)
 				wrong.push('The initial plan has no actions. Write the line, or explicitly choose passing with a step whose action is {"option":"pass"}.');
 			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");

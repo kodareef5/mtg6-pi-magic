@@ -4,7 +4,7 @@ import { checkProcedure } from "./procedures.ts";
 import { isLand, quotes, type Printed } from "./printed.ts";
 
 /** Ignore typography and reminder text when comparing the model's quoted source. */
-const plain = (text: string) => text.replace(/\([^)]*\)/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " ").trim().toLowerCase();
+const plain = (text: string) => text.replace(/\([^)]*\)/g, " ").replace(/^\s*•\s*/gm, "").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " ").trim().toLowerCase();
 
 /** Every source paragraph must have accepted terms; matching a quote does not prove those terms correct. */
 export function assessmentProblems(printed: Printed, pack: Package): string[] {

@@ -76,12 +76,12 @@ export const printedTargetless = (printed?: Printed) => !!printed &&
 
 /**
  * Whether a registration's basis is the card's own text, word for word: line
- * breaks, reminder text, dashes, apostrophes and case aside. A card's abilities
- * come from its card, never from a claim.
+ * breaks, reminder text, dashes, apostrophes and case aside. Separate quotations
+ * may be joined with literal " ... "; every part must be on the card.
  */
 export function quotes(printed: Printed | undefined, basis: string): boolean {
 	const plain = (text: string) => text.replace(/\\n|\n/g, " ").replace(/\([^)]*\)/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-")
 		.replace(/\s+/g, " ").trim().toLowerCase();
-	const quoted = plain(basis).replace(/^"|"$/g, "").replace(/\.$/, "");
-	return !!printed && !!quoted && plain(printed.oracle).includes(quoted);
+	const quoted = basis.split(" ... ").map((part) => plain(part).replace(/^"|"$/g, "").replace(/\.$/, ""));
+	return !!printed && quoted.every((part) => !!part && plain(printed.oracle).includes(part));
 }

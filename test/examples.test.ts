@@ -15,6 +15,7 @@ import { decks } from "../tools/matchup-fixture.ts";
 import { planWork, syntaxReference } from "../src/context/strategy.ts";
 import { workFrame, editWork } from "../src/core/work-tools.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
+import { checkProcedure } from "../src/core/procedures.ts";
 import { tally } from "../src/context/spend.ts";
 import { main, matchup } from "./play.ts";
 
@@ -33,7 +34,10 @@ test("every example block parses and quotes its card", () => {
 	};
 	// A token is named by the card that made it; its procedures quote that card's reminder text.
 	const tokens = new Set<string>();
-	const procedure = (value: Procedure, where: string) => value.source.card && !tokens.has(value.source.card) && quotes(value.source.card, value.basis, where);
+	const procedure = (value: Procedure, where: string) => {
+		checkProcedure(value);
+		if (value.source.card && !tokens.has(value.source.card)) quotes(value.source.card, value.basis, where);
+	};
 	const pack = (value: Package, where: string) => value.registers.forEach((registration) => quotes(value.card, registration.basis, where));
 	const files = readdirSync(DIR).filter((file) => file.endsWith(".md") && file !== "README.md");
 	assert.ok(files.length > 0);

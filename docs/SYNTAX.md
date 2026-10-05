@@ -194,7 +194,8 @@ permanent "evaluates" things while it sits on the battlefield.
 
 The seat that plays a card is responsible for registering it faithfully. The
 table refuses a package whose `basis` is not that card's own text word for word
-(line breaks, reminder text, dashes and case aside): a card registers only
+(line breaks, reminder text, dashes and case aside). Separate quotes can be
+joined with literal ` ... `; every part must appear on the card. A card registers only
 abilities it has. Whether a registration does what its quote says is not
 checked by the table; the opponent sees both, and objects when they differ.
 

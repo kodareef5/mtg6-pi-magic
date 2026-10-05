@@ -10,8 +10,10 @@ import { assessCard } from "../src/context/assess.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
 import { ASSESSMENT_CEILING, tally } from "../src/context/spend.ts";
 import { actions, changedPlan } from "../src/context/plan-edit.ts";
+import { registrationProblems } from "../src/context/strategy.ts";
 import { seat } from "../src/context/sit.ts";
 import { assessmentProblems } from "../src/core/assessment.ts";
+import { checkProcedure } from "../src/core/procedures.ts";
 import type { Package, Procedure } from "../src/core/language.ts";
 import { editWork, planProblems, workFrame } from "../src/core/work-tools.ts";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
@@ -19,7 +21,7 @@ import { characteristics } from "../src/core/characteristics.ts";
 import { sick } from "../src/core/funding.ts";
 import { project } from "../src/core/view.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
-import { main, place, quiet, passBoth, finish } from "./play.ts";
+import { main, place, quiet, passBoth, finish, example } from "./play.ts";
 import { matchTable, universe } from "../tools/matchup-fixture.ts";
 
 const normal = (card: string, basis: string): Procedure => ({ source: { card, zones: ["hand", "graveyard", "exile"], controller: "any" }, claim: `Cast ${card}`, basis, timing: "spell", instructions: [] });
@@ -43,6 +45,26 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const clock = table.cursor.clock;
 	const printed = table.printed[pack.card]!;
 	assert.deepEqual(assessmentProblems(printed, pack), []);
+	const kellan = example("Kellan becomes a Detective");
+	assert.doesNotThrow(() => checkProcedure(kellan), "a granted trigger binds and uses its own card");
+	assert.throws(() => checkProcedure({ ...kellan, instructions: [...kellan.instructions, { do: "move", what: "bound:card", to: "hand", reason: "bounce" }] }), /bound:card is used before/,
+		"a future trigger's local binding does not escape into the granting ability");
+	const unbound = structuredClone(kellan);
+	const granting = unbound.instructions[0]!;
+	if (granting.do !== "modify" || granting.change.registers?.[0]?.kind !== "watch") assert.fail("Expected the granted watch");
+	granting.change.registers[0].effect.instructions.shift();
+	assert.throws(() => checkProcedure(unbound), /bound:card is used before/, "the nested trigger is checked within its own scope");
+	const abrade = table.printed.Abrade!;
+	const modes: Package = { card: "Abrade", registers: [], procedures: [
+		{ ...normal("Abrade", "Choose one — ... Abrade deals 3 damage to target creature."), targets: [{ object: { types: ["creature"] } }], instructions: [{ do: "damage", to: "target:0", amount: 3 }] },
+		{ ...normal("Abrade", "Destroy target artifact."), targets: [{ object: { types: ["artifact"] } }], instructions: [{ do: "destroy", what: "target:0" }] },
+	] };
+	assert.deepEqual(assessmentProblems(abrade, modes), [], "mode bullets are typography, not missing card meaning");
+	assert.match(assessmentProblems(abrade, { ...modes, procedures: modes.procedures!.slice(0, 1) }).join("; "), /Unassessed text.*destroy target artifact/);
+	assert.match(assessmentProblems(abrade, { ...modes, procedures: [{ ...modes.procedures![0]!, basis: "Choose one — ... Draw two cards." }] }).join("; "), /is not on Abrade/);
+	assert.match(registrationProblems([{ card: "Rockface Village", registers: [{ kind: "continuous", basis: universe.cards.get("Rockface Village")!.oracle.split("\n").at(-1)!,
+		affects: { types: ["creature"], controller: "you" }, change: { power: 1, words: ["haste"] } }] }]).join("; "), /activated ability/,
+		"the same interpreter lint refuses activated effects registered as free static bonuses");
 	assert.match(assessmentProblems(printed, { ...pack, registers: [], procedures: [normal(pack.card, printed.oracle)] }).join("; "), /Unassessed text.*flying/,
 		"a bare cast quoting the whole card cannot stand in for its abilities");
 	let rounds = 0;
