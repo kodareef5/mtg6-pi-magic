@@ -7,8 +7,8 @@
  * prepare at the same time, so the wall time is the slowest analyst plus one
  * synthesis.
  *
- * The brief is filed by where it is read. Strategy reads all of it whenever it
- * plans. The pilot reads only the opening policy while it mulligans, the note
+ * The brief is filed by where it is read. Strategy reads its policies and
+ * visible card notes. The pilot reads only the opening policy while it mulligans, the note
  * for the phase it is in on whose turn it is, and the notes for cards its
  * options name; pasting the whole brief into every decision is the failure this
  * shape exists to avoid.
@@ -17,6 +17,7 @@
  * did it come from" wants the questions, the tools and the filing in one place.
  */
 import { Type, type Static } from "typebox";
+import { ExampleSchema, PlaybookSchema, type Playbook } from "./playbook.ts";
 import type { Card, Universe } from "../core/cards.ts";
 import { listed } from "../core/decks.ts";
 import { problems } from "../core/language.ts";
@@ -56,9 +57,11 @@ const BriefSchema = object({
 	cards: Type.Optional(Type.Record(Type.String(), Note)),
 	/** Strategy: plays that look automatic and are wrong in this matchup. */
 	traps: Type.Optional(Note),
+	/** Five reusable decision policies; opening has its own four pilot questions. */
+	policies: PlaybookSchema,
 });
 /** Older version-three briefs used free-form opening notes. Keep those intact on replay. */
-export type Brief = Omit<Static<typeof BriefSchema>, "opening"> & { opening: Static<typeof Note>; seat: SeatId; version: 3; gaps: string[] };
+export type Brief = Omit<Static<typeof BriefSchema>, "opening" | "policies"> & { policies?: Playbook; opening: Static<typeof Note>; seat: SeatId; version: 3; gaps: string[] };
 
 export const emptyBrief = (seat: SeatId): Brief => ({
 	seat, version: 3, role: "", route: "", recovery: "", matchup: "", opening: "", steps: {}, cards: {}, traps: [], gaps: [],
@@ -94,6 +97,7 @@ const FindingsSchema = object({
 		assumptions: Type.Array(text),
 		/** The visible fact that would change it. */
 		changesWhen: text,
+		example: Type.Optional(ExampleSchema),
 		destination: Type.Enum([...DESTINATIONS]),
 		card: Type.Optional(text),
 		step: Type.Optional(Type.Enum([...STEPS])),
@@ -139,16 +143,16 @@ function numbers(deck: string[], universe: Universe): string {
 const SYSTEM = [
 	"You prepare one seat for a game of Magic: The Gathering, before it starts.",
 	"You are one of four analysts working at once on separate questions. A writer then reconciles your findings into the seat's brief.",
-	"The strategist reads the whole brief whenever it plans a turn. A fast pilot reads only a short note for the window it is in and notes for the cards in front of it.",
+	"The strategist reads the strategic policies whenever it organizes a turn. A fast pilot reads only a short note for the window it is in and notes for the cards in front of it.",
 	"",
 	"Both registered deck lists are public and given in full. They give composition, never a hand or the library order. Do not assume any other card.",
 	"Analyze the printed abilities of every listed card. This call does not determine engine support or certify an ability's interpretation; do not invent unsupported-card exclusions.",
 	"Think like a strong player preparing a matchup: roles and clocks, threats and their last answer windows, scarce resources, and plays that look automatic but are wrong here.",
 	"Prepare the questions the pilot will actually answer: keep and retained-hand choices; source, target and payment; order of dependent uses; responses; resolution choices; combat declarations; and when the window's work is complete. For each recurring use, name its purpose, required resources, later choices and the visible exception that changes it.",
-	"Examples: preserve two green sources in the hand remaining after each bottom choice; use Village's creature-only red for a creature while holding Mountain for Shock; let Hydra enter before spending landfall; carry a fetch's Forest-and-landfall purpose through its search; do not hold ground blockers as protection from a flying threat they cannot block. These illustrate questions to settle, not mandatory strategies for every position.",
+	"Work through examples from these lists: a keep after bottoming; restricted mana used for development while unrestricted mana remains for a response; a beneficiary resolving before its triggering event; a response held until its last useful window; a combat race that changes which creatures attack; rebuilding after losing an engine. Use only cases these decks support. Name the position, ordered line, resources left, and visible exception.",
 	"Teach each default with the visible condition that reverses it. Never write a bare slogan such as always save removal.",
 	"This is setup for later short turn updates. Settle the deck's normal sequencing, mana commitments, protection priorities, trigger targets and combat decisions now. Later sessions should revise these defaults for the board and draw, not derive the matchup again.",
-	"Every conclusion gives the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Say what you are unsure of instead of inventing certainty.",
+	"Give an operational conclusion an example with position, ordered line and exception. Every conclusion gives the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Say what you are unsure of instead of inventing certainty.",
 	"",
 	"Every card's text in both decks is above, so do not look cards up. Look a rule up only when you are unsure of it, at most two lookups,",
 	"then call submit once with your findings. Nothing you write as text is read.",
@@ -260,9 +264,11 @@ const SYNTHESIS = [
 	"The opening pilot sees only this policy and its hand. Name which cards satisfy the early-play condition; do not leave it to infer what functional, early action or a plausible curve means. Name any required mana or target, and judge the cards retained after bottoming.",
 	"- steps: keyed by these step names only: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end, cleanup. Each holds own and opponent notes, for your turn and theirs, only where there is something to do or avoid. Cleanup normally offers only discards; a state-based action or waiting trigger opens priority and requires another cleanup. Read by the pilot in that step.",
 	"- cards: keyed by exact card name, from either deck: notes only for cards with a real choice or trap, such as when to play it, what to hold it for, or how to play around it. Read by the pilot when an option names the card.",
+	"- policies: sequencing, resources, responses, combat and recovery. Each has when (applicability), priorities (ordered decisions), reserve (resources and release window), reconsider (a visible exception), and example {position, line, exception}. Opening already has its own policies. Give real examples from these lists, with actual costs and choices. If a family offers no action for this deck, say why and give the appropriate pass or development line; do not invent a card.",
+	"For sequencing, order dependencies and distinguish an announcement from its resolution. For resources, show a whole-turn payment and what remains for the response. For responses, identify the last useful window and when unused mana can be spent. For combat, give attacks, blocks, damage and the race-changing exception. For recovery, give the new priorities after a draw or opposing play invalidates the main route.",
 	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",
 	"Every default comes with the visible condition that reverses it. Name cards and numbers. No preamble.",
-	"Your step notes become Jev's initial phase scripts. Give ordered decisions with mana kept, trigger and search choices, attack and block policy, and the exception that changes the line. Write decisions the pilot can follow, not a reminder to think about the phase. The turn strategist will change only what the position requires.",
+	"Put the reusable reasoning and worked example in policies, not repeated in every card note. The policy fields are instructions for binding a line to a position, not a second card assessment. Your step notes become Jev's initial phase scripts. Give ordered decisions with mana kept, trigger and search choices, attack and block policy, and the exception that changes the line. Write decisions the pilot can follow, not a reminder to think about the phase. The turn strategist will change only what the position requires.",
 	"The schema fixes opening's four short policies. Other notes may be sentences or small structures, such as one entry per threat with its answer window. This brief guides choices; it does not certify card interpretations or decide engine support.",
 	"",
 	"Call submit once with the brief. Nothing you write as text is read.",

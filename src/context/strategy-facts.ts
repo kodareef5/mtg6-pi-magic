@@ -5,6 +5,8 @@ import type { Selector } from "../core/language.ts";
 import type { Universe } from "../core/cards.ts";
 import type { Rules } from "../core/rules.ts";
 import { say, type Brief } from "./brief.ts";
+import { strategyBrief } from "./playbook.ts";
+import { choices } from "./choices.ts";
 import type { Plan } from "../core/language.ts";
 import type { Step } from "../core/steps.ts";
 import type { Recap } from "./summary.ts";
@@ -117,7 +119,7 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		seat: frame.seat, turns: turns(frame), notebook: work?.notebook ?? [], mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
 		...more,
 		packages: (work?.packages ?? []).map((pack) => pack.card),
-		options: frame.decision?.options, brief: context.brief,
+		choices: choices(frame.decision?.options ?? []), brief: strategyBrief(context.brief, frame),
 		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]
 			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
 		recaps: context.recaps?.slice(-3), refused: frame.refused,

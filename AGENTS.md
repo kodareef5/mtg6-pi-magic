@@ -131,7 +131,7 @@ opening-hand odds computed in code, and tools to look up a rule or a card. One
 synthesis then reconciles them into the brief; a failed analyst reaches it as a
 failure, never as an invented answer. Both seats prepare at the same time, so the
 brief's wall time is the slowest analyst plus one synthesis. The brief is filed by where
-it is read: strategy reads it all; the pilot reads the opening policy while it
+it is read: strategy reads the policies and visible card notes; the pilot reads the opening policy while it
 mulligans, the note for its phase on whose turn it is, and notes for the cards
 its options name. A decision about blocking does not want the mulligan reasoning.
 

@@ -28,6 +28,7 @@ import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
 import { worthPlanning } from "../src/context/strategy.ts";
+import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { splits } from "../src/core/odds.ts";
@@ -82,7 +83,24 @@ const BRIEF = { role: "Beatdown: force the exchange before control stabilizes.",
 		draw: { keep: "Keep two to four lands with early creatures.", bottom: "Preserve two lands and a curve of creatures." },
 	},
 	steps: { "precombat-main": { own: "Play a land, then a creature.", opponent: "Hold Veil for a removal spell." } },
-	cards: { "Snakeskin Veil": "Hold it for their removal, not for a block." }, traps: ["Pumping into an open blocker."] };
+	cards: { "Snakeskin Veil": "Hold it for their removal, not for a block." }, traps: ["Pumping into an open blocker."],
+	policies: {
+		sequencing: { when: "Developing creatures with protection available.", priorities: ["Resolve the creature before protecting it."],
+			reserve: "One green for Veil.", reconsider: "A response is needed before development.",
+			example: { position: "Two Forests, Llanowar Elves and Snakeskin Veil in hand.", line: ["Cast Elves from one Forest.", "Retain the other Forest for Veil after Elves resolves."], exception: "Elves is countered; release the protection hold." } },
+		resources: { when: "A spell and a response share sources.", priorities: ["Allocate the response, then the affordable development."],
+			reserve: "A green source for Veil.", reconsider: "There is no creature worth protecting.",
+			example: { position: "One Forest, Elves on the battlefield, Veil in hand.", line: ["Keep the Forest untapped while Elves is threatened."], exception: "A lethal line needs that mana now." } },
+		responses: { when: "A removal spell targets our creature.", priorities: ["Protect the relevant target while the removal is pending."],
+			reserve: "Veil and one green.", reconsider: "The targeted creature is no longer part of the line.",
+			example: { position: "Elves targeted by removal, Veil and an untapped Forest available.", line: ["Respond with Veil targeting Elves.", "Wait for both effects."], exception: "The opposing effect cannot be answered by hexproof or the counter." } },
+		combat: { when: "Choosing attackers.", priorities: ["Prevent opposing lethal.", "Attack with creatures not required for that defense."],
+			reserve: "A blocker that can legally stop the relevant threat.", reconsider: "Evasion changes the possible blocks.",
+			example: { position: "Our grounded creatures race a flying threat.", line: ["Do not count grounded creatures as blockers for that flyer.", "Use the prepared racing line."], exception: "A creature gains reach or flying." } },
+		recovery: { when: "The main threat is removed.", priorities: ["Preserve enough mana to rebuild.", "Develop the next threat."],
+			reserve: "Resources required by that threat.", reconsider: "The opponent threatens lethal before it matters.",
+			example: { position: "Our threat died and Elves remains in hand with a Forest available.", line: ["Develop Elves."], exception: "Using the last green source loses an essential response." } },
+	} };
 /** Pi's stream as the pregame meets it: each analyst submits findings, the synthesis submits the brief. */
 function pregame(options: { hold?: Promise<void>; fail?: string; brief?: object } = {}) {
 	const tasks: string[] = [], seen: string[] = [];
@@ -131,6 +149,12 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	assert.ok(spent.every((one) => one.thinking === "low" && one.usage?.reasoning === 8));
 	assert.ok(spent.every((one) => !one.pending), "settling an attempt clears pending without adding another call");
 	assert.match(bill(spent).join("\n"), /pregame/);
+	const frame = { seat: me!.id, version: built.cursor.clock, view: project(built, me!.id) };
+	const forTurn = JSON.parse(strategyFacts(frame, { brief: written }));
+	assert.deepEqual(forTurn.brief.policies, written.policies, "turn preparation keeps dependencies and contingency examples across all five families");
+	assert.equal(forTurn.brief.opening, undefined, "completed opening decisions do not accompany a turn question");
+	assert.equal(forTurn.brief.steps, undefined, "existing phase scripts arrive through the base plan, not twice");
+	assert.equal(forTurn.brief.cards["Snakeskin Veil"], undefined, "a card note does not follow an unidentified library object");
 });
 
 test("the analysts read both lists and computed odds, look rules up, and a failed analyst reaches the synthesis as a failure", async () => {

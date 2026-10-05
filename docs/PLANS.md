@@ -102,13 +102,19 @@ without separate invitations for Jev to invent a strategy for each one.
    The action question now carries derived checklist status and completion
    conditions. Card/response review jobs and the automatic review-then-pick
    loop are removed. All voluntary actions and passes still reach Jev.
-5. [ ] Make pregame a reusable playbook and Luna its turn organizer.
+5. [x] Make pregame a reusable playbook and Luna its turn organizer.
    File policies by opening, sequencing, resources, responses, combat and recovery,
    with applicability, priorities, worked examples and reversing conditions.
    Supply relevant policies and changed facts to each turn session. Ordinary turn
    plans select known actions and choices; they should not rewrite card meaning.
    Remove pinned-matchup names from shared instructions. Reject missing bindings
    clearly. Measure accepted plans, repairs and waiting with Luna low unchanged.
+   `docs/PLAYBOOK.md` defines the preferred examples. Fresh briefs now require
+   all five turn-policy families with ordered priorities, resources and worked
+   examples. Carried briefs retain their original shape. Turn context selects
+   strategic fields and visible card notes; repeated offer terms are factored.
+   Source/condition bindings and unknown reuse keys still receive explicit
+   refusals. The live gate must measure whether these changes improve planning.
 6. [ ] Close verified integrity gaps and reconcile the interface.
    Reproduce the missing alternate-zone cast, weak source checks, rollback id
    collision and delayed-trigger look-back report. Fix each supported reproduction

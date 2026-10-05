@@ -187,7 +187,8 @@ test("a branch and a held resource are marked on the options they touch, and not
 	const decision = nextDecision(table)!;
 	assert.equal(decision.seat, 0);
 	const frame = workFrame(table, 0);
-	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[] };
+	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[]; choices: { options: { id: string }[] } };
+	assert.deepEqual(supplied.choices.options.map((one) => one.id), decision.options.map((one) => one.id), "factoring repeated use and payment terms preserves every offered id");
 	for (const object of frame.view.objects!) {
 		assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.traits, object.traits, "the writer keeps current types and active registrations, including changes from the layer walk");
 		if (object.ability) assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.ability, object.ability, "an unresolved spell keeps its accepted cost, targets and effect");
