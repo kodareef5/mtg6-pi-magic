@@ -71,9 +71,14 @@ export type AiSeatOptions = {
 	challenge?(frame: Frame, prepared: Prepared, criticized: (errors: string[]) => boolean): Promise<Prepared | undefined>;
 	/** Checks a prepared plan when the turn begins, given what changed since it was prepared. */
 	review?(frame: Frame, prepared: Prepared, changed: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }>;
+	/** How long the turn waits for a preparation still running before it plans without it. */
+	grace?: number;
 	/** Called each time the seat waited on strategy for its plan: how the plan came, how long the table waited, and whether a preparation was ready. */
 	onPlanned?(planned: Planned): void;
 };
+
+/** How long the turn waits for an unfinished preparation, in milliseconds: about what writing the plan anew would cost. */
+const GRACE = 20_000;
 
 /** A prepared turn: the plan, and the notebook edits the preparation and its challenger made, not yet at the table. */
 export type Prepared = { plan: Plan; edits?: NoteEdit[] };
@@ -208,6 +213,13 @@ export function aiSeat(options: AiSeatOptions): Player {
 	// A job is current only while it is this variable: one taken, replaced or closed starts nothing more and is never used.
 	let preparation: { turn: number; from: Frame; plan: Promise<Prepared | undefined>; ready?: true; criticism?: string[]; revised?: Prepared } | undefined;
 	let navigation: { version: number; learned: string[]; walked: string[] } | undefined;
+	// Notes from a preparation that finished after its turn was planned without it: they go in with the seat's next answer.
+	const late: NoteEdit[] = [];
+	const noted = (tools: WorkCommand[]): WorkCommand[] => {
+		if (!late.length) return tools;
+		const edits = late.splice(0);
+		return [...tools, { do: "notebook.edit", edits }];
+	};
 
 	// Start preparing own turn `turn` from this frame, once: a job for that turn already running is kept.
 	const begin = (frame: Frame, turn: number) => {
@@ -261,7 +273,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 			if (reason && !frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
 				const job = preparation, ready = !!job.ready;
 				preparation = undefined;
-				const made = await job.plan;
+				// A preparation not done by now gets a short grace, then the turn is planned without it; its notes still arrive later.
+				const made = ready ? await job.plan : await Promise.race([job.plan, new Promise<"late">((resolve) => setTimeout(() => resolve("late"), options.grace ?? GRACE))]);
+				if (made === "late") void job.plan.then((done) => { if (done?.edits?.length) late.push(...done.edits); });
+				else {
 				// A challenge whose revision did not finish still goes into the notebook, where the review reads it.
 				const prepared = job.revised ?? (made && job.criticism ? { ...made, edits: [...(made.edits ?? []), { topic: `challenge of turn ${at.kind === "turn" ? at.turn : 0}`, note: job.criticism.join(" ") }] } : made);
 				if (prepared) {
@@ -271,14 +286,15 @@ export function aiSeat(options: AiSeatOptions): Player {
 					if (!criticism.length && settled(frame, prepared.plan, changed)) {
 						planned("prepared", ready);
 						onward(frame, putting(prepared));
-						return { kind: "work", tools: putting(prepared), revision, actionId: id };
+						return { kind: "work", tools: noted(putting(prepared)), revision, actionId: id };
 					}
 					if (options.review) {
 						const { tools, objection } = await options.review(frame, prepared, [...changed.lines, ...criticism]);
 						planned("reviewed", ready);
 						onward(frame, tools);
-						return { kind: "work", tools, revision, actionId: id, ...(objection ? { objection } : {}) };
+						return { kind: "work", tools: noted(tools), revision, actionId: id, ...(objection ? { objection } : {}) };
 					}
+				}
 				}
 			}
 			if (reason) {
@@ -286,7 +302,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				const { tools, objection } = await options.plan(frame);
 				planned(frame.view.work?.request ? "escalation" : "written");
 				onward(frame, tools);
-				return { kind: "work", tools, revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
+				return { kind: "work", tools: noted(tools), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.
 			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));

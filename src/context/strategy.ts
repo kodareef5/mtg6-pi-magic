@@ -129,6 +129,8 @@ const HINTS: [RegExp, string][] = [
 	[/when\/step must be equal to one of/, "Leave step out to match every step."],
 	[/\/if has no field "action"/, "A step or branch is {\"label\", \"when\", \"if\", \"action\"}: action sits beside if, not inside it."],
 	[/has no priority, so nothing can be done in it/, "The table untaps, draws and discards to hand size for you; plan only what you choose."],
+	[/\/ has no field "(reevaluate|goal)"/, "goal and reevaluate belong inside a phase: \"phases\": [{\"when\": {...}, \"goal\": \"...\", \"guidance\": \"...\", \"reevaluate\": [\"...\"]}]."],
+	[/\/holds\/\d+\/releaseWhen/, "releaseWhen is a condition, written like an if: {\"amount\": {\"count\": {...}}, \"atLeast\": 1}. It is not a window or a sentence; leave it out to keep the hold all along."],
 ];
 const hints = (found: string[]) => HINTS.filter(([pattern]) => found.some((line) => pattern.test(line))).map(([, hint]) => ` ${hint}`).join("");
 

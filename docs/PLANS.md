@@ -115,6 +115,10 @@ found and get one revision, used only if it is ready when the turn begins.
 Errors with no finished revision go to the review; they never let the plan
 through as it is.
 
+A preparation still running when the turn begins gets a short grace (20 s,
+about what writing the plan anew costs); past it, the turn is planned without
+it, and its notebook edits go in with the seat's next answer when it finishes.
+
 A preparation belongs to the seat while it is the current one: once it is
 taken, replaced or the seat closes, it starts no further call and is never
 used. A failed preparation leaves the ordinary turn plan. The plan goes through

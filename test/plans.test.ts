@@ -860,3 +860,26 @@ test("odds count from what the seat can name: our library exactly, the opponent'
 	assert.ok(Math.abs(theirs.Shock!.inHand - (1 - choose(unknown.length - theirs.Shock!.remaining, hand) / choose(unknown.length, hand))) < 1e-12);
 	assert.match(theirs.Shock!.basis, /library order is not tracked/);
 });
+
+test("a preparation not done in its grace is not waited for, and its notes still go in with the next answer", async () => {
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+	main(table, 1, 4);
+	const finish: ((made: Prepared) => void)[] = [];
+	let written = 0;
+	const seat = aiSeat({ name: "Green", api: { named: "none", ask: async () => { throw new Error("no pilot call"); } } as never, intent: startingIntent(0), onGap() {}, grace: 10,
+		prepare: () => new Promise((resolve) => { finish.push(resolve); }),
+		plan: async () => { written += 1; return { tools: [{ do: "plan.put", plan: line }] }; } });
+	seat.observe(workFrame(table, 0));
+	main(table, 0, 5);
+	const first = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
+	assert.equal(written, 1, "planned without the preparation");
+	assert.deepEqual(first.tools, [{ do: "plan.put", plan: line }]);
+	assert.equal(finish.length, 2, "and the next turn's preparation has started");
+	finish[0]!({ plan: line, edits: [{ topic: "opponent", note: "Red holds burn." }] });
+	await new Promise((resolve) => setImmediate(resolve));
+	editWork(table, 0, [{ do: "plan.request", reason: "Stop: The Hydra died" }], "stop");
+	const next = await seat.answer(workFrame(table, 0)) as Extract<Answer, { kind: "work" }>;
+	assert.deepEqual(next.tools.at(-1), { do: "notebook.edit", edits: [{ topic: "opponent", note: "Red holds burn." }] }, "the late preparation's notes arrive with the next answer");
+});
