@@ -155,7 +155,7 @@ const SYSTEM = [
 const QUESTIONS = {
 	deck: "DECK AND RESOURCES. What does your deck do: its engines and the pieces they depend on, the curve against the mana it can really make (restrictions included), recurring value, its weak draws, and its routes to a win.",
 	matchup: "MATCHUP. Both clocks, the opponent's engines and threats with the windows in which they must be answered, the removal and protection exchanges, evasion, when the roles change, and how your sequencing can deny the conditions their key cards need.",
-	opening: "OPENING. Keep, mulligan and bottom choices on the play and on the draw: what a keep needs, the borderline hands and the plan behind each, and what to bottom first. Use the computed odds.",
+	opening: "OPENING. Keep, mulligan and bottom choices on the play and on the draw: what a keep needs, the borderline hands and the plan behind each, and what to bottom first. Name the cards that count as early development or interaction, and the mana and targets each needs. A cheap protection spell without a creature to protect is not an early play. Describe exceptions after earlier mulligans. Use the computed odds.",
 	challenge: "CHALLENGE. Find the mistakes a competent player of this deck is likely to make in this matchup: wrong shortcuts, missed response windows, resource conflicts, trigger order, and plays that look automatic but lose.",
 } as const;
 
@@ -253,6 +253,7 @@ const SYNTHESIS = [
 	"- route: the main route to a win. recovery: the route when its key dependency fails. Read by the strategist.",
 	"- matchup: both clocks, the opponent's threats with their last answer windows, and how to deny their key cards' conditions. Read by the strategist.",
 	"- opening: play and draw each hold keep and bottom. Each field is at most three short sentences, read alone for that decision. keep gives ordered keep/mulligan conditions and how they change after a mulligan. bottom gives the cards to preserve and the order to return others. Keep supporting analysis in route or traps.",
+	"The opening pilot sees only this policy and its hand. Name which cards satisfy the early-play condition; do not leave it to infer what functional, early action or a plausible curve means. Name any required mana or target, and judge the cards retained after bottoming.",
 	"- steps: keyed by these step names only: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end, cleanup. Each holds own and opponent notes, for your turn and theirs, only where there is something to do or avoid. Cleanup normally offers only discards; a state-based action or waiting trigger opens priority and requires another cleanup. Read by the pilot in that step.",
 	"- cards: keyed by exact card name, from either deck: notes only for cards with a real choice or trap, such as when to play it, what to hold it for, or how to play around it. Read by the pilot when an option names the card.",
 	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",

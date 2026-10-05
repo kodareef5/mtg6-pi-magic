@@ -158,6 +158,8 @@ export type Resolution = {
 	bound: Record<string, Bound>;
 	/** Targets illegal as resolution began, by target key (608.2b). */
 	illegal: string[];
+	/** The seat handled target restrictions before carrying out an instruction. */
+	targetsChecked?: true;
 	/** Every target was illegal: nothing resolves (608.2b). */
 	lost?: boolean;
 	/** Picks so far in the current `choose`. */

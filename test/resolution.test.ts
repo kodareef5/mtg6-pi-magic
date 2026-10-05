@@ -15,10 +15,10 @@ import { type ProcedureOption } from "../src/core/procedures.ts";
 import { characteristics } from "../src/core/characteristics.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { project } from "../src/core/view.ts";
-import { open, save, replay, fork, exportGame } from "../src/core/journal.ts";
+import { open, save, replay, fork, exportGame, relive } from "../src/core/journal.ts";
 import { cardsIn } from "../src/core/table.ts";
 import type { Procedure } from "../src/core/language.ts";
-import { announce, finish, main, matchup, offered, passBoth, place, step } from "./play.ts";
+import { announce, example, finish, main, matchup, offered, passBoth, place, step } from "./play.ts";
 
 const deal = () => matchup("resolution");
 
@@ -112,6 +112,57 @@ test("mana keeps its stated count and restriction, and restricted mana pays only
 });
 
 test("targets that partly fail, labels, fight, tokens, each player, and counter unless paid", () => {
+	for (const choice of ["respect", "continue", "own", "partial", "during"] as const) {
+		const setup = () => {
+			const game = deal();
+			place(game, 0, "battlefield", "Llanowar Elves", "Forest"); place(game, 0, "hand", "Snakeskin Veil");
+			const [claw] = place(game, 1, "battlefield", "Hired Claw", "Mountain"); place(game, 1, "hand", "Shock");
+			if (choice === "own") commit(game, [{ do: "note", note: { kind: "label", by: 1, on: { id: claw!.id, incarnation: claw!.incarnation },
+				text: "hexproof", until: "end-of-turn", change: { words: ["hexproof"] } } }], "game-setup");
+			return game;
+		};
+		const game = setup(), elf = cardsIn(game, "battlefield", 0).find((one) => one.card === "Llanowar Elves")!;
+		const claw = cardsIn(game, "battlefield", 1).find((one) => one.card === "Hired Claw")!;
+		main(game, 1, 2);
+		if (choice === "during") announce(game, { source: { card: "Mountain", zones: ["battlefield"] }, claim: "Protect, then ping", basis: "Authored target-check fixture.", timing: "stack",
+			targets: [{ object: { types: ["creature"], controller: "opponent" } }], instructions: [
+				{ do: "modify", what: "target:0", until: "end-of-turn", change: { words: ["hexproof"] } }, { do: "damage", to: "target:0", amount: 1 }] });
+		else if (choice === "partial") announce(game, { source: { card: "Mountain", zones: ["battlefield"] }, claim: "Two pings", basis: "Authored target-check fixture.", timing: "stack",
+			targets: [{ object: { types: ["creature"], controller: "opponent" } }, { object: { types: ["creature"], controller: "you" } }],
+			instructions: [{ do: "damage", to: "target:0", amount: 1 }, { do: "damage", to: "target:1", amount: 1 }] });
+		else announce(game, example("Cast Shock"), (one) => one.activation.targets[0]!.some((target) => "id" in target && target.id === (choice === "own" ? claw.id : elf.id)));
+		if (choice !== "own" && choice !== "during") {
+			apply(game, "pass", "model", "chosen");
+			announce(game, example("Cast Snakeskin Veil"), (one) => one.activation.targets[0]!.some((target) => "id" in target && target.id === elf.id));
+			passBoth(game); finish(game);
+		}
+		passBoth(game);
+		if (choice === "during") {
+			apply(game, nextDecision(game)!.options[0]!.id, "model", "chosen");
+			assert.equal(nextDecision(game)!.options.some((one) => one.id.endsWith(":targets")), false, "hexproof gained during resolution does not restart target checking");
+			finish(game);
+			assert.equal(game.things.get(elf.id)!.zone, "graveyard", "the already legal target receives the later instruction");
+			assert.deepEqual(relive(setup(), game.ledger).things, game.things);
+			continue;
+		}
+		const targetCheck = nextDecision(game)!;
+		if (choice === "own") {
+			assert.equal(targetCheck.options.length, 1, "your own hexproof creature stays a legal target");
+			continue;
+		}
+		const honor = targetCheck.options.find((one) => one.id.endsWith(":targets"));
+		assert.ok(honor, "the seat can honor protection gained after announcement");
+		const continuation = targetCheck.options.find((one) => !one.id.endsWith(":targets"))!;
+		assert.match(continuation.shows!, /conflicts with hexproof/, "the original physical instruction remains available with its conflict");
+		assert.deepEqual(nextDecision(relive(setup(), game.ledger)), targetCheck, "replay reaches the same unchosen target check");
+		step(game, (label) => choice === "continue" ? label === continuation.label : label === honor.label);
+		if (choice === "respect") assert.match(nextDecision(game)!.options[0]!.label, /Every target is illegal/);
+		finish(game);
+		assert.equal(game.things.get(elf.id)!.zone, choice === "continue" ? "graveyard" : "battlefield");
+		if (choice === "partial") assert.equal(game.things.get(claw.id)!.damage, 1, "the other legal target still receives its instruction");
+		assert.deepEqual(relive(setup(), game.ledger).things, game.things, "both honoring and continuing replay as chosen");
+	}
+
 	const table = deal();
 	const [elves, chocobo] = place(table, 0, "battlefield", "Llanowar Elves", "Sazh's Chocobo");
 	place(table, 0, "battlefield", ...Array(9).fill("Forest"));

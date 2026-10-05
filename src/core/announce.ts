@@ -77,11 +77,17 @@ const name = (object: Seen) => object.card ?? object.token?.name ?? object.id;
 /** Each target slot as an option shows it, then any choice that conflicts with hexproof. One wording for spells, abilities and triggers. */
 export function aiming(targets: Chosen[][], world: World, controller: SeatId): string[] {
 	const named = (chosen: Chosen) => { if ("player" in chosen) return `seat ${chosen.player}`; const object = world.lastKnown(chosen)?.object; return `${object ? name(object) : chosen.id} (${chosen.id}@${chosen.incarnation})`; };
-	const marks = targets.flat().flatMap((chosen) => {
-		const object = "id" in chosen ? world.lastKnown(chosen)?.object : undefined;
-		return object && object.controller !== controller && world.read(object)?.words.includes("hexproof") ? [`${named(chosen)} conflicts with hexproof.`] : [];
-	});
+	const marks = targetConflicts(targets.flat(), world, controller).map((one) => one.reason);
 	return [...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map(named).join(", ") : "none"}.`), ...marks];
+}
+
+/** Registered target restrictions guide announcement and resolution without hiding physical continuations. */
+export function targetConflicts(targets: Chosen[], world: World, controller: SeatId) {
+	return targets.flatMap((target) => {
+		const object = "id" in target ? world.lastKnown(target)?.object : undefined;
+		return object && object.controller !== controller && world.read(object)?.words.includes("hexproof")
+			? [{ target, reason: `${name(object)} (${object.id}@${object.incarnation}) conflicts with hexproof.` }] : [];
+	});
 }
 
 /** The objects and players each slot could take now, before counting. */

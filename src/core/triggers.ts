@@ -12,12 +12,12 @@
  */
 import { characteristics, walk, type Traits } from "./characteristics.ts";
 import { aiming, summary, targetings } from "./announce.ts";
-import { holds, matches, players, tableWorld, targetKey, type Scope, type Seen, type World } from "./selectors.ts";
+import { holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
 import { playing, type Activation, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { GameEvent, Registration } from "./language.ts";
 import type { Change, Zone } from "./syntax.ts";
-import type { ObjectRef, SeatId } from "./types.ts";
+import type { Frame, ObjectRef, SeatId } from "./types.ts";
 import type { Step } from "./steps.ts";
 
 /** One thing that happened in a group, as a watch reads it. */
@@ -174,6 +174,16 @@ function watches(world: World, objects: Seen[]): Watch[] {
 		.map((registration) => ({ object, controller: object.controller, registration, world })));
 }
 
+/** Registered watches on visible permanents now. A card in hand supplies none; this predicts no future event. */
+export function activeWatches(frame: Frame) {
+	const world = viewWorld(frame.view);
+	return watches(world, world.objects).flatMap(({ object, controller, registration }) => registration.kind === "watch" ? [{
+		source: { ...ref(object), name: object.card ?? object.token?.name ?? "unknown", controller },
+		basis: registration.basis, event: structuredClone(registration.event),
+		...(registration.if ? { if: structuredClone(registration.if) } : {}),
+	}] : []);
+}
+
 /**
  * The triggers one group causes, in the order their watches were found, and the
  * once-only delayed triggers it used up. `prior` is the world before the group.
@@ -276,4 +286,3 @@ export function triggerWindow(table: Table): Pending | null {
 	});
 	return { situation: "trigger-order", seat: seat.id, question: `Put your triggered abilities on the stack, one at a time; the last one put on resolves first (603.3b).`, moves };
 }
-

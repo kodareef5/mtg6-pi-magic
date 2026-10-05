@@ -15,6 +15,7 @@ import { entersTapped } from "../core/budget.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
+import { activeWatches } from "../core/triggers.ts";
 
 /** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
 const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => object.zone !== "library").map((object) => ({
@@ -109,7 +110,7 @@ export function chancing(frame: Frame): Lookup {
 export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}): string {
 	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, ...view } = frame.view;
 	return JSON.stringify({
-		seat: frame.seat, turns: turns(frame), notebook: work?.notebook ?? [], mana: mana(frame), view, objects: objects(frame),
+		seat: frame.seat, turns: turns(frame), notebook: work?.notebook ?? [], mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
 		...more,
 		packages: (work?.packages ?? []).map((pack) => pack.card),
 		options: frame.decision?.options, brief: context.brief,

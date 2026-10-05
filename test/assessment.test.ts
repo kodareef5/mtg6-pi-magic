@@ -20,6 +20,9 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { characteristics } from "../src/core/characteristics.ts";
 import { sick } from "../src/core/funding.ts";
 import { project } from "../src/core/view.ts";
+import { focus } from "../src/context/packet.ts";
+import { startingIntent } from "../src/context/plan.ts";
+import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { main, place, quiet, passBoth, finish, example } from "./play.ts";
 import { matchTable, universe } from "../tools/matchup-fixture.ts";
@@ -112,6 +115,8 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const offered = nextDecision(table)!.options.filter((one) => one.objects?.[0]?.id === nova!.id);
 	assert.equal(offered.length, 2, "normal and warp casts come from preparation, with no bare duplicate");
 	const frame = workFrame(table, 1), available = actions(frame);
+	assert.equal(focus(frame, startingIntent(1)).watches.some((one) => one.source.name === pack.card), false, "a prepared card still in hand supplies no active watch");
+	assert.equal(JSON.parse(strategyFacts(frame, {})).watches.some((one: { source: { name: string } }) => one.source.name === pack.card), false, "the writer reads the same battlefield facts");
 	assert.deepEqual(available["prepared:0"]!.action, { procedure: pack.procedures![0] });
 	const plan = changedPlan({ objective: "Attack in the air.", guidance: "Cast before combat.", steps: [] }, {
 		steps: [{ label: "Cast Nova", when: {}, action: { reuse: "prepared:0" } }],
@@ -120,6 +125,7 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	apply(table, offered.find((one) => one.label.startsWith("Cast Nova"))!.id, "model", "chosen");
 	passBoth(table); finish(table);
 	assert.deepEqual(characteristics(table, nova!)!.words.sort(), ["flying", "haste"]);
+	assert.ok(focus(workFrame(table, 1), startingIntent(1)).watches.some((one) => one.source.name === pack.card && one.event.on === "enters"), "entry activates the accepted watch without a strategy edit");
 	assert.equal(sick(workFrame(table, 1), project(table, 1).objects!.find((one) => one.id === nova!.id)!), false, "prepared haste permits attacking on entry");
 	assert.equal(nextDecision(table)!.situation, "trigger-order", "the enters ability did not depend on a turn-plan edit");
 	apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen");

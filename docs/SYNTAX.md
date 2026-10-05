@@ -22,6 +22,10 @@ The table guides and never restrains.
 - It marks an option that conflicts with a registered word. A lone blocker
   against a registered menace attacker reads "conflicts with menace: needs two
   or more blockers".
+- Resolution offers a target check for hexproof gained before it begins. The
+  seat can ignore those targets, leaving any legal targets to resolve (608.2b).
+  The original instruction remains available with its conflict marked. Once
+  instructions begin, gaining hexproof does not restart that check.
 - Registrations change what it derives: characteristics, how a permanent enters,
   which triggers fire. They change steps it performs itself: first and double
   strike, trample, vigilance, indestructible, deathtouch, and haste lifting

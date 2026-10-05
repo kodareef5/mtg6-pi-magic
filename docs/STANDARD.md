@@ -150,7 +150,35 @@ brief at four saved opening decisions, using eight Jev calls in 1.7 seconds.
 Both policies kept the original playable seven. The new policy also kept a
 two-land hand without early development that the carried policy mulliganed.
 The result is mixed: shorter guidance helps focus, but "early action" still
-leaves the classifier to infer which cards qualify.
+leaves the classifier to infer which cards qualify. Opening preparation now
+asks for named qualifying cards, their mana and targets, and exceptions after
+mulligans. A second eight-call probe rejected that weak two-land hand, but
+also mulliganed a five-card keep the carried policy accepted. Better opening
+play remains unproven.
+
+A continuation of `1791200859709` played only turns three and four and saved
+`1791204383584`. It made 149 Jev calls (92 reviews and 57 picks), 20 strategy
+calls, and took 189 seconds. It replayed with no gaps or fallbacks but exposed
+two failures that those counters cannot detect:
+
+- Green's plan expected Chocobo's landfall before Chocobo entered. Packets now
+  include the registered watches on visible battlefield sources, separate from
+  cards in hand. The planner's generic land-before-creature example was removed.
+  At version 49, one isolated plan review reversed the order correctly. Its
+  prose still misread Hired Claw's attack trigger; this did not prove the whole
+  plan sound.
+- Green correctly answered Shock with Snakeskin Veil, but Shock's resolution
+  menu supplied no way to ignore the newly protected target. Resolution now
+  offers that choice beside the original marked continuation. At version 84,
+  two live Jev calls applied hexproof and finished Shock without damage. The Elf
+  survived with its counter, and the resulting journal replayed identically.
+  Offline cases cover partially legal targets, targeting one's own hexproof
+  creature, choosing the marked continuation, and gaining hexproof during an
+  effect without restarting its target check.
+
+The next strategy review should address Hired Claw's trigger, declined attacks,
+and repeated help requests at those saved positions. More calls alone did not
+produce a coherent line.
 
 Full games remain behind the readiness checks above. Next probes should keep
 the same saved decision when comparing context, inspect accepted card terms,

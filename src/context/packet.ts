@@ -21,6 +21,7 @@ import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { sources } from "../core/funding.ts";
 import { openingHand } from "../core/pregame.ts";
+import { activeWatches } from "../core/triggers.ts";
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -68,6 +69,8 @@ export type Packet = {
 	resources: string[];
 	known: string[];
 	objects: Seen[];
+	/** Registered watches on the battlefield now; neither pending nor predicted triggers. */
+	watches: ReturnType<typeof activeWatches>;
 	/** Source text for visible cards involved in this decision, kept apart from current traits. */
 	cards: Record<string, Printed>;
 	/** The pregame snippets that apply here: this window's, and a note for each card an option names. */
@@ -182,6 +185,7 @@ export function focus(
 		] : [])],
 		known: [...view.table, ...view.since],
 		objects: (view.objects ?? []).filter((object) => object.zone === "battlefield" || object.zone === "stack").map(seen),
+		watches: activeWatches(frame),
 		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => relevant.has(name)).map(([name, card]) => [name, structuredClone(card)])),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		...(resolving ? { resolving: { claim: resolving.claim, basis: resolving.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),

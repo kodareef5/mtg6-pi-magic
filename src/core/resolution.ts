@@ -11,6 +11,7 @@ import { eventScope } from "./triggers.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { Table, Thing } from "./table.ts";
 import type { Change } from "./syntax.ts";
+import { targetConflicts } from "./announce.ts";
 
 const PERMANENT = ["artifact", "battle", "creature", "enchantment", "land", "planeswalker"];
 
@@ -74,5 +75,17 @@ export function resolving(table: Table): Pending | null {
 				...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
 		reason: "resolve",
 	}));
+	const conflicts = pending.targetsChecked ? [] : targetConflicts(ability.targets.flat(), world, ability.controller)
+		.filter((one) => !pending.illegal.includes(targetKey(one.target)));
+	if (conflicts.length) {
+		const ignored = [...new Set([...pending.illegal, ...conflicts.map((one) => targetKey(one.target))])];
+		const warning = conflicts.map((one) => one.reason).join(" ");
+		for (const move of moves) {
+			move.option.shows = `${move.option.shows ?? ""} ${warning} This continues with those targets.`.trim();
+		}
+		moves.unshift({ option: { id: `${prefix}:targets`, label: "Apply target restrictions before resolving (608.2b).",
+			shows: `${warning} Ignore those targets; if no legal target remains, none of this use resolves.` },
+			changes: [{ do: "resolution", action: "targets", what: object.id, illegal: ignored }], reason: "resolve" });
+	}
 	return { situation: "resolution", seat: step.actor, question: `Resolve: ${ability.claim}. ${step.question}`, moves };
 }

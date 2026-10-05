@@ -81,6 +81,8 @@ export type Change =
 	| { do: "activate"; what: string; id: string; ability: Activation }
 	| { do: "resolution"; action: "begin"; what: string; source: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean;
 		bound?: Resolution["bound"]; optional?: true }
+	/** The seat accepts target restrictions, or continues with the warned targets. No instruction is carried out. */
+	| { do: "resolution"; action: "targets"; what: string; illegal: string[] }
 	/**
 	 * Finish the current instruction, or record one pick of a `choose` that has
 	 * more to pick. `bind` keeps what it did for later instructions, and follows

@@ -22,6 +22,7 @@ import { before as lookBack, detect } from "./triggers.ts";
 import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
+import { targetKey } from "./selectors.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Activation,
@@ -414,7 +415,15 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 		return;
 	}
 	const pending = table.resolution!;
+	if (change.action === "targets") {
+		pending.illegal = [...change.illegal];
+		pending.targetsChecked = true;
+		const targets = table.things.get(pending.object)!.ability!.targets.flat();
+		if (targets.length && targets.every((one) => pending.illegal.includes(targetKey(one)))) pending.lost = true;
+		return;
+	}
 	if (change.accept) { delete pending.optional; return; }
+	pending.targetsChecked = true;
 	if (change.follow) pending.source = structuredClone(change.follow);
 	if (change.pick) { pending.picked.push(structuredClone(change.pick)); return; }
 	if (change.bind) Object.assign(pending.bound, structuredClone(change.bind));
