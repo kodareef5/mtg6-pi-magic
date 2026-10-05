@@ -29,8 +29,6 @@ import { holds, viewWorld } from "../core/selectors.ts";
 import { matches, select } from "../core/query.ts";
 import { STEPS } from "../core/steps.ts";
 import { putting } from "./strategy.ts";
-import { reviewCommand, reviewQuestion, STACK_PRIORITY } from "./review.ts";
-import { checklist } from "../core/review.ts";
 import { inspect, type Inspection } from "./choices.ts";
 import { decisionChoices } from "./packet.ts";
 
@@ -174,18 +172,19 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.combat ? ["combat shows the developing declaration and assignments. Compare the plan with current flying, reach, menace, sickness and damage. Finish the declaration explicitly; selecting a creature is not finishing combat."] : []),
 		...(packet.resolving ? ["Complete the accepted use under resolving.purpose and its original guidance. Its costs are already paid. This is an instruction choice, not priority. Declining a search deliberately finds nothing; it is not a pass.",
 			"resolution holds the current instruction and earlier bindings. Resolve against the actual locked targets, including their legality; a completed announcement is not a completed effect."] : []),
-		...(packet.objects.some((one) => one.zone === "stack") && !packet.resolving ? [STACK_PRIORITY,
+		...(packet.objects.some((one) => one.zone === "stack") && !packet.resolving ? ["The stack is waiting. Land plays and uses at sorcery speed need an empty stack. Their absence alone does not require a new plan. Apply the prepared response policy now. Passing lets the top object resolve after every seat passes; it does not end the phase or guarantee a later use will become available.",
 			"Read named stack targets and order before responding. An effect already pending on a target has not resolved; paying again starts another use."] : []),
 		...(packet.plan ? ["Follow the current plan and phase guidance. A held resource can be spent only under its release policy. A waiting prerequisite is not an unavailable line; a contradicted assumption may need a covered alternative or a revision."] : []),
-		...(packet.checklist?.length ? ["checklist records assessments, not execution. Before ending, review any unanswered uses. A completion review moves nothing; the following question asks for the actual pass or declaration."] : []),
+		...(packet.checklist?.length ? ["checklist describes the plan now: available means a listed use; later means after an earlier available step; waiting means a use requiring an empty stack; condition-false means its stated condition is false; unavailable means no current option. None completes a step. recorded means the phase's explicit steps are in the ledger, not that its goal is guaranteed. Follow the order and prepared response policies; do not optimize a new line.",
+			"Before choosing a pass or declaration ending, check remaining actions against the phase guidance. Confirm that no planned action is required now. A pending effect can require waiting. An unavailable required line or an uncovered change needs help; silence in the plan alone is not a passing policy."] : []),
 		...(help ? ["Ask for help when the position contradicts the line and no prepared alternative covers it. Explain the conflict through the supplied use, targets, payments and remaining work; do not invent a strategy."] : []),
 		...(packet.routes.length ? ["Rule asks show the named rule and return to this decision without acting."] : []),
 		...(packet.learned?.length ? ["learned contains the cited rules you asked to see; they are reference text, not actions."] : []),
 		...(packet.refused?.length ? ["refused explains the previous unusable answer. The physical decision is unchanged."] : []),
 	].join("\n");
 	return { type: "choice", instructions, criteria: Object.fromEntries([
-		...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.some((one) => !one.judgment)
-			? "Request the remaining completion reviews, then confirm this ending separately."
+		...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.length
+			? `Confirm the plan's current completion or waiting conditions, then choose ${option.label}. This records the physical choice, not completion of any unperformed step.`
 			: `Select the option with this id: ${option.label}. Read its bindings, payment and notes in options.`]),
 		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
 		...(help ? [[HELP, "Request a revision of the unfinished line. Moves nothing."]] : []),
@@ -294,32 +293,27 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
 			for (;;) {
-				const items = checklist(frame);
-				const ready = items.some((item) => item.kind !== "phase" && item.kind !== "response" && item.judgment?.verdict === "act" && item.options.some((id) => !["pass", "attack:done", "block:done"].includes(id)));
-				const reviewing = ready && frame.view.work?.finishReview !== frame.version ? undefined : items.find((item) => !item.judgment);
 				const rules = options.rules && walked.length < budget ? options.rules : undefined;
 				const capacity = CHOICE_LIMIT - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
-				const menu = reviewing ? undefined : inspect(decisionChoices(frame), navigation.selected, capacity);
+				const menu = inspect(decisionChoices(frame), navigation.selected, capacity);
 				const whole = focus(frame, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
 					...(seated ? { recaps: seated.recaps } : {}),
 					...(rules ? { rules } : {}),
 					...(learned.length ? { learned } : {}),
-					...(reviewing ? { review: reviewing } : { inspection: navigation.selected, capacity }),
+					inspection: navigation.selected, capacity,
 				});
 				// A route already followed is not offered again. Its answer is
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
-				// Review the next use, execute it, then reconsider the changed
-				// position. Later steps need not be affordable before this one.
-				const ask = reviewing ? reviewQuestion(packet, reviewing, help) : question(packet, help);
+				const ask = question(packet, help);
 				asked += 1;
 				options.onAsk?.(packet);
 				const answers = await options.api.ask({
 					state: asState(packet),
 					questions: { [KEY]: ask },
-				}, reviewing ? "review" : "pick");
+				}, "pick");
 
 				const answer = chose(answers, KEY);
 				if (typeof answer === "string") {
@@ -329,22 +323,15 @@ export function aiSeat(options: AiSeatOptions): Player {
 					options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
 					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 				}
-				if (menu && Object.hasOwn(menu.enter, answer.choice)) {
+				if (Object.hasOwn(menu.enter, answer.choice)) {
 					navigation.selected = menu.enter[answer.choice]!;
 					continue;
 				}
 				if (answer.choice === HELP && help) {
-					const due = reviewing ? ` Checklist item: ${reviewing.label}.` : packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";
+					const due = packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";
 					return { kind: "work", tools: [{ do: "plan.request", reason: `The pilot asked for help: ${frame.decision.question}${due} Review the conflict with the current position and repair the unfinished line.` }],
 						revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
 				}
-				if (reviewing) {
-					const tool = reviewCommand(reviewing, answer.choice);
-					if (!tool || !(ask.type === "choice" && Object.hasOwn(ask.criteria, answer.choice))) throw new Error(`No review answer ${answer.choice}; choose one of the listed review judgments.`);
-					return { kind: "work", tools: [tool], revision, actionId: `${options.name}-${frame.version}-${revision}-review-${asked}` };
-				}
-				if (["pass", "attack:done", "block:done"].includes(answer.choice) && packet.checklist?.some((item) => !item.judgment))
-					return { kind: "work", tools: [{ do: "review.finish" }], revision, actionId: `${options.name}-${frame.version}-${revision}-finish-${asked}` };
 				const route = packet.routes.find((candidate) => candidate.id === answer.choice);
 				if (!route) return { kind: "pick", option: answer.choice, actionId: `${options.name}-${asked}` } satisfies Answer;
 				walked.push(route.id);

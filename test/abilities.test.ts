@@ -128,11 +128,6 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 		const question = request.questions.pick!;
 		if (question.type !== "choice") throw new Error("Expected a choice");
 		const packet = request.state as unknown as Packet;
-		if (Object.hasOwn(question.criteria, "review:hold")) {
-			const choice = Object.hasOwn(question.criteria, "review:act") ? "review:act" : "review:skip";
-			return { api: model.api, provider: model.provider, model: model.id, stopReason: "stop", timestamp: 0,
-				answers: { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } } };
-		}
 		// The use and its original payments remain separate questions.
 		const use = Object.values(packet.uses)[0]!;
 		assert.match(use.notes!.join(" "), /Plan step 1: Loot with a Merchant/);

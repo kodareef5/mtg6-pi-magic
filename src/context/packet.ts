@@ -42,7 +42,7 @@ export type Packet = {
 	resources: string[]; known: string[]; objects: Seen[];
 	watches: ReturnType<typeof activeWatches>; cards: Record<string, Printed>;
 	guidance: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
-	history?: SeatView["history"]; resolution?: SeatView["resolution"]; checklist?: ReviewItem[]; combat?: SeatView["combat"];
+	history?: SeatView["history"]; resolution?: SeatView["resolution"]; checklist?: (Omit<ReviewItem, "options"> & { available: number })[]; combat?: SeatView["combat"];
 	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
 	inspection?: Pick<Menu, "stage" | "selected" | "field" | "path" | "facts">;
 };
@@ -70,13 +70,13 @@ function inPlanOrder<T extends { id: string }>(options: readonly T[], state: Ret
 /** The same canonical grouping drives inspection and the question's facts. */
 export function decisionChoices(frame: Frame) { return choices(inPlanOrder(frame.decision?.options ?? [], planState(frame))); }
 
-export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; review?: ReviewItem; inspection?: Inspection; capacity?: number };
+export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; inspection?: Inspection; capacity?: number };
 /** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
 export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet {
 	const { decision, seat, view, version, refused } = frame;
 	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) throw new Error("A packet needs a decision and intent for its own seat");
 	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
-	const state = planState(frame), review = context.review;
+	const state = planState(frame);
 	const scripts = (state?.plan.phases ?? []).filter((one) => matches(one.when, frame));
 	const dueAt = state?.due.find((one) => one.candidates.length)?.at, done = new Set(view.done ?? []);
 	const plan = state && !view.resolution ? {
@@ -92,10 +92,10 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const all = inPlanOrder(decision.options, state);
 	const factored = choices(all), menu = context.inspection ? inspect(factored, context.inspection, context.capacity) : undefined;
 	const inspected = menu?.scope && new Set(menu.scope);
-	const offered = review && review.kind !== "response" ? all.filter((one) => review.options.includes(one.id))
-		: inspected ? all.filter((one) => inspected.has(one.id)) : all;
-	const data = review ? choices(offered) : factored;
-	const scoped = decisionFacts(frame, offered, review), names = new Set(scoped.objects.flatMap((one) => one.card ? [one.card] : []));
+	const offered = inspected ? all.filter((one) => inspected.has(one.id)) : all, data = factored;
+	const itemList = checklist(frame);
+	const attention = context.inspection?.use ? [] : itemList.filter((one) => ["unavailable", "waiting"].includes(one.status));
+	const scoped = decisionFacts(frame, offered, attention), names = new Set(scoped.objects.flatMap((one) => one.card ? [one.card] : []));
 	for (const option of offered) for (const card of option.cards ?? []) names.add(card);
 	const watches = view.window.kind === "opening" ? [] : activeWatches(frame);
 	// A proposed action can cause new triggers. Their full source text and
@@ -114,7 +114,6 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const selection = view.window.kind === "opening" && view.window.action === "bottom" || decision.situation === "turn-based" && view.window.kind === "turn" && view.window.step === "cleanup";
 	const available = !view.resolution && view.window.kind === "turn" ? sources(frame).map(({ object, yields }) =>
 		`${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}): ${[...new Set(yields.map((one) => `${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`) : [];
-	const itemList = review ? [review] : checklist(frame);
 	const listed = menu?.options ?? data.options;
 	const used = new Set(listed.flatMap((one) => one.use ? [one.use] : []));
 	const paid = new Set(listed.flatMap((one) => one.payment ? [one.payment] : []));
@@ -123,9 +122,9 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		hand: openingHand({ ...view, objects: view.objects?.filter((one) => !option.objects?.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation)) }, seat) })) : undefined;
 	return {
 		actor: seat, window: structuredClone(view.window), version, obligation: decision.question,
-		kind: review ? `review:${review.kind}` : view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
+		kind: view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
 		...(view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
-		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: structuredClone(itemList) } : {}),
+		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => ({ ...structuredClone(item), available: options.length })) } : {}),
 		options: listed, uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
 		payments: Object.fromEntries(Object.entries(data.payments).filter(([id]) => paid.has(id))),
 		funding: Object.fromEntries(Object.entries(data.funding).filter(([id]) => taps.has(id))), pools: structuredClone(view.pools),

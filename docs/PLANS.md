@@ -59,6 +59,15 @@ contract before changing the writer prompts. An empty option list has distinct
 causes: a false condition, a later window, a resolving prerequisite, missing
 interpretation, or an impossible required step. Those must not collapse to skip.
 
+The pilot's action question carries a derived checklist. With a land step
+available and a creature step later, it asks for the land directly. With a spell
+on the stack, it shows the land as waiting and asks for a response or pass. With
+a false branch condition, it shows that fact without asking whether it is false
+again. Ending an empty-stack window explicitly confirms the supplied completion
+conditions in the same physical choice. An unavailable required line needs help;
+no status marks it completed. Unmentioned cards remain inspectable options,
+without separate invitations for Jev to invent a strategy for each one.
+
 ## Commit sequence and acceptance
 
 1. [x] Record the approved contract and preserve the previous experiments.
@@ -85,11 +94,14 @@ interpretation, or an impossible required step. Those must not collapse to skip.
    visible source enters their accepted scope. A separate strategy-role call
    interprets them before a priority action or pass. This conservative gate does
    not yet test affordability or timing. Old complete assessments remain usable.
-4. [ ] Refocus Jev on executing prepared instructions.
+4. [x] Refocus Jev on executing prepared instructions.
    Replace duplicate review-then-pick questions with a direct execution question
    when the plan and facts settle the purpose. Keep necessary completion and
    exception checks. Distinguish waiting from a broken line. Remove strategic
    reassessment of each otherwise unmentioned card as a routine obligation.
+   The action question now carries derived checklist status and completion
+   conditions. Card/response review jobs and the automatic review-then-pick
+   loop are removed. All voluntary actions and passes still reach Jev.
 5. [ ] Make pregame a reusable playbook and Luna its turn organizer.
    File policies by opening, sequencing, resources, responses, combat and recovery,
    with applicability, priorities, worked examples and reversing conditions.

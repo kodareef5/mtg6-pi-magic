@@ -403,10 +403,12 @@ rather than adding a test for each branch.
   visible source enters their accepted scope. Unpermitted zones and another
   seat's hidden hand create no work. Required interpretation blocks actions
   and fallback passes, moves nothing, and survives replay without reinference.
-- **Considered.** A pilot reviews unfinished uses, including unavailable steps,
-  before choosing a move. Private judgments neither move cards nor complete
-  steps; they survive replay at that decision and expire when the position or
-  plan changes. Every listed move stays available to the seat.
+- **Considered.** A pilot's action question carries the phase instructions and
+  derived status of unfinished steps and branches. False conditions, later
+  steps, stack prerequisites and unavailable uses remain distinct; none counts
+  as execution. Passing confirms the current completion or waiting conditions.
+  Optional private judgments survive replay and expire with the position or
+  plan. Unmentioned cards create no separate strategy review. Every move stays available.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a

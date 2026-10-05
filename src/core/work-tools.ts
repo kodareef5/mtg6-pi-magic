@@ -173,7 +173,7 @@ export function prepareWork(frame: Frame, input: unknown): Workspace {
 				const item = checklist({ ...frame, view: { ...frame.view, work } }).find((one) => one.id === tool.item);
 				if (!item) throw new Error(`No checklist item ${tool.item} in this decision.`);
 				if (item.judgment) throw new Error(`Checklist item ${tool.item} was already reviewed in this position.`);
-				if (tool.verdict === "act" && item.kind !== "response" && !item.options.length) throw new Error(`Checklist item ${tool.item} has no current option; defer it or ask for help.`);
+				if (tool.verdict === "act" && !item.options.length) throw new Error(`Checklist item ${tool.item} has no current option; defer it or ask for help.`);
 				work.reviews = [...(work.reviews ?? []).filter((one) => one.at === frame.version && one.plan === work.planned),
 					{ item: tool.item, verdict: tool.verdict, reason: tool.reason, at: frame.version, ...(work.planned === undefined ? {} : { plan: work.planned }) }];
 				break;

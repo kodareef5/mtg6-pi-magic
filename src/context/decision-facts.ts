@@ -5,7 +5,7 @@ import type { Selector } from "../core/language.ts";
 import { matches, viewWorld } from "../core/selectors.ts";
 import { select } from "../core/query.ts";
 
-export function decisionFacts(frame: Frame, options: readonly Option[], review?: ReviewItem) {
+export function decisionFacts(frame: Frame, options: readonly Option[], attention: readonly ReviewItem[] = []) {
 	const all = frame.view.objects ?? [], world = viewWorld(frame.view), reasons = new Map<string, Set<string>>();
 	const add = (id: string, why: string) => { const set = reasons.get(id) ?? new Set(); set.add(why); reasons.set(id, set); };
 	const opening = frame.view.window.kind === "opening";
@@ -13,7 +13,7 @@ export function decisionFacts(frame: Frame, options: readonly Option[], review?:
 	else {
 		for (const option of options) for (const ref of option.objects ?? []) if (all.some((one) => one.id === ref.id && one.incarnation === ref.incarnation)) add(ref.id, "offered source, target or payment");
 		for (const one of all) {
-			if (review?.cards.includes(one.card ?? "")) add(one.id, "reviewed use");
+			if (attention.some((item) => item.cards.includes(one.card ?? ""))) add(one.id, "unfinished use needing a completion check");
 			if (one.zone === "stack") add(one.id, "pending stack effect");
 			if (frame.view.window.kind === "turn" && frame.view.window.phase === "combat" && one.zone === "battlefield" && one.traits?.types.includes("creature")) add(one.id, "combat participant or potential blocker");
 		}
