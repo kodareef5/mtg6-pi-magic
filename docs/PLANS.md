@@ -14,8 +14,11 @@ Core accepts a complete `PlanSchema` plan; the strategist can write a short upda
    then study resources, the matchup, opening hands
    and likely mistakes. A synthesis writes the brief. Its step decisions become
    the initial phase scripts, and its short objective supplies Jev's strategy
-   line. The brief also supplies the mulligan and upkeep
-   guidance, so there is no extra opening strategy session before the draw.
+   line. New briefs give separate keep and bottom policies for playing first
+   and drawing first. Jev reads only its current policy, beside projected hand
+   counts and printed costs. Carried free-form opening notes stay intact.
+   The brief also supplies upkeep guidance, so there is no extra opening
+   strategy session before the draw.
 2. **Think ahead.** At the start of the opponent's turn, one strategy session
    prepares the seat's next turn from its projected position, brief and accepted
    work. It writes the ordered line, mana commitments, phase decisions and

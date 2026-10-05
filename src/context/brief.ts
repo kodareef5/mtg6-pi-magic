@@ -24,7 +24,7 @@ import { splits } from "../core/odds.ts";
 import { search, term, type Rules } from "../core/rules.ts";
 import type { Step } from "../core/steps.ts";
 import type { Seat } from "../core/table.ts";
-import type { SeatId } from "../core/types.ts";
+import type { SeatId, SeatView } from "../core/types.ts";
 import type { Lookup, Reasoner, Submission } from "./reason.ts";
 
 /** The steps a note can be written for: the ones with priority, by the table's own names. */
@@ -34,6 +34,8 @@ const text = Type.String({ minLength: 1 });
 /** A sentence, or a small structure of short sentences: a strong writer organizes a matchup by threat, and that structure is worth keeping. */
 const Note = Type.Union([text, Type.Array(Type.Unknown(), { minItems: 1 }), Type.Record(Type.String(), Type.Unknown())]);
 const Side = object({ own: Type.Optional(Note), opponent: Type.Optional(Note) });
+const OpeningDecision = object({ keep: text, bottom: text });
+const OpeningPolicy = object({ play: OpeningDecision, draw: OpeningDecision });
 
 /** Where a brief is read, by field. */
 const BriefSchema = object({
@@ -47,7 +49,7 @@ const BriefSchema = object({
 	/** Strategy: both clocks, the opposing threats and their windows, how to deny them. */
 	matchup: Type.Optional(Note),
 	/** The pilot, while it keeps or mulligans and bottoms. */
-	opening: Note,
+	opening: OpeningPolicy,
 	/** The pilot, in that step, on its own turn or the opponent's. Only steps with something to do or avoid. */
 	steps: Type.Optional(object(Object.fromEntries(STEPS.map((step) => [step, Type.Optional(Side)])) as Record<(typeof STEPS)[number], ReturnType<typeof Type.Optional<typeof Side>>>)),
 	/** The pilot, when an option names the card; strategy always. Only cards with a real choice or trap. */
@@ -55,7 +57,8 @@ const BriefSchema = object({
 	/** Strategy: plays that look automatic and are wrong in this matchup. */
 	traps: Type.Optional(Note),
 });
-export type Brief = Static<typeof BriefSchema> & { seat: SeatId; version: 3; gaps: string[] };
+/** Older version-three briefs used free-form opening notes. Keep those intact on replay. */
+export type Brief = Omit<Static<typeof BriefSchema>, "opening"> & { opening: Static<typeof Note>; seat: SeatId; version: 3; gaps: string[] };
 
 export const emptyBrief = (seat: SeatId): Brief => ({
 	seat, version: 3, role: "", route: "", recovery: "", matchup: "", opening: "", steps: {}, cards: {}, traps: [], gaps: [],
@@ -68,6 +71,14 @@ export function say(note: unknown): string {
 	if (Array.isArray(note)) return note.map(say).filter(Boolean).join(" ");
 	if (typeof note === "object") return Object.entries(note).map(([key, value]) => `${key}: ${say(value)}`).join(". ");
 	return String(note);
+}
+
+/** New policies name each decision; carried free-form notes are read without guessing their keys. */
+export function openingGuidance(brief: Brief | undefined, view: SeatView, seat: SeatId): string {
+	if (!brief || view.window.kind !== "opening") return "";
+	if (!view.opening || problems(OpeningPolicy, brief.opening).length) return say(brief.opening);
+	const policy = (brief.opening as Static<typeof OpeningPolicy>)[view.opening.starting === seat ? "play" : "draw"];
+	return view.window.action === "bottom" ? policy.bottom : view.window.action === "declare" ? policy.keep : "";
 }
 
 /** A brief carried from a journal written before this shape is not used: reading it would mean guessing its fields. */
@@ -131,6 +142,7 @@ const SYSTEM = [
 	"The strategist reads the whole brief whenever it plans a turn. A fast pilot reads only a short note for the window it is in and notes for the cards in front of it.",
 	"",
 	"Both registered deck lists are public and given in full. They give composition, never a hand or the library order. Do not assume any other card.",
+	"Analyze the printed abilities of every listed card. This call does not determine engine support or certify an ability's interpretation; do not invent unsupported-card exclusions.",
 	"Think like a strong player preparing a matchup: roles and clocks, threats and their last answer windows, scarce resources, and plays that look automatic but are wrong here.",
 	"Teach each default with the visible condition that reverses it. Never write a bare slogan such as always save removal.",
 	"This is setup for later short turn updates. Settle the deck's normal sequencing, mana commitments, protection priorities, trigger targets and combat decisions now. Later sessions should revise these defaults for the board and draw, not derive the matchup again.",
@@ -240,13 +252,13 @@ const SYNTHESIS = [
 	"- role: who must force the exchange at the start, and the visible facts that change it. Read by the strategist.",
 	"- route: the main route to a win. recovery: the route when its key dependency fails. Read by the strategist.",
 	"- matchup: both clocks, the opponent's threats with their last answer windows, and how to deny their key cards' conditions. Read by the strategist.",
-	"- opening: the keep, mulligan and bottom policy on the play and on the draw. Read by the pilot while it mulligans.",
+	"- opening: play and draw each hold keep and bottom. Each field is at most three short sentences, read alone for that decision. keep gives ordered keep/mulligan conditions and how they change after a mulligan. bottom gives the cards to preserve and the order to return others. Keep supporting analysis in route or traps.",
 	"- steps: keyed by these step names only: upkeep, draw, precombat-main, begin-combat, declare-attackers, declare-blockers, combat-damage, end-of-combat, postcombat-main, end. Each holds own and opponent notes, for your turn and theirs, only where there is something to do or avoid. Read by the pilot in that step.",
 	"- cards: keyed by exact card name, from either deck: notes only for cards with a real choice or trap, such as when to play it, what to hold it for, or how to play around it. Read by the pilot when an option names the card.",
 	"- traps: plays that look automatic but are wrong in this matchup, each with the condition that makes it wrong. Read by the strategist.",
 	"Every default comes with the visible condition that reverses it. Name cards and numbers. No preamble.",
 	"Your step notes become Jev's initial phase scripts. Give ordered decisions with mana kept, trigger and search choices, attack and block policy, and the exception that changes the line. Write decisions the pilot can follow, not a reminder to think about the phase. The turn strategist will change only what the position requires.",
-	"Any field may be a sentence or a small structure of short sentences, such as one entry per threat with its answer window.",
+	"The schema fixes opening's four short policies. Other notes may be sentences or small structures, such as one entry per threat with its answer window. This brief guides choices; it does not certify card interpretations or decide engine support.",
 	"",
 	"Call submit once with the brief. Nothing you write as text is read.",
 ].join("\n");

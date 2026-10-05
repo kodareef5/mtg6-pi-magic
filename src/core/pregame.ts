@@ -11,7 +11,24 @@ import type { Pending } from "./moves.ts";
 import type { Change, Reason } from "./syntax.ts";
 import { commit } from "./commit.ts";
 import { cardsIn, type Table } from "./table.ts";
-import type { Option, SeatId } from "./types.ts";
+import type { Option, SeatId, SeatView } from "./types.ts";
+import { isLand } from "./printed.ts";
+
+/** Count only this seat's projected hand. Costs are printed costs, not a claim of castability. */
+export function openingHand(view: SeatView, seat: SeatId) {
+	const hand = (view.objects ?? []).filter((one) => one.zone === "hand" && one.owner === seat);
+	let lands = 0, unknown = 0;
+	const spells = new Map<string, { name: string; count: number; cost: string }>();
+	for (const card of hand) {
+		const printed = card.card && view.printed?.[card.card];
+		if (!printed) { unknown++; continue; }
+		if (isLand(printed)) { lands++; continue; }
+		const spell = spells.get(card.card!) ?? { name: card.card!, count: 0, cost: printed.mana };
+		spell.count++;
+		spells.set(spell.name, spell);
+	}
+	return { cards: hand.length, lands, unknown, spells: [...spells.values()] };
+}
 
 /** Deal the opening hands and open the first declaration round. */
 export function begin(table: Table): void {

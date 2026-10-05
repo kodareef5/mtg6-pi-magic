@@ -145,6 +145,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const names = [...new Set([...objects.flatMap((object) => "card" in object && object.card ? [object.card] : []), ...listed])].sort();
 	const draw = viewer !== "spectator" ? table.ledger.findLast((row) => row.seat === viewer && row.situation === "turn-based" && row.picked === "draw" && (row.clock ?? 0) > (table.cursor.began[viewer] ?? 0))?.clock : undefined;
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
+		...(at.kind === "opening" && viewer !== "spectator" ? { opening: { starting: table.seats[0]!.id, mulligans: table.opening?.taken[viewer] ?? 0,
+			bottom: at.action === "bottom" ? table.opening?.owed[viewer] ?? 0 : table.format.mulliganBottom === "on-keep" ? owedFor(table, viewer) : 0 } } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
 		...(table.format.decksRegistered ? { decks: table.seats.map(({ id, deck }) => ({ seat: id, name: deck.name,
 			cards: Object.fromEntries(Object.entries(deck.main).sort(([a], [b]) => a.localeCompare(b))),

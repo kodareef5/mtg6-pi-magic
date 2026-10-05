@@ -30,6 +30,12 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	assert.deepEqual(packet.routes, []);
 	assert.equal(JSON.stringify(packet).includes("Qiqirn Merchant"), false, "no deck lists, so nothing names a card this seat has not seen");
 	const hand = opening.view.objects!.filter((one) => one.zone === "hand");
+	assert.equal(packet.opening?.hand.cards, 7);
+	assert.equal(packet.opening?.hand.lands, hand.filter((one) => table.printed[one.card!]!.type.includes("Land")).length);
+	assert.equal(packet.opening?.hand.unknown, 0);
+	const masked = focus({ ...opening, view: { ...opening.view, objects: opening.view.objects!.map((one) => ({ ...one, card: undefined })) } }, intent);
+	assert.deepEqual(masked.opening?.hand, { cards: 7, lands: 0, unknown: 7, spells: [] }, "registered counts and hidden traits cannot identify an opening card");
+	assert.equal(project(table, "spectator").opening, undefined, "the spectator has no private opening hand assessment");
 	for (const object of hand) if (object.card) assert.equal(packet.cards[object.card]!.oracle, table.printed[object.card]!.oracle, "the mulligan reads the hand's actual text");
 	for (const name of Object.keys(packet.cards)) assert.ok(hand.some((object) => object.card === name), "hidden assignments supply no card facts");
 	packet.options[0]!.label = "Changed by a consumer";

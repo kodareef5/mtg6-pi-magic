@@ -44,7 +44,9 @@ reaches a decision is a short plan plus the facts.
   matchup, opening, a challenger), each able to look up rules and cards, then one
   synthesis that files the brief by where it is read. Both seats prepare at the
   same time. Strategy reads the whole brief; the pilot reads only the slice for
-  its window, never the whole of it.
+  its window, never the whole of it. New opening policies separate keep from
+  bottom and play from draw. The pilot reads one, alongside its current hand
+  counts. Older free-form policies carried by journals remain whole.
 - **strategy** advances the pregame reasoning with one planner per seat. It
   prepares during the opponent's turn, then accepts or amends after the draw,
   and answers stops or requests for help. It submits changed fields and reuses

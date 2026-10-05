@@ -109,8 +109,46 @@ saved privately as `real-standard-9-1791200644612`. Sol is now the suggested
 pregame model; a chosen roster is never silently replaced.
 
 These counts include lookup and correction calls. Syntax acceptance does not
-establish correct card meaning. Review of the accepted terms and a bounded live
-opening continue below the full-game readiness threshold.
+establish correct card meaning. Review found Magebane Lizard's cast watch and
+cast-history selectors omitted the stack zone, so they could never match. A
+generic check now refuses that error. Four model calls corrected both seats'
+assessments in `review-prepared-1791202094448`, reusing the rest of preparation.
+
+## Bounded opening results
+
+Each run below reused version-zero preparation, dealt normally, and stopped at
+turn three. Calls include attempts and cancelled strategy preparation. Reviews
+are Jev's private judgments about a use, separate from physical picks.
+
+| Run suffix | Strategy | Jev reviews | Jev picks | Strategy calls | Wall time |
+|---|---|---:|---:|---:|---:|
+| `1791200859709` | Luna low | 0 | 45 | 9 | 62.6s |
+| `1791202153756` | Luna low | 78 | 49 | 11 | 76.7s |
+| `1791202788583` | Sol 6.1 low | 50 | 46 | 6 | 78.3s |
+
+All three replayed with no recorded gaps or fallback picks. That does not
+establish good play. The second run exposed two context failures: later steps
+were reviewed before their earlier actions, and Fabled Passage's sacrificed
+source disappeared from the resolution packet while stale casting advice
+remained. Green paid the sacrifice and chose to find nothing.
+
+Jev now reviews a use, chooses its action, and then considers the changed
+position. Requesting a pass first reviews any remaining uses, then asks for a
+fresh confirmation. Resolution carries the accepted effect, source text and
+remaining instructions. At the saved Passage failure position, four live Jev
+calls found Forest, put it onto the battlefield tapped, shuffled, and skipped
+the unmet four-land untap condition.
+
+The third run used the revised sequence and an explicitly selected Sol
+strategist. It also mulliganed a playable seven down to five, so these runs
+cannot compare strategist strength. The opening packet had combined play,
+draw, keep and bottom advice. New briefs now separate those policies and the
+packet supplies projected hand counts; old carried briefs keep their original
+notes. The change is covered offline and has not yet been measured live.
+
+Full games remain behind the readiness checks above. Next probes should keep
+the same saved decision when comparing context, inspect accepted card terms,
+and check completed effects and chosen passes, not just call counts.
 
 ## Run the matchup
 

@@ -8,7 +8,7 @@
 import type { Rules } from "../core/rules.ts";
 import type { Frame, SeatId, SeatView, Window } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
-import { say, type Brief } from "./brief.ts";
+import { openingGuidance, say, type Brief } from "./brief.ts";
 import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
 import { planState } from "../core/planning.ts";
@@ -20,6 +20,7 @@ import { summary } from "../core/announce.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { sources } from "../core/funding.ts";
+import { openingHand } from "../core/pregame.ts";
 
 /**
  * What the pregame and the commentator left behind, shared by every seat.
@@ -58,6 +59,8 @@ export type Packet = {
 	version: number;
 	/** The remaining obligation in one sentence: what still has to be settled. */
 	obligation: string;
+	/** Current hand counts and the keep/bottom obligation, without inferred future draws. */
+	opening?: NonNullable<SeatView["opening"]> & { hand: ReturnType<typeof openingHand> };
 	plan?: PlanSlice;
 	/** Every option, at equal detail, already marked with what the plan says about it. */
 	options: { id: string; label: string; shows?: string }[];
@@ -129,7 +132,7 @@ export function focus(
 	const named = decision.options.map((option) => `${option.label} ${option.shows ?? ""}`).join("\n");
 	const step = view.window.kind === "turn" ? brief?.steps?.[view.window.step as keyof Brief["steps"]] : undefined;
 	const guidance = [
-		say(view.window.kind === "opening" ? brief?.opening : view.window.kind === "turn" ? step?.[view.window.active === seat ? "own" : "opponent"] : undefined),
+		view.window.kind === "opening" ? openingGuidance(brief, view, seat) : say(step?.[view.window.kind === "turn" && view.window.active === seat ? "own" : "opponent"]),
 		...Object.entries(brief?.cards ?? {}).filter(([card]) => named.includes(card)).map(([card, note]) => `${card}: ${say(note)}`),
 	].filter((line) => line.length > 0);
 
@@ -169,6 +172,7 @@ export function focus(
 	return {
 		actor: seat, window: structuredClone(view.window), version,
 		obligation: decision.question,
+		...(view.window.kind === "opening" && view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat) } } : {}),
 		...(plan ? { plan } : {}),
 		...(review.length ? { checklist: review } : {}),
 		options: inPlanOrder(decision.options, state).map(({ id, label, shows }) => ({ id, label, ...(shows ? { shows } : {}) })),

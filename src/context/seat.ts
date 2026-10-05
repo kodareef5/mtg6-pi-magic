@@ -159,6 +159,7 @@ export function question(packet: Packet, help: boolean): Question {
 	const lines = [
 		packet.obligation,
 		"Read known, resources and lately in the supplied state for the position and recent events.",
+		...(packet.opening ? ["opening holds your mulligans, remaining bottom obligation and hand counts. Apply the policy for this decision to these cards. Printed mana costs do not prove that a spell is castable; use its card text and available colors."] : []),
 		...(packet.lately.length ? ["", "Recently:", ...packet.lately] : []),
 		...(plan ? ["", `Your strategy: ${plan.objective}`,
 			...(plan.script ? [...plan.script.goal.map((goal) => `This phase: ${goal}`), ...plan.script.guidance,

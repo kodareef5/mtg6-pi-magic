@@ -74,7 +74,10 @@ const turnTable = () => start(standard, [{ name: "A", deck: deck("Forest turns")
 const FINDINGS = { conclusions: [{ claim: "Develop the Elves before anything else.", evidence: ["4 Llanowar Elves", "16 one-drops"], assumptions: ["no early removal"],
 	changesWhen: "the opponent shows removal on turn one", destination: "route" }], unsure: [] };
 const BRIEF = { role: "Beatdown: force the exchange before control stabilizes.", route: "Curve out and pump the biggest creature.", recovery: "Rebuild with Elves.",
-	matchup: "Their removal is sorcery-speed; attack around it.", opening: "Keep two to four lands with a one-drop.",
+	matchup: "Their removal is sorcery-speed; attack around it.", opening: {
+		play: { keep: "Keep two to four lands with a one-drop.", bottom: "Preserve an early creature and two lands." },
+		draw: { keep: "Keep two to four lands with early creatures.", bottom: "Preserve two lands and a curve of creatures." },
+	},
 	steps: { "precombat-main": { own: "Play a land, then a creature.", opponent: "Hold Veil for a removal spell." } },
 	cards: { "Snakeskin Veil": "Hold it for their removal, not for a block." }, traps: ["Pumping into an open blocker."] };
 /** Pi's stream as the pregame meets it: each analyst submits findings, the synthesis submits the brief. */
@@ -164,6 +167,28 @@ test("the analysts read both lists and computed odds, look rules up, and a faile
 });
 
 test("a brief snippet reaches the decision and a card note only when its card is visible", async () => {
+	const opening = table();
+	advance(opening);
+	const policy = { ...emptyBrief(0), opening: BRIEF.opening };
+	const openingPacket = () => {
+		const decision = nextDecision(opening)!;
+		return focus({ seat: decision.seat, version: opening.cursor.clock, view: project(opening, decision.seat), decision }, startingIntent(decision.seat), { brief: policy });
+	};
+	assert.deepEqual(openingPacket().guidance, [BRIEF.opening.play.keep], "only the starting seat's keep policy reaches its declaration");
+	apply(opening, "mulligan", "model", "chosen");
+	assert.deepEqual(openingPacket().guidance, [BRIEF.opening.draw.keep], "the other seat receives the draw policy, without bottom instructions");
+	apply(opening, "keep", "model", "chosen");
+	advance(opening);
+	assert.deepEqual(openingPacket().opening, { starting: 0, mulligans: 1, bottom: 1, hand: openingPacket().opening!.hand });
+	apply(opening, "keep", "model", "chosen");
+	advance(opening);
+	assert.deepEqual(openingPacket().guidance, [BRIEF.opening.play.bottom], "after keeping, only the bottom policy is read");
+	assert.deepEqual(openingPacket().options.map((one) => one.id), nextDecision(opening)!.options.map((one) => one.id), "the policy narrows context, never choices");
+	const bottom = nextDecision(opening)!;
+	const legacy = focus({ seat: bottom.seat, version: opening.cursor.clock, view: project(opening, bottom.seat), decision: bottom }, startingIntent(bottom.seat),
+		{ brief: { ...policy, opening: { old: "The original policy remains whole." } } });
+	assert.deepEqual(legacy.guidance, ["old: The original policy remains whole."], "a carried free-form note is preserved, not guessed into a new shape");
+
 	const built = table();
 	advance(built);
 	apply(built, "keep", "model", "chosen");

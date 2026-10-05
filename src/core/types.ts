@@ -73,6 +73,8 @@ export type Decision = {
  * and never silence.
  */
 export type SeatView = {
+	/** This seat's opening obligation and the public starting seat, without hidden hands. */
+	opening?: { starting: SeatId; mulligans: number; bottom: number };
 	/** This viewer's most recent turn start, for tap-cost availability. */
 	began?: number;
 	/** The rules draw in this viewer's current turn, derived from its ledger row. */
