@@ -15,7 +15,7 @@
  * shared game, roster and journal lifecycle can be read in one file.
  */
 
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -34,7 +34,8 @@ import {
 	type Cast,
 	type Role,
 } from "./src/context/roles.ts";
-import { degraded, report, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
+import { degraded, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
+import { gameResult, report, preparationFailure } from "./src/context/report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
 import { deck } from "./src/core/decks.ts";
 import { start } from "./src/core/commit.ts";
@@ -178,6 +179,7 @@ export default function (pi: ExtensionAPI) {
 			journal = openGame(join(GAMES, `${from.seed}.jsonl`), header);
 		}
 
+		const began = Date.now();
 		seated = await seatTable(opened, (at) => roster(ctx, at), inference(ctx), cards, {
 			format: standard.name,
 			journal,
@@ -185,6 +187,12 @@ export default function (pi: ExtensionAPI) {
 			// nothing to switch on: a seat may look a rule up mid decision.
 			rules,
 			...(carried.length ? { prepared: carried } : {}),
+		}).catch((error) => {
+			const result = preparationFailure(opened, error, began, { journal: journal.path });
+			const path = join(GAMES, `${header.id}-${began}.result.json`);
+			writeFileSync(path, JSON.stringify(result, null, 2) + "\n");
+			ctx.ui.notify(`${report(result).join("\n")}\nresult    ${path}`, "warning");
+			throw error;
 		});
 		table = opened;
 		games.set(opened, journal);
@@ -293,10 +301,9 @@ export default function (pi: ExtensionAPI) {
 
 			if (verb === "play" || verb === "resume") {
 				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed });
-				const began = Date.now();
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
 				running = true;
-				let outcome;
+				let outcome, failure: unknown;
 				try { outcome = await run(
 					opened,
 					seated!,
@@ -304,10 +311,13 @@ export default function (pi: ExtensionAPI) {
 					commentator,
 					(line) => ctx.ui.notify(line, "info"),
 					games.get(opened),
-				); } finally { running = false; }
+				); } catch (error) { failure = error; } finally { running = false; }
+				const result = gameResult(opened, seated!, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
+				const resultPath = join(GAMES, `${seed}-${seated!.timing.startedAt}.result.json`);
+				writeFileSync(resultPath, JSON.stringify(result, null, 2) + "\n");
 				ctx.ui.notify(
 					`${verb === "resume" ? "Resumed" : "Seed"} ${seed}.\n` +
-						report(opened, seated!, outcome, Date.now() - began).join("\n"),
+						report(result).join("\n") + `\nresult    ${resultPath}`,
 					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
 				return;
@@ -412,7 +422,7 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(
 					`${table.format.name}, ${table.seats.length} seats, ` +
 						`${table.log.length} committed events, ${table.said.length} things said.\n` +
-						report(table, seated, table.outcome, 0).join("\n"),
+						report(gameResult(table, seated)).join("\n"),
 					"info",
 				);
 				return;

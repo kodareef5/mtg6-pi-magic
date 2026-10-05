@@ -27,7 +27,7 @@ import type {
 	JsonObject,
 } from "@earendil-works/pi-ai";
 
-import { CEILING, type Tally } from "./spend.ts";
+import { CEILING, meter, type Tally } from "./spend.ts";
 import { PlayerUnavailable } from "../core/player.ts";
 
 export type Question = ClassifierQuestion;
@@ -82,22 +82,21 @@ export function decisionApi(
 		named,
 		async ask(request, about = "pick") {
 			const began = Date.now();
-			const base = { role: "decide" as const, about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began };
+			const finish = meter(options.tally, { role: "decide", about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began });
 			let result: ClassifierResult;
 			try {
 				// classify never rejects, so the stop reason is the error channel.
 				result = await classify(model, request, options);
 			} catch (error) {
-				options.tally?.record({ ...base, ms: Date.now() - began, failed: String(error) });
+				finish({ failed: String(error) });
 				throw new PlayerUnavailable(String(error));
 			}
 			const wrong =
 				result.stopReason === "stop"
 					? null
 					: `${named} ${result.stopReason}: ${result.errorMessage ?? "no reason given"}`;
-			options.tally?.record({
-				...base,
-				ms: Date.now() - began,
+			finish({
+				...(result.provider && result.model ? { model: `${result.provider}/${result.model}` } : {}),
 				...(result.usage ? { usage: result.usage } : {}),
 				...(wrong ? { failed: wrong } : {}),
 			});

@@ -56,6 +56,8 @@ export type Spend = {
 	about: string;
 	/** provider/id of the model that answered, which is not always the one asked for. */
 	model: string;
+	/** Kept when the reply identifies a different model. */
+	requestedModel?: string;
 	thinking?: ThinkingLevel;
 	/** When the request started, in epoch milliseconds, so overlapping calls are not summed as waiting. */
 	at?: number;
@@ -71,6 +73,8 @@ export type Spend = {
 	failed?: string;
 	/** Pending preparation was deliberately discarded, rather than a model failure. */
 	cancelled?: true;
+	/** Recorded before dispatch, cleared when the request settles. */
+	pending?: true;
 };
 
 export type Tally = {
@@ -83,37 +87,15 @@ export const tally = (): Tally => {
 	return { record: (spend) => void spends.push(spend), spent: () => spends };
 };
 
-const sum = (spends: readonly Spend[], of: (usage: Usage) => number | undefined) =>
-	spends.reduce((n, spend) => n + (spend.usage ? (of(spend.usage) ?? 0) : 0), 0);
-
-/**
- * The bill, by role.
- *
- * Reasoning and cached tokens are shown beside the totals they are part of,
- * because the question they answer is different: reasoning tokens say whether a
- * thinking level is earning its cost, and cached reads say whether the prompts
- * are stable enough to be cached at all.
- */
-export function bill(spends: readonly Spend[]): string[] {
-	const roles = [...new Set(spends.map((spend) => spend.role))];
-	const lines = roles.map((role) => {
-		const mine = spends.filter((spend) => spend.role === role);
-		const cost = mine.reduce((n, spend) => n + (spend.usage?.cost.total ?? 0), 0);
-		const reasoning = sum(mine, (usage) => usage.reasoning);
-		const cached = sum(mine, (usage) => usage.cacheRead);
-		return (
-			`${role.padEnd(9)} ${String(mine.length).padStart(4)} calls  ` +
-			`${String(sum(mine, (u) => u.input)).padStart(7)} in  ` +
-			`${String(sum(mine, (u) => u.output)).padStart(6)} out` +
-			(reasoning ? ` (${reasoning} thinking)` : "") +
-			(cached ? `  ${cached} cached` : "") +
-			`  ${(mine.reduce((n, spend) => n + spend.ms, 0) / 1000).toFixed(1)}s` +
-			`  $${cost.toFixed(4)}` +
-			(mine.some((spend) => spend.truncated) ? "  TRUNCATED" : "") +
-			(mine.some((spend) => spend.failed) ? `  ${mine.filter((s) => s.failed).length} failed` : "")
-		);
-	});
-	const total = spends.reduce((n, spend) => n + (spend.usage?.cost.total ?? 0), 0);
-	lines.push(`${"total".padEnd(9)} ${String(spends.length).padStart(4)} calls` + `  $${total.toFixed(4)}`);
-	return lines;
+/** Count dispatch immediately. Settlement updates that same attempt, never adds a second one. */
+export function meter(counted: Tally | undefined, request: Omit<Spend, "ms">): (reply: Partial<Spend>) => void {
+	const spend: Spend = { ...request, at: request.at ?? Date.now(), ms: 0, pending: true };
+	counted?.record(spend);
+	return (reply) => {
+		if (reply.model && reply.model !== spend.model) spend.requestedModel = spend.model;
+		Object.assign(spend, reply, { ms: Date.now() - spend.at! });
+		delete spend.pending;
+	};
 }
+
+export { bill } from "./metrics.ts";

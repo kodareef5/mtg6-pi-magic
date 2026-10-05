@@ -20,8 +20,10 @@ import { brief, current, emptyBrief, needsNote } from "../src/context/brief.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
-import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
-import { bill, CEILING, tally } from "../src/context/spend.ts";
+import { degraded, run, seat as seatTable } from "../src/context/sit.ts";
+import { gameResult, report, preparationFailure } from "../src/context/report.ts";
+import { totals, usageReport } from "../src/context/metrics.ts";
+import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
 import { worthPlanning } from "../src/context/strategy.ts";
@@ -112,6 +114,7 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	const writing = brief(me!, [them!], universe, () => reasoner({ role: "pregame", stream, model: sol, thinking: "low", tally: counted, backoffMs: 0 }), { format: standard.name });
 	await new Promise((resolve) => setTimeout(resolve, 0));
 	assert.equal(tasks.length, 4, "all four analysts started before any finished");
+	assert.equal(counted.spent().filter((call) => call.pending).length, 4, "dispatched work is counted before a reply exists");
 	assert.deepEqual(tasks.map((task) => task.split(".")[0]).sort(), ["CHALLENGE", "DECK AND RESOURCES", "MATCHUP", "OPENING"]);
 	release();
 	const written = await writing;
@@ -125,6 +128,7 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	const spent = counted.spent();
 	assert.deepEqual(spent.map((one) => one.ceiling), [2000, 2000, 2000, 2000, 4000], "an analyst's ceiling, then the synthesis's");
 	assert.ok(spent.every((one) => one.thinking === "low" && one.usage?.reasoning === 8));
+	assert.ok(spent.every((one) => !one.pending), "settling an attempt clears pending without adding another call");
 	assert.match(bill(spent).join("\n"), /pregame/);
 });
 
@@ -405,13 +409,22 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 
 	// Every role is in one bill, with the decision model counted separately
 	// because Pi does not meter a classifier's tokens.
-	const reading = report(built, seated, outcome, ms).join("\n");
+	const result = gameResult(built, seated);
+	const reading = report(result).join("\n");
+	assert.equal(result.schema, 1);
+	assert.deepEqual(JSON.parse(JSON.stringify(result)).llm, result.llm, "the saved report retains exact aggregates");
+	assert.equal(result.fromVersion, 0);
+	assert.equal(result.version, built.ledger.length);
+	assert.ok(result.timing!.preparedAt! <= result.timing!.playStartedAt!);
+	assert.ok(result.timing!.playStartedAt! <= result.timing!.playEndedAt!);
+	assert.ok(result.timing!.playEndedAt! <= result.timing!.finishedAt!);
+	assert.equal(result.elapsedMs, result.timing!.finishedAt! - result.timing!.startedAt);
 	assert.match(reading, /pregame/);
 	assert.match(reading, /summary/);
-	assert.match(reading, /picks     \d+ decision-model calls/);
+	assert.match(reading, /jev       \d+ calls/);
 	const [, forced, chosen] = reading.match(/forced (\d+)  delegated \d+  chosen (\d+)/)!;
 	assert.ok(Number(forced) > 0 && Number(chosen) > 1000, "rules perform compulsory work while both pilots answer voluntary windows");
-	assert.match(reading, /forced    \d+\.\d%/);
+	assert.match(reading, /judge     0 calls/);
 
 	// A role switched off is a decision, not a gap.
 	const quiet = turnTable();
@@ -430,6 +443,43 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	// every call it made in one place.
 	assert.ok(asked.length > 50, `${asked.length} decision calls recorded`);
 	assert.equal(asked.length, seatedQuiet.picks());
+});
+
+test("a game bill counts attempts and separates overlapping time, role, model and reported usage", () => {
+	const usage = { input: 100, output: 20, cacheRead: 10, cacheWrite: 5, reasoning: 8, totalTokens: 135,
+		cost: { input: 0.0001, output: 0.00004, cacheRead: 0, cacheWrite: 0, total: 0.00014 } };
+	const base: Spend = { role: "strategy", about: "preparation", model: "test/sol", thinking: "low", ceiling: 4000, at: 0, ms: 1000, usage };
+	const calls: Spend[] = [base,
+		{ ...base, role: "pregame", thinking: "high", at: 250, ms: 500 },
+		{ ...base, role: "judge", about: "ruling", at: 2000, ms: 250 },
+		{ ...base, role: "judge", about: "ruling", model: "test/other", at: 2250, ms: 250, usage: undefined, failed: "retry" },
+		{ ...base, role: "judge", about: "ruling", at: 3000, ms: 100, usage: undefined, cancelled: true },
+		{ ...base, at: 4000, ms: 0, usage: undefined, pending: true }];
+	const result = usageReport(calls, 4500), total = result.total;
+	assert.equal(total.calls, 6);
+	assert.equal(total.callMs, 2600);
+	assert.equal(total.activeMs, 2100, "overlaps and idle gaps are not summed as elapsed time");
+	assert.equal(total.input, 345, "input includes fresh, cached read and cached write tokens once");
+	assert.equal(total.output, 60, "reasoning is already in output");
+	assert.equal(total.reasoning, 24);
+	assert.equal(total.missingUsage, 3);
+	assert.equal(total.missingCost, 3);
+	assert.deepEqual([total.failed, total.cancelled, total.pending], [1, 1, 1]);
+	assert.equal(result.models.length, 3, "thinking levels and providers are distinct");
+	assert.equal(result.models.find((one) => one.model === "test/sol" && one.thinking === "low")!.calls, 4, "a model total includes all its roles");
+	assert.equal(result.roles.find((one) => one.role === "judge")!.calls, 3);
+	assert.equal(result.roles.find((one) => one.role === "summary")!.calls, 0);
+	assert.equal(totals([{ ...base, at: undefined }]).activeMs, null, "older calls without start times have unknown overlap");
+	assert.equal(totals([]).activeMs, 0);
+	assert.equal(totals([{ ...base, failed: "error", usage: { ...usage, totalTokens: 0 } }]).missingUsage, 1);
+	const failed = preparationFailure(table(), Object.assign(new Error("refused"), {
+		spends: calls, timing: { startedAt: 0, finishedAt: 4500 }, problem: "Card meaning missing.",
+	}), 0);
+	assert.equal(failed.llm!.total.calls, 6, "refused preparation does not lose its bill");
+	assert.equal(failed.error, "Card meaning missing.");
+	const reading = report({ ...failed, error: undefined, interruptions: { stops: 0, essential: 0, help: 0, rulings: 1, upheld: 0 }, judged: { cases: 1, failed: 0 } }).join("\n");
+	assert.match(reading, /judge\s+3 calls\s+1 cases this run.*1 game rulings\s+0 rollbacks/);
+	assert.match(reading, /unmetered 3 calls lack usage/);
 });
 
 test("a carried brief keeps its failures, and a stuck recap cannot lose a saved game", async () => {

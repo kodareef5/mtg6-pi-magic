@@ -30,17 +30,22 @@ import { startingIntent } from "./plan.ts";
 import { reasoner, type Reasoner, type Stream } from "./reason.ts";
 import { rule } from "./ruling.ts";
 import type { Cast, Role } from "./roles.ts";
-import { bill, tally, type Spend, type Tally } from "./spend.ts";
+import { bill, tally, type Tally } from "./spend.ts";
 import { aiSeat, type Planned } from "./seat.ts";
 import { recap, type Recap } from "./summary.ts";
 import { planWork, prepareTurn } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
 import { assessCard } from "./assess.ts";
+import type { RunTiming } from "./report.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
 export type Inference = { classify: Classify; stream: Stream };
 
 export type Seated = {
+	/** This invocation, including preparation. Carried decisions belong to the game prefix. */
+	timing: RunTiming;
+	fromVersion: number;
+	judged: { cases: number; failed: number };
 	players: Record<SeatId, Player>;
 	intents: Record<SeatId, Intent>;
 	chronicle: Chronicle;
@@ -93,6 +98,8 @@ export async function seat(
 		prepared?: { seat: SeatId; made: unknown }[];
 	},
 ): Promise<Seated> {
+	const timing: RunTiming = { startedAt: Date.now() };
+	const fromVersion = table.ledger.length;
 	const counted = tally();
 	const dialled: Record<string, number> = {};
 	const planned: Planned[] = [];
@@ -169,7 +176,7 @@ export async function seat(
 	const refuse = async (message: string): Promise<never> => {
 		if (options.journal) save(options.journal, table);
 		await Promise.all(Object.values(players).map((player) => player.close()));
-		throw Object.assign(new Error([message, ...bill(counted.spent())].join("\n")), { spends: counted.spent() });
+		throw Object.assign(new Error([message, ...bill(counted.spent())].join("\n")), { spends: counted.spent(), timing: { ...timing, finishedAt: Date.now() }, problem: message });
 	};
 	if (jobs.length && table.ledger.length) return refuse("This position predates complete card assessment. Replay remains available; start from prepared version zero to play.");
 	const assessors = new Map<SeatId, Reasoner>();
@@ -237,7 +244,9 @@ export async function seat(
 
 	// The judge is the table's: the first seat's roster that names a chat model for it.
 	const judging = table.seats.map((at) => pick(parts.get(at.id)!, "judge")).find((part) => part && !part.off && part.model && part.model.type !== "classifier");
+	timing.preparedAt = Date.now();
 	return {
+		timing, fromVersion, judged: { cases: 0, failed: 0 },
 		players,
 		intents,
 		chronicle,
@@ -259,7 +268,11 @@ export function judgeFor(table: Table, seated: Seated, journal?: Journal): Judge
 	const judging = seated.judge;
 	if (!judging) return undefined;
 	const entrants = table.seats.map((at) => ({ name: at.name, deck: at.deck }));
-	return { rule: (now, open) => rule(now, open, judging.reasoner, judging), restart: () => start(table.format, entrants, table.rng.seed, judging.universe),
+	return { rule: async (now, open) => {
+		seated.judged.cases++;
+		try { return await rule(now, open, judging.reasoner, judging); }
+		catch (error) { seated.judged.failed++; throw error; }
+	}, restart: () => start(table.format, entrants, table.rng.seed, judging.universe),
 		flush: () => { if (journal) save(journal, table); } };
 }
 
@@ -294,6 +307,8 @@ export async function run(
 	/** How long to wait for outstanding recaps once the game is saved. */
 	grace = 30_000,
 ): Promise<Outcome | null> {
+	seated.timing.playStartedAt = Date.now();
+	delete seated.timing.finishedAt;
 	const talking =
 		commentator && !commentator.off && commentator.model && commentator.model.type !== "classifier"
 			? reasoner({
@@ -342,7 +357,11 @@ export async function run(
 				}),
 		);
 	}, undefined, judge); }
-	finally { await Promise.all(Object.values(seated.players).map((player) => player.close())); }
+	finally {
+		seated.timing.playEndedAt = Date.now();
+		await Promise.all(Object.values(seated.players).map((player) => player.close()));
+		seated.timing.finishedAt = Date.now();
+	}
 
 	// The game is saved first and the commentary is waited on after. A recap is
 	// not part of the game, so a recap that never answers must not be able to
@@ -356,6 +375,7 @@ export async function run(
 	// command open. What is still outstanding is said rather than waited for.
 	const left = await settle(flight, grace);
 	if (left) table.gaps.push(`${left} recaps were still unanswered when the game was saved.`);
+	seated.timing.finishedAt = Date.now();
 	return outcome;
 }
 
@@ -392,35 +412,6 @@ export async function settle(flight: Promise<void>[], grace: number): Promise<nu
 	}
 	return flight.length - done;
 }
-
-/** What the run cost and what it did, as the lines a report prints. */
-export const report = (table: Table, seated: Seated, outcome: Outcome | null, ms: number): string[] => {
-	const by = (why: string) => table.ledger.filter((row) => row.why === why).length;
-	const spends: readonly Spend[] = seated.tally.spent();
-	const failed = spends.filter((spend) => spend.failed).length;
-	return [
-		`state     ${degraded(table, seated) ?? "clean"}`,
-		`outcome   ${outcome ? JSON.stringify(outcome.results) : "unfinished, waiting on a usable answer"}`,
-		`turns     ${table.cursor.turn}`,
-		`decisions ${table.ledger.length}  forced ${by("forced")}  delegated ${by("delegated")}  chosen ${by("chosen")}  declared ${by("declared")}  fallback ${by("fallback")}`,
-		`forced    ${((by("forced") / Math.max(1, table.ledger.length)) * 100).toFixed(1)}%`,
-		`picks     ${seated.picks()} decision-model calls`,
-		`plans     ${table.workLog.filter((entry) => entry.tools?.some((tool) => tool.do === "plan.put")).length} accepted  ${table.workLog.filter((entry) => entry.tools?.some((tool) => tool.do === "plan.request")).length} requested  ${table.ledger.filter((row) => row.execution?.step !== undefined).length} steps and ${table.ledger.filter((row) => row.execution?.branch !== undefined).length} branches carried out`,
-		`recaps    ${seated.chronicle.recaps.length} of ${table.cursor.turn} turns`,
-		// A route is a request, so it is in the picks count already. Named
-		// separately because "how often did a seat look a rule up" is the question
-		// the dialer exists to answer and a total hides it.
-		`dials     ${Object.values(seated.dials).reduce((n, count) => n + count, 0)}` +
-			(Object.keys(seated.dials).length
-				? `  ${Object.entries(seated.dials).map(([route, count]) => `${route} ${count}`).join(", ")}`
-				: ""),
-		`failed    ${failed} of ${spends.length} model calls`,
-		`elapsed   ${(ms / 1000).toFixed(1)}s`,
-		"",
-		...bill(spends),
-		...(table.gaps.length ? ["", `gaps      ${table.gaps.length}`, ...table.gaps.map((gap) => `  ${gap}`)] : []),
-	];
-};
 
 /**
  * Did this run give a usable result, or did it degrade?

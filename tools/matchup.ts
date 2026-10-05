@@ -14,7 +14,7 @@ import { play } from "../src/core/loop.ts";
 import { judgeFor, seat as seatTable } from "../src/context/sit.ts";
 import { cast, rosterFor } from "../src/context/roles.ts";
 import { traceInference } from "../src/context/trace.ts";
-import { bill } from "../src/context/spend.ts";
+import { gameResult, report, preparationFailure } from "../src/context/report.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
@@ -46,17 +46,25 @@ const observed = traceInference(inference as never, (event) => {
 // The clock starts before seating, so the elapsed time includes the pregame.
 const began = Date.now();
 console.log(`${values.prepare ? "Preparing" : "Playing"} ${id}; journal ${path}`);
-const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) });
+const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
+	const result = preparationFailure(table, error, began, { journal: path, trace: calls });
+	writeFileSync(join(values.out!, `${id}.result.json`), JSON.stringify(result, null, 2) + "\n");
+	console.error(report(result).join("\n"));
+	process.exit(1);
+});
 const stop = new Error("Monitor stop");
 const limit = Number(values.turns);
+if (!values.prepare) seated.timing.playStartedAt = Date.now();
+let failure: unknown;
 try {
 	if (!values.prepare) await play(table, seated.players, seated.intents, (line) => {
 		console.log(line); save(journal, table);
 		// A gap the game plays on through, a failed strategy session or an essential step passed, is recorded; any other stops the run.
 		if (table.gaps.some((gap) => !gap.endsWith("Play goes on.")) || table.cursor.turn > limit) throw stop;
 	}, undefined, undefined, judgeFor(table, seated, journal));
-} catch (error) { if (error !== stop) throw error; }
+} catch (error) { if (error !== stop) failure = error; }
 finally {
+	if (!values.prepare) seated.timing.playEndedAt = Date.now();
 	await Promise.all(Object.values(seated.players).map((player) => player.close()));
 	save(journal, table);
 }
@@ -64,20 +72,9 @@ finally {
 while (!values.prepare && !table.outcome && !nextDecision(table)) advance(table);
 // The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
 const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome?.results });
-// Every time play stopped to ask strategy or the judge, by why: the measure of how well the plans were prepared.
-const requests = table.workLog.flatMap((entry) => (entry.tools ?? []).flatMap((tool) => tool.do === "plan.request" ? [tool.reason] : []));
-const interruptions = {
-	stops: requests.filter((reason) => reason.startsWith("Stop:") && !/^Stop: Step \d+ cannot be taken now/.test(reason)).length,
-	essential: requests.filter((reason) => /^Stop: Step \d+ cannot be taken now/.test(reason)).length,
-	help: requests.filter((reason) => reason.startsWith("The pilot asked")).length,
-	rulings: table.rulings.length, upheld: table.rulings.filter((one) => one.kept !== undefined).length,
-};
-const result = { seed: table.rng.seed, outcome: table.outcome, turn: table.cursor.turn, gaps: table.gaps, interruptions,
-	replayMatches: state(replay(path, (header) => matchTable(header.seed)).table) === state(table),
-	reasons: Object.fromEntries(["forced", "delegated", "chosen", "declared", "fallback"].map((why) => [why, table.ledger.filter((row) => row.why === why).length])),
-	calls: seated.tally.spent(), planned: seated.planned, elapsedMs: Date.now() - began, journal: path, trace: calls };
+const replayMatches = state(replay(path, (header) => matchTable(header.seed)).table) === state(table);
+seated.timing.finishedAt = Date.now();
+const result = gameResult(table, seated, { replayMatches, journal: path, trace: calls, ...(failure ? { error: String(failure) } : {}) });
 writeFileSync(join(values.out!, `${id}.result.json`), JSON.stringify(result, null, 2) + "\n");
-console.log(`${values.prepare ? "Prepared" : table.outcome ? "Finished" : "Stopped"} on turn ${table.cursor.turn}; replay ${result.replayMatches ? "matched" : "mismatch"}; ${table.gaps.length} gaps.`);
-for (const gap of table.gaps) console.log(`Gap: ${gap}`);
-console.log(bill(seated.tally.spent()).join("\n"));
-process.exit(result.replayMatches && !table.gaps.length ? 0 : 1);
+console.log(report(result).join("\n"));
+process.exit(result.replayMatches && !table.gaps.length && !failure ? 0 : 1);

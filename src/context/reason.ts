@@ -24,7 +24,7 @@ import type { Api, Model, ThinkingLevel as Reasoning } from "@earendil-works/pi-
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 
 import type { Role } from "./roles.ts";
-import { CEILING, type Tally } from "./spend.ts";
+import { CEILING, meter, type Tally } from "./spend.ts";
 
 /** The part of Pi this uses. `ctx.modelRegistry` satisfies it, and a double can too. */
 export type Stream = (
@@ -32,7 +32,7 @@ export type Stream = (
 	context: { systemPrompt?: string; messages: unknown[]; tools?: ToolSpec[] },
 	options?: { reasoning?: Reasoning; maxTokens?: number; signal?: AbortSignal; sessionId?: string },
 ) => { result(): Promise<Reply> };
-type Reply = { role?: "assistant"; content: unknown[]; usage?: unknown; stopReason: string; errorMessage?: string };
+type Reply = { provider?: string; model?: string; role?: "assistant"; content: unknown[]; usage?: unknown; stopReason: string; errorMessage?: string };
 
 /** A tool as the provider reads it: a name, what it is for, and JSON Schema parameters. */
 export type ToolSpec = { name: string; description: string; parameters: object };
@@ -132,7 +132,7 @@ export function reasoner(options: {
 		options.signal?.throwIfAborted();
 		const began = Date.now();
 		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
-		const base = {
+		const finish = meter(options.tally, {
 			role: options.role,
 			about,
 			model: named,
@@ -140,7 +140,7 @@ export function reasoner(options: {
 			at: began,
 			prompt,
 			...(options.thinking ? { thinking: options.thinking } : {}),
-		};
+		});
 		let reply: Awaited<ReturnType<ReturnType<Stream>["result"]>>;
 		// A reply that never comes would stall the game forever: past the limit it is abandoned and tried again.
 		const limit = new AbortController();
@@ -170,7 +170,7 @@ export function reasoner(options: {
 				if (signal.aborted) aborted();
 			})]);
 		} catch (error) {
-			options.tally.record({ ...base, ms: Date.now() - began,
+			finish({
 				...(taskSignal?.aborted ? { cancelled: true } : { failed: String(error) }) });
 			throw error;
 		} finally {
@@ -182,9 +182,8 @@ export function reasoner(options: {
 		const wrong = reply.stopReason === "error" || reply.stopReason === "aborted"
 			? `${named} ${reply.stopReason}: ${reply.errorMessage ?? "no reason given"}`
 			: !tools && !textOf(reply.content) ? `${named} returned no text for ${about}` : null;
-		options.tally.record({
-			...base,
-			ms: Date.now() - began,
+		finish({
+			...(reply.provider && reply.model ? { model: `${reply.provider}/${reply.model}` } : {}),
 			...(usage ? { usage: usage as never } : {}),
 			...(reply.stopReason === "length" ? { truncated: true } : {}),
 			...(wrong ? { failed: wrong } : {}),

@@ -17,13 +17,14 @@ import { parseArgs } from "node:util";
 import { ModelRuntime } from "@earendil-works/pi-coding-agent";
 
 import { cast, readRoster, rosterFor, type Crew, type Role } from "../src/context/roles.ts";
-import { degraded, report, run, seat as seatTable } from "../src/context/sit.ts";
+import { degraded, run, seat as seatTable } from "../src/context/sit.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { deck } from "../src/core/decks.ts";
 import { open, reopen, replay, save, type Header } from "../src/core/journal.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
+import { gameResult, report, preparationFailure } from "../src/context/report.ts";
 import { traceInference } from "../src/context/trace.ts";
 
 const { values: a } = parseArgs({
@@ -128,6 +129,7 @@ const observed = tracePath ? traceInference(inference, (event) => {
 }) : inference;
 
 const began = Date.now();
+const resultPath = join(a.out!, `${a.from ?? seed}-${began}.result.json`);
 const seated = await seatTable(
 	table,
 	// --no-brief drops the pregame role rather than faking an empty brief, so the
@@ -141,9 +143,15 @@ const seated = await seatTable(
 		rules,
 		...(carried?.prepared.length ? { prepared: carried.prepared } : {}),
 	},
-);
+).catch((error) => {
+	const result = preparationFailure(table, error, began, { journal: journal.path, trace: tracePath });
+	writeFileSync(resultPath, JSON.stringify(result, null, 2) + "\n");
+	console.error(report(result).join("\n"));
+	process.exit(1);
+});
 
 const commentator = parts.find((part) => part.role === "summary");
+let failure: unknown;
 const outcome = await run(
 	table,
 	seated,
@@ -151,9 +159,12 @@ const outcome = await run(
 	commentator,
 	a.watch ? (line) => console.log(`  ${line}`) : undefined,
 	journal,
-);
+).catch((error) => { failure = error; return null; });
 
-console.log(`\nseed      ${seed}\n${report(table, seated, outcome, Date.now() - began).join("\n")}`);
+const result = gameResult(table, seated, { journal: journal.path, trace: tracePath, ...(failure ? { error: String(failure) } : {}) });
+writeFileSync(resultPath, JSON.stringify(result, null, 2) + "\n");
+console.log(`\n${report(result).join("\n")}`);
+console.log(`result    ${resultPath}`);
 console.log(`journal   ${journal.path}`);
 console.log(`clone     node tools/smoke.ts --from ${seed}   (continues this game)`);
 // Non-zero when the result is not comparable: a game that finished with half its
