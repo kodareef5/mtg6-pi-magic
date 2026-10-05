@@ -92,7 +92,7 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	walk({}, []);
 	assert.deepEqual([...paths.keys()].sort(), decision.options.map((one) => one.id).sort(), "every original move and pass stays reachable");
 	for (const offer of offers) {
-		const path = [...paths.get(offer.option.id)!], physical = structuredClone(targets);
+		const path = ["inspect:use:0", "inspect:back", ...paths.get(offer.option.id)!], physical = structuredClone(targets);
 		const pilot = aiSeat({ name: "Inspection", intent: startingIntent(1), onGap: assert.fail, api: { named: "fixture", async ask(request) {
 			assert.deepEqual(targets, physical, "inspection never moves the table or edits equipment");
 			const packet = request.state as unknown as Packet, choice = path.shift()!;
@@ -114,7 +114,7 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 		assert.equal(answer.kind, "pick");
 		if (answer.kind !== "pick") assert.fail();
 		assert.equal(answer.option, offer.option.id);
-		assert.equal(path.length, 0, "even a single final payment requires its own answer");
+		assert.equal(path.length, 0, "revisiting an inspected use stays available, and the final payment requires its own answer");
 		await pilot.close();
 	}
 	assert.deepEqual(choiceFrame, originalChoices, "factoring and every inspection leave the original offers intact");

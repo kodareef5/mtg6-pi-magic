@@ -31,7 +31,6 @@ import { STEPS } from "../core/steps.ts";
 import { putting } from "./strategy.ts";
 import { reviewCommand, reviewQuestion, STACK_PRIORITY } from "./review.ts";
 import { checklist } from "../core/review.ts";
-import { PlayerUnavailable } from "../core/player.ts";
 import { inspect, type Inspection } from "./choices.ts";
 import { decisionChoices } from "./packet.ts";
 
@@ -194,7 +193,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let closed = false;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true } | undefined;
 	let began: string | undefined;
-	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection; visited: Set<string> } | undefined;
+	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;
 	const cancel = () => {
 		const old = preparation;
 		preparation = undefined;
@@ -239,7 +238,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 			// alone is not a reason for a model call.
 			const seated = options.chronicle;
 			const budget = options.dials ?? 2;
-			if (navigation?.version !== frame.version || navigation.revision !== (frame.view.work?.revision ?? 0)) navigation = { version: frame.version, revision: frame.view.work?.revision ?? 0, learned: [], walked: [], selected: {}, visited: new Set() };
+			if (navigation?.version !== frame.version || navigation.revision !== (frame.view.work?.revision ?? 0)) navigation = { version: frame.version, revision: frame.view.work?.revision ?? 0, learned: [], walked: [], selected: {} };
 			const { learned, walked } = navigation;
 			const reason = planReason(frame);
 			const revision = frame.view.work?.revision ?? 0;
@@ -318,9 +317,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 				}
 				if (menu && Object.hasOwn(menu.enter, answer.choice)) {
-					const key = JSON.stringify([navigation.selected, answer.choice]);
-					if (navigation.visited.has(key)) throw new PlayerUnavailable("Repeated the same option inspection without a changed decision. No move was chosen.");
-					navigation.visited.add(key); navigation.selected = menu.enter[answer.choice]!;
+					navigation.selected = menu.enter[answer.choice]!;
 					continue;
 				}
 				if (answer.choice === HELP && help) {
