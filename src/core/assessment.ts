@@ -12,7 +12,7 @@ export function assessmentProblems(printed: Printed, pack: Package): string[] {
 	const claims = [...pack.registers, ...(pack.procedures ?? []), ...(pack.deferred ?? [])];
 	if (pack.printedCast && !permanentSpell(printed)) problems.push(`${pack.card} cannot use the shared printed cast: it needs a targetless permanent and a fixed mana cost.`);
 	if (!isLand(printed) && !pack.printedCast && ![...(pack.procedures ?? []), ...(pack.deferred ?? [])].some((one) => one.timing === "spell")) problems.push(`${pack.card} has no prepared casting procedure or identified cast to prepare.`);
-	for (const claim of claims) if (!quotes(printed, claim.basis)) problems.push(`The basis ${JSON.stringify(claim.basis)} is not on ${pack.card}.`);
+	for (const claim of claims) if (!quotes(printed, claim.basis)) problems.push(`The basis ${JSON.stringify(claim.basis)} is not on ${pack.card} as complete sentences or printed lines in source order.`);
 	// An empty normal cast merely pays the printed cost. Quoting the whole card
 	// there cannot stand in for assessing its abilities.
 	const effects = (pack.procedures ?? []).filter((one) => one.instructions.length || one.words?.length || one.cost || one.if || one.limit);

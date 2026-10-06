@@ -124,6 +124,10 @@ without separate invitations for Jev to invent a strategy for each one.
    rollback. Departure events read delayed triggers from the prior world, so a
    source-tied watch sees its own departure and then expires. Both reproduced
    failures have invariant coverage, including a clone's subsequent rollback.
+   Source checks require complete sentences or printed lines, including short
+   keyword lines, and preserve the order of joined quotations. Cost symbols
+   and arbitrary word fragments no longer pass. The worked examples use the
+   same check; accepted meaning remains a separate judgment.
 7. [ ] Validate the complete path, then run one live gate.
    Run offline invariants, focused model-contract exercises and replay/clone checks
    before paid full games. Use registered decks and ordinary setup. Review the

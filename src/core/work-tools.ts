@@ -134,7 +134,7 @@ function packageProblem(frame: Frame, pack: Package): string | null {
 	}
 	const all = (registrations: Registration[]): Registration[] => registrations.flatMap((one) => [one, ...(one.kind === "continuous" && one.change.registers ? all(one.change.registers) : [])]);
 	const foreign = all(pack.registers).filter((one) => !quotes(printed, one.basis));
-	return foreign.length ? `package ${pack.card}: ${foreign.map((one) => JSON.stringify(one.basis)).join(", ")} ${foreign.length === 1 ? "is" : "are"} not on ${pack.card}; each registration quotes the card's own text word for word, and a card registers only abilities it has` : null;
+	return foreign.length ? `package ${pack.card}: ${foreign.map((one) => JSON.stringify(one.basis)).join(", ")} ${foreign.length === 1 ? "is" : "are"} not on ${pack.card} as complete sentences or printed lines in source order; each registration quotes the card's own text word for word, and a card registers only abilities it has` : null;
 }
 const withPackages = (current: Package[] = [], added: Package[] = []) =>
 	[...current.filter((entry) => !added.some((one) => one.card === entry.card)), ...added.map((pack) => structuredClone({ ...current.find((one) => one.card === pack.card), ...pack }))];

@@ -16,6 +16,7 @@ import { planWork, syntaxReference } from "../src/context/strategy.ts";
 import { workFrame, editWork } from "../src/core/work-tools.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
 import { checkProcedure } from "../src/core/procedures.ts";
+import { quotes as sourceQuote } from "../src/core/printed.ts";
 import { tally } from "../src/context/spend.ts";
 import { main, matchup } from "./play.ts";
 
@@ -31,6 +32,7 @@ test("every example block parses and quotes its card", () => {
 		assert.ok(oracle, `${where}: ${card} is not a Standard card`);
 		named.add(card);
 		for (const part of basis.split(" ... ")) assert.ok(oracle.includes(part), `${where}: "${part}" is not in ${card}'s text`);
+		assert.ok(sourceQuote(cards.get(card), basis), `${where}: ${basis} does not quote complete source sentences or lines`);
 	};
 	// A token is named by the card that made it; its procedures quote that card's reminder text.
 	const tokens = new Set<string>();

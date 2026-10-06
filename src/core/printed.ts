@@ -77,11 +77,28 @@ export const printedTargetless = (printed?: Printed) => !!printed &&
 /**
  * Whether a registration's basis is the card's own text, word for word: line
  * breaks, reminder text, dashes, apostrophes and case aside. Separate quotations
- * may be joined with literal " ... "; every part must be on the card.
+ * may be joined with literal " ... ". Each part consists of complete printed
+ * sentences or lines, in source order. This checks provenance, not meaning.
  */
-export function quotes(printed: Printed | undefined, basis: string): boolean {
-	const plain = (text: string) => text.replace(/\\n|\n/g, " ").replace(/\([^)]*\)/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-")
+export function quotes(printed: Pick<Printed, "oracle"> | undefined, basis: string): boolean {
+	const plain = (text: string) => text.replace(/\\n|\n/g, " ").replace(/\([^)]*\)/g, " ").replace(/^\s*•\s*/, "").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-")
 		.replace(/\s+/g, " ").trim().toLowerCase();
-	const quoted = basis.split(" ... ").map((part) => plain(part).replace(/^"|"$/g, "").replace(/\.$/, ""));
-	return !!printed && quoted.every((part) => !!part && plain(printed.oracle).includes(part));
+	const quoted = basis.split(" ... ").map((part) => {
+		const text = plain(part);
+		return (text.startsWith('"') && text.endsWith('"') ? text.slice(1, -1) : text).replace(/\.$/, "");
+	});
+	const sentences = (printed?.oracle ?? "").replace(/\\n/g, "\n").replace(/\([^)]*\)/g, " ")
+		.split(/\n|(?<=[.!?])\s+/).map(plain).filter(Boolean);
+	let next = 0;
+	return !!printed && quoted.every((part) => {
+		if (!part) return false;
+		for (let start = next; start < sentences.length; start++) {
+			for (let end = start; end < sentences.length; end++) {
+				if (sentences.slice(start, end + 1).join(" ").replace(/\.$/, "") !== part) continue;
+				next = end + 1;
+				return true;
+			}
+		}
+		return false;
+	});
 }
