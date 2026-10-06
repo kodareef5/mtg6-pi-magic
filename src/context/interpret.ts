@@ -2,7 +2,7 @@
 import type { Frame } from "../core/types.ts";
 import type { Universe } from "../core/cards.ts";
 import type { Rules } from "../core/rules.ts";
-import { PackageSchema, problems, type Package, type Procedure } from "../core/language.ts";
+import { PackageSchema, ProcedureSchema, problems, type Package, type Procedure } from "../core/language.ts";
 import { assessmentProblems } from "../core/assessment.ts";
 import type { Reasoner } from "./reason.ts";
 import { lookups } from "./brief.ts";
@@ -17,6 +17,8 @@ const SYSTEM = [
 	"Use the example and rules tools when needed. If the syntax cannot express a requested use, report unsupported. A failure leaves the physical decision pending. Acceptance checks syntax and coverage; it does not certify that your interpretation follows the rules.",
 	"Submit procedures and unsupported. No prose answer is read. Correct all named problems after a refusal.",
 	syntaxReference(), exampleIndex,
+	"The complete procedure schema is checked locally. The submit tool stays shallow to avoid recursive expansion by providers.",
+	JSON.stringify(ProcedureSchema),
 ].join("\n\n");
 
 export async function interpret(frame: Frame, writer: Pick<Reasoner, "work">, universe: Universe, rules?: Rules): Promise<Package> {
