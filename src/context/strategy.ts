@@ -175,6 +175,9 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			return null;
 		} },
 		lookups: [syntaxLookup, equipment(frame, available), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
+		// Observed ordinary replies take 6-28s; retry a stalled critical-path
+		// request without replacing its task, model, or accepted plan.
+		...(options.nextTurn ? {} : { timeoutMs: 45_000 }),
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");

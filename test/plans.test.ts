@@ -40,7 +40,7 @@ import { emptyBrief } from "../src/context/brief.ts";
 import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
-import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
+import { aiSeat, changes, question, settled, type Prepared, type Planned } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment, responseChanges, selectionFields } from "../src/context/plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
@@ -837,7 +837,7 @@ test("one unfinished preparation is awaited at the draw without a second planner
  main(table, 1, 4);
  let finish: (value: Prepared) => void = () => {};
  let amended = 0, resolved = false;
- const waits: { ready?: boolean; waitedMs: number }[] = [];
+ const waits: Planned[] = [];
  const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
   prepare: () => new Promise((resolve) => { finish = resolve; }),
   plan: async (_frame, made) => { amended++; assert.equal(made!.plan.objective, "Ready."); return { tools: [{ do: "plan.put", plan: made!.plan }] }; },
@@ -852,6 +852,9 @@ test("one unfinished preparation is awaited at the draw without a second planner
  assert.equal((await answer).kind, "work");
  assert.equal(amended, 1, "the uncovered draw gets one amendment");
  assert.equal(waits[0]!.ready, false); assert.ok(waits[0]!.waitedMs >= 0);
+ const timing = waits[0]!.preparation!;
+ assert.equal(timing.fromTurn, 4);
+ assert.ok(timing.queuedAt <= timing.startedAt! && timing.startedAt! <= timing.neededAt! && timing.neededAt! <= timing.finishedAt!, "queue, background work and draw wait are separately measured");
  await seat.close();
 });
 

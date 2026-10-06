@@ -78,7 +78,7 @@ export type Reasoner = {
 	 * named, up to `turns` replies in all. The final reply offers only submit,
 	 * so reference lookups cannot consume the delivery slot. Returns accepted arguments.
 	 */
-	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number; signal?: AbortSignal }, ceiling?: number): Promise<Record<string, unknown>>;
+	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number; signal?: AbortSignal; timeoutMs?: number }, ceiling?: number): Promise<Record<string, unknown>>;
 	/**
 	 * Why this reasoner stopped answering, or null while it is working.
 	 *
@@ -128,7 +128,7 @@ export function reasoner(options: {
 	let gaveUp: string | null = null;
 
 	/** One request. Recorded whether it worked, because a failed call still costs. */
-	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[], taskSignal?: AbortSignal): Promise<Reply> {
+	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[], taskSignal?: AbortSignal, timeoutMs = TIMEOUT[options.role]): Promise<Reply> {
 		taskSignal?.throwIfAborted();
 		options.signal?.throwIfAborted();
 		const began = Date.now();
@@ -147,7 +147,7 @@ export function reasoner(options: {
 		let reply: Awaited<ReturnType<ReturnType<Stream>["result"]>>;
 		// A reply that never comes would stall the game forever: past the limit it is abandoned and tried again.
 		const limit = new AbortController();
-		const timer = setTimeout(() => limit.abort(new Error(`timed out after ${TIMEOUT[options.role] / 1000}s`)), TIMEOUT[options.role]);
+		const timer = setTimeout(() => limit.abort(new Error(`timed out after ${timeoutMs / 1000}s`)), timeoutMs);
 		timer.unref();
 		const signal = AbortSignal.any([limit.signal, ...[options.signal, taskSignal].filter((one): one is AbortSignal => !!one)]);
 		let aborted: (() => void) | undefined;
@@ -243,7 +243,7 @@ export function reasoner(options: {
 				const finishing = turn === (tools.turns ?? 3) && !!tools.lookups?.length;
 				if (finishing) messages.push({ role: "user", content: `This session's final reply is for ${tools.submit.name}. Reference lookups are closed. Submit your answer using the facts already returned; state any unresolved limitation in the answer's supported fields. Acceptance still depends on validation.`, timestamp: Date.now() });
 				const available = finishing ? specs.filter((one) => one.name === tools.submit.name) : specs;
-				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, available, tools.signal), tools.signal);
+				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, available, tools.signal, tools.timeoutMs), tools.signal);
 				messages.push(reply);
 				const calls = reply.content.filter((part): part is { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> } =>
 					(part as { type?: unknown }).type === "toolCall");

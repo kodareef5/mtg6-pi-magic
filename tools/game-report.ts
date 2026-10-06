@@ -77,6 +77,8 @@ export function report(result: GameResult): string[] {
 	const purpose = (about: string) => usage.purposes.find((one) => one.role === "decide" && one.about === about)?.calls ?? 0;
 	const planned = result.planned ?? [];
 	const waitedMs = planned.reduce((sum, one) => sum + one.waitedMs, 0);
+	const preparations = planned.filter((one) => one.ready !== undefined);
+	const preparationWait = preparations.reduce((sum, one) => sum + Math.max(0, (one.preparation?.finishedAt ?? 0) - (one.preparation?.neededAt ?? Infinity)), 0);
 	const state = result.error ? "failed" : result.outcome ? "finished" : timing && !timing.finishedAt ? "waiting" : timing && !timing.playStartedAt ? "prepared" : "stopped";
 	const outcome = result.outcome ? Object.entries(result.outcome.results).map(([seat, end]) => `${result.seats?.find((one) => String(one.id) === seat)?.name ?? `seat ${seat}`} ${end}`).join(", ") : "no outcome";
 	const diff = (end: number | undefined, start: number | undefined) => end !== undefined && start !== undefined ? end - start : undefined;
@@ -88,6 +90,7 @@ export function report(result: GameResult): string[] {
 		...(reasons ? [`decisions ${Object.entries(reasons).map(([why, n]) => `${why} ${n}`).join("  ")}`] : []),
 		`jev       ${byRole("decide")} calls  ${purpose("pick")} picks  ${purpose("review")} reviews  ${byRole("decide") - purpose("pick") - purpose("review")} other`,
 		`strategy  ${byRole("strategy")} calls  ${planned.length} sessions${plans ? `  ${plans.accepted} plans  ${plans.steps} steps  ${plans.branches} branches` : ""}${stops ? `; help ${stops.help}  stops ${stops.stops}  essential ${stops.essential}` : ""}`,
+		`planning  ready ${preparations.filter((one) => one.ready).length}/${preparations.length}  unfinished wait ${preparations.some((one) => one.preparation) ? duration(preparationWait) : "?"}  timeouts ${result.calls.filter((one) => one.role === "strategy" && /timed out/.test(one.failed ?? "")).length}`,
 		`judge     ${byRole("judge")} calls  ${result.judged?.cases ?? "?"} cases this run (${result.judged?.failed ?? "?"} failed); ${stops?.rulings ?? "?"} game rulings  ${stops?.upheld ?? "?"} rollbacks`,
 		`summary   ${byRole("summary")} calls  ${result.recaps ?? "?"} recaps; rule lookups ${result.dials ? Object.values(result.dials).reduce((sum, n) => sum + n, 0) : "?"}`,
 		...bill(result.calls, now),

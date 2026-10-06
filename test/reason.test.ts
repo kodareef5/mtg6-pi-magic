@@ -759,6 +759,23 @@ test("work takes its answer only through submit, and tells the model what was wr
 	assert.equal(cancellable.broken(), null);
 	assert.deepEqual(await cancellable.work("turn", { system: "S", user: "now" }, { submit }), { commands: ["plan"] });
 	assert.equal(calls, 2);
+
+	const timed = tally(), requests: unknown[] = [], signals: AbortSignal[] = [];
+	const retry = reasoner({ role: "strategy", model: sol, tally: timed, attempts: 2, backoffMs: 0,
+		stream: (_model, context, options) => {
+			requests.push(structuredClone(context)); signals.push(options!.signal!);
+			return requests.length === 1 ? { result: () => new Promise(() => {}) }
+				: { result: async () => ({ content: [{ type: "toolCall", id: "retry", name: "submit", arguments: { commands: ["plan"] } }], stopReason: "toolUse" }) };
+		} });
+	// The adapter's deadline is unref'd; keep this isolated probe alive to observe it.
+	const alive = setInterval(() => {}, 100);
+	try { assert.deepEqual(await retry.work("turn amendment", { system: "S", user: "same position" }, { submit, timeoutMs: 10 }), { commands: ["plan"] }); }
+	finally { clearInterval(alive); }
+	assert.deepEqual(requests[0], requests[1], "a timeout retries the same question, without another planner or replacement instructions");
+	assert.equal(signals[0]!.aborted, true);
+	assert.match(timed.spent()[0]!.failed!, /timed out/);
+	assert.equal(timed.spent()[1]!.failed, undefined);
+	assert.equal(retry.broken(), null);
 });
 
 test("opening-hand splits are exact: they match counting every hand", () => {

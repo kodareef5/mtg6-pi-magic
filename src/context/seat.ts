@@ -75,7 +75,8 @@ export type AiSeatOptions = {
 
 /** Private pending work; nothing reaches core until the turn's draw is accessible. */
 export type Prepared = { plan: Plan; edits?: NoteEdit[] };
-export type Planned = { seat: number; turn: number; how: "prepared" | "amended" | "written" | "escalation"; waitedMs: number; ready?: boolean; failed?: boolean };
+type PreparationTiming = { fromVersion: number; fromTurn: number; queuedAt: number; startedAt?: number; finishedAt?: number; neededAt?: number };
+export type Planned = { seat: number; turn: number; how: "prepared" | "amended" | "written" | "escalation"; waitedMs: number; ready?: boolean; failed?: boolean; preparation?: PreparationTiming };
 
 /**
  * What changed between the frame a plan was prepared from and the turn it is for,
@@ -200,7 +201,7 @@ export function question(packet: Packet, help: boolean): Question {
 export function aiSeat(options: AiSeatOptions): Player {
 	let asked = 0;
 	let closed = false;
-	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true } | undefined;
+	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
 	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;
 	const cancel = () => {
@@ -217,8 +218,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 		const cancelled = cancel();
 		began = key;
 		const controller = new AbortController();
-		const job: NonNullable<typeof preparation> = { turn: at.turn + 1, from: frame, controller,
-			plan: Promise.resolve(cancelled).then(() => { controller.signal.throwIfAborted(); return options.prepare!(frame, controller.signal); }).catch(() => undefined) };
+		const timing: PreparationTiming = { fromVersion: frame.version, fromTurn: at.turn, queuedAt: Date.now() };
+		const job: NonNullable<typeof preparation> = { turn: at.turn + 1, from: frame, controller, timing,
+			plan: Promise.resolve(cancelled).then(() => { controller.signal.throwIfAborted(); timing.startedAt = Date.now(); return options.prepare!(frame, controller.signal); })
+				.catch(() => undefined).finally(() => { timing.finishedAt = Date.now(); }) };
 		preparation = job;
 		void job.plan.then(() => { job.ready = true; });
 	};
@@ -263,11 +266,14 @@ export function aiSeat(options: AiSeatOptions): Player {
 				const started = Date.now(), turn = at.kind === "turn" ? at.turn : 0;
 				let how: Planned["how"] = frame.view.work?.request ? "escalation" : "written";
 				let ready: boolean | undefined, failed = true;
+				let preparationTiming: PreparationTiming | undefined;
 				try {
 					let made: Prepared | undefined, changed: string[] | undefined;
 					if (!frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
 						const job = preparation;
 						ready = !!job.ready;
+						preparationTiming = job.timing;
+						preparationTiming.neededAt = Date.now();
 						// Wait for this job rather than starting another planner beside it.
 						made = await job.plan;
 						if (closed) throw new Error(`${options.name} closed while planning.`);
@@ -292,7 +298,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 					return { kind: "work", tools, revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}`, ...(objection ? { objection } : {}) };
 				} finally {
 					options.onPlanned?.({ seat: frame.seat, turn, how, waitedMs: Date.now() - started,
-						...(ready === undefined ? {} : { ready }), ...(failed ? { failed: true } : {}) });
+						...(ready === undefined ? {} : { ready }), ...(failed ? { failed: true } : {}),
+						...(preparationTiming ? { preparation: { ...preparationTiming } } : {}) });
 				}
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.

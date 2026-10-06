@@ -236,6 +236,12 @@ Record per-role and per-model calls, tokens, cost, failures, request time and
 active time; preparation, play and strategy wait; Jev purposes; plan repairs;
 judge requests and rulings; gaps, fallback and replay. Compare cold preparation
 and carried preparation separately. Keep the report and timeline for each gate.
+Consumed preparations record their queue, start, finish and needed-at times,
+with the source turn and version. Reports separate unfinished preparation wait
+from total strategy wait and count strategy timeouts. Foreground turn planning
+retries the same request after 45 seconds; background preparation retains its
+150-second request limit. A retry neither installs a replacement plan nor
+changes the model or question. Measure the effect before claiming a speed gain.
 
 Completion requires implemented readiness and execution paths, passing offline
 checks, replay/clone parity, and a live gate reviewed without known machinery
