@@ -285,3 +285,36 @@ Tool availability, representation, input size and human hints are confounded in
 the earlier diagnostics. This does not establish an absence of reasoning or its
 cause. The JSON diagnostic also used the older card representation; it cannot
 isolate the effect of the subsequent hand-definition correction.
+
+
+## Activation payments and candidate recognition
+
+The ordered budget now keeps a tap-cost source out of mana funding and marks
+that source spent for later steps and opponent-turn branches. It checks the
+source's current tap/sickness availability. Restricted mana reads a spell on
+the stack or an activation's actual source zone, matching physical announcement.
+Additional costs outside this forecast remain unpriced. An empty conflict list
+does not certify feasibility. The arithmetic invariant compares the forecast
+with actual offered Ba Sing Se and Kellan activations, including fixed payments,
+spent tap costs, future branches and creature-cast-only Village mana. Types,
+179 offline tests and all 18 journal-prefix replays pass.
+
+The private `recognition.ts` screen compared identical complete current facts,
+pregame policies and four supplied lines. Each included payment witnesses and
+a hypothetical post-cast board obtained by physically executing that sequence
+on a copy. Core then graded the fixed attack with Explorer blocking Kellan,
+no opposing responses, and accepted zero-Treasure Smaug triggers. Two lines won:
+Smaug plus the two established attackers, and Smaug plus Challenger with the
+animated Sanctuary tapped for payment. Kellan alone and Smaug alone did not.
+No combat result or winner label entered the questions. Candidate order/ids
+rotated and answer-format order alternated.
+
+Both minimal-tool and text answers selected a winning line 3/3. Whole-call
+medians were 2.1 seconds for tools and 2.2 seconds for text; all six calls
+reported zero reasoning tokens. The total reported cost was $0.0117. Keep the
+tool form for the next experiment. This small screen tests recognition of
+supplied, checked candidates. The scripted outcomes are evaluation evidence,
+not model gameplay; no generator, binding stage or general tactical strength
+has been validated. Traces, packets, scripts and offline outcome receipts remain
+in `recognition/` in the private artifact directory. Generation with a defensive
+control and actual bounded execution is next; a full game has not been gated.

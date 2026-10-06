@@ -22,7 +22,7 @@ import { annotate, execution, planDue, planState } from "../src/core/planning.ts
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget, manaBudget } from "../src/core/budget.ts";
-import { printedCast } from "../src/core/procedures.ts";
+import { printedCast, procedureOptions } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
@@ -624,6 +624,38 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 			timing: "spell", targets: [{ object: { types: ["creature"], controller: "you" } }], instructions: [] } } }];
 
 	// Three Forests: Hydra spends them all, so Veil cannot also be kept.
+	const tappedSource = matchup("activation-tap-cost");
+	establish(tappedSource, 0, "Ba Sing Se");
+	place(tappedSource, 0, "battlefield", "Forest", "Forest");
+	main(tappedSource, 0, 3);
+	const earthbend = { label: "Earthbend", when: now(tappedSource), action: { procedure: example("Earthbend 2 with Ba Sing Se") } };
+	assert.match(problems(tappedSource, { steps: [earthbend] }), /costs \{2\}\{G\}/, "the source cannot tap once for mana and again for its activation cost");
+	assert.equal(procedureOptions(earthbend.action.procedure, workFrame(tappedSource, 0), "check").length, 0);
+	place(tappedSource, 0, "battlefield", "Forest");
+	assert.equal(problems(tappedSource, { steps: [earthbend] }), "", "three other sources pay the mana");
+	const paidAbility = procedureOptions(earthbend.action.procedure, workFrame(tappedSource, 0), "check")[0]!;
+	assert.ok(paidAbility);
+	place(tappedSource, 0, "hand", "Llanowar Elves");
+	assert.match(problems(tappedSource, { steps: [earthbend, cast(tappedSource, "Llanowar Elves")] }), /Cast Llanowar Elves.*no untapped source/, "the tap-cost source stays spent for later steps");
+	assert.match(problems(tappedSource, { steps: [earthbend], may: [{ ...earthbend, when: { active: "opponent" } }] }), /may\[0\].*tap cost/, "the opponent-turn branch cannot reuse a spent tap-cost source");
+	const exactFrame = workFrame(tappedSource, 0);
+	exactFrame.decision!.options.push(paidAbility.option);
+	assert.match(budget(exactFrame, { objective: "Sequence", guidance: "Use the chosen payment", steps: [{ ...earthbend, action: { option: paidAbility.option.id } }, cast(tappedSource, "Llanowar Elves")] }).join(" "), /Cast Llanowar Elves.*no untapped source/, "an exact activation also carries its tap cost");
+
+	const restricted = matchup("activation-spending-zone");
+	establish(restricted, 1, "Rockface Village"); establish(restricted, 1, "Rockface Village");
+	establish(restricted, 1, "Kellan, Planar Trailblazer", []);
+	main(restricted, 1, 2);
+	const detective = { label: "Become a Detective", when: now(restricted), action: { procedure: example("Kellan becomes a Detective") } };
+	const originalRestricted = structuredClone(restricted);
+	assert.equal(procedureOptions(detective.action.procedure, workFrame(restricted, 1), "check").length, 0);
+	assert.match(budget(workFrame(restricted, 1), { objective: "Develop", guidance: "Activate", steps: [detective] }).join(" "), /costs \{1\}\{R\}/, "creature-cast-only red cannot pay an activation on that creature");
+	assert.match(budget(workFrame(restricted, 1), { objective: "Wait", guidance: "Activate later", steps: [], may: [{ ...detective, when: { active: "opponent" } }] }).join(" "), /may\[0\].*costs \{1\}\{R\}/);
+	assert.deepEqual(restricted, originalRestricted, "activation forecasting moves no source or mana");
+	place(restricted, 1, "battlefield", "Mountain");
+	assert.deepEqual(budget(workFrame(restricted, 1), { objective: "Develop", guidance: "Use unrestricted red", steps: [detective] }), []);
+	assert.ok(procedureOptions(detective.action.procedure, workFrame(restricted, 1), "check").length, "Village colorless and Mountain red really pay the activation");
+
 	const three = matchup("arithmetic");
 	place(three, 0, "battlefield", "Forest", "Forest", "Forest");
 	main(three, 0, 3);

@@ -88,8 +88,8 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 
 /**
  * Every distinct way to pay exactly, from floating mana, tapped sources, or both.
- * `spending` is what the mana pays for, as it will be on the stack: restricted
- * mana is used only when it matches.
+ * `spending` is the spell as it will be on the stack, or an activation's source
+ * in its actual zone. Restricted mana is used only when it matches.
  */
 export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject): { funding: Funding; shows: string }[] {
 	const allowed = (spendOnly?: Selector) => !spendOnly || (!!spending && matches({ world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, spendOnly, spending.traits));

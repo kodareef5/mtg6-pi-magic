@@ -21,7 +21,7 @@
  * beside their shared entry forecast and funding reader.
  */
 import { symbols } from "./announce.ts";
-import { fundings, sources, type Funding, type Price } from "./funding.ts";
+import { fundings, sick, sources, type Funding, type Price } from "./funding.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, playable } from "./permits.ts";
 import { select } from "./query.ts";
@@ -31,7 +31,7 @@ import { STEPS } from "./steps.ts";
 import type { Frame } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
-type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true };
+type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true };
 
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
 export function afterUntap(frame: Frame): Frame {
@@ -68,6 +68,7 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 	};
 }
 
+/** Conflicts found within the resource forecast's scope. Empty does not certify a feasible line. */
 export function budget(frame: Frame, plan: Plan): string[] {
 	const at = frame.view.window;
 	if (at.kind !== "turn") return [];
@@ -108,16 +109,17 @@ export function budget(frame: Frame, plan: Plan): string[] {
 		if ("procedure" in action) {
 			const procedure = action.procedure;
 			if (procedure.timing === "mana" || procedure.instructions.some((instruction) => instruction.do === "mana")) honest = false;
-			if (procedure.timing !== "land" && procedure.timing !== "spell" && !procedure.cost?.mana) return undefined;
+			if (procedure.timing !== "land" && procedure.timing !== "spell" && !procedure.cost?.mana && !procedure.cost?.tap) return undefined;
 			const fromHand = procedure.timing === "land" || procedure.timing === "spell";
 			const chosen = select({ ...procedure.source, zones: procedure.source.zones ?? [fromHand ? "hand" : "battlefield"] }, hypothetical);
 			const source = fromHand ? offBoard(chosen) : chosen[0];
 			const named = procedure.source.card;
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
-			const stated = procedure.cost?.mana ?? (source?.card ? frame.view.printed?.[source.card]?.mana : undefined);
+			const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? source?.card ? frame.view.printed?.[source.card]?.mana : undefined : "{0}");
 			const mana = stated ? symbols(stated) : undefined;
-			const unknown = !mana || mana.x > 0 || !!procedure.cost?.reduce;
-			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !unknown ? { price: { generic: mana.generic, colors: mana.colors } } : {}), ...(unknown ? { unknown: true as const } : {}) };
+			const unknown = !mana || mana.x > 0 || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof procedure.cost?.tap === "object";
+			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !unknown ? { price: { generic: mana.generic, colors: mana.colors } } : {}),
+				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}) };
 		}
 		const id = action.option ?? action.prefix ?? "";
 		const offered = action.option ? frame.decision?.options.find((option) => option.id === action.option) : undefined;
@@ -134,15 +136,16 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			const { generic, colors, ...extra } = offered.use.cost;
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
-			if (Object.keys(extra).length || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
+			if (Object.keys(extra).some((key) => key !== "tap") || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
 			return { kind, ...(source ? { source } : {}), price: { generic, colors },
+				...(timing === "spell" ? { spell: true } : {}), ...(extra.tap ? { tap: true } : {}),
 				fixed: { paid: offered.use.paid, taps: offered.use.funding ?? [] } };
 		}
 		const mana = source?.card ? symbols(frame.view.printed?.[source.card]?.mana ?? "") : undefined;
-		return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }) };
+		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
-	type Item = { at: string; expired: boolean } & ({ kind: "land"; land: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string });
+	type Item = { at: string; expired: boolean } & ({ kind: "land"; land: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true });
 	const items: Item[] = [];
 	for (const [at, step] of plan.steps.entries()) {
 		if (!ours(step)) continue;
@@ -172,9 +175,10 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			continue;
 		}
 		if (act.unknown) { honest = false; continue; }
-		items.push({ at: where, expired, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}), label: step.label });
+		items.push({ at: where, expired, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}),
+			...(act.spell ? { spell: true } : {}), ...(act.tap ? { tap: true } : {}), label: step.label });
 		// A permanent cast now permits more land plays from then on.
-		for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
+		if (act.spell) for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
 	}
 	if (!honest) return found;
 
@@ -194,6 +198,8 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	const drained = (position: Frame): Frame => ({ ...position, view: { ...position.view, pools: lasting(position.view.pools) } });
 	// A position is its index, the sources spent and the mana left floating: one that failed once fails again.
 	const failed = new Set<string>();
+	const spending = (act: { source?: SeenObject; spell?: true }) => act.spell ? { ...act.source!, zone: "stack" as const } : act.source!;
+	const cannotTap = (position: Frame, source: SeenObject, spent: ReadonlySet<string>) => source.tapped || spent.has(source.id) || sick(position, source);
 	let visits = 0;
 	const go = (index: number, position: Frame, spent: ReadonlySet<string>): boolean => {
 		const key = `${index}|${[...spent].sort().join(",")}|${pool(position).map((mana) => mana.id).sort().join(",")}`;
@@ -205,19 +211,23 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			if (!item) {
 				// A branch is on the opponent's turn, when nothing floats; a hold may be what it is for, so held sources pay for it.
 				const later = drained(position);
-				for (const { at, act } of branches) if (!fundings(later, act.price!, spent, { ...act.source!, zone: "stack" }).length)
-					return fail(index, `${at}: costs ${stated(act.price!)} but ${left(later, spent)}; keep a source for it with holds, or drop the branch`);
+				for (const { at, act } of branches) {
+					if (act.tap && cannotTap(later, act.source!, spent)) return fail(index, `${at}: its source cannot pay the tap cost after the preceding steps`);
+					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act)).length)
+						return fail(index, `${at}: costs ${stated(act.price!)} but ${left(later, spent)}; keep a source for it with holds, or drop the branch`);
+				}
 				return true;
 			}
 			if (item.kind === "land") return go(index + 1, { ...position, view: { ...position.view, objects: (position.view.objects ?? []).map((object) => object.id === item.land.id ? item.land : object) } }, spent);
-			const reserved = new Set([...spent, ...held]);
+			if (item.tap && (cannotTap(position, item.source, spent) || held.has(item.source.id))) return fail(index, `${item.at}: its source cannot pay the tap cost while spent, unavailable or held`);
+			const reserved = new Set([...spent, ...held, ...(item.tap ? [item.source.id] : [])]);
 			let paymentPosition = position;
 			if (item.fixed) {
 				const selected = new Set(item.fixed.taps.map((tap) => tap.source.id));
 				for (const { object } of sources(position)) if (!selected.has(object.id)) reserved.add(object.id);
 				paymentPosition = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => item.fixed!.paid.includes(mana.id)) })) } };
 			}
-			const ways = fundings(paymentPosition, item.price, reserved, { ...item.source, zone: "stack" })
+			const ways = fundings(paymentPosition, item.price, reserved, spending(item))
 				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
 			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent)}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
@@ -226,7 +236,7 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			return [...distinct.values()].some(({ funding }) => {
 				const paid = new Set(funding.paid);
 				const after = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => !paid.has(mana.id)) })) } };
-				return go(index + 1, after, new Set([...spent, ...funding.taps.map((tap) => tap.source.id)]));
+				return go(index + 1, after, new Set([...spent, ...funding.taps.map((tap) => tap.source.id), ...(item.tap ? [item.source.id] : [])]));
 			});
 		})();
 		if (!ok) failed.add(key);
