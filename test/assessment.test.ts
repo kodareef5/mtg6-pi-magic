@@ -54,6 +54,8 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	assert.equal(quotes(table.printed.Shock, "target"), false, "a whole word inside a sentence is still not the source statement");
 	assert.equal(quotes(printed, "Flying, haste"), true, "short complete keyword lines remain valid without a word-count rule");
 	assert.equal(quotes(printed, printed.oracle.split("\n").reverse().join(" ... ")), false, "joined statements preserve printed order");
+	const modal = table.printed["Origin of Metalbending"]!;
+	assert.equal(quotes(modal, modal.oracle), true, "a full multiline quotation keeps every printed bullet line");
 	assert.deepEqual(assessmentProblems(printed, pack), []);
 	const shared: Package = { ...pack, printedCast: true, procedures: pack.procedures!.slice(1) };
 	assert.deepEqual(assessmentProblems(printed, shared), [], "the shared cast needs no empty per-card program");

@@ -81,7 +81,7 @@ export const printedTargetless = (printed?: Printed) => !!printed &&
  * sentences or lines, in source order. This checks provenance, not meaning.
  */
 export function quotes(printed: Pick<Printed, "oracle"> | undefined, basis: string): boolean {
-	const plain = (text: string) => text.replace(/\\n|\n/g, " ").replace(/\([^)]*\)/g, " ").replace(/^\s*•\s*/, "").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-")
+	const plain = (text: string) => text.replace(/\\n/g, "\n").replace(/^\s*•\s*/gm, "").replace(/\n/g, " ").replace(/\([^)]*\)/g, " ").replace(/[\u2018\u2019]/g, "'").replace(/[\u2013\u2014]/g, "-")
 		.replace(/\s+/g, " ").trim().toLowerCase();
 	const quoted = basis.split(" ... ").map((part) => {
 		const text = plain(part);
