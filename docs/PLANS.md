@@ -115,6 +115,10 @@ without separate invitations for Jev to invent a strategy for each one.
    strategic fields and visible card notes; repeated offer terms are factored.
    Source/condition bindings and unknown reuse keys still receive explicit
    refusals. The live gate must measure whether these changes improve planning.
+   The first component run exposed duplicate work across the analyst questions.
+   Each family now has one analyst, and synthesis can carry draft policies
+   unchanged instead of rewriting them. This changes the question structure;
+   it does not trim returned text or change model effort.
 6. [x] Close verified integrity gaps and reconcile the interface.
    Reproduce the missing alternate-zone cast, weak source checks, rollback id
    collision and delayed-trigger look-back report. Fix each supported reproduction

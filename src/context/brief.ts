@@ -102,11 +102,14 @@ const FindingsSchema = object({
 		card: Type.Optional(text),
 		step: Type.Optional(Type.Enum([...STEPS])),
 		turn: Type.Optional(Type.Enum(["own", "opponent"])),
-	}), { minItems: 1, maxItems: 10 }),
+	})),
 	/** What the analyst could not settle. */
 	unsure: Type.Array(text),
+	policies: Type.Optional(Type.Partial(PlaybookSchema)),
 });
 type Findings = Static<typeof FindingsSchema>;
+const WrittenSchema = object({ ...BriefSchema.properties, policies: Type.Optional(Type.Partial(PlaybookSchema)) });
+type Written = Static<typeof WrittenSchema>;
 
 /** Does this card earn a note? A basic land or a card with no rules text has nothing to explain. */
 const BASIC = new Set(["Forest", "Island", "Mountain", "Plains", "Swamp", "Wastes"]);
@@ -146,24 +149,27 @@ const SYSTEM = [
 	"The strategist reads the strategic policies whenever it organizes a turn. A fast pilot reads only a short note for the window it is in and notes for the cards in front of it.",
 	"",
 	"Both registered deck lists are public and given in full. They give composition, never a hand or the library order. Do not assume any other card.",
-	"Analyze the printed abilities of every listed card. This call does not determine engine support or certify an ability's interpretation; do not invent unsupported-card exclusions.",
+	"Use the printed abilities relevant to your assigned question. Card assessment is separate: this call neither repeats that inventory nor determines engine support or certifies an interpretation.",
 	"Think like a strong player preparing a matchup: roles and clocks, threats and their last answer windows, scarce resources, and plays that look automatic but are wrong here.",
-	"Prepare the questions the pilot will actually answer: keep and retained-hand choices; source, target and payment; order of dependent uses; responses; resolution choices; combat declarations; and when the window's work is complete. For each recurring use, name its purpose, required resources, later choices and the visible exception that changes it.",
-	"Work through examples from these lists: a keep after bottoming; restricted mana used for development while unrestricted mana remains for a response; a beneficiary resolving before its triggering event; a response held until its last useful window; a combat race that changes which creatures attack; rebuilding after losing an engine. Use only cases these decks support. Name the position, ordered line, resources left, and visible exception.",
+	"Answer only your assigned question. Other analysts own the other policy families. Do not repeat their opening, sequencing or matchup analyses. Group cards by the decision their interaction creates instead of writing a card-by-card inventory.",
+	"For each assigned policy family, give when, priorities, reserve, reconsider and one worked example with position, ordered line and exception. State actual costs, usable sources and what remains. Put that case in policies, without repeating it in conclusions. Opening has no turn-policy family; its analyst supplies retained-hand examples in its conclusions.",
 	"Teach each default with the visible condition that reverses it. Never write a bare slogan such as always save removal.",
 	"This is setup for later short turn updates. Settle the deck's normal sequencing, mana commitments, protection priorities, trigger targets and combat decisions now. Later sessions should revise these defaults for the board and draw, not derive the matchup again.",
-	"Give an operational conclusion an example with position, ordered line and exception. Every conclusion gives the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Say what you are unsure of instead of inventing certainty.",
+	"Conclusions hold supporting findings outside the policy itself and can be empty when the assigned policies settle the question. Give the claim, the card facts or numbers it rests on, what it assumes, and the visible fact that would change it. Cite the decisive facts instead of repeating the deck text or policy. Put unresolved questions in unsure.",
 	"",
 	"Every card's text in both decks is above, so do not look cards up. Look a rule up only when you are unsure of it, at most two lookups,",
 	"then call submit once with your findings. Nothing you write as text is read.",
 ].join("\n");
 
 const QUESTIONS = {
-	deck: "DECK AND RESOURCES. What does your deck do: its engines and the pieces they depend on, the curve against the mana it can really make (restrictions included), recurring value, its weak draws, and its routes to a win.",
-	matchup: "MATCHUP. Both clocks, the opponent's engines and threats with the windows in which they must be answered, the removal and protection exchanges, evasion, when the roles change, and how your sequencing can deny the conditions their key cards need.",
+	deck: "DECK AND RESOURCES. Own sequencing and resources. Prepare the deck's engine order and whole-turn payments, including spending restrictions and a retained response. Use a dependency example and a resource-conflict example. Supporting conclusions cover the route to a win and weak draws; leave opening hands, response targets and combat assignments to their analysts.",
+	matchup: "MATCHUP. Own responses and combat. Compare both clocks, opposing engines, last answer windows, removal/protection exchanges and evasion. Give a response-and-release example and an attack/block example that changes with the race. Supporting conclusions name roles and threats; do not reproduce opening or routine development plans.",
 	opening: "OPENING. Keep, mulligan and bottom choices on the play and on the draw: what a keep needs, the borderline hands and the plan behind each, and what to bottom first. Name the cards that count as early development or interaction, and the mana and targets each needs. A cheap protection spell without a creature to protect is not an early play. Describe exceptions after earlier mulligans. Use the computed odds.",
-	challenge: "CHALLENGE. Find the mistakes a competent player of this deck is likely to make in this matchup: wrong shortcuts, missed response windows, resource conflicts, trigger order, and plays that look automatic but lose.",
+	challenge: "CHALLENGE. Own recovery. Prepare the alternate route after losing a key dependency, with a worked example. Supporting conclusions identify exceptions and traps a competent player could miss, including timing and resource conflicts. State the exception without rebuilding the other analysts' ordinary opening, development or combat policies.",
 } as const;
+const FAMILIES: Record<keyof typeof QUESTIONS, (keyof Playbook)[]> = {
+	deck: ["sequencing", "resources"], matchup: ["responses", "combat"], opening: [], challenge: ["recovery"],
+};
 
 /** The tools an analyst or the judge may use. A miss answers "not found", so a lookup never ends the work. */
 export function lookups(universe: Universe, rules?: Rules): Lookup[] {
@@ -222,10 +228,15 @@ export async function brief(
 ): Promise<Brief> {
 	const user = facts(seat, others, universe, options.format);
 	const tools = lookups(universe, options.rules);
-	const findings = submission<Findings>(FindingsSchema, "Submit your findings for this question. Call it once.");
 	const results = await Promise.all(Object.entries(QUESTIONS).map(async ([key, question]) => {
 		try {
-			const answer = await reasoners().work(`pregame ${key}`, { system: SYSTEM, user, task: `${question}\nSubmit at most ten conclusions.` },
+			const owned = FAMILIES[key as keyof typeof QUESTIONS];
+			const policies = object(Object.fromEntries(owned.map((family) => [family, PlaybookSchema.properties[family]])));
+			const schema = object({ ...FindingsSchema.properties, policies: owned.length ? policies : Type.Optional(policies),
+				conclusions: owned.length ? FindingsSchema.properties.conclusions : Type.Array(FindingsSchema.properties.conclusions.items, { minItems: 1 }),
+			});
+			const findings = submission<Findings>(schema, "Submit only your assigned policy families and supporting findings. This supplies advice, not certified card meaning or a proven best line.");
+			const answer = await reasoners().work(`pregame ${key}`, { system: SYSTEM, user, task: `${question}\nSubmit the assigned policies and supporting conclusions without repeating their content.` },
 				{ submit: findings, lookups: tools, turns: 3 }, ANALYST);
 			return { key, findings: answer.value as Findings };
 		} catch (error) { return { key, failed: String(error instanceof Error ? error.message : error) }; }
@@ -236,13 +247,15 @@ export async function brief(
 	// Notes may be on either deck's cards; one note may name several, joined by " / ".
 	const known = new Set([seat, ...others].flatMap((one) => [...Object.keys(one.deck.main), ...Object.keys(one.deck.sideboard)]));
 	const names = (key: string) => key.split(" / ").map((name) => name.replace(/\s*\((yours|opponent|theirs)\)$/i, "").trim());
-	const written = submission<Static<typeof BriefSchema>>(BriefSchema, "Submit the seat's brief. Call it once.",
-		(value) => Object.keys(value.cards ?? {}).flatMap((key) => names(key).filter((name) => !known.has(name)).map((name) => `cards names ${name}, which is in neither registered deck`)));
+	const drafted: Partial<Playbook> = Object.assign({}, ...results.map((one) => one.findings?.policies ?? {}));
+	const complete = (value: Written) => ({ ...value, policies: { ...drafted, ...value.policies } });
+	const written = submission<Written>(WrittenSchema, "Submit the brief, overriding only policy families that need reconciliation. Omitted families retain their analyst's draft. Acceptance checks shape and card names, not strategic quality.",
+		(value) => [...problems(BriefSchema, complete(value)), ...Object.keys(value.cards ?? {}).flatMap((key) => names(key).filter((name) => !known.has(name)).map((name) => `cards names ${name}, which is in neither registered deck`))]);
 	const answer = await reasoners().work("pregame synthesis", { system: SYNTHESIS, user, task: [
 		"The analysts' findings, by question:", JSON.stringify(Object.fromEntries(results.map((one) => [one.key, "findings" in one ? one.findings : { failed: one.failed }]))),
 		"", "Write the brief now and submit it.",
 	].join("\n") }, { submit: written }, SYNTHESIZED);
-	const made = answer.value as Static<typeof BriefSchema>;
+	const made = complete(answer.value as Written) as Static<typeof BriefSchema>;
 	const cards = Object.fromEntries(Object.entries(made.cards ?? {}).flatMap(([key, note]) => names(key).map((name) => [name, note])));
 	return { ...made, cards, seat: seat.id, version: 3, gaps: failed };
 }
@@ -254,6 +267,7 @@ const SYNTHESIS = [
 	"You write one seat's brief for a game of Magic: The Gathering from four analysts' findings, given after the deck lists.",
 	"Reconcile them. Where they conflict, decide, or keep the disagreement as a condition when it depends on unknown play: do X unless Y.",
 	"A missing or failed analyst stays missing: do not invent its part.",
+	"The analysts supply separate policy families. Read those drafts together for conflicting priorities, resource commitments and timing. Omit policies that still fit: the application carries them unchanged. Return a complete replacement only for a family you need to reconcile. Do not rewrite sound examples to change their wording. If an analyst failed and a family has no draft, explicitly state the uncertainty in that family; do not invent findings from the missing analyst.",
 	"",
 	"The fields, and who reads them:",
 	"- objective: one sentence giving the role and route to a win, for the pilot. Keep the supporting analysis in the fields below.",

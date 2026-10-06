@@ -23,6 +23,14 @@ An example states enough facts to follow its arithmetic: costs, usable sources,
 spending restrictions, intended targets, and what remains. It distinguishes
 casting from resolving, and a forecast from an event already recorded.
 
+The deck analyst owns sequencing and resources. The matchup analyst owns
+responses and combat. The challenger owns recovery and exceptions. The opening
+analyst owns retained-hand decisions. The tool schema enforces those separate
+policy destinations. Supporting conclusions can be empty when the policies
+already settle the assigned question. Synthesis reads the drafts together and
+replaces only families that need reconciliation; omitted families carry forward
+unchanged. A failed analyst stays visible as a failure.
+
 During play, the strategist receives all five families because a turn line
 commits resources through the opponent's turn. It does not receive the opening
 policies again. Existing phase scripts arrive as the base plan, and card notes

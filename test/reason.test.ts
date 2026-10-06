@@ -101,12 +101,21 @@ const BRIEF = { role: "Beatdown: force the exchange before control stabilizes.",
 			reserve: "Resources required by that threat.", reconsider: "The opponent threatens lethal before it matters.",
 			example: { position: "Our threat died and Elves remains in hand with a Forest available.", line: ["Develop Elves."], exception: "Using the last green source loses an essential response." } },
 	} };
+const analystFindings = (request: Parameters<Stream>[1]) => {
+	const schema = request.tools!.find((one) => one.name === "submit")!.parameters as {
+		properties: { value: { properties: { policies: { properties: Record<string, unknown> } } } };
+	};
+	const owned = Object.keys(schema.properties.value.properties.policies.properties);
+	return { ...FINDINGS, policies: Object.fromEntries(owned.map((family) => [family, BRIEF.policies[family as keyof typeof BRIEF.policies]])) };
+};
 /** Pi's stream as the pregame meets it: each analyst submits findings, the synthesis submits the brief. */
 function pregame(options: { hold?: Promise<void>; fail?: string; brief?: object } = {}) {
-	const tasks: string[] = [], seen: string[] = [];
+	const tasks: string[] = [], seen: string[] = [], families: string[][] = [];
 	const stream: Stream = (_model, context) => {
 		const task = String((context.messages[1] as { content?: unknown } | undefined)?.content ?? "");
 		const synthesis = task.includes("Write the brief now");
+		const findings = synthesis ? undefined : analystFindings(context);
+		if (findings) families.push(Object.keys(findings.policies));
 		tasks.push(task);
 		seen.push(JSON.stringify(context.messages));
 		const failing = options.fail && task.includes(options.fail);
@@ -114,10 +123,10 @@ function pregame(options: { hold?: Promise<void>; fail?: string; brief?: object 
 			if (options.hold && !synthesis) await options.hold;
 			const usage = { input: 100, output: 20, cacheRead: 10, cacheWrite: 0, reasoning: 8, totalTokens: 130, cost: { input: 0.0001, output: 0.00004, cacheRead: 0, cacheWrite: 0, total: 0.00014 } };
 			if (failing) return { content: [{ type: "text", text: "Prose instead of findings." }], stopReason: "stop", usage };
-			return { content: [{ type: "toolCall", id: `call-${tasks.length}`, name: "submit", arguments: { value: synthesis ? options.brief ?? { ...BRIEF, cards: {} } : FINDINGS } }], stopReason: "toolUse", usage };
+			return { content: [{ type: "toolCall", id: `call-${tasks.length}`, name: "submit", arguments: { value: synthesis ? options.brief ?? { ...BRIEF, cards: {} } : findings } }], stopReason: "toolUse", usage };
 		} };
 	};
-	return { stream, tasks, seen };
+	return { stream, tasks, seen, families };
 }
 
 test("the pregame asks four analysts at once, then one synthesis, and files the brief where it is read", async () => {
@@ -128,13 +137,15 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 
 	let release = () => {};
 	const hold = new Promise<void>((resolve) => { release = resolve; });
-	const { stream, tasks } = pregame({ hold, brief: BRIEF });
+	const { policies: _policies, ...withoutPolicies } = BRIEF;
+	const { stream, tasks, families } = pregame({ hold, brief: withoutPolicies });
 	const counted = tally();
 	const writing = brief(me!, [them!], universe, () => reasoner({ role: "pregame", stream, model: sol, thinking: "low", tally: counted, backoffMs: 0 }), { format: standard.name });
 	await new Promise((resolve) => setTimeout(resolve, 0));
 	assert.equal(tasks.length, 4, "all four analysts started before any finished");
 	assert.equal(counted.spent().filter((call) => call.pending).length, 4, "dispatched work is counted before a reply exists");
 	assert.deepEqual(tasks.map((task) => task.split(".")[0]).sort(), ["CHALLENGE", "DECK AND RESOURCES", "MATCHUP", "OPENING"]);
+	assert.deepEqual(families, [["sequencing", "resources"], ["responses", "combat"], [], ["recovery"]], "each turn-policy family has one analyst; opening owns its separate decisions");
 	release();
 	const written = await writing;
 	assert.equal(tasks.length, 5, "then one synthesis");
@@ -181,7 +192,7 @@ test("the analysts read both lists and computed odds, look rules up, and a faile
 			const last = context.messages.at(-1) as { role?: string };
 			if (last.role === "toolResult") answers.push(JSON.stringify(last));
 			const fresh = context.messages.length === 2 && !String((context.messages[1] as { content?: unknown }).content).includes("Write the brief now");
-			const value = String((context.messages[1] as { content?: unknown }).content).includes("Write the brief now") ? { ...BRIEF, cards: {} } : FINDINGS;
+			const value = String((context.messages[1] as { content?: unknown }).content).includes("Write the brief now") ? { ...BRIEF, cards: {} } : analystFindings(context);
 			return { result: async () => fresh ? { content: [{ type: "toolCall", id: "a", name, arguments: args }], stopReason: "toolUse" }
 				: { content: [{ type: "toolCall", id: "b", name: "submit", arguments: { value } }], stopReason: "toolUse" } };
 		};
