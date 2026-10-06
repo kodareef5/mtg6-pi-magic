@@ -139,11 +139,34 @@ without separate invitations for Jev to invent a strategy for each one.
    Reports and timeline rendering now live in `tools/`. Loop observers use
    named options. The unused `Decision.delegated` flag is removed; documentation
    identifies the explicit intent permission that core actually honors.
-7. [ ] Validate the complete path, then run one live gate.
+7. [x] Validate the complete path, then run one live gate.
    Run offline invariants, focused model-contract exercises and replay/clone checks
    before paid full games. Use registered decks and ordinary setup. Review the
    gate's exact requests, strategic decisions, legality and timeline. A finished
    game alone is insufficient. Stop a failing gate at its first diagnostic gap.
+   The gate finished on turn 16 with no recorded gaps or fallback and matched
+   replay. It took 15m14s of play with carried preparation, 675 Jev calls and
+   67 strategy calls. Strategy wait was 12m07s; playing strength and the fivefold
+   speed target remain unmet. Review found missing pending-action windows in
+   Jev's packet. The corrected packet passed the exact saved draw-step check:
+   Jev waited for the planned cast instead of spending its mana elsewhere.
+   Types and all 179 offline tests pass. The full evidence, limits and separate
+   preparation measurements are in [the validation record](history/2026-10-05-next-version.md).
+
+## Next priorities from the gate
+
+- Filter ordinary reusable-action context by visible source bindings, not just
+  card identity. A creature already in play must not look like another cast in
+  hand. Keep absent equipment available through lookup.
+- Give the turn organizer a concrete resource forecast for its ordered line,
+  including which attackers a payment taps. Bind target and response choices;
+  prose about retaining mana is insufficient when the line spends it.
+- Narrow post-draw amendments and preserve sound phase policies. All 15 prepared
+  turns needed amendments in this gate; 16 of 67 strategy requests followed a
+  refusal. The background and repair questions still do too much work.
+- Preserve missed attacks, premature fetches and incorrect clock estimates as
+  position benchmarks. Check strategic improvement on these before another
+  full batch, then compare matching seeds with preparation measured separately.
 
 ## Measurements and completion
 

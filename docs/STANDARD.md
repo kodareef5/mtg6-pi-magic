@@ -7,6 +7,17 @@ The full October 5 experiments, request references and findings are preserved in
 
 ## Current evidence
 
+The shared-mechanics gate finished on turn 16 with Red winning, no recorded gaps
+or fallback, and matched replay. With carried preparation it used 15m14s of play,
+675 Jev calls, 67 Luna low strategy calls and $0.2621 of reported model cost.
+Strategy waiting remained 12m07s. The exact-request review found strategic errors
+and a missing pending-window fact in Jev context; that fact was added and checked
+against the saved decision. This is not an expert-play result or a complete
+legality audit. See [the validation record](history/2026-10-05-next-version.md)
+for separate pregame measurements, clone checks, limits and the next priorities.
+
+## Previous batch
+
 The focused-context gate and three further games used Jev, Sol 6.1 high pregame,
 Luna low strategy and judge, and summaries off. Three games reached outcomes;
 one stopped at a combat-damage menu with 1,041 classifier choices. All four

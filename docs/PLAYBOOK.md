@@ -50,6 +50,10 @@ prior plan, and currentWindow gives the response window in plan syntax.
 Position objects are grouped by their actual zone and controller, with empty
 hand and battlefield groups shown explicitly. A cast candidate in hand or exile
 does not appear among current battlefield creatures.
+The pilot's pending actions carry their required windows and whether the window
+is closed or the condition is false. A main-phase cast in the plan calls for
+passing through draw under the response policy, not choosing an unrelated
+activation with its mana. Every pass still goes through Jev.
 For a response repair, the writer submits `current` actions with labels and
 purposes. Context binds them to the exact current turn and step and replaces
 only that window's unfinished steps. Other steps stay. The model cannot put
