@@ -44,3 +44,6 @@ writeFileSync(join(values.out!, `${id}.briefs.json`), JSON.stringify({ decks: na
 console.log(`${names.join(" vs ")} with ${part.pattern}: ${((Date.now() - began) / 1000).toFixed(0)}s. Briefs in ${join(values.out!, `${id}.briefs.json`)}`);
 for (const made of briefs) if ("failed" in made) console.log(`Seat ${made.seat} failed: ${made.failed}`);
 console.log(bill(counted.spent()).join("\n"));
+
+// Model transports may retain connections after the saved component has finished.
+process.exit(briefs.some((made) => "failed" in made || made.gaps.length) ? 1 : 0);
