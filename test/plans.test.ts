@@ -112,6 +112,7 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	}
 	const conditional = { ...line, steps: [{ ...line.steps[0]!, if: { amount: { history: "cast" as const, of: { name: "Llanowar Elves" } }, atLeast: 1 } }] };
 	assert.match(planProblems(workFrame(table, 0), conditional).join("; "), /cast history selectors need zones/);
+	assert.match(planProblems(workFrame(table, 0), { ...line, steps: [{ ...line.steps[0]!, if: { not: { any: [{ bound: "x" }] } } }] }).join("; "), /bound x has no binding/);
 });
 
 test("the pilot flies the plan: actions and passes are chosen, and progress lives on the ledger", async () => {

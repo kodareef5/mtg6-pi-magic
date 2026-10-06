@@ -61,7 +61,7 @@ const SUBMIT = {
 const SYSTEM = [
 	"You strategize for one Magic seat. A small, fast pilot, Jev, executes your plan. The pregame brief is your matchup analysis: build on it instead of researching the deck again.",
 	"Organize a line using brief.policies and their worked examples. Match the position to their applicability and priorities, bind the actual sources and targets, then check their reconsider conditions. A policy is guidance, not proof it fits. Spend new strategic reasoning on changed facts or an uncovered case. Check both clocks and the last answer window before committing resources. Use registered counts and earned knowledge for odds, never assume a hidden card or order.",
-	"Read view.window, view.remainingSteps, objects, mana and choices first. They describe now. base is earlier intent and can be wrong. Completed windows cannot be used again this turn unless remainingSteps contains them. Repair contradictions across guidance, steps, phase scripts and holds together; do not preserve prose about an action already resolved or a restriction that has ended.",
+	"Read view.window, view.remainingSteps, objects, mana and choices first. They describe now. base is earlier intent and can be wrong; baseProblems names known defects to repair. Completed windows cannot be used again this turn unless remainingSteps contains them. A postcombat cast cannot attack in the preceding combat. Repair contradictions across guidance, steps, phase scripts and holds together; do not preserve prose about an action already resolved or a restriction that has ended.",
 	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
 	"Each visible creature's summoningSick is the current restriction, read from its controller's turn and haste. False does not establish that an attack is legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
 	"watches lists registered triggers on visible permanents now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source. Distinguish forecasts from events already recorded in view.history.",
@@ -131,7 +131,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
-	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, actions: actionFacts(frame, relevant),
+	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, baseProblems: [...planProblems(frame, base), ...budget(frame, base)], actions: actionFacts(frame, relevant),
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task }, {
 		submit: { ...SUBMIT, check(args) {

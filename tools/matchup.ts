@@ -59,8 +59,8 @@ let failure: unknown;
 try {
 	if (!values.prepare) await play(table, seated.players, seated.intents, { watch: (line) => {
 		console.log(line); save(journal, table);
-		// A gap the game plays on through, a failed strategy session or an essential step passed, is recorded; any other stops the run.
-		if (table.gaps.some((gap) => !gap.endsWith("Play goes on.")) || table.cursor.turn > limit) throw stop;
+		// This runner is a diagnostic gate: even a recoverable gap ends the run.
+		if (table.gaps.length || table.cursor.turn > limit) throw stop;
 	}, judge: judgeFor(table, seated, journal), onTurnStart: (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }) });
 } catch (error) { if (error !== stop) failure = error; }
 finally {

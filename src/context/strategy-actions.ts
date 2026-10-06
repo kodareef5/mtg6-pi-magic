@@ -5,7 +5,10 @@ import type { actions } from "./plan-edit.ts";
 /** Keep accepted instructions intact and make an omitted printed cost explicit. */
 export function actionFacts(frame: Frame, available: ReturnType<typeof actions>) {
 	return Object.fromEntries(Object.entries(available).map(([key, one]) => {
-		if (!("procedure" in one.action)) return [key, one];
+		if (!("procedure" in one.action)) {
+			const offered = frame.decision?.options.find((option) => option.id === ("option" in one.action ? one.action.option : undefined));
+			return [key, { ...one, ...(offered?.use ? { fixedUse: offered.use } : {}) }];
+		}
 		const { cost, ...procedure } = one.action.procedure;
 		const card = procedure.source.card;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
