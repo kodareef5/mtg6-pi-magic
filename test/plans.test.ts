@@ -723,6 +723,24 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
+	// The same card name in play or exile is not a source for every accepted cast.
+	const nova = cardsIn(table, "hand", 1).find((one) => one.card === "Nova Hellkite")!;
+	commit(table, [{ do: "move", what: nova.id, to: "battlefield", reason: "resolve" }], "resolve");
+	const read = (seat = 1, turn?: number) => { const frame = workFrame(table, seat); return actionFacts(frame, available, turn); };
+	assert.equal(read()[normalKey], undefined, "an existing permanent does not advertise another cast");
+	const prior = { "step:0 Cast Nova": available[normalKey]! };
+	assert.deepEqual(actionFacts(workFrame(table, 1), prior)["step:0 Cast Nova"].sourcesNow, [], "unbound prior intent remains visible to repair");
+	place(table, 1, "hand", "Nova Hellkite");
+	assert.equal(read()[normalKey].sourcesNow.length, 1, "a second copy really in hand restores the casting candidate even without enough mana");
+	const second = cardsIn(table, "hand", 1).find((one) => one.card === "Nova Hellkite")!;
+	commit(table, [{ do: "move", what: second.id, to: "exile", reason: "resolve" }], "resolve");
+	assert.equal(read()[normalKey], undefined, "visible exile alone grants no permission");
+	const exiled = table.things.get(second.id)!;
+	commit(table, [{ do: "note", note: { kind: "permit", by: 1, who: 1, on: { id: exiled.id, incarnation: exiled.incarnation }, fromTurn: 4, until: "indefinite" } }], "resolve");
+	assert.equal(read()[normalKey], undefined, "a later permission is not available now");
+	assert.equal(read(1, 4)[normalKey].sourcesNow[0].zone, "exile", "next-turn preparation can see a permission that opens then");
+	assert.equal(read(1, 4)[warpKey], undefined, "a hand-only alternate cast stays unavailable from exile");
+	assert.equal(read(0, 4)[normalKey], undefined, "one seat's permission does not authorize the other seat");
 });
 
 test("one unfinished preparation is awaited at the draw without a second planner or note race", async () => {

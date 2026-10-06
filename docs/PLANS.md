@@ -2,8 +2,8 @@
 
 ## Next version: shared mechanics and prepared strategy
 
-Approved October 5. The active Codex goal is to deliver this version in tested
-commits. This document records the contract and work order. The previous design,
+Approved October 5 and delivered through the reviewed gate. This document
+records the contract, completed work and the next review cycle. The previous design,
 worked question sequences and implementation notes remain in
 [the October 5 archive](history/2026-10-05-plans.md).
 
@@ -155,18 +155,27 @@ without separate invitations for Jev to invent a strategy for each one.
 
 ## Next priorities from the gate
 
-- Filter ordinary reusable-action context by visible source bindings, not just
+- [x] Filter ordinary reusable-action context by visible source bindings, not just
   card identity. A creature already in play must not look like another cast in
   hand. Keep absent equipment available through lookup.
-- Give the turn organizer a concrete resource forecast for its ordered line,
+  The shared source reader now serves offers, readiness and planning context.
+  Saved-position checks still found stale prior instructions copied into a new
+  line; candidate filtering alone did not fix that planning error.
+- [ ] Give the turn organizer a concrete resource forecast for its ordered line,
   including which attackers a payment taps. Bind target and response choices;
   prose about retaining mana is insufficient when the line spends it.
-- Narrow post-draw amendments and preserve sound phase policies. All 15 prepared
+- [ ] Narrow post-draw amendments and preserve sound phase policies. All 15 prepared
   turns needed amendments in this gate; 16 of 67 strategy requests followed a
   refusal. The background and repair questions still do too much work.
-- Preserve missed attacks, premature fetches and incorrect clock estimates as
+- [ ] Preserve missed attacks, premature fetches and incorrect clock estimates as
   position benchmarks. Check strategic improvement on these before another
   full batch, then compare matching seeds with preparation measured separately.
+
+Each cycle starts with the reviewed journal and exact request. Save the smallest
+position that exhibits the mistake, state the preferred decision and its
+exceptions, then check the context and physical continuation there. Run another
+full game after those positions improve. Review that game before choosing the
+next changes; a completed game does not close a strategic-quality problem.
 
 ## Measurements and completion
 

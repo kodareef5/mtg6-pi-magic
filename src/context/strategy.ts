@@ -141,11 +141,6 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const base = !options.prepared && !frame.view.work?.plan && context.brief ? initialPlan(context.brief)
 		: basePlan(frame, options.prepared?.plan, options.nextTurn);
 	const available = actions(frame, base);
-	const visible = new Set((frame.view.objects ?? []).flatMap((one) => one.card ? [one.card] : []));
-	const relevant = Object.fromEntries(Object.entries(available).filter(([, one]) => {
-		const card = "procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card;
-		return !card || visible.has(card);
-	}));
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
@@ -155,7 +150,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		parameters: { ...SUBMIT.parameters, properties: { ...ResponseSchema.properties, notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection }, required: ["current"] } } : SUBMIT;
 	const current = at.kind === "turn" ? `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
-	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, relevant),
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }, response ? "response" : "turn"),
 		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {

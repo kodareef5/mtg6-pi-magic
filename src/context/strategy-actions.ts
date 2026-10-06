@@ -3,23 +3,30 @@ import type { Frame, Option } from "../core/types.ts";
 import type { Plan } from "../core/language.ts";
 import { matches, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
+import { useSources } from "../core/readiness.ts";
 import type { actions } from "./plan-edit.ts";
 
-/** Show accepted claims and explicit costs; equipment retains the executable bodies. */
-export function actionFacts(frame: Frame, available: ReturnType<typeof actions>) {
+/** Show source-bound uses and prior intent to repair; absent equipment remains a lookup. */
+export function actionFacts(frame: Frame, available: ReturnType<typeof actions>, turn?: number) {
 	return Object.fromEntries(Object.entries(available).map(([key, one]) => {
+		const prior = key.startsWith("step:") || key.startsWith("may:");
 		if (!("procedure" in one.action)) {
+			if (!prior && one.action.objects && !select(one.action.objects, frame).length) return undefined;
 			const offered = frame.decision?.options.find((option) => option.id === ("option" in one.action ? one.action.option : undefined));
 			return [key, { ...one, ...(offered?.use ? { fixedUse: offered.use }
-				: one.action.option ? { availability: offered ? "Offered now" : "This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }];
+				: one.action.option ? { availability: offered ? "Offered now" : "This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }] as const;
 		}
 		const { cost, instructions: _instructions, ...procedure } = one.action.procedure;
+		const bound = useSources(frame, procedure, turn);
+		if (!bound.length && !prior) return undefined;
 		const card = procedure.source.card;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
-		return [key, { ...procedure, sourcesNow: select(procedure.source, frame).map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
+		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
+			...(turn === undefined ? {} : { permissionTurn: turn }),
+			...(!bound.length ? { availability: "Prior intent has no permitted source now. An earlier step or a future draw must supply it; it is not an available use." } : {}),
 			cost: { ...cost, mana: mana ?? (procedure.timing === "spell" ? "Read the bound source's printed cost" : "{0}") },
-			costBasis: cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost" }];
-	}));
+			costBasis: cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost" }] as const;
+	}).filter((one) => one !== undefined));
 }
 
 /** The displayed base refers to its reusable actions; executable bodies stay in equipment. */

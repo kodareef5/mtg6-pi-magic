@@ -50,6 +50,13 @@ prior plan, and currentWindow gives the response window in plan syntax.
 Position objects are grouped by their actual zone and controller, with empty
 hand and battlefield groups shown explicitly. A cast candidate in hand or exile
 does not appear among current battlefield creatures.
+Reusable uses bind the source's current zone, incarnation and this seat's
+permission, without requiring current mana or targets. A creature already in
+play is not another cast. A second copy in hand is. A hand-only alternate cost
+does not become an exile cast; next-turn preparation can consider an earned
+permission that opens on that turn. Unbound steps in prior intent stay visible
+for repair. Other absent equipment stays accessible through lookup, so a draw
+branch or an earlier return-to-hand effect can still prepare its continuation.
 The pilot's pending actions carry their required windows and whether the window
 is closed or the condition is false. A main-phase cast in the plan calls for
 passing through draw under the response policy, not choosing an unrelated

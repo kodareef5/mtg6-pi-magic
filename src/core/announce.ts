@@ -13,7 +13,8 @@ import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
-import { allowance, flashed, playable } from "./permits.ts";
+import { allowance, flashed } from "./permits.ts";
+import { useSources } from "./readiness.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -146,11 +147,8 @@ function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: F
 /** Every source, X, cost, payment and target this seat could announce for one procedure now. */
 export function offers(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
 	const world = viewWorld(frame.view), printed = frame.view.printed ?? {};
-	const fromHand = procedure.timing === "spell" || procedure.timing === "land";
-	const zones = procedure.source.zones ?? [fromHand ? "hand" : "battlefield"];
 	const seen = new Set<string>();
-	const sources = query(procedure.source, frame).filter((source) => (source.card || source.token) && zones.includes(source.zone as never) &&
-		(fromHand || (source.zone === "battlefield" || source.zone === "stack" ? source.controller : source.owner) === frame.seat) &&
+	const sources = useSources(frame, procedure).filter((source) =>
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	const offered: ProcedureOption[] = [];
 	for (const source of sources) {
@@ -161,8 +159,6 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		// Targets belong to an Aura spell, or to the permanent's abilities once it is on the battlefield.
 		if (procedure.timing === "spell" && procedure.targets?.length && source.traits && targetless(source.traits.types, source.traits.subtypes)) continue;
 		if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= allowance(world, frame.seat).lands)) continue;
-		// A card is played from hand unless a permission says otherwise.
-		if (fromHand && !playable(world, frame.seat, source, frame.view.window.kind === "turn" ? frame.view.window.turn : 0, procedure.timing === "land")) continue;
 		if (procedure.timing !== "spell" && procedure.speed === "sorcery" && !mainWindow(frame)) continue;
 		if (procedure.if && !holds(scope, procedure.if)) continue;
 		if (procedure.limit === "once-per-turn" && world.history.some((event) => event.kind === "activated" && event.source.id === source.id &&
