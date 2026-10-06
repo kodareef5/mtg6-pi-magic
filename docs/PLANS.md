@@ -203,6 +203,12 @@ without separate invitations for Jev to invent a strategy for each one.
   offers. Expose that dependency as a conditional forecast, retaining unknown
   mills, responses and unresolved choices as unknown. Do not ask the writer to
   reconstruct these dependencies from a missing option and long prose.
+  The first permission forecast now reads accepted unconditional land permissions
+  on ordinary permanent casts. It shows the resulting allowance and visible
+  lands in newly opened zones, with an explicit resolution assumption. It does
+  not simulate instructions or unknown cards. `objects.types` now selects any
+  listed current type from projected characteristics. Response-source bindings
+  and repeated live validation remain open.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected

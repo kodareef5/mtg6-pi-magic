@@ -297,6 +297,10 @@ A **plan** is what jev flies.
 
 A plan points at the table's own options by id prefix and objects, so it never
 needs an object id in advance.
+An `objects` query can narrow by `card`, `zones`, `controller`, `types`,
+`tapped` and exact incarnation `refs`. `types` matches any listed current type;
+other fields narrow that match. It reads projected characteristics, including
+type changes, and cannot discover the type of a hidden object.
 
 | Id | Option |
 |---|---|

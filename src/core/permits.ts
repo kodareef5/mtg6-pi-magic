@@ -5,21 +5,21 @@
  * a seat's view agree on what is offered.
  */
 import { matches, type Seen, type World } from "./selectors.ts";
-import type { Selector } from "./language.ts";
+import type { Registration, Selector } from "./language.ts";
 import type { SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
 
-/** What this seat's permanents permit it now. */
-export function allowance(world: World, seat: SeatId): { lands: number; landsFrom: Zone[]; flash: Selector[] } {
+/** What this seat's permanents permit it. Additional assumed registrations
+ * support labelled forecasts, without adding an object or resolving a spell. */
+export function allowance(world: World, seat: SeatId, assumed: readonly Registration[] = []): { lands: number; landsFrom: Zone[]; flash: Selector[] } {
 	const found = { lands: 1, landsFrom: ["hand"] as Zone[], flash: [] as Selector[] };
-	for (const object of world.objects) {
-		if (object.zone !== "battlefield" || object.controller !== seat) continue;
-		for (const registration of world.read(object)?.registrations ?? []) {
-			if (registration.kind !== "permit") continue;
-			found.lands += registration.lands ?? 0;
-			for (const zone of registration.landsFrom ?? []) if (!found.landsFrom.includes(zone as Zone)) found.landsFrom.push(zone as Zone);
-			if (registration.flash) found.flash.push(registration.flash);
-		}
+	const current = world.objects.filter((object) => object.zone === "battlefield" && object.controller === seat)
+		.flatMap((object) => world.read(object)?.registrations ?? []);
+	for (const registration of [...current, ...assumed]) {
+		if (registration.kind !== "permit") continue;
+		found.lands += registration.lands ?? 0;
+		for (const zone of registration.landsFrom ?? []) if (!found.landsFrom.includes(zone as Zone)) found.landsFrom.push(zone as Zone);
+		if (registration.flash) found.flash.push(registration.flash);
 	}
 	return found;
 }

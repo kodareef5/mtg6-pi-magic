@@ -171,6 +171,15 @@ resolved permanent. For example, a graveyard land unavailable now can become a
 candidate after the prepared spell grants permission. Keep that forecast
 distinct from a current offer and from unknown results such as a future mill.
 
+Permission forecasts have three representative cases. With Explorer in hand
+and Vein already in the graveyard, show the accepted additional land allowance
+and that visible Vein as a candidate after Explorer resolves. With only unknown
+library cards, name no future milled card. With a permission already active,
+show the current allowance rather than claiming the next copy opens that zone
+for the first time. These forecasts read unconditional accepted `permit`
+registrations only. They do not resolve a spell, predict a response or validate
+the rest of a line.
+
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved

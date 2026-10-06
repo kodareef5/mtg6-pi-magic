@@ -25,6 +25,7 @@ import { printedCast } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
+import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
@@ -136,6 +137,11 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.ok(checked.structure && !checked.passed, "a valid action line can fail the fixture's prose property");
 	assert.deepEqual(checked.prose[0]!.matches, ["Keep one Forest for Veil"]);
 	assert.equal(checkPlan({ ...line, guidance: "No reserve." }, { forbidProse: ["keep[^.]*Veil"] }, workFrame(table, 0)).passed, true);
+	const typed = { ...line, steps: [{ ...line.steps[2]!, action: { prefix: "attack:", objects: { zones: ["battlefield" as const], controller: "self" as const, types: ["creature" as const] } } }] };
+	assert.deepEqual(planProblems(workFrame(table, 0), typed), []);
+	assert.deepEqual(select(typed.steps[0]!.action.objects, workFrame(table, 0)).map((one) => one.card), ["Sazh's Chocobo"]);
+	assert.ok(select({ types: ["land", "creature"] }, workFrame(table, 0)).length > 1, "type lists match any listed type, like condition selectors");
+	assert.equal(select({ zones: ["hand"], controller: "opponent", types: ["land"] }, workFrame(table, 0)).length, 0, "a type query cannot inspect the opponent's hidden hand");
 });
 
 test("the pilot flies the plan: actions and passes are chosen, and progress lives on the ledger", async () => {
@@ -584,9 +590,24 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	place(icetill, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
 	main(icetill, 0, 3);
 	place(icetill, 0, "hand", "Icetill Explorer", "Forest", "Forest");
-	editWork(icetill, 0, [{ do: "package.put", package: { card: "Icetill Explorer", registers: pack("Icetill Explorer") } }, { do: "package.put", package: { card: "Forest", registers: [] } }], "icetill");
+	editWork(icetill, 0, [{ do: "package.put", package: { card: "Icetill Explorer", printedCast: true, registers: pack("Icetill Explorer") } }, { do: "package.put", package: { card: "Forest", registers: [] } }], "icetill");
 	assert.equal(problems(icetill, { steps: [cast(icetill, "Icetill Explorer"), land(icetill, "Forest"), land(icetill, "Forest")] }), "");
 	assert.match(problems(icetill, { steps: [land(icetill, "Forest"), land(icetill, "Forest")] }), /no land play is left for it this turn/);
+	place(icetill, 0, "graveyard", "Promising Vein");
+	place(icetill, 1, "graveyard", "Mountain");
+	const frame = workFrame(icetill, 0), before = structuredClone(frame);
+	const available = actions(frame, { objective: "o", guidance: "g", steps: [cast(icetill, "Icetill Explorer")] });
+	const forecast = permissionForecasts(frame, available)[0]!;
+	assert.deepEqual(forecast.landsPerTurn, { now: 1, after: 2 });
+	assert.deepEqual(forecast.openedZones, ["graveyard"]);
+	assert.deepEqual(forecast.candidates.map((one) => one.card), ["Promising Vein"], "only visible owned lands in newly opened zones are forecast");
+	assert.ok(!movementActions(frame)["land Promising Vein from graveyard"], "a future candidate does not become a current offer");
+	assert.deepEqual(frame, before, "forecasting neither resolves the spell nor mutates projected facts");
+	establish(icetill, 0, "Icetill Explorer");
+	const already = permissionForecasts(workFrame(icetill, 0), available)[0]!;
+	assert.deepEqual(already.landsPerTurn, { now: 2, after: 3 });
+	assert.deepEqual(already.openedZones, [], "an existing permission is not described as a new zone");
+	assert.deepEqual(already.candidates, []);
 });
 
 test("an essential step that cannot be taken where it belongs asks for a new plan; a plain one is passed over", async () => {

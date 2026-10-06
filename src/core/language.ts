@@ -255,6 +255,7 @@ const seatSide = one("self", "opponent", "any");
 export const QuerySchema = object({
 	zones: Type.Optional(Type.Array(one("hand", "battlefield", "stack", "graveyard", "exile", "command", "dungeon"))),
 	controller: Type.Optional(seatSide), card: Type.Optional(text), tapped: Type.Optional(Type.Boolean()),
+	types: Type.Optional(Type.Array(one(...CARD_TYPES), { description: "Matches any listed current card type on a projected object. Other query fields still narrow the selection." })),
 	refs: Type.Optional(Type.Array(RefSchema)),
 });
 /** A window: whose turn, which step or phase, and inclusive table turn bounds. */
