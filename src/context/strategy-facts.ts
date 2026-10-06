@@ -115,13 +115,19 @@ export function chancing(frame: Frame): Lookup {
 
 export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}): string {
 	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, ...view } = frame.view;
+	const at = frame.view.window;
 	return JSON.stringify({
-		seat: frame.seat, turns: turns(frame), notebook: work?.notebook ?? [], mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
+		brief: strategyBrief(context.brief, frame),
 		...more,
+		notebook: work?.notebook ?? [],
 		packages: (work?.packages ?? []).map((pack) => pack.card),
-		choices: planningChoices(frame.decision?.options ?? []), brief: strategyBrief(context.brief, frame),
 		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]
 			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
-		recaps: context.recaps?.slice(-3), refused: frame.refused,
+		recaps: context.recaps?.slice(-3),
+		// Background and prior intent precede the position they must answer.
+		seat: frame.seat, turns: turns(frame),
+		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
+		mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
+		choices: planningChoices(frame), refused: frame.refused,
 	});
 }

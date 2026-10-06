@@ -18,7 +18,7 @@ import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
 import { ChangesSchema, actions, basePlan, changedPlan, equipment } from "./plan-edit.ts";
-import { actionFacts } from "./strategy-actions.ts";
+import { actionFacts, bindingFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, nextMana, type Context } from "./strategy-facts.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
@@ -61,8 +61,9 @@ const SUBMIT = {
 const SYSTEM = [
 	"You strategize for one Magic seat. A small, fast pilot, Jev, executes your plan. The pregame brief is your matchup analysis: build on it instead of researching the deck again.",
 	"Organize a line using brief.policies and their worked examples. Match the position to their applicability and priorities, bind the actual sources and targets, then check their reconsider conditions. A policy is guidance, not proof it fits. Spend new strategic reasoning on changed facts or an uncovered case. Check both clocks and the last answer window before committing resources. Use registered counts and earned knowledge for odds, never assume a hidden card or order.",
+	"Evaluate a win available now before development or a defensive reserve. Name the action and damage that can finish, or the visible obstacle that prevents it. A reserve must name an actual card or ability and its useful window; an unknown future draw is not itself a response. Release holds when the winning line needs them.",
 	"Read view.window, view.remainingSteps, objects, mana and choices first. They describe now. base is earlier intent and can be wrong; baseProblems names known defects to repair. Completed windows cannot be used again this turn unless remainingSteps contains them. A postcombat cast cannot attack in the preceding combat. Repair contradictions across guidance, steps, phase scripts and holds together; do not preserve prose about an action already resolved or a restriction that has ended.",
-	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
+	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. Current offers state manaRequired and untappedSourcesAfterPayment. Use those counts; do not invent a leftover source. State resource holds and their release condition, then let Jev select the payment. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
 	"Each visible creature's summoningSick is the current restriction, read from its controller's turn and haste. False does not establish that an attack is legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
 	"watches lists registered triggers on visible permanents now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source. Distinguish forecasts from events already recorded in view.history.",
 	"",
@@ -81,14 +82,14 @@ const SYSTEM = [
 	"- Repair the unfinished line and its guidance together. history names actions already taken this turn; do not reintroduce them when the new base omits completed steps. Phase instructions should say what to do while an effect is pending and after it resolves, not keep ordering an already completed activation.",
 	"- phases: [{when, goal, guidance, reevaluate}]. Give the current main phases, combat and the opponent's turn clear decisions and sequencing, including trigger targets and searches. Keep unchanged scripts. reevaluate names only an unexpected threat or opportunity that changes the line; routine events belong in guidance or branches.",
 	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
-	"- Use active self/opponent and step names for windows. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
+	"- Use active self/opponent and step names for windows. active means whose TURN it is, not whose choice. currentWindow is the exact when for a response now: copy it for a pending-spell response. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
 	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
 	"- choices.options lists direct decisions such as land plays, blocks and passes. choices.uses describes available spell and activation modes with explicit locked costs and target bindings, without payment combinations. Use action.reuse for that mode, then state target priorities and exact resource holds. Jev selects the offered target and payment; do not copy a payment id into a reusable turn line.",
 	"- cards gives the full text of visible cards. Registered lists remain in view.decks; use card or equipment for an absent card when it matters. Use syntax only before changing a procedure or package; ordinary sequencing and conditions are defined below and need no card reinterpretation.",
 	"- Combat is sequential: attack: or block: per creature, then attack:done or block:done. Jev handles listed trigger, resolution and damage choices with your phase guidance. It escalates if the plan cannot answer them.",
 	"",
 	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
-	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Keep the answer short because Jev reads the conclusions, not your analysis.",
+	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Give Jev the final consistent conclusion, not a running calculation followed by a correction. Remove superseded statements before submitting.",
 	"",
 	"The definitions below cover ordinary plans and conditions. Procedure and Package definitions are available through syntax when you need to change card terms. The complete schema is checked locally.",
 	JSON.stringify(planReference),
@@ -131,9 +132,11 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
-	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, baseProblems: [...planProblems(frame, base), ...budget(frame, base)], actions: actionFacts(frame, relevant),
+	const at = frame.view.window;
+	const current = at.kind === "turn" ? `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
+	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, relevant),
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
-		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task }, {
+		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task: `${task}\n${current}` }, {
 		submit: { ...SUBMIT, check(args) {
 			const { notes, objection: raised, ...changes } = args;
 			let plan: Plan;

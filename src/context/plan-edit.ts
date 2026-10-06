@@ -21,7 +21,10 @@ export function actions(frame: Frame, prepared?: Plan): Record<string, { label: 
 	return Object.fromEntries([
 		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
-		...(frame.view.worked ?? []).map((one, at) => [`worked:${at} ${one.label}`, { label: one.label, action: one.action }]),
+		// A historical pick fixed a past incarnation and payment. It is evidence
+		// in history, not reusable equipment. Procedures and selectors remain useful.
+		...(frame.view.worked ?? []).flatMap((one, at) => "option" in one.action && one.action.option ? []
+			: [[`worked:${at} ${one.label}`, { label: one.label, action: one.action }]]),
 		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),
 		...(frame.view.work?.packages ?? []).filter((pack) => pack.printedCast && frame.view.printed?.[pack.card]).map((pack) =>
 			[`printed:${pack.card}`, { label: `Cast ${pack.card} for its printed cost`, action: { procedure: printedCast(pack.card, frame.view.printed![pack.card]!) } }]),

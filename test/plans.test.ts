@@ -39,7 +39,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment } from "../src/context/plan-edit.ts";
-import { actionFacts } from "../src/context/strategy-actions.ts";
+import { actionFacts, bindingFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -191,6 +191,7 @@ test("a branch and a held resource are marked on the options they touch, and not
 	assert.equal(decision.seat, 0);
 	const frame = workFrame(table, 0);
 	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[]; choices: { options: { id: string }[]; uses: { offeredCombinations: number }[] } };
+	assert.deepEqual(JSON.parse(facts(frame, {})).currentWindow, { active: "opponent", step: "precombat-main" }, "answering priority does not make it this seat's turn");
 	assert.deepEqual(supplied.choices.options.map((one) => one.id), decision.options.filter((one) => !one.use).map((one) => one.id), "direct decisions remain selectable by the planner");
 	assert.equal(supplied.choices.uses.reduce((n, use) => n + use.offeredCombinations, 0), decision.options.filter((one) => one.use).length, "every offered spell and activation is represented without asking the planner to select a payment");
 	for (const object of frame.view.objects!) {
@@ -244,6 +245,8 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  apply(table, first.id, "engine", "delegated", { plan: table.work[0]!.planned!, step: 0 });
  editWork(table, 0, [{ do: "plan.request", reason: "The pilot asked for a changed combat line." }], "request");
  const frame = workFrame(table, 0), base = basePlan(frame), available = actions(frame);
+ const pastPick = { ...frame, view: { ...frame.view, worked: [{ label: "Old physical pick", action: { option: "cast:past-incarnation-and-payment" } }] } };
+ assert.ok(!Object.keys(actions(pastPick)).some((key) => key.startsWith("worked:")), "past physical picks are history, not reusable equipment");
  const shockKey = Object.keys(available).find((key) => available[key]!.label === "Cast Shock")!;
  assert.ok(shockKey && !frame.view.objects!.some((one) => one.card === "Shock"));
  assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Shock" })).actions[shockKey], available[shockKey], "absent card equipment keeps its exact reusable key and accepted terms");
@@ -689,7 +692,16 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.equal((descriptions[warpKey] as { cost: { mana: string } }).cost.mana, "{2}{R}");
 	const warped = frame.decision!.options.find((one) => one.use?.claim === warp.claim)!;
 	assert.ok(warped?.use);
+	const planningOffers = JSON.parse(facts(frame, {})).choices.uses as { claim: string; notes: string[] }[];
+	assert.ok(planningOffers.find((one) => one.claim === warp.claim)!.notes.some((note) => note.includes("Flying, haste")), "grouped casting modes preserve the accepted entry abilities, not just empty casting instructions");
+	const stale: Plan = { objective: "o", guidance: "g", steps: [{ label: "Old payment", when: now, action: { option: `${warped.id}-obsolete` } }] };
+	assert.equal(bindingFacts(frame, stale).unoffered[0]!.option, `${warped.id}-obsolete`);
+	assert.deepEqual(bindingFacts(frame, { ...stale, steps: [{ ...stale.steps[0]!, when: { active: "opponent", step: "end" } }] }).unoffered, [], "future windows are not diagnosed as current failures");
+
 	assert.deepEqual(budget(frame, { objective: "o", guidance: "g", steps: [{ label: "Warp", when: now, action: { option: warped.id } }] }), [], "a locked warp costs three, not the printed five");
+	const warpFacts = JSON.parse(facts(frame, {})).choices.uses.find((one: { claim: string }) => one.claim === warp.claim);
+	assert.equal(warpFacts.manaRequired, 3);
+	assert.deepEqual([warpFacts.untappedSourcesAfterPayment.minimum, warpFacts.untappedSourcesAfterPayment.maximum], [0, 0], "three available sources pay the three-mana warp with none retained");
 	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
