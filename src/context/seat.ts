@@ -160,7 +160,8 @@ export const HELP = "ask:help";
 export function question(packet: Packet, help: boolean): Question {
 	const stage = packet.inspection?.stage;
 	const instruction = packet.resolution?.program[0]?.instruction;
-	const search = instruction?.do === "choose" && instruction.from.zones?.includes("library");
+	const search = instruction?.do === "choose" && instruction.from.zones?.length === 1 && instruction.from.zones[0] === "library" &&
+		!instruction.from.is && !instruction.from.linked && packet.resolution?.program.some((one) => one.instruction.do === "shuffle" && one.instruction.who === instruction.who);
 	const instructions = [packet.obligation,
 		"Choose one listed id using the supplied facts and this seat's preparation. Acceptance does not certify card meaning or rules legality.",
 		"options describes the choices; uses holds shared source, timing, effect, target-slot terms and notes; payments holds costs and paid mana ids; funding holds the referenced mana abilities, while pools names existing mana and its restrictions. Read these references together. Printed cards and current characteristics are separate.",

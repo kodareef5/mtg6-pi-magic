@@ -27,8 +27,8 @@ export function movementActions(frame: Frame, turn?: number): ReturnType<typeof 
 }
 
 /** A new literal must name a listed button. Future movement uses selectors or prepared uses. */
-export function choiceProblems(frame: Frame, changes: Record<string, unknown>): string[] {
-	const listed = new Set(["pass", "attack:done", "block:done", ...(frame.decision?.options.map((one) => one.id) ?? [])]);
+export function choiceProblems(frame: Frame, changes: Record<string, unknown>, nextTurn = false): string[] {
+	const listed = new Set(["pass", "attack:done", "block:done", ...(!nextTurn ? frame.decision?.options.map((one) => one.id) ?? [] : [])]);
 	return ["steps", "may", "current"].flatMap((field) => {
 		const entries = changes[field];
 		return !Array.isArray(entries) ? [] : entries.flatMap((one, at) => {

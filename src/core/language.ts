@@ -259,8 +259,9 @@ export const QuerySchema = object({
 });
 /** A window: whose turn, which step or phase, and inclusive table turn bounds. */
 export const WhenSchema = object({
-	active: Type.Optional(seatSide), step: Type.Optional(Step),
-	phase: Type.Optional(Type.String({ enum: [...new Set(Object.values(STEPS).map((step) => step.phase))] })),
+	active: Type.Optional({ ...seatSide, description: "Whose turn: self, opponent or any. Attack declarations are on self; blocks on opponent." }),
+	step: Type.Optional({ ...Step, description: "One rules step. Omit for any step; do not write any. Combat is a phase, not a step." }),
+	phase: Type.Optional(Type.String({ enum: [...new Set(Object.values(STEPS).map((step) => step.phase))], description: "A whole phase such as combat. Omit for any phase." })),
 	fromTurn: Type.Optional(positive), throughTurn: Type.Optional(positive),
 });
 

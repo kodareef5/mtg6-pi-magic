@@ -246,6 +246,9 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	assert.match(choiceProblems(frame, { steps: [{ action: { option: "land:Forest" } }] }).join(" "), /not a listed option id/, "a card name cannot masquerade as a future button");
 	assert.match(choiceProblems(frame, { current: [{ action: { option: "cast:stale-payment" } }] }).join(" "), /not a listed option id/, "response repair uses the same boundary");
 	assert.deepEqual(choiceProblems(frame, { steps: frame.decision!.options.map((one) => ({ action: { option: one.id } })) }), [], "every actual listed id remains usable");
+	const currentLand = frame.decision!.options.find((one) => one.id.startsWith("land:"))!;
+	assert.ok(currentLand);
+	assert.match(choiceProblems(frame, { steps: [{ action: { option: currentLand.id } }] }, true).join(" "), /not a listed option id/, "a preparation cannot bind the other turn's listed picks");
 	assert.deepEqual(choiceProblems(frame, { steps: ["pass", "attack:done", "block:done"].map((option) => ({ action: { option } })) }), [], "stable continuation ids can name later windows");
 });
 

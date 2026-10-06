@@ -190,4 +190,10 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.match(moveQuestion(resolving, false).instructions, /costs are already paid/);
 	assert.doesNotMatch(moveQuestion(resolving, false).instructions, /Stale guidance/);
 	assert.ok(resolving.options.some((one) => one.label.includes("Decline")), "declining the search remains the seat's choice");
+	const limited = structuredClone(resolving);
+	const select = limited.resolution!.program[0]!.instruction;
+	assert.ok(select.do === "choose");
+	select.from.is = { top: 1, of: "you" };
+	assert.doesNotMatch(moveQuestion(limited, false).instructions, /deliberate exception requiring a prepared reason/, "choosing from a limited library set is not a whole-library search");
+	assert.deepEqual(limited.options, resolving.options, "search guidance never removes an optional decline");
 });

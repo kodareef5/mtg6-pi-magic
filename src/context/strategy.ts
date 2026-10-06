@@ -161,7 +161,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			try { plan = changedPlan(base, response ? responseChanges(frame, base, changes) : changes, available); } catch (error) { return String(error); }
 			const objection = raised as Objection | undefined;
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
-			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes), ...registrationProblems(plan.packages ?? [])];
+			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes, options.nextTurn), ...registrationProblems(plan.packages ?? [])];
 			if (!plan.steps.length && (options.nextTurn || !frame.view.work?.plan && !options.prepared && !plan.may?.length))
 				wrong.push('This turn has no ordered actions. Write the known line, or explicitly choose passing with a step whose action is {"option":"pass"}. Conditional branches do not replace the known turn line.');
 			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");
