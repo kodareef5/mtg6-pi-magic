@@ -9,6 +9,7 @@ import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
 import { planState } from "../core/planning.ts";
 import { matches } from "../core/query.ts";
+import type { When } from "../core/work-language.ts";
 import type { SeenObject } from "../core/work.ts";
 import type { Printed } from "../core/printed.ts";
 import { checklist, type ReviewItem } from "../core/review.ts";
@@ -23,7 +24,9 @@ import { decisionFacts } from "./decision-facts.ts";
 
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
 export type PlanSlice = {
-	objective: string; guidance?: string; due?: string; next: string[]; branches: string[]; held: string[]; stops: string[]; done: string[];
+	objective: string; guidance?: string; due?: string;
+	next: { label: string; when: When; status: "outside-window" | "condition-false" }[];
+	branches: string[]; held: string[]; stops: string[]; done: string[];
 	script?: { goal: string[]; guidance: string[]; steps: string[]; reevaluate: string[] };
 };
 export type Seen = {
@@ -82,7 +85,9 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const plan = state && !view.resolution ? {
 		objective: state.plan.objective, ...(scripts.length ? {} : { guidance: state.plan.guidance }),
 		...(dueAt !== undefined ? { due: state.plan.steps[dueAt]!.label } : {}),
-		next: state.waiting.map((one) => one.label), branches: state.branches.map((one) => one.label),
+		next: state.waiting.map((one) => ({ label: one.label, when: structuredClone(state.plan.steps[one.at]!.when),
+			status: matches(state.plan.steps[one.at]!.when, frame) ? "condition-false" as const : "outside-window" as const })),
+		branches: state.branches.map((one) => one.label),
 		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
 		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
 		...(scripts.length ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),

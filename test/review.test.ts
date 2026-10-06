@@ -31,6 +31,16 @@ test("a pilot executes with derived plan status, while private judgments neither
 	], may: [{ label: "Only with a resource", when: { active: "self", step: "precombat-main" }, if: { amount: 0, atLeast: 1 },
 		action: { prefix: "land:", objects: { card: "Forest" } } }],
 	phases: [{ when: { active: "self", step: "precombat-main" }, goal: "Develop without spending protection.", guidance: "Play Forest; do not invent extra mana." }] } }], "plan");
+	const drawFrame = workFrame(table, 0);
+	drawFrame.view.window = { kind: "turn", turn: 1, active: 0, step: "draw", phase: "beginning" };
+	for (const inspection of [undefined, {}]) {
+		const draw = focus(drawFrame, startingIntent(0), { ...(inspection ? { inspection } : {}) });
+		assert.deepEqual(draw.plan!.next.map((one) => [one.label, one.when.step, one.status]), [
+			["Play Forest", "precombat-main", "outside-window"], ["Cast Hydra", "precombat-main", "outside-window"],
+		], "a pilot waiting for main phase sees the required windows even without a current checklist");
+		assert.match(moveQuestion(draw, true).instructions!, /unrelated available activation is not a substitute/);
+		assert.deepEqual(drawFrame.view.work!.plan!.steps, table.work[0]!.plan!.steps, "slicing pending windows changes no intent");
+	}
 	const physical = () => JSON.stringify({ things: [...table.things], cursor: table.cursor, ledger: table.ledger, log: table.log });
 	const before = physical(), offered = nextDecision(table), prompts: string[] = [];
 	const pilot = aiSeat({ name: "Green", intent: startingIntent(0), onGap: assert.fail, api: { named: "fixture", async ask(request) {
