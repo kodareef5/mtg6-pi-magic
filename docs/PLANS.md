@@ -120,6 +120,10 @@ without separate invitations for Jev to invent a strategy for each one.
    collision and delayed-trigger look-back report. Fix each supported reproduction
    in its invariant test. Make delegation documentation match executable handlers.
    Keep visualization assets outside decision context and simplify display hooks.
+   Bounded replay and clones now retain the ruling history behind an included
+   rollback. Departure events read delayed triggers from the prior world, so a
+   source-tied watch sees its own departure and then expires. Both reproduced
+   failures have invariant coverage, including a clone's subsequent rollback.
 7. [ ] Validate the complete path, then run one live gate.
    Run offline invariants, focused model-contract exercises and replay/clone checks
    before paid full games. Use registered decks and ordinary setup. Review the

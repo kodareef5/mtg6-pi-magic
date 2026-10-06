@@ -227,9 +227,12 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			...(registration.limit ? { limit: registration.limit } : {}) });
 	}
 	// Delayed triggers belong to the table and fire even after their source is gone (603.7c).
-	for (const note of table.notes) {
-		if (note.kind !== "delay" || note.written > table.cursor.clock) continue;
-		for (const world of note.event.on === "leaves" || note.event.on === "dies" ? (prior ? [prior] : []) : [after]) {
+	for (const world of prior ? [prior, after] : [after]) {
+		for (const note of world.notes) {
+			if (note.kind !== "delay" || note.written > table.cursor.clock) continue;
+			// A while-source delay may have expired in this group. Departures
+			// still read its prior existence; later events read the current notes.
+			if ((note.event.on === "leaves" || note.event.on === "dies") !== (world !== after)) continue;
 			const scope: Scope = { world, controller: note.by, source: world.lastKnown(note.fixed.source)?.object ?? after.lastKnown(note.fixed.source)?.object,
 				targets: note.fixed.targets, bound: note.fixed.bound, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) };
 			const fired = raise(scope, note.by, note.fixed.source, `Delayed: ${note.effect.instructions.map(summary).join(" ")}`, note.event, {

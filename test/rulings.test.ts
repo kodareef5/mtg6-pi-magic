@@ -14,7 +14,7 @@ import { start } from "../src/core/commit.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { append, open, reopen, replay, rollback, save, type Header } from "../src/core/journal.ts";
+import { append, fork, open, reopen, replay, rollback, save, type Header } from "../src/core/journal.ts";
 import { play, type Judge } from "../src/core/loop.ts";
 import type { Ruling } from "../src/core/judge.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -96,6 +96,7 @@ test("an upheld objection takes the game back to just before the action, and the
 test("a ruling that lets the action stand is recorded and play goes on; without a judge the objection is a gap", async () => {
 	const stands: Judge = { async rule() { return { legal: true, rule: "305.1", remedy: "stand", because: "A land play." }; }, restart: dealt };
 	const table = dealt(), contested: { row?: number } = {};
+	editWork(table, 0, [{ do: "notebook.edit", edits: [{ topic: "role", note: "Develop lands." }] }], "initial-work");
 	await playThrough(table, { 0: steady("A"), 1: objector(table, contested) }, stands, 4);
 	assert.deepEqual(table.rulings.map((one) => [one.case.row, one.kept]), [[contested.row, undefined]]);
 	assert.ok(table.ledger.length > contested.row! + 1, "play went on from where it was");
@@ -104,9 +105,20 @@ test("a ruling that lets the action stand is recorded and play goes on; without 
 	save(journal, table);
 	rollback(table, { case: { row: contested.row!, raisedBy: 1, claim: "A later objection reaches an earlier action." },
 		ruling: { legal: false, rule: "614.1c", remedy: "rollback", because: "Rewind the action." } }, dealt);
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan after the first rollback." }], "ruling-2-0");
 	save(journal, table);
 	assert.equal(table.rulings.length, 2);
 	assert.deepEqual(replay(journal.path, dealt).table.rulings, table.rulings, "a rollback retains the earlier stand ruling even beyond the new durable version");
+	assert.deepEqual(replay(journal.path, dealt, table.ledger.length).table.rulings, table.rulings, "a bounded replay retains the ruling history behind an included rollback");
+	const childPath = join(dir, "child.jsonl");
+	fork(journal.path, table.ledger.length, "child", childPath);
+	const child = replay(childPath, dealt).table;
+	assert.deepEqual(child.rulings, table.rulings, "a clone has the same ruling count and work-id history");
+	await playThrough(child, { 0: steady("A"), 1: objector(child, {}) }, {
+		restart: dealt,
+		async rule() { return { legal: false, rule: "614.1c", remedy: "rollback", because: "A new objection on the continuation." }; },
+	}, 4);
+	assert.equal(child.rulings.length, 3, "the next rollback completes without reusing ruling-2-0 for different work");
 
 	const alone = dealt(), asked: { row?: number } = {};
 	await playThrough(alone, { 0: steady("A"), 1: objector(alone, asked) }, undefined, 4);

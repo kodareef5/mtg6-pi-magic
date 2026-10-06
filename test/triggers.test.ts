@@ -474,8 +474,28 @@ test("a delayed trigger that lasts while its source remains ends when the source
 		instructions: [{ do: "delay", until: "while-source", event: { on: "enters", of: { types: ["land"], controller: "you" } }, effect: { instructions: [{ do: "life", who: "you", amount: 1 }] } }] });
 	resolveTop(table);
 	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 1, "the delayed trigger is created");
-	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" }], "resolve");
+	const land = place(table, 0, "hand", "Forest")[0]!;
+	commit(table, [{ do: "move", what: chocobo.id, to: "graveyard", reason: "resolve" },
+		{ do: "move", what: land.id, to: "battlefield", reason: "resolve", controller: 0 }], "resolve");
 	assert.equal(table.notes.filter((note) => note.kind === "delay").length, 0, "and ends with its source");
+	assert.equal(table.waiting.length, 0, "the expired delay cannot see an entering event that reads the world after the group");
+	for (const on of ["dies", "leaves"] as const) {
+		const dying = matchup(`while-source-${on}`);
+		const source = establish(dying, 0, "Sazh's Chocobo", []);
+		const other = establish(dying, 0, "Llanowar Elves", []);
+		main(dying, 0);
+		announce(dying, { claim: "Watch departures", basis: "For as long as this creature remains, watch creatures leaving.",
+			source: { zones: ["battlefield"], controller: "self", card: source.card }, timing: "stack", cost: { mana: "{0}" },
+			instructions: [{ do: "delay", until: "while-source", event: { on, of: { types: ["creature"], controller: "you" } },
+				effect: { instructions: [{ do: "life", who: "you", amount: 1 }] } }] });
+		resolveTop(dying);
+		commit(dying, [source, other].map((object) => ({ do: "move" as const, what: object.id, to: "graveyard" as const, reason: "destroy" as const })), "resolve");
+		assert.equal(dying.waiting.length, 2, `${on} looks back for both simultaneous departures, including the delayed trigger's source`);
+		assert.equal(dying.notes.filter((note) => note.kind === "delay").length, 0, "the expired watch is not kept for future events");
+		for (let n = 0; n < 2; n++) { trigger(dying, () => true); }
+		resolveTop(dying); resolveTop(dying);
+		assert.equal(dying.seats[0]!.life, 22);
+	}
 });
 
 test("a permanent spell other than an Aura is cast with no targets; its abilities target once it is on the battlefield", () => {

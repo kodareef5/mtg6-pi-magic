@@ -260,6 +260,15 @@ export const rowsOf = (lines: Line[], upTo?: number): LedgerRow[] =>
 		.filter((row) => upTo === undefined || row.seq < upTo)
 		.sort((a, b) => a.seq - b.seq);
 
+/** A rollback retains earlier rulings, even when their old versions exceed
+ * its destination. A prefix containing that rollback must retain them too.
+ */
+function atVersion(lines: Line[], at?: number): Line[] {
+	if (at === undefined) return lines;
+	const rolled = lines.findLastIndex((line) => "ruling" in line && line.ruling.kept !== undefined && line.v <= at);
+	return lines.filter((line, index) => line.v <= at || "ruling" in line && index <= rolled);
+}
+
 /** What a model prepared before the game. A clone carries it, so it is not paid for twice. */
 export const preparedIn = (lines: Line[]): { seat: SeatId; made: unknown }[] =>
 	lines.flatMap((line) => ("prepared" in line ? [line.prepared] : []));
@@ -368,7 +377,8 @@ export function replay(
 	upTo?: number,
 	against?: { cards: { generated: string }; rules: { effective: string } },
 ): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
-	const { header, lines } = read(path);
+	const { header, lines: all } = read(path);
+	const lines = atVersion(all, upTo);
 	if (against) {
 		const drift = [
 			against.cards.generated === header.cards.generated
@@ -384,7 +394,7 @@ export function replay(
 	const table = relive(start(header), rowsOf(lines, upTo), work);
 	restoreWork(table, lines, upTo);
 	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
-	table.rulings = lines.flatMap((line) => "ruling" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.ruling)] : []);
+	table.rulings = lines.flatMap((line) => "ruling" in line ? [structuredClone(line.ruling)] : []);
 	return {
 		table,
 		header,
@@ -415,7 +425,7 @@ export function replay(
  */
 export function fork(path: string, at: number, id: string, to: string): Header {
 	const { header, lines } = read(path);
-	const kept = lines.filter((line) => line.v <= at);
+	const kept = atVersion(lines, at);
 	if (!kept.length && at > 0) throw new Error(`${path} has nothing at or before version ${at}.`);
 	const forked: Header = { ...header, id, created: new Date().toISOString(), forkedFrom: { game: header.id, version: at } };
 	const journal = open(to, forked);
