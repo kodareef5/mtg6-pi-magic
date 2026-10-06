@@ -39,7 +39,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment } from "../src/context/plan-edit.ts";
-import { actionFacts, bindingFacts } from "../src/context/strategy-actions.ts";
+import { actionFacts, bindingFacts, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -245,6 +245,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  apply(table, first.id, "engine", "delegated", { plan: table.work[0]!.planned!, step: 0 });
  editWork(table, 0, [{ do: "plan.request", reason: "The pilot asked for a changed combat line." }], "request");
  const frame = workFrame(table, 0), base = basePlan(frame), available = actions(frame);
+ assert.deepEqual(changedPlan(base, planFacts(base), actions(frame, base)), base, "the displayed plan uses exact reusable references instead of repeating executable bodies");
  const pastPick = { ...frame, view: { ...frame.view, worked: [{ label: "Old physical pick", action: { option: "cast:past-incarnation-and-payment" } }] } };
  assert.ok(!Object.keys(actions(pastPick)).some((key) => key.startsWith("worked:")), "past physical picks are history, not reusable equipment");
  const shockKey = Object.keys(available).find((key) => available[key]!.label === "Cast Shock")!;
@@ -256,6 +257,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  const stream: Stream = (_model, request) => {
   const sent = JSON.parse((request.messages[0] as { content: string }).content);
   assert.equal(sent.actions[shockKey], undefined, "an absent card's procedure is fetched when needed, not sent with every repair");
+  assert.ok(Object.values(sent.actions).every((one) => !("instructions" in (one as object))), "ordinary strategy reads accepted claims and costs; equipment retains executable instructions");
   assert.deepEqual(sent.view.remainingSteps, table.cursor.steps, "the writer sees the real remaining turn windows");
   seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((one) => one.name) });
   return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: { guidance: "Hold the Chocobo back." } }], stopReason: "toolUse" }) };
@@ -961,7 +963,8 @@ test("preparation starts on the opponent's turn, not before our line has played,
   return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "Recover." } }], stopReason: "toolUse" }) };
  };
  await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules: loadRules("rules/cr.tsv") }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
- assert.match(seen[0]!.messages, /Repair the unfinished line from the current window/);
+ assert.match(seen[0]!.messages, /Repair this response or combat decision/);
+ assert.match(seen[0]!.messages, /Do not write the next own turn's line/);
  assert.deepEqual(seen[0]!.tools.sort(), ["card", "equipment", "example", "odds", "rule", "submit", "syntax"]);
 });
 

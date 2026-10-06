@@ -13,13 +13,19 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>)
 			return [key, { ...one, ...(offered?.use ? { fixedUse: offered.use }
 				: one.action.option ? { availability: offered ? "Offered now" : "This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }];
 		}
-		const { cost, ...procedure } = one.action.procedure;
+		const { cost, instructions: _instructions, ...procedure } = one.action.procedure;
 		const card = procedure.source.card;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: select(procedure.source, frame).map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
 			cost: { ...cost, mana: mana ?? (procedure.timing === "spell" ? "Read the bound source's printed cost" : "{0}") },
 			costBasis: cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost" }];
 	}));
+}
+
+/** The displayed base refers to its reusable actions; executable bodies stay in equipment. */
+export function planFacts(plan: Plan) {
+	const options = (list: Plan["steps"], kind: string) => list.map((one, at) => ({ ...one, action: { reuse: `${kind}:${at} ${one.label}` } }));
+	return { ...plan, steps: options(plan.steps, "step"), ...(plan.may ? { may: options(plan.may, "may") } : {}) };
 }
 
 /** Diagnose exact bindings in the old line without treating a future use as illegal. */
@@ -58,7 +64,8 @@ export function planningChoices(frame: Frame) {
 	}
 	return { options: options.filter((one) => !one.use), uses: [...uses.values()].map((use) => {
 		const source = frame.view.objects?.find((one) => one.id === use.terms.source.id && one.incarnation === use.terms.source.incarnation);
-		return { ...use.terms, card: source?.card, from: source?.zone, targets: [...use.bindings.values()], notes: [...use.notes],
+		const { instructions: _instructions, ...terms } = use.terms;
+		return { ...terms, card: source?.card, from: source?.zone, targets: [...use.bindings.values()], notes: [...use.notes],
 			manaRequired: use.terms.cost.generic + use.terms.cost.colors.length,
 			untappedSourcesAfterPayment: { minimum: Math.min(...use.left), maximum: Math.max(...use.left),
 				scope: "Remaining current mana-source objects immediately after paying, before resolution or changes to their abilities. Floating mana is separate." },

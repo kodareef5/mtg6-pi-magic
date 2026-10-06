@@ -24,11 +24,13 @@ export type Playbook = Static<typeof PlaybookSchema>;
  * Opening choices have already happened; phase scripts arrive through base.
  * Card notes follow visible identities, never a hidden library arrangement.
  */
-export function strategyBrief(brief: Brief | undefined, frame: Frame) {
+export function strategyBrief(brief: Brief | undefined, frame: Frame, scope: "turn" | "response" = "turn") {
 	if (!brief) return undefined;
 	const visible = new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []));
-	return { objective: brief.objective, role: brief.role, route: brief.route, recovery: brief.recovery,
-		matchup: brief.matchup, traps: brief.traps, policies: brief.policies, gaps: brief.gaps,
+	const policies = brief.policies && (scope === "turn" ? brief.policies
+		: { resources: brief.policies.resources, responses: brief.policies.responses, combat: brief.policies.combat });
+	return { objective: brief.objective, role: brief.role,
+		...(policies ? { policies } : { route: brief.route, recovery: brief.recovery, matchup: brief.matchup, traps: brief.traps }), gaps: brief.gaps,
 		cards: Object.fromEntries(Object.entries(brief.cards ?? {}).filter(([name]) => visible.has(name))),
 	};
 }

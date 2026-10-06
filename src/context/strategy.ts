@@ -18,7 +18,7 @@ import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
 import { ChangesSchema, actions, basePlan, changedPlan, equipment } from "./plan-edit.ts";
-import { actionFacts, bindingFacts } from "./strategy-actions.ts";
+import { actionFacts, bindingFacts, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, nextMana, type Context } from "./strategy-facts.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
@@ -69,7 +69,7 @@ const SYSTEM = [
 	"",
 	"YOUR ANSWER",
 	"- base is your plan to update. Submit changed fields directly: no plan or changes wrapper. Omitted fields stay, a list replaces that list, [] clears it. Packages join by card name instead. Keep sound objective, guidance, phases and responses. Your new turn's base has no ordered steps; write the line for this turn. A midturn base already omits completed steps. Do not put them back.",
-	"- actions holds accepted uses whose named cards are visible, plus generic actions. Set action.reuse to the exact listed key, including its readable name. Check its timing, cost and instructions against the step you intend. A normal cast and an alternate-cost cast are different uses. Prefer prepared: or printed: keys for spells and activations; an old step may bind an obsolete payment or target. It copies the action's selectors and costs unchanged. equipment reads accepted uses for another named card. These terms were prepared by a model, not certified as correct.",
+	"- actions describes accepted uses by their claim, quoted card meaning, source, cost and targets. Set action.reuse to the exact listed key, including its readable name. A normal cast and an alternate-cost cast are different uses. Prefer prepared: or printed: keys for spells and activations; an old step may bind an obsolete payment or target. Reuse copies the accepted executable body unchanged. equipment reads that body when an interpretation needs inspection. These terms were prepared by a model, not certified as correct.",
 	"- packages persist in private work. Standing abilities are assessed before play. Some spell effects and activations remain identified in deferred until their source is available; a separate interpretation call prepares them before the pilot acts. Use accepted actions instead of rewriting their meaning as part of strategy. Correct a package only when its interpretation was wrong; a new line does not change a card's abilities. Registrations quote the card's own text. printedCast selects the shared ordinary permanent cast; set it false if a correction needs a special casting procedure.",
 	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
 	"",
@@ -123,7 +123,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	options: { prepared?: Prepared; nextTurn?: boolean; changed?: string[]; signal?: AbortSignal } = {}): Promise<Prepared & { objection?: Objection }> {
 	const base = !options.prepared && !frame.view.work?.plan && context.brief ? initialPlan(context.brief)
 		: basePlan(frame, options.prepared?.plan, options.nextTurn);
-	const available = actions(frame, options.prepared?.plan);
+	const available = actions(frame, base);
 	const visible = new Set((frame.view.objects ?? []).flatMap((one) => one.card ? [one.card] : []));
 	const relevant = Object.fromEntries(Object.entries(available).filter(([, one]) => {
 		const card = "procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card;
@@ -133,10 +133,13 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
 	const at = frame.view.window;
+	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request;
 	const current = at.kind === "turn" ? `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
-	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, relevant),
+	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
+	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, relevant),
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
-		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task: `${task}\n${current}` }, {
+		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }, response ? "response" : "turn"),
+		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {
 		submit: { ...SUBMIT, check(args) {
 			const { notes, objection: raised, ...changes } = args;
 			let plan: Plan;

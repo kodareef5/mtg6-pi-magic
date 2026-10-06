@@ -113,11 +113,11 @@ export function chancing(frame: Frame): Lookup {
 	};
 }
 
-export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}): string {
-	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, ...view } = frame.view;
+export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}, scope: "turn" | "response" = "turn"): string {
+	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, ...view } = frame.view;
 	const at = frame.view.window;
 	return JSON.stringify({
-		brief: strategyBrief(context.brief, frame),
+		brief: strategyBrief(context.brief, frame, scope),
 		...more,
 		notebook: work?.notebook ?? [],
 		packages: (work?.packages ?? []).map((pack) => pack.card),

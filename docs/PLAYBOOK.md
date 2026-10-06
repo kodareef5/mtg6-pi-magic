@@ -31,13 +31,22 @@ already settle the assigned question. Synthesis reads the drafts together and
 replaces only families that need reconciliation; omitted families carry forward
 unchanged. A failed analyst stays visible as a failure.
 
-During play, the strategist receives all five families because a turn line
-commits resources through the opponent's turn. It does not receive the opening
-policies again. Existing phase scripts arrive as the base plan, and card notes
-arrive for visible identities. Full visible card text remains available.
+Whole-turn preparation receives all five families because its line commits
+resources through the opponent's turn. A response repair during the opponent's
+turn reads resources, responses and combat; the scheduled preparation handles
+the next own turn. New playbooks replace the older duplicate route and matchup
+paragraphs in this context. Carried briefs without policies keep their old fields.
+Existing phase scripts arrive as the base plan, and card notes arrive for visible
+identities. Full visible card text remains available.
 The planner reads each offered spell or activation mode with its locked cost
 and target bindings. Reusable actions spell out omitted printed costs. Jev reads
 the physical payment choices after the planner chooses the mode and resources.
+Strategy reads accepted claims and quoted meaning; executable bodies remain
+available through equipment when an interpretation needs inspection. The base
+plan names those reusable actions instead of repeating their programs. Past
+physical picks remain history, since their old incarnation and payment cannot
+serve as reusable equipment. Current position facts follow the background and
+prior plan, and currentWindow gives the response window in plan syntax.
 For example, a normal five-mana cast and a three-mana warp remain two different
 uses even if they put the same creature onto the battlefield. A plan reuses the
 chosen procedure; it does not copy a payment id while describing another mode.
