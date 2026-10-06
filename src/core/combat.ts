@@ -12,6 +12,8 @@
  * Damage is divided as the controller chooses (510.1c-d); trample has to assign
  * lethal damage to every blocker before any reaches the player (702.19b). All of
  * it is dealt at once (510.2). First and double strike add a damage step (510.4).
+ * Past 150 lines to keep declarations, their displayed arithmetic and the
+ * actual damage assignments under the same combat rules.
  */
 import { characteristics, has, sick, type Traits } from "./characteristics.ts";
 import { cardsIn, playing, type Table, type Thing } from "./table.ts";
@@ -32,6 +34,26 @@ function present(table: Table, wanted: ObjectRef): Thing | undefined {
 	return object && same(object, wanted) && object.zone === "battlefield" && characteristics(table, object)?.types.includes("creature") ? object : undefined;
 }
 const traitsOf = (table: Table, object: Thing) => characteristics(table, object);
+/** 702.19b, 702.2c: trample counts marked damage; deathtouch needs one point. */
+const lethal = (table: Table, source: Thing, target: Thing) => has(traitsOf(table, source), "deathtouch")
+	? 1 : Math.max(0, (traitsOf(table, target)?.toughness ?? 0) - target.damage);
+
+/** A single normal damage exchange, not a prediction of replies or triggers. */
+function exchange(table: Table, attacker: Thing, blocker: Thing): string {
+	const attack = traitsOf(table, attacker), block = traitsOf(table, blocker);
+	if (attack?.power === undefined || attack.toughness === undefined || block?.power === undefined || block.toughness === undefined) return "";
+	if ([attack, block].some((one) => has(one, "first strike") || has(one, "double strike")))
+		return "First or double strike requires separate damage steps; no single-step exchange is predicted here.";
+	const trample = has(attack, "trample"), power = Math.max(0, attack.power), back = Math.max(0, block.power);
+	const forward = trample ? Math.min(power, lethal(table, attacker, blocker)) : power;
+	const result = (object: Thing, traits: Traits, incoming: number, from: Traits) => {
+		const deadly = object.damage + incoming >= traits.toughness! || incoming > 0 && has(from, "deathtouch");
+		return `${name(object)} ${deadly && !has(traits, "indestructible") ? "would be destroyed by this damage" : "survives this damage"}`;
+	};
+	return `If this is the only blocker and characteristics stay unchanged: ${name(attacker)} deals ${forward} to ${name(blocker)}` +
+		`${trample ? ` and ${power - forward} to the defending player when assigning minimum lethal to the blocker` : ""}; ${name(blocker)} deals ${back} back. ` +
+		`${result(attacker, attack, back, block)}; ${result(blocker, block, forward, attack)}. Responses, triggered effects and damage replacements are not predicted.`;
+}
 
 /** 508.1: the active player picks attackers one at a time, then finishes. */
 export function declareAttackers(table: Table): Pending {
@@ -86,10 +108,12 @@ export function declareBlockers(table: Table): Pending {
 	}).sort((a, b) => a.id.localeCompare(b.id));
 	const moves: Move[] = able.flatMap((blocker) => attackers.map((attacker): Move => {
 		const marks = conflicts(table, blocker, attacker, blocking(attacker));
+		const calculation = blocking(attacker) ? "" : exchange(table, attacker, blocker);
+		const shows = [...marks, ...(calculation ? [calculation] : [])].join(" ");
 		return { option: { id: `block:${blocker.id}:${attacker.id}`, label: `Block ${name(attacker)} (${body(traitsOf(table, attacker))}${words(traitsOf(table, attacker))}) with ${name(blocker)} (${body(traitsOf(table, blocker))}${words(traitsOf(table, blocker))})`,
 			objects: [ref(blocker), ref(attacker)],
 			parameters: { Blocker: `${name(blocker)} (${blocker.id}@${blocker.incarnation})`, Attacker: `${name(attacker)} (${attacker.id}@${attacker.incarnation})` },
-			...(marks.length ? { shows: marks.join(" ") } : {}) },
+			...(shows ? { shows } : {}) },
 			changes: [{ do: "combat", action: "choose", pick: { blocker: ref(blocker), attacker: ref(attacker) } }], reason: "combat" };
 	}));
 	const declared = new Map<string, { blocker: Thing; blocking: ObjectRef[] }>();
@@ -162,16 +186,13 @@ export function combatDamage(table: Table): Pending | null {
 
 /** One attacker's divisions among its blockers and, with trample, the player it attacks. */
 function assign(table: Table, attacker: Thing, walls: Thing[], defending: SeatId, total: number, trample: boolean): Pending {
-	const deathtouch = has(traitsOf(table, attacker), "deathtouch");
-	// 702.19b, 702.2c: lethal counts damage already marked, and any damage from deathtouch is lethal.
-	const lethal = (wall: Thing) => deathtouch ? 1 : Math.max(0, (traitsOf(table, wall)?.toughness ?? 0) - wall.damage);
 	const recipients: Chosen[] = [...walls.map(ref), ...(trample ? [{ player: defending }] : [])];
-	const legal = divisions(total, recipients.length).filter((parts) => !trample || parts.at(-1) === 0 || walls.every((wall, at) => parts[at]! >= lethal(wall)));
+	const legal = divisions(total, recipients.length).filter((parts) => !trample || parts.at(-1) === 0 || walls.every((wall, at) => parts[at]! >= lethal(table, attacker, wall)));
 	const describe = (to: Chosen) => "player" in to ? `seat ${to.player}` : name(table.things.get(to.id)!);
 	const moves: Move[] = legal.map((parts) => ({
 		option: { id: `assign:${attacker.id}:${parts.join("-")}`, label: `${name(attacker)} assigns ${recipients.map((to, at) => `${parts[at]} to ${describe(to)}`).join(", ")}`,
 			parameters: Object.fromEntries(recipients.map((to, at) => [`Damage to ${describe(to)}${"id" in to ? ` (${to.id}@${to.incarnation})` : ""}`, parts[at]!])),
-			shows: walls.map((wall) => `${name(wall)} ${body(traitsOf(table, wall))}, ${wall.damage} marked, lethal ${lethal(wall)}.`).join(" "), objects: [ref(attacker), ...walls.map(ref)] },
+			shows: walls.map((wall) => `${name(wall)} ${body(traitsOf(table, wall))}, ${wall.damage} marked, lethal ${lethal(table, attacker, wall)}.`).join(" "), objects: [ref(attacker), ...walls.map(ref)] },
 		changes: [{ do: "combat", action: "assign", source: ref(attacker), division: recipients.map((to, at) => ({ to, amount: parts[at]! })).filter((part) => part.amount > 0) }],
 		reason: "combat",
 	}));

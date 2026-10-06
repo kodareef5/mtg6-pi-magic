@@ -106,6 +106,23 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	assert.equal(table.seats[0]!.life, 16);
 	finish(table);
 	assert.deepEqual([chocobo, elves].map((one) => table.things.get(one.id)!.zone), ["graveyard", "graveyard"]);
+	for (const keyword of [undefined, "indestructible", "deathtouch"]) {
+		const position = matchup(`exchange-${keyword ?? "ordinary"}`);
+		const hydra = establish(position, 0, "Mossborn Hydra");
+		const challenger = establish(position, 1, "Emberheart Challenger", []);
+		reach(position, "declare-attackers", 2);
+		pick(position, `attack:${challenger.id}`); pick(position, "attack:done");
+		reach(position, "declare-blockers", 2);
+		if (keyword) label(position, hydra, `Fixture grants ${keyword}.`, [keyword]);
+		const described = option(position, `block:${hydra.id}:${challenger.id}`)!.shows!;
+		assert.match(described, /Emberheart Challenger deals 2 to Mossborn Hydra; Mossborn Hydra deals 1 back/);
+		assert.ok(described.includes(`Mossborn Hydra ${keyword === "indestructible" ? "survives this damage" : "would be destroyed by this damage"}`));
+		assert.ok(described.includes(`Emberheart Challenger ${keyword === "deathtouch" ? "would be destroyed by this damage" : "survives this damage"}`));
+		pick(position, `block:${hydra.id}:${challenger.id}`); pick(position, "block:done");
+		reach(position, "combat-damage", 2); pick(position, "damage"); finish(position);
+		assert.equal(position.things.get(hydra.id)!.zone, keyword === "indestructible" ? "battlefield" : "graveyard");
+		assert.equal(position.things.get(challenger.id)!.zone, keyword === "deathtouch" ? "graveyard" : "battlefield");
+	}
 });
 
 test("trample assigns lethal to the blocker before the player, counting marked damage", () => {
