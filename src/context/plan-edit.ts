@@ -1,6 +1,7 @@
-/** Short writer answers expand to ordinary plans before they reach core. */
+/** Short writer answers expand to ordinary plans before they reach core.
+ * Writer aliases, advertised fields and expansion stay together past 150 lines. */
 import { Type, type Static } from "typebox";
-import { PlanDefs, PlanSchema, QuerySchema, problems, type Plan, type PlanOption } from "../core/language.ts";
+import { PlanDefs, PlanSchema, QuerySchema, WhenSchema, lifted, problems, type Plan, type PlanOption } from "../core/language.ts";
 import type { Frame } from "../core/types.ts";
 import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
@@ -8,6 +9,29 @@ import { printedCast } from "../core/procedures.ts";
 import { matches } from "../core/query.ts";
 import { movementActions } from "./strategy-actions.ts";
 import { permissionForecasts } from "./strategy-permissions.ts";
+import { STEPS } from "../core/steps.ts";
+
+// The writer can name a whole phase in step, or any step. Core receives the
+// canonical window; conflicting step/phase claims remain invalid.
+const phases = [...new Set(Object.values(STEPS).map((one) => one.phase))];
+const WriterWhen = Type.Object({ ...WhenSchema.properties,
+	step: Type.Optional(Type.String({ enum: [...Object.keys(STEPS), ...phases.filter((one) => !(one in STEPS)), "any"],
+		description: "A rules step, or any to leave the step open. A whole phase such as combat is also accepted here and becomes phase; it must agree with an explicit phase." })),
+}, { additionalProperties: false });
+
+function writerChanges(value: unknown): unknown {
+	const changed = lifted(value);
+	if (!changed || typeof changed !== "object" || Array.isArray(changed)) return changed;
+	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key,
+		["steps", "may", "phases", "askWhen"].includes(key) && Array.isArray(list) ? list.map((one) => {
+			if (!one?.when || typeof one.when !== "object" || Array.isArray(one.when)) return one;
+			const { step, ...when } = one.when;
+			if (step === "any") return { ...one, when };
+			if (typeof step === "string" && !(step in STEPS) && phases.includes(step as typeof phases[number]) && (when.phase === undefined || when.phase === step))
+				return { ...one, when: { ...when, phase: step } };
+			return one;
+		}) : list]));
+}
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
@@ -21,14 +45,15 @@ export const ChangesSchema = Type.Cyclic({ ...definitions,
 // Advertise the ordinary plan fields where the model writes them. Recursive
 // card programs and conditions stay locally checked, without provider expansion.
 const terms = Type.Object({}, { additionalProperties: true });
-const submittedOption = Type.Object({ ...PlanDefs.Option.properties, if: Type.Optional(terms),
+const submittedOption = Type.Object({ ...PlanDefs.Option.properties, when: WriterWhen, if: Type.Optional(terms),
 	action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!,
 		Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false }),
 		Type.Object({ procedure: terms }, { additionalProperties: false })]),
 }, { additionalProperties: false });
 export const submissionFields = { ...planFields.properties,
 	steps: Type.Array(submittedOption), may: Type.Array(submittedOption),
-	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, if: terms }, { additionalProperties: false })),
+	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, when: Type.Optional(WriterWhen), if: terms }, { additionalProperties: false })),
+	phases: Type.Array(Type.Object({ ...planFields.properties.phases.items.properties, when: WriterWhen }, { additionalProperties: false })),
 	holds: Type.Array(Type.Object({ ...planFields.properties.holds.items.properties, releaseWhen: Type.Optional(terms) }, { additionalProperties: false })),
 	packages: Type.Array(terms),
 };
@@ -123,6 +148,7 @@ export function basePlan(frame: Frame, prepared?: Plan, nextTurn = false): Plan 
 
 /** Merge changed fields and expand reused actions. This never writes private or physical state. */
 export function changedPlan(base: Plan, changes: unknown, available: ReturnType<typeof actions>): Plan {
+	changes = writerChanges(changes);
 	const wrong = problems(ChangesSchema, changes);
 	if (wrong.length) throw new Error(`changes does not match the schema: ${wrong.join("; ")}.`);
 	const plan = structuredClone({ ...base, ...changes as Partial<Plan> });

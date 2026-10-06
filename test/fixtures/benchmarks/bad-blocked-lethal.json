@@ -1,0 +1,267 @@
+{
+  "results": [
+    {
+      "id": "red-blocked-lethal",
+      "plan": {
+        "objective": "Use Kellan's double-strike clock for a possible immediate lethal while preserving the animated Sanctuary as the only blocker against Explorer; continue pressure next turn if Kellan is stopped.",
+        "guidance": "Apply the combat policy, but the visible 8/10 Explorer can block Kellan and is not a threat this turn because it is summoning sick; no lethal damage is available now. Attack only with Kellan: if unblocked, its 3 power double strike deals exactly 6 and wins; if Explorer blocks, keep Sanctuary back to block Explorer on its next attack. Do not animate another land. Play the drawn Mountain before postcombat development. After combat, cast Challenger for {1}{R} using Mountain and a Mountain red source if available, otherwise cast Hired Claw for {R}; retain the remaining sources and do not cast Smaug unless its payment does not compromise Sanctuary as a blocker. No burn or known response is in hand. Sanctuary’s current hold is released; preserve it by not tapping it.",
+        "steps": [
+          {
+            "label": "Attack with Kellan",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "1-15",
+                    "incarnation": 3
+                  }
+                ]
+              }
+            },
+            "purpose": "Kellan deals 6 and wins if unblocked; Explorer may block, so keep Sanctuary back."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          },
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "card": "Mountain"
+              }
+            },
+            "purpose": "Make the drawn land available before development."
+          },
+          {
+            "label": "Cast Emberheart Challenger",
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Emberheart Challenger"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Emberheart Challenger"
+                },
+                "claim": "Cast Emberheart Challenger",
+                "basis": "Haste",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Develop a hasty threat after the lethal attack window; do not spend Sanctuary as mana."
+          },
+          {
+            "label": "Cast Hired Claw if Challenger unavailable or unaffordable",
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Hired Claw"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Hired Claw",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Hired Claw",
+                "basis": "Whenever you attack with one or more Lizards, this creature deals 1 damage to target opponent.",
+                "timing": "spell",
+                "instructions": []
+              }
+            }
+          },
+          {
+            "label": "Block with Sanctuary",
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "opponent",
+                  "name": "Icetill Explorer",
+                  "types": [
+                    "creature"
+                  ]
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "prefix": "block:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "1-50",
+                    "incarnation": 2
+                  }
+                ]
+              }
+            },
+            "purpose": "If Explorer attacks, block to prevent 8 damage; Sanctuary dies but Explorer remains blocked."
+          },
+          {
+            "label": "Finish blockers",
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "action": {
+              "option": "block:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "combat-damage"
+            },
+            "goal": "Take lethal if Kellan connects.",
+            "guidance": "Kellan's 3 power double strike deals 6, exactly the opponent's life. If Explorer blocks, it survives and no player damage occurs; Sanctuary remains back. If the opponent takes lethal, cease further development."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "goal": "Develop pressure without losing the only blocker.",
+            "guidance": "Mountain has been played. Cast Challenger for {1}{R} if affordable, otherwise Hired Claw for {R}; do not tap Sanctuary. No available burn answers Explorer. Keep at least the Sanctuary available to block the 8/10 trampler if it attacks. Smaug is not affordable while retaining that blocker’s untapped status."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "goal": "Block Explorer's attack with Sanctuary.",
+            "guidance": "Explorer is an 8/10 trample creature and is currently summoning sick, but may attack on the opponent's turn. If it attacks, block with Sanctuary: 3 damage is assigned to it and 5 tramples over; Sanctuary dies. No known instant can alter this. If no attack, finish blocks without blocking."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Reassess visible landfall threats before combat.",
+            "guidance": "Both Ascensions have high quest counts; a landfall can grant a +1/+1 counter and trample to a creature. Explorer can play additional lands and lands from graveyard. No known removal is available, so preserve Sanctuary as blocker and do not assume Explorer remains 8/10 if a landfall occurs."
+          }
+        ],
+        "may": [
+          {
+            "label": "Use drawn creature when useful",
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "types": [
+                    "creature"
+                  ]
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "option": "pass"
+            }
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "1-50",
+                  "incarnation": 2
+                }
+              ]
+            },
+            "purpose": "Preserve animated Sanctuary as the available blocker for Explorer's trample attack.",
+            "releaseWhen": {
+              "amount": {
+                "life": "opponent"
+              },
+              "atMost": 6
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -345,6 +345,16 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:999" } }], may: [{ ...line.steps[1], action: { reuse: "may:999" } }] }, available), /step:999.*may:999/, "all unknown keys are named in one refusal");
 	const advertised = JSON.stringify(selectionFields(available));
 	assert.ok(advertised.includes(JSON.stringify(Object.keys(available))), "the submission schema enumerates the exact reusable equipment keys");
+	const aliases = { phases: [{ when: { active: "self", step: "combat" }, guidance: "Keep the planned attack." }],
+		may: [{ label: "Wait for the response window", when: { active: "opponent", step: "any" }, action: { option: "pass" },
+			if: { amount: { count: { zones: ["hand"], controller: "you", types: ["instant"] }, atLeast: 1 } } }] };
+	const untouched = structuredClone(aliases), canonical = changedPlan(base, aliases, available);
+	assert.deepEqual(canonical.phases![0]!.when, { active: "self", phase: "combat" });
+	assert.deepEqual(canonical.may![0]!.when, { active: "opponent" });
+	assert.deepEqual(canonical.may![0]!.if, { amount: { count: { zones: ["hand"], controller: "you", types: ["instant"] } }, atLeast: 1 });
+	assert.deepEqual(aliases, untouched, "writer aliases neither mutate the submitted answer nor enter the stored plan");
+	assert.throws(() => changedPlan(base, { phases: [{ when: { step: "combat", phase: "beginning" }, guidance: "Contradictory." }] }, available), /schema/);
+	assert.throws(() => changedPlan(base, { may: [{ ...aliases.may[0], if: { amount: { count: { types: ["creature"] }, atLeast: 3 }, atLeast: 1 } }] }, available), /schema/, "two stated bounds are not silently reconciled");
  // Core sees ordinary terms, so replay and execution need no new language.
 	assert.doesNotThrow(() => prepareWork(frame, [{ do: "plan.put", plan: reused }]));
 	assert.ok(!JSON.stringify(reused).includes('"reuse"'));

@@ -293,6 +293,14 @@ A **plan** is what jev flies.
 
 `docs/PLANS.md` says how the table flies a plan.
 
+The strategy submission tool accepts two explicit window shorthands before
+checking the canonical plan: `when.step: "any"` omits the step constraint, and
+a phase name such as `when.step: "combat"` becomes `when.phase: "combat"`.
+An explicit phase must agree; conflicting claims are refused. It also lifts
+`atLeast` and `atMost` from inside a condition's `amount` when that bound is
+absent outside it. A bound stated twice is refused. The journal stores the
+canonical fields; replay does not reinterpret old answers.
+
 ## Options the table lists
 
 A plan points at the table's own options by id prefix and objects, so it never

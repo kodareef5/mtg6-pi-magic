@@ -185,7 +185,7 @@ without separate invitations for Jev to invent a strategy for each one.
   before another full gate. Preparation must also cover the next upkeep so the
   pilot does not improvise from an expired turn's general guidance.
 - [x] Establish one runnable saved-position manifest. `npm run benchmark` validates
-  16 saved prefixes offline; `--live` runs selected pilot, preparation, amendment or repair
+  17 saved prefixes offline; `--live` runs selected pilot, preparation, amendment or repair
   probes. It records expected properties, whole-decision timing and every call.
   Known good and bad landfall amendments can be checked without inference.
 - [ ] Extend those benchmarks to changed blockers, clocks, covered draws and

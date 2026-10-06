@@ -36,6 +36,11 @@ Repair cases preserve a journal prefix with a pending help request and call
 the ordinary repair path, without inventing a prepared plan. The after-Explorer
 case checks for a graveyard land play already enabled by the current board and
 forbids the inherited attack with a Forest that is no longer a creature.
+The blocked-lethal amendment preserves the preparation actually consumed in
+the continuation, reconstructed from its submission and verified against the
+amendment request's complete base. Its prefix ends before that amendment was
+accepted. The automatic property checks Smaug's cast before its attack; review
+the other attackers and payments separately to establish lethal damage.
 `zone` matches a projected source in that zone; it does not assert that a future
 zone change or permission has happened.
 
@@ -61,7 +66,7 @@ a wording failure for that fixture, not proof of a false fact: conditional and
 negative statements can match too. Review the matched text before comparing
 arms. These checks never reject a plan during a game.
 
-For planning comparisons, run all six planning cases at least three times per
+For broad planning comparisons, run the planning cases at least three times per
 arm. Preserve the source revision or patch with the results. Compare acceptance,
 structural properties, reviewed prose, refusal kinds, calls and elapsed time;
 an isolated perfect answer is not evidence of an improvement.

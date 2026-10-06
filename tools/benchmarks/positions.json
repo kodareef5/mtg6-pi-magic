@@ -2,7 +2,8 @@
   "journals": {
     "oct6": "test/fixtures/benchmarks/oct6.jsonl.gz",
     "oct5": "test/fixtures/benchmarks/oct5.jsonl.gz",
-    "afterExplorer": "test/fixtures/benchmarks/after-explorer.jsonl.gz"
+    "afterExplorer": "test/fixtures/benchmarks/after-explorer.jsonl.gz",
+    "blockedLethal": "test/fixtures/benchmarks/blocked-lethal.jsonl.gz"
   },
   "cases": [
     {
@@ -227,6 +228,22 @@
         "prefix": "attack:",
         "source": "Forest"
       }
+    },
+    {
+      "id": "red-blocked-lethal",
+      "journal": "blockedLethal",
+      "version": 579,
+      "seat": 1,
+      "task": "amend",
+      "property": "Do not send Kellan alone into an untapped 8/10 Explorer. Cast hasty flying Smaug before combat and include it in the attack; preserve enough other attackers for lethal through one blocker.",
+      "prepared": {
+        "file": "test/fixtures/benchmarks/blocked-lethal-preparation.json",
+        "name": "red-blocked-lethal"
+      },
+      "order": [
+        { "source": "Smaug the Magnificent", "timing": "spell" },
+        { "source": "Smaug the Magnificent", "prefix": "attack:" }
+      ]
     }
   ]
 }

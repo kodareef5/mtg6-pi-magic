@@ -1,0 +1,149 @@
+{
+  "source": "test/fixtures/benchmarks/blocked-lethal.jsonl.gz",
+  "results": [
+    {
+      "name": "red-blocked-lethal",
+      "version": 506,
+      "seat": 1,
+      "plan": {
+        "objective": "Establish a decisive flying clock while controlling the visible oversized trample threat; preserve a meaningful blocker and any useful interaction.",
+        "guidance": "Use sequencing/resource policy: the known 5 mana cannot cast Smaug ({2}{R}{R}) and still retain meaningful interaction, but Kellan already supplies double-strike pressure and Sanctuary is an available 3/3 vigilant blocker. Do not spend resources animating a land already animated. Opponent is at 6; Kellan's unblocked double strike is lethal. Explorer is tapped? Forecast shows it untapped but summoning sick; it can block. Attack with Kellan only if it is not blocked by Explorer; preserve Sanctuary to block the 4/6 trampler. No known instant or removal in hand. Reassess after draw and combat; unknown draws are not assumed.",
+        "steps": [
+          {
+            "label": "Attack with Kellan",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "1-15",
+                    "incarnation": 3
+                  }
+                ]
+              }
+            },
+            "purpose": "Pressure lethal; if blocked, Sanctuary remains back to defend against Explorer."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "combat-damage"
+            },
+            "goal": "Exploit Kellan's double strike for lethal if unblocked; preserve defense if blocked.",
+            "guidance": "Opponent is at 6 and Kellan deals 3 twice if it connects, lethal. Explorer can block Kellan, so do not treat lethal as guaranteed. If blocked, Sanctuary remains available for the 4/6 trample return attack."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "goal": "Develop while retaining Sanctuary as a blocker.",
+            "guidance": "Cast Emberheart Challenger for {1}{R} if mana permits; otherwise cast Hired Claw for {R}. Do not cast Smaug if doing so requires using Sanctuary as a mana source needed to preserve the block. No land is in hand. Keep remaining sources available; there is no burn in hand."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "goal": "Use Sanctuary to prevent lethal or reduce trample damage.",
+            "guidance": "If Explorer attacks, block with the 3/3 vigilant Sanctuary when it prevents lethal or substantially reduces damage. Explorer is 4/6 with trample: Sanctuary absorbs 3, leaving 1 trample damage, and Sanctuary dies. Kellan cannot block if tapped attacking. Finish blocks."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Reassess actual threats and preserve available defense.",
+            "guidance": "No removal spell is known in hand. If new visible threats or a lethal attack changes the exchange, prioritize survival; otherwise keep Sanctuary available to block Explorer."
+          }
+        ],
+        "may": [
+          {
+            "label": "Use drawn creature when useful",
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "types": [
+                    "creature"
+                  ]
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "option": "pass"
+            }
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "1-50",
+                  "incarnation": 2
+                }
+              ]
+            },
+            "purpose": "Keep animated Sanctuary untapped to block Explorer's trampling attack.",
+            "releaseWhen": {
+              "any": [
+                {
+                  "amount": {
+                    "life": "opponent"
+                  }
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atMost": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

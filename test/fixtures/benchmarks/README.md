@@ -24,3 +24,14 @@ briefs and rollback history. The manifest names individual earlier positions.
 Regenerate a fixture from its source journal, never by editing physical facts
 or deleting inconvenient records. `npm run benchmark` checks all prefixes
 against the pinned cards and rules without inference.
+# Blocked lethal continuation
+
+`blocked-lethal.jsonl.gz` is the prefix of
+`.pi/grounded-repair-20261006/continuation-pending/next-version-gate-20261005-1791300535238.jsonl`
+immediately before Red's accepted turn-14 amendment at decision 579.
+`blocked-lethal-preparation.json` expands the actual preparation submission
+(trace call 1) against Red's source frame at decision 506. Its displayed full
+plan was checked for exact equality with the consumed base in trace call 71.
+`bad-blocked-lethal.json` contains the accepted amendment that sent Kellan
+alone into Explorer. These records carry private game knowledge and stay
+outside the published package.

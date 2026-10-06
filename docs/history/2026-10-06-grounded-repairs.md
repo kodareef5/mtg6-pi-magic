@@ -19,7 +19,8 @@ latency result. These are small exploratory samples.
 | Baseline | 9/9 | 1/9 | 0/9 | 14 | 259.1 s |
 | Current source bindings | 9/9 | 4/9 | 4/9 | 13 | 205.0 s |
 | Separate repair question, retired general prose | 8/9 | 4/9 | 3/9 | 14 | 211.0 s |
-| Original question with current-position sheet | 9/9 | 8/9 | 7/9 | 14 | 322.5 s |
+| Original question with current-position sheet | 9/9 | 8/9 | 7/9 | 14 | 325.1 s |
+| Sheet with only the inherited action sequence | 7/9 | 5/9 | 5/9 | 20 | 235.0 s |
 
 The binding arm adds current types, tap state and sickness beside movement
 selectors, and evaluates each inherited hold's own release condition. Resource
@@ -55,5 +56,45 @@ default. Removing an old resource hold alone does not bind that advice to the
 current hand. Future response commitments need actual source and window
 bindings, rather than another instruction to recount the board.
 
-Both retained builders passed types and all 179 offline tests. The broader
-planning cases and a physical continuation are the next validation step.
+## Continuation and next saved decision
+
+The pending repair prefix at decision 506 continued through turn 14 and stopped
+at turn 15. Green played a graveyard Passage and fetched Forest. Those land
+entries grew Explorer from 4/6 to 8/10; no nonexistent land creature attacked.
+The plan still incorrectly declined an affordable Hydra and requested one more
+land play than remained. The table offered no extra land play.
+
+Red's amendment then ordered Kellan to attack alone. Explorer blocked; double
+strike dealt it six damage, and its eight damage killed Kellan. Red had Smaug
+in hand and enough mana to cast it before combat. Smaug's flying and haste,
+with the other available attackers and a payment preserving them, provides a
+lethal line through the single ground blocker. The accepted plan instead
+developed smaller creatures after combat.
+
+`red-blocked-lethal` is the seventeenth saved case. Its journal ends just before
+the failed amendment. The preparation is reconstructed from the recorded
+submission and verified against the actual amendment request's full base.
+The narrow check requires casting Smaug before attacking with it. The payment
+and remaining attackers still need review; that check alone does not prove a
+winning line. This is the next combat-arithmetic question to refine.
+
+The continuation took 116.4 seconds overall, 112.8 seconds of play and 63.8
+seconds waiting for strategy. It made 101 Jev calls and seven strategy calls,
+two cancelled on stopping. Reported cost was $0.0401, covering supplied usage;
+the two cancellations supplied none. Replay matched, with no gaps or fallback.
+Its consumed preparation was ready, with no unfinished-preparation wait or
+timeouts. The report and timeline are in `continuation-pending/`.
+An earlier continuation under `continuation/` copied the already accepted old
+repair; it was stopped and is excluded from this validation. Its trace remains.
+
+Twelve broader probes cover the other three preparation cases and the funding
+land amendment. They remain a small quality sample; the full traces and answers
+are in `broader/`. The repeated refusals also reproduce `when.step: "combat"`
+and `"any"`, plus bounds nested inside `amount`. The strategy submission tool
+now accepts those unambiguous forms and stores canonical windows and bounds.
+Conflicting phase claims and duplicate bounds remain errors. This uses the
+existing bound reader, which had no production caller, rather than another
+prompt warning. Offline tests cover normalization without mutating the answer.
+
+Types and all 179 offline tests pass. Full games remain gated on coherent
+combat and resource decisions, not on completing this partial continuation.
