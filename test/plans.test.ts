@@ -393,6 +393,12 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	assert.deepEqual(aliases, untouched, "writer aliases neither mutate the submitted answer nor enter the stored plan");
 	assert.throws(() => changedPlan(base, { phases: [{ when: { step: "combat", phase: "beginning" }, guidance: "Contradictory." }] }, available), /schema/);
 	assert.throws(() => changedPlan(base, { may: [{ ...aliases.may[0], if: { amount: { count: { types: ["creature"] }, atLeast: 3 }, atLeast: 1 } }] }, available), /schema/, "two stated bounds are not silently reconciled");
+	const legacy: Plan = { ...base, holds: [{ objects: { card: "Forest" }, purpose: "Keep it until the stated condition", releaseWhen: { any: [{ amount: { life: "opponent" } }] } }] };
+	assert.doesNotThrow(() => prepareWork(frame, [{ do: "plan.put", plan: legacy }]), "old accepted terms remain replayable");
+	assert.throws(() => changedPlan(legacy, {}, available), /holds\[0\].releaseWhen.any\[0\].*needs atLeast or atMost/, "a new submission must repair the inherited unconditional release");
+	assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[0], if: { not: { all: [{ amount: { count: { zones: ["stack"] } } }] } } }] }, available), /steps\[0\].if.not.all\[0\].*needs atLeast or atMost/);
+	const bounded = changedPlan(legacy, { holds: [{ ...legacy.holds![0], releaseWhen: { amount: { life: "opponent" }, atMost: 0 } }] }, available);
+	assert.equal(conditionHolds({ world: viewWorld(frame.view), controller: frame.seat }, bounded.holds![0]!.releaseWhen!), false, "an explicit zero is a comparison, not a missing bound");
  // Core sees ordinary terms, so replay and execution need no new language.
 	assert.doesNotThrow(() => prepareWork(frame, [{ do: "plan.put", plan: reused }]));
 	assert.ok(!JSON.stringify(reused).includes('"reuse"'));

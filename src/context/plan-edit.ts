@@ -1,7 +1,7 @@
 /** Short writer answers expand to ordinary plans before they reach core.
  * Writer aliases, advertised fields and expansion stay together past 150 lines. */
 import { Type, type Static } from "typebox";
-import { PlanDefs, PlanSchema, QuerySchema, WhenSchema, lifted, problems, type Plan, type PlanOption } from "../core/language.ts";
+import { PlanDefs, PlanSchema, QuerySchema, WhenSchema, lifted, problems, type Condition, type Plan, type PlanOption } from "../core/language.ts";
 import type { Frame } from "../core/types.ts";
 import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
@@ -146,6 +146,22 @@ export function basePlan(frame: Frame, prepared?: Plan, nextTurn = false): Plan 
 	return base;
 }
 
+/** Require an explicit comparison in newly submitted plan conditions; legacy core replay is unchanged. */
+export function conditionProblems(plan: Plan): string[] {
+	const found: string[] = [];
+	const check = (condition: Condition | undefined, where: string): void => {
+		if (!condition) return;
+		if ("amount" in condition && condition.atLeast === undefined && condition.atMost === undefined)
+			found.push(`${where}: an amount condition needs atLeast or atMost. Without a bound it is always true, including when the amount is zero.`);
+		if ("not" in condition) check(condition.not, `${where}.not`);
+		for (const kind of ["all", "any"] as const) if (kind in condition)
+			(condition as { all?: Condition[]; any?: Condition[] })[kind]!.forEach((one, at) => check(one, `${where}.${kind}[${at}]`));
+	};
+	for (const kind of ["steps", "may", "askWhen"] as const) (plan[kind] ?? []).forEach((one, at) => check(one.if, `${kind}[${at}].if`));
+	(plan.holds ?? []).forEach((one, at) => check(one.releaseWhen, `holds[${at}].releaseWhen`));
+	return found;
+}
+
 /** Merge changed fields and expand reused actions. This never writes private or physical state. */
 export function changedPlan(base: Plan, changes: unknown, available: ReturnType<typeof actions>): Plan {
 	changes = writerChanges(changes);
@@ -165,5 +181,7 @@ export function changedPlan(base: Plan, changes: unknown, available: ReturnType<
 	}
 	const shape = problems(PlanSchema, plan);
 	if (shape.length) throw new Error(`The resulting plan does not match the schema: ${shape.join("; ")}.`);
+	const conditions = conditionProblems(plan);
+	if (conditions.length) throw new Error(conditions.join("; "));
 	return plan;
 }

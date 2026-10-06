@@ -296,6 +296,11 @@ A **plan** is what jev flies.
 
 `docs/PLANS.md` says how the table flies a plan.
 
+New strategy submissions require `atLeast` or `atMost` on every plan `amount`
+condition, including nested stops and hold releases. An explicit zero is valid.
+An omitted comparison is refused instead of silently making the condition
+always true. Previously accepted journal terms keep their original semantics.
+
 The strategy submission tool accepts two explicit window shorthands before
 checking the canonical plan: `when.step: "any"` omits the step constraint, and
 a phase name such as `when.step: "combat"` becomes `when.phase: "combat"`.

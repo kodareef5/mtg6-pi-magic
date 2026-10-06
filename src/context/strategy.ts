@@ -17,7 +17,7 @@ import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
-import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
+import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 import { combatLookup } from "./strategy-combat.ts";
@@ -153,7 +153,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const current = at.kind === "turn" ? options.nextTurn ? `Planning target: your turn ${at.turn + 1}, from precombat-main through the opponent's following turn. You are seat ${frame.seat}. Use the forecast position; you are not answering the opponent's current priority decision.`
 		: `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
-	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...conditionProblems(base), ...budget(frame, base)], bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }, options.nextTurn ? "preparation" : response ? "response" : "turn"),
 		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {
 		submit: { ...submit, check(args) {

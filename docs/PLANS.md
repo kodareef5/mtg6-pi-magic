@@ -223,6 +223,14 @@ without separate invitations for Jev to invent a strategy for each one.
   failing repair/amendment positions, structural checks improved from 1/9 to
   8/9. False resource claims remain in otherwise passing answers. Broader saved
   positions and physical continuations precede the next full-game gate.
+  The latest continuation also shows a listed winning attack omitted during
+  execution. Actual resource commitments now drive hold marks, and saved pilot
+  probes include the live loop's annotations. New strategy submissions must
+  supply a comparison bound in plan amount conditions; legacy replay is intact.
+  Next, repair the ordered resource forecast's tap-cost and spending-zone
+  checks, then compare fixed-candidate recognition under identical facts before
+  adding a planning stage. Candidate recognition is an intermediate screen;
+  generated plans must execute coherently before the full-game gate.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected

@@ -257,3 +257,31 @@ planning problem; the mechanical fix is retained for accurate facts.
 The exact failed declaration is now a committed journal prefix and pilot case,
 bringing the catalog to 18 cases. Types and all 179 offline tests pass, including
 actual vigilant/nonvigilant declarations and a held protection target.
+
+
+## Independent review and explicit comparisons
+
+The Codex and Claude committee agreed to finish deterministic corrections before
+another planner redesign. Both found the participant/spending mismatch. Review
+also identified plan amount conditions without either comparison bound: the
+reader correctly treats those as unrestricted, but the writer was using them
+as if they tested presence or life. The consumed preparation contains one in a
+hold release. Newly submitted plans now name every missing bound, including
+nested conditions and inherited fields. The initial question exposes these
+problems before the first submission. Core's existing syntax and journal replay
+remain unchanged; zero remains a valid explicit bound. Types and 179 tests pass.
+
+The reviewers initially differed on an extra tool-free decision stage versus a
+checked candidate receipt. They agreed on a smaller next experiment: identical
+complete facts and mechanically checked payment facts, rotated fixed candidates,
+three Luna-low answers through a minimal tool and three through text. Correctness
+and whole-call latency decide that screen, not reported reasoning tokens. Only
+a successful screen leads to candidate generation and binding with a no-lethal
+control and bounded gameplay. Runtime combat simulation and broad pregame
+redesign are deferred. The planned deterministic budget fixes remain separate.
+
+Claude observed zero reported reasoning in the saved Luna-low tool replies.
+Tool availability, representation, input size and human hints are confounded in
+the earlier diagnostics. This does not establish an absence of reasoning or its
+cause. The JSON diagnostic also used the older card representation; it cannot
+isolate the effect of the subsequent hand-definition correction.
