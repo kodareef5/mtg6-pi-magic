@@ -17,11 +17,13 @@
  * procedure makes, a land whose entry is conditional, a search too large to
  * finish, the walk names no conflict rather than guess. It is a forecast: the
  * writer is told once, and the table's payment at the time is what decides.
+ * Past 150 lines to keep the single-use preview and ordered payment search
+ * beside their shared entry forecast and funding reader.
  */
 import { symbols } from "./announce.ts";
 import { fundings, sources, type Funding, type Price } from "./funding.ts";
-import type { Plan, PlanOption, Registration } from "./language.ts";
-import { allowance } from "./permits.ts";
+import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
+import { allowance, playable } from "./permits.ts";
 import { select } from "./query.ts";
 import { matches, viewWorld } from "./selectors.ts";
 import { intrinsic } from "./characteristics.ts";
@@ -37,6 +39,33 @@ export function afterUntap(frame: Frame): Frame {
 		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield"
 			? { ...object, tapped: false, summoningSick: false } : object),
 		pools: (frame.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => mana.persists) })) } };
+}
+
+/** Price one use before sequencing it. A land preview is one named drop, not a prediction of resolved effects. */
+export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObject) {
+	const cost = procedure.cost;
+	const printed = cost?.mana ?? (procedure.timing === "spell" ? frame.view.printed?.[source.card ?? ""]?.mana : "{0}");
+	const mana = printed === undefined ? undefined : symbols(printed);
+	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof cost?.tap === "object")
+		return { scope: "Not priced: variable mana or additional costs require the offered payment." };
+	const reserved = new Set(cost?.tap === true ? [source.id] : []);
+	const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const } : source;
+	const possible = (position: Frame) => fundings(position, mana, reserved, spending).length > 0;
+	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
+	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
+		? (frame.view.objects ?? []).filter((one) => one.traits?.types.includes("land") && one.zone !== "battlefield" && playable(world, frame.seat, one, turn, true)) : [];
+	return { cost: stated(mana), payableBeforeNewResources: possible(frame),
+		afterOneLand: [...new Map(lands.map((one) => [one.card, one])).values()].map((land) => {
+			const registers = frame.view.work?.packages?.find((one) => one.card === land.card)?.registers;
+			const entry = entersTapped(frame, land, registers);
+			if (entry === "unknown" || entry === "conditional") return { card: land.card, entry, payable: "unknown" };
+			const entered = { ...land, zone: "battlefield" as const, controller: frame.seat, entered: Number.MAX_SAFE_INTEGER, tapped: entry === "tapped",
+				...(land.traits && registers ? { traits: { ...land.traits, registrations: registers } } : {}) };
+			return { card: land.card, entry, payable: possible({ ...frame, view: { ...frame.view,
+				objects: frame.view.objects!.map((one) => one.id === land.id ? entered : one) } }) };
+		}),
+		scope: "Mana only, before other actions spend sources; held sources are included. No intervening effects or further land plays are assumed. Timing, targets and source tap restrictions are separate.",
+	};
 }
 
 export function budget(frame: Frame, plan: Plan): string[] {

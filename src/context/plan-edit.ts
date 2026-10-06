@@ -16,6 +16,21 @@ export const ChangesSchema = Type.Cyclic({ ...definitions,
 	Changes: Type.Object(Object.fromEntries(Object.entries(planFields.properties).map(([key, field]) => [key, Type.Optional(field)])), { additionalProperties: false }),
 }, "Changes");
 
+// Advertise the ordinary plan fields where the model writes them. Recursive
+// card programs and conditions stay locally checked, without provider expansion.
+const terms = Type.Object({}, { additionalProperties: true });
+const submittedOption = Type.Object({ ...PlanDefs.Option.properties, if: Type.Optional(terms),
+	action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!,
+		Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false }),
+		Type.Object({ procedure: terms }, { additionalProperties: false })]),
+}, { additionalProperties: false });
+export const submissionFields = { ...planFields.properties,
+	steps: Type.Array(submittedOption), may: Type.Array(submittedOption),
+	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, if: terms }, { additionalProperties: false })),
+	holds: Type.Array(Type.Object({ ...planFields.properties.holds.items.properties, releaseWhen: Type.Optional(terms) }, { additionalProperties: false })),
+	packages: Type.Array(terms),
+};
+
 /** A current response has a known window. The model chooses actions, not that metadata. */
 export const ResponseSchema = Type.Object({
 	current: Type.Array(Type.Object({ label: Type.String({ minLength: 1 }), purpose: Type.Optional(Type.String()),

@@ -17,7 +17,7 @@ import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
-import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges } from "./plan-edit.ts";
+import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges, submissionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 
@@ -40,7 +40,7 @@ export const syntaxLookup: Lookup = {
 // Ordinary planning reads visible counts, life and history. Instruction-local
 // bindings and library references belong in the full syntax lookup, not here.
 const planningDefs = ChangesSchema.$defs;
-const planReference = { $ref: ChangesSchema.$ref, $defs: { Changes: planningDefs.Changes, Option: planningDefs.Option,
+const planReference = { $ref: "#/$defs/Condition", $defs: {
 	Condition: { anyOf: planningDefs.Condition.anyOf.filter((one) => !("bound" in one.properties) && !("is" in one.properties)) },
 	Amount: { anyOf: planningDefs.Amount.anyOf.filter((one) => one.type === "integer" || Object.keys(one.properties ?? {}).some((key) => ["count", "life", "history", "sum", "negate", "distinct"].includes(key))) },
 	Selector: { ...planningDefs.Selector, properties: Object.fromEntries(Object.entries(planningDefs.Selector.properties).filter(([key]) => !["is", "attachedTo", "linked", "other"].includes(key))) } } };
@@ -56,8 +56,7 @@ const SUBMIT = {
 	name: "submit",
 	description: "Update the base plan with only changed fields. Omitted fields stay; lists replace whole lists and [] clears one, except packages join by card name. {} keeps the base. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
 	parameters: { type: "object", properties: {
-		objective: { type: "string" }, guidance: { type: "string" },
-		...Object.fromEntries(["steps", "may", "askWhen", "holds", "phases", "packages"].map((name) => [name, { type: "array", items: { type: "object" } }])),
+		...submissionFields,
 		notes: NoteEditsSchema,
 		objection: { type: "object", properties: { row: { type: "integer" }, claim: { type: "string", minLength: 1 }, rule: { type: "string" } }, required: ["row", "claim"], additionalProperties: false },
 	}, additionalProperties: false },
@@ -99,7 +98,7 @@ const SYSTEM = [
 	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
 	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Give Jev the final consistent conclusion, not a running calculation followed by a correction. Remove superseded statements before submitting.",
 	"",
-	"The definitions below cover ordinary plans and conditions. Procedure and Package definitions are available through syntax when you need to change card terms. The complete schema is checked locally.",
+	"The submit tool defines ordinary plan fields, object queries and windows. The definitions below cover its conditions and amounts. Procedure and Package definitions are available through syntax when you need to change card terms. The complete schema is checked locally.",
 	JSON.stringify(planReference),
 ].join("\n");
 

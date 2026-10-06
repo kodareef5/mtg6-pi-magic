@@ -4,10 +4,14 @@ import type { Plan } from "../core/language.ts";
 import { matches, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
+import { afterUntap, manaBudget } from "../core/budget.ts";
 import type { actions } from "./plan-edit.ts";
 
 /** Show source-bound uses and prior intent to repair; absent equipment remains a lookup. */
 export function actionFacts(frame: Frame, available: ReturnType<typeof actions>, turn?: number) {
+	let resources = turn === undefined ? frame : afterUntap(frame);
+	if (turn !== undefined && resources.view.window.kind === "turn") resources = { ...resources,
+		view: { ...resources.view, window: { ...resources.view.window, turn, active: frame.seat } } };
 	return Object.fromEntries(Object.entries(available).map(([key, one]) => {
 		const prior = key.startsWith("step:") || key.startsWith("may:");
 		if (!("procedure" in one.action)) {
@@ -16,12 +20,14 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 			return [key, { ...one, ...(offered?.use ? { fixedUse: offered.use }
 				: one.action.option ? { availability: offered ? "Offered now" : "This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }] as const;
 		}
-		const { cost, instructions: _instructions, ...procedure } = one.action.procedure;
+		const use = one.action.procedure;
+		const { cost, instructions: _instructions, ...procedure } = use;
 		const bound = useSources(frame, procedure, turn);
 		if (!bound.length && !prior) return undefined;
 		const card = procedure.source.card;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
+			manaBudgets: bound.map((source) => ({ source: { id: source.id, incarnation: source.incarnation }, ...manaBudget(resources, use, source) })),
 			...(turn === undefined ? {} : { permissionTurn: turn }),
 			...(!bound.length ? { availability: "Prior intent has no permitted source now. An earlier step or a future draw must supply it; it is not an available use." } : {}),
 			cost: { ...cost, mana: mana ?? (procedure.timing === "spell" ? "Read the bound source's printed cost" : "{0}") },

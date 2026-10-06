@@ -82,9 +82,13 @@ test("strategy can fetch the full syntax and every indexed example without loadi
 		if (rounds === 1) {
 			const example = request.tools!.find((tool) => tool.name === "example")!;
 			assert.deepEqual((example.parameters as { properties: { file: { enum: string[] } } }).properties.file.enum, listed);
-			const schema = JSON.stringify(request.tools!.find((tool) => tool.name === "submit")!.parameters);
+			const fields = (request.tools!.find((tool) => tool.name === "submit")!.parameters as { properties: Record<string, any> }).properties;
+			const schema = JSON.stringify(fields);
 			assert.doesNotMatch(schema, /\$ref|\$defs/, "providers receive no recursive tool definitions");
-			assert.ok(schema.length < 3000, `${schema.length} characters in the advertised schema`);
+			assert.deepEqual(fields.steps.items.properties.when.properties.active.enum, ["self", "opponent", "any"], "ordinary turn windows are described at the submission field");
+			assert.equal(fields.steps.items.properties.action.anyOf[0].properties.objects.additionalProperties, false, "object queries cannot acquire invented fields");
+			assert.equal(fields.steps.items.properties.if.additionalProperties, true, "recursive conditions are checked locally without expanding the provider schema");
+			assert.deepEqual(fields.packages.items.properties, {}, "the card language remains behind its lookup");
 			assert.ok(!request.systemPrompt!.includes(reference), "ordinary planning does not load the whole card procedure language");
 			assert.match(request.systemPrompt!, /\$defs/, "ordinary planning definitions remain in the prompt");
 			assert.doesNotMatch(request.systemPrompt!, /"Instruction":|"Registration":/, "ordinary planning omits the recursive card-language definitions, which its tools can fetch");

@@ -20,7 +20,7 @@ import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { annotate, planDue, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
-import { budget } from "../src/core/budget.ts";
+import { budget, manaBudget } from "../src/core/budget.ts";
 import { printedCast } from "../src/core/procedures.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -758,6 +758,17 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.equal(read(1, 4)[normalKey].sourcesNow[0].zone, "exile", "next-turn preparation can see a permission that opens then");
 	assert.equal(read(1, 4)[warpKey], undefined, "a hand-only alternate cast stays unavailable from exile");
 	assert.equal(read(0, 4)[normalKey], undefined, "one seat's permission does not authorize the other seat");
+	const preview = matchup("future-payment"); main(preview, 1, 6);
+	establish(preview, 1, "Zhao, the Moon Slayer", pack("Zhao, the Moon Slayer"));
+	place(preview, 1, "battlefield", "Mountain", "Mountain", "Mountain");
+	place(preview, 1, "hand", "Smaug the Magnificent", "Soulstone Sanctuary");
+	editWork(preview, 1, [{ do: "package.put", package: { card: "Soulstone Sanctuary", registers: [{ kind: "mana", basis: "{T}: Add {C}.", cost: { tap: true }, colors: ["C"] }] } }], "sanctuary");
+	const smaug = cardsIn(preview, "hand", 1).find((one) => one.card === "Smaug the Magnificent")!;
+	const price = () => manaBudget(workFrame(preview, 1), printedCast(smaug.card!, preview.printed[smaug.card!]!), workFrame(preview, 1).view.objects!.find((one) => one.id === smaug.id)!);
+	assert.equal(price().payableBeforeNewResources, false, "a four-mana cast cannot use three sources");
+	assert.deepEqual(price().afterOneLand?.find((one) => one.card === "Soulstone Sanctuary"), { card: "Soulstone Sanctuary", entry: "tapped", payable: false }, "an entry replacement stops the prospective land funding this cast");
+	commit(preview, [{ do: "move", what: cardsIn(preview, "battlefield", 1).find((one) => one.card === "Zhao, the Moon Slayer")!.id, to: "graveyard", reason: "resolve" }], "resolve");
+	assert.deepEqual(price().afterOneLand?.find((one) => one.card === "Soulstone Sanctuary"), { card: "Soulstone Sanctuary", entry: "untapped", payable: true }, "the same land enables the cast when that entry restriction leaves");
 });
 
 test("one unfinished preparation is awaited at the draw without a second planner or note race", async () => {

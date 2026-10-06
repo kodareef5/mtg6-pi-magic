@@ -44,3 +44,25 @@ beneficiary before a fetch instead of returning no steps based on currently
 tapped mana. The physical continuations still need checking. Syntax corrections
 and resource conflicts remained, so this is not a speed improvement. Artifacts:
 `.pi/review-cycle-20261006/source-components-1791283773873/`.
+
+## Candidate payments and submission fields
+
+The submit tool now describes ordinary queries, windows, steps and phase scripts
+at their fields. Recursive conditions and card programs remain locally checked;
+the tool has no recursive references. The three positions used six calls and
+1m54s, but one accepted line still proposed Smaug with insufficient mana after
+the forecast warning. Its saved answer is a regression example, not a successful
+plan (`source-components-1791284166761/`).
+
+Each source-bound action now includes a mana preview using the core payment
+reader, both before new resources and after a named land drop. Entry restrictions
+are included. Additional and variable costs are explicitly unpriced; this does
+not prove an ordered line, targets or timing. The red and green positions then
+each produced a preparation in one call, together 49.5s, 34,762 input and 2,564
+output tokens, and $0.0039. Red stopped promising the unpayable Smaug cast. Green
+ordered its beneficiary before the fetch. Artifacts:
+`.pi/review-cycle-20261006/source-components-1791284677856/`.
+
+Types and all 179 offline tests pass with these changes. The original gate's
+710 ledger rows and every receipt also match replay after the shared source
+reader change.

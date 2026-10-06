@@ -93,6 +93,12 @@ it cannot cast it again. The next draw is unknown and belongs in a conditional
 branch. Prior phase prose is intent to revise, not a record of the current hand.
 Forecasts retain current characteristics and assume the visible permanents
 survive; changes before the draw still require review.
+Each source-bound use also shows whether its mana cost can be paid before other
+actions, and after one named land drop. This is a resource preview, not a timing
+or target check. For example, a land entering tapped under another permanent's
+restriction cannot supply the missing fourth mana. Variable costs and additional
+costs remain explicitly unpriced. The ordered line must still account for earlier
+spending, held sources and effects that change the resource picture.
 
 The turn answer acknowledges applicable policies in its guidance or phase
 script and binds them through ordered steps, conditional responses and holds.
