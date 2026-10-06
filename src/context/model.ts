@@ -89,7 +89,7 @@ export function decisionApi(
 					throw new PlayerUnavailable(`${named}: ${key} exceeds the ${CHOICE_LIMIT}-choice capacity. The decision needs further inspection; no request was sent.`);
 			}
 			const began = Date.now();
-			const finish = meter(options.tally, { role: "decide", seat: options.seat, about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began });
+			const finish = meter(options.tally, { role: "decide", type: "classifier", seat: options.seat, about: options.about ?? about, model: named, ceiling: CEILING.decide, at: began });
 			let result: ClassifierResult;
 			try {
 				// classify never rejects, so the stop reason is the error channel.

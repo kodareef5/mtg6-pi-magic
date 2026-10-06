@@ -36,6 +36,7 @@ export function totals(calls: readonly Spend[], now?: number) {
 
 export type Totals = ReturnType<typeof totals>;
 const identity = (call: Spend) => JSON.stringify([call.model, call.thinking ?? null]);
+const callType = (call: Spend) => call.type ?? (call.role === "decide" ? "classifier" : "chat");
 
 export function usageReport(calls: readonly Spend[], now?: number) {
 	const models = [...new Set(calls.map(identity))].sort().map((key) => {
@@ -44,7 +45,11 @@ export function usageReport(calls: readonly Spend[], now?: number) {
 	});
 	return {
 		total: totals(calls, now), models,
-		roles: roles.map((role) => ({ role, type: role === "decide" ? "classifier" : "chat", ...totals(calls.filter((call) => call.role === role), now) })),
+		types: (["classifier", "chat"] as const).map((type) => ({ type, ...totals(calls.filter((call) => callType(call) === type), now) })),
+		roles: roles.map((role) => {
+			const group = calls.filter((call) => call.role === role), types = new Set(group.map(callType));
+			return { role, type: types.size > 1 ? "mixed" : types.values().next().value ?? (role === "decide" ? "classifier" : "chat"), ...totals(group, now) };
+		}),
 		roleModels: roles.flatMap((role) => models.flatMap(({ model, thinking }) => {
 			const group = calls.filter((call) => call.role === role && call.model === model && (call.thinking ?? null) === thinking);
 			return group.length ? [{ role, model, thinking, ...totals(group, now) }] : [];

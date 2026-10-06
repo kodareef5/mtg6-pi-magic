@@ -164,9 +164,16 @@ without separate invitations for Jev to invent a strategy for each one.
 - [ ] Give the turn organizer a concrete resource forecast for its ordered line,
   including which attackers a payment taps. Bind target and response choices;
   prose about retaining mana is insufficient when the line spends it.
-- [ ] Narrow post-draw amendments and preserve sound phase policies. All 15 prepared
-  turns needed amendments in this gate; 16 of 67 strategy requests followed a
-  refusal. The background and repair questions still do too much work.
+- [ ] Narrow post-draw amendments and preserve sound phase policies. The first
+  gate amended all 15 preparations; the October 6 gate amended all eight,
+  accounting for about 477 of its 534 seconds of strategy wait. First separate
+  reusable policy from conclusions tied to an old hand, board or turn. Establish
+  positive coverage for draws and changed facts before bypassing a writer call;
+  syntax, budget and an empty `askWhen` list do not establish strategic validity.
+  The narrow-review trial kept stale advice and failed landfall ordering, so it
+  was withdrawn. A repeated full amendment also failed that order and invented
+  action keys. Use the acceptance examples in `docs/PLAYBOOK.md` and
+  compare both covered changes and changes that must trigger reconsideration.
 - [x] Prevent newly authored fake button ids and verify paid searches separately.
   Land and combat movement now have reusable selectors. Literal picks must name
   actual options or stable continuation ids. The next gate's two empty fetches
@@ -177,9 +184,21 @@ without separate invitations for Jev to invent a strategy for each one.
   available sources. Preserve those draw positions and fix the factual question
   before another full gate. Preparation must also cover the next upkeep so the
   pilot does not improvise from an expired turn's general guidance.
-- [ ] Preserve missed attacks, premature fetches and incorrect clock estimates as
-  position benchmarks. Check strategic improvement on these before another
-  full batch, then compare matching seeds with preparation measured separately.
+- [x] Establish one runnable saved-position manifest. `npm run benchmark` validates
+  13 saved prefixes offline; `--live` runs selected pilot, preparation or amendment
+  probes. It records expected properties, whole-decision timing and every call.
+  Known good and bad landfall amendments can be checked without inference.
+- [ ] Extend those benchmarks to changed blockers, clocks, covered draws and
+  stale factual guidance. Action-order checks alone do not establish playing
+  strength. Check improvement before another full batch, then compare matching
+  seeds with preparation measured separately.
+
+The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
+Jev and Luna low on identical pilot questions. Jev matched 27/27 expected
+decisions at 253 ms median; Luna matched 24/27 at 1,714 ms median. Keep Jev as the
+pilot. A narrow Luna exception review is a candidate experiment, not a new
+production role. Defer preparation restarts and timeout changes until prepared
+reuse has been tested, so waiting improvements have an identifiable cause.
 
 Each cycle starts with the reviewed journal and exact request. Save the smallest
 position that exhibits the mistake, state the preferred decision and its

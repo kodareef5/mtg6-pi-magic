@@ -55,6 +55,8 @@ export type RunTiming = { startedAt: number; preparedAt?: number; playStartedAt?
 
 export type Spend = {
 	role: Role;
+	/** The actual call interface; absent historical records use their role's original interface. */
+	type?: "classifier" | "chat";
 	seat?: number;
 	/** What the request was for, so two pregame calls are tellable apart. */
 	about: string;

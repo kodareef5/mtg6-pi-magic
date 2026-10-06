@@ -119,6 +119,45 @@ It carries later-choice purpose on the announcing step. It updates an uncovered
 case without rewriting accepted card meaning. If facts contradict the example,
 the example does not override the facts.
 
+## Prepared-turn acceptance examples
+
+These define the next acceptance experiment, not the current `settled` handler.
+The current handler still requires no change beyond a covered draw. A valid
+resource budget does not prove the attack or response policy remains sound.
+
+Before preparing a line, distinguish reusable advice from bound conclusions.
+"Preserve green for protection when protection is in hand" is a policy.
+"Keep this Forest for Veil" is a conclusion that depends on the current hand,
+source and purpose. A previous turn's sickness, mana count or lethal estimate
+must not become the next turn's default fact.
+
+| Prepared coverage | Change at the draw | Preferred handling | Required check |
+|---|---|---|---|
+| Develop the named threat; the response policy covers an additional opposing mana source | Opponent played and tapped an ordinary land; draw matches the land branch | Accept the prepared line without a writer call | Source and payment still work; the covered response and combat conditions hold |
+| Attack only while the named attack remains safe; new blockers are a stop | Opponent added a blocker | Review the combat line and its response resources | Mechanical validity does not settle damage, trades or the clock |
+| Use a land draw before a spell that needs it | The drawn land supplies the required color and enters untapped under accepted terms | Follow the existing branch | Check the entry restriction and ordered payment, not just printed mana production |
+| Existing draw branches do not cover a new relevant spell | Draw adds removal or a different development line | Ask a narrow comparison against the prepared line | Consider timing, target and reserved mana before keeping or changing it |
+| Cast the beneficiary before a land or fetch | The fetch is gone, but a land is in hand and existing sources pay for the beneficiary | Replace the missing continuation; retain beneficiary before land | A repaired line must preserve the dependency that made the sequence useful |
+| Hold a response until the opponent's last useful window | A changed threat makes that response ineffective, or a required source is lost | Replace the response and affected spending together | Do not preserve a hold that no longer has its stated purpose |
+| No declared coverage for a changed position | Syntax and mana checks still pass; `askWhen` is empty | Review, rather than treating silence as permission | Missing assumptions are unknown coverage, not a strategic judgment |
+
+The preparation question should select the applicable pregame policies, bind
+the ordered line and resources, cover likely draws, and state what invalidates
+those decisions. Shared condition machinery can evaluate those declared facts;
+it cannot infer strategic irrelevance from a card name or an unchanged action id.
+
+A remaining amendment asks which dependency changed, whether the existing line
+still serves its policy, and which actions, holds or bound conclusions need
+replacement. Give it the affected complete policy families and the current
+facts. Other complete policies remain available through lookup. Do not remove
+strategic context merely because the old plan passed syntax validation.
+
+Accepting unchanged fields must be deliberate. A narrow question should allow
+`{}` when the line remains sound, without encouraging it to keep stale advice.
+The October 6 experiment failed that distinction; its production shortcut was
+withdrawn. The [review record](history/2026-10-06-review-tune.md) and
+[benchmark instructions](../tools/benchmarks/README.md) preserve the evidence.
+
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved

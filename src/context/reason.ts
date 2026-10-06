@@ -135,6 +135,7 @@ export function reasoner(options: {
 		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
 		const finish = meter(options.tally, {
 			role: options.role,
+			type: "chat",
 			seat: options.seat,
 			about,
 			model: named,

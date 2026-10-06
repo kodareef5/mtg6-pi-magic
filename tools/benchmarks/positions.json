@@ -1,0 +1,21 @@
+{
+  "journals": {
+    "oct6": ".pi/review-cycle-20261006/gate/next-version-gate-20261005-1791285458578.jsonl",
+    "oct5": ".pi/next-version-20261005/gate/next-version-gate-20261005-1791250809663.jsonl"
+  },
+  "cases": [
+    { "id": "keep-opening", "journal": "oct6", "version": 0, "seat": 0, "task": "pilot", "property": "Keep the recorded seven under its pregame policy.", "expect": { "id": "keep" } },
+    { "id": "sick-creature", "journal": "oct6", "version": 32, "seat": 1, "task": "pilot", "property": "Kellan entered this turn without haste; finish without attacking.", "expect": { "id": "attack:done" } },
+    { "id": "cast-zhao", "journal": "oct6", "version": 67, "seat": 1, "task": "pilot", "property": "Execute the planned Zhao cast with two Mountains.", "expect": { "source": "Zhao, the Moon Slayer", "timing": "spell" } },
+    { "id": "attack-kellan", "journal": "oct6", "version": 75, "seat": 1, "task": "pilot", "property": "Attack with the established Kellan under the prepared line.", "expect": { "id": "attack:1-15" } },
+    { "id": "finish-attackers", "journal": "oct6", "version": 76, "seat": 1, "task": "pilot", "property": "Finish the declaration after choosing Kellan.", "expect": { "id": "attack:done" } },
+    { "id": "draw-before-main", "journal": "oct6", "version": 64, "seat": 1, "task": "pilot", "property": "Pass the draw window to reach the planned land and cast.", "expect": { "id": "pass" } },
+    { "id": "paid-vein-search", "journal": "oct6", "version": 150, "seat": 0, "task": "pilot", "property": "Find the offered Forest after sacrificing Promising Vein.", "expect": { "id": "resolve:ability-318:3:0:0-14" } },
+    { "id": "paid-passage-search", "journal": "oct6", "version": 221, "seat": 0, "task": "pilot", "property": "Find the offered Forest after sacrificing Fabled Passage.", "expect": { "id": "resolve:ability-449:4:0:0-14" } },
+    { "id": "respond-to-chocobo", "journal": "oct6", "version": 235, "seat": 1, "task": "pilot", "property": "Use Burst Lightning on the opponent's Chocobo before it grows.", "expect": { "source": "Burst Lightning", "timing": "spell", "target": "Sazh's Chocobo" } },
+    { "id": "existing-kellan", "journal": "oct5", "version": 44, "seat": 1, "task": "prepare", "property": "Do not cast the Kellan already on the battlefield.", "forbid": { "source": "Kellan, Planar Trailblazer", "timing": "spell" } },
+    { "id": "tapped-land-budget", "journal": "oct5", "version": 87, "seat": 1, "task": "prepare", "property": "Zhao makes the available Sanctuary enter tapped; it cannot pay for Smaug.", "forbid": { "source": "Smaug the Magnificent", "timing": "spell" } },
+    { "id": "beneficiary-before-fetch", "journal": "oct5", "version": 389, "seat": 0, "task": "prepare", "property": "Cast Explorer before activating Vein for landfall.", "order": [{ "source": "Icetill Explorer", "timing": "spell" }, { "source": "Promising Vein", "timing": "stack" }] },
+    { "id": "green-landfall-order", "journal": "oct5", "version": 475, "seat": 0, "task": "amend", "property": "After Vein is lost, preserve Explorer before the Forest land drop; current lands already pay for Explorer.", "prepared": { "file": ".pi/review-cycle-20261006/accepted-preparations.json", "name": "green-landfall-order" }, "order": [{ "source": "Icetill Explorer", "timing": "spell" }, { "source": "Forest", "prefix": "land:" }] }
+  ]
+}

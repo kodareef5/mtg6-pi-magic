@@ -511,6 +511,9 @@ test("a game bill counts attempts and separates overlapping time, role, model an
 	assert.equal(result.models.find((one) => one.model === "test/sol" && one.thinking === "low")!.calls, 4, "a model total includes all its roles");
 	assert.equal(result.roles.find((one) => one.role === "judge")!.calls, 3);
 	assert.equal(result.roles.find((one) => one.role === "summary")!.calls, 0);
+	const pilots = usageReport([{ ...base, role: "decide", model: "test/jev" }, { ...base, role: "decide", type: "chat" }]);
+	assert.equal(pilots.roles.find((one) => one.role === "decide")!.type, "mixed", "a chat pilot remains chat even when it answers decide");
+	assert.deepEqual(pilots.types.map((one) => [one.type, one.calls, one.input]), [["classifier", 1, 115], ["chat", 1, 115]], "historical classifiers and explicit chat calls retain separate usage");
 	assert.equal(totals([{ ...base, at: undefined }]).activeMs, null, "older calls without start times have unknown overlap");
 	assert.equal(totals([]).activeMs, 0);
 	assert.equal(totals([{ ...base, failed: "error", usage: { ...usage, totalTokens: 0 } }]).missingUsage, 1);
