@@ -20,6 +20,7 @@ import { viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { useSources } from "../core/readiness.ts";
+import { decisionFacts } from "./strategy-position.ts";
 
 /** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
 function objects(frame: Frame) {
@@ -152,5 +153,6 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
 		mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
 		choices: planningChoices(frame), refused: frame.refused,
+		decisionFacts: decisionFacts(frame),
 	});
 }

@@ -203,6 +203,15 @@ reject a future transformation, choose a reserve for the seat, or infer card
 meaning from prose. Repeated saved-position answers must improve before the
 new question is credited with better gameplay.
 
+The turn question ends with a compact fact sheet: the complete current creature
+rosters, the seat's hand, available mana sources and land allowance with visible
+permitted candidates. Empty creature and hand lists mean none. These are read
+from the projected position, including its labelled untap forecast during
+preparation. They do not apply a registered entry effect or predict a future
+card. Full characteristics, standing restrictions and card text remain in the
+question. The first repeated comparison improved action selection but still
+produced false resource prose; the sheet is not a factual acceptance gate.
+
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved

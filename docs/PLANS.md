@@ -218,6 +218,11 @@ without separate invitations for Jev to invent a strategy for each one.
   hand lands. These facts diagnose stale commitments without rejecting future
   transformations. The first repeated answers still copy false prose; source
   bindings alone do not close the repair problem.
+  A compact current-position sheet now exposes complete creature rosters, the
+  visible hand, available mana and land permissions. In three repeats of three
+  failing repair/amendment positions, structural checks improved from 1/9 to
+  8/9. False resource claims remain in otherwise passing answers. Broader saved
+  positions and physical continuations precede the next full-game gate.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected

@@ -545,6 +545,12 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	assert.doesNotMatch(JSON.parse(facts(workFrame(table, 0), {})).mana, /Permitted from graveyard/, "a visible land still needs permission");
 	establish(table, 0, "Icetill Explorer");
 	assert.match(JSON.parse(facts(workFrame(table, 0), {})).mana, /Permitted from graveyard: [^.]*Forest: enters untapped, makes G/, "resource context includes a currently permitted graveyard land");
+	const snapshot = structuredClone(table), frame = workFrame(table, 0), stated = JSON.parse(facts(frame, {})).decisionFacts;
+	assert.deepEqual(stated.yourCreatures.map((one: { id: string }) => one.id), frame.view.objects!.filter((one) => one.controller === 0 && one.zone === "battlefield" && one.traits?.types.includes("creature")).map((one) => one.id), "the roster contains current creatures, never a spell in hand or a potential animated land");
+	assert.deepEqual(stated.yourHand.map((one: { id: string }) => one.id), frame.view.objects!.filter((one) => one.controller === 0 && one.zone === "hand").map((one) => one.id));
+	assert.equal(stated.landPlays.remaining, 2);
+	assert.ok(stated.landPlays.visibleCandidates.some((one: { id: string; zone: string }) => one.id === grave.id && one.zone === "graveyard"));
+	assert.deepEqual(table, snapshot, "building decision facts neither moves a card nor applies a future ability");
 	const elf = establish(table, 0, "Llanowar Elves");
 	commit(table, [{ do: "tap", what: elf.id }], "resolve");
 	main(table, 1, 4);
@@ -754,6 +760,8 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	assert.deepEqual(sent.view.window, { kind: "turn", turn: 5, active: 0, step: "precombat-main", phase: "precombat-main" });
 	assert.equal(sent.objects.battlefield.you.find((one: { id: string }) => one.id === forest.id).tapped, undefined);
 	assert.ok(sent.objects.battlefield.you.filter((one: { traits: { types: string[] } }) => one.traits.types.includes("creature")).every((one: { summoningSick: boolean }) => !one.summoningSick));
+	assert.ok(sent.decisionFacts.yourCreatures.every((one: { summoningSick: boolean }) => !one.summoningSick), "the roster uses the labelled forecast, not the observed opponent-turn restriction");
+	assert.ok(sent.decisionFacts.mana.untappedSources.some((one: { id: string }) => one.id === forest.id));
 	assert.deepEqual(sent.choices, { options: [], uses: [] }, "current opponent-turn choices do not masquerade as next-turn offers");
 	assert.deepEqual(sent.view.history, [], "events on this turn are observations, not events on the forecast turn");
 	assert.match(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [{ label: "Cast absent Explorer", when: { active: "self", step: "precombat-main" },
