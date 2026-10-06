@@ -1,0 +1,168 @@
+{
+  "results": [
+    {
+      "id": "red-blocked-lethal",
+      "plan": {
+        "objective": "Win through the single visible ground blocker this turn.",
+        "guidance": "Play Mountain, then cast Smaug while preserving the animated Sanctuary. After Smaug resolves, attack with Kellan, Sanctuary and Smaug. If Explorer blocks Kellan, the other attackers deal seven; it cannot block the flyer. Reconsider only if an actual response changes this line.",
+        "steps": [
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "controller": "self",
+                "card": "Mountain"
+              }
+            }
+          },
+          {
+            "label": "Cast Smaug before combat",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Smaug the Magnificent",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Smaug the Magnificent",
+                "basis": "Flying, haste",
+                "timing": "spell",
+                "instructions": []
+              }
+            }
+          },
+          {
+            "label": "Attack with Kellan, Planar Trailblazer",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "1-15",
+                    "incarnation": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Attack with Soulstone Sanctuary",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "1-50",
+                    "incarnation": 2
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Attack with Smaug",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Smaug the Magnificent"
+              }
+            }
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "refs": [
+                {
+                  "id": "1-50",
+                  "incarnation": 2
+                }
+              ]
+            },
+            "purpose": "Keep Sanctuary untapped for the lethal attack.",
+            "releaseWhen": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "you",
+                  "name": "Smaug the Magnificent"
+                }
+              },
+              "atLeast": 1
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "guidance": "Play the Mountain and pay for Smaug without tapping the held animated Sanctuary. Wait for resolution."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "guidance": "Attack with all three named creatures, then finish. Choose the opponent for Smaug damage. A zero-Treasure attack trigger deals zero."
+          }
+        ],
+        "may": [],
+        "askWhen": []
+      }
+    }
+  ]
+}

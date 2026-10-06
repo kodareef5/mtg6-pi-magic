@@ -1157,7 +1157,7 @@ test("preparation starts on the opponent's turn, not before our line has played,
  await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules: loadRules("rules/cr.tsv") }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
  assert.match(seen[0]!.messages, /Repair this response or combat decision/);
  assert.match(seen[0]!.messages, /Do not write the next own turn's line/);
- assert.deepEqual(seen[0]!.tools.sort(), ["card", "equipment", "example", "odds", "rule", "submit", "syntax"]);
+ assert.deepEqual(seen[0]!.tools.sort(), ["card", "combat", "equipment", "example", "odds", "rule", "submit", "syntax"]);
 });
 
 test("odds count from what the seat can name: our library exactly, the opponent's hand and library together", () => {

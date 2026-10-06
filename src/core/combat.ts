@@ -21,6 +21,7 @@ import type { Change } from "./syntax.ts";
 import type { Chosen } from "./selectors.ts";
 import type { Move, Pending } from "./moves.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
+import { attackConflicts, blockConflicts, combatExchange, lethalDamage } from "./combat-facts.ts";
 
 const ref = (object: Pick<Thing, "id" | "incarnation">): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 const same = (a: ObjectRef, b: ObjectRef) => a.id === b.id && a.incarnation === b.incarnation;
@@ -35,25 +36,7 @@ function present(table: Table, wanted: ObjectRef): Thing | undefined {
 }
 const traitsOf = (table: Table, object: Thing) => characteristics(table, object);
 /** 702.19b, 702.2c: trample counts marked damage; deathtouch needs one point. */
-const lethal = (table: Table, source: Thing, target: Thing) => has(traitsOf(table, source), "deathtouch")
-	? 1 : Math.max(0, (traitsOf(table, target)?.toughness ?? 0) - target.damage);
-
-/** A single normal damage exchange, not a prediction of replies or triggers. */
-function exchange(table: Table, attacker: Thing, blocker: Thing): string {
-	const attack = traitsOf(table, attacker), block = traitsOf(table, blocker);
-	if (attack?.power === undefined || attack.toughness === undefined || block?.power === undefined || block.toughness === undefined) return "";
-	if ([attack, block].some((one) => has(one, "first strike") || has(one, "double strike")))
-		return "First or double strike requires separate damage steps; no single-step exchange is predicted here.";
-	const trample = has(attack, "trample"), power = Math.max(0, attack.power), back = Math.max(0, block.power);
-	const forward = trample ? Math.min(power, lethal(table, attacker, blocker)) : power;
-	const result = (object: Thing, traits: Traits, incoming: number, from: Traits) => {
-		const deadly = object.damage + incoming >= traits.toughness! || incoming > 0 && has(from, "deathtouch");
-		return `${name(object)} ${deadly && !has(traits, "indestructible") ? "would be destroyed by this damage" : "survives this damage"}`;
-	};
-	return `If this is the only blocker and characteristics stay unchanged: ${name(attacker)} deals ${forward} to ${name(blocker)}` +
-		`${trample ? ` and ${power - forward} to the defending player when assigning minimum lethal to the blocker` : ""}; ${name(blocker)} deals ${back} back. ` +
-		`${result(attacker, attack, back, block)}; ${result(blocker, block, forward, attack)}. Responses, triggered effects and damage replacements are not predicted.`;
-}
+const lethal = (table: Table, source: Thing, target: Thing) => lethalDamage(traitsOf(table, source), traitsOf(table, target), target.damage);
 
 /** 508.1: the active player picks attackers one at a time, then finishes. */
 export function declareAttackers(table: Table): Pending {
@@ -68,7 +51,7 @@ export function declareAttackers(table: Table): Pending {
 	const attackers = chosen.flatMap((one) => present(table, one) ?? []);
 	const moves: Move[] = able.map((object) => {
 		const traits = traitsOf(table, object);
-		const marks = (["defender", "can't attack"] as const).filter((word) => has(traits, word)).map((word) => `Conflicts with ${word}.`);
+		const marks = attackConflicts({ ...object, traits });
 		return { option: { id: `attack:${object.id}`, label: `Attack with ${name(object)} (${body(traits)}${words(traits)})`, objects: [ref(object)],
 			...(marks.length ? { shows: marks.join(" ") } : {}) },
 			changes: [{ do: "combat", action: "choose", pick: { attacker: ref(object) } }], reason: "combat" };
@@ -81,17 +64,6 @@ export function declareAttackers(table: Table): Pending {
 			{ do: "attack", attackers: attackers.map((object) => ({ ...ref(object), defending })) },
 		], reason: "combat" });
 	return { situation: "turn-based", seat: active, question: chosen.length ? `Declare attackers: ${attackers.map(name).join(", ")} so far. Add another or finish.` : "Declare attackers, one at a time, then finish.", moves };
-}
-
-/** Why a block conflicts with a registered word, or nothing. */
-function conflicts(table: Table, blocker: Thing, attacker: Thing, others: number): string[] {
-	const by = traitsOf(table, blocker), on = traitsOf(table, attacker), found: string[] = [];
-	if (has(on, "flying") && !has(by, "flying") && !has(by, "reach")) found.push("Conflicts with flying: needs flying or reach.");
-	if (has(on, "can't be blocked")) found.push("Conflicts with can't be blocked.");
-	if (has(by, "can't block")) found.push("Conflicts with can't block.");
-	if (has(on, "menace") && others === 0) found.push("Conflicts with menace unless another creature also blocks it.");
-	if (has(on, "can't be blocked by more than one creature") && others > 0) found.push("Conflicts with can't be blocked by more than one creature.");
-	return found;
 }
 
 /** 509.1: the defending player picks blocks one at a time, then finishes. */
@@ -107,8 +79,9 @@ export function declareBlockers(table: Table): Pending {
 			!blocks.some((pick) => same(pick.blocker, object));
 	}).sort((a, b) => a.id.localeCompare(b.id));
 	const moves: Move[] = able.flatMap((blocker) => attackers.map((attacker): Move => {
-		const marks = conflicts(table, blocker, attacker, blocking(attacker));
-		const calculation = blocking(attacker) ? "" : exchange(table, attacker, blocker);
+		const attack = { ...attacker, traits: traitsOf(table, attacker) }, block = { ...blocker, traits: traitsOf(table, blocker) };
+		const marks = blockConflicts(attack, block, blocking(attacker));
+		const calculation = blocking(attacker) ? "" : combatExchange(attack, block)?.summary ?? "";
 		const shows = [...marks, ...(calculation ? [calculation] : [])].join(" ");
 		return { option: { id: `block:${blocker.id}:${attacker.id}`, label: `Block ${name(attacker)} (${body(traitsOf(table, attacker))}${words(traitsOf(table, attacker))}) with ${name(blocker)} (${body(traitsOf(table, blocker))}${words(traitsOf(table, blocker))})`,
 			objects: [ref(blocker), ref(attacker)],

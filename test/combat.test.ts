@@ -16,6 +16,8 @@ import type { Decision } from "../src/core/types.ts";
 import type { Registration } from "../src/core/language.ts";
 import { workFrame } from "../src/core/work-tools.ts";
 import { activeWatches } from "../src/core/triggers.ts";
+import { combatExchange } from "../src/core/combat-facts.ts";
+import { combatLookup } from "../src/context/strategy-combat.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { facts } from "../src/context/strategy-facts.ts";
@@ -115,7 +117,7 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 		reach(position, "declare-blockers", 2);
 		if (keyword) label(position, hydra, `Fixture grants ${keyword}.`, [keyword]);
 		const described = option(position, `block:${hydra.id}:${challenger.id}`)!.shows!;
-		assert.match(described, /Emberheart Challenger deals 2 to Mossborn Hydra; Mossborn Hydra deals 1 back/);
+		assert.match(described, /Emberheart Challenger deals 2 to Mossborn Hydra and 0 to the defending player; Mossborn Hydra deals 1 back/);
 		assert.ok(described.includes(`Mossborn Hydra ${keyword === "indestructible" ? "survives this damage" : "would be destroyed by this damage"}`));
 		assert.ok(described.includes(`Emberheart Challenger ${keyword === "deathtouch" ? "would be destroyed by this damage" : "survives this damage"}`));
 		pick(position, `block:${hydra.id}:${challenger.id}`); pick(position, "block:done");
@@ -143,6 +145,16 @@ test("trample assigns lethal to the blocker before the player, counting marked d
 	pick(table, `assign:${hydra.id}:1-3`);
 	pick(table, "damage");
 	assert.equal(table.seats[1]!.life, 17);
+	// Damage already marked on an indestructible blocker can satisfy all lethal assignment.
+	const marked = matchup("marked-deathtouch"), trampler = establish(marked, 0, "Mossborn Hydra");
+	const wall = establish(marked, 1, "Hired Claw", []);
+	reach(marked, "declare-attackers", 3); label(marked, trampler, "Fixture grants deathtouch.", ["deathtouch"]);
+	label(marked, wall, "Fixture grants indestructible.", ["indestructible"]);
+	commit(marked, [{ do: "damage", source: trampler.id, target: { id: wall.id, incarnation: wall.incarnation }, amount: 2 }], "game-setup");
+	pick(marked, `attack:${trampler.id}`); pick(marked, "attack:done");
+	reach(marked, "declare-blockers", 3); pick(marked, `block:${wall.id}:${trampler.id}`); pick(marked, "block:done");
+	const divisions = reach(marked, "combat-damage", 3);
+	assert.ok(divisions.options.some((one) => one.id === `assign:${trampler.id}:0-1`), "deathtouch does not demand one more damage when marked damage is already lethal");
 });
 
 test("double strike deals damage in both steps, and a creature killed by first strike deals none", () => {
@@ -156,6 +168,11 @@ test("double strike deals damage in both steps, and a creature killed by first s
 	pick(table, `attack:${claw.id}`);
 	pick(table, "attack:done");
 	reach(table, "declare-blockers", 2);
+	const before = workFrame(table, 1), attacker = before.view.objects!.find((one) => one.id === kellan.id)!, blocker = before.view.objects!.find((one) => one.id === elves.id)!;
+	const forecast = combatExchange(attacker, blocker)!;
+	assert.equal(forecast.toPlayer, 0, "a double striker stays blocked after killing its blocker unless it tramples");
+	assert.equal(forecast.blockerDestroyed, true);
+	assert.deepEqual(forecast.steps.map((one) => one.toAttacker), [0, 0]);
 	pick(table, `block:${elves.id}:${kellan.id}`);
 	pick(table, "block:done");
 	const first = reach(table, "combat-damage", 2);
@@ -169,6 +186,34 @@ test("double strike deals damage in both steps, and a creature killed by first s
 	pick(table, "damage");
 	assert.equal(table.seats[0]!.life, 19);
 	assert.equal(table.things.get(kellan.id)!.damage, 0);
+	for (const trample of [false, true]) {
+		const game = matchup(`forecast-strike-${trample}`), striker = establish(game, 1, "Kellan, Planar Trailblazer", []);
+		const wall = establish(game, 0, trample ? "Llanowar Elves" : "Icetill Explorer", []);
+		if (!trample) commit(game, [{ do: "counters", what: striker.id, kind: "+1/+1", amount: 1 }, { do: "counters", what: wall.id, kind: "+1/+1", amount: 6 }], "game-setup");
+		reach(game, "declare-attackers", 2);
+		label(game, striker, "Fixture grants strike keywords.", ["double strike", ...(trample ? ["trample"] : [])]);
+		const frame = workFrame(game, 1), original = structuredClone(game);
+		const read = combatExchange(frame.view.objects!.find((one) => one.id === striker.id)!, frame.view.objects!.find((one) => one.id === wall.id)!)!;
+		assert.equal(read.toPlayer, trample ? 3 : 0);
+		assert.equal(read.attackerDestroyed, !trample);
+		assert.equal(read.blockerDestroyed, trample);
+		assert.equal(JSON.parse(combatLookup(frame).answer({ attacker: striker.id, blocker: wall.id })).exchange.toPlayer, read.toPlayer);
+		assert.deepEqual(game, original, "arithmetic applies no hypothetical damage or state-based action");
+		pick(game, `attack:${striker.id}`); pick(game, "attack:done");
+		reach(game, "declare-blockers", 2); pick(game, `block:${wall.id}:${striker.id}`); pick(game, "block:done");
+		const life = game.seats.map((one) => one.life);
+		for (let damageStep = 0; damageStep < 2; damageStep++) {
+			reach(game, "combat-damage", 2);
+			const assignment = nextDecision(game)!.options[0]!;
+			if (assignment.id.startsWith("assign:")) pick(game, assignment.id);
+			pick(game, "damage");
+		}
+		finish(game);
+		assert.equal(game.seats[0]!.life, life[0]! - read.toPlayer);
+		assert.equal(game.seats[1]!.life, life[1]);
+		assert.equal(game.things.get(striker.id)!.zone === "graveyard", read.attackerDestroyed);
+		assert.equal(game.things.get(wall.id)!.zone === "graveyard", read.blockerDestroyed);
+	}
 });
 
 test("attacking with nothing skips blockers and damage, and combat ends after the end of combat step", () => {

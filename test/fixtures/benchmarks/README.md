@@ -35,3 +35,6 @@ plan was checked for exact equality with the consumed base in trace call 71.
 `bad-blocked-lethal.json` contains the accepted amendment that sent Kellan
 alone into Explorer. These records carry private game knowledge and stay
 outside the published package.
+`good-blocked-lethal.json` is a manually authored answer checked by core and
+then executed through Jev in `known-lethal-play/`; it won on turn 14 with replay
+matching. It establishes an executable expected line, not a Luna success.

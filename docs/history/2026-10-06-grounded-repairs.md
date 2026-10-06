@@ -88,7 +88,8 @@ An earlier continuation under `continuation/` copied the already accepted old
 repair; it was stopped and is excluded from this validation. Its trace remains.
 
 Twelve broader probes cover the other three preparation cases and the funding
-land amendment. They remain a small quality sample; the full traces and answers
+land amendment: 11/12 accepted and 8/12 passing action structure. They remain a
+small quality sample; the full traces and answers
 are in `broader/`. The repeated refusals also reproduce `when.step: "combat"`
 and `"any"`, plus bounds nested inside `amount`. The strategy submission tool
 now accepts those unambiguous forms and stores canonical windows and bounds.
@@ -98,3 +99,43 @@ prompt warning. Offline tests cover normalization without mutating the answer.
 
 Types and all 179 offline tests pass. Full games remain gated on coherent
 combat and resource decisions, not on completing this partial continuation.
+
+## Combat arithmetic and the known winning line
+
+The unchanged planner missed the saved Smaug line in three of three probes.
+Automatically adding current single-block exchanges also missed it in three
+of three. The extra attachment is withdrawn. Some answers acknowledged that
+Explorer kills Kellan and still ordered that attack; another repeated the false
+claim that a sick creature cannot block. Correct facts alone do not repair the
+large question's reliance on inherited intent.
+
+The shared calculation remains useful independently of that failed attachment.
+Physical block options and the named `combat` lookup now use the same damage
+reader, including first strike, double strike, marked damage, deathtouch,
+indestructible and minimum lethal trample assignment. It reports keyword
+conflicts separately and does not select attacks or blocks. Tests execute the
+real combat after the prediction and compare destruction and player damage.
+A blocker killed in first-strike damage deals no later damage, and a blocked
+double striker reaches the player only with trample. Marked lethal damage on
+an indestructible blocker requires no extra assignment even with deathtouch.
+Responses, triggers, replacements and life gain remain outside the forecast.
+The arithmetic probe also exposed that the current damage path does not apply
+lifelink automatically; that broader mechanic remains open.
+
+`good-blocked-lethal.json` records a manually authored, checked answer. It plays
+Mountain, casts Smaug while holding the animated Sanctuary untapped, releases
+that hold when Smaug enters, and attacks with all three creatures. This is a
+known-answer benchmark, not a successful Luna planning sample.
+
+Jev executed that answer in the real seat loop. Green's Luna response chose the
+best single block, Explorer on Kellan. Smaug and Sanctuary dealt seven through
+it, and Red won on turn 14. Replay matched with no gaps or fallback. The focused
+execution took 20.0 seconds overall, 17.5 seconds of play, 29 Jev calls and one
+completed response-planning call. Two background preparations were cancelled;
+reported cost was $0.0116, with their usage unknown. The evidence and timeline
+are in `known-lethal-play/`.
+
+This separates a planning failure from an execution failure. The engine and
+pilot can execute the line; the organizer still fails to choose it. The next
+context comparison should ask for current tactical decisions with prior
+reasoning accessible separately, before another full-game gate.

@@ -212,6 +212,22 @@ card. Full characteristics, standing restrictions and card text remain in the
 question. The first repeated comparison improved action selection but still
 produced false resource prose; the sheet is not a factual acceptance gate.
 
+Before committing an attack, distinguish unblocked damage from an exchange
+with a blocker. With a 3/2 double striker facing an untapped 8/10, the two
+damage steps deal six to the blocker; its eight damage destroys the attacker,
+and no damage reaches the player. The plan needs a different attack, a way to
+remove that block, or another development line. It cannot count six unblocked
+damage as an available win.
+
+The `combat` lookup supplies arithmetic for a named attacker and optional sole
+blocker. Pair results are alternatives and do not solve multi-blocker
+assignment. A double striker
+whose blocker dies in the first step stays blocked in the second; trample can
+carry that later damage to the player. Payments can tap an attacking land, so
+preserving its damage also requires a payment or hold that leaves it untapped.
+These calculations do not resolve future creatures, predict responses or
+triggers, apply damage replacements, or calculate life gain.
+
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved
