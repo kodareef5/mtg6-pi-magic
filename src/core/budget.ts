@@ -31,6 +31,14 @@ import type { SeenObject } from "./work.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true };
 
+/** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
+export function afterUntap(frame: Frame): Frame {
+	return { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0,
+		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield"
+			? { ...object, tapped: false, summoningSick: false } : object),
+		pools: (frame.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => mana.persists) })) } };
+}
+
 export function budget(frame: Frame, plan: Plan): string[] {
 	const at = frame.view.window;
 	if (at.kind !== "turn") return [];
@@ -44,8 +52,7 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	// On a later turn every permanent of ours has untapped and none is new.
 	// Floating mana that does not persist is gone by then.
 	const lasting = (pools: Frame["view"]["pools"]) => (pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => mana.persists) }));
-	let hypothetical: Frame = now ? frame : { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, pools: lasting(frame.view.pools),
-		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield" ? { ...object, tapped: false } : object) } };
+	let hypothetical = now ? frame : afterUntap(frame);
 	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
 	const held = new Set((plan.holds ?? []).flatMap((hold) => select(hold.objects, frame).map((object) => object.id)));
 	let plays = allowance(viewWorld(hypothetical.view), frame.seat).lands - (now ? frame.view.landsPlayed ?? 0 : 0);
@@ -112,8 +119,8 @@ export function budget(frame: Frame, plan: Plan): string[] {
 		const drew = drawing;
 		if ("procedure" in step.action && step.action.procedure.instructions.length) drawing = true;
 		if (!act.source) {
-			if (now && !drew && taken) found.push(`${where}: every card it names is already taken by an earlier step`);
-			else if (now && act.named && !drew) found.push(`${where}: you hold no ${act.named} now; cast or play only what you have, and put a card you might draw in a branch`);
+			if (!drew && taken) found.push(`${where}: every card it names is already taken by an earlier step`);
+			else if (act.named && !drew) found.push(`${where}: you hold no ${act.named} now in the stated source zone; cast or play only what you have, and put a card you might draw in a branch`);
 			honest = false;
 			continue;
 		}

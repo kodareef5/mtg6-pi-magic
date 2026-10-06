@@ -85,6 +85,14 @@ hand or battlefield test. The ordinary planning reference carries counts, life,
 history and combinations; instruction bindings stay in the full syntax lookup.
 Preparation labels both the table's alternating turn counter and the seat's own
 turn number. Neither number is a mana forecast.
+Preparation must answer the upcoming turn from a clearly labelled forecast,
+not from the opponent's current priority question. For example, two tapped
+Mountains and a Kellan already in play become two untapped sources and the same
+Kellan after a normal untap. The line may upgrade or attack with that creature;
+it cannot cast it again. The next draw is unknown and belongs in a conditional
+branch. Prior phase prose is intent to revise, not a record of the current hand.
+Forecasts retain current characteristics and assume the visible permanents
+survive; changes before the draw still require review.
 
 The turn answer acknowledges applicable policies in its guidance or phase
 script and binds them through ordered steps, conditional responses and holds.

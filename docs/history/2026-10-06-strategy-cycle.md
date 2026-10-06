@@ -25,3 +25,22 @@ and window syntax. The third submitted no ordered steps. These are failures to
 improve strategic preparation, not evidence that the catalog change is enough.
 The exact requests, answers and prefixes are in
 `.pi/review-cycle-20261006/source-components-1791283332284/`.
+
+## Next-turn position
+
+Preparation previously mixed the opponent's current priority question and tapped
+sources with a separate next-turn mana paragraph. It now receives one labelled
+forecast after normal untap, with the known hand and no invented draw. Current
+events remain observations, not events on the forecast turn. The forecast states
+that it retains current characteristics and assumes the permanents survive.
+The physical frame remains unchanged. A preparation must write ordered actions
+or an explicit pass; branches alone do not stand in for the turn's line.
+
+Repeating the same three prefixes produced accepted preparations in eight calls,
+2m51s of request time, 136,084 input and 8,904 output tokens, and $0.0129. Red
+planned attacks with the existing Kellan instead of another cast. Its later
+position planned an upgrade rather than recasting Zhao. Green planned a
+beneficiary before a fetch instead of returning no steps based on currently
+tapped mana. The physical continuations still need checking. Syntax corrections
+and resource conflicts remained, so this is not a speed improvement. Artifacts:
+`.pi/review-cycle-20261006/source-components-1791283773873/`.

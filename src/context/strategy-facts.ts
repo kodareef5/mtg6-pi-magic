@@ -13,7 +13,8 @@ import type { Recap } from "./summary.ts";
 import type { Lookup } from "./reason.ts";
 import { intrinsic } from "../core/characteristics.ts";
 import { sources } from "../core/funding.ts";
-import { entersTapped } from "../core/budget.ts";
+import { afterUntap, entersTapped } from "../core/budget.ts";
+import { TURN } from "../core/steps.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
@@ -78,9 +79,7 @@ export function initialPlan(brief: Brief): Plan {
 
 /** A forecast, separate from current facts: normal untap and no resource-changing reply. */
 export function nextMana(frame: Frame): string {
-	return mana({ ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0,
-		objects: (frame.view.objects ?? []).map((one) => one.controller === frame.seat && one.zone === "battlefield" ? { ...one, tapped: false } : one),
-		pools: (frame.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => mana.persists) })) } });
+	return mana(afterUntap(frame));
 }
 
 /** Whose turns are whose, by number: the table's global turns alternate, and a window on the wrong seat's turn never opens. */
@@ -120,12 +119,26 @@ export function chancing(frame: Frame): Lookup {
 	};
 }
 
-export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}, scope: "turn" | "response" = "turn"): string {
+export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}, scope: "turn" | "response" | "preparation" = "turn"): string {
+	const observed = frame;
+	if (scope === "preparation" && frame.view.window.kind === "turn") {
+		const projected = afterUntap(frame), { decision: _decision, refused: _refused, ...rest } = projected;
+		frame = { ...rest, view: { ...projected.view,
+			window: { kind: "turn", turn: frame.view.window.turn + 1, active: frame.seat, step: "precombat-main", phase: "precombat-main" },
+			remainingSteps: TURN.filter((step) => !["untap", "upkeep", "draw"].includes(step)),
+			landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
+		} };
+	}
 	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, ...view } = frame.view;
 	const at = frame.view.window;
 	return JSON.stringify({
-		brief: strategyBrief(context.brief, frame, scope),
+		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn"),
 		...more,
+		...(scope === "preparation" ? { positionBasis: {
+			kind: "forecast", observedWindow: observed.view.window,
+			assumptions: "Your next main phase after normal untap and draw. No unknown draw is added. Your current permanents survive and untap; current characteristics and abilities are retained. Nonpersistent floating mana expires. This is not the current position or a prediction of the opponent's actions or intervening effects.",
+			observedHistory: observed.view.history, observedActions: observed.view.actions,
+		} } : { positionBasis: { kind: "observed" } }),
 		notebook: work?.notebook ?? [],
 		packages: (work?.packages ?? []).map((pack) => pack.card),
 		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]

@@ -648,17 +648,34 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
 	main(table, 1, 4);
 	const seen: string[] = [];
-	const replies: Record<string, unknown>[] = [{ objective: "Next turn.", guidance: "g", steps: [], phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] }];
+	const forest = cardsIn(table, "battlefield", 0).find((one) => one.card === "Forest")!;
+	commit(table, [{ do: "tap", what: forest.id }], "resolve");
+	const before = structuredClone(table);
+	const replies: Record<string, unknown>[] = [{ steps: [] }, { objective: "Next turn.", guidance: "g",
+		steps: [{ label: "Wait under the response policy", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }],
+		phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] }];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const prepared = await prepareTurn(workFrame(table, 0), {}, writer);
+	assert.deepEqual(table, before, "next-turn facts do not untap the live position");
 	assert.match(seen[0]!, /PREPARE YOUR NEXT TURN, 5 on the table's alternating counter \(your own turn 3\), during the opponent's turn 4/);
+	assert.match(seen[1]!, /This turn has no ordered actions/, "a preparation must choose a line or an explicit pass");
+	const sent = JSON.parse(JSON.parse(seen[0]!)[0].content);
+	assert.equal(sent.positionBasis.kind, "forecast");
+	assert.equal(sent.positionBasis.observedWindow.turn, 4);
+	assert.deepEqual(sent.view.window, { kind: "turn", turn: 5, active: 0, step: "precombat-main", phase: "precombat-main" });
+	assert.equal(sent.objects.battlefield.you.find((one: { id: string }) => one.id === forest.id).tapped, undefined);
+	assert.ok(sent.objects.battlefield.you.filter((one: { traits: { types: string[] } }) => one.traits.types.includes("creature")).every((one: { summoningSick: boolean }) => !one.summoningSick));
+	assert.deepEqual(sent.choices, { options: [], uses: [] }, "current opponent-turn choices do not masquerade as next-turn offers");
+	assert.deepEqual(sent.view.history, [], "events on this turn are observations, not events on the forecast turn");
+	assert.match(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [{ label: "Cast absent Explorer", when: { active: "self", step: "precombat-main" },
+		action: { prefix: "cast:", objects: { card: "Icetill Explorer", zones: ["hand"] } } }] }).join(" "), /you hold no Icetill Explorer/, "an unknown future draw is not an unconditional source");
 	assert.equal(prepared.plan.objective, "Next turn.");
 
 	main(table, 0, 5);
 	replies.push({});
 	const kept = await planWork(workFrame(table, 0), {}, writer, prepared, ["you drew Forest"]);
-	assert.match(seen[1]!, /you drew Forest/);
+	assert.match(seen[2]!, /you drew Forest/);
 	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: prepared.plan }]);
 });
 
