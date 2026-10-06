@@ -128,6 +128,10 @@ without separate invitations for Jev to invent a strategy for each one.
    keyword lines, and preserve the order of joined quotations. Cost symbols
    and arbitrary word fragments no longer pass. The worked examples use the
    same check; accepted meaning remains a separate judgment.
+   An older empty printed-cost procedure no longer suppresses the shared cast
+   in an earned graveyard or exile permission. Alternative costs, special
+   instructions, conditions and an explicit withdrawal remain distinct. All
+   four previous games still replay to their original outcome or stopping point.
 7. [ ] Validate the complete path, then run one live gate.
    Run offline invariants, focused model-contract exercises and replay/clone checks
    before paid full games. Use registered decks and ordinary setup. Review the

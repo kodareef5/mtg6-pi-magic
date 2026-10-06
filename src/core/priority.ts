@@ -1,6 +1,6 @@
 /** Priority actions. Timing gates belong here; a seat may still declare its own motion. */
 import type { Move } from "./moves.ts";
-import { cardsIn, seat, type Table } from "./table.ts";
+import { cardsIn, seat, type Table, type Thing } from "./table.ts";
 import { facts, isLand, permanentSpell } from "./printed.ts";
 import { offers } from "./announce.ts";
 import { entering } from "./entry.ts";
@@ -8,7 +8,7 @@ import { tableWorld } from "./selectors.ts";
 import { allowance, playable } from "./permits.ts";
 import type { Frame, SeatId } from "./types.ts";
 import { STEPS } from "./steps.ts";
-import { printedCast } from "./procedures.ts";
+import { isPrintedCast, printedCast } from "./procedures.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
 export function priorityMoves(table: Table, holder: SeatId): Move[] {
@@ -62,9 +62,16 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 export function defaultCasts(table: Table, frame: Frame): Move[] {
 	const holder = frame.seat;
 	const world = tableWorld(table);
+	const shared = (card: Thing) => {
+		const pack = table.work[holder]?.packages?.find((pack) => pack.card === card.card);
+		if (!pack?.assessed || pack.printedCast) return true;
+		if (pack.printedCast === false) return false;
+		const ordinary = (pack.procedures ?? []).filter((one) => isPrintedCast(one, pack.card, table.printed[pack.card]!));
+		return ordinary.length > 0 && !ordinary.some((one) => (one.source.zones ?? ["hand"]).includes(card.zone));
+	};
 	// From hand, and from another zone where a permission names the card ("you may cast it from exile").
 	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
-		!table.work[holder]?.packages?.some((pack) => pack.card === card.card && pack.assessed && !pack.printedCast) &&
+		shared(card) &&
 		(card.zone === "hand" ? card.owner === holder : playable(world, holder, card, table.cursor.turn, false)));
 	const sources = [...new Set(castable.map((card) => `${card.zone}|${card.card}`))].sort().map((key) => key.split("|") as ["hand" | "exile" | "graveyard", string]);
 	return sources.flatMap(([zone, name]) => offers({ ...printedCast(name, table.printed[name]!),

@@ -158,6 +158,35 @@ test("assessment covers the whole card before play, and accepted terms supply en
 		assert.equal(card!.zone, "battlefield");
 		assert.deepEqual(characteristics(position, card!)!.words.sort(), ["flying", "haste"]);
 	}
+	// Older assessments expressed the ordinary cast as an empty hand procedure.
+	// Its presence must not suppress that same cast in a separately permitted zone.
+	const legacy = structuredClone(pack);
+	legacy.procedures![0]!.source.zones = ["hand"];
+	for (const zone of ["graveyard", "exile"] as const) {
+		const position = matchTable(`legacy-${zone}`);
+		editWork(position, 1, [{ do: "package.put", package: legacy }], "legacy-cast");
+		const card = place(position, 1, zone, pack.card)[0]!;
+		place(position, 1, "battlefield", ...Array(5).fill("Mountain")); main(position, 1);
+		const casts = () => nextDecision(position)!.options.filter((one) => one.use?.source.id === card.id);
+		assert.equal(casts().length, 0, "the old empty procedure grants no extra zone permission");
+		commit(position, [{ do: "note", note: { kind: "permit", by: 1, until: "indefinite",
+			on: { id: card.id, incarnation: card.incarnation }, who: 1, fromTurn: position.cursor.turn } }], "game-setup");
+		assert.equal(casts().length, 1, "an accepted ordinary hand cast also supplies the shared cast where permission is earned");
+		const accepted = structuredClone(position);
+		for (const changed of [
+			{ ...legacy, printedCast: false },
+			{ ...legacy, procedures: legacy.procedures!.map((one, at) => at ? one : { ...one, cost: { mana: "{6}{R}" } }) },
+		]) {
+			const corrected = structuredClone(accepted);
+			editWork(corrected, 1, [{ do: "package.put", package: changed }], "correction");
+			assert.equal(nextDecision(corrected)!.options.filter((one) => one.use?.source.id === card.id).length, 0,
+				"an explicit withdrawal or nonstandard casting cost cannot gain an unchecked default");
+		}
+		const ordinary = nextDecision(accepted)!.options.find((one) => one.use?.source.id === card.id)!;
+		assert.equal(ordinary.use!.instructions.length, 0, "warp's delayed exile is not copied onto the normal cast");
+		apply(accepted, ordinary.id, "model", "chosen"); passBoth(accepted); finish(accepted);
+		assert.equal(accepted.things.get(card.id)!.zone, "battlefield");
+	}
 
 	// An established position tests card mechanics; the journal test below uses ordinary dealing.
 	const [nova] = place(table, 1, "hand", "Nova Hellkite");

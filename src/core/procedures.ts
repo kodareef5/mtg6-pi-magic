@@ -26,6 +26,20 @@ export function printedCast(card: string, printed: Printed): Procedure {
 		claim: "Cast for its printed cost", basis: `Printed ${printed.type}, ${printed.mana}`, timing: "spell", instructions: [] };
 }
 
+/** Older packages wrote an empty procedure for the shared cast. Recognize
+ * only that exact operation; conditions, extra costs and spell effects remain
+ * the model's terms. This reads structured syntax, never printed prose.
+ */
+export function isPrintedCast(procedure: Procedure, card: string, printed: Printed): boolean {
+	return permanentSpell(printed) && procedure.timing === "spell" && procedure.source.card === card &&
+		(procedure.source.zones ?? ["hand"]).includes("hand") &&
+		(!procedure.source.controller || procedure.source.controller === "self" || procedure.source.controller === "any") &&
+		Object.keys(procedure.source).every((key) => ["card", "zones", "controller"].includes(key)) &&
+		!procedure.instructions.length && !procedure.targets?.length && !procedure.words?.length && !procedure.if && !procedure.limit &&
+		(!procedure.speed || procedure.speed === "sorcery") &&
+		(!procedure.cost || Object.keys(procedure.cost).every((key) => key === "mana") && procedure.cost.mana === printed.mana);
+}
+
 /** Shape, then the structure the schema cannot say: refs that point somewhere, timing that fits. */
 export function checkProcedure(value: unknown): Procedure {
 	const procedure = check(ProcedureSchema, value, "Procedure");
