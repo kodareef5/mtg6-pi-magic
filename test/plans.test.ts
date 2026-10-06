@@ -113,6 +113,13 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	const conditional = { ...line, steps: [{ ...line.steps[0]!, if: { amount: { history: "cast" as const, of: { name: "Llanowar Elves" } }, atLeast: 1 } }] };
 	assert.match(planProblems(workFrame(table, 0), conditional).join("; "), /cast history selectors need zones/);
 	assert.match(planProblems(workFrame(table, 0), { ...line, steps: [{ ...line.steps[0]!, if: { not: { any: [{ bound: "x" }] } } }] }).join("; "), /bound x has no binding/);
+	for (const zones of [["hand"], ["battlefield"]] as const) {
+		const guarded = { ...line, steps: [{ ...line.steps[0]!, if: { is: { top: 1, of: "you" }, matches: { zones: [...zones], name: "Forest" } } }] };
+		assert.match(planProblems(workFrame(table, 0), guarded).join("; "), /top always names a library object/);
+		const counted = { ...line, steps: [{ ...line.steps[0]!, if: { amount: { count: { zones: [...zones], name: "Forest", controller: "you" } }, atLeast: 1 } }] };
+		assert.deepEqual(planProblems(workFrame(table, 0), counted), [], "visible presence has a condition whose meaning agrees with its zone");
+	}
+	assert.deepEqual(planProblems(workFrame(table, 0), { ...line, steps: [{ ...line.steps[0]!, if: { is: { top: 1, of: "you" }, matches: { zones: ["library"], name: "Forest" } } }] }), [], "a library test remains a library test, subject to projected knowledge");
 });
 
 test("the pilot flies the plan: actions and passes are chosen, and progress lives on the ledger", async () => {
@@ -645,7 +652,7 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const prepared = await prepareTurn(workFrame(table, 0), {}, writer);
-	assert.match(seen[0]!, /PREPARE YOUR NEXT TURN, 5, during the opponent's turn 4/);
+	assert.match(seen[0]!, /PREPARE YOUR NEXT TURN, 5 on the table's alternating counter \(your own turn 3\), during the opponent's turn 4/);
 	assert.equal(prepared.plan.objective, "Next turn.");
 
 	main(table, 0, 5);

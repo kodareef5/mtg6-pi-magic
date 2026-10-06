@@ -37,8 +37,13 @@ export const syntaxLookup: Lookup = {
 	parameters: { type: "object", properties: {}, additionalProperties: false },
 	answer: () => `${syntaxReference()}\n${JSON.stringify(ChangesSchema)}`,
 };
-const planReference = { $ref: ChangesSchema.$ref, $defs: { Changes: ChangesSchema.$defs.Changes, Option: ChangesSchema.$defs.Option,
-	Condition: ChangesSchema.$defs.Condition, Amount: ChangesSchema.$defs.Amount, Selector: ChangesSchema.$defs.Selector } };
+// Ordinary planning reads visible counts, life and history. Instruction-local
+// bindings and library references belong in the full syntax lookup, not here.
+const planningDefs = ChangesSchema.$defs;
+const planReference = { $ref: ChangesSchema.$ref, $defs: { Changes: planningDefs.Changes, Option: planningDefs.Option,
+	Condition: { anyOf: planningDefs.Condition.anyOf.filter((one) => !("bound" in one.properties) && !("is" in one.properties)) },
+	Amount: { anyOf: planningDefs.Amount.anyOf.filter((one) => one.type === "integer" || Object.keys(one.properties ?? {}).some((key) => ["count", "life", "history", "sum", "negate", "distinct"].includes(key))) },
+	Selector: { ...planningDefs.Selector, properties: Object.fromEntries(Object.entries(planningDefs.Selector.properties).filter(([key]) => !["is", "attachedTo", "linked", "other"].includes(key))) } } };
 export const exampleReference: Lookup = {
 	name: "example", description: "Read a worked use of the syntax. Examples describe accepted terms, not certified card interpretations.",
 	parameters: { type: "object", properties: { file: { type: "string", enum: examples } }, required: ["file"], additionalProperties: false },
@@ -83,6 +88,7 @@ const SYSTEM = [
 	"- Repair the unfinished line and its guidance together. history names actions already taken this turn; do not reintroduce them when the new base omits completed steps. Phase instructions should say what to do while an effect is pending and after it resolves, not keep ordering an already completed activation.",
 	"- phases: [{when, goal, guidance, reevaluate}]. Give the current main phases, combat and the opponent's turn clear decisions and sequencing, including trigger targets and searches. Keep unchanged scripts. reevaluate names only an unexpected threat or opportunity that changes the line; routine events belong in guidance or branches.",
 	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
+	'- Conditions count visible objects: {"amount":{"count":{"zones":["hand"],"controller":"you","types":["creature"]}},"atLeast":1} tests a creature in your hand after the draw. A battlefield threat uses zones ["battlefield"], controller "opponent" and its name or characteristics. Combine tests with all/any/not. top refers only to library objects; it never means a card in hand or in play. Query objects use controller "self", while condition selectors use "you". An unconditional known action needs no presence condition: its options already require the source.',
 	"- Use active self/opponent and step names for windows. active means whose TURN it is, not whose choice. currentWindow is the exact when for a response now: copy it for a pending-spell response. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
 	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
 	"- choices.options lists direct decisions such as land plays, blocks and passes. choices.uses describes available spell and activation modes with explicit locked costs and target bindings, without payment combinations. Use action.reuse for that mode, then state target priorities and exact resource holds. Jev selects the offered target and payment; do not copy a payment id into a reusable turn line.",
@@ -196,6 +202,6 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
 export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">, signal?: AbortSignal): Promise<Prepared> {
 	const at = frame.view.window;
 	if (at.kind !== "turn" || at.active === frame.seat) throw new Error("Prepare the next own turn during the opponent's turn.");
-	return write(frame, context, reasoner, `YOUR TASK: PREPARE YOUR NEXT TURN, ${at.turn + 1}, during the opponent's turn ${at.turn}.\nBuild on the brief and your standing defaults. Write the next line, allocate mana and retained responses, and keep phase decisions ready for Jev. Anticipate normal opposing play and likely draw classes with conditional branches. The next draw is unknown. Notes are optional; submit once, with no separate research or note-taking pass.`,
+	return write(frame, context, reasoner, `YOUR TASK: PREPARE YOUR NEXT TURN, ${at.turn + 1} on the table's alternating counter (your own turn ${Math.ceil((at.turn + 1) / 2)}), during the opponent's turn ${at.turn}. The table turn number is not your land count or mana budget.\nBuild on the brief and your standing defaults. Write the next line using the actual sources in forecast.mana and the known land choices. Allocate mana and retained responses, and keep phase decisions ready for Jev. Anticipate normal opposing play and likely draw classes with visible-hand conditions; the next draw is unknown. Keep unchanged phase policies rather than restating them. Notes are optional; submit once, with no separate research or note-taking pass.`,
 		"preparation", { nextTurn: true, ...(signal ? { signal } : {}) });
 }

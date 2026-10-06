@@ -67,6 +67,14 @@ For a normal single block, the decision includes damage and survival arithmetic
 under explicitly stated assumptions. Responses and later effects still need the
 policy's exception guidance.
 
+Draw branches test the visible hand after drawing. For example,
+`{amount: {count: {zones: ["hand"], controller: "you", types: ["creature"]}}, atLeast: 1}`
+tests for a creature in hand. `top` names library objects and cannot stand for a
+hand or battlefield test. The ordinary planning reference carries counts, life,
+history and combinations; instruction bindings stay in the full syntax lookup.
+Preparation labels both the table's alternating turn counter and the seat's own
+turn number. Neither number is a mana forecast.
+
 The turn answer acknowledges applicable policies in its guidance or phase
 script and binds them through ordered steps, conditional responses and holds.
 It carries later-choice purpose on the announcing step. It updates an uncovered

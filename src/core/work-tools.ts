@@ -40,8 +40,10 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 	// no resolving source, chosen target, event or instruction-local binding.
 	const condition = (value: unknown, where: string): void => {
 		if (!value || typeof value !== "object") return;
-		const term = value as { history?: string; of?: { zones?: string[] } };
+		const term = value as { history?: string; of?: { zones?: string[] }; is?: { top?: number }; matches?: { zones?: string[] }; zones?: string[] };
 		if (term.history === "cast" && term.of && !term.of.zones?.includes("stack")) found.push(`${where}: cast history selectors need zones ["stack"]; omitted zones mean battlefield.`);
+		if (term.is?.top && !(term.matches?.zones ?? term.zones ?? ["battlefield"]).includes("library"))
+			found.push(`${where}: top always names a library object, so it cannot match a hand or battlefield selector. Test presence there with {amount: {count: selector}, atLeast: 1}.`);
 		for (const [key, part] of Object.entries(value)) {
 			if (key === "bound") found.push(`${where}: bound ${String(part)} has no binding in a plan condition. Instruction-local choices exist only inside a resolving procedure.`);
 			if (["is", "on", "power", "toughness", "by", "controller", "owner", "attachedTo"].includes(key) && typeof part === "string" && /^(?:(?:controller|owner):)?(?:this$|target:|event:|bound:)/.test(part))
