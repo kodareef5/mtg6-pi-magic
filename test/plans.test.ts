@@ -312,8 +312,13 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 		}) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "work");
+	// A prepared version-zero position can hold card equipment without a planning policy.
+	editWork(table, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "carried-equipment");
 	const seated = await seatTable(table, roster, inference, universe, { format: standard.name });
 	assert.equal(prompts.length, 0, "seating spends no strategy before a decision");
+	assert.ok(table.work[0]!.eachTurn && table.work[1]!.eachTurn, "both a prepared seat and a fresh seat plan each turn");
+	assert.deepEqual(table.work[0]!.packages, [{ card: "Forest", registers: [] }], "enabling strategy preserves carried card equipment");
+	assert.equal(table.ledger.length, 0, "enabling strategy makes no physical decision");
 	assert.ok(await run(table, seated, inference, undefined));
 	assert.equal(table.gaps.length, 0);
 	// Turn plans, not the background preparation of a later turn.

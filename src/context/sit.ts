@@ -142,7 +142,7 @@ export async function seat(
 			? reasoner({ role: "strategy", seat: at.id, stream: inference.stream, model: strategy.model as Model<Api>, tally: counted,
 				...(strategy.thinkingLevel ? { thinking: strategy.thinkingLevel } : {}) }) : undefined;
 		// The brief handles the opening and upkeep. Strategy is due after the first draw window.
-		if (planning && !table.work[at.id]) {
+		if (planning && !table.work[at.id]?.eachTurn) {
 			editWork(table, at.id, [{ do: "plan.each-turn" }], `planning-${at.id}`);
 		}
 		// Older version-zero clones carried this automatic opening request.
