@@ -243,6 +243,10 @@
       "order": [
         { "source": "Smaug the Magnificent", "timing": "spell" },
         { "source": "Smaug the Magnificent", "prefix": "attack:" }
+      ],
+      "require": [
+        { "source": "Kellan, Planar Trailblazer", "prefix": "attack:" },
+        { "source": "Soulstone Sanctuary", "prefix": "attack:" }
       ]
     }
   ]

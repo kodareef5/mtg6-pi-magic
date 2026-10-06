@@ -137,6 +137,10 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.ok(checked.structure && !checked.passed, "a valid action line can fail the fixture's prose property");
 	assert.deepEqual(checked.prose[0]!.matches, ["Keep one Forest for Veil"]);
 	assert.equal(checkPlan({ ...line, guidance: "No reserve." }, { forbidProse: ["keep[^.]*Veil"] }, workFrame(table, 0)).passed, true);
+	const required = { require: [{ prefix: "land:", source: "Forest" }, { prefix: "attack:", source: "Sazh's Chocobo" }] };
+	assert.equal(checkPlan(line, required, workFrame(table, 0)).passed, true);
+	assert.equal(checkPlan({ ...line, steps: [line.steps[0]!] }, required, workFrame(table, 0)).passed, false, "the first named action alone cannot satisfy the whole commitment");
+	assert.equal(checkPlan({ ...line, steps: [...line.steps].reverse() }, required, workFrame(table, 0)).passed, true, "required actions do not invent an ordering constraint");
 	const typed = { ...line, steps: [{ ...line.steps[2]!, action: { prefix: "attack:", objects: { zones: ["battlefield" as const], controller: "self" as const, types: ["creature" as const] } } }] };
 	assert.deepEqual(planProblems(workFrame(table, 0), typed), []);
 	assert.deepEqual(select(typed.steps[0]!.action.objects, workFrame(table, 0)).map((one) => one.card), ["Sazh's Chocobo"]);

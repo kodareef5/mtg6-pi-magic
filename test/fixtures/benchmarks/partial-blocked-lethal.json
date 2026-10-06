@@ -1,0 +1,222 @@
+{
+  "results": [
+    {
+      "id": "red-blocked-lethal",
+      "plan": {
+        "objective": "Establish a decisive flying clock while controlling the visible oversized trample threat; preserve a meaningful blocker and any useful interaction.",
+        "guidance": "Finish: No guaranteed finish now. Kellan is a 3/2 double striker, but Explorer is an available 8/10 blocker, so Kellan cannot be counted on for the six damage; no burn or evasion is in hand. The precombat Mountain does not change that. Do not attack Kellan into the trade. Danger: Explorer is tapped currently but can attack next turn despite being summoning sick now; its 8 power with trample threatens lethal from your 18 life only after further growth, not presently. If it attacks as 8/10, block with Sanctuary: it absorbs 3 and only 5 tramples through, Sanctuary dies, you survive at 13. There is no known response in hand; preserve the blocker through the opponent's turn. Commitment: Apply sequencing/resources policy: play the drawn Mountain first, then cast Smaug for {2}{R}{R} using two Mountains for red and one Mountain plus the new Mountain for generic; retain both Sanctuaries untapped as a blocker and future resource. Smaug has haste and can attack, but Explorer can block its 4/3 flying body? Explorer has no flying, so it cannot block Smaug; attack with Smaug and send Kellan only if accepting Explorer's block does not create a bad exchange (keep Kellan back). Smaug's attack trigger has zero Treasures, so target opponent for no damage. Keep the animated Sanctuary untapped to block Explorer next turn.",
+        "steps": [
+          {
+            "label": "Play drawn Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "card": "Mountain"
+              }
+            },
+            "purpose": "Make the fifth land available before casting Smaug."
+          },
+          {
+            "label": "Cast Smaug",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Smaug the Magnificent",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Smaug the Magnificent",
+                "basis": "Flying, haste",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Add a hasty evasive clock without spending either Sanctuary needed for the defense."
+          },
+          {
+            "label": "Attack with Smaug",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Smaug the Magnificent"
+              }
+            },
+            "purpose": "Apply flying damage; Explorer cannot block it. Attack trigger has zero Treasures, so target opponent."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          },
+          {
+            "label": "Block Explorer with Sanctuary if it attacks",
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "opponent",
+                  "types": [
+                    "creature"
+                  ]
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "prefix": "block:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "1-50",
+                    "incarnation": 2
+                  }
+                ]
+              }
+            },
+            "purpose": "Use the 3/3 to absorb trample; current 8 power deals 5 excess to you, which is nonlethal. Do not risk Kellan."
+          },
+          {
+            "label": "Finish blockers",
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "action": {
+              "option": "block:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "goal": "No further expenditure; preserve Sanctuary as the trample blocker.",
+            "guidance": "Do not animate another land or spend the remaining Sanctuary. Smaug has haste and attacked already; it remains a flying threat."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Preserve Sanctuary for the Explorer attack; use no unknown response.",
+            "guidance": "There is no instant or removal in hand. Explorer's current 8 power is not lethal through Sanctuary: block, take 5 trample, and keep Kellan back. Reassess if visible growth makes the attack lethal."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "goal": "Block Explorer with animated Sanctuary when it attacks.",
+            "guidance": "Explorer is an 8/10 trampler. Sanctuary's 3 toughness reduces trample damage to 5; you survive. Finish blocks."
+          }
+        ],
+        "may": [
+          {
+            "label": "Use drawn creature when useful",
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "types": [
+                    "creature"
+                  ]
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "option": "pass"
+            }
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "1-50",
+                  "incarnation": 2
+                }
+              ]
+            },
+            "purpose": "Keep animated Sanctuary untapped to block Explorer's trampling attack.",
+            "releaseWhen": {
+              "any": [
+                {
+                  "amount": {
+                    "life": "opponent"
+                  }
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atMost": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -38,3 +38,9 @@ outside the published package.
 `good-blocked-lethal.json` is a manually authored answer checked by core and
 then executed through Jev in `known-lethal-play/`; it won on turn 14 with replay
 matching. It establishes an executable expected line, not a Luna success.
+`partial-blocked-lethal.json` is the third blocked-lethal answer from
+`.pi/grounded-repair-20261006/explicit-conclusions/results.json`. It casts and
+attacks with Smaug but keeps both other attackers back, missing the win. The
+strengthened property rejects that partial commitment while accepting the
+executed known answer. It names one verified winning line; other winning lines
+still need review rather than being classified as poor play by this check.

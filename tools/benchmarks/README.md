@@ -39,8 +39,10 @@ forbids the inherited attack with a Forest that is no longer a creature.
 The blocked-lethal amendment preserves the preparation actually consumed in
 the continuation, reconstructed from its submission and verified against the
 amendment request's complete base. Its prefix ends before that amendment was
-accepted. The automatic property checks Smaug's cast before its attack; review
-the other attackers and payments separately to establish lethal damage.
+accepted. The automatic property checks Smaug's cast before its attack and
+requires attacks from Kellan and Sanctuary, the verified winning commitment.
+Review payments, conditions and instruction consistency separately. Another
+winning line can fail this specific property and needs human review.
 `zone` matches a projected source in that zone; it does not assert that a future
 zone change or permission has happened.
 
@@ -58,6 +60,10 @@ Read the accepted answer as well as the pass count.
 Order uses the first matching step and does not inspect `may` branches. A
 `prefix` matches a movement selector, not a procedure. Repeated land drops and
 conditional lines need a more specific property before they can be scored.
+`require` checks every named action without ordering those actions relative to
+each other. Requiring the other attackers prevents a Smaug-only attack from
+passing the blocked-lethal case; it does not calculate an arbitrary attack's
+damage or prove that the proposed payment leaves those attackers untapped.
 
 `forbidProse` holds case-specific regular expressions over objective, guidance,
 phase text, labels, purposes and holds, excluding executable card definitions.

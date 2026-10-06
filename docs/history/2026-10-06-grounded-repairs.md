@@ -183,3 +183,10 @@ observed or labelled untap position before reserving the source. It does not
 predict a future release caused by a resolving effect. The existing arithmetic
 test covers a response still in hand, its departure, agreement with execution,
 and an unchanged input frame. Types and all 179 offline tests pass.
+
+The blocked-lethal property now requires Kellan and Sanctuary attacks as well
+as Smaug's cast before its attack. A durable partial answer preserves the case
+that previously passed while still missing lethal. The executed known answer
+passes and that partial answer fails. This remains a check for the verified
+line, not a general combat solver; payments, conditions and alternative wins
+still require review. The unchanged test count is 179, all passing with types.
