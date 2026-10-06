@@ -159,6 +159,8 @@ export const HELP = "ask:help";
  */
 export function question(packet: Packet, help: boolean): Question {
 	const stage = packet.inspection?.stage;
+	const instruction = packet.resolution?.program[0]?.instruction;
+	const search = instruction?.do === "choose" && instruction.from.zones?.includes("library");
 	const instructions = [packet.obligation,
 		"Choose one listed id using the supplied facts and this seat's preparation. Acceptance does not certify card meaning or rules legality.",
 		"options describes the choices; uses holds shared source, timing, effect, target-slot terms and notes; payments holds costs and paid mana ids; funding holds the referenced mana abilities, while pools names existing mana and its restrictions. Read these references together. Printed cards and current characteristics are separate.",
@@ -172,6 +174,8 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.combat ? ["combat shows the developing declaration and assignments. Compare the plan with current flying, reach, menace, sickness and damage. Finish the declaration explicitly; selecting a creature is not finishing combat."] : []),
 		...(packet.resolving ? ["Complete the accepted use under resolving.purpose and its original guidance. Its costs are already paid. This is an instruction choice, not priority. Declining a search deliberately finds nothing; it is not a pass.",
 			"resolution holds the current instruction and earlier bindings. Resolve against the actual locked targets, including their legality; a completed announcement is not a completed effect."] : []),
+		...(search ? ["The accepted search is already being carried out. Choose a listed card that fulfills its instruction and recorded purpose. Failing to find is a deliberate exception requiring a prepared reason, not a way to pass or postpone the paid action. If no eligible card remains, finish the search.",
+			...(help ? ["If an uncovered change requires failing to find, ask for help."] : [])] : []),
 		...(packet.objects.some((one) => one.zone === "stack") && !packet.resolving ? ["The stack is waiting. Land plays and uses at sorcery speed need an empty stack. Their absence alone does not require a new plan. Apply the prepared response policy now. Passing lets the top object resolve after every seat passes; it does not end the phase or guarantee a later use will become available.",
 			"Read named stack targets and order before responding. An effect already pending on a target has not resolved; paying again starts another use."] : []),
 		...(packet.plan ? ["Follow the current plan and phase guidance. A held resource can be spent only under its release policy. A waiting prerequisite is not an unavailable line; a contradicted assumption may need a covered alternative or a revision."] : []),

@@ -18,10 +18,15 @@ use the actual registered lists. These are the questions they must settle:
 | Responses | A response and a discretionary instant compete for the same mana | Keep the response through its last useful window; spend on the discretionary instant only after its release condition | A must-answer threat appears, or a different response is needed before then |
 | Combat | An evasive clock, grounded blockers and a race | Name which creatures attack, which can block the expected threat, and how damage advances or prevents lethal | A removal spell or changed characteristics alters those assignments |
 | Recovery | The engine is removed or the draw changes available mana | Use the prepared alternate route, replace unfinished steps and their holds together | Neither route covers the new threat; request a new line with that mismatch stated |
+| Paid search | A fetch has been sacrificed, a basic land is offered, and no card is chosen yet | Choose the land to fulfill the accepted search, then finish its remaining instructions | The recorded purpose deliberately calls for finding nothing, or an uncovered change needs help |
 
 An example states enough facts to follow its arithmetic: costs, usable sources,
 spending restrictions, intended targets, and what remains. It distinguishes
 casting from resolving, and a forecast from an event already recorded.
+The paid-search question states that choosing none completes an empty search;
+it cannot postpone the activation or preserve the sacrificed fetch. The original
+target policy remains authoritative, including an intentional failure to find.
+That is execution guidance for Jev, not a forced choice or a new strategy call.
 
 The deck analyst owns sequencing and resources. The matchup analyst owns
 responses and combat. The challenger owns recovery and exceptions. The opening

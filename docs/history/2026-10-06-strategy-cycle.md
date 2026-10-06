@@ -112,3 +112,35 @@ cast Kellan has haste, and Green misstates how many sources its land leaves.
 Syntax acceptance is not a gameplay-quality result. The full gate also chose
 empty searches after sacrificing fetch lands. Those resolution packets need
 their own review before another complete game is justified.
+
+The gate finished on turn 10: Red won, replay matched, and there were no recorded
+engine gaps or fallbacks. Wall time was 10m04s, play 10m03s and foreground strategy
+wait 8m54s. Jev made 272 picks, with no separate reviews. Strategy made 39 requests,
+15 after a refusal, including one 150-second timeout followed by a successful
+retry. The 311 requests reported 1,399,114 input and 46,299 output tokens and
+$0.0826. One request lacked usage and cost. Preparation was carried, summary was
+off and no judge was called. This is a failed gameplay review, not a comparable
+speed win: Green's empty fetches and failed development shortened the game.
+
+## Paid searches
+
+The exact Jev questions at decisions 150 and 221 reproduced both empty searches
+in all six baseline calls. Both offered a Forest and a distinct decline. They
+carried old whole-turn guidance without an action-specific purpose. Relabelling
+that old guidance alone was unreliable. Adding explicit execution guidance for
+an already accepted search chose the Forest in all twelve checks, including
+the variant that also relabelled the old guidance. No source fact or option was
+removed. The 24-call comparison is in `fetch-packets-1791286175250/`.
+
+The chosen correction tells Jev to fulfill the accepted search and its recorded
+purpose; choosing none cannot postpone the paid action. An explicit failure-to-
+find policy remains valid, and an uncovered exception can request help. Six
+negative checks all honored an explicit instruction to find nothing. Both real
+saved resolutions then selected Forest, moved it onto the battlefield and
+completed the shuffle. Fabled Passage's conditional untap correctly did not
+apply. Both journals replayed to the same ledger and objects. These physical
+continuations and negative checks are in `fetch-replay-1791286296154/`.
+
+The game JSON, compact text report and flame chart are beside the gate journal.
+The existing timeline index now links this diagnostic run and the earlier gate,
+and labels the before/after green-turn charts as partial continuations.

@@ -167,6 +167,16 @@ without separate invitations for Jev to invent a strategy for each one.
 - [ ] Narrow post-draw amendments and preserve sound phase policies. All 15 prepared
   turns needed amendments in this gate; 16 of 67 strategy requests followed a
   refusal. The background and repair questions still do too much work.
+- [x] Prevent newly authored fake button ids and verify paid searches separately.
+  Land and combat movement now have reusable selectors. Literal picks must name
+  actual options or stable continuation ids. The next gate's two empty fetches
+  now complete in their isolated resolutions, while deliberate failure-to-find
+  intent remains usable. See [the October 6 review](history/2026-10-06-strategy-cycle.md).
+- [ ] Ground entry and combat forecasts in accepted characteristics. The opening
+  writer still invented haste for Kellan, and resource prose contradicted the
+  available sources. Preserve those draw positions and fix the factual question
+  before another full gate. Preparation must also cover the next upkeep so the
+  pilot does not improvise from an expired turn's general guidance.
 - [ ] Preserve missed attacks, premature fetches and incorrect clock estimates as
   position benchmarks. Check strategic improvement on these before another
   full batch, then compare matching seeds with preparation measured separately.
