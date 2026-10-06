@@ -47,6 +47,11 @@ plan names those reusable actions instead of repeating their programs. Past
 physical picks remain history, since their old incarnation and payment cannot
 serve as reusable equipment. Current position facts follow the background and
 prior plan, and currentWindow gives the response window in plan syntax.
+For a response repair, the writer submits `current` actions with labels and
+purposes. Context binds them to the exact current turn and step and replaces
+only that window's unfinished steps. Other steps stay. The model cannot put
+an opponent-turn response into its own draw step. Core still receives an
+ordinary complete plan; Jev still selects each physical action and pass.
 For example, a normal five-mana cast and a three-mana warp remain two different
 uses even if they put the same creature onto the battlefield. A plan reuses the
 chosen procedure; it does not copy a payment id while describing another mode.

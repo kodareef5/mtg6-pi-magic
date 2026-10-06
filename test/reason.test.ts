@@ -163,6 +163,9 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	const frame = { seat: me!.id, version: built.cursor.clock, view: project(built, me!.id) };
 	const forTurn = JSON.parse(strategyFacts(frame, { brief: written }));
 	assert.deepEqual(forTurn.brief.policies, written.policies, "turn preparation keeps dependencies and contingency examples across all five families");
+	const forResponse = JSON.parse(strategyFacts(frame, { brief: written }, {}, "response"));
+	assert.deepEqual(Object.keys(forResponse.brief.policies), ["resources", "responses", "combat"], "a current response repair does not plan next turn's development");
+	assert.equal(forTurn.brief.route, undefined, "the new policies replace duplicate legacy strategic paragraphs");
 	assert.equal(forTurn.brief.opening, undefined, "completed opening decisions do not accompany a turn question");
 	assert.equal(forTurn.brief.steps, undefined, "existing phase scripts arrive through the base plan, not twice");
 	assert.equal(forTurn.brief.cards["Snakeskin Veil"], undefined, "a card note does not follow an unidentified library object");

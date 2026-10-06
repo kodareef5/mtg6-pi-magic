@@ -5,7 +5,7 @@ import { matches, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
 import type { actions } from "./plan-edit.ts";
 
-/** Keep accepted instructions intact and make an omitted printed cost explicit. */
+/** Show accepted claims and explicit costs; equipment retains the executable bodies. */
 export function actionFacts(frame: Frame, available: ReturnType<typeof actions>) {
 	return Object.fromEntries(Object.entries(available).map(([key, one]) => {
 		if (!("procedure" in one.action)) {

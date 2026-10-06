@@ -1,10 +1,11 @@
 /** Short writer answers expand to ordinary plans before they reach core. */
-import { Type } from "typebox";
-import { PlanDefs, PlanSchema, problems, type Plan, type PlanOption } from "../core/language.ts";
+import { Type, type Static } from "typebox";
+import { PlanDefs, PlanSchema, QuerySchema, problems, type Plan, type PlanOption } from "../core/language.ts";
 import type { Frame } from "../core/types.ts";
 import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
 import { printedCast } from "../core/procedures.ts";
+import { matches } from "../core/query.ts";
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
@@ -14,6 +15,26 @@ export const ChangesSchema = Type.Cyclic({ ...definitions,
 	Option: Type.Object({ ...PlanDefs.Option.properties, action: Action }, { additionalProperties: false }),
 	Changes: Type.Object(Object.fromEntries(Object.entries(planFields.properties).map(([key, field]) => [key, Type.Optional(field)])), { additionalProperties: false }),
 }, "Changes");
+
+/** A current response has a known window. The model chooses actions, not that metadata. */
+export const ResponseSchema = Type.Object({
+	current: Type.Array(Type.Object({ label: Type.String({ minLength: 1 }), purpose: Type.Optional(Type.String()),
+		action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!, Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false })]),
+	}, { additionalProperties: false }), { minItems: 1 }),
+	guidance: Type.Optional(Type.String()),
+	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }) }, { additionalProperties: false }))),
+}, { additionalProperties: false });
+
+/** Replace this window's unfinished steps, preserving the rest of the line. */
+export function responseChanges(frame: Frame, base: Plan, changes: unknown) {
+	const wrong = problems(ResponseSchema, changes);
+	if (wrong.length) throw new Error(`The response does not match its schema: ${wrong.join("; ")}.`);
+	const at = frame.view.window;
+	if (at.kind !== "turn") throw new Error("A response needs a current turn window.");
+	const { current, ...rest } = changes as Static<typeof ResponseSchema>;
+	const when = { active: at.active === frame.seat ? "self" as const : "opponent" as const, step: at.step, fromTurn: at.turn, throughTurn: at.turn };
+	return { ...rest, steps: [...current.map((one) => ({ ...one, when })), ...base.steps.filter((one) => !matches(one.when, frame))] };
+}
 
 /** The actions available to reuse, with readable labels and their complete accepted syntax. */
 export function actions(frame: Frame, prepared?: Plan): Record<string, { label: string; action: PlanOption["action"] }> {

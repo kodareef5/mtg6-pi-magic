@@ -17,7 +17,7 @@ import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
-import { ChangesSchema, actions, basePlan, changedPlan, equipment } from "./plan-edit.ts";
+import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, nextMana, type Context } from "./strategy-facts.ts";
 
@@ -95,6 +95,16 @@ const SYSTEM = [
 	JSON.stringify(planReference),
 ].join("\n");
 
+const RESPONSE_SYSTEM = [
+	"You repair one current Magic response or combat decision for a seat. Jev executes the resulting actions and every voluntary pass. Use the supplied pregame policies, current facts and accepted action claims; do not research or plan the next own turn.",
+	"Prior intent can be stale. The current window, objects, mana and choices are facts. Read the actual hand and available sources before reserving a response; a card named in a policy is not necessarily in hand. Arithmetic attached to a block or payment is a fact under its stated assumptions, not a prediction of responses or later triggers.",
+	"Choose the line that wins now, otherwise prevents a concrete loss, otherwise preserves the relevant engine and response resources. For blocks, name the creature preserved or lost; a blocker dying does not imply it kills the attacker. Use damage and survival facts in the offered choice.",
+	"Submit current: an ordered list of {label, action, purpose?}. action is {reuse: exact action key} for an accepted use, or a listed {option: id}, or {prefix, objects}. Include the intended pass or block:done when needed. The context builder binds every current action to this turn and step. Do not write when or a next-turn line. Unaffected steps stay.",
+	"Optional guidance replaces the old general guidance with a concise consistent conclusion. Optional holds replaces all holds; [] releases them. A hold query reserves every matching object, so use exact refs to reserve one. Optional notes and objection use the submit schema. Do not repeat source programs; equipment can inspect accepted terms if their interpretation is in question.",
+	"The table validates resources and syntax, not card meaning or playing strength. You can object to a listed opposing action that broke a rule; strategic disagreement is not an objection. If refused, fix all named problems without pretending an action was executed.",
+	JSON.stringify(ResponseSchema),
+].join("\n");
+
 /** Interpreter checks: activated effects need procedures, and cast selectors must reach the stack. */
 export function registrationProblems(packages: readonly Package[]): string[] {
 	const found: string[] = [];
@@ -133,17 +143,19 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
 	const at = frame.view.window;
-	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request;
+	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request && !!frame.view.work.plan;
+	const submit = response ? { ...SUBMIT, description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy.",
+		parameters: { ...SUBMIT.parameters, properties: { ...ResponseSchema.properties, notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection }, required: ["current"] } } : SUBMIT;
 	const current = at.kind === "turn" ? `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
-	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, relevant),
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...budget(frame, base)], bindings: bindingFacts(frame, base), actions: actionFacts(frame, relevant),
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }, response ? "response" : "turn"),
 		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {
-		submit: { ...SUBMIT, check(args) {
+		submit: { ...submit, check(args) {
 			const { notes, objection: raised, ...changes } = args;
 			let plan: Plan;
-			try { plan = changedPlan(base, changes, available); } catch (error) { return String(error); }
+			try { plan = changedPlan(base, response ? responseChanges(frame, base, changes) : changes, available); } catch (error) { return String(error); }
 			const objection = raised as Objection | undefined;
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
 			const wrong = [...planProblems(frame, plan), ...registrationProblems(plan.packages ?? [])];
