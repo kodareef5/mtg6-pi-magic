@@ -190,13 +190,14 @@ test("a branch and a held resource are marked on the options they touch, and not
 	const decision = nextDecision(table)!;
 	assert.equal(decision.seat, 0);
 	const frame = workFrame(table, 0);
-	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[]; choices: { options: { id: string }[]; uses: { offeredCombinations: number }[] } };
+	const supplied = JSON.parse(facts(frame, {})) as { objects: Record<string, { you: { id: string; traits?: unknown; ability?: unknown }[]; others: { id: string; traits?: unknown; ability?: unknown }[] }>; choices: { options: { id: string }[]; uses: { offeredCombinations: number }[] } };
 	assert.deepEqual(JSON.parse(facts(frame, {})).currentWindow, { active: "opponent", step: "precombat-main" }, "answering priority does not make it this seat's turn");
 	assert.deepEqual(supplied.choices.options.map((one) => one.id), decision.options.filter((one) => !one.use).map((one) => one.id), "direct decisions remain selectable by the planner");
 	assert.equal(supplied.choices.uses.reduce((n, use) => n + use.offeredCombinations, 0), decision.options.filter((one) => one.use).length, "every offered spell and activation is represented without asking the planner to select a payment");
+	const visibleObjects = Object.values(supplied.objects).flatMap((zone) => [...zone.you, ...zone.others]);
 	for (const object of frame.view.objects!) {
-		assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.traits, object.traits, "the writer keeps current types and active registrations, including changes from the layer walk");
-		if (object.ability) assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.ability, object.ability, "an unresolved spell keeps its accepted cost, targets and effect");
+		assert.deepEqual(visibleObjects.find((one) => one.id === object.id)?.traits, object.traits, "the writer keeps current types and active registrations, including changes from the layer walk");
+		if (object.ability) assert.deepEqual(visibleObjects.find((one) => one.id === object.id)?.ability, object.ability, "an unresolved spell keeps its accepted cost, targets and effect");
 	}
 	frame.view.work = prepareWork(frame, [{ do: "plan.put", plan: { objective: "Keep the Chocobo.", guidance: "Veil it if it is targeted.", steps: [],
 		may: [{ label: "Veil a targeted creature", when: { active: "opponent" }, if: { amount: { count: { zones: ["stack"], controller: "opponent", targeting: { types: ["creature"], controller: "you" } } }, atLeast: 1 },
@@ -329,8 +330,8 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 	assert.equal(new Set(prompts.map((prompt) => prompt.system)).size, 1, "every call sends the same system prompt, so it can be cached");
 	assert.ok(!prompts[0]!.system!.includes(syntaxReference()), "card procedure semantics stay behind the syntax lookup until needed");
 	for (const prompt of prompts) {
-		const sent = JSON.parse(prompt.user) as { seat: number; objects: { zone: string; controller: number }[]; cards: { name: string; oracle: string }[] };
-		assert.ok(sent.objects.every((object) => object.zone !== "library" && (object.zone !== "hand" || object.controller === sent.seat)), "nothing hidden from the seat");
+		const sent = JSON.parse(prompt.user) as { seat: number; objects: Record<string, { you: { zone: string; controller: number }[]; others: { zone: string; controller: number }[] }>; cards: { name: string; oracle: string }[] };
+		assert.ok(Object.values(sent.objects).flatMap((zone) => [...zone.you, ...zone.others]).every((object) => object.zone !== "library" && (object.zone !== "hand" || object.controller === sent.seat)), "nothing hidden from the seat");
 		assert.ok(sent.cards.length > 0 && sent.cards.every((fact) => fact.oracle === universe.cards.get(fact.name)!.oracle), "the writer reads the actual card text");
 	}
 	// An upkeep escalation has no revealed draw to plan from yet.
@@ -701,6 +702,9 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.deepEqual(bindingFacts(frame, { ...stale, steps: [{ ...stale.steps[0]!, when: { active: "opponent", step: "end" } }] }).unoffered, [], "future windows are not diagnosed as current failures");
 
 	assert.deepEqual(budget(frame, { objective: "o", guidance: "g", steps: [{ label: "Warp", when: now, action: { option: warped.id } }] }), [], "a locked warp costs three, not the printed five");
+	const located = JSON.parse(facts(frame, {})).objects;
+	assert.ok(located.hand.you.some((one: { name: string }) => one.name === "Emberheart Challenger"));
+	assert.ok(!located.battlefield.you.some((one: { name: string }) => one.name === "Emberheart Challenger"), "a card available to cast is not already a battlefield attacker");
 	const warpFacts = JSON.parse(facts(frame, {})).choices.uses.find((one: { claim: string }) => one.claim === warp.claim);
 	assert.equal(warpFacts.manaRequired, 3);
 	assert.deepEqual([warpFacts.untappedSourcesAfterPayment.minimum, warpFacts.untappedSourcesAfterPayment.maximum], [0, 0], "three available sources pay the three-mana warp with none retained");

@@ -57,7 +57,7 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	}
 	const pilot = focus(frame, startingIntent(1)).objects.find((one) => one.id === claws[0]!.id)!;
 	assert.equal(pilot.summoningSick, false); assert.ok(pilot.subtypes!.includes("Lizard"));
-	assert.equal(JSON.parse(facts(frame, {})).objects.find((one: { id: string }) => one.id === claws[0]!.id).summoningSick, false);
+	assert.equal(JSON.parse(facts(frame, {})).objects.battlefield.you.find((one: { id: string }) => one.id === claws[0]!.id).summoningSick, false);
 	assert.deepEqual(table, before, "projecting readiness and watch matches moves nothing and stores no derived value");
 	label(table, kellan, "vigilance until end of turn", ["vigilance"]);
 	pick(table, `attack:${claws[0]!.id}`);

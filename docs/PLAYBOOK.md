@@ -47,6 +47,9 @@ plan names those reusable actions instead of repeating their programs. Past
 physical picks remain history, since their old incarnation and payment cannot
 serve as reusable equipment. Current position facts follow the background and
 prior plan, and currentWindow gives the response window in plan syntax.
+Position objects are grouped by their actual zone and controller, with empty
+hand and battlefield groups shown explicitly. A cast candidate in hand or exile
+does not appear among current battlefield creatures.
 For a response repair, the writer submits `current` actions with labels and
 purposes. Context binds them to the exact current turn and step and replaces
 only that window's unfinished steps. Other steps stay. The model cannot put

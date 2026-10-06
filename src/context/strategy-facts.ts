@@ -20,7 +20,8 @@ import { odds, within } from "../core/odds.ts";
 import { activeWatches } from "../core/triggers.ts";
 
 /** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
-const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => object.zone !== "library").map((object) => ({
+function objects(frame: Frame) {
+	const listed = (frame.view.objects ?? []).filter((object) => object.zone !== "library").map((object) => ({
 	id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim, zone: object.zone, owner: object.owner, controller: object.controller,
 	...(object.tapped ? { tapped: true } : {}), ...(object.faceDown ? { faceDown: true } : {}),
 	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
@@ -28,7 +29,13 @@ const objects = (frame: Frame) => (frame.view.objects ?? []).filter((object) => 
 	...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
 	...(object.entered === undefined ? {} : { entered: object.entered }), ...(object.position === undefined ? {} : { position: object.position }),
 	...(object.ability ? { ability: object.ability } : {}),
-}));
+	}));
+	const zones = new Set(["battlefield", "hand", "stack", "exile", "graveyard", ...listed.map((one) => one.zone)]);
+	return Object.fromEntries([...zones].map((zone) => [zone, {
+		you: listed.filter((one) => one.zone === zone && one.controller === frame.seat),
+		others: listed.filter((one) => one.zone === zone && one.controller !== frame.seat),
+	}]));
+}
 
 function mana(frame: Frame): string {
 	const only = (selector: Selector) => selector.types || selector.subtypes ? `only to cast a ${[...(selector.subtypes ?? []), ...(selector.types ?? [])].join(" or ")} spell` : `only on ${JSON.stringify(selector)}`;
