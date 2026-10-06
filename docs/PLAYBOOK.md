@@ -232,3 +232,20 @@ The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved
 calls before claiming the playbook made Luna stronger or faster.
+
+## Card definitions and current characteristics
+
+A turn question distinguishes a card available to cast from a permanent already
+in play. For a creature in hand, show the complete printed definition beside its
+identity, including cost, stats and Oracle text. Do not describe an empty set of
+installed battlefield keywords as that card having no abilities. For an existing
+creature, show its current characteristics through the layer walk, including
+keywords added or removed since entry. A cast candidate's printed power is not
+another current attacker. Accepted terms and unresolved stack instructions stay
+visible; neither a card definition nor an accepted package predicts resolution.
+
+The same position labels our life and opposing life explicitly. A damage
+calculation must name whose life it changes. Full hand definitions appear once
+in the hand roster; the other visible card definitions remain in the card index.
+This is a representation of supplied facts, not a tactical recommendation or a
+claim that the planner used them correctly.

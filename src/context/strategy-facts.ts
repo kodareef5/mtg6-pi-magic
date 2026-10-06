@@ -1,4 +1,5 @@
-/** The strategist's projected position, resources and reference tools. No hidden order is read. */
+/** The strategist's projected position, resources and reference tools. No hidden order is read.
+ * Past 150 lines to keep the observed and forecast positions on the same complete readers. */
 import type { Frame } from "../core/types.ts";
 import type { SeenObject } from "../core/work.ts";
 import type { Selector } from "../core/language.ts";
@@ -20,7 +21,17 @@ import { viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { useSources } from "../core/readiness.ts";
-import { decisionFacts } from "./strategy-position.ts";
+import { cardDefinition, decisionFacts } from "./strategy-position.ts";
+
+/** Off-field cards have not installed their battlefield abilities. Keep their
+ * base type/stats and any explicit terms, without claiming empty printed keywords. */
+function characteristics(object: SeenObject) {
+	if (!object.traits) return {};
+	if (object.zone === "battlefield" || object.token) return { traits: object.traits };
+	const { words, registrations, ...base } = object.traits;
+	return { baseCharacteristics: base,
+		...(words.length ? { explicitKeywords: words } : {}), ...(registrations.length ? { registrations } : {}) };
+}
 
 /** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
 function objects(frame: Frame) {
@@ -28,7 +39,7 @@ function objects(frame: Frame) {
 	id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim, zone: object.zone, owner: object.owner, controller: object.controller,
 	...(object.tapped ? { tapped: true } : {}), ...(object.faceDown ? { faceDown: true } : {}),
 	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
-	...(object.traits ? { traits: object.traits } : {}), ...(object.attached ? { attached: object.attached } : {}),
+	...characteristics(object), ...(object.attached ? { attached: object.attached } : {}),
 	...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
 	...(object.entered === undefined ? {} : { entered: object.entered }), ...(object.position === undefined ? {} : { position: object.position }),
 	...(object.ability ? { ability: object.ability } : {}),
@@ -135,6 +146,8 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 	}
 	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, ...view } = frame.view;
 	const at = frame.view.window;
+	const decision = decisionFacts(frame, context.cards);
+	const inHand = new Set(decision.yourHand.filter((one) => one.printed).map((one) => one.name));
 	return JSON.stringify({
 		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn"),
 		...more,
@@ -146,13 +159,13 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		notebook: work?.notebook ?? [],
 		packages: (work?.packages ?? []).map((pack) => pack.card),
 		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]
-			.flatMap((name) => { const card = context.cards?.cards.get(name); return card ? [{ name, type: card.type, mana: card.mana, stats: card.stats, oracle: card.oracle }] : []; }),
+			.flatMap((name) => { const card = !inHand.has(name) && cardDefinition(frame, name, context.cards); return card ? [card] : []; }),
 		recaps: context.recaps?.slice(-3),
 		// Background and prior intent precede the position they must answer.
 		seat: frame.seat, turns: turns(frame),
 		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
 		mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
 		choices: planningChoices(frame), refused: frame.refused,
-		decisionFacts: decisionFacts(frame),
+		decisionFacts: decision,
 	});
 }

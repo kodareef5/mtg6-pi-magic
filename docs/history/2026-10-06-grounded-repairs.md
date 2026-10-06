@@ -190,3 +190,27 @@ that previously passed while still missing lethal. The executed known answer
 passes and that partial answer fails. This remains a check for the verified
 line, not a general combat solver; payments, conditions and alternative wins
 still require review. The unchanged test count is 179, all passing with types.
+
+## Card definitions beside the hand
+
+The context now separates off-field base characteristics from installed
+battlefield abilities. An empty keyword array on a card in hand came from the
+core's uninstalled registrations; it did not mean that its printed flying or
+haste was absent. The hand roster now carries the complete printed definition,
+and the other visible definitions remain in the card index. Battlefield traits,
+explicit off-field terms and unresolved stack instructions remain intact. Life
+totals are also labelled by our seat and the opposing seats. No Oracle prose is
+parsed and no resolution is simulated.
+
+A fresh paired comparison used the four own-turn cases three times each, under
+the stronger attack property. The unchanged `8a32785` planner accepted 12/12,
+passed 6/12 structural checks and 4/12 combined checks, with 14 calls in 255.4
+seconds of whole-decision time. The revised representation accepted 11/12,
+passed 6/12 structural checks and 5/12 combined checks, with 15 attempts in
+361.1 seconds. One attempt timed out at 45 seconds with no reported usage.
+Both missed the complete winning attack. These overlapping small samples show
+no established strength or speed gain. The representation is retained because
+it states the supplied card facts accurately, not because a wording score rose.
+The paired traces are `card-definitions-baseline/` and `card-definitions/`.
+Types and all 179 offline tests pass, including full visible-definition coverage,
+private-hand projection, unresolved effects and current battlefield abilities.
