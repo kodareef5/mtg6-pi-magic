@@ -17,7 +17,7 @@ import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
-import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges, submissionFields } from "./plan-edit.ts";
+import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 
@@ -147,8 +147,8 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
 	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request && !!frame.view.work.plan;
-	const submit = response ? { ...SUBMIT, description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy.",
-		parameters: { ...SUBMIT.parameters, properties: { ...ResponseSchema.properties, notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection }, required: ["current"] } } : SUBMIT;
+	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
+		parameters: { ...SUBMIT.parameters, properties: { ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection }, ...(response ? { required: ["current"] } : {}) } };
 	const current = at.kind === "turn" ? options.nextTurn ? `Planning target: your turn ${at.turn + 1}, from precombat-main through the opponent's following turn. You are seat ${frame.seat}. Use the forecast position; you are not answering the opponent's current priority decision.`
 		: `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;

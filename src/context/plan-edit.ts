@@ -41,6 +41,15 @@ export const ResponseSchema = Type.Object({
 	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }) }, { additionalProperties: false }))),
 }, { additionalProperties: false });
 
+/** Advertise exact equipment keys while retaining declarations and selectors. Local validation remains authoritative. */
+export function selectionFields(available: ReturnType<typeof actions>, response = false) {
+	const reuse = Type.Object({ reuse: Type.String({ enum: Object.keys(available), description: "Copy an exact accepted action key, including its name and punctuation." }) }, { additionalProperties: false });
+	const withKeys = (option: typeof submittedOption | typeof ResponseSchema.properties.current.items) => ({ ...option,
+		properties: { ...option.properties, action: Type.Union([...option.properties.action.anyOf.filter((one) => !("reuse" in one.properties)), reuse]) } });
+	return response ? { ...ResponseSchema.properties, current: Type.Array(withKeys(ResponseSchema.properties.current.items), { minItems: 1 }) }
+		: { ...submissionFields, steps: Type.Array(withKeys(submittedOption)), may: Type.Array(withKeys(submittedOption)) };
+}
+
 /** Replace this window's unfinished steps, preserving the rest of the line. */
 export function responseChanges(frame: Frame, base: Plan, changes: unknown) {
 	const wrong = problems(ResponseSchema, changes);
@@ -117,11 +126,12 @@ export function changedPlan(base: Plan, changes: unknown, available: ReturnType<
 	// new permanent must keep those pending packages as well as accepted ones.
 	const added = (changes as Partial<Plan>).packages;
 	if (added) plan.packages = [...(base.packages ?? []).filter((one) => !added.some((next) => next.card === one.card)), ...structuredClone(added)];
+	const unknown = [...plan.steps, ...(plan.may ?? [])].flatMap((one) => "reuse" in one.action && !available[one.action.reuse as string] ? [String(one.action.reuse)] : []);
+	if (unknown.length) throw new Error(`No reusable action for ${[...new Set(unknown)].map((key) => JSON.stringify(key)).join(", ")}. Copy exact keys under actions or read equipment for the card. No edit was applied.`);
 	for (const one of [...plan.steps, ...(plan.may ?? [])]) {
 		if (!("reuse" in one.action)) continue;
 		const key = one.action.reuse as string, found = available[key];
-		if (!found) throw new Error(`No reusable action ${JSON.stringify(key)}. Use a key under actions, or write the action.`);
-		one.action = structuredClone(found.action);
+		one.action = structuredClone(found!.action);
 	}
 	const shape = problems(PlanSchema, plan);
 	if (shape.length) throw new Error(`The resulting plan does not match the schema: ${shape.join("; ")}.`);

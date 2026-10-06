@@ -39,7 +39,7 @@ import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
-import { actions, basePlan, changedPlan, equipment, responseChanges } from "../src/context/plan-edit.ts";
+import { actions, basePlan, changedPlan, equipment, responseChanges, selectionFields } from "../src/context/plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
@@ -295,6 +295,9 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  const reused = changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: `step:1 ${line.steps[1]!.label}` } }] }, available);
  assert.deepEqual(reused.steps[0]!.action, line.steps[1]!.action);
  assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:999" } }] }, available), /No reusable action/);
+	assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:999" } }], may: [{ ...line.steps[1], action: { reuse: "may:999" } }] }, available), /step:999.*may:999/, "all unknown keys are named in one refusal");
+	const advertised = JSON.stringify(selectionFields(available));
+	assert.ok(advertised.includes(JSON.stringify(Object.keys(available))), "the submission schema enumerates the exact reusable equipment keys");
  // Core sees ordinary terms, so replay and execution need no new language.
 	assert.doesNotThrow(() => prepareWork(frame, [{ do: "plan.put", plan: reused }]));
 	assert.ok(!JSON.stringify(reused).includes('"reuse"'));
