@@ -267,6 +267,9 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	assert.match(choiceProblems(frame, { steps: [{ action: { option: "land:Forest" } }] }).join(" "), /not a listed option id/, "a card name cannot masquerade as a future button");
 	assert.match(choiceProblems(frame, { current: [{ action: { option: "cast:stale-payment" } }] }).join(" "), /not a listed option id/, "response repair uses the same boundary");
 	assert.deepEqual(choiceProblems(frame, { steps: frame.decision!.options.map((one) => ({ action: { option: one.id } })) }), [], "every actual listed id remains usable");
+	assert.match(choiceProblems(frame, { steps: [{ action: { prefix: "activate:" } }] }).join(" "), /names no table move family/, "invented activation prefixes cannot silently become unusable plan steps");
+	assert.deepEqual(choiceProblems(frame, { steps: [{ action: { prefix: "use:" } }, { action: { prefix: "land:" } }] }, true), [], "known future move families remain usable before their sources enter");
+	assert.deepEqual(choiceProblems({ ...frame, decision: { ...frame.decision!, options: [{ id: "custom:move", label: "A currently listed move" }] } }, { steps: [{ action: { prefix: "custom:" } }] }), [], "a currently listed move need not be in the future-family vocabulary");
 	const currentLand = frame.decision!.options.find((one) => one.id.startsWith("land:"))!;
 	assert.ok(currentLand);
 	assert.match(choiceProblems(frame, { steps: [{ action: { option: currentLand.id } }] }, true).join(" "), /not a listed option id/, "a preparation cannot bind the other turn's listed picks");
@@ -598,10 +601,13 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	const frame = workFrame(icetill, 0), before = structuredClone(frame);
 	const available = actions(frame, { objective: "o", guidance: "g", steps: [cast(icetill, "Icetill Explorer")] });
 	const forecast = permissionForecasts(frame, available)[0]!;
+	assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Icetill Explorer" })).permissionForecasts, [forecast], "the named lookup carries the conditional candidates");
+	assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Forest" })).permissionForecasts, [], "an unrelated lookup does not carry another card's forecast");
 	assert.deepEqual(forecast.landsPerTurn, { now: 1, after: 2 });
 	assert.deepEqual(forecast.openedZones, ["graveyard"]);
 	assert.deepEqual(forecast.candidates.map((one) => one.card), ["Promising Vein"], "only visible owned lands in newly opened zones are forecast");
 	assert.ok(!movementActions(frame)["land Promising Vein from graveyard"], "a future candidate does not become a current offer");
+	assert.equal(problems(icetill, { steps: [cast(icetill, "Icetill Explorer"), { label: "Play the enabled Vein", when: now(icetill), action: forecast.candidates[0]!.action as Plan["steps"][number]["action"] }] }), "", "the forecast's candidate can enter an ordinary checked plan after its prerequisite");
 	assert.deepEqual(frame, before, "forecasting neither resolves the spell nor mutates projected facts");
 	establish(icetill, 0, "Icetill Explorer");
 	const already = permissionForecasts(workFrame(icetill, 0), available)[0]!;

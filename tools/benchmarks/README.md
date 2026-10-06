@@ -32,6 +32,12 @@ Preparation cases plan the upcoming own turn from the saved opponent-turn
 position. An amendment also names its previously accepted preparation and
 replays that earlier prefix to compute changes. The amendment frame carries an
 explicit planning request, without editing the journal or game state.
+Repair cases preserve a journal prefix with a pending help request and call
+the ordinary repair path, without inventing a prepared plan. The after-Explorer
+case checks for a graveyard land play already enabled by the current board and
+forbids the inherited attack with a Forest that is no longer a creature.
+`zone` matches a projected source in that zone; it does not assert that a future
+zone change or permission has happened.
 
 The runner records each answer, property result, whole-decision duration,
 individual calls, model, effort, tokens, cost and complete request/response

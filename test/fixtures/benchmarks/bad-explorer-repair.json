@@ -1,0 +1,227 @@
+{
+  "source": ".pi/review-repeat-20261006/continuation/next-version-gate-20261005-1791294571883.jsonl",
+  "results": [
+    {
+      "id": "after-explorer-repair",
+      "plan": {
+        "objective": "Survive red's next turn, then use the Explorer/Ascension engine to grow an attack-ready trample threat.",
+        "guidance": "Turn 13 main: Explorer has already resolved this turn; the land was already played, and all lands other than Forest 0-19, 0-23, and 0-25 are tapped. The alleged hand Forest is not present. No landfall or Ascension counters are pending from the earlier Explorer cast. Do not repeat it or attempt another land play. At 6 life, favor a credible trample attacker over a 3-mana spell that consumes all three remaining sources and produces no immediate attacker; neither available spell can attack this turn. Preserve Forest 0-19, an actual untapped green source, only if it can meaningfully protect Explorer or the earthbent Forest; Veil is not in hand, so do not assume it. Kellan is tapped now but untaps for the opponent's next turn; at 3/2 with double strike, it threatens lethal if unblocked. Earthbent Forest 0-19 is currently an eligible 2/2 haste creature, but is also our only possible ground blocker and cannot block flyers. Opponent's lands are tapped now, not through their next turn. No current line wins: opponent is at 18 and we have no attack-ready creature. Prioritize blocking Kellan with the earthbent Forest if it attacks and that exchange is useful; reassess other attackers and the 3/3 Sanctuary if it untaps/activates. Do not assume Veil can stop face damage or that unknown burn is absent.",
+        "steps": [
+          {
+            "label": "Attack with earthbent Forest only if favorable",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "0-19",
+                    "incarnation": 4
+                  }
+                ]
+              }
+            },
+            "purpose": "Preserve the only ground blocker unless an attack is clearly beneficial; it cannot block flyers."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          },
+          {
+            "label": "Block with earthbent Forest if it prevents a damaging ground connection",
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "opponent",
+                  "types": [
+                    "creature"
+                  ],
+                  "attacking": true
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "prefix": "block:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "0-19",
+                    "incarnation": 4
+                  }
+                ]
+              }
+            },
+            "purpose": "Use it to block Kellan or another ground attacker when the exchange materially improves survival; never assign it to a flyer."
+          },
+          {
+            "label": "Finish blockers",
+            "when": {
+              "active": "opponent",
+              "step": "declare-blockers"
+            },
+            "action": {
+              "option": "block:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "goal": "Avoid an all-in spell that leaves no blocker or meaningful defense.",
+            "guidance": "Explorer already resolved; the normal land play is used. You have exactly three available green sources (0-19, 0-23, 0-25), no Forest in hand, and only Harmonizer and Hydra in hand. Each cast costs all three sources. Neither creature can attack this turn; casting Hydra leaves only a 1/1, while Harmonizer leaves a 4/4 engine, but either consumes every available source and there is no Veil in hand. Default to pass and preserve the 2/2 earthbent Forest as a ground blocker. Consider casting Harmonizer only if its persistent future landfall value outweighs losing all current mana and it will not undermine the needed defense; do not claim current landfall triggers from a land already played."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "goal": "Retain the earthbent land as a blocker unless attacking has clear value.",
+            "guidance": "Forest 0-19 is the only creature you control, a 2/2 earthbent Forest with haste and no summoning-sickness restriction. Opponent is at 18; no attack threatens lethal. Prefer to keep it untapped to block ground attackers; it cannot block flying."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Reassess actual threats as the opponent's lands untap.",
+            "guidance": "Kellan currently is tapped 3/2 with double strike; it will untap before this turn. The opponent's lands are tapped now but untap before their main phase, so do not treat them as exhausted for the coming turn. No Snakeskin Veil is in hand and no usable instant response is visible. Watch for a new flyer or direct damage; count actual mana and targets rather than presuming a hidden spell."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-attackers"
+            },
+            "goal": "Use the earthbent Forest to reduce the visible ground clock.",
+            "guidance": "If Kellan attacks, block it with Forest 0-19 when available: the 2/2 Forest can trade with the 3/2 double striker, preventing its player connection and trigger if it is blocked and killed in first-strike damage. For other ground attackers, block when it improves survival; a ground blocker cannot block a flyer. Recalculate with all visible attackers and any attack-triggered effects, then finish blocks."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "end"
+            },
+            "goal": "End the turn with the best surviving defense.",
+            "guidance": "If the earthbent Forest survives, it returns to being a land if it leaves the battlefield; do not count it as a flying blocker. Reassess damage and surviving board after combat and spells."
+          }
+        ],
+        "may": [
+          {
+            "label": "Cast Harmonizer if persistent engine is worth tapping out",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mightform Harmonizer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Mightform Harmonizer"
+                },
+                "claim": "Cast Mightform Harmonizer normally",
+                "basis": "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Only choose this if accepting zero remaining mana and losing the current ground blocker is preferable to passing; it cannot attack this turn."
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "0-19",
+                  "incarnation": 4
+                }
+              ]
+            },
+            "purpose": "Keep the earthbent Forest available as a ground blocker against the next turn's ground attack.",
+            "releaseWhen": {
+              "any": [
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atMost": 0
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ],
+                      "attacking": true
+                    }
+                  },
+                  "atLeast": 1
+                }
+              ]
+            }
+          }
+        ],
+        "askWhen": []
+      }
+    }
+  ]
+}

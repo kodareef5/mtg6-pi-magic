@@ -171,7 +171,9 @@ resolved permanent. For example, a graveyard land unavailable now can become a
 candidate after the prepared spell grants permission. Keep that forecast
 distinct from a current offer and from unknown results such as a future mill.
 
-Permission forecasts have three representative cases. With Explorer in hand
+The equipment lookup's permission forecasts have three representative cases.
+They are retrieved for a named card, not attached to every planning question.
+With Explorer in hand
 and Vein already in the graveyard, show the accepted additional land allowance
 and that visible Vein as a candidate after Explorer resolves. With only unknown
 library cards, name no future milled card. With a permission already active,

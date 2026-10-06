@@ -1,7 +1,8 @@
 {
   "journals": {
     "oct6": "test/fixtures/benchmarks/oct6.jsonl.gz",
-    "oct5": "test/fixtures/benchmarks/oct5.jsonl.gz"
+    "oct5": "test/fixtures/benchmarks/oct5.jsonl.gz",
+    "afterExplorer": "test/fixtures/benchmarks/after-explorer.jsonl.gz"
   },
   "cases": [
     {
@@ -209,6 +210,22 @@
       "expect": {
         "source": "Zhao, the Moon Slayer",
         "prefix": "attack:"
+      }
+    },
+    {
+      "id": "after-explorer-repair",
+      "journal": "afterExplorer",
+      "version": 506,
+      "seat": 0,
+      "task": "repair",
+      "property": "Explorer is a 4/6 creature and permits one more land play. Use a visible graveyard land instead of defending with a nonexistent creature-land.",
+      "expect": {
+        "prefix": "land:",
+        "zone": "graveyard"
+      },
+      "forbid": {
+        "prefix": "attack:",
+        "source": "Forest"
       }
     }
   ]

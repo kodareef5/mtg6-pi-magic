@@ -13,6 +13,11 @@ is excluded from the published package.
 - `good-landfall.json` and `bad-landfall.json`: accepted answers with correct and
   incorrect action ordering. Both still have prose problems; the names refer
   only to the original ordering property.
+- `after-explorer.jsonl.gz`: prefix 506 of the October 6 continuation
+  `next-version-gate-20261005-1791294571883`, ending after the help request and
+  before work row 116 accepts its answer. Cutting at that journal line preserves
+  the exact pending request within a physical version. `bad-explorer-repair.json`
+  keeps the failed benchmark answer, which the game itself had accepted.
 
 Prefixes were copied through `journal.fork`, retaining accepted equipment,
 briefs and rollback history. The manifest names individual earlier positions.

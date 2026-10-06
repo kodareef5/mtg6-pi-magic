@@ -3,7 +3,7 @@ import type { Plan, PlanOption } from "../src/core/language.ts";
 import type { Frame } from "../src/core/types.ts";
 import { select } from "../src/core/query.ts";
 
-export type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string };
+export type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string; zone?: string };
 export type PlanCheck = { expect?: Property; forbid?: Property; order?: Property[]; forbidProse?: string[] };
 
 export function planText(plan: Plan): string {
@@ -14,8 +14,9 @@ export function planText(plan: Plan): string {
 
 export function checkPlan(plan: Plan, check: PlanCheck, frame: Frame) {
 	const fits = (action: PlanOption["action"], property: Property) => "procedure" in action
-		? (!property.source || action.procedure.source.card === property.source) && (!property.timing || action.procedure.timing === property.timing) && !property.prefix && !property.id
+		? (!property.source || action.procedure.source.card === property.source) && (!property.zone || action.procedure.source.zones?.some((zone) => zone === property.zone)) && (!property.timing || action.procedure.timing === property.timing) && !property.prefix && !property.id
 		: (!property.source || action.objects?.card === property.source || !!action.objects && select(action.objects, frame).some((object) => object.card === property.source)) &&
+			(!property.zone || !!action.objects && select(action.objects, frame).some((object) => object.zone === property.zone && (!property.source || object.card === property.source))) &&
 			(!property.prefix || action.prefix === property.prefix) && (!property.id || action.option === property.id) && !property.timing;
 	const index = (property: Property) => plan.steps.findIndex((step) => fits(step.action, property));
 	const ordered = check.order?.map(index) ?? [];

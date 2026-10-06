@@ -23,7 +23,7 @@ import { traceInference } from "../src/context/trace.ts";
 import { usageReport, bill } from "../src/context/metrics.ts";
 import type { Brief } from "../src/context/brief.ts";
 
-type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend"; property: string;
+type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair"; property: string;
 	prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
@@ -56,6 +56,7 @@ const positions = selected.map((one) => {
 	if (one.task === "amend" && (!prior?.plan || prior.seat !== one.seat || preparation.source !== path || prior.version >= one.version)) throw new Error(`${one.id}: preparation does not match this position.`);
 	const earlier = prior && workFrame(replay(journals.get(one.journal)!, (header) => matchTable(header.seed), prior.version, { cards: matchup.cards, rules: matchup.rules }).table, one.seat);
 	if (one.task === "amend") frame.view.work = { ...frame.view.work!, request: "Review the prepared line after the draw against this current position." };
+	if (one.task === "repair" && !frame.view.work?.request) throw new Error(`${one.id}: repair fixture needs a pending planning request.`);
 	console.log(`${one.id}: ${one.task}, seat ${one.seat}, decision ${one.version}; ${one.property}`);
 	return { one, frame, brief, prior, earlier };
 });
@@ -63,7 +64,7 @@ if (values.review) {
 	if (values.live) throw new Error("--review checks saved answers offline; it cannot be combined with --live.");
 	const saved = JSON.parse(readFileSync(values.review, "utf8")) as { results: { id?: string; name?: string; answer?: { plan?: Plan }; plan?: Plan }[] };
 	const results = positions.map(({ one, frame }) => {
-		if (one.task === "pilot") throw new Error("--review checks saved plans; select prepare or amend cases.");
+		if (one.task === "pilot") throw new Error("--review checks saved plans; select prepare, amend or repair cases.");
 		const rows = saved.results.filter((row) => (row.id ?? row.name) === one.id);
 		const checked = rows.map((row) => { const plan = row.plan ?? row.answer?.plan; return plan && checkPlan(plan, one, frame); });
 		const passed = checked.length > 0 && checked.every((one) => one?.passed);
@@ -96,7 +97,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				const context = { brief, cards: universe, rules };
 				if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
 				else {
-					const result = await planWork(frame, context, writer, { plan: prior!.plan }, changes(earlier!, frame).lines);
+					const result = await planWork(frame, context, writer, prior ? { plan: prior.plan } : undefined, earlier ? changes(earlier, frame).lines : undefined);
 					const put = result.tools.find((tool) => tool.do === "plan.put");
 					if (put?.do !== "plan.put") throw new Error("Amendment returned no accepted plan.");
 					answer = { ...result, plan: put.plan };

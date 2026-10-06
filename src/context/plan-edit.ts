@@ -7,6 +7,7 @@ import type { Lookup } from "./reason.ts";
 import { printedCast } from "../core/procedures.ts";
 import { matches } from "../core/query.ts";
 import { movementActions } from "./strategy-actions.ts";
+import { permissionForecasts } from "./strategy-permissions.ts";
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
@@ -80,10 +81,13 @@ export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<st
 
 /** Read accepted equipment beyond the current position without changing it or certifying its interpretation. */
 export function equipment(frame: Frame, available: ReturnType<typeof actions>): Lookup {
-	return { name: "equipment", description: "Read this seat's accepted package and reusable actions for a named card, including registered cards absent from the position. These terms may contain interpretation errors; reading them neither prepares nor uses a card.",
+	return { name: "equipment", description: "Read this seat's accepted package and reusable actions for a named card, including registered cards absent from the position. Ordinary permanent casts with unconditional land permissions include a conditional forecast of visible land candidates. These terms may contain interpretation errors; reading them neither prepares nor uses a card or simulates its resolution.",
 		parameters: { type: "object", properties: { card: { type: "string" } }, required: ["card"], additionalProperties: false },
-		answer: ({ card }) => JSON.stringify({ card, package: frame.view.work?.packages?.find((one) => one.card === card),
-			actions: Object.fromEntries(Object.entries(available).filter(([, one]) => ("procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card) === card)) }),
+		answer: ({ card }) => {
+			const named = Object.fromEntries(Object.entries(available).filter(([, one]) => ("procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card) === card));
+			return JSON.stringify({ card, package: frame.view.work?.packages?.find((one) => one.card === card), actions: named,
+				permissionForecasts: permissionForecasts(frame, named) });
+		},
 	};
 }
 

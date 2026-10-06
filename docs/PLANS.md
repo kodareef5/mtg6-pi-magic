@@ -185,7 +185,7 @@ without separate invitations for Jev to invent a strategy for each one.
   before another full gate. Preparation must also cover the next upkeep so the
   pilot does not improvise from an expired turn's general guidance.
 - [x] Establish one runnable saved-position manifest. `npm run benchmark` validates
-  15 saved prefixes offline; `--live` runs selected pilot, preparation or amendment
+  16 saved prefixes offline; `--live` runs selected pilot, preparation, amendment or repair
   probes. It records expected properties, whole-decision timing and every call.
   Known good and bad landfall amendments can be checked without inference.
 - [ ] Extend those benchmarks to changed blockers, clocks, covered draws and
@@ -203,12 +203,15 @@ without separate invitations for Jev to invent a strategy for each one.
   offers. Expose that dependency as a conditional forecast, retaining unknown
   mills, responses and unresolved choices as unknown. Do not ask the writer to
   reconstruct these dependencies from a missing option and long prose.
-  The first permission forecast now reads accepted unconditional land permissions
-  on ordinary permanent casts. It shows the resulting allowance and visible
+  The equipment lookup now reads accepted unconditional land permissions
+  on a named ordinary permanent cast. It shows the resulting allowance and visible
   lands in newly opened zones, with an explicit resolution assumption. It does
   not simulate instructions or unknown cards. `objects.types` now selects any
   listed current type from projected characteristics. Response-source bindings
   and repeated live validation remain open.
+  Automatically attaching every permission forecast did not improve the repeated
+  action checks, so that attachment was removed. The per-card lookup preserves
+  access without adding speculative continuations to unrelated questions.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected
@@ -219,6 +222,11 @@ reuse has been tested, so waiting improvements have an identifiable cause.
 The [second tuning round](history/2026-10-06-binding-review.md) records the
 remaining false source claims and a factual-audit probe. The audit found real
 mistakes but also false positives, so it is not an automatic acceptance gate.
+The [repeated planning review](history/2026-10-06-repeated-planning.md) compares
+three runs per planning case and preserves a later failed repair after Explorer
+resolved. Current facts were present; the writer still repeated an obsolete
+creature-land claim. The next repair question must bind combat and resource
+commitments to current sources instead of asking for another prose inventory.
 
 Each cycle starts with the reviewed journal and exact request. Save the smallest
 position that exhibits the mistake, state the preferred decision and its
