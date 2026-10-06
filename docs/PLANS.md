@@ -212,6 +212,12 @@ without separate invitations for Jev to invent a strategy for each one.
   Automatically attaching every permission forecast did not improve the repeated
   action checks, so that attachment was removed. The per-card lookup preserves
   access without adding speculative continuations to unrelated questions.
+  Movement actions now bind their selectors to current types, tap state and
+  sickness. Old holds show whether their existing release condition holds.
+  Resource context includes permitted visible graveyard and exile lands beside
+  hand lands. These facts diagnose stale commitments without rejecting future
+  transformations. The first repeated answers still copy false prose; source
+  bindings alone do not close the repair problem.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected

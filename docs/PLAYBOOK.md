@@ -182,6 +182,27 @@ for the first time. These forecasts read unconditional accepted `permit`
 registrations only. They do not resolve a spell, predict a response or validate
 the rest of a line.
 
+## Repairing commitments against current sources
+
+A repair reads the unfinished line as intent and binds each proposed use to
+the current position. A source's current type, incarnation, tap state and
+sickness belong beside the action that names it. A label such as "attack with
+the animated land" does not establish that the selected object is a creature.
+An earlier effect or future prerequisite may change those facts; the writer
+must name that dependency instead of treating it as already resolved.
+
+| Situation | Preferred repair | What the context must establish |
+|---|---|---|
+| An old attack names a land that has returned without its animation | Remove that attack unless the remaining line animates it again; use actual creatures for defense | The selector's current incarnation and types, and the current creature roster |
+| A previous hold reserves mana for a card that is gone | Evaluate the hold's existing release condition, then choose how to spend the released resource | Whether the hold is released now and whether its selected sources are tapped |
+| A creature resolved and granted another land play | Continue from the current allowance and permitted visible zones | Graveyard land candidates appear beside hand lands; unknown future mills supply no candidate |
+| An established creature was sick on the prior turn | Reconsider its attack using current sickness, blockers and remaining windows | The selected creature's current characteristics, rather than inherited prose |
+
+These are factual bindings, not legality or strategy certification. They do not
+reject a future transformation, choose a reserve for the seat, or infer card
+meaning from prose. Repeated saved-position answers must improve before the
+new question is credited with better gameplay.
+
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved

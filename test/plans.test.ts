@@ -299,6 +299,18 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  assert.ok(shockKey && !frame.view.objects!.some((one) => one.card === "Shock"));
  assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Shock" })).actions[shockKey], available[shockKey], "absent card equipment keeps its exact reusable key and accepted terms");
 	const described = actionFacts(frame, available);
+	const forest = frame.view.objects!.find((one) => one.zone === "battlefield" && one.card === "Forest")!;
+	const stale: Plan = { objective: "Keep the old attack.", guidance: "An old label is not a current type.", steps: [{
+		label: "Attack with the animated land", when: { active: "self", step: "declare-attackers" },
+		action: { prefix: "attack:", objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] } },
+	}], holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Save a source for a response no longer in hand.",
+		releaseWhen: { amount: { count: { zones: ["hand"], name: "Shock", controller: "you" } }, atMost: 0 } }] };
+	const before = structuredClone(frame);
+	const bound = actionFacts(frame, actions(frame, stale)) as Record<string, { selectedNow?: { types: string[]; obstaclesNow: string[] }[] }>;
+	assert.deepEqual(bound["step:0 Attack with the animated land"]!.selectedNow![0]!.types, ["land"]);
+	assert.ok(bound["step:0 Attack with the animated land"]!.selectedNow![0]!.obstaclesNow.includes("not a creature"));
+	assert.equal(bindingFacts(frame, stale).holds[0]!.releasedNow, true, "a conditional hold can already be released despite its stale purpose");
+	assert.deepEqual(frame, before, "source diagnostics never apply the intended transformation or release an equipment hold");
 	const original = Object.entries(available).find(([key, one]) => "procedure" in one.action && described[key])!;
 	assert.ok(original);
 	const twins = { ...available, twin: structuredClone(original[1]) };
@@ -528,6 +540,11 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	assert.match(seen[0]!, /Mana now: Forest \(0-\d+\) makes G; Forest \(0-\d+\) makes G/);
 	assert.match(seen[0]!, /Land plays left this turn: 1\. In hand: .*Forest: enters untapped, makes G/);
 	assert.match(seen[0]!, /Ba Sing Se: no package, so how it enters and what it makes are unknown/, "a land with no package is not guessed at");
+	const grave = cardsIn(table, "hand", 0).find((one) => one.card === "Forest")!;
+	commit(table, [{ do: "move", what: grave.id, to: "graveyard", reason: "game-setup" }], "game-setup");
+	assert.doesNotMatch(JSON.parse(facts(workFrame(table, 0), {})).mana, /Permitted from graveyard/, "a visible land still needs permission");
+	establish(table, 0, "Icetill Explorer");
+	assert.match(JSON.parse(facts(workFrame(table, 0), {})).mana, /Permitted from graveyard: [^.]*Forest: enters untapped, makes G/, "resource context includes a currently permitted graveyard land");
 	const elf = establish(table, 0, "Llanowar Elves");
 	commit(table, [{ do: "tap", what: elf.id }], "resolve");
 	main(table, 1, 4);

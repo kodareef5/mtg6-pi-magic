@@ -1,12 +1,32 @@
-/** The planner chooses uses and resource policy; Jev binds an offered payment. */
+/** The planner chooses uses and resource policy; Jev binds an offered payment.
+ * Source descriptions and choice diagnostics stay together past 150 lines. */
 import type { Frame, Option } from "../core/types.ts";
-import type { Plan } from "../core/language.ts";
+import type { Plan, PlanOption } from "../core/language.ts";
+import type { SeenObject } from "../core/work.ts";
 import { matches, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
 import type { actions } from "./plan-edit.ts";
 import { isDeepStrictEqual } from "node:util";
+import { holds, viewWorld } from "../core/selectors.ts";
+
+const sourceFact = (one: SeenObject) => ({ id: one.id, incarnation: one.incarnation, card: one.card ?? one.token?.name,
+	zone: one.zone, controller: one.controller, tapped: one.tapped,
+	...(one.traits ? { types: one.traits.types, power: one.traits.power, toughness: one.traits.toughness, words: one.traits.words } : {}),
+	...(one.summoningSick === undefined ? {} : { summoningSick: one.summoningSick }) });
+
+/** Bind a selector to current facts without deciding whether a later prerequisite will change them. */
+function movementFacts(frame: Frame, action: PlanOption["action"]) {
+	if ("procedure" in action || !action.objects) return {};
+	const selected = select(action.objects, frame), combat = action.prefix === "attack:" || action.prefix === "block:";
+	return { selectedNow: selected.map((one) => ({ ...sourceFact(one), ...(combat ? { obstaclesNow: [
+		...(one.zone !== "battlefield" ? ["not on the battlefield"] : []),
+		...(!one.traits?.types.includes("creature") ? ["not a creature"] : []),
+		...(one.tapped ? ["tapped"] : []),
+		...(action.prefix === "attack:" && one.summoningSick ? ["summoning sick"] : []),
+	] } : {}) })), bindingScope: "Current source facts only. An earlier action may change them; naming a source does not establish a legal or useful future move." };
+}
 
 /** Visible land and combat selectors, ready to reuse without inventing button ids. */
 export function movementActions(frame: Frame, turn?: number): ReturnType<typeof actions> {
@@ -55,7 +75,7 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 		if (!("procedure" in one.action)) {
 			if (!prior && one.action.objects && !select(one.action.objects, frame).length) return undefined;
 			const offered = frame.decision?.options.find((option) => option.id === ("option" in one.action ? one.action.option : undefined));
-			return [key, { ...one, ...(offered?.use ? { fixedUse: offered.use }
+			return [key, { ...one, ...movementFacts(resources, one.action), ...(offered?.use ? { fixedUse: offered.use }
 				: one.action.option ? { availability: offered ? "Offered now" : "This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }] as const;
 		}
 		const use = one.action.procedure;
@@ -84,7 +104,9 @@ export function planFacts(plan: Plan) {
 }
 
 /** Diagnose exact bindings in the old line without treating a future use as illegal. */
-export function bindingFacts(frame: Frame, base: Plan) {
+export function bindingFacts(frame: Frame, base: Plan, nextTurn = false) {
+	if (nextTurn) frame = afterUntap(frame);
+	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	return {
 		unoffered: base.steps.flatMap((step, at) => {
 			if (!("option" in step.action) || !step.action.option || !matches(step.when, frame)) return [];
@@ -92,7 +114,8 @@ export function bindingFacts(frame: Frame, base: Plan) {
 			return frame.decision?.options.some((one) => one.id === id) ? [] : [{ step: at, label: step.label, option: id,
 				fact: "Not offered at this decision. An earlier prerequisite may still enable it, but a stale payment or zone incarnation will not become valid. Use a prepared action for the intended cast." }];
 		}),
-		holds: (base.holds ?? []).map((hold) => ({ purpose: hold.purpose, selected: select(hold.objects, frame).map((one) => ({ id: one.id, incarnation: one.incarnation, card: one.card })) })),
+		holds: (base.holds ?? []).map((hold) => ({ purpose: hold.purpose,
+			releasedNow: !!hold.releaseWhen && holds(scope, hold.releaseWhen), selected: select(hold.objects, frame).map(sourceFact) })),
 	};
 }
 
