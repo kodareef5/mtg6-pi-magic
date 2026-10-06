@@ -56,7 +56,7 @@ Any other lowercase word is recorded for the players and the judge.
 | `event:object`, `event:objects` | what the triggering event happened to ("that land", "those creatures") |
 | `event:player`, `event:source` | who caused the event, and the spell or ability that did ("that player", ward's "that spell") |
 | `{top: 1, of: "you"}` | the top card of a library |
-| `you`, `opponent`, `each-player` | players relative to the source's controller |
+| `you` (or `self`), `opponent`, `each-player` | players relative to the source's controller |
 | `controller:target:0`, `owner:this` | a player read off an object |
 
 Refs inside a delayed or reflexive effect, other than `event:*`, are fixed when
@@ -70,7 +70,7 @@ watched. Each field narrows, and a list matches any of its members.
 |---|---|
 | `name` | a printed name, for "named" and for plans |
 | `zones` | default battlefield; `["graveyard"]` for "card in a graveyard" |
-| `controller`, `owner` | `you`, `opponent`, `any`, or a bound player |
+| `controller`, `owner` | `you` (or `self`), `opponent`, `any`, or a bound player |
 | `types`, `subtypes`, `supertypes` | "basic land card" is `supertypes: ["basic"], types: ["land"]` |
 | `not` | "nonbasic", "noncreature" |
 | `words` | "creature with flying" |

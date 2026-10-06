@@ -185,13 +185,24 @@ without separate invitations for Jev to invent a strategy for each one.
   before another full gate. Preparation must also cover the next upkeep so the
   pilot does not improvise from an expired turn's general guidance.
 - [x] Establish one runnable saved-position manifest. `npm run benchmark` validates
-  13 saved prefixes offline; `--live` runs selected pilot, preparation or amendment
+  15 saved prefixes offline; `--live` runs selected pilot, preparation or amendment
   probes. It records expected properties, whole-decision timing and every call.
   Known good and bad landfall amendments can be checked without inference.
 - [ ] Extend those benchmarks to changed blockers, clocks, covered draws and
   stale factual guidance. Action-order checks alone do not establish playing
   strength. Check improvement before another full batch, then compare matching
   seeds with preparation measured separately.
+  The second round adds a funding-land prerequisite and an established attacker
+  that old guidance wrongly held back. Exact reusable-key schemas, complete
+  reference diagnostics, shared action descriptions and consistent player
+  references are implemented. Broader prompt and plan-reset experiments did
+  not establish coherent play and were withdrawn.
+- [ ] Ground commitments and future continuations in structured facts. A reserve
+  should identify its response source and useful window. A proposed resolved
+  permanent can enable a graveyard land or another use absent from current
+  offers. Expose that dependency as a conditional forecast, retaining unknown
+  mills, responses and unresolved choices as unknown. Do not ask the writer to
+  reconstruct these dependencies from a missing option and long prose.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected
@@ -199,6 +210,9 @@ decisions at 253 ms median; Luna matched 24/27 at 1,714 ms median. Keep Jev as t
 pilot. A narrow Luna exception review is a candidate experiment, not a new
 production role. Defer preparation restarts and timeout changes until prepared
 reuse has been tested, so waiting improvements have an identifiable cause.
+The [second tuning round](history/2026-10-06-binding-review.md) records the
+remaining false source claims and a factual-audit probe. The audit found real
+mistakes but also false positives, so it is not an automatic acceptance gate.
 
 Each cycle starts with the reviewed journal and exact request. Save the smallest
 position that exhibits the mistake, state the preferred decision and its

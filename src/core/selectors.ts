@@ -143,7 +143,7 @@ export function players(scope: Scope, ref: string): SeatId[] {
 	const all = scope.world.players.map((one) => one.id);
 	const [head, rest] = [ref.split(":")[0], ref.slice(ref.indexOf(":") + 1)];
 	switch (head) {
-		case "you": return [scope.controller];
+		case "you": case "self": return [scope.controller];
 		case "opponent": return all.filter((id) => id !== scope.controller);
 		case "each-player": return all;
 		case "event": return scope.event?.player === undefined ? [] : [scope.event.player];

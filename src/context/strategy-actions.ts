@@ -6,6 +6,7 @@ import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
 import type { actions } from "./plan-edit.ts";
+import { isDeepStrictEqual } from "node:util";
 
 /** Visible land and combat selectors, ready to reuse without inventing button ids. */
 export function movementActions(frame: Frame, turn?: number): ReturnType<typeof actions> {
@@ -43,7 +44,7 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 	let resources = turn === undefined ? frame : afterUntap(frame);
 	if (turn !== undefined && resources.view.window.kind === "turn") resources = { ...resources,
 		view: { ...resources.view, window: { ...resources.view.window, turn, active: frame.seat } } };
-	return Object.fromEntries(Object.entries(available).map(([key, one]) => {
+	const entries = Object.entries(available).map(([key, one]) => {
 		const prior = key.startsWith("step:") || key.startsWith("may:");
 		if (!("procedure" in one.action)) {
 			if (!prior && one.action.objects && !select(one.action.objects, frame).length) return undefined;
@@ -63,7 +64,11 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 			...(!bound.length ? { availability: "Prior intent has no permitted source now. An earlier step or a future draw must supply it; it is not an available use." } : {}),
 			cost: { ...cost, mana: mana ?? (procedure.timing === "spell" ? "Read the bound source's printed cost" : "{0}") },
 			costBasis: cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost" }] as const;
-	}).filter((one) => one !== undefined));
+	}).filter((one) => one !== undefined);
+	return Object.fromEntries(entries.map(([key, description], at) => {
+		const earlier = entries.find(([other, facts], n) => n < at && isDeepStrictEqual(available[key]!.action, available[other]!.action) && isDeepStrictEqual(description, facts));
+		return [key, earlier ? { sameAs: earlier[0] } : description];
+	}));
 }
 
 /** The displayed base refers to its reusable actions; executable bodies stay in equipment. */

@@ -7,6 +7,8 @@ import { parseArgs, isDeepStrictEqual } from "node:util";
 import { replay } from "../src/core/journal.ts";
 import { workFrame } from "../src/core/work-tools.ts";
 import type { Plan, PlanOption } from "../src/core/language.ts";
+import type { Frame } from "../src/core/types.ts";
+import { select } from "../src/core/query.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { aiSeat, changes } from "../src/context/seat.ts";
@@ -23,10 +25,11 @@ import type { Brief } from "../src/context/brief.ts";
 type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string };
 type Case = { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend"; property: string;
 	expect?: Property; forbid?: Property; order?: Property[]; prepared?: { file: string; name: string } };
-function checks(plan: Plan, one: Case): boolean {
+function checks(plan: Plan, one: Case, frame: Frame): boolean {
 	const fits = (action: PlanOption["action"], property: Property) => "procedure" in action
 		? action.procedure.source.card === property.source && (!property.timing || action.procedure.timing === property.timing) && !property.prefix && !property.id
-		: (!property.source || action.objects?.card === property.source) && (!property.prefix || action.prefix === property.prefix) && (!property.id || action.option === property.id) && !property.timing;
+		: (!property.source || action.objects?.card === property.source || !!action.objects && select(action.objects, frame).some((object) => object.card === property.source)) &&
+			(!property.prefix || action.prefix === property.prefix) && (!property.id || action.option === property.id) && !property.timing;
 	const index = (property: Property) => plan.steps.findIndex((step) => fits(step.action, property));
 	const ordered = one.order?.map(index) ?? [];
 	return (!one.expect || index(one.expect) >= 0) && (!one.forbid || index(one.forbid) < 0) && ordered.every((at, n) => at >= 0 && (!n || at > ordered[n - 1]!));
@@ -56,10 +59,10 @@ const positions = selected.map((one) => {
 if (values.review) {
 	if (values.live) throw new Error("--review checks saved answers offline; it cannot be combined with --live.");
 	const saved = JSON.parse(readFileSync(values.review, "utf8")) as { results: { id?: string; name?: string; answer?: { plan?: Plan }; plan?: Plan }[] };
-	const results = positions.map(({ one }) => {
+	const results = positions.map(({ one, frame }) => {
 		if (one.task === "pilot") throw new Error("--review checks saved plans; select prepare or amend cases.");
 		const rows = saved.results.filter((row) => (row.id ?? row.name) === one.id);
-		const passed = rows.length > 0 && rows.every((row) => { const plan = row.plan ?? row.answer?.plan; return !!plan && checks(plan, one); });
+		const passed = rows.length > 0 && rows.every((row) => { const plan = row.plan ?? row.answer?.plan; return !!plan && checks(plan, one, frame); });
 		console.log(`${one.id}: ${passed ? "PASS" : "FAIL"}, ${rows.length} saved answers`); return passed;
 	});
 	process.exit(results.every(Boolean) ? 0 : 1);
@@ -94,7 +97,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					if (put?.do !== "plan.put") throw new Error("Amendment returned no accepted plan.");
 					answer = { ...result, plan: put.plan };
 				}
-				passed = checks((answer as { plan: Plan }).plan, one);
+				passed = checks((answer as { plan: Plan }).plan, one, frame);
 			} else {
 				const api: DecisionApi = pilot === "jev" ? decisionApi(inference.classify, jev.model as never, { tally: measured, seat: one.seat }) : {
 					named: "benchmark Luna pilot", async ask(request) {

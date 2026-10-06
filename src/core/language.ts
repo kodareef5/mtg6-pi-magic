@@ -44,9 +44,9 @@ const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
  */
 export const ObjectRef = Type.Union([
 	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
-	object({ top: positive, of: Type.String({ pattern: "^(you|opponent|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
+	object({ top: positive, of: Type.String({ pattern: "^(you|self|opponent|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
 ]);
-export const PlayerRef = Type.String({ pattern: "^(you|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source)|owner:(this|attached|target:[0-9]+|event:object))$" });
+export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source)|owner:(this|attached|target:[0-9]+|event:object))$" });
 const Side = Type.Union([PlayerRef, Type.Literal("any")]);
 const Range = object({ atLeast: Type.Optional(Type.Integer()), atMost: Type.Optional(Type.Integer()) });
 

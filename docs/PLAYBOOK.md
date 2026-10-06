@@ -62,6 +62,10 @@ does not become an exile cast; next-turn preparation can consider an earned
 permission that opens on that turn. Unbound steps in prior intent stay visible
 for repair. Other absent equipment stays accessible through lookup, so a draw
 branch or an earlier return-to-hand effect can still prepare its continuation.
+The submission schema lists exact reusable keys. All unknown keys are reported
+together. Identical executable terms and identical displayed facts share one
+description through `sameAs`; each original key remains usable. Matching card
+names or claims alone do not merge different modes or instructions.
 The pilot's pending actions carry their required windows and whether the window
 is closed or the condition is false. A main-phase cast in the plan calls for
 passing through draw under the response policy, not choosing an unrelated
@@ -96,6 +100,8 @@ Draw branches test the visible hand after drawing. For example,
 tests for a creature in hand. `top` names library objects and cannot stand for a
 hand or battlefield test. The ordinary planning reference carries counts, life,
 history and combinations; instruction bindings stay in the full syntax lookup.
+Player references accept `self` as a synonym for `you`, including conditions;
+both mean the evaluating source or seat's controller, not the active player.
 Preparation labels both the table's alternating turn counter and the seat's own
 turn number. Neither number is a mana forecast.
 Preparation must answer the upcoming turn from a clearly labelled forecast,
@@ -157,6 +163,13 @@ Accepting unchanged fields must be deliberate. A narrow question should allow
 The October 6 experiment failed that distinction; its production shortcut was
 withdrawn. The [review record](history/2026-10-06-review-tune.md) and
 [benchmark instructions](../tools/benchmarks/README.md) preserve the evidence.
+
+The [second tuning round](history/2026-10-06-binding-review.md) confirms that
+correct action order can coexist with unusable guidance. Next, bind response
+reservations to actual sources and expose continuations enabled by a proposed
+resolved permanent. For example, a graveyard land unavailable now can become a
+candidate after the prepared spell grants permission. Keep that forecast
+distinct from a current offer and from unknown results such as a future mill.
 
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare

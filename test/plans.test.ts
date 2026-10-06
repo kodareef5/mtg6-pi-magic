@@ -23,6 +23,7 @@ import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work
 import { budget, manaBudget } from "../src/core/budget.ts";
 import { printedCast } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
+import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
@@ -119,6 +120,14 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 		assert.match(planProblems(workFrame(table, 0), guarded).join("; "), /top always names a library object/);
 		const counted = { ...line, steps: [{ ...line.steps[0]!, if: { amount: { count: { zones: [...zones], name: "Forest", controller: "you" } }, atLeast: 1 } }] };
 		assert.deepEqual(planProblems(workFrame(table, 0), counted), [], "visible presence has a condition whose meaning agrees with its zone");
+		const self = structuredClone(counted);
+		self.steps[0]!.if.amount.count.controller = "self";
+		assert.deepEqual(planProblems(workFrame(table, 0), self), [], "a condition accepts the same self spelling as an action query");
+		for (const controller of [0, 1]) {
+			const scope = { world: viewWorld(workFrame(table, controller).view), controller };
+			assert.deepEqual(players(scope, "self"), [controller]);
+			assert.equal(conditionHolds(scope, self.steps[0]!.if), conditionHolds(scope, counted.steps[0]!.if), "self and you are relative to this seat, not the active seat");
+		}
 	}
 	assert.deepEqual(planProblems(workFrame(table, 0), { ...line, steps: [{ ...line.steps[0]!, if: { is: { top: 1, of: "you" }, matches: { zones: ["library"], name: "Forest" } } }] }), [], "a library test remains a library test, subject to projected knowledge");
 });
@@ -274,6 +283,17 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  const shockKey = Object.keys(available).find((key) => available[key]!.label === "Cast Shock")!;
  assert.ok(shockKey && !frame.view.objects!.some((one) => one.card === "Shock"));
  assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Shock" })).actions[shockKey], available[shockKey], "absent card equipment keeps its exact reusable key and accepted terms");
+	const described = actionFacts(frame, available);
+	const original = Object.entries(available).find(([key, one]) => "procedure" in one.action && described[key])!;
+	assert.ok(original);
+	const twins = { ...available, twin: structuredClone(original[1]) };
+	const twin = actionFacts(frame, twins).twin;
+	assert.ok(twin && "sameAs" in twin, "identical accepted terms and display facts have one description");
+	const distinct = structuredClone(original[1]);
+	assert.ok("procedure" in distinct.action);
+	distinct.action.procedure.instructions = [{ do: "draw", who: "you", count: 1 }];
+	const separate = actionFacts(frame, { ...twins, distinct }).distinct;
+	assert.ok(separate && !("sameAs" in separate), "matching claims do not merge different executable terms");
  assert.equal(base.steps[0]!.label, "Crack Fabled Passage", "the played land is already omitted");
  assert.equal(base.packages, undefined, "accepted packages need no repetition");
  const seen: { messages: string; tools: string[] }[] = [];
@@ -777,18 +797,19 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	const nova = cardsIn(table, "hand", 1).find((one) => one.card === "Nova Hellkite")!;
 	commit(table, [{ do: "move", what: nova.id, to: "battlefield", reason: "resolve" }], "resolve");
 	const read = (seat = 1, turn?: number) => { const frame = workFrame(table, seat); return actionFacts(frame, available, turn); };
+	const boundSources = (described: ReturnType<typeof actionFacts>[string] | undefined) => { assert.ok(described && "sourcesNow" in described); return described.sourcesNow; };
 	assert.equal(read()[normalKey], undefined, "an existing permanent does not advertise another cast");
 	const prior = { "step:0 Cast Nova": available[normalKey]! };
-	assert.deepEqual(actionFacts(workFrame(table, 1), prior)["step:0 Cast Nova"].sourcesNow, [], "unbound prior intent remains visible to repair");
+	assert.deepEqual(boundSources(actionFacts(workFrame(table, 1), prior)["step:0 Cast Nova"]), [], "unbound prior intent remains visible to repair");
 	place(table, 1, "hand", "Nova Hellkite");
-	assert.equal(read()[normalKey].sourcesNow.length, 1, "a second copy really in hand restores the casting candidate even without enough mana");
+	assert.equal(boundSources(read()[normalKey]).length, 1, "a second copy really in hand restores the casting candidate even without enough mana");
 	const second = cardsIn(table, "hand", 1).find((one) => one.card === "Nova Hellkite")!;
 	commit(table, [{ do: "move", what: second.id, to: "exile", reason: "resolve" }], "resolve");
 	assert.equal(read()[normalKey], undefined, "visible exile alone grants no permission");
 	const exiled = table.things.get(second.id)!;
 	commit(table, [{ do: "note", note: { kind: "permit", by: 1, who: 1, on: { id: exiled.id, incarnation: exiled.incarnation }, fromTurn: 4, until: "indefinite" } }], "resolve");
 	assert.equal(read()[normalKey], undefined, "a later permission is not available now");
-	assert.equal(read(1, 4)[normalKey].sourcesNow[0].zone, "exile", "next-turn preparation can see a permission that opens then");
+	assert.equal(boundSources(read(1, 4)[normalKey])[0]!.zone, "exile", "next-turn preparation can see a permission that opens then");
 	assert.equal(read(1, 4)[warpKey], undefined, "a hand-only alternate cast stays unavailable from exile");
 	assert.equal(read(0, 4)[normalKey], undefined, "one seat's permission does not authorize the other seat");
 	const preview = matchup("future-payment"); main(preview, 1, 6);
