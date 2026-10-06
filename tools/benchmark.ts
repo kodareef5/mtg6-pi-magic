@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /** Saved decision probes. Default is offline validation; --live spends on explicit model comparisons.
  * A matching property is a narrow regression result, never a gameplay-strength score. */
-import { readFileSync, mkdirSync, writeFileSync, appendFileSync, existsSync } from "node:fs";
+import { readFileSync, mkdirSync, writeFileSync, appendFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { gunzipSync } from "node:zlib";
 import { parseArgs, isDeepStrictEqual } from "node:util";
 import { replay } from "../src/core/journal.ts";
 import { workFrame } from "../src/core/work-tools.ts";
-import type { Plan, PlanOption } from "../src/core/language.ts";
-import type { Frame } from "../src/core/types.ts";
-import { select } from "../src/core/query.ts";
+import type { Plan } from "../src/core/language.ts";
+import { checkPlan, type PlanCheck } from "./benchmark-checks.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { aiSeat, changes } from "../src/context/seat.ts";
@@ -22,18 +23,8 @@ import { traceInference } from "../src/context/trace.ts";
 import { usageReport, bill } from "../src/context/metrics.ts";
 import type { Brief } from "../src/context/brief.ts";
 
-type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string };
-type Case = { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend"; property: string;
-	expect?: Property; forbid?: Property; order?: Property[]; prepared?: { file: string; name: string } };
-function checks(plan: Plan, one: Case, frame: Frame): boolean {
-	const fits = (action: PlanOption["action"], property: Property) => "procedure" in action
-		? action.procedure.source.card === property.source && (!property.timing || action.procedure.timing === property.timing) && !property.prefix && !property.id
-		: (!property.source || action.objects?.card === property.source || !!action.objects && select(action.objects, frame).some((object) => object.card === property.source)) &&
-			(!property.prefix || action.prefix === property.prefix) && (!property.id || action.option === property.id) && !property.timing;
-	const index = (property: Property) => plan.steps.findIndex((step) => fits(step.action, property));
-	const ordered = one.order?.map(index) ?? [];
-	return (!one.expect || index(one.expect) >= 0) && (!one.forbid || index(one.forbid) < 0) && ordered.every((at, n) => at >= 0 && (!n || at > ordered[n - 1]!));
-}
+type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend"; property: string;
+	prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" } } });
@@ -41,17 +32,29 @@ const repeat = Number(values.repeat), pilots = values.pilot === "both" ? ["jev",
 if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "luna"].includes(one))) throw new Error("Use a positive --repeat and --pilot jev, luna or both.");
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
+// Committed compressed journals stay outside the published package. Expand only
+// the selected inputs and remove temporary copies even when a probe fails.
+const scratch = mkdtempSync(join(tmpdir(), "magic-bench-"));
+process.on("exit", () => rmSync(scratch, { recursive: true, force: true }));
+const journals = new Map<string, string>();
+for (const one of selected) if (!journals.has(one.journal)) {
+	const path = catalog.journals[one.journal];
+	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
+	const to = join(scratch, `${one.journal}.jsonl`);
+	writeFileSync(to, path.endsWith(".gz") ? gunzipSync(readFileSync(path)) : readFileSync(path));
+	journals.set(one.journal, to);
+}
 const positions = selected.map((one) => {
 	const path = catalog.journals[one.journal];
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
-	const saved = replay(path, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
+	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
 	if (one.task === "pilot" && !frame.decision) throw new Error(`${one.id}: this seat has no decision at the recorded prefix.`);
 	const brief = saved.prepared.find((entry) => entry.seat === one.seat)?.made as Brief | undefined;
 	const preparation = one.prepared && JSON.parse(readFileSync(one.prepared.file, "utf8"));
 	const prior = preparation?.results.find((row: { name: string }) => row.name === one.prepared!.name) as { version: number; seat: number; plan: Plan } | undefined;
 	if (one.task === "amend" && (!prior?.plan || prior.seat !== one.seat || preparation.source !== path || prior.version >= one.version)) throw new Error(`${one.id}: preparation does not match this position.`);
-	const earlier = prior && workFrame(replay(path, (header) => matchTable(header.seed), prior.version, { cards: matchup.cards, rules: matchup.rules }).table, one.seat);
+	const earlier = prior && workFrame(replay(journals.get(one.journal)!, (header) => matchTable(header.seed), prior.version, { cards: matchup.cards, rules: matchup.rules }).table, one.seat);
 	if (one.task === "amend") frame.view.work = { ...frame.view.work!, request: "Review the prepared line after the draw against this current position." };
 	console.log(`${one.id}: ${one.task}, seat ${one.seat}, decision ${one.version}; ${one.property}`);
 	return { one, frame, brief, prior, earlier };
@@ -62,8 +65,9 @@ if (values.review) {
 	const results = positions.map(({ one, frame }) => {
 		if (one.task === "pilot") throw new Error("--review checks saved plans; select prepare or amend cases.");
 		const rows = saved.results.filter((row) => (row.id ?? row.name) === one.id);
-		const passed = rows.length > 0 && rows.every((row) => { const plan = row.plan ?? row.answer?.plan; return !!plan && checks(plan, one, frame); });
-		console.log(`${one.id}: ${passed ? "PASS" : "FAIL"}, ${rows.length} saved answers`); return passed;
+		const checked = rows.map((row) => { const plan = row.plan ?? row.answer?.plan; return plan && checkPlan(plan, one, frame); });
+		const passed = checked.length > 0 && checked.every((one) => one?.passed);
+		console.log(`${one.id}: ${passed ? "PASS" : "FAIL"}, ${rows.length} saved answers; structure ${checked.filter((one) => one?.structure).length}/${rows.length}; prose flags ${checked.reduce((n, one) => n + (one?.prose.length ?? 0), 0)}`); return passed;
 	});
 	process.exit(results.every(Boolean) ? 0 : 1);
 }
@@ -84,7 +88,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 	// Alternate order so one model does not always receive the earlier request.
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
-		let answer: unknown, passed = false, error: string | undefined;
+		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		try {
 			const writer = reasoner({ role: one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
 				model: luna.model as never, thinking: luna.thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
@@ -97,7 +101,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					if (put?.do !== "plan.put") throw new Error("Amendment returned no accepted plan.");
 					answer = { ...result, plan: put.plan };
 				}
-				passed = checks((answer as { plan: Plan }).plan, one, frame);
+				checks = checkPlan((answer as { plan: Plan }).plan, one, frame);
+				passed = checks.passed;
 			} else {
 				const api: DecisionApi = pilot === "jev" ? decisionApi(inference.classify, jev.model as never, { tally: measured, seat: one.seat }) : {
 					named: "benchmark Luna pilot", async ask(request) {
@@ -124,7 +129,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			if (!isDeepStrictEqual(frame, before)) throw new Error("Benchmark mutated the projected frame.");
 		} catch (caught) { error = String(caught); }
 		const calls = measured.spent().slice(startCall), entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
-			ms: Date.now() - began, calls: calls.length, answer, ...(error ? { error } : {}), usage: usageReport(calls) };
+			ms: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
 		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.ms}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
 		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", results, calls: measured.spent() }, null, 2) + "\n");
 	}

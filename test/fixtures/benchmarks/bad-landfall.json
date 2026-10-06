@@ -1,0 +1,281 @@
+{
+  "source": ".pi/review-cycle-20261006/amend-components-1791287704003/results.json",
+  "results": [
+    {
+      "name": "green-landfall-order",
+      "version": 475,
+      "seat": 0,
+      "window": {
+        "kind": "turn",
+        "turn": 13,
+        "active": 0,
+        "step": "draw",
+        "phase": "beginning"
+      },
+      "plan": {
+        "objective": "Stabilize at 6 life against the opponent's double-striking Kellan and preserve blockers while rebuilding a landfall threat; attack only when lethal is established or defense is no longer viable.",
+        "guidance": "Observed turn 13 draw step, with precombat main and combat still ahead. The former Vein line is impossible: Promising Vein and Chocobo are in the graveyard, and Explorer is only in hand. A Forest is in hand and one land play remains. First play Forest, then cast Explorer for {2}{G}{G} from the six currently untapped Forests, retaining two untapped Forests if payment permits; its landfall does not trigger from the already-played Forest. Do not assume a graveyard land is playable this turn unless Explorer resolves and a land play remains. Current opponent is at 18; Kellan is tapped (3/2 double strike) and Sanctuary is tapped (animated 3/3 vigilance), so no attack wins now. Your lands are not creatures; Ascensions have no attacker. Life is 6, so prioritize a blocker/threat and keep a real green source available for Veil against targeted removal. Reassess after Explorer resolves and its mill occurs. No current stack response is needed.",
+        "steps": [
+          {
+            "label": "Play Forest from hand",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "essential": true,
+            "purpose": "Use this turn's land play to develop mana; Zhao is gone so no nonbasic restriction applies.",
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "card": "Forest"
+              }
+            }
+          },
+          {
+            "label": "Cast Icetill Explorer",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "essential": true,
+            "purpose": "Establish future additional-land and graveyard access; retain available green for protection if possible.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Icetill Explorer"
+                },
+                "claim": "Cast Icetill Explorer",
+                "basis": "You may play an additional land on each of your turns.",
+                "timing": "spell",
+                "instructions": []
+              }
+            }
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "goal": "Play the visible Forest and establish Explorer without pretending the lost Vein is available.",
+            "guidance": "Play Forest first, then cast Explorer for {2}{G}{G} if payable from the six untapped Forests after the land play. Its entry triggers both Ascensions' landfall abilities; resolve those choices, targeting a useful creature only if one exists (none is currently on your battlefield). Resolve Explorer's mill, then reassess graveyard contents. Do not sacrifice or search with Promising Vein; it is in the graveyard and no current action retrieves it. Preserve an untapped Forest for Snakeskin Veil if possible. You are at 6 life; prioritize survival over optional deployment."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "goal": "Do not attack into the current board without a lethal or survival-based reason.",
+            "guidance": "You currently have no battlefield creatures, so no attacker is available. The opposing Kellan and animated Sanctuary are tapped; do not invent an attack with an Ascension or land. Reassess only if an actual creature enters and is eligible to attack."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-attackers"
+            },
+            "goal": "Preserve life and block if a blocker becomes available.",
+            "guidance": "You currently have no creatures to block with. If Explorer resolves this turn, it will be summoning sick but can block on the opponent's turn. Block a meaningful ground attacker with Explorer when doing so prevents damage and does not sacrifice a more valuable winning line; Veil can protect it from targeted removal, not combat damage. No creature can block a flyer absent flying or reach."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Protect the recovery nucleus against targeted removal and reassess the clock.",
+            "guidance": "Hold one untapped Forest for Snakeskin Veil only if Veil is in hand and the source remains genuinely untapped. Opponent's visible Kellan is already 3/2 with double strike and its combat-damage trigger; track whether it untaps or gains haste/new attackers. Hexproof does not stop burn to you. At 6 life, prioritize a credible blocker or lethal attack over speculative development."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "end"
+            },
+            "goal": "Recount survival and next-turn landfall opportunities.",
+            "guidance": "Recount life, visible board, mana, hand and graveyard after all combat and spells. Do not assume a future draw or a specific Explorer mill."
+          }
+        ],
+        "may": [
+          {
+            "label": "Cast Explorer if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Icetill Explorer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Icetill Explorer"
+                },
+                "claim": "Cast Icetill Explorer",
+                "basis": "You may play an additional land on each of your turns.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Only cast if the full cost and Veil reserve remain payable after the baseline sequence."
+          },
+          {
+            "label": "Cast Harmonizer if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mightform Harmonizer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Mightform Harmonizer"
+                },
+                "claim": "Cast Mightform Harmonizer normally",
+                "basis": "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Prefer persistent development only if it does not consume the protected green reserve or disrupt Explorer/Vein order."
+          },
+          {
+            "label": "Cast Hydra if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mossborn Hydra"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Mossborn Hydra",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Mossborn Hydra.",
+                "basis": "This creature enters with a +1/+1 counter on it.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Develop only after pricing the landfall sequence and retaining useful interaction mana."
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "0-14",
+                  "incarnation": 1
+                }
+              ]
+            },
+            "purpose": "Keep one untapped Forest available for Snakeskin Veil against targeted removal of a critical creature, if Veil is available.",
+            "releaseWhen": {
+              "any": [
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "hand"
+                      ],
+                      "controller": "you",
+                      "name": "Snakeskin Veil"
+                    }
+                  },
+                  "atMost": 0
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atMost": 0
+                }
+              ]
+            }
+          }
+        ],
+        "askWhen": []
+      },
+      "journal": ".pi/review-cycle-20261006/amend-components-1791287704003/green-landfall-order.jsonl"
+    }
+  ]
+}

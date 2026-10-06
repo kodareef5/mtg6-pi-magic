@@ -1,0 +1,291 @@
+{
+  "source": ".pi/review-cycle-20261006/amend-components-1791284835939/results.json",
+  "results": [
+    {
+      "name": "green-landfall-order",
+      "version": 475,
+      "seat": 0,
+      "window": {
+        "kind": "turn",
+        "turn": 13,
+        "active": 0,
+        "step": "draw",
+        "phase": "beginning"
+      },
+      "plan": {
+        "objective": "Stabilize at 6 life against Kellan and Sanctuary while converting landfall into a future lethal threat.",
+        "guidance": "Current turn 13, draw step: no immediate winning attack; no creatures currently controlled and opponent is at 18. Kellan and animated Sanctuary are tapped, but opponent untaps next turn and burn remains a clock. Play the Forest from hand. Cast Explorer for {2}{G}{G} first using four untapped Forests; two of six untapped Forests remain, alongside two already tapped. Then play Forest, triggering Explorer and both Ascensions. They can put counters and trample on a creature, but none is in play now. Explorer mills one card; reassess actual graveyard without assuming a useful land. No Veil in hand, so no protection reserve is available. Do not cast Hydra without productive landfall; absent an actual post-mill useful line, pass.",
+        "steps": [
+          {
+            "label": "Cast Icetill Explorer",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "essential": true,
+            "purpose": "Establish Explorer before playing the drawn Forest.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Icetill Explorer"
+                },
+                "claim": "Cast Icetill Explorer",
+                "basis": "You may play an additional land on each of your turns.",
+                "timing": "spell",
+                "instructions": []
+              }
+            }
+          },
+          {
+            "label": "Play Forest from hand",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "essential": true,
+            "purpose": "Trigger Explorer and both Ascensions; resolve triggers and mill, then reassess actual graveyard.",
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "controller": "self",
+                "card": "Forest"
+              }
+            }
+          },
+          {
+            "label": "Pass attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "purpose": "Explorer is summoning sick; no justified attack.",
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "goal": "Cast Explorer, play Forest, and reassess actual mill.",
+            "guidance": "Use four Forests for Explorer, then play the Forest in hand. Each Ascension triggers at four or more counters; choose no impossible creature target if none exists. Explorer mills one. Only use an actual land in graveyard if available permissions allow a productive play; no land is presumed. No Veil is in hand."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "goal": "Avoid an unproductive attack.",
+            "guidance": "Explorer is summoning sick; attack:done."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "goal": "Pass unless actual mill results create a useful available action.",
+            "guidance": "Do not cast Hydra or Harmonizer absent a productive landfall sequence."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Rebuild while accounting for red's untapped resources.",
+            "guidance": "No usable protection in hand. Opponent's tapped sources untap normally; if a spell targets Explorer, no Veil response is available."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-attackers"
+            },
+            "goal": "Prevent lethal where possible.",
+            "guidance": "Explorer can block ground attackers but cannot block flying. Kellan has double strike; at 6 life count attacks and burn, and block only if it materially prevents lethal or preserves a critical line."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "end"
+            },
+            "goal": "Recount actual position.",
+            "guidance": "Recount life, board, hand, graveyard and Explorer permissions; assume no future draw or mill result."
+          }
+        ],
+        "may": [
+          {
+            "label": "Cast Explorer if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Icetill Explorer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Icetill Explorer"
+                },
+                "claim": "Cast Icetill Explorer",
+                "basis": "You may play an additional land on each of your turns.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Only cast if the full cost and Veil reserve remain payable after the baseline sequence."
+          },
+          {
+            "label": "Cast Harmonizer if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mightform Harmonizer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Mightform Harmonizer"
+                },
+                "claim": "Cast Mightform Harmonizer normally",
+                "basis": "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Prefer persistent development only if it does not consume the protected green reserve or disrupt Explorer/Vein order."
+          },
+          {
+            "label": "Cast Hydra if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mossborn Hydra"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Mossborn Hydra",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Mossborn Hydra.",
+                "basis": "This creature enters with a +1/+1 counter on it.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Develop only after pricing the landfall sequence and retaining useful interaction mana."
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "0-16",
+                  "incarnation": 1
+                }
+              ]
+            },
+            "purpose": "Reserve one usable green for Snakeskin Veil against targeted removal of the earthbent blocker or Explorer.",
+            "releaseWhen": {
+              "any": [
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "hand"
+                      ],
+                      "controller": "you",
+                      "name": "Snakeskin Veil"
+                    }
+                  },
+                  "atMost": 0
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atMost": 0
+                }
+              ]
+            }
+          }
+        ],
+        "askWhen": []
+      },
+      "journal": ".pi/review-cycle-20261006/amend-components-1791284835939/green-landfall-order.jsonl"
+    }
+  ]
+}

@@ -24,6 +24,7 @@ import { budget, manaBudget } from "../src/core/budget.ts";
 import { printedCast } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
+import { checkPlan } from "../tools/benchmark-checks.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
@@ -130,6 +131,11 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 		}
 	}
 	assert.deepEqual(planProblems(workFrame(table, 0), { ...line, steps: [{ ...line.steps[0]!, if: { is: { top: 1, of: "you" }, matches: { zones: ["library"], name: "Forest" } } }] }), [], "a library test remains a library test, subject to projected knowledge");
+	const prose = { ...line, guidance: "Keep one Forest for Veil." };
+	const checked = checkPlan(prose, { forbidProse: ["keep[^.]*Veil"] }, workFrame(table, 0));
+	assert.ok(checked.structure && !checked.passed, "a valid action line can fail the fixture's prose property");
+	assert.deepEqual(checked.prose[0]!.matches, ["Keep one Forest for Veil"]);
+	assert.equal(checkPlan({ ...line, guidance: "No reserve." }, { forbidProse: ["keep[^.]*Veil"] }, workFrame(table, 0)).passed, true);
 });
 
 test("the pilot flies the plan: actions and passes are chosen, and progress lives on the ledger", async () => {

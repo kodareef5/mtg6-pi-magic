@@ -2,9 +2,10 @@
 
 `npm run benchmark` replays the positions in `positions.json` without model
 calls. Each case names a journal, decision-prefix version, seat and expected
-property. The journals and accepted preparations are local `.pi` artifacts;
-missing artifacts fail explicitly. They are private game records, not packaged
-fixtures or a substitute for `npm test`.
+property. Compressed journal prefixes and accepted preparations are committed
+under `test/fixtures/benchmarks`, outside the published package. The runner
+expands them in a temporary directory and removes those copies on exit. A `.pi`
+cleanup no longer deletes the inputs. Missing artifacts fail explicitly.
 
 Examples, run from the repository root:
 
@@ -43,15 +44,32 @@ source, timing and target. Plan cases require or forbid named actions in the
 ordered line, or require their relative order. These checks do not establish
 correct phase guidance, combat quality, conditional execution or game strength.
 Read the accepted answer as well as the pass count.
+Order uses the first matching step and does not inspect `may` branches. A
+`prefix` matches a movement selector, not a procedure. Repeated land drops and
+conditional lines need a more specific property before they can be scored.
+
+`forbidProse` holds case-specific regular expressions over objective, guidance,
+phase text, labels, purposes and holds, excluding executable card definitions.
+Results record structural success and matched text separately. A text match is
+a wording failure for that fixture, not proof of a false fact: conditional and
+negative statements can match too. Review the matched text before comparing
+arms. These checks never reject a plan during a game.
+
+For planning comparisons, run all six planning cases at least three times per
+arm. Preserve the source revision or patch with the results. Compare acceptance,
+structural properties, reviewed prose, refusal kinds, calls and elapsed time;
+an isolated perfect answer is not evidence of an improvement.
 
 Saved plan answers can be checked again without a model call:
 
 ```sh
-npm run benchmark -- --case green-landfall-order --review .pi/review-cycle-20261006/amend-components-1791284835939/results.json
-npm run benchmark -- --case green-landfall-order --review .pi/review-cycle-20261006/amend-components-1791287704003/results.json
+npm run benchmark -- --case green-landfall-order --review test/fixtures/benchmarks/good-landfall.json
+npm run benchmark -- --case green-landfall-order --review test/fixtures/benchmarks/bad-landfall.json
 ```
 
-The first recorded answer passes the beneficiary-before-land property. The
-second contains a known sequencing failure and must fail. `--review` accepts the
+The first recorded answer passes the beneficiary-before-land property. It also
+names an absent protection card, so the added prose check flags it. The second
+fails both checks. `--review` prints the structural and prose results separately
+and accepts the
 runner's results and the older component runner's named plan answers. It
 requires an answer for every selected case and cannot be combined with `--live`.

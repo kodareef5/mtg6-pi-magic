@@ -1,0 +1,700 @@
+{
+  "source": "test/fixtures/benchmarks/oct5.jsonl.gz",
+  "inputs": [
+    "source-components-1791284166761/results.json",
+    "source-components-1791284677856/results.json"
+  ],
+  "results": [
+    {
+      "name": "red-after-kellan",
+      "version": 44,
+      "seat": 1,
+      "window": {
+        "kind": "turn",
+        "turn": 3,
+        "active": 0,
+        "step": "draw",
+        "phase": "beginning"
+      },
+      "plan": {
+        "objective": "Build the early clock with existing Kellan and use the known Mountain to develop; preserve Lightning Strike for consequential threats when feasible.",
+        "guidance": "Turn 4 forecast: Kellan and one Mountain are already in play. Play the Mountain from hand; with only two lands Smaug is not castable. Attack with Kellan when favorable. The Kellan upgrade costs both lands and precludes a Strike response, so use it only if its likely connection-driven card value justifies that trade. Keep actual mana and Veil in mind on the opponent's turn.",
+        "steps": [
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "controller": "self",
+                "card": "Mountain"
+              }
+            }
+          },
+          {
+            "label": "Attack Kellan",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Kellan, Planar Trailblazer"
+              }
+            }
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          },
+          {
+            "label": "Pass",
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "action": {
+              "option": "pass"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "goal": "Play Mountain; do not claim Smaug is affordable.",
+            "guidance": "Kellan is already in play and is not summoning sick. Play the Mountain from hand. The resulting two mana cannot cast Smaug ({2}{R}{R}) or Strike plus another spell. Kellan's {1}{R} upgrade uses both lands, so take it only if likely connection and card value warrant sacrificing the opponent-turn response."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "goal": "Advance Kellan's clock when attack is useful.",
+            "guidance": "Attack with Kellan unless a visible blocker makes the exchange unfavorable; finish attackers. If upgraded, it gains double strike only with its separate later upgrade, which is unaffordable this turn."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Strike only consequential threats when affordable.",
+            "guidance": "With both lands untapped, one Lightning Strike is affordable. Prefer a material accelerator, dangerous creature, or imminent lethal threat within three damage. Respect the green source and Veil; avoid discretionary attempts without lethal follow-up. If both lands were spent upgrading Kellan, no Strike is available this turn."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-attackers"
+            },
+            "goal": "Block only to prevent lethal or gain a valuable exchange.",
+            "guidance": "Assess actual attackers and Kellan's untapped status. Do not trade the 2/1 merely to reduce nonlethal damage."
+          }
+        ],
+        "may": [
+          {
+            "label": "Strike a consequential creature",
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "if": {
+              "any": [
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "name": "Llanowar Elves"
+                    }
+                  },
+                  "atLeast": 1
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ],
+                      "power": {
+                        "atLeast": 3
+                      }
+                    }
+                  },
+                  "atLeast": 1
+                }
+              ]
+            },
+            "purpose": "Remove a visible accelerator or dangerous creature only when three damage materially changes the landfall turn.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "red-after-zhao",
+      "version": 87,
+      "seat": 1,
+      "window": {
+        "kind": "turn",
+        "turn": 5,
+        "active": 0,
+        "step": "draw",
+        "phase": "beginning"
+      },
+      "plan": {
+        "objective": "Apply early pressure while preserving useful interaction against green's landfall engine; develop Kellan's value only when the connection and remaining mana justify it.",
+        "guidance": "This is the forecast for your turn 6, not the opponent's current turn. First check lethal: at 20 life each with only Kellan and Zhao versus two Forests, no lethal line is available. Apply the sequencing policy: the hand Sanctuary enters tapped under Zhao and contributes no mana this turn; with only two untapped Mountains, neither Smaug nor Lightning Strike is affordable. Do not invent a third source. Reassess after the normal draw, using only visible hand cards. Kellan is already established and can attack (summoningSick false); Zhao cannot attack this turn. Preserve both Strikes for a meaningful target or face lethal, not discretionary removal into open green mana. No usable immediate defensive response exists this turn.",
+        "steps": [
+          {
+            "label": "Play the tapped Sanctuary as land for turn",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "action": {
+              "prefix": "land:",
+              "objects": {
+                "zones": [
+                  "hand"
+                ],
+                "controller": "self",
+                "card": "Soulstone Sanctuary"
+              }
+            }
+          },
+          {
+            "label": "Attack with Kellan; Zhao stays back",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Kellan, Planar Trailblazer"
+              }
+            }
+          },
+          {
+            "label": "Finish declaring attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "goal": "Use the two Mountains for a feasible development spell only if one is present after the draw; otherwise make the land drop and preserve Strikes.",
+            "guidance": "Land Sanctuary first if it is the intended land drop; Zhao makes it enter tapped. Do not cast Smaug: {2}{R}{R} is beyond the available two mana. Do not cast Lightning Strike without a relevant target. Kellan's Scout upgrade costs {1}{R}; it is feasible with both Mountains, but only activate if Kellan's likely connection makes the exile card worthwhile and spending all mana will not forfeit essential immediate development. A newly drawn one- or two-mana creature can be cast only if its actual cost and remaining mana permit; it cannot attack this turn unless it has haste.",
+            "reevaluate": [
+              "A visible post-draw card enables a materially stronger line or urgent survival response."
+            ]
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "goal": "Attack with established Kellan for pressure and potential connection value.",
+            "guidance": "Kellan is not summoning sick; attack with Kellan unless a visible blocker or survival calculation makes the exchange clearly unfavorable. Zhao entered this turn and cannot attack. If Kellan connects after being upgraded to Scout, follow the exiled card only if its cost is payable from remaining resources; land for the turn may already have been played.",
+            "reevaluate": [
+              "A visible blocker changes Kellan's attack from profitable to an unfavorable exchange."
+            ]
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Use a Lightning Strike only for a meaningful engine or imminent lethal threat when its {1}{R} cost is actually available.",
+            "guidance": "After playing Sanctuary it is tapped, and the two Mountains may have been spent on Kellan's upgrade; if they were, no response mana remains. If they were left open, either Strike costs both sources. Prioritize a vulnerable landfall engine or creature whose growth creates an urgent threat; avoid discretionary removal into open Forest mana representing Veil. If a threat appears while no mana is available, accept that no response can be cast rather than claiming otherwise.",
+            "reevaluate": [
+              "A visible threat makes survival impossible without an answer."
+            ]
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-attackers"
+            },
+            "goal": "Block only if a future eligible blocker exists and blocking materially prevents damage or lethal.",
+            "guidance": "Kellan and Zhao may block if untapped and legal, but do not assume either trades profitably without seeing attackers' characteristics. No ground blocker stops flying without flying or reach. Use current trample damage and toughness to assess lethal.",
+            "reevaluate": [
+              "An attacker presents lethal damage or a profitable defensive exchange."
+            ]
+          }
+        ],
+        "may": [
+          {
+            "label": "Cast Lightning Strike on a meaningful threat or lethal face",
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "if": {
+              "any": [
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atLeast": 1
+                },
+                {
+                  "amount": {
+                    "life": "opponent"
+                  },
+                  "atMost": 3
+                }
+              ]
+            },
+            "purpose": "Stop a visible landfall engine or lethal threat; target face only when it finishes.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "green-landfall-order",
+      "version": 389,
+      "seat": 0,
+      "window": {
+        "kind": "turn",
+        "turn": 12,
+        "active": 1,
+        "step": "draw",
+        "phase": "beginning"
+      },
+      "plan": {
+        "objective": "Stabilize against Kellan and the animated Sanctuary while building a protected landfall threat; convert a legal lethal attack when available.",
+        "guidance": "Forecast turn 13: opponent Zhao is gone, so nonbasic lands no longer enter tapped. You have 8 mana sources (seven Forests and Promising Vein), one land play, two Ascensions (5 and 2 counters), Chocobo 1/2, and earthbent Forest 4/4 with haste and trample until end of turn when an Ascension landfall resolves. Promising Vein is the only land in play that can make a landfall if sacrificed; it requires {1} from another source, then its searched Forest enters tapped. No attack wins now: opponent at 18 with Kellan 3/2 double strike and an untapped 3/3 vigilance Sanctuary; don't send the earthbent blocker speculatively. Establish Explorer before sacrificing the Vein: cast Explorer for {2}{G}{G}, leaving four Forests plus Vein available, then activate Vein using one source for {1}, tapping and sacrificing it. Search a basic Forest; resolve landfall and Explorer mill before proceeding. The 4-counter Ascension triggers grant +1/+1 and trample; choose the ready earthbent Forest as target, making it 5/5. The second Ascension advances to 3 counters; Chocobo grows to 2/3. Preserve one untapped Forest for Veil after paying for Explorer and Vein (use Vein's {C} plus three Forests for Explorer; activate Vein with another Forest; keep a further Forest untapped). Attack only if post-trigger lethal through Sanctuary and Kellan's available blocks, or preserving the blocker is worse than the visible air/burn clock; ordinarily keep the Forest back and retain Veil for targeted removal. After Explorer resolves its trigger mill and Vein search fully resolve, reassess rather than presume graveyard contents. Pass remaining resources unused absent a productive, affordable draw-based line.",
+        "steps": [
+          {
+            "label": "Cast Icetill Explorer",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "essential": true,
+            "purpose": "Establish additional land access and landfall triggers before sacrificing Promising Vein.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Icetill Explorer"
+                },
+                "claim": "Cast Icetill Explorer",
+                "basis": "You may play an additional land on each of your turns.",
+                "timing": "spell",
+                "instructions": []
+              }
+            }
+          },
+          {
+            "label": "Search with Promising Vein",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "essential": true,
+            "purpose": "Pay {1} from a Forest, sacrifice Vein, and find a basic Forest for landfall; keep another Forest available for Snakeskin Veil.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "self",
+                  "card": "Promising Vein"
+                },
+                "claim": "Search for a basic land",
+                "basis": "{1}, {T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+                "timing": "stack",
+                "cost": {
+                  "mana": "{1}",
+                  "tap": true,
+                  "sacrifice": "this"
+                },
+                "instructions": [
+                  {
+                    "do": "choose",
+                    "who": "you",
+                    "from": {
+                      "zones": [
+                        "library"
+                      ],
+                      "owner": "you",
+                      "supertypes": [
+                        "basic"
+                      ],
+                      "types": [
+                        "land"
+                      ]
+                    },
+                    "count": 1,
+                    "upTo": true,
+                    "as": "land"
+                  },
+                  {
+                    "do": "move",
+                    "what": "bound:land",
+                    "to": "battlefield",
+                    "tapped": true,
+                    "reason": "resolve"
+                  },
+                  {
+                    "do": "shuffle",
+                    "who": "you"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Attack if winning or necessary",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "purpose": "Send the earthbent Forest only if its trample attack is lethal through legal blocks, or the visible flying/burn clock makes blocking less valuable.",
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "refs": [
+                  {
+                    "id": "0-19",
+                    "incarnation": 2
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "goal": "Develop Explorer, then spend the Cave for a Forest landfall while holding a real green response source.",
+            "guidance": "Cast Explorer before sacrificing Promising Vein. Use the Vein's colorless and three Forests to cast Explorer for {2}{G}{G}; activate Vein with a different Forest paying {1}; retain one more Forest untapped for Veil. The searched Forest enters untapped because Zhao is gone? It enters tapped per Vein's instruction, independent of Zhao. Resolve all landfall triggers and Explorer's mill between actions. The 5-counter Ascension gives its trigger to earthbent Forest, adding a counter and trample; the second Ascension advances to 3 and Chocobo grows. Do not make an assumed graveyard land play."
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "goal": "Attack only if converted damage is lethal or defense cannot hold.",
+            "guidance": "Evaluate the 5/5 trampler against Kellan (3/2 double strike) and the untapped 3/3 vigilance Sanctuary, including blocks. Otherwise retain the 5/5 earthbent Forest to block the potential Kellan attack; Chocobo is summoning sick this turn. Preserve one Forest for Veil through the opposing turn."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "precombat-main"
+            },
+            "goal": "Protect the body that blocks the critical attack or enables lethal next turn.",
+            "guidance": "Hold an untapped Forest for Snakeskin Veil against targeted removal; hexproof does not stop damage to you. Kellan is already a Detective/Rogue with double strike. Reassess any new flyer or burn clock and protect the creature whose survival changes lethal arithmetic."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "declare-attackers"
+            },
+            "goal": "Block Kellan's double strike and Sanctuary's ground attack only when this prevents meaningful damage.",
+            "guidance": "The earthbent Forest can block ground attackers if untapped; Chocobo may block if it remains untapped. Do not block a flyer with either absent flying/reach. Count Kellan's double strike and any visible attack trigger; preserve Veil mana for targeted interaction when possible."
+          },
+          {
+            "when": {
+              "active": "opponent",
+              "step": "end"
+            },
+            "goal": "Recount for the next turn.",
+            "guidance": "Recount life, attackers, mana, cards and graveyard; do not assume an unknown draw or burn spell."
+          }
+        ],
+        "may": [
+          {
+            "label": "Cast Explorer if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Icetill Explorer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Icetill Explorer"
+                },
+                "claim": "Cast Icetill Explorer",
+                "basis": "You may play an additional land on each of your turns.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Only cast if the full cost and Veil reserve remain payable after the baseline sequence."
+          },
+          {
+            "label": "Cast Harmonizer if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mightform Harmonizer"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "card": "Mightform Harmonizer"
+                },
+                "claim": "Cast Mightform Harmonizer normally",
+                "basis": "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Prefer persistent development only if it does not consume the protected green reserve or disrupt Explorer/Vein order."
+          },
+          {
+            "label": "Cast Hydra if drawn and affordable",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "if": {
+              "amount": {
+                "count": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "controller": "you",
+                  "name": "Mossborn Hydra"
+                }
+              },
+              "atLeast": 1
+            },
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Mossborn Hydra",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any"
+                },
+                "claim": "Cast Mossborn Hydra.",
+                "basis": "This creature enters with a +1/+1 counter on it.",
+                "timing": "spell",
+                "instructions": []
+              }
+            },
+            "purpose": "Develop only after pricing the landfall sequence and retaining useful interaction mana."
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self",
+              "refs": [
+                {
+                  "id": "0-16",
+                  "incarnation": 1
+                }
+              ]
+            },
+            "purpose": "Reserve one usable green for Snakeskin Veil against targeted removal of the earthbent blocker or Explorer.",
+            "releaseWhen": {
+              "any": [
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "hand"
+                      ],
+                      "controller": "you",
+                      "name": "Snakeskin Veil"
+                    }
+                  },
+                  "atMost": 0
+                },
+                {
+                  "amount": {
+                    "count": {
+                      "zones": [
+                        "battlefield"
+                      ],
+                      "controller": "opponent",
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "atMost": 0
+                }
+              ]
+            }
+          }
+        ],
+        "askWhen": []
+      }
+    }
+  ]
+}
