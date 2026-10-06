@@ -214,3 +214,46 @@ it states the supplied card facts accurately, not because a wording score rose.
 The paired traces are `card-definitions-baseline/` and `card-definitions/`.
 Types and all 179 offline tests pass, including full visible-definition coverage,
 private-hand projection, unresolved effects and current battlefield abilities.
+
+
+## A listed attack is not an executed attack
+
+A compact current-turn question retired inherited general/phase prose, kept
+complete current facts and moved prior advice behind lookup. Across four cases
+three times, it accepted 10/12, passed 5/12 action/wording checks and took 28
+calls over 323.1 seconds. It introduced malformed conditions and did not
+establish an improvement. It was withdrawn; its source and traces remain in
+`current-turn-question.patch`, `current-turn-question.ts` and
+`current-turn-question/` in this round's private directory.
+
+The final blocked-lethal answer listed all three attackers, passing the stronger
+property. Installed unchanged at decision 579, it missed lethal: Jev selected
+Kellan and Smaug, then finished without Sanctuary. The plan itself contains
+false damage arithmetic and conflicting preservation advice. Core made this
+worse by marking every involved object as spent, including a vigilant attacker
+held for blocking. `luna-proposal-play/` preserves the actual run: 106 seconds
+of play, 41 Jev calls, 9 strategy attempts, no gaps/fallback and matching replay.
+Those health checks do not establish playing quality.
+
+Resource preference and annotations now share a reader of accepted payments,
+source taps and removals. Direct land plays and attacks carry their own
+commitments. A vigilant attack stays untapped; a normal attack commits a tap
+when its declaration finishes. Targeting a held creature spends none of its
+resources. No option is removed and no release condition is inferred from prose.
+Attack choices state the tap consequence from current characteristics.
+
+The saved pilot runner also omitted the loop's annotations and additional
+prepared offers. It now supplies both before asking the player. With that
+correction, the old consumption marks selected Sanctuary 1/3, and the corrected
+marks selected it 2/3. Three earlier unannotated probes failed and are excluded
+from that comparison. After adding explicit tap consequences, all ten pilot
+cases passed once. These small samples do not establish reliability.
+
+The unchanged Luna plan still omitted Sanctuary in a bounded continuation with
+the complete correction: `luna-proposal-fixed-play/`, 10.3 seconds of play,
+35 Jev calls, two cancelled background plans, no gaps/fallback, matching replay.
+There was no foreground strategy session. Contradictory instructions remain a
+planning problem; the mechanical fix is retained for accurate facts.
+The exact failed declaration is now a committed journal prefix and pilot case,
+bringing the catalog to 18 cases. Types and all 179 offline tests pass, including
+actual vigilant/nonvigilant declarations and a held protection target.

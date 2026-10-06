@@ -44,3 +44,10 @@ attacks with Smaug but keeps both other attackers back, missing the win. The
 strengthened property rejects that partial commitment while accepting the
 executed known answer. It names one verified winning line; other winning lines
 still need review rather than being classified as poor play by this check.
+
+`held-vigilance.jsonl.gz` is decision prefix 592 of
+`luna-proposal-play/next-version-gate-20261005-1791305906277.jsonl` in the same
+private artifact directory. It preserves the actual accepted Luna plan from
+the compact-question experiment, after Kellan and Smaug were selected and
+before Jev omitted Sanctuary. The plan passed the attack-list property but
+missed lethal when played. Its conflicting prose remains in the fixture.

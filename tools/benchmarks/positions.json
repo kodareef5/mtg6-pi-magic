@@ -3,7 +3,8 @@
     "oct6": "test/fixtures/benchmarks/oct6.jsonl.gz",
     "oct5": "test/fixtures/benchmarks/oct5.jsonl.gz",
     "afterExplorer": "test/fixtures/benchmarks/after-explorer.jsonl.gz",
-    "blockedLethal": "test/fixtures/benchmarks/blocked-lethal.jsonl.gz"
+    "blockedLethal": "test/fixtures/benchmarks/blocked-lethal.jsonl.gz",
+    "heldVigilance": "test/fixtures/benchmarks/held-vigilance.jsonl.gz"
   },
   "cases": [
     {
@@ -248,6 +249,17 @@
         { "source": "Kellan, Planar Trailblazer", "prefix": "attack:" },
         { "source": "Soulstone Sanctuary", "prefix": "attack:" }
       ]
+    },
+    {
+      "id": "held-vigilant-attacker",
+      "journal": "heldVigilance",
+      "version": 592,
+      "seat": 1,
+      "task": "pilot",
+      "property": "Execute the remaining planned Sanctuary attack: vigilance preserves its untapped state for blocking.",
+      "expect": {
+        "id": "attack:1-50"
+      }
     }
   ]
 }

@@ -6,6 +6,7 @@
  * Progress comes from the ledger (`view.done`), never from equipment, so it
  * cannot tear and replay needs nothing new. Everything here reads; the loop
  * decides what to do with it.
+ * Past 150 lines to keep matching, resource marks and execution credit together.
  */
 import { holds as condition, viewWorld, type Scope } from "./selectors.ts";
 import { matches, select } from "./query.ts";
@@ -41,6 +42,16 @@ export type PlanState = {
 /** Ledger rows record which step or branch an action carried out. */
 export type Execution = NonNullable<LedgerRow["execution"]>;
 
+/** Holds concern resources paid or tapped, not every source or target a choice mentions. */
+function spent(option: Option) {
+	const use = option.use;
+	if (!use) return option.spends ?? [];
+	const cost = use.cost;
+	return [...(use.timing === "spell" || use.timing === "land" || cost.tap || cost.counters ? [use.source] : []),
+		...(use.funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.sacrificed ?? []),
+		...(cost.exiled ?? []), ...(cost.discarded ?? [])];
+}
+
 function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[] } {
 	const { action } = option;
 	if ("procedure" in action) {
@@ -74,7 +85,7 @@ export function planState(frame: Frame): PlanState | null {
 	// Where some ways of carrying a step out spare what the plan holds, only those fit it.
 	const keeps = new Set(held.flatMap((hold) => hold.objects.map((object) => object.id)));
 	const spare = (options: Option[]) => {
-		const sparing = options.filter((option) => !option.objects?.some((ref) => keeps.has(ref.id)));
+		const sparing = options.filter((option) => !spent(option).some((ref) => keeps.has(ref.id)));
 		return sparing.length ? sparing : options;
 	};
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
@@ -128,8 +139,8 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		if (step) marks.push(`Plan step ${step.at + 1}${step === next ? "" : ", out of order"}: ${step.label}.`);
 		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.`);
 		for (const hold of state.held) {
-			const spent = hold.objects.filter((object) => option.objects?.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
-			if (spent.length) marks.push(`Uses ${spent.map((object) => object.card ?? object.id).join(", ")}, held: ${hold.purpose}.`);
+			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
+			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.id).join(", ")}, held: ${hold.purpose}.`);
 		}
 		return marks.length ? { ...option, notes: [...(option.notes ?? []), ...marks], shows: [option.shows, ...marks].filter(Boolean).join(" ") } : option;
 	});

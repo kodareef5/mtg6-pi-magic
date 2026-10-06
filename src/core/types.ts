@@ -52,6 +52,9 @@ export type Option = {
 	shows?: string;
 	/** Visible objects this option binds. Ids are opaque; consumers never parse them. */
 	objects?: ObjectRef[];
+	/** Objects tapped or consumed by a direct action (for an attack, when the declaration finishes).
+	 * Announcements derive this from `use` instead. Targets and vigilant attackers are not spent. */
+	spends?: ObjectRef[];
 	/** Card identities exposed by this choice, such as an authorized library search. */
 	cards?: string[];
 	/** Accepted announcement facts built from this seat's view, never executable changes. */

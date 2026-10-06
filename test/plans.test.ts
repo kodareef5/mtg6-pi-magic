@@ -7,7 +7,8 @@
  * Past 150 lines because each invariant plays a real position.
  */
 import { strict as assert } from "node:assert";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -25,6 +26,7 @@ import { printedCast } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
+import { matchTable } from "../tools/matchup-fixture.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -253,6 +255,29 @@ test("a branch and a held resource are marked on the options they touch, and not
 	assert.ok(veil.length > 0 && veil.every((option) => /Plan branch: Veil a targeted creature/.test(option.shows!)));
 	assert.ok(veil.some((option) => /Uses Forest, held: green for Veil/.test(option.shows!)), "spending the held Forest is marked, not refused");
 	assert.equal(marked.length, frame.decision!.options.length + state.procedures.length);
+	frame.view.work.plan!.holds!.push({ objects: { refs: [{ id: chocobo.id, incarnation: chocobo.incarnation }] }, purpose: "Keep the Chocobo" });
+	const protectedTarget = annotate(frame.decision!.options, planState(frame)!);
+	assert.ok(protectedTarget.some((option) => option.use?.targets.flat().some((ref) => "id" in ref && ref.id === chocobo.id)));
+	assert.ok(protectedTarget.every((option) => !option.shows?.includes("Uses Sazh's Chocobo, held:")), "protecting a held target does not spend it");
+	const scratch = mkdtempSync(join(tmpdir(), "held-vigilance-"));
+	try {
+		const path = join(scratch, "game.jsonl");
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/held-vigilance.jsonl.gz")));
+		const saved = replay(path, (header) => matchTable(header.seed), 592).table;
+		const attack = workFrame(saved, 1), before = structuredClone(saved);
+		const due = planState(attack)!.due.find((one) => one.candidates.length)!;
+		assert.deepEqual(due.candidates.map((one) => one.id), ["attack:1-50"]);
+		const candidate = annotate(attack.decision!.options, planState(attack)!).find((one) => one.id === "attack:1-50")!;
+		assert.ok(!candidate.shows?.includes("held:"), "the saved vigilant attacker stays available to block");
+		assert.deepEqual(saved, before, "resource annotations move nothing");
+		apply(saved, candidate.id, "model", "chosen");
+		apply(saved, "attack:done", "model", "chosen");
+		assert.equal(saved.things.get("1-50")!.tapped, false);
+		assert.equal(saved.things.get("1-49")!.tapped, true, "the nonvigilant attacker does tap when the declaration finishes");
+		const earlier = workFrame(replay(path, (header) => matchTable(header.seed), 591).table, 1);
+		earlier.view.work!.plan!.holds!.push({ objects: { card: "Smaug the Magnificent", zones: ["battlefield"] }, purpose: "Keep this blocker untapped" });
+		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.shows!, /Uses Smaug the Magnificent, held:/);
+	} finally { rmSync(scratch, { recursive: true, force: true }); }
 });
 
 test("the writer's check names every problem at once, and a corrected plan is accepted", async () => {

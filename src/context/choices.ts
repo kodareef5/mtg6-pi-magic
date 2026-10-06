@@ -5,7 +5,7 @@ import { summary } from "../core/announce.ts";
 import { CHOICE_LIMIT } from "./model.ts";
 import { inspectSpace, type Filter } from "./choice-space.ts";
 
-export type Choice = Pick<Option, "id" | "label" | "shows" | "notes" | "cards" | "objects" | "parameters"> & { use?: string; payment?: string; targets?: Activation["targets"]; x?: number };
+export type Choice = Pick<Option, "id" | "label" | "shows" | "notes" | "cards" | "objects" | "spends" | "parameters"> & { use?: string; payment?: string; targets?: Activation["targets"]; x?: number };
 export type Use = Pick<Activation, "source" | "claim" | "basis" | "timing" | "speed" | "slots" | "words"> & { effects: string[]; notes?: string[] };
 export type Funding = NonNullable<Activation["funding"]>[number];
 export type Payment = Pick<Activation, "cost" | "paid"> & { funding?: string[] };

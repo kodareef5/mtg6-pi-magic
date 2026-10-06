@@ -289,6 +289,9 @@ A **plan** is what jev flies.
   the table then asks strategy for a new plan, at most twice a turn.
 - `holds`: resources kept for a purpose (`objects`, `purpose`, an optional
   `releaseWhen`). An option that spends one is marked, never removed.
+  Marks read payment, tapping and removal commitments, not every participant:
+  targeting a held creature or attacking with vigilance does not spend it.
+  A nonvigilant attack commits its tap when the declaration finishes.
 - `packages`: corrections to the seat's prepared registrations and procedures.
 
 `docs/PLANS.md` says how the table flies a plan.

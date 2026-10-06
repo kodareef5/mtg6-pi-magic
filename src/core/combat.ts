@@ -51,12 +51,15 @@ export function declareAttackers(table: Table): Pending {
 	const attackers = chosen.flatMap((one) => present(table, one) ?? []);
 	const moves: Move[] = able.map((object) => {
 		const traits = traitsOf(table, object);
-		const marks = attackConflicts({ ...object, traits });
+		const marks = [has(traits, "vigilance") ? "Remains untapped after the declaration (vigilance)." : "Taps when the declaration finishes.",
+			...attackConflicts({ ...object, traits })];
 		return { option: { id: `attack:${object.id}`, label: `Attack with ${name(object)} (${body(traits)}${words(traits)})`, objects: [ref(object)],
+			spends: has(traits, "vigilance") ? [] : [ref(object)],
 			...(marks.length ? { shows: marks.join(" ") } : {}) },
 			changes: [{ do: "combat", action: "choose", pick: { attacker: ref(object) } }], reason: "combat" };
 	});
 	moves.push({ option: { id: "attack:done", label: attackers.length ? `Finish: attack with ${attackers.map(name).join(", ")}` : "Attack with nothing",
+		spends: attackers.filter((object) => !has(traitsOf(table, object), "vigilance")).map(ref),
 		...(attackers.length ? { objects: attackers.map(ref) } : {}) },
 		changes: [
 			// 508.1f, 702.20b: attacking taps, unless the creature has vigilance.

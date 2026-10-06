@@ -22,7 +22,12 @@ the game's roster. Preparation and amendment always use Luna low. `--case` can
 be repeated; `--out` chooses a fresh output directory, otherwise the runner uses
 `.pi/benchmarks/<timestamp>`.
 
-Pilot cases use the actual seat context and inspection path. Luna receives the
+Pilot cases include the loop's accepted procedures and plan/resource annotations
+before entering the actual seat context and inspection path. Earlier probes
+omitted these annotations; their results are historical, not packet parity.
+The held-vigilance case preserves a plan whose listed attack and preservation
+prose disagree. Correct consumption marks alone do not prove it will execute.
+Luna receives the
 same classifier question through a chat adapter with an exact-id submission,
 one request attempt per question and a 256-token output ceiling. The adapter
 does not invent confidence scores. Cases start with the recorded private plan

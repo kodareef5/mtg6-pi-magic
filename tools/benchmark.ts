@@ -8,6 +8,7 @@ import { gunzipSync } from "node:zlib";
 import { parseArgs, isDeepStrictEqual } from "node:util";
 import { replay } from "../src/core/journal.ts";
 import { workFrame } from "../src/core/work-tools.ts";
+import { annotate, planState } from "../src/core/planning.ts";
 import type { Plan } from "../src/core/language.ts";
 import { checkPlan, type PlanCheck } from "./benchmark-checks.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
@@ -50,6 +51,10 @@ const positions = selected.map((one) => {
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
 	if (one.task === "pilot" && !frame.decision) throw new Error(`${one.id}: this seat has no decision at the recorded prefix.`);
+	// Match the physical loop: accepted procedures and plan/resource marks are
+	// part of the offered decision, not added by the player adapter.
+	const state = one.task === "pilot" && planState(frame);
+	if (state && frame.decision) frame.decision = { ...frame.decision, options: annotate(frame.decision.options, state) };
 	const brief = saved.prepared.find((entry) => entry.seat === one.seat)?.made as Brief | undefined;
 	const preparation = one.prepared && JSON.parse(readFileSync(one.prepared.file, "utf8"));
 	const prior = preparation?.results.find((row: { name: string }) => row.name === one.prepared!.name) as { version: number; seat: number; plan: Plan } | undefined;

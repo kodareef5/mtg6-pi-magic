@@ -35,7 +35,8 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 			if (!card.card || !isLand(facts(table, card)) || !["hand", "graveyard", "exile"].includes(card.zone) || !playable(world, holder, card, table.cursor.turn, true)) continue;
 			const note = entering(table, holder, card.card!);
 			moves.push({
-				option: { id: `land:${card.id}`, label: `Play ${card.card}${card.zone === "hand" ? "" : ` from ${card.zone}`}`, objects: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
+				option: { id: `land:${card.id}`, label: `Play ${card.card}${card.zone === "hand" ? "" : ` from ${card.zone}`}`, objects: [{ id: card.id, incarnation: card.incarnation }],
+					spends: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
 				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land", controller: holder }],
 				reason: "play-land",
 			});
