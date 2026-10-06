@@ -17,7 +17,7 @@ import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { play } from "../src/core/loop.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
-import { annotate, planDue, planState } from "../src/core/planning.ts";
+import { annotate, execution, planDue, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget, manaBudget } from "../src/core/budget.ts";
@@ -737,6 +737,21 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	const warpFacts = JSON.parse(facts(frame, {})).choices.uses.find((one: { claim: string }) => one.claim === warp.claim);
 	assert.equal(warpFacts.manaRequired, 3);
 	assert.deepEqual([warpFacts.untappedSourcesAfterPayment.minimum, warpFacts.untappedSourcesAfterPayment.maximum], [0, 0], "three available sources pay the three-mana warp with none retained");
+	const equivalent = structuredClone(table);
+	place(equivalent, 1, "battlefield", "Mountain", "Mountain");
+	editWork(equivalent, 1, [{ do: "plan.put", plan: { objective: "Warp Nova", guidance: "Use the alternate cost.", steps: [
+		{ label: "Warp Nova", when: now, essential: true, purpose: "Prepare the flying attack.", action: { procedure: warp } },
+	] } }], "equivalent-cast");
+	const sameFrame = workFrame(equivalent, 1), sameState = planState(sameFrame)!;
+	const ordinaryWarp = sameFrame.decision!.options.find((one) => one.use?.claim === warp.claim)!;
+	const ordinaryNormal = sameFrame.decision!.options.find((one) => one.use?.claim === normal.claim)!;
+	assert.ok(ordinaryWarp && ordinaryNormal);
+	assert.equal(execution(sameState, ordinaryNormal.id), undefined, "a different casting mode does not finish the planned mode");
+	assert.deepEqual(execution(sameState, ordinaryWarp.id), { plan: sameState.revision, step: 0 }, "an identical ordinary announcement carries out the step too");
+	assert.match(annotate(sameFrame.decision!.options, sameState).find((one) => one.id === ordinaryWarp.id)!.shows!, /Plan step 1/);
+	apply(equivalent, ordinaryWarp.id, "model", "chosen", execution(sameState, ordinaryWarp.id));
+	assert.deepEqual(workFrame(equivalent, 1).view.done, [0], "progress is journaled on the actual chosen row, without a second plan edit");
+	assert.deepEqual(planState(workFrame(equivalent, 1))!.due, [], "the executed cast is not reintroduced as a missing essential step");
 	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);

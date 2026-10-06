@@ -66,3 +66,31 @@ ordered its beneficiary before the fetch. Artifacts:
 Types and all 179 offline tests pass with these changes. The original gate's
 710 ledger rows and every receipt also match replay after the shared source
 reader change.
+
+## Amendments and physical continuations
+
+The actual post-draw positions at decisions 64, 107 and 475 used five amendment
+calls, 1m16s of request time and $0.0066. Each answer was accepted and saved into
+its own cloned journal. The changes included the new draw and, for Green, the
+loss of creatures and its fetch during the opponent's turn. These are under
+`amend-components-1791284835939/`.
+
+Red's turn 4 continuation cast Zhao and attacked with Kellan. Turn 6 upgraded
+Kellan, attacked and resolved its damage trigger. They took 7.4s and 7.9s total,
+29 and 31 Jev calls, and no foreground strategy wait. Both replays matched with
+no recorded gap or fallback.
+
+Green's turn 13 cast Explorer through an ordinary prepared option instead of
+the duplicate planned option. The engine failed to credit that identical
+announcement to the plan, then requested a repair for the resolved cast. The
+continuation took 34s, including 22s of avoidable strategy wait. The repair also
+introduced incorrect prose about creatures and land plays, showing why this
+unnecessary call matters beyond latency.
+
+Progress now matches an ordinary option to a planned procedure when all accepted
+announcement terms, targets and payment are identical. Different modes remain
+distinct; the original option id and chosen ledger reason stay intact. Repeating
+the same cloned turn took 13.6s, including 11s of play, with the same 42 Jev calls
+and zero foreground strategy wait. Replay matched with no gap or fallback. The
+two versions are under `continuations/green-turn13/` and
+`continuations/green-turn13-fixed/`. Types and all 179 offline tests pass.

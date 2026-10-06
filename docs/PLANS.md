@@ -176,6 +176,10 @@ position that exhibits the mistake, state the preferred decision and its
 exceptions, then check the context and physical continuation there. Run another
 full game after those positions improve. Review that game before choosing the
 next changes; a completed game does not close a strategic-quality problem.
+An ordinary option and a planned procedure can name the same announcement under
+different ids. Both carry out the step when their accepted terms, source, targets
+and payment match exactly. The physical ledger row records that progress; a
+different mode does not count merely because it plays the same card.
 
 ## Measurements and completion
 

@@ -14,6 +14,7 @@ import type { Plan, PlanOption, Procedure } from "./language.ts";
 import type { Frame, Option } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import type { LedgerRow } from "./table.ts";
+import { isDeepStrictEqual } from "node:util";
 
 /** A step or branch that applies now, and the listed options that fit it. */
 export type Fit = { at: number; label: string; candidates: Option[] };
@@ -44,7 +45,12 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 	const { action } = option;
 	if ("procedure" in action) {
 		const procedures = procedureOptions(action.procedure as Procedure, frame, prefix);
-		return { options: procedures.map((choice) => choice.option), procedures };
+		// Ordinary equipment can offer the same announcement under another id.
+		// Credit that physical action too, only when all accepted terms, targets
+		// and payment match. A card name alone cannot identify its chosen mode.
+		const equivalent = (frame.decision?.options ?? []).filter((listed) => listed.use &&
+			procedures.some((choice) => isDeepStrictEqual(listed.use, choice.activation)));
+		return { options: [...procedures.map((choice) => choice.option), ...equivalent], procedures };
 	}
 	const objects = action.objects ? select(action.objects, frame) : null;
 	// A step that names only objects means playing them: it is not a discard, a resolution choice or a trigger that happens to name the same card.
