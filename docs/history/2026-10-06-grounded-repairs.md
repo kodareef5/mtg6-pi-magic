@@ -139,3 +139,47 @@ This separates a planning failure from an execution failure. The engine and
 pilot can execute the line; the organizer still fails to choose it. The next
 context comparison should ask for current tactical decisions with prior
 reasoning accessible separately, before another full-game gate.
+
+## Further question comparisons
+
+Two more arms each ran the same four own-turn decisions three times, adding
+the blocked-lethal case to the earlier three. Both are withdrawn. The explicit
+conclusions arm required finish, danger and commitment fields in the same
+submission and used them as general guidance. The advice-lookup arm retired
+inherited general and phase prose, preserving structured commitments, and made
+the full playbook and previous plan available through a named lookup. Neither
+changed the roster or clipped any text.
+
+| Arm | Accepted | Action structure | Structure and wording | Calls | Whole decisions |
+|---|---:|---:|---:|---:|---:|
+| Explicit conclusions | 12/12 | 7/12 | 6/12 | 18 | 343.5 s |
+| Prior advice through lookup | 12/12 | 8/12 | 7/12 | 32 | 369.4 s |
+
+Both missed beneficiary-before-land in all three repetitions. In the blocked
+case, one explicit-conclusions answer and two advice-lookup answers passed the
+narrow Smaug-before-attack property. None included enough attackers to execute
+the known winning line. The apparent passes do not establish tactical quality.
+The conclusions still invented trample on Explorer, confused life totals or
+payments, and declined wins for unnecessary defense. The lookup variant spent
+more calls retrieving prior advice without making that advice reliable.
+The patches and complete traces remain under `explicit-conclusions/` and
+`advice-lookup/` in this round's private artifact directory.
+
+A separate diagnostic asked Luna low for plain-language tactics, without plan
+syntax, old intent or the brief. With the remaining detailed projected facts,
+three replies still missed the win. A hand-written simplified combat position
+made all three replies find a lethal cast-and-attack idea, but each claimed it
+could tap the creature-land for mana and also attack with it. This diagnostic
+was not an executable plan or a complete gameplay context: it omitted other
+permanents, ongoing registrations and Sanctuary's all-creature-types detail.
+It only indicates that clearer presentation helps recognize an opportunity;
+resource and combat facts must still bind the actual sequence. Both diagnostic
+scripts, prompts, replies and usage are preserved beside the comparison arms.
+
+Review also found a deterministic inconsistency: `budget` reserved every hold,
+even when its release condition was already true. `planState` correctly released
+it during execution. The forecast now evaluates that same condition against its
+observed or labelled untap position before reserving the source. It does not
+predict a future release caused by a resolving effect. The existing arithmetic
+test covers a response still in hand, its departure, agreement with execution,
+and an unchanged input frame. Types and all 179 offline tests pass.

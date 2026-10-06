@@ -25,7 +25,7 @@ import { fundings, sources, type Funding, type Price } from "./funding.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, playable } from "./permits.ts";
 import { select } from "./query.ts";
-import { matches, viewWorld } from "./selectors.ts";
+import { holds as condition, matches, viewWorld } from "./selectors.ts";
 import { intrinsic } from "./characteristics.ts";
 import { STEPS } from "./steps.ts";
 import type { Frame } from "./types.ts";
@@ -83,7 +83,11 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	const lasting = (pools: Frame["view"]["pools"]) => (pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => mana.persists) }));
 	let hypothetical = now ? frame : afterUntap(frame);
 	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
-	const held = new Set((plan.holds ?? []).flatMap((hold) => select(hold.objects, frame).map((object) => object.id)));
+	// Use the same current release condition as execution. Future releases
+	// caused by resolving effects are outside this resource-only forecast.
+	const scope = { world: viewWorld(hypothetical.view), controller: frame.seat };
+	const held = new Set((plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
+		.flatMap((hold) => select(hold.objects, hypothetical).map((object) => object.id)));
 	let plays = allowance(viewWorld(hypothetical.view), frame.seat).lands - (now ? frame.view.landsPlayed ?? 0 : 0);
 	let honest = true;
 	// A step that resolves instructions may put cards in hand: after it, a missing card is not a mistake.

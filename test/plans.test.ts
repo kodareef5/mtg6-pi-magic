@@ -586,6 +586,16 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	const forest = cardsIn(three, "battlefield", 0).find((one) => one.card === "Forest")!;
 	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three), holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Veil" }] }),
 		/steps\[\d\] \(Cast Mossborn Hydra\): costs \{2\}\{G\} but the steps before it leave Forest \(G\), Forest \(G\), and the plan holds Forest/);
+	const released = structuredClone(three), releasePlan: Plan = { objective: "Develop after the response is gone.", guidance: "Spend the released source.",
+		steps: [cast(released, "Mossborn Hydra")], holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Veil while it is in hand.",
+			releaseWhen: { amount: { count: { zones: ["hand"], name: "Snakeskin Veil", controller: "you" } }, atMost: 0 } }] };
+	assert.match(budget(workFrame(released, 0), releasePlan).join(" "), /plan holds Forest/, "a live response still reserves its source");
+	commit(released, [{ do: "move", what: cardsIn(released, "hand", 0).find((one) => one.card === "Snakeskin Veil")!.id, to: "graveyard", reason: "game-setup" }], "game-setup");
+	editWork(released, 0, [{ do: "plan.put", plan: releasePlan }], "released-hold");
+	const releasedFrame = workFrame(released, 0), beforeRelease = structuredClone(releasedFrame);
+	assert.deepEqual(planState(releasedFrame)!.held, []);
+	assert.deepEqual(budget(releasedFrame, releasePlan), [], "the budget agrees with execution when the hold's release condition is already true");
+	assert.deepEqual(releasedFrame, beforeRelease, "evaluating a released hold changes neither the plan nor the position");
 
 	// Exact cast ids are opaque. Read their structured source, locked cost and payment.
 	editWork(three, 0, [{ do: "package.put", package: { card: "Mossborn Hydra", assessed: true, registers: pack("Mossborn Hydra"), procedures: [{ ...printedCast("Mossborn Hydra", three.printed["Mossborn Hydra"]!), basis: "Trample" }] } }], "hydra-cast");
