@@ -22,6 +22,7 @@ import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget, manaBudget } from "../src/core/budget.ts";
 import { printedCast } from "../src/core/procedures.ts";
+import { select } from "../src/core/query.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
@@ -39,7 +40,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment, responseChanges } from "../src/context/plan-edit.ts";
-import { actionFacts, bindingFacts, planFacts } from "../src/context/strategy-actions.ts";
+import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -242,7 +243,10 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[1]!, /is not an option id; use prefix/, "an invented action shorthand is refused before it bypasses the resource forecast");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
-
+	assert.match(choiceProblems(frame, { steps: [{ action: { option: "land:Forest" } }] }).join(" "), /not a listed option id/, "a card name cannot masquerade as a future button");
+	assert.match(choiceProblems(frame, { current: [{ action: { option: "cast:stale-payment" } }] }).join(" "), /not a listed option id/, "response repair uses the same boundary");
+	assert.deepEqual(choiceProblems(frame, { steps: frame.decision!.options.map((one) => ({ action: { option: one.id } })) }), [], "every actual listed id remains usable");
+	assert.deepEqual(choiceProblems(frame, { steps: ["pass", "attack:done", "block:done"].map((option) => ({ action: { option } })) }), [], "stable continuation ids can name later windows");
 });
 
 test("a short amendment retains phase guidance and packages, reuses accepted syntax and never repeats a completed step", async () => {
@@ -253,6 +257,14 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  apply(table, first.id, "engine", "delegated", { plan: table.work[0]!.planned!, step: 0 });
  editWork(table, 0, [{ do: "plan.request", reason: "The pilot asked for a changed combat line." }], "request");
  const frame = workFrame(table, 0), base = basePlan(frame), available = actions(frame);
+	const candidates = movementActions(frame);
+	assert.ok(Object.keys(candidates).some((key) => key.startsWith("land ")), "a visible land already has a reusable selector");
+	for (const candidate of Object.values(candidates)) {
+		const action = candidate.action;
+		assert.ok(!("procedure" in action));
+		assert.equal(action.option, undefined, "future movement binds by objects rather than an invented id");
+		assert.ok(select(action.objects!, frame).every((one) => one.card || one.token), "a reusable movement never exposes an unknown identity");
+	}
  assert.deepEqual(changedPlan(base, planFacts(base), actions(frame, base)), base, "the displayed plan uses exact reusable references instead of repeating executable bodies");
  const pastPick = { ...frame, view: { ...frame.view, worked: [{ label: "Old physical pick", action: { option: "cast:past-incarnation-and-payment" } }] } };
  assert.ok(!Object.keys(actions(pastPick)).some((key) => key.startsWith("worked:")), "past physical picks are history, not reusable equipment");

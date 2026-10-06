@@ -94,3 +94,21 @@ the same cloned turn took 13.6s, including 11s of play, with the same 42 Jev cal
 and zero foreground strategy wait. Replay matched with no gap or fallback. The
 two versions are under `continuations/green-turn13/` and
 `continuations/green-turn13-fixed/`. Types and all 179 offline tests pass.
+
+## The next full gate and opening repairs
+
+The same-seed gate `next-version-gate-20261005-1791285458578` started from version
+zero at `af3d32f`, with the same carried preparation and testing roster. Its
+early turns exposed invented ids such as `land:Forest`: the plan accepted them,
+then requested a repair when the land play could not bind. Movement candidates
+now arrive as reusable selectors. New literal ids must be actual offered picks
+or the stable pass and declaration endings. This checks newly authored context
+answers without changing old plans or replay semantics.
+
+Two isolated opening amendments under `opening-components-1791285986918/`
+accepted valid movement bindings in three Luna low calls, 11.8s total and
+$0.0048. They still contain strategic mistakes: Red incorrectly says its newly
+cast Kellan has haste, and Green misstates how many sources its land leaves.
+Syntax acceptance is not a gameplay-quality result. The full gate also chose
+empty searches after sacrificing fetch lands. Those resolution packets need
+their own review before another complete game is justified.

@@ -6,6 +6,7 @@ import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
 import { printedCast } from "../core/procedures.ts";
 import { matches } from "../core/query.ts";
+import { movementActions } from "./strategy-actions.ts";
 
 // Reuse names an action already written by this seat, not a card implementation.
 const Action = Type.Union([...PlanDefs.Option.properties.action.anyOf,
@@ -52,9 +53,10 @@ export function responseChanges(frame: Frame, base: Plan, changes: unknown) {
 }
 
 /** The actions available to reuse, with readable labels and their complete accepted syntax. */
-export function actions(frame: Frame, prepared?: Plan): Record<string, { label: string; action: PlanOption["action"] }> {
+export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<string, { label: string; action: PlanOption["action"] }> {
 	const plan = prepared ?? frame.view.work?.plan;
 	return Object.fromEntries([
+		...Object.entries(movementActions(frame, turn)),
 		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		// A historical pick fixed a past incarnation and payment. It is evidence

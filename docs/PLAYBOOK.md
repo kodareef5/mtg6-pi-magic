@@ -66,6 +66,14 @@ purposes. Context binds them to the exact current turn and step and replaces
 only that window's unfinished steps. Other steps stay. The model cannot put
 an opponent-turn response into its own draw step. Core still receives an
 ordinary complete plan; Jev still selects each physical action and pass.
+Visible lands and battlefield creatures have reusable movement selectors beside
+the accepted spell and activation uses. The writer chooses among them without
+constructing button ids. A land selector names its card and permitted zone; a
+combat selector names one current creature incarnation. These are candidates,
+not promises of a legal land play, attack or block. New literal ids must already
+be offered, apart from the stable pass and declaration-ending ids. Future casts
+reuse accepted terms; future movement uses selectors. Existing plans and journal
+entries retain their original meaning.
 For example, a normal five-mana cast and a three-mana warp remain two different
 uses even if they put the same creature onto the battlefield. A plan reuses the
 chosen procedure; it does not copy a payment id while describing another mode.

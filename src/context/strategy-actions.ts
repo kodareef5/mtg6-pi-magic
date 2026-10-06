@@ -7,6 +7,37 @@ import { useSources } from "../core/readiness.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
 import type { actions } from "./plan-edit.ts";
 
+/** Visible land and combat selectors, ready to reuse without inventing button ids. */
+export function movementActions(frame: Frame, turn?: number): ReturnType<typeof actions> {
+	const entries: [string, ReturnType<typeof actions>[string]][] = [];
+	for (const source of useSources(frame, { source: { zones: ["hand", "graveyard", "exile"], controller: "any" }, timing: "land" }, turn)) {
+		if (!source.traits?.types.includes("land") || !source.card) continue;
+		const label = `Play ${source.card} from ${source.zone}`;
+		entries.push([`land ${source.card} from ${source.zone}`, { label, action: { prefix: "land:", objects: { zones: [source.zone], card: source.card } } }]);
+	}
+	for (const source of frame.view.objects ?? []) {
+		if (source.zone !== "battlefield" || source.controller !== frame.seat || !source.traits?.types.includes("creature")) continue;
+		for (const kind of ["attack", "block"] as const) {
+			const label = `${kind === "attack" ? "Attack" : "Block"} with ${source.card ?? source.token?.name}`;
+			entries.push([`${kind} ${source.id}@${source.incarnation}`, { label, action: { prefix: `${kind}:`,
+				objects: { zones: ["battlefield"], controller: "self", refs: [{ id: source.id, incarnation: source.incarnation }] } } }]);
+		}
+	}
+	return Object.fromEntries(entries);
+}
+
+/** A new literal must name a listed button. Future movement uses selectors or prepared uses. */
+export function choiceProblems(frame: Frame, changes: Record<string, unknown>): string[] {
+	const listed = new Set(["pass", "attack:done", "block:done", ...(frame.decision?.options.map((one) => one.id) ?? [])]);
+	return ["steps", "may", "current"].flatMap((field) => {
+		const entries = changes[field];
+		return !Array.isArray(entries) ? [] : entries.flatMap((one, at) => {
+			const id = one?.action?.option;
+			return typeof id !== "string" || listed.has(id) ? [] : [`${field}[${at}]: ${JSON.stringify(id)} is not a listed option id. Reuse an action under actions, or use prefix with objects for a future land or combat action. Card names are not button ids.`];
+		});
+	});
+}
+
 /** Show source-bound uses and prior intent to repair; absent equipment remains a lookup. */
 export function actionFacts(frame: Frame, available: ReturnType<typeof actions>, turn?: number) {
 	let resources = turn === undefined ? frame : afterUntap(frame);

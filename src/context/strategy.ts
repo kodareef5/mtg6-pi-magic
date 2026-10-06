@@ -18,7 +18,7 @@ import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
 import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, equipment, responseChanges, submissionFields } from "./plan-edit.ts";
-import { actionFacts, bindingFacts, planFacts } from "./strategy-actions.ts";
+import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
@@ -80,7 +80,8 @@ const SYSTEM = [
 	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
 	"",
 	"WHAT JEV NEEDS",
-	"- steps: ordered actions, each with label, when and action. option is an exact listed id such as pass or attack:done. prefix matches ids beginning with land:, cast:, attack: or block:, with objects selecting the card. land and cast are not ids. Write lands, spells, attacks, blocks and responses; prose alone does not offer an action. Essential means the line fails if that step cannot be taken.",
+	"- steps: ordered actions, each with label, when and action. Reuse the supplied land and combat actions as well as accepted spells and activations. Movement selectors name candidates, not promises that they can move now: check sickness, windows and land plays. For a creature entering later, write prefix attack: with objects naming that future battlefield creature only if it will be eligible. Essential means the line fails if that step cannot be taken.",
+	'- action.option is an exact listed button id, or pass, attack:done, block:done. Never construct it from a card name. A future land uses {"prefix":"land:","objects":{"zones":["hand"],"card":"<visible card name>"}} or a supplied reusable action. objects is a query with card, zones, controller, tapped or refs; it has no types field. A condition selector can test types.',
 	"- Give a step or response a purpose when its later choices need direction: for a fetch, name the land and intended landfall; for removal, name the threatened object and desired result. purpose is preserved for resolution even if you amend the plan afterward. An announcement is recorded before its effect resolves.",
 	"- Acknowledge the selected policy and its concrete decision in guidance or the relevant phase script: action order, resources left, response window and exception. A holds query reserves EVERY matching object. To reserve one source, use objects.refs with its exact id and incarnation; a card-name query reserves all copies. Bind future draw branches to the visible hand after the draw, never to an unknown library object. Spending-restricted mana may develop a creature while unrestricted mana remains for a response. Check the actual restrictions. If a resource is lost, use the covered alternative before requesting another plan.",
 	"- Sequence prerequisites and continuations explicitly. A landfall beneficiary must resolve before the land enters; a search carries the chosen land and trigger purpose through its resolution. Waiting for that stack to resolve is not a broken line. Do not repeat an activation already pending on the same target.",
@@ -93,7 +94,7 @@ const SYSTEM = [
 	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
 	"- choices.options lists direct decisions such as land plays, blocks and passes. choices.uses describes available spell and activation modes with explicit locked costs and target bindings, without payment combinations. Use action.reuse for that mode, then state target priorities and exact resource holds. Jev selects the offered target and payment; do not copy a payment id into a reusable turn line.",
 	"- cards gives the full text of visible cards. Registered lists remain in view.decks; use card or equipment for an absent card when it matters. Use syntax only before changing a procedure or package; ordinary sequencing and conditions are defined below and need no card reinterpretation.",
-	"- Combat is sequential: attack: or block: per creature, then attack:done or block:done. Jev handles listed trigger, resolution and damage choices with your phase guidance. It escalates if the plan cannot answer them.",
+	'- Combat is sequential: attack: or block: per creature, then finish. Finish your attacks with {"label":"Finish attackers","when":{"active":"self","step":"declare-attackers"},"action":{"option":"attack:done"}}. Finish blocks on their turn with {"label":"Finish blockers","when":{"active":"opponent","step":"declare-blockers"},"action":{"option":"block:done"}}. Your own turn never needs a block step. Jev handles listed trigger, resolution and damage choices with your phase guidance.',
 	"",
 	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
 	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Give Jev the final consistent conclusion, not a running calculation followed by a correction. Remove superseded statements before submitting.",
@@ -140,11 +141,11 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	options: { prepared?: Prepared; nextTurn?: boolean; changed?: string[]; signal?: AbortSignal } = {}): Promise<Prepared & { objection?: Objection }> {
 	const base = !options.prepared && !frame.view.work?.plan && context.brief ? initialPlan(context.brief)
 		: basePlan(frame, options.prepared?.plan, options.nextTurn);
-	const available = actions(frame, base);
+	const at = frame.view.window;
+	const available = actions(frame, base, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined);
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
-	const at = frame.view.window;
 	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request && !!frame.view.work.plan;
 	const submit = response ? { ...SUBMIT, description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy.",
 		parameters: { ...SUBMIT.parameters, properties: { ...ResponseSchema.properties, notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection }, required: ["current"] } } : SUBMIT;
@@ -160,7 +161,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			try { plan = changedPlan(base, response ? responseChanges(frame, base, changes) : changes, available); } catch (error) { return String(error); }
 			const objection = raised as Objection | undefined;
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
-			const wrong = [...planProblems(frame, plan), ...registrationProblems(plan.packages ?? [])];
+			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes), ...registrationProblems(plan.packages ?? [])];
 			if (!plan.steps.length && (options.nextTurn || !frame.view.work?.plan && !options.prepared && !plan.may?.length))
 				wrong.push('This turn has no ordered actions. Write the known line, or explicitly choose passing with a step whose action is {"option":"pass"}. Conditional branches do not replace the known turn line.');
 			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");
