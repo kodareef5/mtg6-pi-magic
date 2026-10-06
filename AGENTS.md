@@ -481,6 +481,8 @@ tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           stub for bulk games and counters
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
+tools/game-report.ts   compact reports and saved results for each run
+tools/game-timeline.ts offline timeline rendering; HTML and script beside it
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
 docs/SYNTAX.md         the syntax, the table's line, and execution semantics
 docs/examples/         worked uses of the syntax by shape, checked against card text
@@ -516,8 +518,10 @@ verify every carried field against the source and refuse to pass on a mismatch.
   that does not exist, so nothing advertises them. The rules routes in
   `src/context/dial.ts` are the ones that work, because the rules are on disk
   and answering one costs no model call.
-- General declaring and delegating. A model-backed seat can execute
-  prepared procedures and delegate unique continuations for its own seat. Raw
+- General declaring and delegating. A model-backed seat can execute prepared
+  procedures. Core honors `Intent.deck.delegates` for unique card continuations
+  when a seat's intent explicitly names the situation; the model adapter does
+  not set it or offer a tool to change it. Raw
   `declare` and free-form delegation still throw or leave the decision pending.
   Objections and the judge's rewind work through the core loop.
 - Parts of combat no card in the matchup needs: attacking a planeswalker or

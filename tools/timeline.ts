@@ -4,8 +4,9 @@ import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync } 
 import { createInterface } from "node:readline";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { timeline } from "../src/context/timeline.ts";
-import type { GameResult, TurnMark } from "../src/context/report.ts";
+import { timeline } from "./game-timeline.ts";
+import type { GameResult } from "./game-report.ts";
+import type { TurnMark } from "../src/context/spend.ts";
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: {
 	out: { type: "string", short: "o" }, trace: { type: "string" }, help: { type: "boolean" },

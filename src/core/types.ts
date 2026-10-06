@@ -70,8 +70,6 @@ export type Decision = {
 	options: Option[];
 	/** An offered option that safely ends this decision after two unusable answers. */
 	fallback?: string;
-	/** Accepted permission for a unique effect continuation, never rules force. */
-	delegated?: boolean;
 	/** Known uses with visible sources. Prepare them before answering this physical decision. */
 	preparation?: { card: string; uses: DeferredUse[] }[];
 };

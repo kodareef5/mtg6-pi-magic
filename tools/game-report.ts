@@ -1,15 +1,13 @@
 /** One saved result and one rendering for matchup, smoke and /magic. No prompts or hidden card data. */
 import { writeFileSync } from "node:fs";
-import type { Table } from "../core/table.ts";
-import type { Outcome } from "../core/types.ts";
-import type { Planned } from "./seat.ts";
-import type { Seated } from "./sit.ts";
-import type { Spend } from "./spend.ts";
-import { bill, duration, usageReport } from "./metrics.ts";
-import { timeline } from "./timeline.ts";
+import type { Table } from "../src/core/table.ts";
+import type { Outcome } from "../src/core/types.ts";
+import type { Planned } from "../src/context/seat.ts";
+import type { Seated } from "../src/context/sit.ts";
+import type { Spend, RunTiming } from "../src/context/spend.ts";
+import { bill, duration, usageReport } from "../src/context/metrics.ts";
+import { timeline } from "./game-timeline.ts";
 
-export type TurnMark = { at: number; turn: number; active: number; source: "recorded" | "first-observed" };
-export type RunTiming = { startedAt: number; preparedAt?: number; playStartedAt?: number; playEndedAt?: number; finishedAt?: number; turns?: TurnMark[] };
 export type GameResult = {
 	/** Absent on older matchup results, which remain readable. */
 	schema?: 1;

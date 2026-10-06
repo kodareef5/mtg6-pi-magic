@@ -80,7 +80,7 @@ const opponent: Player = { name: "Red", observe() {}, close() {}, async answer(f
 const stopAfter = (table: Table, turn: number) => () => { if (table.cursor.turn > turn) throw stop; };
 const stop = new Error("stop");
 async function playUntil(table: Table, players: Record<number, Player>, turn: number) {
-	try { await play(table, players, { 0: startingIntent(0), 1: startingIntent(1) }, stopAfter(table, turn)); } catch (error) { if (error !== stop) throw error; }
+	try { await play(table, players, { 0: startingIntent(0), 1: startingIntent(1) }, { watch: stopAfter(table, turn) }); } catch (error) { if (error !== stop) throw error; }
 }
 
 test("a plan is accepted whole and atomically, and every problem with it is named at once", () => {

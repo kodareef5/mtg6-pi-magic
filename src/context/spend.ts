@@ -50,6 +50,9 @@ export const CEILING: Record<Role, number> = {
 export const ASSESSMENT_CEILING = 4000;
 
 /** One request. */
+export type TurnMark = { at: number; turn: number; active: number; source: "recorded" | "first-observed" };
+export type RunTiming = { startedAt: number; preparedAt?: number; playStartedAt?: number; playEndedAt?: number; finishedAt?: number; turns?: TurnMark[] };
+
 export type Spend = {
 	role: Role;
 	seat?: number;

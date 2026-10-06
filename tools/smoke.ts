@@ -24,7 +24,7 @@ import { open, reopen, replay, save, type Header } from "../src/core/journal.ts"
 import { load as loadRules } from "../src/core/rules.ts";
 import { start } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
-import { gameResult, report, preparationFailure, saveReport } from "../src/context/report.ts";
+import { gameResult, report, preparationFailure, saveReport } from "./game-report.ts";
 import { traceInference } from "../src/context/trace.ts";
 
 const { values: a } = parseArgs({

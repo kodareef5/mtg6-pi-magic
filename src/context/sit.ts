@@ -10,6 +10,8 @@
  * commentator runs once per turn that had anything in it. A seat with a
  * strategist prepares during the opponent's turn and accepts or amends after
  * the draw, and when its plan stops fitting. The judge can rewind an action.
+ * Past 150 lines to keep preparation, restoration and shutdown under the same
+ * lifecycle. This file owns no prompts or card syntax.
  */
 
 import type { Api, ClassifierApi, ClassifierModel, Model } from "@earendil-works/pi-ai";
@@ -37,7 +39,7 @@ import { planWork, prepareTurn } from "./strategy.ts";
 import { editWork } from "../core/work-tools.ts";
 import { assessCard } from "./assess.ts";
 import { interpret } from "./interpret.ts";
-import type { RunTiming } from "./report.ts";
+import type { RunTiming } from "./spend.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
 export type Inference = { classify: Classify; stream: Stream };
@@ -340,7 +342,7 @@ export async function run(
 	const judge = judgeFor(table, seated, journal);
 	const flight: Promise<void>[] = [];
 	let outcome: Outcome | null;
-	try { outcome = await play(table, seated.players, seated.intents, watch, (turn, active, from) => {
+	try { outcome = await play(table, seated.players, seated.intents, { watch, onTurn: (turn, active, from) => {
 		// A reasoner that has given up is one problem, not one per turn. The gap
 		// it wrote on the way down says the rest of the game ran without recaps.
 		if (!talking || talking.broken()) return;
@@ -366,7 +368,7 @@ export async function run(
 					);
 				}),
 		);
-	}, undefined, judge, (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" })); }
+	}, judge, onTurnStart: (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }) }); }
 	finally {
 		seated.timing.playEndedAt = Date.now();
 		await Promise.all(Object.values(seated.players).map((player) => player.close()));

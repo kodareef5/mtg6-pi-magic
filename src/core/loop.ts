@@ -44,6 +44,14 @@ export type Watcher = (line: string) => void;
  * rather than a crash.
  */
 export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promise<void> | void;
+export type PlayOptions = {
+	watch?: Watcher;
+	onTurn?: TurnWatcher;
+	/** Presentation only, including the first turn after the opening. */
+	onTurnStart?: (turn: number, active: SeatId) => void;
+	workBudget?: number;
+	judge?: Judge;
+};
 
 /**
  * When the table may act without asking, and why.
@@ -63,7 +71,6 @@ export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promis
 function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" | null {
 	if (decision.situation === "priority" || decision.options.some((one) => one.id === "attack:done" || one.id === "block:done")) return null;
 	if (decision.options.length !== 1) return null;
-	if (decision.delegated) return "delegated";
 	if (["turn-based", "state-based", "pregame", "trigger-order"].includes(decision.situation)) return "forced";
 	if (intent?.deck.delegates?.includes(decision.situation)) return "delegated";
 	return null;
@@ -74,12 +81,7 @@ export async function play(
 	table: Table,
 	players: Record<SeatId, Player>,
 	intents: Record<SeatId, Intent>,
-	watch?: Watcher,
-	onTurn?: TurnWatcher,
-	workBudget = 32,
-	judge?: Judge,
-	/** Presentation only, called as a turn begins, including the first turn after the opening. */
-	onTurnStart?: (turn: number, active: SeatId) => void,
+	{ watch, onTurn, onTurnStart, workBudget = 32, judge }: PlayOptions = {},
 ): Promise<Outcome | null> {
 	if (!Number.isSafeInteger(workBudget) || workBudget < 1) throw new Error("The work edit budget must be a positive integer.");
 	// What each seat has already been shown, so a frame's "since" is the part it

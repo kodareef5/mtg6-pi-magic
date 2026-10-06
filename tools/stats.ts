@@ -3,7 +3,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { report, type GameResult } from "../src/context/report.ts";
+import { report, type GameResult } from "./game-report.ts";
 import { bill, duration, usageReport } from "../src/context/metrics.ts";
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: {

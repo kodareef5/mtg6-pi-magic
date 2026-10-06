@@ -14,7 +14,7 @@ import { play } from "../src/core/loop.ts";
 import { judgeFor, seat as seatTable } from "../src/context/sit.ts";
 import { cast, rosterFor } from "../src/context/roles.ts";
 import { traceInference } from "../src/context/trace.ts";
-import { gameResult, report, preparationFailure, saveReport } from "../src/context/report.ts";
+import { gameResult, report, preparationFailure, saveReport } from "./game-report.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
@@ -57,11 +57,11 @@ const limit = Number(values.turns);
 if (!values.prepare) seated.timing.playStartedAt = Date.now();
 let failure: unknown;
 try {
-	if (!values.prepare) await play(table, seated.players, seated.intents, (line) => {
+	if (!values.prepare) await play(table, seated.players, seated.intents, { watch: (line) => {
 		console.log(line); save(journal, table);
 		// A gap the game plays on through, a failed strategy session or an essential step passed, is recorded; any other stops the run.
 		if (table.gaps.some((gap) => !gap.endsWith("Play goes on.")) || table.cursor.turn > limit) throw stop;
-	}, undefined, undefined, judgeFor(table, seated, journal), (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }));
+	}, judge: judgeFor(table, seated, journal), onTurnStart: (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }) });
 } catch (error) { if (error !== stop) failure = error; }
 finally {
 	if (!values.prepare) seated.timing.playEndedAt = Date.now();

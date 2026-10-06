@@ -115,7 +115,7 @@ without separate invitations for Jev to invent a strategy for each one.
    strategic fields and visible card notes; repeated offer terms are factored.
    Source/condition bindings and unknown reuse keys still receive explicit
    refusals. The live gate must measure whether these changes improve planning.
-6. [ ] Close verified integrity gaps and reconcile the interface.
+6. [x] Close verified integrity gaps and reconcile the interface.
    Reproduce the missing alternate-zone cast, weak source checks, rollback id
    collision and delayed-trigger look-back report. Fix each supported reproduction
    in its invariant test. Make delegation documentation match executable handlers.
@@ -132,6 +132,9 @@ without separate invitations for Jev to invent a strategy for each one.
    in an earned graveyard or exile permission. Alternative costs, special
    instructions, conditions and an explicit withdrawal remain distinct. All
    four previous games still replay to their original outcome or stopping point.
+   Reports and timeline rendering now live in `tools/`. Loop observers use
+   named options. The unused `Decision.delegated` flag is removed; documentation
+   identifies the explicit intent permission that core actually honors.
 7. [ ] Validate the complete path, then run one live gate.
    Run offline invariants, focused model-contract exercises and replay/clone checks
    before paid full games. Use registered decks and ordinary setup. Review the

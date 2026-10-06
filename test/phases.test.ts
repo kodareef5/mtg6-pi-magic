@@ -78,18 +78,18 @@ test("a turn hook that never answers does not stop the game", async () => {
 		return { kind: "pick" as const, option: (land ?? options[0]!).id, actionId: `t${turns}` };
 	};
 	const seat = (name: string): Player => ({ name, answer, observe() {}, close() {} });
-	const outcome = await play(built, { 0: seat("A"), 1: seat("B") }, {}, undefined, () => {
+	const outcome = await play(built, { 0: seat("A"), 1: seat("B") }, {}, { onTurn: () => {
 		turns += 1;
 		return new Promise<void>(() => {});
-	});
+	} });
 	assert.ok(outcome, "the game finished with every hook still outstanding");
 	assert.ok(turns > 50, `${turns} turn endings`);
 
 	// A hook that throws is the hook's bug. It is recorded and the game goes on.
 	const other = table();
-	assert.ok(await play(other, { 0: seat("A"), 1: seat("B") }, {}, undefined, () => {
+	assert.ok(await play(other, { 0: seat("A"), 1: seat("B") }, {}, { onTurn: () => {
 		throw new Error("the commentator fell over");
-	}));
+	} }));
 	assert.ok(other.gaps.length > 50);
 	assert.match(other.gaps[0]!, /hook failed: Error: the commentator fell over/);
 });

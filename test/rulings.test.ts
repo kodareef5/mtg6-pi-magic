@@ -51,7 +51,7 @@ function objector(table: Table, contested: { row?: number }): Player {
 }
 const stop = new Error("stop");
 async function playThrough(table: Table, players: Record<number, Player>, judge: Judge | undefined, turn: number) {
-	try { await play(table, players, {}, () => { if (table.cursor.turn > turn) throw stop; }, undefined, 32, judge); } catch (error) { if (error !== stop) throw error; }
+	try { await play(table, players, {}, { watch: () => { if (table.cursor.turn > turn) throw stop; }, workBudget: 32, judge }); } catch (error) { if (error !== stop) throw error; }
 	while (!table.outcome && !nextDecision(table)) advance(table);
 }
 const physical = (table: Table) => JSON.stringify({ ledger: table.ledger, log: table.log, things: [...table.things], cursor: table.cursor, rulings: table.rulings });

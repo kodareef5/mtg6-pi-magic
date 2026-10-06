@@ -17,8 +17,10 @@ Describe sources, costs, effects, timing and alternatives at equal detail.
 Strategy belongs in attributable, revisable seat guidance, not in tool prose
 that makes every seat prefer the same move.
 
-Describe listed picks first. Keep every id unchanged. Prepared procedures and
-unique delegated continuations work; raw declarations, free-form delegation,
+Describe listed picks first. Keep every id unchanged. Prepared procedures work.
+Core can delegate a unique card continuation through explicit
+`Intent.deck.delegates`; the model adapter grants no such permission by default
+and has no tool to change it. Raw declarations, free-form delegation,
 and option widening remain unfinished. Objections can invoke the judge's rewind. Do not
 advertise an executable route whose handler does not exist.
 

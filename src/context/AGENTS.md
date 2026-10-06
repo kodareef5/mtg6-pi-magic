@@ -157,6 +157,8 @@ Widen mechanically first. The playable space is always larger than the
 shortlist, and a shortlist of one is not proof that a choice was forced. Record
 compulsory rules operations as forced and explicitly authorized card
 continuations as delegated. Voluntary actions and passes go to Jev.
+Core reads that permission from `Intent.deck.delegates`. The model adapter does
+not grant it or offer a delegation tool.
 
 When a widened list still has nothing usable, record the gap and play on.
 

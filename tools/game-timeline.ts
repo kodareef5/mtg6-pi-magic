@@ -1,7 +1,8 @@
 /** Build an offline flame chart from measured requests, without carrying prompts into the page. */
 import { readFileSync } from "node:fs";
-import { usageReport } from "./metrics.ts";
-import type { GameResult, TurnMark } from "./report.ts";
+import { usageReport } from "../src/context/metrics.ts";
+import type { GameResult } from "./game-report.ts";
+import type { TurnMark } from "../src/context/spend.ts";
 
 export function timelineData(result: GameResult, observed: TurnMark[] = []) {
 	const timed = result.calls.filter((call) => call.at !== undefined);

@@ -35,7 +35,7 @@ import {
 	type Role,
 } from "./src/context/roles.ts";
 import { degraded, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
-import { gameResult, report, preparationFailure, saveReport } from "./src/context/report.ts";
+import { gameResult, report, preparationFailure, saveReport } from "./tools/game-report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
 import { deck } from "./src/core/decks.ts";
 import { start } from "./src/core/commit.ts";
