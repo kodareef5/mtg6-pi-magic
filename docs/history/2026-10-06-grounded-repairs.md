@@ -318,3 +318,39 @@ not model gameplay; no generator, binding stage or general tactical strength
 has been validated. Traces, packets, scripts and offline outcome receipts remain
 in `recognition/` in the private artifact directory. Generation with a defensive
 control and actual bounded execution is next; a full game has not been gated.
+
+
+## Recognition did not transfer to generation
+
+The following private experiment asked for action keys before combat, attackers,
+resources to preserve and action keys after combat. It used complete current
+facts, pregame policies and accepted action descriptions, without the recognition
+candidates or their hypothetical boards. Preferred simple and dependent uses
+were written before the experiment in `proposal-uses.md`. Three independent
+Luna-low proposals each covered the blocked-lethal and after-Explorer positions.
+All six matched the small submission shape, at a 4.25-second median. None is
+counted as a gameplay success: the existing resource budget found conflicts in
+four, and the others still needed factual and sequence repair. Full proposals,
+source bindings and mechanical reviews are in `proposals/`.
+
+One Red proposal omitted Smaug from its attacker list while saying it attacked;
+another needed seven mana from six sources while also reserving a Mountain.
+The third listed the correct attackers but invented an additional animation
+and contradictory resource advice. Green twice reserved mana for a Veil absent
+from its hand, preventing its proposed warp cast. The remaining Green answer
+put the land before the beneficiary and omitted the other enabled land play.
+The trial received no budget-feedback repair round and was not submitted to
+core as a production plan. It tests first proposals only; it does not establish
+that a checked repair loop cannot work. No stage or schema from it was adopted.
+
+A final pilot control replayed the exact corrected declaration question,
+alternating original guidance with reviewed guidance that explicitly commits
+to all three attackers and explains vigilance. Only that field changed; holds,
+steps, choices and facts were identical. Both arms selected Sanctuary 3/3.
+Jev assigned the selected attack 42-48 percent under original guidance and
+55-58 percent under reviewed guidance. Those reported probabilities are not a
+calibrated strength measure. This tiny control neither establishes reliability
+nor explains the two earlier full-continuation misses. The trace is
+`coherence-control/`; reviewed prose is human-authored control input, not a Luna
+success. Resource-checked candidate construction and coherent binding remain
+open before another full-game gate.

@@ -227,10 +227,13 @@ without separate invitations for Jev to invent a strategy for each one.
   execution. Actual resource commitments now drive hold marks, and saved pilot
   probes include the live loop's annotations. New strategy submissions must
   supply a comparison bound in plan amount conditions; legacy replay is intact.
-  Next, repair the ordered resource forecast's tap-cost and spending-zone
-  checks, then compare fixed-candidate recognition under identical facts before
-  adding a planning stage. Candidate recognition is an intermediate screen;
-  generated plans must execute coherently before the full-game gate.
+  The ordered resource forecast now accounts for tap costs and activation
+  spending zones. Fixed-candidate recognition passed six Luna-low calls across
+  tool and text answers, with checked payments supplied. Generating candidates
+  still produced four payment conflicts in six replies and contradictory prose.
+  No new planning stage was adopted. Next, expose scoped payment witnesses and
+  check candidate commitments before binding the phase instructions. Generated
+  plans must execute coherently before the full-game gate.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected
