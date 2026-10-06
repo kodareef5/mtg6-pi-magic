@@ -21,6 +21,7 @@ import { annotate, planDue, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget } from "../src/core/budget.ts";
+import { printedCast } from "../src/core/procedures.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
 import { lifted, type Plan } from "../src/core/language.ts";
@@ -38,6 +39,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
 import { aiSeat, changes, question, settled, type Prepared } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment } from "../src/context/plan-edit.ts";
+import { actionFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
 
@@ -187,8 +189,9 @@ test("a branch and a held resource are marked on the options they touch, and not
 	const decision = nextDecision(table)!;
 	assert.equal(decision.seat, 0);
 	const frame = workFrame(table, 0);
-	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[]; choices: { options: { id: string }[] } };
-	assert.deepEqual(supplied.choices.options.map((one) => one.id), decision.options.map((one) => one.id), "factoring repeated use and payment terms preserves every offered id");
+	const supplied = JSON.parse(facts(frame, {})) as { objects: { id: string; traits?: unknown; ability?: unknown }[]; choices: { options: { id: string }[]; uses: { offeredCombinations: number }[] } };
+	assert.deepEqual(supplied.choices.options.map((one) => one.id), decision.options.filter((one) => !one.use).map((one) => one.id), "direct decisions remain selectable by the planner");
+	assert.equal(supplied.choices.uses.reduce((n, use) => n + use.offeredCombinations, 0), decision.options.filter((one) => one.use).length, "every offered spell and activation is represented without asking the planner to select a payment");
 	for (const object of frame.view.objects!) {
 		assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.traits, object.traits, "the writer keeps current types and active registrations, including changes from the layer walk");
 		if (object.ability) assert.deepEqual(supplied.objects.find((one) => one.id === object.id)?.ability, object.ability, "an unresolved spell keeps its accepted cost, targets and effect");
@@ -479,6 +482,22 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three), holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Veil" }] }),
 		/steps\[\d\] \(Cast Mossborn Hydra\): costs \{2\}\{G\} but the steps before it leave Forest \(G\), Forest \(G\), and the plan holds Forest/);
 
+	// Exact cast ids are opaque. Read their structured source, locked cost and payment.
+	editWork(three, 0, [{ do: "package.put", package: { card: "Mossborn Hydra", assessed: true, registers: pack("Mossborn Hydra"), procedures: [{ ...printedCast("Mossborn Hydra", three.printed["Mossborn Hydra"]!), basis: "Trample" }] } }], "hydra-cast");
+	const exact = nextDecision(three)!.options.find((one) => one.use && three.things.get(one.use.source.id)?.card === "Mossborn Hydra")!;
+	assert.ok(exact.use);
+	assert.match(problems(three, { steps: [{ label: "Exact Hydra", when: now(three), action: { option: exact.id } }], may: veil(three) }), /may\[0\].*costs \{G\}/);
+	const four = matchup("fixed-payment");
+	place(four, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
+	main(four, 0, 3);
+	place(four, 0, "hand", "Mossborn Hydra");
+	const picked = nextDecision(four)!.options.find((one) => one.use && four.things.get(one.use.source.id)?.card === "Mossborn Hydra")!;
+	const spentSource = picked.use!.funding![0]!.source;
+	assert.match(problems(four, { steps: [{ label: "Fixed Hydra", when: now(four), action: { option: picked.id } }],
+		holds: [{ objects: { refs: [spentSource] }, purpose: "Keep this exact Forest" }] }), /steps\[0\].*costs \{2\}\{G\}/,
+		"a fixed payment cannot silently switch to the spare Forest to satisfy a hold");
+	assert.equal(problems(four, { steps: [cast(four, "Mossborn Hydra")], holds: [{ objects: { refs: [spentSource] }, purpose: "Keep this exact Forest" }] }), "", "a generic cast can choose the other payment");
+
 	// The land first pays for the Hydra; the Hydra first does not.
 	const two = matchup("order");
 	place(two, 0, "battlefield", "Forest", "Forest");
@@ -653,6 +672,23 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 		may: [{ label: "Shock a blocker", when: { active: "any" }, action: { procedure: { claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", source: { zones: ["hand"], controller: "self", card: "Shock" },
 			timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] } } }] };
 	assert.deepEqual(budget(workFrame(table, 1), plan), []);
+	const normal = { ...printedCast("Nova Hellkite", table.printed["Nova Hellkite"]!), basis: "Flying, haste" };
+	const warp = { ...example("Cast Knight Luminary for its warp cost"), source: { zones: ["hand" as const], controller: "self" as const, card: "Nova Hellkite" },
+		claim: "Cast Nova Hellkite for its warp cost", basis: "Warp {2}{R} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)", cost: { mana: "{2}{R}" } };
+	place(table, 1, "hand", "Nova Hellkite");
+	editWork(table, 1, [{ do: "package.put", package: { card: "Nova Hellkite", assessed: true, registers: [
+		{ basis: "Flying, haste", kind: "continuous", affects: { is: "this" }, change: { words: ["flying", "haste"] } },
+		{ basis: "When this creature enters, it deals 1 damage to target creature an opponent controls.", kind: "watch", event: { on: "enters", of: { is: "this" } },
+			effect: { targets: [{ object: { types: ["creature"], controller: "opponent" } }], instructions: [{ do: "damage", to: "target:0", amount: 1 }] } },
+	], procedures: [normal, warp] } }], "nova-modes");
+	const frame = workFrame(table, 1), available = actions(frame), descriptions = actionFacts(frame, available);
+	const normalKey = Object.keys(available).find((key) => available[key]!.label === normal.claim)!;
+	const warpKey = Object.keys(available).find((key) => available[key]!.label === warp.claim)!;
+	assert.equal((descriptions[normalKey] as { cost: { mana: string } }).cost.mana, "{3}{R}{R}");
+	assert.equal((descriptions[warpKey] as { cost: { mana: string } }).cost.mana, "{2}{R}");
+	const warped = frame.decision!.options.find((one) => one.use?.claim === warp.claim)!;
+	assert.ok(warped?.use);
+	assert.deepEqual(budget(frame, { objective: "o", guidance: "g", steps: [{ label: "Warp", when: now, action: { option: warped.id } }] }), [], "a locked warp costs three, not the printed five");
 	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);

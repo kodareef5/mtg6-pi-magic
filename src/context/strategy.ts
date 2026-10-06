@@ -18,6 +18,7 @@ import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget } from "../core/budget.ts";
 import { ChangesSchema, actions, basePlan, changedPlan, equipment } from "./plan-edit.ts";
+import { actionFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, nextMana, type Context } from "./strategy-facts.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
@@ -67,14 +68,14 @@ const SYSTEM = [
 	"",
 	"YOUR ANSWER",
 	"- base is your plan to update. Submit changed fields directly: no plan or changes wrapper. Omitted fields stay, a list replaces that list, [] clears it. Packages join by card name instead. Keep sound objective, guidance, phases and responses. Your new turn's base has no ordered steps; write the line for this turn. A midturn base already omits completed steps. Do not put them back.",
-	"- actions holds accepted uses whose named cards are visible, plus generic actions. Set action.reuse to the exact listed key, including its readable name. Check that name against the step you intend: reusing a land play does not cast a creature. It copies the action's selectors and costs unchanged. equipment reads accepted uses for another named card. These terms were prepared by a model, not certified as correct.",
+	"- actions holds accepted uses whose named cards are visible, plus generic actions. Set action.reuse to the exact listed key, including its readable name. Check its timing, cost and instructions against the step you intend. A normal cast and an alternate-cost cast are different uses. Prefer prepared: or printed: keys for spells and activations; an old step may bind an obsolete payment or target. It copies the action's selectors and costs unchanged. equipment reads accepted uses for another named card. These terms were prepared by a model, not certified as correct.",
 	"- packages persist in private work. Standing abilities are assessed before play. Some spell effects and activations remain identified in deferred until their source is available; a separate interpretation call prepares them before the pilot acts. Use accepted actions instead of rewriting their meaning as part of strategy. Correct a package only when its interpretation was wrong; a new line does not change a card's abilities. Registrations quote the card's own text. printedCast selects the shared ordinary permanent cast; set it false if a correction needs a special casting procedure.",
 	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
 	"",
 	"WHAT JEV NEEDS",
 	"- steps: ordered actions, each with label, when and action. option is an exact listed id such as pass or attack:done. prefix matches ids beginning with land:, cast:, attack: or block:, with objects selecting the card. land and cast are not ids. Write lands, spells, attacks, blocks and responses; prose alone does not offer an action. Essential means the line fails if that step cannot be taken.",
 	"- Give a step or response a purpose when its later choices need direction: for a fetch, name the land and intended landfall; for removal, name the threatened object and desired result. purpose is preserved for resolution even if you amend the plan afterward. An announcement is recorded before its effect resolves.",
-	"- Acknowledge the selected policy and its concrete decision in guidance or the relevant phase script: action order, resources left, response window and exception. Bind holds to actual resources, not only prose. Spending-restricted mana may develop a creature while unrestricted mana remains for a response. Check the actual restrictions. If a resource is lost, use the covered alternative before requesting another plan.",
+	"- Acknowledge the selected policy and its concrete decision in guidance or the relevant phase script: action order, resources left, response window and exception. A holds query reserves EVERY matching object. To reserve one source, use objects.refs with its exact id and incarnation; a card-name query reserves all copies. Bind future draw branches to the visible hand after the draw, never to an unknown library object. Spending-restricted mana may develop a creature while unrestricted mana remains for a response. Check the actual restrictions. If a resource is lost, use the covered alternative before requesting another plan.",
 	"- Sequence prerequisites and continuations explicitly. A landfall beneficiary must resolve before the land enters; a search carries the chosen land and trigger purpose through its resolution. Waiting for that stack to resolve is not a broken line. Do not repeat an activation already pending on the same target.",
 	"- Give opening bottom, combat, search and optional-instruction choices a policy with a visible exception. Compare the hand left after bottoming. A ground blocker cannot stop a flying threat without flying or reach; a flying defender can still block a ground attacker. Use current characteristics.",
 	"- Repair the unfinished line and its guidance together. history names actions already taken this turn; do not reintroduce them when the new base omits completed steps. Phase instructions should say what to do while an effect is pending and after it resolves, not keep ordering an already completed activation.",
@@ -82,7 +83,7 @@ const SYSTEM = [
 	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
 	"- Use active self/opponent and step names for windows. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
 	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
-	"- choices factors the current offers into options, uses, payments and funding. Those keys describe current choices only, not reusable action keys. Jev selects the target and payment under your purpose and holds; use actions to prepare later steps.",
+	"- choices.options lists direct decisions such as land plays, blocks and passes. choices.uses describes available spell and activation modes with explicit locked costs and target bindings, without payment combinations. Use action.reuse for that mode, then state target priorities and exact resource holds. Jev selects the offered target and payment; do not copy a payment id into a reusable turn line.",
 	"- cards gives the full text of visible cards. Registered lists remain in view.decks; use card or equipment for an absent card when it matters. Use syntax only before changing a procedure or package; ordinary sequencing and conditions are defined below and need no card reinterpretation.",
 	"- Combat is sequential: attack: or block: per creature, then attack:done or block:done. Jev handles listed trigger, resolution and damage choices with your phase guidance. It escalates if the plan cannot answer them.",
 	"",
@@ -130,7 +131,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
-	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, actions: relevant,
+	await reasoner.work(about, { system: SYSTEM, user: facts(frame, context, { base, actions: actionFacts(frame, relevant),
 		...(options.nextTurn ? { forecast: { assumes: "Normal untap, current abilities retained, and no opponent action changes these sources. Creatures you retain cease to be summoning-sick when your next turn begins. Nonpersistent floating mana expires. The draw is unknown.", mana: nextMana(frame) } } : {}),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }), task }, {
 		submit: { ...SUBMIT, check(args) {

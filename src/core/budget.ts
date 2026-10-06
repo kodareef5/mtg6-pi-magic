@@ -19,7 +19,7 @@
  * writer is told once, and the table's payment at the time is what decides.
  */
 import { symbols } from "./announce.ts";
-import { fundings, sources, type Price } from "./funding.ts";
+import { fundings, sources, type Funding, type Price } from "./funding.ts";
 import type { Plan, PlanOption, Registration } from "./language.ts";
 import { allowance } from "./permits.ts";
 import { select } from "./query.ts";
@@ -29,7 +29,7 @@ import { STEPS } from "./steps.ts";
 import type { Frame } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
-type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; unknown?: true };
+type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true };
 
 export function budget(frame: Frame, plan: Plan): string[] {
 	const at = frame.view.window;
@@ -80,17 +80,29 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !unknown ? { price: { generic: mana.generic, colors: mana.colors } } : {}), ...(unknown ? { unknown: true as const } : {}) };
 		}
 		const id = action.option ?? action.prefix ?? "";
-		const kind = id.startsWith("land:") ? "land" : id.startsWith("cast:") || id.startsWith("play:") ? "cast" : undefined;
+		const offered = action.option ? frame.decision?.options.find((option) => option.id === action.option) : undefined;
+		const timing = offered?.use?.timing;
+		const kind = timing === "land" || id.startsWith("land:") ? "land"
+			: timing === "spell" || timing === "stack" || id.startsWith("cast:") || id.startsWith("play:") ? "cast" : undefined;
 		if (!kind) return undefined;
-		const direct = action.option ? id.split(":")[1]?.split("@")[0] : undefined;
-		const source = offBoard(direct ? (hypothetical.view.objects ?? []).filter((object) => object.id === direct) as SeenObject[] : action.objects ? select(action.objects, hypothetical) : []);
+		const refs = offered?.use ? [offered.use.source] : offered?.objects;
+		const selected = refs ? select({ refs }, hypothetical) : action.objects ? select(action.objects, hypothetical) : [];
+		const source = timing === "stack" ? selected[0] : offBoard(selected);
 		const named = action.objects?.card;
 		if (kind === "land") return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}) };
+		if (offered?.use) {
+			const { generic, colors, ...extra } = offered.use.cost;
+			// An exact pick fixes its payment, including an alternative casting cost.
+			// Extra costs and resource-producing effects need a fuller simulation.
+			if (Object.keys(extra).length || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
+			return { kind, ...(source ? { source } : {}), price: { generic, colors },
+				fixed: { paid: offered.use.paid, taps: offered.use.funding ?? [] } };
+		}
 		const mana = source?.card ? symbols(frame.view.printed?.[source.card]?.mana ?? "") : undefined;
 		return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
-	type Item = { at: string; expired: boolean } & ({ kind: "land"; land: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; label: string });
+	type Item = { at: string; expired: boolean } & ({ kind: "land"; land: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string });
 	const items: Item[] = [];
 	for (const [at, step] of plan.steps.entries()) {
 		if (!ours(step)) continue;
@@ -120,7 +132,7 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			continue;
 		}
 		if (act.unknown) { honest = false; continue; }
-		items.push({ at: where, expired, kind: "cast", source: act.source, price: act.price!, label: step.label });
+		items.push({ at: where, expired, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}), label: step.label });
 		// A permanent cast now permits more land plays from then on.
 		for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
 	}
@@ -158,7 +170,15 @@ export function budget(frame: Frame, plan: Plan): string[] {
 				return true;
 			}
 			if (item.kind === "land") return go(index + 1, { ...position, view: { ...position.view, objects: (position.view.objects ?? []).map((object) => object.id === item.land.id ? item.land : object) } }, spent);
-			const ways = fundings(position, item.price, new Set([...spent, ...held]), { ...item.source, zone: "stack" });
+			const reserved = new Set([...spent, ...held]);
+			let paymentPosition = position;
+			if (item.fixed) {
+				const selected = new Set(item.fixed.taps.map((tap) => tap.source.id));
+				for (const { object } of sources(position)) if (!selected.has(object.id)) reserved.add(object.id);
+				paymentPosition = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => item.fixed!.paid.includes(mana.id)) })) } };
+			}
+			const ways = fundings(paymentPosition, item.price, reserved, { ...item.source, zone: "stack" })
+				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
 			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent)}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
 			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}${mana?.persists ? "+" : ""}${JSON.stringify(mana?.spendOnly ?? null)}`; };
@@ -203,3 +223,5 @@ const SEARCH = 5000;
 const INCOMPLETE = new Error("The payment search is too large to finish.");
 
 const stated = (price: Price) => `${price.generic ? `{${price.generic}}` : ""}${price.colors.map((color) => `{${color}}`).join("")}` || "{0}";
+const paymentKey = (funding: Funding) => JSON.stringify({ paid: [...funding.paid].sort(),
+	taps: funding.taps.map((tap) => `${tap.source.id}@${tap.source.incarnation}:${tap.colors.join("")}:${!!tap.sacrifice}`).sort() });

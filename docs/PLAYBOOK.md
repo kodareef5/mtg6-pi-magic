@@ -35,8 +35,20 @@ During play, the strategist receives all five families because a turn line
 commits resources through the opponent's turn. It does not receive the opening
 policies again. Existing phase scripts arrive as the base plan, and card notes
 arrive for visible identities. Full visible card text remains available.
-Current offers share use, payment and funding terms instead of repeating the
-same effect for every target/payment combination.
+The planner reads each offered spell or activation mode with its locked cost
+and target bindings. Reusable actions spell out omitted printed costs. Jev reads
+the physical payment choices after the planner chooses the mode and resources.
+For example, a normal five-mana cast and a three-mana warp remain two different
+uses even if they put the same creature onto the battlefield. A plan reuses the
+chosen procedure; it does not copy a payment id while describing another mode.
+
+A hold query reserves every matching object. Keeping one Forest for a response
+requires its exact id and incarnation, not a query naming all untapped Forests.
+The forecast reads an exact pick's structured source, locked cost and payment;
+it cannot silently swap the source to make an inconsistent reservation fit.
+For a normal single block, the decision includes damage and survival arithmetic
+under explicitly stated assumptions. Responses and later effects still need the
+policy's exception guidance.
 
 The turn answer acknowledges applicable policies in its guidance or phase
 script and binds them through ordered steps, conditional responses and holds.
