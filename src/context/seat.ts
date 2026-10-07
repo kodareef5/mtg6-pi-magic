@@ -200,14 +200,14 @@ export function helpRequest(frame: Frame, packet: Packet): string {
 	const plan = packet.plan;
 	const next = (plan?.next ?? []).map((one) => `${one.label} (${one.status === "condition-false" ? "its condition is false now"
 		: one.scheduled ? `${one.scheduled.step}${at.kind === "turn" && one.scheduled.turn !== at.turn ? ` of turn ${one.scheduled.turn}` : ""}` : "no window left this turn"})`);
-	const blocked = (packet.checklist ?? []).filter((one) => one.kind !== "phase" && ["unavailable", "waiting", "condition-false"].includes(one.status))
+	const blocked = (packet.checklist ?? []).filter((one) => one.kind !== "phase" && ["unavailable", "waiting"].includes(one.status))
 		.map((one) => `${one.label} (${one.status})`);
 	return [`The pilot asked for help at ${where}: ${frame.decision?.question ?? ""}`,
 		...(plan?.due ? [`Due step: ${plan.due}.`] : []),
 		...(blocked.length ? [`Unfinished in this window: ${blocked.join("; ")}.`] : []),
 		stack.length ? `On the stack: ${stack.join(", ")}.` : "The stack is empty.",
 		next.length ? `Later planned steps: ${next.join("; ")}.` : "No later step is planned this turn.",
-		!plan?.due && !stack.length && !blocked.length ? "Nothing is due in this window. Decide whether an action belongs here; if not, submit {} to keep the line and the pilot continues it."
+		!plan?.due && !stack.length && !blocked.length ? "Nothing is due in this window. Decide whether an action belongs here; if not, submit only the assessment to keep the line and the pilot continues it."
 			: "Review the conflict with the current position and repair the unfinished line."].join(" ");
 }
 

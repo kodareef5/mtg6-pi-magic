@@ -150,7 +150,11 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 	const at = frame.view.window;
 	const decision = decisionFacts(frame, context.cards);
 	const inHand = new Set(decision.yourHand.filter((one) => one.printed).map((one) => one.name));
+	// The position the decision binds comes first; the brief and prior intent follow it.
 	return JSON.stringify({
+		seat: frame.seat, decisionFacts: decision,
+		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
+		mana: mana(frame),
 		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn"),
 		...more,
 		...(scope === "preparation" ? { positionBasis: {
@@ -163,11 +167,7 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]
 			.flatMap((name) => { const card = !inHand.has(name) && cardDefinition(frame, name, context.cards); return card ? [card] : []; }),
 		recaps: context.recaps?.slice(-3),
-		// Background and prior intent precede the position they must answer.
-		seat: frame.seat, turns: turns(frame),
-		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
-		mana: mana(frame), view, objects: objects(frame), watches: activeWatches(frame),
+		turns: turns(frame), view, objects: objects(frame), watches: activeWatches(frame),
 		choices: planningChoices(frame), refused: frame.refused,
-		decisionFacts: decision,
 	});
 }

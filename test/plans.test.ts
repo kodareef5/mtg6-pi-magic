@@ -1426,11 +1426,12 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	assert.deepEqual(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
 	const seen: string[] = [];
 	const plan = { objective: "o", guidance: "g", steps: [hydra], packages: [{ card: "Mossborn Hydra", registers: pack("Mossborn Hydra") }] };
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: plan }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { assessment: "Opponent at 20; no attackers; develop.", ...plan } }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.equal(seen.length, 2, "refused once, then accepted");
 	assert.match(seen[1]!, /costs \{2\}\{G\}/);
-	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...plan, throughTurn: 4 } }]);
+	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...plan, throughTurn: 4 } }])
+	assert.ok(!JSON.stringify(tools).includes("assessment"), "the written assessment never enters the plan or the pilot's packet");
 });
 
 test("the arithmetic counts each card once, lets floating mana go when its step ends, and tries every payment", () => {

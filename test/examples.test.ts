@@ -82,7 +82,10 @@ test("strategy can fetch the full syntax and every indexed example without loadi
 		if (rounds === 1) {
 			const example = request.tools!.find((tool) => tool.name === "example")!;
 			assert.deepEqual((example.parameters as { properties: { file: { enum: string[] } } }).properties.file.enum, listed);
-			const fields = (request.tools!.find((tool) => tool.name === "submit")!.parameters as { properties: Record<string, any> }).properties;
+			const submitted = request.tools!.find((tool) => tool.name === "submit")!.parameters as { properties: Record<string, any>; required?: string[] };
+			const fields = submitted.properties;
+			assert.equal(Object.keys(fields)[0], "assessment", "the writer's win arithmetic is written before any plan field");
+			assert.ok(submitted.required?.includes("assessment"));
 			const schema = JSON.stringify(fields);
 			assert.doesNotMatch(schema, /\$ref|\$defs/, "providers receive no recursive tool definitions");
 			assert.deepEqual(fields.steps.items.properties.when.properties.active.enum, ["self", "opponent", "any"], "ordinary turn windows are described at the submission field");

@@ -19,6 +19,16 @@ Three task-decomposition prototypes failed their comparison and were removed.
 No failed prompting arm remains in production. The current checks pass all 178
 invariants; an unused phase-planning predicate and its obsolete test were deleted.
 
+Claude's tuning round on October 7 kept two changes. A sound background
+preparation is installed at a plain upkeep without a writer call, and the one
+post-draw review reads every change since it was prepared: writer calls per own
+turn fell from about 1.8 to 1.27 on two new seeds. The writer now submits a
+required `assessment` first, counting the whole attack through the opponent's
+best blocks, castable haste creatures and burn; the plan follows its verdict.
+No code computes or checks lethal. Saved lethal positions rose from 7/15 to
+about 11/15 with the non-lethal guards unchanged; the blocked Smaug line still
+wins only 2/6.
+
 Run notes live in `design-ref/experiments/2026-10-07-reset/`; traces and reports
 live in `.pi/renewed-20261007/`. Neither directory ships. Keep contracts in
 `docs/` and experiment narratives outside the repository.
