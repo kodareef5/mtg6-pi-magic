@@ -827,3 +827,13 @@ planning, excluding physical continuations. The child reports were complete;
 the counts above come from them. The runner now includes continuation calls in
 each case and the aggregate bill, and its console reports whole-case elapsed
 time. This reporting repair changes no model request or game decision.
+
+One accounting smoke at clean `ff5a88f` in `receipt-accounting-live/` confirms
+the parent call records, case count and complete usage report exactly equal the
+continuation's records. It again selected both remaining attackers, won without
+Red help and passed replay/clone with zero gaps/fallback. Green made two repairs;
+one strategy WebSocket error retried successfully. The displayed 15 calls include
+that failed attempt and two cancelled preparations, all three without usage.
+Reported input was 104,810 tokens, cached input 19,456, output 1,220 and cost
+$0.00499. Play took 17.90 seconds; the complete benchmark case took 20.54 seconds.
+Types, all 179 tests and all 27 saved replays pass at this code revision.
