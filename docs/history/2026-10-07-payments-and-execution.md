@@ -837,3 +837,69 @@ that failed attempt and two cancelled preparations, all three without usage.
 Reported input was 104,810 tokens, cached input 19,456, output 1,220 and cost
 $0.00499. Play took 17.90 seconds; the complete benchmark case took 20.54 seconds.
 Types, all 179 tests and all 27 saved replays pass at this code revision.
+
+## Accepting the turn before upkeep work
+
+The scoped full game's Red turn-10 preparation forecast precombat main and
+supplied no upkeep policy. It finished before upkeep, but the lifecycle consumed
+it only after draw. At decision 270, clock 530, the previous plan had expired.
+Jev animated Sanctuary using that Sanctuary and three Mountains. The preparation
+also became stale when Green acquired an animated 2/2 Forest. Earlier delivery
+without changed-board validation would not have been sound.
+
+The visible hand supports a stronger control than passing until draw: two
+Lightning Strikes deal Green's remaining six life with the four untapped lands.
+Commit `18692e3` freezes the actual prefix and that supplied line. At that commit,
+`upkeep-burn-control/` won three of three during upkeep with no foreground repair,
+gap or fallback and matching replay/clone. Each first Strike paid with Mountain
+`1-19` and Sanctuary `1-50`; each second used Mountains `1-26` and `1-32`.
+Both targeted Green. The first dealt three at clock 534 before the second cast
+at 536; the second dealt three at 539. No draw occurred. Play took 3.72, 3.34
+and 3.28 seconds; complete cases took 5.75, 5.38 and 5.25 seconds. The 39 calls
+were 36 Jev calls and three cancelled background preparations, with 185,619
+reported input tokens, 3,528 output and $0.0078 reported cost. Cancelled calls
+have no usage. `upkeep-burn-control/audit.json` preserves the payment audit.
+This establishes execution of an installed line, not generation or automatic
+acceptance of a prepared turn.
+
+The committee converged on two deadlines using existing scope and timestamps.
+Prior scoped work requires acceptance after untap and before upkeep choices,
+including a compulsory trigger's announcement. The same background job is
+awaited and checked against current facts; a resumed seat without that job uses
+the same writer on the actual position. Opening and unscoped legacy work keep
+their old schedule. After the actual draw, the writer receives the remaining
+same-scope commitments, holds and policies; completed upkeep actions are removed.
+Preparation forecasts upkeep, clears the previous draw clock and predicts no
+upkeep effects or unknown card. There is no new journal command or lifecycle flag.
+This can require an upkeep amendment and a draw amendment; no broader prepared
+reuse or latency improvement is claimed.
+
+Offline tests cover the forced Smaug upkeep trigger, announcing-time policy,
+completed-step removal, retained prerequisites and opponent policy, clone/replay,
+opening and legacy exceptions, and waiting for one unfinished preparation with
+a newly added blocker. Types and all 179 tests pass. The 28 existing prefixes
+and the new decision-219 `red-before-upkeep` prefix replay. That earlier case
+starts before Red's job so a live continuation can test background acceptance;
+decision 270 alone can only test the resumed no-job path. The live lifecycle and
+generation gates remain pending.
+
+Review corrected two context details before the live gate. A late first
+acceptance, including the saved draw-step cases, now asks for a plan from the
+playbook rather than claiming a current unfinished line exists. Those cases'
+task text changed, so old generation counts are not a paired control. The draw
+review receives `view.turnDraw`, derived from its own rules-draw row and receipt,
+with card names filtered by event-time visibility. It identifies the new card
+even after upkeep consumed the background job; preparation clears that field.
+An earlier opponent-turn response with an explicit scope establishes the upkeep
+deadline even on the seat's first own turn. Without such work, the opening
+exception remains. The actual loop test intercepts Smaug's single-option trigger
+before put, recovers the new policy at resolution, then reviews after draw.
+
+The last contract review also keeps scheduled planning behind compulsory draws
+and single-option state checks, including a loss after drawing an empty library.
+A state-based choice such as keeping a legend still receives policy. A valid
+finite future-turn plan remains the amendment base even when accepted before
+this turn began. A wholly skipped draw causes no second review after upkeep
+acceptance; the later first-acceptance deadline remains when no plan was accepted.
+The draw fact comes only from the receipt at the rules-draw row's clock, not
+other groups sharing its decision boundary.

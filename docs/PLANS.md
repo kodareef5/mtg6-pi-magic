@@ -81,7 +81,23 @@ optional branches create no obligation.
 Tactical work expires after its selected own turn and the following opponent
 turn. Fresh preparation starts from the pregame playbook, accepted equipment
 and current facts. Repairs preserve the scope and unfinished commitments; no
-old windows are re-dated. Context renders each step's execution choices before
+old windows are re-dated. A seat with prior scoped tactical work accepts its
+next plan after untap, before upkeep choices or compulsory trigger announcements.
+The existing background job is awaited and checked against the actual position;
+without a surviving job, the same planner writes from current facts. Opening
+and unscoped legacy work retain the post-draw deadline. A separate review after
+the actual draw preserves the valid scope, holds, policies and unfinished steps,
+using the resources left by upkeep and the recorded cards drawn. Prior scoped
+response work also establishes early acceptance on a seat's first own turn.
+A wholly skipped draw introduces no second review after upkeep acceptance. With
+no acceptance yet, planning is still due at the first later policy decision.
+The recorded rules-draw action creates a review deadline even if a replacement
+changes what arrives; compulsory drawing and single-option state checks run
+before scheduled planning.
+No new journal event or stored progress flag is needed. A kept or failed plan
+acknowledges the deadline once without supplying missing policy or permission
+to pass. Prepared reuse still requires positive coverage for changed facts.
+Context renders each step's execution choices before
 announcement and throughout inspection. Resolution recovers the announcing
 plan's step and phase policy, including triggers. General objective and guidance
 remain audit rationale. Completion is explicit per window; missing instructions

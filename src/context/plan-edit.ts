@@ -3,7 +3,6 @@
 import { Type, type Static } from "typebox";
 import { PlanDefs, PlanSchema, QuerySchema, WhenSchema, lifted, problems, type Condition, type Plan, type PlanOption } from "../core/language.ts";
 import type { Frame } from "../core/types.ts";
-import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
 import { printedCast } from "../core/procedures.ts";
 import { currentPlan, matches } from "../core/query.ts";
@@ -136,7 +135,8 @@ export function basePlan(frame: Frame, prepared?: Plan, nextTurn = false, playbo
 	const at = frame.view.window;
 	if (prepared && (prepared.throughTurn === undefined || at.kind === "turn" && at.turn <= prepared.throughTurn)) return structuredClone(prepared);
 	const plan = currentPlan(frame);
-	const fresh = nextTurn || planDue(frame) || !plan;
+	const fresh = nextTurn || !plan || plan.throughTurn === undefined && at.kind === "turn" && at.active === frame.seat &&
+		(frame.view.work?.accepted === undefined || frame.view.work.accepted < (frame.view.began ?? 0));
 	const done = new Set(frame.view.done ?? []);
 	const base = structuredClone(fresh ? playbook ?? { objective: "Plan the current position.", guidance: "No tactical rationale supplied.", steps: [] }
 		: { ...plan!, steps: plan!.steps.filter((_, n) => !done.has(n)) });

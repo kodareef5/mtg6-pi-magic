@@ -49,8 +49,9 @@ reaches a decision is a short plan plus the facts.
   The implementation still uses four analysts and a synthesis; measure its wall
   time and repairs before claiming that a larger brief improves gameplay.
 - **strategy** advances the pregame reasoning with one planner per seat. It
-  prepares during the opponent's turn, then accepts or amends after the draw,
-  and answers stops or requests for help. It submits changed fields and reuses
+  prepares during the opponent's turn, accepts scoped work before upkeep choices,
+  then reviews the unfinished line after draw. Without prior scoped work, opening
+  planning waits for draw. It also answers stops or requests for help. It submits changed fields and reuses
   its own accepted actions; context expands these into a complete plan for core.
   Optional notebook edits belong in that answer, not separate rounds. The cached
   system prompt defines ordinary plans and conditions. Visible cards supply their

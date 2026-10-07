@@ -151,7 +151,9 @@ into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
 **`strategy` advances the pregame setup.** One planner prepares during the
-opponent's turn, then accepts or amends after its own draw. Jev flies the phase
+opponent's turn. After prior scoped tactical work, it accepts or amends before
+upkeep choices, then reviews the unfinished line after its draw. Opening and
+unscoped legacy work retain the post-draw deadline. Jev flies the phase
 scripts and ordered actions between sessions; a stop or help request changes
 only the unfinished line. Short updates expand to complete accepted plans.
 Notebook edits are optional parts of that answer, not separate calls. There is
@@ -251,7 +253,8 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    interpretation of deferred uses with visible, permitted sources, then offers casts and activations to any
    player adapter. Lands and registered mana abilities pay during casting
    (601.2g). Strategy prepares during the opponent's turn and accepts or amends
-   after the draw. Jev chooses every voluntary action and pass. `npm run matchup`
+   before upkeep when scoped, then reviews after the draw. Jev chooses every
+   voluntary action and pass. `npm run matchup`
    plays the pinned lists live and stops at the first gap.
 3. **Triggered abilities** and trigger ordering. `enters` is 48.5% of all
    triggers in Standard. **Implemented:** `commit` reads each group's events

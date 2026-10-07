@@ -176,20 +176,32 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 	});
 }
 
-/**
- * A seat that asked to plan each turn plans once per turn of its own, after it
- * has drawn: no plan accepted since its turn began, including its first turn.
- */
+/** Scoped work is accepted before upkeep choices, then reviewed after the draw.
+ * Opening and unscoped legacy work retain their first post-draw priority deadline. */
 export function planDue(frame: Frame): boolean {
 	const work = frame.view.work, at = frame.view.window;
-	// After the untap and the draw: the seat's first priority of its turn, outside the upkeep.
-	return !!work?.eachTurn && at.kind === "turn" && at.active === frame.seat && !["untap", "upkeep"].includes(at.step) &&
-		(!frame.decision || frame.decision.situation === "priority") && (work.accepted === undefined || work.accepted < (frame.view.drawnAt ?? frame.view.began ?? 0));
+	if (!work?.eachTurn || at.kind !== "turn" || at.active !== frame.seat || at.step === "untap") return false;
+	const decision = frame.decision;
+	if (decision?.situation === "state-based" && decision.options.length === 1 ||
+		decision?.situation === "turn-based" && decision.options.some((one) => one.id === "draw")) return false;
+	const scoped = work.plan?.throughTurn !== undefined;
+	// Read the recorded plan here: an expired plan still establishes this schedule.
+	if (scoped && (work.accepted === undefined || work.accepted < (frame.view.began ?? 0))) return true;
+	if (at.step === "upkeep" || at.step === "draw" && frame.view.drawnAt === undefined) return false;
+	return (scoped || !frame.decision || frame.decision.situation === "priority") &&
+		(work.accepted === undefined || work.accepted < (frame.view.drawnAt ?? frame.view.began ?? 0));
 }
 
 /**
  * Why strategy is being asked now, if it is. Only in a turn window: the opening
  * plan waits until the mulligans are done, so it is written for the hand kept.
  */
-export const planReason = (frame: Frame): string | undefined => frame.view.window.kind !== "turn" ? undefined :
-	frame.view.work?.request ?? (planDue(frame) ? "Your turn has begun and you have drawn. Plan this turn and the opponent's next turn." : undefined);
+export function planReason(frame: Frame): string | undefined {
+	if (frame.view.window.kind !== "turn") return;
+	if (frame.view.work?.request) return frame.view.work.request;
+	if (!planDue(frame)) return;
+	const accepted = frame.view.work?.accepted;
+	if (accepted === undefined || accepted < (frame.view.began ?? 0))
+		return "Accept or amend this turn's plan from current facts and the pregame playbook. Cover the remaining turn and the opponent's next turn. No future draw is known.";
+	return "Review the unfinished line after the turn draw. view.turnDraw records what arrived. Keep completed work completed and cover the opponent's next turn.";
+}

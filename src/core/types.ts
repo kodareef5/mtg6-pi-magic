@@ -90,6 +90,8 @@ export type SeatView = {
 	began?: number;
 	/** The rules draw in this viewer's current turn, derived from its ledger row. */
 	drawnAt?: number;
+	/** Cards received in that rules draw, with this seat's event-time visibility. */
+	turnDraw?: { id: string; incarnation: number; card?: string }[];
 	/** Lands this viewer has played this turn. */
 	landsPlayed?: number;
 	/** Printed facts for the names of visible objects. Public, from the pinned card file. */

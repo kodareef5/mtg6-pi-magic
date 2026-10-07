@@ -156,8 +156,14 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	// Visible cards, and every card on a registered list: those lists are public, and a package for a card still in the library is checked against it.
 	const listed = table.format.decksRegistered ? table.seats.flatMap(({ deck }) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]) : [];
 	const names = [...new Set([...objects.flatMap((object) => "card" in object && object.card ? [object.card] : []), ...listed])].sort();
-	const draw = viewer !== "spectator" ? table.ledger.findLast((row) => row.seat === viewer && row.situation === "turn-based" && row.picked === "draw" && (row.clock ?? 0) > (table.cursor.began[viewer] ?? 0))?.clock : undefined;
-	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
+	const draw = viewer !== "spectator" ? table.ledger.findLast((row) => row.seat === viewer && row.situation === "turn-based" && row.picked === "draw" && (row.clock ?? 0) > (table.cursor.began[viewer] ?? 0)) : undefined;
+	const drawn = draw && table.log.find((receipt) => receipt.clock === draw.clock);
+	const turnDraw = drawn?.changes.flatMap((change) => {
+		const object = change.do === "move" && change.to === "hand" && drawn.after[change.what];
+		return object && object.owner === viewer ? [{ id: object.id, incarnation: object.incarnation,
+			...(!object.faceDown && object.card ? { card: object.card } : {}) }] : [];
+	});
+	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		...(at.kind === "opening" && viewer !== "spectator" ? { opening: { starting: table.seats[0]!.id, mulligans: table.opening?.taken[viewer] ?? 0,
 			bottom: at.action === "bottom" ? table.opening?.owed[viewer] ?? 0 : table.format.mulliganBottom === "on-keep" ? owedFor(table, viewer) : 0 } } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),

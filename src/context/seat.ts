@@ -5,7 +5,7 @@
  * the decision packet without inference.
  *
  * While the opponent plays, it prepares its own next turn in the background,
- * and at the draw it uses the prepared plan or amends it for what changed.
+ * and at its acceptance deadline uses the plan or amends it for what changed.
  * There is one planner per seat, no challenger or parallel replacement plan.
  *
  * Raw declarations and free-form delegation still lack game handlers.
@@ -73,7 +73,7 @@ export type AiSeatOptions = {
 	onPlanned?(planned: Planned): void;
 };
 
-/** Private pending work; nothing reaches core until the turn's draw is accessible. */
+/** Private pending work; core receives it only at the scheduled acceptance deadline. */
 export type Prepared = { plan: Plan; edits?: NoteEdit[] };
 type PreparationTiming = { fromVersion: number; fromTurn: number; queuedAt: number; startedAt?: number; finishedAt?: number; neededAt?: number };
 export type Planned = { seat: number; turn: number; how: "prepared" | "amended" | "written" | "escalation"; waitedMs: number; ready?: boolean; failed?: boolean; preparation?: PreparationTiming };

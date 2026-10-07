@@ -85,10 +85,26 @@ action still records what the seat did, and fails the obedience check.
 
 ## Upkeep, responses and the opponent's turn
 
-An upkeep fetch belongs to the accepted standing policy, before the next own
-turn plan is amended after draw. Its payment and search still require the same
-announcement and resolution coverage. The draw amendment reads the actual
-resources left after upkeep; it does not reuse the pre-untap forecast as fact.
+A prepared turn starts at upkeep after normal untap. Before any upkeep choice
+or compulsory trigger announcement, a seat with prior scoped tactical work
+accepts or amends that preparation against current facts. Opening and unscoped
+legacy work still use pregame upkeep guidance before their post-draw deadline.
+The background job is awaited, never replaced by a competing writer. A new
+blocker prevents accepting its old attack policy unchanged.
+
+In the frozen Red upkeep, Green has 6 life. Red has two Lightning Strikes and
+four untapped lands, three Mountains and Sanctuary. The supplied line casts
+both Strikes at Green, waiting for the first to resolve before casting the
+second. Each costs two mana; together they deal six. Jev follows that payment
+and target policy before any Sanctuary animation or draw. Winning here ends
+the game before a draw amendment is needed.
+
+An upkeep fetch instead continues through payment, search, landfall targets and
+resolution under the accepted policy. The draw amendment reads the sacrificed
+source, fetched land, counters and remaining mana. It removes completed upkeep
+steps, retains unfinished stack prerequisites and the same expiry, and preserves
+the opponent-turn policy. It never reinstalls the original preparation. Accepting
+a plan at upkeep alone does not establish coverage for the later draw.
 
 A response reserve names the response, source, useful window and release.
 For example, a Veil branch depends on Veil being in hand and meaningful targeted
@@ -114,7 +130,8 @@ holds and unfinished commitments with their actual status.
 An old statement that Kellan already attacked, Red has six life, or a land is
 animated is a bound conclusion from an earlier position. It must not become the
 next turn's authority simply because the writer omitted a prose edit. After
-expiry, upkeep uses an applicable standing policy; absent coverage grants no pass.
+expiry, scheduled acceptance supplies new upkeep policy. Until acceptance, only
+applicable standing policy remains; absent coverage grants no pass.
 
 Any prepared-plan skip needs positive coverage for the observed change. The
 first case remains an ordinary opposing land change plus a drawn land covered

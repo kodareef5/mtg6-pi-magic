@@ -12,7 +12,8 @@
     "readyLethal": "test/fixtures/benchmarks/red-ready-lethal.jsonl.gz",
     "readyPartialAttack": "test/fixtures/benchmarks/ready-partial-attack.jsonl.gz",
     "readyBeforeHelp": "test/fixtures/benchmarks/ready-before-help.jsonl.gz",
-    "redUpkeepLethal": "test/fixtures/benchmarks/red-upkeep-lethal.jsonl.gz"
+    "redUpkeepLethal": "test/fixtures/benchmarks/red-upkeep-lethal.jsonl.gz",
+    "redBeforeUpkeep": "test/fixtures/benchmarks/red-before-upkeep.jsonl.gz"
   },
   "cases": [
     {
@@ -23,6 +24,15 @@
       "task": "plan",
       "winner": 1,
       "property": "Win from upkeep with the actual four untapped lands and two Lightning Strikes against six life. Grade physical outcome and policy obedience separately; avoid spending the sources on unnecessary animation."
+    },
+    {
+      "id": "red-before-upkeep",
+      "journal": "redBeforeUpkeep",
+      "version": 219,
+      "seat": 1,
+      "task": "continue",
+      "winner": 1,
+      "property": "Resume before Red prepares during Green turn 9. Accept or amend before turn-10 upkeep, validate any new blocker, and preserve completed work across draw. Grade generated strategy separately from lifecycle and replay."
     },
     {
       "id": "attack-before-help",

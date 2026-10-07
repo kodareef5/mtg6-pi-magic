@@ -18,7 +18,7 @@ import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { play } from "../src/core/loop.ts";
 import { fork, open, reopen, replay, save, type Header } from "../src/core/journal.ts";
-import { annotate, execution, planDue, planState } from "../src/core/planning.ts";
+import { annotate, execution, planDue, planReason, planState } from "../src/core/planning.ts";
 import { checklist } from "../src/core/review.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
@@ -502,7 +502,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	assert.deepEqual(frame, snapshot, "registration, receipts and selection move nothing");
 });
 
-test("strategy plans after the draw, with no extra opening strategy call, with one cached prompt", async () => {
+test("strategy accepts scoped work before upkeep and reviews after draw, with no extra opening call", async () => {
 	const universe = loadCards("cards/standard.tsv");
 	const model = { type: "classifier", id: "jev-latest", provider: "typesafe", api: "typesafe-system-one" } as never;
 	const chat = { id: "fixture", provider: "offline", type: "chat" } as never;
@@ -542,8 +542,13 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 		.map((prompt) => JSON.parse(prompt.user) as { seat: number; view: { window: { kind: string; turn: number; active: number; step: string } } });
 	for (const seat of [0, 1]) {
 		const own = sessions.filter((session) => session.seat === seat && session.view.window.kind === "turn" && session.view.window.active === seat);
-		assert.deepEqual(own.map((session) => session.view.window.turn), [...new Set(own.map((session) => session.view.window.turn))], "at most one plan per own turn");
-		assert.ok(own.every((session) => session.view.window.step !== "upkeep"), "even the first plan waits for the draw window");
+		assert.notEqual(own[0]!.view.window.step, "upkeep", "the opening plan still waits for the draw boundary");
+		assert.ok(own.some((session) => session.view.window.step === "upkeep"), "later scoped turns accept before upkeep choices");
+		for (const turn of new Set(own.map((session) => session.view.window.turn))) {
+			const windows = own.filter((session) => session.view.window.turn === turn).map((session) => session.view.window.step);
+			assert.equal(windows.length, new Set(windows).size, "each deadline is acknowledged once");
+			assert.ok(windows.length <= 2, "upkeep acceptance and draw review are the only scheduled sessions");
+		}
 	}
 	assert.equal(sessions.filter((session) => session.view.window.kind === "opening").length, 0, "no plan during the mulligan: the brief's opening policy decides it");
 	for (const seat of [0, 1]) assert.ok(sessions.find((session) => session.seat === seat), `seat ${seat} planned once the game began`);
@@ -565,6 +570,105 @@ test("strategy plans after the draw, with no extra opening strategy call, with o
 	assert.equal(planDue(workFrame(early, 0)), true, "a plan accepted in upkeep does not suppress the post-draw update");
 	editWork(early, 0, [{ do: "plan.put", plan: { objective: "Hold.", guidance: "The draw is covered.", steps: [] } }], "after-draw");
 	assert.equal(planDue(workFrame(early, 0)), false);
+
+	const scheduled = structuredClone(workFrame(early, 0));
+	scheduled.view.work!.plan!.throughTurn = 4;
+	scheduled.view.work!.accepted = 0;
+	assert.equal(planDue(scheduled), true);
+	const drawAgain = structuredClone(scheduled);
+	drawAgain.decision = { ...drawAgain.decision!, situation: "turn-based", options: [{ id: "draw", label: "Draw" }] };
+	assert.equal(planDue(drawAgain), false, "even a repeated compulsory draw precedes scheduled review");
+	const losing = structuredClone(scheduled);
+	losing.decision = { ...losing.decision!, situation: "state-based", options: [{ id: "lose:0", label: "Lose after drawing empty" }] };
+	assert.equal(planDue(losing), false, "compulsory state checks precede scheduled work");
+	losing.decision.options = [{ id: "keep:a", label: "Keep first legend" }, { id: "keep:b", label: "Keep second legend" }];
+	assert.equal(planDue(losing), true, "a state-based choice can require policy");
+	const skipped = structuredClone(scheduled); delete skipped.view.drawnAt; delete skipped.view.turnDraw;
+	assert.equal(planDue(skipped), true, "the opening skipped-draw boundary still requests first acceptance");
+	skipped.view.work!.accepted = skipped.version;
+	assert.equal(planDue(skipped), false, "no actual draw introduces no second review after acceptance");
+	const future = matchup("future-plan"); main(future, 1, 2);
+	const futurePlan: Plan = { ...line, throughTurn: 4 };
+	editWork(future, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: futurePlan }], "future-turn");
+	main(future, 0, 3, "upkeep");
+	assert.equal(planDue(workFrame(future, 0)), true);
+	const futureBase = basePlan(workFrame(future, 0));
+	assert.deepEqual(futureBase.steps, futurePlan.steps, "an explicitly accepted future scope survives the turn boundary");
+	assert.equal(futureBase.throughTurn, futurePlan.throughTurn);
+
+	const response = matchup("first-turn-response"); main(response, 0, 1);
+	editWork(response, 1, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "Respond", guidance: "Wait", throughTurn: 1, steps: [] } }], "response");
+	main(response, 1, 2, "upkeep");
+	assert.ok(planDue(workFrame(response, 1)), "prior scoped response work establishes early acceptance even on this seat's first own turn");
+
+	const setup = () => { const table = matchup("upkeep-deadline"); establish(table, 1, "Smaug the Magnificent"); return table; };
+	const lifecycle = setup(); main(lifecycle, 1, 2);
+	editWork(lifecycle, 1, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "Old", guidance: "Expired", throughTurn: 3, steps: [] } }], "prior-scope");
+	main(lifecycle, 0, 3);
+	const policy: Plan = { objective: "Wait", guidance: "Keep resources", throughTurn: 5,
+		steps: [{ label: "Pass for the Treasure trigger", when: { active: "self", step: "upkeep" }, action: { option: "pass" } },
+			{ label: "Finish main", when: { active: "self", step: "precombat-main" }, waitFor: "empty-stack", action: { option: "pass" } }],
+		holds: [{ objects: { card: "Smaug the Magnificent" }, purpose: "Keep the Dragon" }],
+		phases: [{ when: { active: "self", step: "upkeep" }, guidance: "Create the Treasure, then pass to draw." },
+			{ when: { active: "opponent" }, guidance: "Keep Smaug to block." }] };
+	const deadlines: Frame[] = [], captures: { version: number; frame: Frame }[] = [];
+	const red: Player = { ...pilot([]), async answer(frame) {
+		if (planDue(frame)) {
+			deadlines.push(frame); const at = frame.view.window; assert.equal(at.kind, "turn");
+			if (at.kind === "turn" && at.step === "upkeep") {
+				assert.equal(frame.decision!.situation, "trigger-order", "attention intercepts the compulsory announcement");
+				assert.equal(frame.decision!.options.length, 1);
+				assert.equal(planState(frame), null, "the expired recorded scope still raises the deadline");
+				const legacy = structuredClone(frame); delete legacy.view.work!.plan!.throughTurn;
+				assert.equal(planDue(legacy), false, "unscoped legacy work keeps its old schedule");
+				const kept = structuredClone(frame); kept.view.work = prepareWork(frame, [{ do: "plan.keep", reason: "Retain the standing policy." }]);
+				assert.equal(planDue(kept), false, "keep acknowledges this deadline without installing policy");
+				return { kind: "work", tools: [{ do: "plan.put", plan: policy }], revision: frame.view.work!.revision, actionId: "upkeep-accept" };
+			}
+			assert.ok(frame.view.drawnAt, "the compulsory draw precedes its review");
+			assert.equal(frame.view.turnDraw!.length, 1);
+			const drawn = frame.view.turnDraw![0]!;
+			assert.equal(drawn.card, lifecycle.things.get(drawn.id)!.card);
+			assert.ok(!project(lifecycle, 0).turnDraw?.some((one) => one.id === drawn.id), "opponents do not receive this private draw");
+			assert.equal(project(lifecycle, "spectator").turnDraw, undefined);
+			assert.deepEqual(JSON.parse(facts(frame, {})).view.turnDraw, frame.view.turnDraw);
+			assert.match(planReason(frame)!, /unfinished line/);
+			const late = structuredClone(frame); late.view.work!.accepted = 0;
+			assert.match(planReason(late)!, /pregame playbook/, "a late first acceptance does not claim an existing turn line");
+			assert.deepEqual(frame.view.done, [0]);
+			const remainder = basePlan(frame);
+			assert.equal(remainder.throughTurn, 5);
+			assert.deepEqual(remainder.steps, policy.steps.slice(1), "completed upkeep work is not installed again");
+			assert.deepEqual(remainder.holds, policy.holds);
+			assert.deepEqual(remainder.phases, policy.phases);
+			const announcement = structuredClone(frame); announcement.decision!.situation = "trigger-order";
+			assert.ok(planDue(announcement), "post-draw announcement choices also require review");
+			return { kind: "work", tools: [{ do: "plan.put", plan: remainder }], revision: frame.view.work!.revision, actionId: "draw-amend" };
+		}
+		if (frame.decision!.situation === "resolution")
+			assert.match(JSON.stringify(frame.view.purposes), /Create the Treasure/, "resolution recovers the accepted upkeep announcement policy");
+		captures.push({ version: lifecycle.ledger.length, frame });
+		return pilot([]).answer(frame);
+	} };
+	await playUntil(lifecycle, { 0: opponent, 1: red }, 4);
+	assert.deepEqual(lifecycle.gaps, []);
+	assert.deepEqual(deadlines.map((frame) => frame.view.window.kind === "turn" && frame.view.window.step), ["upkeep", "draw"]);
+	const directory = mkdtempSync(join(tmpdir(), "magic-upkeep-"));
+	try {
+		const journal = open(join(directory, "parent.jsonl"), { id: "upkeep", format: standard.name, seed: lifecycle.rng.seed,
+			seats: lifecycle.seats.map(({ id, name, deck }) => ({ id, name, deck })), cards: { path: "cards/standard.tsv", generated: "fixture" },
+			rules: { path: "rules/cr.tsv", effective: "fixture" }, created: "fixture" });
+		save(journal, lifecycle);
+		assert.deepEqual(replay(journal.path, setup).table.ledger, lifecycle.ledger);
+		for (const captured of captures.filter(({ frame }) => frame.decision!.situation === "resolution" || frame.view.window.kind === "turn" && frame.view.window.step === "draw")) {
+			const path = join(directory, `clone-${captured.version}.jsonl`); fork(journal.path, captured.version, "clone", path);
+			const restored = workFrame(replay(path, setup).table, 1);
+			assert.equal(planDue(restored), planDue(captured.frame));
+			assert.deepEqual(basePlan(restored), basePlan(captured.frame));
+			assert.deepEqual(restored.view.purposes, captured.frame.view.purposes);
+			assert.deepEqual(restored.view.turnDraw, captured.frame.view.turnDraw);
+		}
+	} finally { rmSync(directory, { recursive: true, force: true }); }
 });
 
 test("the pilot's packet stays small: the plan, the options and the public position", () => {
@@ -1094,7 +1198,10 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	const sent = JSON.parse(JSON.parse(seen[0]!)[0].content);
 	assert.equal(sent.positionBasis.kind, "forecast");
 	assert.equal(sent.positionBasis.observedWindow.turn, 4);
-	assert.deepEqual(sent.view.window, { kind: "turn", turn: 5, active: 0, step: "precombat-main", phase: "precombat-main" });
+	assert.deepEqual(sent.view.window, { kind: "turn", turn: 5, active: 0, step: "upkeep", phase: "beginning" });
+	assert.equal(sent.view.drawnAt, undefined, "the prior own-turn draw does not enter the forecast");
+	assert.equal(sent.view.turnDraw, undefined);
+	assert.deepEqual(sent.view.remainingSteps.slice(0, 2), ["upkeep", "draw"]);
 	assert.equal(sent.objects.battlefield.you.find((one: { id: string }) => one.id === forest.id).tapped, undefined);
 	assert.ok(sent.objects.battlefield.you.filter((one: { traits: { types: string[] } }) => one.traits.types.includes("creature")).every((one: { summoningSick: boolean }) => !one.summoningSick));
 	assert.ok(sent.decisionFacts.yourCreatures.every((one: { summoningSick: boolean }) => !one.summoningSick), "the roster uses the labelled forecast, not the observed opponent-turn restriction");
@@ -1230,31 +1337,44 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.deepEqual(price().afterOneLand?.find((one) => one.card === "Soulstone Sanctuary"), { card: "Soulstone Sanctuary", entry: "untapped", payable: true }, "the same land enables the cast when that entry restriction leaves");
 });
 
-test("one unfinished preparation is awaited at the draw without a second planner or note race", async () => {
+test("one unfinished preparation is awaited at upkeep or draw without a second planner or note race", async () => {
+ for (const deadline of ["upkeep", "precombat-main"]) {
  const table = position(); main(table, 0, 3);
- editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+ editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", ...(deadline === "upkeep" ? { throughTurn: 4 } : {}), steps: [] } }], "planned");
  main(table, 1, 4);
  let finish: (value: Prepared) => void = () => {};
  let amended = 0, resolved = false;
  const waits: Planned[] = [];
  const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
   prepare: () => new Promise((resolve) => { finish = resolve; }),
-  plan: async (_frame, made) => { amended++; assert.equal(made!.plan.objective, "Ready."); return { tools: [{ do: "plan.put", plan: made!.plan }] }; },
+  plan: async (_frame, made, changed) => { amended++; assert.equal(made!.plan.objective, "Ready."); if (deadline === "upkeep") assert.match(changed!.join(" "), /Emberheart Challenger/); return { tools: [{ do: "plan.put", plan: made!.plan }] }; },
   onPlanned: (one) => waits.push(one) });
  seat.observe(workFrame(table, 0));
  await new Promise((resolve) => setImmediate(resolve));
- main(table, 0, 5);
+ if (deadline === "upkeep") place(table, 1, "battlefield", "Emberheart Challenger");
+ main(table, 0, 5, deadline);
  const answer = seat.answer(workFrame(table, 0)).then((value) => { resolved = true; return value; });
  await new Promise((resolve) => setImmediate(resolve));
  assert.equal(resolved, false); assert.equal(amended, 0, "unfinished work does not start a competing writer");
  finish({ plan: { objective: "Ready.", guidance: "Pass", steps: [] } });
  assert.equal((await answer).kind, "work");
- assert.equal(amended, 1, "the uncovered draw gets one amendment");
+ assert.equal(amended, 1, "a changed blocker or uncovered draw gets one amendment");
  assert.equal(waits[0]!.ready, false); assert.ok(waits[0]!.waitedMs >= 0);
  const timing = waits[0]!.preparation!;
  assert.equal(timing.fromTurn, 4);
- assert.ok(timing.queuedAt <= timing.startedAt! && timing.startedAt! <= timing.neededAt! && timing.neededAt! <= timing.finishedAt!, "queue, background work and draw wait are separately measured");
+ assert.ok(timing.queuedAt <= timing.startedAt! && timing.startedAt! <= timing.neededAt! && timing.neededAt! <= timing.finishedAt!, "queue, background work and acceptance wait are separately measured");
  await seat.close();
+ // A resumed scoped turn has no process-local job; the same writer uses current facts.
+ if (deadline === "upkeep") {
+  let written = 0;
+  const resumed = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+   plan: async (frame, made) => { written++; assert.equal(made, undefined); assert.ok(frame.view.objects!.some((one) => one.card === "Emberheart Challenger")); return { tools: [{ do: "plan.keep", reason: "Retain the standing policy." }] }; } });
+  const reply = await resumed.answer(workFrame(table, 0)); assert.equal(reply.kind, "work");
+  if (reply.kind === "work") editWork(table, 0, reply.tools, reply.actionId, reply.revision);
+  assert.equal(written, 1); assert.equal(planDue(workFrame(table, 0)), false);
+  await resumed.close();
+ }
+ }
 });
 
 test("the arithmetic is refused once and then left to the pilot, and a conditional step is not counted", async () => {

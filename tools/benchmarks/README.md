@@ -7,6 +7,17 @@ under `test/fixtures/benchmarks`, outside the published package. The runner
 expands them in a temporary directory and removes those copies on exit. A `.pi`
 cleanup no longer deletes the inputs. Missing artifacts fail explicitly.
 
+`red-upkeep-lethal` freezes the turn-10 upkeep at decision 270, before Red
+spent all four sources on Sanctuary. Two Lightning Strikes can deal Green's
+remaining six life. Use `good-upkeep-lethal.json` with `--answers`, `--repeat 3`
+and `--play --through 10` for the supplied-line delivery control; omit `--answers`
+to measure the production planner. Both require physical outcome review.
+`red-before-upkeep` starts at decision 219, Green's turn-9 untap, before Red's
+background job starts. Run it with `--live --play --through 10` to measure early
+acceptance and changed-board amendment. Report generation, execution and
+planning wait separately. A resumed job begins from that prefix's observations;
+it does not recover the parent's process-local preparation.
+
 Examples, run from the repository root:
 
 ```sh

@@ -141,9 +141,9 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 	if (scope === "preparation" && frame.view.window.kind === "turn") {
 		const projected = afterUntap(frame), { decision: _decision, refused: _refused, ...rest } = projected;
 		frame = { ...rest, view: { ...projected.view,
-			window: { kind: "turn", turn: frame.view.window.turn + 1, active: frame.seat, step: "precombat-main", phase: "precombat-main" },
-			remainingSteps: TURN.filter((step) => !["untap", "upkeep", "draw"].includes(step)),
-			landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
+			window: { kind: "turn", turn: frame.view.window.turn + 1, active: frame.seat, step: "upkeep", phase: "beginning" },
+			remainingSteps: TURN.filter((step) => step !== "untap"),
+			drawnAt: undefined, turnDraw: undefined, landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
 		} };
 	}
 	// Pilot receipt windows do not define strategic history. Actions and history
@@ -157,7 +157,7 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		...more,
 		...(scope === "preparation" ? { positionBasis: {
 			kind: "forecast", observedWindow: observed.view.window,
-			assumptions: "Your next main phase after normal untap and draw. No unknown draw is added. Your current permanents survive and untap; current characteristics and abilities are retained. Nonpersistent floating mana expires. This is not the current position or a prediction of the opponent's actions or intervening effects.",
+			assumptions: "Your next upkeep after normal untap, before the unknown draw or any upkeep effects. Your current permanents survive and untap; current characteristics and abilities are retained. Nonpersistent floating mana expires. This is not the current position or a prediction of the opponent's actions or intervening effects.",
 			observedHistory: observed.view.history, observedActions: observed.view.actions,
 		} } : { positionBasis: { kind: "observed" } }),
 		notebook: work?.notebook ?? [],
