@@ -24,6 +24,13 @@ prefix replays. The arithmetic invariant compares the forecast's witness with
 a real offered payment and checks normal attacks, vigilance, conflicting
 payments, unchanged state and false conditional commitments.
 
+The review follow-up marks unpriced and missing-source response branches and
+own-turn alternatives as unchecked. It also reads resource-producing response
+instructions before deciding whether a witness can be given. Receipt fields
+now explicitly name remaining mana sources; they never claimed to list every
+untapped permanent. Response payments are checked separately and are not listed
+in the ordered-action witness.
+
 ## Planning comparisons
 
 Every row below contains three Red blocked-lethal cases and three Green
@@ -53,12 +60,29 @@ the production writer to bind those proposals passed four narrow properties
 out of six, but it destroyed one good winning commitment and repeated false
 facts. Another prose-writing stage is not supported by this comparison.
 
-The remaining variants did not improve the complete Red commitment. None was
-adopted. Their experimental protocol also needs care: combat keys could appear
-in the before-combat list, and a first valid proposal on the last reply could
-exhaust the confirmation round. Rejected protocol answers are not all proof of
-failed tactical recognition. These limitations stay separate from the recorded
-false source and damage claims.
+None of the remaining variants established a reliable complete Red commitment,
+and none was adopted. The reviewers found material protocol confounds:
+
+- Combat keys could appear in the before-combat list as well as the attackers
+  list. One answer selected an attacker twice and received a misleading resource
+  conflict rather than a duplicate-declaration diagnostic.
+- The checked, payment-example and named-source menus omitted fetch activations
+  whose source would enter later, and supplied no equipment lookup. Those fetch
+  omissions cannot establish a planning failure. The focused and readable arms
+  used a wider catalogue, so they also changed available continuations.
+- Informational receipts used the refusal channel, which says to fix the answer.
+  The confirmation flag belonged to the session rather than the exact proposal.
+  A changed proposal could avoid another receipt; a first valid proposal on the
+  last reply could exhaust the confirmation round.
+- The Green structural check admitted a warped Harmonizer with no useful attack
+  before its end-step exile. A graveyard land alone does not establish useful
+  development. The Red check also required one specific winning lineup rather
+  than accepting every executable win through the visible block.
+
+Rejected protocol answers are not all failed tactical recognition. Named source
+keys appeared in some corrected attacks; these small confounded samples establish
+neither benefit nor harm from the names. Recorded false source and damage claims
+remain failures regardless of those limitations.
 
 ## Physical execution control
 
@@ -81,6 +105,62 @@ replay. This supports testing a cleaner separation between strategic rationale
 and executable instructions. It establishes execution of a supplied line,
 not reliable generation, prepared-turn coverage or full-game strength.
 
-The reviewer comparison and a full game from version zero are in progress.
-The full game uses production planning and carried preparation. Experimental
-proposal and instruction renderers remain outside the production path.
+## Full game from version zero
+
+The production planner, with carried preparation and the retained payment
+changes, finished an ordinary game from decision zero. Red won on turn 10.
+The journal and report are under `full-game/`, stem
+`next-version-gate-20261005-1791333555864`.
+
+- Play: 5m25s; total wall: 5m26s; strategy wait: 4m11s.
+- Jev: 249 calls; strategy: 39 attempts, 12 foreground sessions, two help
+  requests. Six of nine background preparations were ready when needed.
+- Reported usage: 1,578,420 input tokens including 264,704 cached, 43,913 output
+  tokens, $0.0994. One cancelled call lacks usage and cost. No call truncated.
+- 264 physical decisions: 23 forced, 241 chosen, no delegated or fallback.
+  No recorded gaps, and the complete journal matched replay. Summary stayed off
+  as in the comparison runner; version-zero preparation cost is not included.
+
+This is completion evidence, not a strategic pass. Accepted plans show failures
+beyond the diagnostic position:
+
+- Red at decision 64 claimed two Mountains could not pay Zhao's `{1}{R}`, then
+  claimed a Mountain remained untapped after paying with both available lands.
+- Green at 94 planned to fund a warped Harmonizer with Promising Vein while
+  acknowledging that Zhao made the Vein enter tapped. The creature never cast.
+- Green at 148 skipped the available Passage land play after an upkeep fetch
+  had spent resources needed for development. No creature appeared until turn 9.
+- Red at 236 spent Treasure on Burst Lightning, then still counted that Treasure
+  in Smaug's attack trigger. Its stated combat damage also ignored the Hydra
+  block. The actual attack won despite those false claims.
+
+The next experiment must grade coherent actions and their execution separately.
+Both committee reviewers agreed on one versus two generated candidates with the
+same corrected receipts, explicit final selection and no prose binder. Receipts
+describe current creatures, selected actions, intended entries and example
+payments; they do not predict a resolved battlefield. Completion, response and
+exception policies must be explicit. No empty list permits a pass. Upkeep,
+opponent turns and resolution need coverage before production adoption.
+
+## Entry forecast correction
+
+A subsequent review identified a real false refusal: playing Fabled Passage and
+then activating it reported no Passage on the battlefield. The ordered forecast
+recorded the land's future payment contribution but source lookup still read the
+initial position. The same defect affected an ordinary permanent cast followed
+by its activation. Earlier strategic scores must not treat those refusals as
+proof that the model chose a bad continuation.
+
+The forecast now carries ordinary entries into later source lookups with their
+new incarnations. Its payment search still starts at the original position, so
+the future source cannot pay for an earlier cast. Consumed cards remain consumed.
+Fetch sacrifice and search instructions remain explicitly unchecked; this fix
+does not pretend to resolve them. Newly entered creature attacks and tap abilities
+retain their entry-characteristic limitation.
+
+The arithmetic invariant reproduces both false refusals and compares the later
+source with the real offered activation. The three Green planning cases are
+being rerun through the shared benchmark tool before re-scoring their strategies.
+The requested follow-ups are derived execution instructions, non-refusing
+response warnings, selector aliases and a narrow prepared-plan reuse case.
+Experimental proposal and instruction renderers remain outside production.

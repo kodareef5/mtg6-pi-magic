@@ -155,105 +155,38 @@ without separate invitations for Jev to invent a strategy for each one.
 
 ## Next priorities from the gate
 
-- [x] Filter ordinary reusable-action context by visible source bindings, not just
-  card identity. A creature already in play must not look like another cast in
-  hand. Keep absent equipment available through lookup.
-  The shared source reader now serves offers, readiness and planning context.
-  Saved-position checks still found stale prior instructions copied into a new
-  line; candidate filtering alone did not fix that planning error.
-- [ ] Give the turn organizer a concrete resource forecast for its ordered line,
-  including which attackers a payment taps. Bind target and response choices;
-  prose about retaining mana is insufficient when the line spends it.
-- [ ] Narrow post-draw amendments and preserve sound phase policies. The first
-  gate amended all 15 preparations; the October 6 gate amended all eight,
-  accounting for about 477 of its 534 seconds of strategy wait. First separate
-  reusable policy from conclusions tied to an old hand, board or turn. Establish
-  positive coverage for draws and changed facts before bypassing a writer call;
-  syntax, budget and an empty `askWhen` list do not establish strategic validity.
-  The narrow-review trial kept stale advice and failed landfall ordering, so it
-  was withdrawn. A repeated full amendment also failed that order and invented
-  action keys. Use the acceptance examples in `docs/PLAYBOOK.md` and
-  compare both covered changes and changes that must trigger reconsideration.
-- [x] Prevent newly authored fake button ids and verify paid searches separately.
-  Land and combat movement now have reusable selectors. Literal picks must name
-  actual options or stable continuation ids. The next gate's two empty fetches
-  now complete in their isolated resolutions, while deliberate failure-to-find
-  intent remains usable. See [the October 6 review](history/2026-10-06-strategy-cycle.md).
-- [ ] Ground entry and combat forecasts in accepted characteristics. The opening
-  writer still invented haste for Kellan, and resource prose contradicted the
-  available sources. Preserve those draw positions and fix the factual question
-  before another full gate. Preparation must also cover the next upkeep so the
-  pilot does not improvise from an expired turn's general guidance.
-- [x] Establish one runnable saved-position manifest. `npm run benchmark` validates
-  17 saved prefixes offline; `--live` runs selected pilot, preparation, amendment or repair
-  probes. It records expected properties, whole-decision timing and every call.
-  Known good and bad landfall amendments can be checked without inference.
-- [ ] Extend those benchmarks to changed blockers, clocks, covered draws and
-  stale factual guidance. Action-order checks alone do not establish playing
-  strength. Check improvement before another full batch, then compare matching
-  seeds with preparation measured separately.
-  The second round adds a funding-land prerequisite and an established attacker
-  that old guidance wrongly held back. Exact reusable-key schemas, complete
-  reference diagnostics, shared action descriptions and consistent player
-  references are implemented. Broader prompt and plan-reset experiments did
-  not establish coherent play and were withdrawn.
-- [ ] Ground commitments and future continuations in structured facts. A reserve
-  should identify its response source and useful window. A proposed resolved
-  permanent can enable a graveyard land or another use absent from current
-  offers. Expose that dependency as a conditional forecast, retaining unknown
-  mills, responses and unresolved choices as unknown. Do not ask the writer to
-  reconstruct these dependencies from a missing option and long prose.
-  The equipment lookup now reads accepted unconditional land permissions
-  on a named ordinary permanent cast. It shows the resulting allowance and visible
-  lands in newly opened zones, with an explicit resolution assumption. It does
-  not simulate instructions or unknown cards. `objects.types` now selects any
-  listed current type from projected characteristics. Response-source bindings
-  and repeated live validation remain open.
-  Automatically attaching every permission forecast did not improve the repeated
-  action checks, so that attachment was removed. The per-card lookup preserves
-  access without adding speculative continuations to unrelated questions.
-  Movement actions now bind their selectors to current types, tap state and
-  sickness. Old holds show whether their existing release condition holds.
-  Resource context includes permitted visible graveyard and exile lands beside
-  hand lands. These facts diagnose stale commitments without rejecting future
-  transformations. The first repeated answers still copy false prose; source
-  bindings alone do not close the repair problem.
-  A compact current-position sheet now exposes complete creature rosters, the
-  visible hand, available mana and land permissions. In three repeats of three
-  failing repair/amendment positions, structural checks improved from 1/9 to
-  8/9. False resource claims remain in otherwise passing answers. Broader saved
-  positions and physical continuations precede the next full-game gate.
-  The latest continuation also shows a listed winning attack omitted during
-  execution. Actual resource commitments now drive hold marks, and saved pilot
-  probes include the live loop's annotations. New strategy submissions must
-  supply a comparison bound in plan amount conditions; legacy replay is intact.
-  The ordered resource forecast now accounts for tap costs and activation
-  spending zones. Fixed-candidate recognition passed six Luna-low calls across
-  tool and text answers, with checked payments supplied. Generating candidates
-  still produced four payment conflicts in six replies and contradictory prose.
-  No new planning stage was adopted. Next, expose scoped payment witnesses and
-  check candidate commitments before binding the phase instructions. Generated
-  plans must execute coherently before the full-game gate.
-  The [October 7 payment and execution round](history/2026-10-07-payments-and-execution.md)
-  adds payment witnesses and marks payments that tap planned attackers. A
-  supplied line executed three times when phase instructions came directly from
-  its selected actions. Candidate generation remains unreliable; the new
-  proposal and instruction-rendering experiments are not production policy.
-
-The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
-Jev and Luna low on identical pilot questions. Jev matched 27/27 expected
-decisions at 253 ms median; Luna matched 24/27 at 1,714 ms median. Keep Jev as the
-pilot. A narrow Luna exception review is a candidate experiment, not a new
-production role. Defer preparation restarts and timeout changes until prepared
-reuse has been tested, so waiting improvements have an identifiable cause.
-The [second tuning round](history/2026-10-06-binding-review.md) records the
-remaining false source claims and a factual-audit probe. The audit found real
-mistakes but also false positives, so it is not an automatic acceptance gate.
-The [repeated planning review](history/2026-10-06-repeated-planning.md) compares
-three runs per planning case and preserves a later failed repair after Explorer
-resolved. Current facts were present; the writer still repeated an obsolete
-creature-land claim. The next repair question must bind combat and resource
-commitments to current sources instead of asking for another prose inventory.
+- [x] Bind reusable actions to visible sources, current characteristics and exact
+  accepted terms. Keep absent equipment available through lookup.
+  [Binding review](history/2026-10-06-binding-review.md).
+- [x] Reject fabricated button ids and preserve paid search continuations.
+  [Strategy cycle](history/2026-10-06-strategy-cycle.md).
+- [x] Keep one saved-position manifest with offline replay and live probes.
+  Eighteen prefixes are retained. [Benchmark guide](../tools/benchmarks/README.md).
+- [ ] Finish the ordered resource forecast, including earlier entries, activation
+  costs, planned attackers and scoped response warnings. Validate future source
+  bindings against physical continuations before grading the planner.
+  [Payment review](history/2026-10-07-payments-and-execution.md).
+- [ ] Derive execution instructions from chosen commitments while preserving
+  explicit completion, response, target and exception policies. Cover upkeep,
+  opponent turns, triggers and resolution before making it the default. An empty
+  list grants no permission to pass.
+  [Execution controls](history/2026-10-07-payments-and-execution.md).
+- [ ] Compare one versus two generated candidates in the shared benchmark runner,
+  with identical informational receipts, complete continuations and immutable
+  selection. Grade useful strategy and physical outcomes separately from syntax.
+  [Reviewed experiment](history/2026-10-07-payments-and-execution.md).
+- [ ] Reuse a prepared line only with positive coverage for the observed change.
+  First test an ordinary opposing land play and a draw covered by a land branch;
+  a changed blocker must still trigger reconsideration. Syntax, an empty stop
+  list and a payable line do not establish strategic validity.
+  [Playbook acceptance cases](PLAYBOOK.md).
+- [ ] Preserve future permissions and source dependencies without predicting
+  hidden cards or unresolved effects. A reserve must identify its actual use and
+  useful window. [Grounded repairs](history/2026-10-06-grounded-repairs.md).
+- [ ] After the saved cases improve, audit a full game and three further declared
+  seeds for resource reuse, missed wins, wasted temporary development and missing
+  phase coverage. Keep Jev and the baseline roster. Completion alone is not a
+  strategic pass. [Latest full game](history/2026-10-07-payments-and-execution.md).
 
 Each cycle starts with the reviewed journal and exact request. Save the smallest
 position that exhibits the mistake, state the preferred decision and its

@@ -30,7 +30,7 @@ import { matchTable } from "../tools/matchup-fixture.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
-import { lifted, type Plan } from "../src/core/language.ts";
+import { lifted, type Plan, type PlanOption } from "../src/core/language.ts";
 import { NOTEBOOK_LIMIT } from "../src/core/work-language.ts";
 import type { Frame } from "../src/core/types.ts";
 import { load as loadCards } from "../src/core/cards.ts";
@@ -47,7 +47,7 @@ import { aiSeat, changes, question, settled, type Prepared, type Planned } from 
 import { actions, basePlan, changedPlan, equipment, responseChanges, selectionFields } from "../src/context/plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
-import { announce, establish, example, main, matchup, pack, place, quiet } from "./play.ts";
+import { announce, establish, example, finish, main, matchup, pack, passBoth, place, quiet } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
 const turn3 = { active: "self" as const, fromTurn: 3, throughTurn: 3 };
@@ -689,7 +689,7 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.deepEqual(witness.conflicts, []);
 	assert.deepEqual(witness.unchecked, []);
 	assert.equal(witness.payments.length, 1);
-	assert.ok(witness.payments[0]!.untappedAfter.some((one) => one.id === elf.id));
+	assert.ok(witness.payments[0]!.untappedManaSourcesAfter.some((one) => one.id === elf.id));
 	assert.ok(witness.payments[0]!.funding.taps.every((tap) => tap.source.id !== elf.id));
 	assert.deepEqual(attacking, beforeWitness, "the receipt leaves both physical and private state unchanged");
 	const receipt = witness.payments[0]!;
@@ -700,6 +700,13 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 		...printedCast("Mossborn Hydra", beforeWitness.printed["Mossborn Hydra"]!), cost: { mana: "{X}{G}" } } } }] });
 	assert.equal(unknown.payments.length, 0);
 	assert.ok(unknown.unchecked.length, "an unpriced line is explicit, never a successful empty witness");
+	const response = { label: "Variable response", when: { active: "opponent" as const }, action: { procedure: {
+		...printedCast("Mossborn Hydra", beforeWitness.printed["Mossborn Hydra"]!), cost: { mana: "{X}{G}" } } } };
+	const responseForecast = (branch: PlanOption) => paymentForecast(workFrame(beforeWitness, 0), { objective: "Wait", guidance: "Reserve the response", steps: [], may: [branch] });
+	assert.match(responseForecast(response).unchecked.join(" "), /may\[0\].*priced cost/, "variable response costs cannot disappear as a completed check");
+	assert.match(responseForecast(veil(beforeWitness)![0]!).unchecked.join(" "), /may\[0\].*known source/, "a missing response source remains unchecked");
+	assert.match(responseForecast({ ...response, when: { active: "self" } }).unchecked.join(" "), /own-turn alternative not priced/);
+	assert.match(responseForecast({ ...response, action: { procedure: { ...response.action.procedure, cost: { mana: "{0}" }, instructions: [{ do: "mana", who: "you", colors: ["G"] }] } } }).unchecked.join(" "), /mana-producing instructions/, "response readers can also invalidate the payment forecast");
 
 	const three = matchup("arithmetic");
 	place(three, 0, "battlefield", "Forest", "Forest", "Forest");
@@ -744,6 +751,36 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	editWork(two, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "forest");
 	assert.match(problems(two, { steps: [cast(two, "Mossborn Hydra"), land(two, "Forest")] }), /Cast Mossborn Hydra\): costs \{2\}\{G\}/);
 	assert.equal(problems(two, { steps: [land(two, "Forest"), cast(two, "Mossborn Hydra")] }), "");
+	// A source played earlier in the line exists for its later activation.
+	const passage = matchup("land-then-activate");
+	main(passage, 0, 3);
+	place(passage, 0, "hand", "Fabled Passage");
+	editWork(passage, 0, [{ do: "package.put", package: { card: "Fabled Passage", registers: [] } }], "passage-package");
+	const fetch: Plan = { objective: "Fetch a Forest", guidance: "Play the Passage, then activate it", steps: [land(passage, "Fabled Passage"),
+		{ label: "Activate Fabled Passage", when: now(passage), action: { procedure: example("Crack Fabled Passage for a basic land") } }] };
+	const passageBefore = structuredClone(passage), fetchForecast = paymentForecast(workFrame(passage, 0), fetch);
+	assert.deepEqual(fetchForecast.conflicts, [], "the earlier land play supplies the activation source");
+	assert.ok(fetchForecast.unchecked.length, "the sacrifice and resolved search remain outside the mana-only witness");
+	assert.deepEqual(passage, passageBefore, "forecasting the entry changes no physical or private state");
+	apply(passage, nextDecision(passage)!.options.find((one) => one.id.startsWith("land:") && one.objects?.some((ref) => passage.things.get(ref.id)?.card === "Fabled Passage"))!.id, "model", "chosen");
+	assert.ok(procedureOptions(example("Crack Fabled Passage for a basic land"), workFrame(passage, 0), "check").length, "the forecasted fetch source really becomes available after the land play");
+	const developing = matchup("cast-then-activate");
+	place(developing, 1, "battlefield", "Mountain", "Mountain", "Mountain");
+	main(developing, 1, 2);
+	place(developing, 1, "hand", "Kellan, Planar Trailblazer");
+	editWork(developing, 1, [{ do: "package.put", package: { card: "Kellan, Planar Trailblazer", printedCast: true, registers: [] } }], "kellan-package");
+	const upgrade: Plan = { objective: "Cast and develop Kellan", guidance: "Pay for the cast before its activation", steps: [
+		cast(developing, "Kellan, Planar Trailblazer"), { ...detective, when: now(developing) }] };
+	const upgradeForecast = paymentForecast(workFrame(developing, 1), upgrade);
+	assert.deepEqual(upgradeForecast.conflicts, []);
+	assert.equal(upgradeForecast.payments.length, 2, "both the cast and the newly entered source's activation are priced");
+	assert.equal(upgradeForecast.payments[1]!.source.incarnation, upgradeForecast.payments[0]!.source.incarnation + 2, "casting and resolution each change identity");
+	assert.match(paymentForecast(workFrame(developing, 1), { ...upgrade, steps: [upgrade.steps[0]!, upgrade.steps[0]!] }).conflicts.join(" "), /already taken|hold no Kellan/, "entry cannot make the same card castable twice");
+	announce(developing, printedCast("Kellan, Planar Trailblazer", developing.printed["Kellan, Planar Trailblazer"]!));
+	passBoth(developing); finish(developing);
+	const realUpgrade = procedureOptions(detective.action.procedure, workFrame(developing, 1), "check")[0]!;
+	assert.ok(realUpgrade, "the actual cast leaves enough mana for the newly entered creature's activation");
+	assert.deepEqual(realUpgrade.activation.source, upgradeForecast.payments[1]!.source);
 	// A card the seat does not hold is named, and a window on the wrong seat's turn never opens.
 	assert.match(problems(two, { steps: [cast(two, "Icetill Explorer")] }), /you hold no Icetill Explorer now/);
 	assert.match(problems(two, { steps: [], askWhen: [{ label: "Never", when: { active: "opponent", fromTurn: turn(two), throughTurn: turn(two) }, if: { amount: { life: "you" }, atMost: 5 } }] }), /is your turn, so a window for the opponent's turn on it never opens/);
