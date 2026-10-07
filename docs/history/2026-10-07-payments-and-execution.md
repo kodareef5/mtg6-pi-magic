@@ -727,3 +727,36 @@ unfinished. Every option, canonical order and execution credit remains intact.
 The extended marks invariant covers both attack orders, shrinking marks, early
 finish credit, unchanged state and reconstruction after cloning and replay.
 Displaying the fact alone establishes no pilot obedience.
+
+At clean `b426b60`, both exact pilot probes passed 3/3: Jev selected Sanctuary
+instead of asking for unchanged-plan help or finishing early. The two completion
+counterexamples still passed 3/3. Comparing before/after requests shows only the
+finish option's `shows` and `notes` changed; classifier criteria stayed identical.
+This is a narrow observed improvement in following available commitments,
+including after help refusal, not proof of general exception handling.
+
+The three physical continuations in `finish-mark-after-resume/` all selected
+Sanctuary, then Zhao, then finished, and won with no Red help before finishing or
+later in the turn. That matches the resumed baseline's 3/3. Green requested one,
+two and two repairs. All six physical runs have zero gaps/fallback and matching
+replay/clone. After play times were 13.02, 12.59 and 11.12 seconds, against
+13.55, 12.55 and 13.85 before. Do not attribute those small timing differences
+to the mark; opposing repairs differ.
+
+The twelve pilot calls per arm reported 47,865/48,435 input tokens, 564/579
+output and $0.00201/$0.00203 before/after. Physical continuations used 43 calls
+before (32 Jev, 11 strategy) and 44 after (33 Jev, 11 strategy), with
+324,418/331,217 input, 40,448/56,832 cached, 3,643/3,701 output and
+$0.01586/$0.01466. Each physical arm has six cancelled background preparations
+with missing usage. None of the measured calls failed or truncated. The compact
+trace audit is `.pi/resume-20261007/finish-mark-audit.json`.
+
+Both reviewers support retaining the factual mark and the narrow pilot result.
+Resume context continuity is now an explicit open defect: `play()` initializes
+its per-seat receipt cursors anew, so the first resumed packet repeats history
+that the parent pilot had already seen. The physical baseline did not reproduce
+the failed parent question. These runs establish observed outcomes and
+execution/replay/clone health, not a repair of the parent's behavior. Until that
+context discrepancy is resolved, use exact saved packets to support pilot
+behavior claims. No full-game gate follows; generation and upkeep coverage
+remain open. Types, all 179 tests and all 27 saved-position replays pass.
