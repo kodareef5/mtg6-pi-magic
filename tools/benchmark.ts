@@ -22,7 +22,7 @@ import { decisionApi, type DecisionApi } from "../src/context/model.ts";
 import { cast, rosterFor } from "../src/context/roles.ts";
 import { planWork, prepareTurn } from "../src/context/strategy.ts";
 import { reasoner } from "../src/context/reason.ts";
-import { tally } from "../src/context/spend.ts";
+import { tally, type Spend } from "../src/context/spend.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { usageReport, bill } from "../src/context/metrics.ts";
 import type { Brief } from "../src/context/brief.ts";
@@ -109,7 +109,7 @@ const source = { revision: execFileSync("git", ["rev-parse", "HEAD"], { encoding
 	dirty: execFileSync("git", ["status", "--porcelain"], { encoding: "utf8" }).trim() };
 if (["results.json", "calls.jsonl"].some((file) => existsSync(join(out, file)))) throw new Error("Choose a fresh --out directory; existing benchmark evidence will not be overwritten.");
 mkdirSync(out, { recursive: true });
-const measured = tally(), results: Record<string, unknown>[] = [], rules = loadRules(matchup.rules.path);
+const measured = tally(), spent: Spend[] = [], results: Record<string, unknown>[] = [], rules = loadRules(matchup.rules.path);
 const inference = traceInference({ classify: (...args) => runtime.classify(...args), stream: (model, request, options) => runtime.streamSimple(model, request as never, options) as never },
 	(event) => appendFileSync(join(out, "calls.jsonl"), JSON.stringify(event) + "\n"));
 for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier } of positions) {
@@ -177,13 +177,15 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			}
 			if (!isDeepStrictEqual(frame, before)) throw new Error("Benchmark mutated the projected frame.");
 		} catch (caught) { error = String(caught); if (caught && typeof caught === "object" && "candidates" in caught) answer = { candidates: caught.candidates, attempts: (caught as { attempts?: unknown }).attempts }; }
-		const calls = measured.spent().slice(startCall), entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
+		const calls = [...measured.spent().slice(startCall), ...(continuation?.result.calls ?? [])];
+		spent.push(...calls);
+		const entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
 			arm, ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
 			...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
-		results.push(entry); console.log(`${one.id} ${pilot} ${arm} ${entry.passed ? "PASS" : "FAIL"} ${entry.ms}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
-		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, results, calls: measured.spent() }, null, 2) + "\n");
+		results.push(entry); console.log(`${one.id} ${pilot} ${arm} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
+		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, results, calls: spent }, null, 2) + "\n");
 	}
 	}
 }
-console.log(bill(measured.spent()).join("\n")); console.log(`Saved ${out}`);
+console.log(bill(spent).join("\n")); console.log(`Saved ${out}`);
 process.exit(results.every((one) => one.passed) ? 0 : 1);

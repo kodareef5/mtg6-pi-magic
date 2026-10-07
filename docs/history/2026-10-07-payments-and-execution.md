@@ -807,3 +807,23 @@ looks cannot be reconstructed. This limitation covers both pilot behavior and
 strategy calls inside older physical continuations; their observed outcomes and
 replay results remain facts. Initial planning probes built from `workFrame` did
 not receive the repeated receipt history.
+
+At clean `8cdeef3`, `receipt-continuity-play/` ran three bounded live
+continuations through turn 12. Each first Jev request matches the exact saved
+post-mark probe, including the complete question. All three selected Sanctuary,
+Zhao, then finish, and won without Red help. Green requested two foreground
+repairs in each. Play took 12.48, 11.48 and 11.44 seconds. Every run has zero
+gaps/fallback and matching replay/clone results. These are continuation controls,
+not a strategy-generation gate or evidence of general exception handling.
+
+The child reports record 42 calls (30 Jev, 12 strategy), 314,840 input tokens,
+40,448 cached, 3,763 output and $0.01664 reported cost. Six cancelled background
+preparations have missing usage; none failed or truncated. Their timing remains
+in the child reports. `receipt-continuity-play/audit.json` records the actual
+picks and exact first-packet comparisons.
+
+The parent benchmark printed zero calls because it counted only initial
+planning, excluding physical continuations. The child reports were complete;
+the counts above come from them. The runner now includes continuation calls in
+each case and the aggregate bill, and its console reports whole-case elapsed
+time. This reporting repair changes no model request or game decision.
