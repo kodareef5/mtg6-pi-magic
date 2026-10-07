@@ -177,14 +177,14 @@ arm. Preserve the source revision or patch with the results. Compare acceptance,
 structural properties, reviewed prose, refusal kinds, calls and elapsed time;
 an isolated perfect answer is not evidence of an improvement.
 
-Saved plan answers can be checked again without a model call:
-
 `--arm receipt-paired` compares one repair of the same frozen production plan
 with and without a reviewed, hash-bound counterexample. It requires
 `--repair-source` and `--receipts`; all selected inputs are validated before
 inference. The [diagnostic contract](../../docs/history/2026-10-07-consequence-feedback.md)
 defines the receipt, reply budget, scoring and rejection gate. This is a
 benchmark experiment, not a production default or an automatic outcome reader.
+
+Saved plan answers can be checked again without a model call:
 
 ```sh
 npm run benchmark -- --case green-landfall-order --review test/fixtures/benchmarks/good-landfall.json
