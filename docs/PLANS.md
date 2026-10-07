@@ -102,6 +102,12 @@ before scheduled planning.
 No new journal event or stored progress flag is needed. A kept or failed plan
 acknowledges the deadline once without supplying missing policy or permission
 to pass. Prepared reuse still requires positive coverage for changed facts.
+A model-backed seat can keep the accepted plan after a covered rules draw
+without calling the writer. It must have observed the accepted position and
+verify that only the drawn cards and their hand/library counts changed. Every
+drawn card needs a matching remaining step or true branch. A reset or resume
+without that observation uses the writer. Keeping records no physical action
+and preserves progress.
 Context renders each step's execution choices before
 announcement and throughout inspection. Resolution recovers the announcing
 plan's step and phase policy, including triggers. General objective and guidance

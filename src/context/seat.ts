@@ -12,6 +12,8 @@
  * Past 150 lines to keep the question beside its navigation and answer handling.
  */
 
+import { isDeepStrictEqual } from "node:util";
+import { basePlan } from "./plan-edit.ts";
 import { PlayerUnavailable, type Answer, type Objection, type Player } from "../core/player.ts";
 import type { Rules } from "../core/rules.ts";
 import type { Frame } from "../core/types.ts";
@@ -78,7 +80,7 @@ export type AiSeatOptions = {
 /** Private pending work; core receives it only at the scheduled acceptance deadline. */
 export type Prepared = { plan: Plan; edits?: NoteEdit[] };
 type PreparationTiming = { fromVersion: number; fromTurn: number; queuedAt: number; startedAt?: number; finishedAt?: number; neededAt?: number };
-export type Planned = { seat: number; turn: number; how: "prepared" | "amended" | "written" | "escalation"; waitedMs: number; ready?: boolean; failed?: boolean; preparation?: PreparationTiming };
+export type Planned = { seat: number; turn: number; how: "prepared" | "amended" | "written" | "escalation" | "kept"; waitedMs: number; ready?: boolean; failed?: boolean; preparation?: PreparationTiming };
 
 /**
  * What changed between the frame a plan was prepared from and the turn it is for,
@@ -132,9 +134,9 @@ export function settled(frame: Frame, prepared: Plan, changed: ReturnType<typeof
 	const takes = (one: PlanOption, card: SeenObject) => {
 		const at = frame.view.window;
 		if (at.kind !== "turn") return false;
-		const step = one.when.step ?? "precombat-main";
-		const window = { ...at, step, phase: STEPS[step].phase };
-		if (!matches(one.when, { ...frame, view: { ...frame.view, window } })) return false;
+		const remaining = frame.view.remainingSteps ?? [at.step];
+		if (!remaining.some((step) => matches(one.when, { ...frame, view: { ...frame.view,
+			window: { ...at, step, phase: STEPS[step].phase } } }))) return false;
 		if (one.if && !holds(scope, one.if)) return false;
 		const action = one.action;
 		if ("procedure" in action) return select({ ...action.procedure.source, zones: action.procedure.source.zones ?? ["hand"] }, frame).some((object) => object.id === card.id);
@@ -143,6 +145,31 @@ export function settled(frame: Frame, prepared: Plan, changed: ReturnType<typeof
 		return !action.option && id === "land:" && !!card.traits?.types.includes("land");
 	};
 	return changed.drawn.every((card) => [...prepared.steps, ...(prepared.may ?? [])].some((one) => takes(one, card)));
+}
+
+/** Reuse only a witnessed accepted position followed by its covered rules draw.
+ * A resumed seat without that observation asks the writer. No snapshot enters the table. */
+export function coveredDraw(from: Frame, frame: Frame): boolean {
+	const at = frame.view.window, old = from.view.window, work = frame.view.work;
+	if (at.kind !== "turn" || old.kind !== "turn" || at.active !== frame.seat || old.turn !== at.turn ||
+		old.active !== at.active || frame.decision?.situation !== "priority" || work?.request ||
+		!work?.plan || work.accepted !== from.version || work.planned !== from.view.work?.planned ||
+		!frame.view.drawnAt || frame.view.drawnAt <= from.version) return false;
+	const drawn = frame.view.turnDraw ?? [];
+	if (!drawn.length) return false;
+	const isDrawn = (one: SeenObject) => drawn.some((card) => card.id === one.id && card.incarnation === one.incarnation);
+	const received = frame.view.objects?.filter(isDrawn) ?? [];
+	if (received.length !== drawn.length || received.some((one) => one.zone !== "hand" || one.controller !== frame.seat)) return false;
+	const position = (seen: Frame, after: boolean) => ({
+		objects: seen.view.objects?.filter((one) => !after || !isDrawn(one)),
+		players: seen.view.players?.map((one) => !after || one.id !== frame.seat ? one : {
+			...one, hand: (one.hand ?? 0) - drawn.length, library: (one.library ?? 0) + drawn.length }),
+		notes: seen.view.notes, pools: seen.view.pools, combat: seen.view.combat,
+		resolution: seen.view.resolution, history: seen.view.history, lands: seen.view.landsPlayed,
+		packages: seen.view.work?.packages, notebook: seen.view.work?.notebook,
+	});
+	return isDeepStrictEqual(position(from, false), position(frame, true)) &&
+		settled(frame, basePlan(frame), changes(from, frame));
 }
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
@@ -206,6 +233,10 @@ export function question(packet: Packet, help: boolean): Question {
 
 export function aiSeat(options: AiSeatOptions): Player {
 	let asked = 0;
+	let accepted: Frame | undefined;
+	const remember = (frame: Frame) => {
+		if (frame.version === frame.view.work?.accepted) accepted = frame;
+	};
 	let closed = false;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
@@ -251,6 +282,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 		async answer(frame) {
 			if (!frame.decision) throw new Error(`${options.name} was asked a frame with no decision`);
 			if (closed) throw new Error(`${options.name} is closed.`);
+			remember(frame);
 			if (frame.decision.preparation?.length) {
 				if (!options.interpret) throw new PlayerUnavailable("Known card uses need preparation, but this seat has no interpreter.");
 				const pack = await options.interpret(frame);
@@ -274,6 +306,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 				let ready: boolean | undefined, failed = true;
 				let preparationTiming: PreparationTiming | undefined;
 				try {
+					if (accepted && coveredDraw(accepted, frame)) {
+						how = "kept"; failed = false;
+						return { kind: "work", tools: [{ do: "plan.keep", reason: "Only the rules draw changed; the accepted line covers every drawn card." }],
+							revision, actionId: `${options.name}-${frame.version}-${revision}-keep-${++asked}` };
+					}
 					let made: Prepared | undefined, changed: string[] | undefined;
 					if (!frame.view.work?.request && at.kind === "turn" && preparation?.turn === at.turn) {
 						const job = preparation;
@@ -364,10 +401,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 		},
 
 		observe(frame) {
+			remember(frame);
 			if (preparation && (frame.version < preparation.from.version || frame.view.work?.planned !== preparation.from.view.work?.planned)) cancel();
 			begin(frame);
 		},
-		reset() { cancel(); began = undefined; navigation = undefined; },
+		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; },
 		close() { closed = true; return cancel()?.then(() => {}); },
 	};
 }

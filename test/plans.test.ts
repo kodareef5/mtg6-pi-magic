@@ -45,7 +45,7 @@ import { emptyBrief } from "../src/context/brief.ts";
 import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
-import { aiSeat, changes, question, settled, type Prepared, type Planned } from "../src/context/seat.ts";
+import { aiSeat, changes, question, settled, coveredDraw, type Prepared, type Planned } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment, responseChanges, selectionFields } from "../src/context/plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
@@ -1573,7 +1573,7 @@ test("an essential step waits while a spell resolves; an impossible line returns
 	assert.equal(bare.gaps.length, 0);
 });
 
-test("a counter on a permanent is a change, and a draw is covered only by a step or branch that takes it", () => {
+test("a counter on a permanent is a change, and a draw is covered only by a step or branch that takes it", async () => {
 	const table = matchup("zhao");
 	main(table, 1, 2);
 	const zhao = establish(table, 1, "Zhao, the Moon Slayer");
@@ -1592,6 +1592,46 @@ test("a counter on a permanent is a change, and a draw is covered only by a step
 	assert.equal(settled(frame, taken, draw), true, "a branch that takes it does");
 	taken.may![0]!.when.phase = "combat";
 	assert.equal(settled(frame, taken, draw), true, "the future step is checked in its own phase, rather than the current main phase");
+	const covered = position(); main(covered, 0, 3, "upkeep");
+	const policy: Plan = { objective: "Use a covered draw", guidance: "Keep the accepted line", throughTurn: 4,
+		steps: [{ label: "Finish main", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }],
+		may: Object.keys(covered.seats[0]!.deck.main).map((card) => ({ label: `Use ${card} if drawn`, when: { active: "self", step: "precombat-main" },
+			if: { amount: { count: { zones: ["hand"], name: card } }, atLeast: 1 }, action: { objects: { zones: ["hand"], card } } })) };
+	editWork(covered, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: policy }], "upkeep-policy");
+	const accepted = workFrame(covered, 0);
+	main(covered, 0, 3, "draw");
+	const current = workFrame(covered, 0);
+	assert.equal(coveredDraw(accepted, current), true);
+	for (const change of [
+		(one: Frame) => { one.view.work!.request = "Changed line"; },
+		(one: Frame) => { one.view.work!.plan!.may = []; },
+		(one: Frame) => { one.view.work!.plan!.may!.forEach((branch) => { branch.when.step = "upkeep"; }); },
+		(one: Frame) => { one.view.objects!.find((card) => card.zone === "battlefield")!.tapped = true; },
+		(one: Frame) => { one.view.objects!.find((card) => card.zone === "battlefield")!.counters.extra = 1; },
+		(one: Frame) => { one.view.players![1]!.hand!++; },
+		(one: Frame) => { one.view.objects!.push({ ...one.view.objects![0]!, id: "new-blocker" }); },
+		(one: Frame) => { one.decision!.situation = "trigger-order"; },
+	]) {
+		const changed = structuredClone(current); change(changed);
+		assert.equal(coveredDraw(accepted, changed), false, "a changed position or uncovered draw retains the writer");
+	}
+	let calls = 0;
+	const pilot = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+		plan: async () => { calls++; return { tools: [{ do: "plan.put", plan: policy }] }; } });
+	pilot.observe(accepted);
+	const before = structuredClone(covered), answer = await pilot.answer(current);
+	assert.equal(calls, 0);
+	assert.equal(answer.kind, "work");
+	if (answer.kind !== "work") throw new Error("Expected retained work");
+	assert.equal(answer.tools[0]!.do, "plan.keep");
+	assert.deepEqual(covered, before, "the seat returns work without changing the table");
+	const kept = prepareWork(current, answer.tools);
+	assert.equal(kept.planned, current.view.work!.planned, "keeping the plan preserves ledger credit");
+	assert.equal(planDue({ ...current, view: { ...current.view, work: kept } }), false);
+	pilot.reset!();
+	await pilot.answer(current);
+	assert.equal(calls, 1, "without the acceptance observation, resume or reset asks the writer");
+	await pilot.close();
 });
 
 test("reset and close cancel preparation; superseded notes and plans never arrive", async () => {

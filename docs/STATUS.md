@@ -16,9 +16,9 @@ play. Saved-position prompting experiments did not demonstrate reliable
 construction of winning plans. Repeating an identical classifier request
 measured score stability, not independent success rates.
 
-Automated goal pursuit is paused for cleanup and a prompting redesign. Current
-priorities are removing retired experiment hooks, reducing the writer's combined
-tasks, and reusing accepted work when its stated coverage still applies. The
+Goal pursuit has resumed. Retired experiment hooks and fixtures have been
+removed. Current work reduces the writer's combined tasks and reuses accepted
+work when its stated coverage still applies. The
 next gameplay measurements must include new positions and seeds.
 
 Experiment narratives are local reference material under
