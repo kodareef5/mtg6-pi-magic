@@ -19,8 +19,20 @@ const WriterWhen = Type.Object({ ...WhenSchema.properties,
 		description: "A rules step, or any to leave the step open. A whole phase such as combat is also accepted here and becomes phase; it must agree with an explicit phase." })),
 }, { additionalProperties: false });
 
+/** Conditions use selectors; action sources keep their distinct card query. */
+function selectorAliases(value: unknown, condition = false): unknown {
+	if (Array.isArray(value)) return value.map((one) => selectorAliases(one, condition));
+	if (!value || typeof value !== "object") return value;
+	const fields = Object.fromEntries(Object.entries(value).map(([key, one]) => [key, selectorAliases(one, condition || key === "if" || key === "releaseWhen")]));
+	if (condition && "card" in fields && (!("name" in fields) || fields.name === fields.card)) {
+		const { card, ...rest } = fields;
+		return { ...rest, name: card };
+	}
+	return fields;
+}
+
 function writerChanges(value: unknown): unknown {
-	const changed = lifted(value);
+	const changed = lifted(selectorAliases(value));
 	if (!changed || typeof changed !== "object" || Array.isArray(changed)) return changed;
 	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key,
 		["steps", "may", "phases", "askWhen"].includes(key) && Array.isArray(list) ? list.map((one) => {

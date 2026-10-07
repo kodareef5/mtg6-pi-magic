@@ -9,10 +9,10 @@
  * A cast or an announcement must be payable from the
  * sources the steps before it left and the plan does not hold, floating mana
  * spent as it goes and gone once a step is in a later window. A permanent the
- * plan casts adds its package's extra land plays from then on. A branch must be
- * payable from what the steps leave, held sources included. Payments are tried
- * together: the first that fits one step may starve a later one, so every
- * different payment is tried before a conflict is named.
+ * plan casts adds its package's extra land plays from then on. Branch funding
+ * is advisory, read from what the selected payment leaves, held sources included.
+ * Payments are tried together: the first that fits one step may starve a later
+ * one, so every different payment is tried before a conflict is named.
  *
  * Nothing is tapped and nothing is promised: every spell is assumed to resolve.
  * Where the arithmetic cannot be done honestly, an X cost, a reduction, mana a
@@ -77,11 +77,11 @@ export function budget(frame: Frame, plan: Plan): string[] {
 }
 
 type Payment = { step: string; source: ObjectRef; funding: Funding; tapSource: boolean; untappedManaSourcesAfter: ObjectRef[] };
-export type PaymentForecast = { conflicts: string[]; payments: Payment[]; unchecked: string[]; scope: string };
+export type PaymentForecast = { conflicts: string[]; payments: Payment[]; responses: string[]; unchecked: string[]; scope: string };
 
 /** One payment witness for the stated sequence, never a choice or a simulated resolution. */
 export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
-	const report: PaymentForecast = { conflicts: [], payments: [], unchecked: [],
+	const report: PaymentForecast = { conflicts: [], payments: [], responses: [], unchecked: [],
 		scope: "Resource forecast under normal untap and successful resolution. Ordinary land and permanent entries supply later sources, using accepted tapped-entry terms. Current attackers keep their current traits. No hidden cards, resolved instructions, triggers, counters, untaps or transformations are simulated. Payments show ordered actions; priced response branches are checked separately, not listed. Remaining sources are mana sources, not every untapped permanent. Payments are examples, not locked choices; timing, targets, future attackers and combat outcomes remain separate." };
 	const at = frame.view.window;
 	if (at.kind !== "turn") { report.unchecked.push("No turn window."); return report; }
@@ -226,8 +226,16 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	// Responses on the opponent's turn must be paid from what the turn leaves; a branch on our own turn is an alternative, not an addition.
 	const branches = (plan.may ?? []).flatMap((branch, index) => {
 		const at = `may[${index}] (${branch.label})`;
-		if (branch.when.active === "self") { report.unchecked.push(`${at}: own-turn alternative not priced with the ordered line.`); return []; }
+		const lineHonest = honest;
+		honest = true;
 		const act = read(branch);
+		const branchHonest = honest;
+		honest = lineHonest;
+		if (branch.when.active === "self") {
+			if (act) report.unchecked.push(`${at}: own-turn alternative not priced with the ordered line.`);
+			return [];
+		}
+		if (!branchHonest) { report.unchecked.push(`${at}: mana-producing instructions or additional costs are not forecast.`); return []; }
 		if (act?.kind === "cast" && act.source && !act.unknown) return [{ at, act }];
 		if (act) report.unchecked.push(`${at}: response payment needs a known source and priced cost.`);
 		return [];
@@ -260,9 +268,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				// A branch is on the opponent's turn, when nothing floats; a hold may be what it is for, so held sources pay for it.
 				const later = drained(position);
 				for (const { at, act } of branches) {
-					if (act.tap && cannotTap(later, act.source!, spent)) return fail(index, `${at}: its source cannot pay the tap cost after the preceding steps`);
+					if (act.tap && cannotTap(later, act.source!, spent)) { report.responses.push(`${at}: its source cannot pay the tap cost after this example line`); continue; }
 					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act)).length)
-						return fail(index, `${at}: costs ${stated(act.price!)} but ${left(later, spent)}; keep a source for it with holds, or drop the branch`);
+						report.responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
 				}
 				return true;
 			}

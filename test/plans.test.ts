@@ -391,6 +391,13 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	assert.deepEqual(canonical.may![0]!.when, { active: "opponent" });
 	assert.deepEqual(canonical.may![0]!.if, { amount: { count: { zones: ["hand"], controller: "you", types: ["instant"] } }, atLeast: 1 });
 	assert.deepEqual(aliases, untouched, "writer aliases neither mutate the submitted answer nor enter the stored plan");
+	const namedCondition = { ...line.steps[0]!, if: { amount: { count: { zones: ["hand"], card: "Forest" } }, atLeast: 1 } };
+	const sourceUnchanged = structuredClone(namedCondition);
+	const namedPlan = changedPlan(base, { steps: [namedCondition] }, available);
+	assert.deepEqual(namedPlan.steps[0]!.if, { amount: { count: { zones: ["hand"], name: "Forest" } }, atLeast: 1 });
+	assert.deepEqual(namedPlan.steps[0]!.action, namedCondition.action, "condition aliases never rename the action's card query");
+	assert.deepEqual(namedCondition, sourceUnchanged);
+	assert.throws(() => changedPlan(base, { steps: [{ ...namedCondition, if: { amount: { count: { card: "Forest", name: "Mountain" } }, atLeast: 1 } }] }, available), /schema/, "conflicting names remain an error");
 	assert.throws(() => changedPlan(base, { phases: [{ when: { step: "combat", phase: "beginning" }, guidance: "Contradictory." }] }, available), /schema/);
 	assert.throws(() => changedPlan(base, { may: [{ ...aliases.may[0], if: { amount: { count: { types: ["creature"] }, atLeast: 3 }, atLeast: 1 } }] }, available), /schema/, "two stated bounds are not silently reconciled");
 	const legacy: Plan = { ...base, holds: [{ objects: { card: "Forest" }, purpose: "Keep it until the stated condition", releaseWhen: { any: [{ amount: { life: "opponent" } }] } }] };
@@ -637,7 +644,7 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.ok(paidAbility);
 	place(tappedSource, 0, "hand", "Llanowar Elves");
 	assert.match(problems(tappedSource, { steps: [earthbend, cast(tappedSource, "Llanowar Elves")] }), /Cast Llanowar Elves.*no untapped source/, "the tap-cost source stays spent for later steps");
-	assert.match(problems(tappedSource, { steps: [earthbend], may: [{ ...earthbend, when: { active: "opponent" } }] }), /may\[0\].*tap cost/, "the opponent-turn branch cannot reuse a spent tap-cost source");
+	assert.match(paymentForecast(workFrame(tappedSource, 0), { objective: "Earthbend", guidance: "Activate once", steps: [earthbend], may: [{ ...earthbend, when: { active: "opponent" } }] }).responses.join(" "), /may\[0\].*tap cost/, "the opponent-turn branch cannot reuse a spent tap-cost source");
 	const exactFrame = workFrame(tappedSource, 0);
 	exactFrame.decision!.options.push(paidAbility.option);
 	assert.match(budget(exactFrame, { objective: "Sequence", guidance: "Use the chosen payment", steps: [{ ...earthbend, action: { option: paidAbility.option.id } }, cast(tappedSource, "Llanowar Elves")] }).join(" "), /Cast Llanowar Elves.*no untapped source/, "an exact activation also carries its tap cost");
@@ -650,7 +657,7 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	const originalRestricted = structuredClone(restricted);
 	assert.equal(procedureOptions(detective.action.procedure, workFrame(restricted, 1), "check").length, 0);
 	assert.match(budget(workFrame(restricted, 1), { objective: "Develop", guidance: "Activate", steps: [detective] }).join(" "), /costs \{1\}\{R\}/, "creature-cast-only red cannot pay an activation on that creature");
-	assert.match(budget(workFrame(restricted, 1), { objective: "Wait", guidance: "Activate later", steps: [], may: [{ ...detective, when: { active: "opponent" } }] }).join(" "), /may\[0\].*costs \{1\}\{R\}/);
+	assert.match(paymentForecast(workFrame(restricted, 1), { objective: "Wait", guidance: "Activate later", steps: [], may: [{ ...detective, when: { active: "opponent" } }] }).responses.join(" "), /may\[0\].*costs \{1\}\{R\}/);
 	assert.deepEqual(restricted, originalRestricted, "activation forecasting moves no source or mana");
 	place(restricted, 1, "battlefield", "Mountain");
 	assert.deepEqual(budget(workFrame(restricted, 1), { objective: "Develop", guidance: "Use unrestricted red", steps: [detective] }), []);
@@ -707,12 +714,17 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.match(responseForecast(veil(beforeWitness)![0]!).unchecked.join(" "), /may\[0\].*known source/, "a missing response source remains unchecked");
 	assert.match(responseForecast({ ...response, when: { active: "self" } }).unchecked.join(" "), /own-turn alternative not priced/);
 	assert.match(responseForecast({ ...response, action: { procedure: { ...response.action.procedure, cost: { mana: "{0}" }, instructions: [{ do: "mana", who: "you", colors: ["G"] }] } } }).unchecked.join(" "), /mana-producing instructions/, "response readers can also invalidate the payment forecast");
+	const unpricedResponse = paymentForecast(workFrame(beforeWitness, 0), { ...commitment, may: veil(beforeWitness) });
+	assert.equal(unpricedResponse.payments.length, 1, "an unchecked response does not discard the ordered-line witness");
+	assert.deepEqual(responseForecast({ label: "Optional pass", when: { active: "self" }, action: { option: "pass" } }).unchecked, [], "costless alternatives add no resource-warning noise");
 
 	const three = matchup("arithmetic");
 	place(three, 0, "battlefield", "Forest", "Forest", "Forest");
 	main(three, 0, 3);
 	place(three, 0, "hand", "Mossborn Hydra", "Snakeskin Veil");
-	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three) }), /may\[0\] \(Veil a targeted creature\): costs \{G\} but the steps before it leave no untapped source/);
+	const unfunded: Plan = { objective: "Develop", guidance: "Use Veil if available", steps: [cast(three, "Mossborn Hydra")], may: veil(three) };
+	assert.match(paymentForecast(workFrame(three, 0), unfunded).responses.join(" "), /may\[0\] \(Veil a targeted creature\): costs \{G\} but the steps before it leave no untapped source/);
+	assert.deepEqual(budget(workFrame(three, 0), unfunded), [], "an unfunded optional response never refuses the payable ordered line");
 	const forest = cardsIn(three, "battlefield", 0).find((one) => one.card === "Forest")!;
 	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three), holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Veil" }] }),
 		/steps\[\d\] \(Cast Mossborn Hydra\): costs \{2\}\{G\} but the steps before it leave Forest \(G\), Forest \(G\), and the plan holds Forest/);
@@ -731,7 +743,7 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	editWork(three, 0, [{ do: "package.put", package: { card: "Mossborn Hydra", assessed: true, registers: pack("Mossborn Hydra"), procedures: [{ ...printedCast("Mossborn Hydra", three.printed["Mossborn Hydra"]!), basis: "Trample" }] } }], "hydra-cast");
 	const exact = nextDecision(three)!.options.find((one) => one.use && three.things.get(one.use.source.id)?.card === "Mossborn Hydra")!;
 	assert.ok(exact.use);
-	assert.match(problems(three, { steps: [{ label: "Exact Hydra", when: now(three), action: { option: exact.id } }], may: veil(three) }), /may\[0\].*costs \{G\}/);
+	assert.match(paymentForecast(workFrame(three, 0), { ...unfunded, steps: [{ label: "Exact Hydra", when: now(three), action: { option: exact.id } }] }).responses.join(" "), /may\[0\].*costs \{G\}/);
 	const four = matchup("fixed-payment");
 	place(four, 0, "battlefield", "Forest", "Forest", "Forest", "Forest");
 	main(four, 0, 3);
@@ -1038,9 +1050,9 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	apply(equivalent, ordinaryWarp.id, "model", "chosen", execution(sameState, ordinaryWarp.id));
 	assert.deepEqual(workFrame(equivalent, 1).view.done, [0], "progress is journaled on the actual chosen row, without a second plan edit");
 	assert.deepEqual(planState(workFrame(equivalent, 1))!.due, [], "the executed cast is not reintroduced as a missing essential step");
-	// Without the Village, both Mountains pay for the creature and Shock is named as the conflict.
+	// Without the Village, both Mountains pay for the creature and Shock is unfunded.
 	commit(table, [{ do: "move", what: cardsIn(table, "battlefield", 1).find((one) => one.card === "Rockface Village")!.id, to: "graveyard", reason: "resolve" }], "resolve");
-	assert.match(budget(workFrame(table, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
+	assert.match(paymentForecast(workFrame(table, 1), plan).responses.join(" "), /may\[0\] \(Shock a blocker\): costs \{R\} but the steps before it leave no untapped source/);
 	// The same card name in play or exile is not a source for every accepted cast.
 	const nova = cardsIn(table, "hand", 1).find((one) => one.card === "Nova Hellkite")!;
 	commit(table, [{ do: "move", what: nova.id, to: "battlefield", reason: "resolve" }], "resolve");
@@ -1144,7 +1156,7 @@ test("the arithmetic counts each card once, lets floating mana go when its step 
 	assert.deepEqual(budget(workFrame(floating, 0), { objective: "o", guidance: "g", steps: [cast("Cast the Elf now", refs(lone!))] }), []);
 	assert.match(budget(workFrame(floating, 0), { objective: "o", guidance: "g", steps: [cast("Cast the Elf after combat", refs(lone!), "postcombat-main")] }).join(" "), /costs \{G\}/);
 
-	// Smaug takes the Villages' creature-only red and the Sanctuaries' colorless, so the Mountain stays for Shock; without it, Shock is named.
+	// Without unrestricted red, Shock is an unfunded response, not a failed Smaug cast.
 	const red = matchup("smaug");
 	main(red, 1, 2);
 	const colorless: Plan["packages"] = [{ card: "Soulstone Sanctuary", registers: [{ basis: "{T}: Add {C}.", kind: "mana", cost: { tap: true }, colors: ["C"] }] }];
@@ -1158,7 +1170,8 @@ test("the arithmetic counts each card once, lets floating mana go when its step 
 			timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] } } }] };
 	assert.deepEqual(budget(workFrame(red, 1), plan), []);
 	commit(red, [{ do: "move", what: mountain!.id, to: "graveyard", reason: "resolve" }], "resolve");
-	assert.match(budget(workFrame(red, 1), plan).join(" "), /may\[0\] \(Shock a blocker\): costs \{R\}/);
+	assert.match(paymentForecast(workFrame(red, 1), plan).responses.join(" "), /may\[0\] \(Shock a blocker\): costs \{R\}/);
+	assert.deepEqual(budget(workFrame(red, 1), plan), []);
 });
 
 test("a plan the writer was told about once goes through the table, and a schema refusal does not use up the arithmetic's", async () => {

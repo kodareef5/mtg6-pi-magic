@@ -159,8 +159,35 @@ does not pretend to resolve them. Newly entered creature attacks and tap abiliti
 retain their entry-characteristic limitation.
 
 The arithmetic invariant reproduces both false refusals and compares the later
-source with the real offered activation. The three Green planning cases are
-being rerun through the shared benchmark tool before re-scoring their strategies.
-The requested follow-ups are derived execution instructions, non-refusing
-response warnings, selector aliases and a narrow prepared-plan reuse case.
-Experimental proposal and instruction renderers remain outside production.
+source with the real offered activation. Commit `3b653c9` passed types, all 179
+tests and all 18 saved-prefix checks.
+
+The shared benchmark runner repeated three Green cases three times after the
+entry fix. All nine answers were accepted; the old narrow checker passed seven.
+The run used 14 calls, 2m16s of reported request time, 346,291 input and 15,046
+output tokens, and $0.0231. Evidence is under `entry-recheck/`.
+
+Two of the three after-Explorer answers now retained a Passage play followed by
+its activation. Two chose lasting Hydra development; the other skipped it and
+still included an Explorer attack despite describing it as summoning sick. The
+landfall amendment still made false mana claims, and preparation kept stale
+Veil prose. The regex checker also flagged a reservation sentence that explicitly
+said Veil was absent. These results support correcting the false refusal, not
+claiming coherent strategy from the seven narrow passes.
+
+## Optional responses and selector aliases
+
+An unfunded `may` response now appears separately from ordered-step conflicts.
+Its warning describes the example payment's remaining sources, not a guarantee
+that every possible payment fails. An unchecked response keeps the ordered-line
+witness intact. Unpriced alternatives remain explicit; a costless pass creates
+no resource warning. Explicit holds and ordered actions retain their checks.
+The writer sees existing optional-response warnings as facts without a refusal.
+
+The writer also accepts `card` as an alias for `name` inside conditions, while
+retaining `card` in action-source queries. Conflicting names are still refused,
+and journals retain the canonical syntax. No system-prompt paragraph was added.
+
+Derived execution instructions, the shared candidate comparison and the narrow
+prepared-plan reuse case remain pending. Experimental proposal and instruction
+renderers remain outside production.
