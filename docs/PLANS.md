@@ -227,7 +227,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   repaired-line win. No adoption. [Diagnostic result](history/2026-10-07-consequence-feedback.md).
 - [ ] Produce complete, coherent turn commitments. The [attack audit](history/2026-10-07-attack-commitments.md)
   separates omitted actions from false choices and payment conflicts; requiring
-  complete attack dispositions remains unadopted.
+  complete attack dispositions remains unadopted. A [post-entry repair diagnostic](history/2026-10-07-post-entry.md)
+  selected winning attack sets in two of three repairs, but failed its gate and
+  left completion coverage incomplete. No physical expansion followed.
 - [ ] Reuse a prepared line only with positive coverage for the observed change.
   First test an ordinary opposing land play and a draw covered by a land branch;
   a changed blocker must still trigger reconsideration. Syntax, an empty stop
