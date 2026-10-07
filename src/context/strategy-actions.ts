@@ -17,9 +17,9 @@ const sourceFact = (one: SeenObject) => ({ id: one.id, incarnation: one.incarnat
 	...(one.summoningSick === undefined ? {} : { summoningSick: one.summoningSick }) });
 
 /** Bind a selector to current facts without deciding whether a later prerequisite will change them. */
-function movementFacts(frame: Frame, action: PlanOption["action"]) {
+function movementFacts(frame: Frame, action: PlanOption["action"], blockPairs = false) {
 	if ("procedure" in action || !action.objects) return {};
-	const selected = select(action.objects, frame), combat = action.prefix === "attack:" || action.prefix === "block:";
+	const selected = select(action.objects, frame), combat = action.prefix === "attack:" || action.prefix === "block:" || blockPairs && action.option?.startsWith("block:");
 	return { selectedNow: selected.map((one) => ({ ...sourceFact(one), ...(combat ? { obstaclesNow: [
 		...(one.zone !== "battlefield" ? ["not on the battlefield"] : []),
 		...(!one.traits?.types.includes("creature") ? ["not a creature"] : []),
@@ -29,7 +29,7 @@ function movementFacts(frame: Frame, action: PlanOption["action"]) {
 }
 
 /** Visible land and combat selectors, ready to reuse without inventing button ids. */
-export function movementActions(frame: Frame, turn?: number): ReturnType<typeof actions> {
+export function movementActions(frame: Frame, turn?: number, blockPairs = false): ReturnType<typeof actions> {
 	const entries: [string, ReturnType<typeof actions>[string]][] = [];
 	for (const source of useSources(frame, { source: { zones: ["hand", "graveyard", "exile"], controller: "any" }, timing: "land" }, turn)) {
 		if (!source.traits?.types.includes("land") || !source.card) continue;
@@ -39,9 +39,17 @@ export function movementActions(frame: Frame, turn?: number): ReturnType<typeof 
 	for (const source of frame.view.objects ?? []) {
 		if (source.zone !== "battlefield" || source.controller !== frame.seat || !source.traits?.types.includes("creature")) continue;
 		for (const kind of ["attack", "block"] as const) {
-			const label = `${kind === "attack" ? "Attack" : "Block"} with ${source.card ?? source.token?.name}`;
+			const label = `${kind === "attack" ? "Attack" : "Block"} with ${source.card ?? source.token?.name}${blockPairs && kind === "block" ? " (any attacker)" : ""}`;
 			entries.push([`${kind} ${source.id}@${source.incarnation}`, { label, action: { prefix: `${kind}:`,
 				objects: { zones: ["battlefield"], controller: "self", refs: [{ id: source.id, incarnation: source.incarnation }] } } }]);
+		}
+		// Experimental catalog entries name physical pairs; they neither rank nor certify blocks.
+		if (blockPairs) for (const attacker of frame.view.objects ?? []) {
+			if (attacker.zone !== "battlefield" || attacker.controller === frame.seat || !attacker.traits?.types.includes("creature")) continue;
+			entries.push([`block ${source.id} on ${attacker.id}`, {
+				label: `Block ${attacker.card ?? attacker.token?.name ?? attacker.id} with ${source.card ?? source.token?.name ?? source.id}; follows these physical cards`,
+				action: { option: `block:${source.id}:${attacker.id}`, objects: { zones: ["battlefield"], controller: "self", ids: [source.id] } },
+			}]);
 		}
 	}
 	return Object.fromEntries(entries);
@@ -66,7 +74,7 @@ export function choiceProblems(frame: Frame, changes: Record<string, unknown>, n
 }
 
 /** Show source-bound uses and prior intent to repair; absent equipment remains a lookup. */
-export function actionFacts(frame: Frame, available: ReturnType<typeof actions>, turn?: number) {
+export function actionFacts(frame: Frame, available: ReturnType<typeof actions>, turn?: number, blockPairs = false) {
 	let resources = turn === undefined ? frame : afterUntap(frame);
 	if (turn !== undefined && resources.view.window.kind === "turn") resources = { ...resources,
 		view: { ...resources.view, window: { ...resources.view.window, turn, active: frame.seat } } };
@@ -75,8 +83,10 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 		if (!("procedure" in one.action)) {
 			if (!prior && one.action.objects && !select(one.action.objects, frame).length) return undefined;
 			const offered = frame.decision?.options.find((option) => option.id === ("option" in one.action ? one.action.option : undefined));
-			return [key, { ...one, ...movementFacts(resources, one.action), ...(offered?.use ? { fixedUse: offered.use }
-				: one.action.option ? { availability: offered ? "Offered now" : "This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }] as const;
+			return [key, { ...one, ...movementFacts(resources, one.action, blockPairs), ...(offered?.use ? { fixedUse: offered.use }
+				: one.action.option ? { availability: offered ? "Offered now" : blockPairs && one.action.option.startsWith("block:") && one.action.objects?.ids ?
+					"This physical pair is not offered now. It can match only that blocker and attacker when the table offers their block. Matching does not certify the complete declaration's legality." :
+					"This exact pick is not offered now. Reuse a prepared use for a future cast; old pick ids do not follow zone changes or different payments." } : {}) }] as const;
 		}
 		const use = one.action.procedure;
 		const { cost, instructions: _instructions, ...procedure } = use;

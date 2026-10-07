@@ -76,3 +76,13 @@ missed lethal when played. Its conflicting prose remains in the fixture.
 that work row after `journal.fork`. Three established creatures and burn can
 win through Green's lone Hydra; the recorded line omitted Sanctuary. The
 manifest grades a physically observed win rather than one specific attack set.
+
+`green-block-preparation.jsonl.gz` freezes prefix292 of
+`consequence-upkeep/red-upkeep-lethal-2-receipt-consequence/game.jsonl` under
+`.pi/resume-20261007/`. Call30 first generated the broad Kellan block there.
+`green-multi-attack.jsonl.gz` is prefix293 of treatment run1 in the same family,
+before Green selects a block against Kellan, Zhao and Smaug. It supports a supplied
+matching test, not a claim about the instruction accepted after that declaration.
+`block-kellan-zhao.jsonl.gz` and `block-zhao-only.jsonl.gz` descend from the first
+prefix through recorded passes and supplied T12 attacks. No physical fact was
+edited. See [the pair-catalog gate](../../../docs/history/2026-10-07-block-pairs.md).

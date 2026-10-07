@@ -16,7 +16,11 @@
     "redBeforeUpkeep": "test/fixtures/benchmarks/red-before-upkeep.jsonl.gz",
     "menacePartialBlock": "test/fixtures/benchmarks/menace-partial-block.jsonl.gz",
     "menace-objection": "test/fixtures/benchmarks/menace-objection.jsonl.gz",
-    "menace-legal-pair": "test/fixtures/benchmarks/menace-legal-pair.jsonl.gz"
+    "menace-legal-pair": "test/fixtures/benchmarks/menace-legal-pair.jsonl.gz",
+    "green-block-preparation": "test/fixtures/benchmarks/green-block-preparation.jsonl.gz",
+    "green-multi-attack": "test/fixtures/benchmarks/green-multi-attack.jsonl.gz",
+    "block-kellan-zhao": "test/fixtures/benchmarks/block-kellan-zhao.jsonl.gz",
+    "block-zhao-only": "test/fixtures/benchmarks/block-zhao-only.jsonl.gz"
   },
   "cases": [
     {
@@ -516,6 +520,41 @@
       "objectionRow": 285,
       "property": "Execute the supplied phase objection policy under unchanged facts; no generation claim.",
       "pilotPolicy": "test/fixtures/benchmarks/red-objection-coverage.json"
+    },
+    {
+      "id": "green-block-preparation",
+      "journal": "green-block-preparation",
+      "version": 292,
+      "seat": 0,
+      "task": "prepare",
+      "property": "Construct a coherent future blocking policy; manual construction audit distinguishes exact pairs, broad bindings and no pairing opportunity."
+    },
+    {
+      "id": "green-multi-attack",
+      "journal": "green-multi-attack",
+      "version": 293,
+      "seat": 0,
+      "task": "pilot",
+      "expect": {
+        "id": "block:0-25:1-15"
+      },
+      "property": "Saved declaration offers Forest blocks of Kellan, Zhao and Smaug; one Forest can legally block Kellan only."
+    },
+    {
+      "id": "block-kellan-zhao",
+      "journal": "block-kellan-zhao",
+      "version": 333,
+      "seat": 0,
+      "task": "plan",
+      "property": "Supplied opposing declaration for accepted generated-policy execution via --answers; runner health is not a legality or strategy grade."
+    },
+    {
+      "id": "block-zhao-only",
+      "journal": "block-zhao-only",
+      "version": 332,
+      "seat": 0,
+      "task": "plan",
+      "property": "Supplied opposing declaration for accepted generated-policy execution via --answers; runner health is not a legality or strategy grade."
     }
   ]
 }

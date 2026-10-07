@@ -225,3 +225,12 @@ its revision and ledger progress. This is a supplied execution control, not a
 production plan acceptance. Its normal marks, ordering and phase precedence are
 part of the measured representation. The table and physical choice set remain
 unchanged. See [the supplied coverage diagnostic](../../docs/history/2026-10-07-supplied-coverage.md).
+
+`--arm block-pairs` adds exact physical blocker/attacker pairs to the production
+writer's reusable catalog. It retains broad selectors and leaves the default
+unchanged. The `green-block-preparation` case freezes construction before the
+broad block was first written. Its runner PASS only means the answer passed
+the configured structural checks; [the manual gate](../../docs/history/2026-10-07-block-pairs.md)
+grades binding, policy and execution. `block-kellan-zhao` and `block-zhao-only`
+are supplied declaration inputs for accepted plans through `--answers`, not
+additional planning calls.

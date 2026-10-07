@@ -40,7 +40,7 @@ const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { t
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" }, arm: { type: "string", default: "production" },
 	"repair-source": { type: "string" }, receipts: { type: "string" } } });
-if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
+if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
 const repairing = values.arm!.startsWith("receipt-");
 if (repairing !== !!values["repair-source"] || repairing !== !!values.receipts || repairing && values.answers)
 	throw new Error("Receipt arms need --repair-source and --receipts, without --answers.");
@@ -56,6 +56,7 @@ if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))
 if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers || values.arm !== "production")) throw new Error("Continuation cases require --play and the production arm, without --answers: they resume the prefix's existing work.");
 if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
 if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
+if (values.arm === "block-pairs" && selected.some((one) => !["prepare", "plan", "amend", "repair"].includes(one.task))) throw new Error("Block-pair arms require planning cases.");
 if (repairing && selected.some((one) => !["plan", "amend", "repair"].includes(one.task))) throw new Error("Receipt arms require current-position planning cases.");
 const repairSource = repairing ? JSON.parse(readFileSync(values["repair-source"]!, "utf8")) as RepairSource : undefined;
 const reviewed = repairing ? JSON.parse(readFileSync(values.receipts!, "utf8")) as { receipts: ReviewedReceipt[] } : undefined;
@@ -158,7 +159,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
 				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
 			} else if (one.task !== "pilot") {
-				const context = { brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}) };
+				const context = { brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}), ...(arm === "block-pairs" ? { blockPairs: true } : {}) };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
 					answer = { plan: frame.view.work.plan, fromPrefix: true };

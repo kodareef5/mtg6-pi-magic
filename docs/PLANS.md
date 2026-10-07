@@ -291,3 +291,5 @@ exception handling remains open. Current hints are not historical verdicts.
 The [supplied coverage controls](history/2026-10-07-supplied-coverage.md) selected
 the authored finish and objection in all six replies. Green's lead over help
 remained narrow. Generated coverage and post-rollback recovery remain unproven.
+An [exact-pair catalog experiment](history/2026-10-07-block-pairs.md) tests
+generated blocking commitments; the production catalog remains unchanged.

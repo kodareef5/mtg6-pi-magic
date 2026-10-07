@@ -439,6 +439,55 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 		assert.equal(action.option, undefined, "future movement binds by objects rather than an invented id");
 		assert.ok(select(action.objects!, frame).every((one) => one.card || one.token), "a reusable movement never exposes an unknown identity");
 	}
+	// Pair binding is an experimental catalog choice, using the ordinary preparation validator and matcher.
+	const scratch = mkdtempSync(join(tmpdir(), "magic-block-pairs-")), path = join(scratch, "game.jsonl");
+	try {
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/green-block-preparation.jsonl.gz")));
+		const saved = replay(path, (header) => matchTable(header.seed)), before = structuredClone(saved.table);
+		const preparation = workFrame(saved.table, 0), key = "block 0-25 on 1-15";
+		const pairCatalog = actions(preparation, undefined, 11, true);
+		assert.equal(actions(preparation, undefined, 11)[key], undefined, "the default catalog is unchanged");
+		assert.match(pairCatalog[key]!.label, /physical cards/);
+		assert.match(pairCatalog["block 0-25@2"]!.label, /any attacker/);
+		const written = { steps: [{ label: "Finish blockers", when: { active: "opponent", step: "declare-blockers" }, action: { option: "block:done" } }],
+			may: [{ label: "Block Kellan with Forest", when: { active: "opponent", step: "declare-blockers" }, action: { reuse: key },
+				if: { amount: { count: { zones: ["battlefield"], controller: "opponent", name: "Kellan, Planar Trailblazer", attacking: true } }, atLeast: 1 } }] };
+		const made = await prepareTurn(preparation, { blockPairs: true }, { async work(_about, prompt, protocol) {
+			const input = JSON.parse(prompt.user);
+			assert.equal(input.positionBasis.kind, "forecast");
+			assert.deepEqual(input.base.steps, []);
+			assert.equal(input.actions[key].selectedNow[0].tapped, false, "source facts use the untapped forecast");
+			assert.match(input.actions[key].availability, /physical pair/);
+			assert.equal(protocol!.submit.check(written), null, "next-turn validation accepts the exact pair through reuse");
+			return written;
+		} });
+		assert.deepEqual(choiceProblems(preparation, written, true), []);
+		assert.deepEqual(planProblems(preparation, made.plan), []);
+		assert.deepEqual(saved.table, before, "catalog construction and validation move nothing");
+		const action = made.plan.may![0]!.action;
+		assert.ok("option" in action);
+		assert.equal(action.option, "block:0-25:1-15");
+		const marked = (at: Frame, selected: PlanOption["action"]) => {
+			const plan: Plan = { objective: "Test matching.", guidance: "No strategy claim.", steps: [{ label: "Block Kellan with Forest", when: { active: "opponent", step: "declare-blockers" }, action: selected }] };
+			const packet = { ...at, view: { ...at.view, done: [], work: { ...at.view.work!, plan } } };
+			const state = planState(packet)!;
+			assert.deepEqual(annotate(at.decision!.options, state).map((one) => one.id), at.decision!.options.map((one) => one.id));
+			return state.due.flatMap((one) => one.candidates.map((option) => option.id));
+		};
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/green-multi-attack.jsonl.gz")));
+		const multiple = workFrame(replay(path, (header) => matchTable(header.seed)).table, 0);
+		assert.deepEqual(marked(multiple, action), ["block:0-25:1-15"]);
+		assert.deepEqual(marked(multiple, actions(multiple)["block 0-25@2"]!.action),
+			["block:0-25:1-15", "block:0-25:1-58", "block:0-25:1-49"], "a blocker-only selector marks all pairings, including rule conflicts");
+		assert.deepEqual(marked(multiple, { ...action, option: "block:0-25:1-1" }), [], "exact pair ids cannot collide with longer attacker ids");
+		const reincarnated = structuredClone(multiple);
+		reincarnated.view.objects!.find((one) => one.id === "0-25")!.incarnation++;
+		reincarnated.decision!.options.forEach((one) => one.objects?.forEach((ref) => { if (ref.id === "0-25") ref.incarnation++; }));
+		assert.deepEqual(marked(reincarnated, action), ["block:0-25:1-15"], "these entries follow physical cards, not old incarnations");
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/menace-partial-block.jsonl.gz")));
+		const absent = workFrame(replay(path, (header) => matchTable(header.seed), 284).table, 0);
+		assert.deepEqual(marked(absent, action), [], "Kellan is not attacking; the pair cannot mark the lone Zhao block");
+	} finally { rmSync(scratch, { recursive: true, force: true }); }
  assert.deepEqual(changedPlan(base, planFacts(base), actions(frame, base)), base, "the displayed plan uses exact reusable references instead of repeating executable bodies");
  const pastPick = { ...frame, view: { ...frame.view, worked: [{ label: "Old physical pick", action: { option: "cast:past-incarnation-and-payment" } }] } };
  assert.ok(!Object.keys(actions(pastPick)).some((key) => key.startsWith("worked:")), "past physical picks are history, not reusable equipment");

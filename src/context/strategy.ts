@@ -143,7 +143,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	options: { prepared?: Prepared; nextTurn?: boolean; changed?: string[]; signal?: AbortSignal } = {}): Promise<Prepared & { objection?: Objection }> {
 	const base = basePlan(frame, options.prepared?.plan, options.nextTurn, context.brief ? initialPlan(context.brief) : undefined);
 	const at = frame.view.window;
-	const available = actions(frame, base, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined);
+	const available = actions(frame, base, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined, context.blockPairs);
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
@@ -155,7 +155,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
 	const resources = paymentForecast(frame, base);
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
-		...(resources.responses.length ? { optionalResponseFunding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
+		...(resources.responses.length ? { optionalResponseFunding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined, context.blockPairs),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }, options.nextTurn ? "preparation" : response ? "response" : "turn"),
 		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {
 		submit: { ...submit, check(args) {
