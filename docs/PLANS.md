@@ -147,6 +147,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
    or branch, its display is `policy`, not unfinished executable work. Prose can
    still require an action; the label grants no pass and changes no core review
    record. [Phase display comparison](history/2026-10-07-phase-policy.md).
+   A future commitment may name its first matching remaining window this turn.
+   That schedule fact certifies no future action availability or pass permission.
+   [Schedule comparison](history/2026-10-07-scheduled-window.md).
 5. [x] Make pregame a reusable playbook and Luna its turn organizer.
    File policies by opening, sequencing, resources, responses, combat and recovery,
    with applicability, priorities, worked examples and reversing conditions.

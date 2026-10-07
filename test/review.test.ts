@@ -33,14 +33,42 @@ test("a pilot executes with derived plan status, while private judgments neither
 	phases: [{ when: { active: "self", step: "precombat-main" }, goal: "Develop without spending protection.", guidance: "Play Forest; do not invent extra mana." }] } }], "plan");
 	const drawFrame = workFrame(table, 0);
 	drawFrame.view.window = { kind: "turn", turn: 1, active: 0, step: "draw", phase: "beginning" };
+	drawFrame.view.remainingSteps = ["draw", "precombat-main", "begin-combat", "declare-attackers", "end"];
 	for (const inspection of [undefined, {}]) {
 		const draw = focus(drawFrame, startingIntent(0), { ...(inspection ? { inspection } : {}) });
 		assert.deepEqual(draw.plan!.next.map((one) => [one.label, one.when.step, one.status]), [
 			["Play Forest", "precombat-main", "outside-window"], ["Cast Hydra", "precombat-main", "outside-window"],
 		], "a pilot waiting for main phase sees the required windows even without a current checklist");
+		assert.deepEqual(draw.plan!.next.map((one) => one.scheduled), [0, 1].map(() => ({ turn: 1, active: 0, step: "precombat-main", phase: "precombat-main" })));
+		assert.doesNotMatch(moveQuestion(draw, true).instructions!, /window is closed/);
+		assert.match(moveQuestion(draw, true).instructions!, /does not promise that conditions, sources or actions will be available/);
 		assert.match(moveQuestion(draw, true).instructions!, /unrelated available activation is not a substitute/);
 		assert.deepEqual(drawFrame.view.work!.plan!.steps, table.work[0]!.plan!.steps, "slicing pending windows changes no intent");
 	}
+	const later = focus(drawFrame, startingIntent(0));
+	for (const remainingSteps of [undefined, ["draw", "end"], ["draw"]] as const) {
+		const missing = structuredClone(drawFrame);
+		missing.view.remainingSteps = remainingSteps && [...remainingSteps];
+		const packet = focus(missing, startingIntent(0));
+		assert.ok(packet.plan!.next.every((one) => !one.scheduled), "no projected matching occurrence means no schedule hint");
+		assert.deepEqual(packet.options, later.options, "a skipped window never filters physical options");
+	}
+	const repeated = structuredClone(drawFrame);
+	repeated.view.remainingSteps = ["draw", "draw", "precombat-main", "draw", "precombat-main"];
+	assert.deepEqual(focus(repeated, startingIntent(0)).plan!.next, later.plan!.next, "remaining occurrences are searched in order");
+	const phaseOnly = structuredClone(drawFrame);
+	phaseOnly.view.work!.plan!.steps[0]!.when = { active: "self", phase: "combat" };
+	phaseOnly.view.work!.plan!.steps[0]!.action = { option: "pass" };
+	assert.equal(focus(phaseOnly, startingIntent(0)).plan!.next[0]!.scheduled!.step, "begin-combat", "phase matching uses the first remaining step of that phase");
+	for (const when of [{ active: "opponent" as const, step: "precombat-main" as const }, { fromTurn: 2 }, { throughTurn: 0 }]) {
+		const other = structuredClone(drawFrame);
+		other.view.work!.plan!.steps[0]!.when = when;
+		assert.equal(focus(other, startingIntent(0)).plan!.next[0]!.scheduled, undefined, "another turn is not invented");
+	}
+	const falseStep = workFrame(table, 0);
+	falseStep.view.work!.plan!.steps[0]!.if = { amount: 0, atLeast: 1 };
+	falseStep.view.remainingSteps = ["precombat-main", "precombat-main", "end"];
+	assert.deepEqual(focus(falseStep, startingIntent(0)).plan!.next.map((one) => [one.status, one.scheduled]), [["condition-false", undefined]], "current false conditions are not reclassified as future work");
 	const physical = () => JSON.stringify({ things: [...table.things], cursor: table.cursor, ledger: table.ledger, log: table.log });
 	const before = physical(), offered = nextDecision(table), prompts: string[] = [];
 	const pilot = aiSeat({ name: "Green", intent: startingIntent(0), onGap: assert.fail, api: { named: "fixture", async ask(request) {
@@ -163,6 +191,14 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.ok(waiting.checklist!.some((one) => one.kind === "branch" && one.available), "an instant response remains available");
 	assert.match(moveQuestion(waiting, true).instructions!, /absence alone does not require a new plan/);
 	assert.match(moveQuestion(waiting, true).instructions!, /does not end the phase/);
+	const futureOnStack = workFrame(response, 1);
+	futureOnStack.view.work!.plan!.steps.push({ label: "Finish attackers", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" } });
+	const scheduledOnStack = focus(futureOnStack, startingIntent(1));
+	assert.equal(scheduledOnStack.plan!.next[0]!.scheduled!.step, "declare-attackers");
+	assert.deepEqual(scheduledOnStack.checklist, waiting.checklist, "a future hint leaves current waits and response bindings intact");
+	assert.deepEqual(scheduledOnStack.options, waiting.options);
+	assert.deepEqual(moveQuestion(scheduledOnStack, true).criteria, moveQuestion(waiting, true).criteria, "the hint grants no new passing policy");
+	assert.match(moveQuestion(scheduledOnStack, true).instructions!, /The stack is waiting/);
 	const stackPolicyFrame = workFrame(response, 1);
 	stackPolicyFrame.view.work!.plan!.steps = []; stackPolicyFrame.view.work!.plan!.may = [];
 	const stackPolicy = focus(stackPolicyFrame, startingIntent(1));

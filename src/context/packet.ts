@@ -9,6 +9,7 @@ import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
 import { laterStep, planState } from "../core/planning.ts";
 import { matches } from "../core/query.ts";
+import { STEPS } from "../core/steps.ts";
 import type { When } from "../core/work-language.ts";
 import type { SeenObject } from "../core/work.ts";
 import type { Printed } from "../core/printed.ts";
@@ -26,7 +27,7 @@ import type { PlanOption } from "../core/language.ts";
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
 export type PlanSlice = {
 	throughTurn?: number; guidance?: string; due?: string;
-	next: { label: string; when: When; status: "outside-window" | "condition-false" }[];
+	next: { label: string; when: When; status: "outside-window" | "condition-false"; scheduled?: Omit<Extract<Window, { kind: "turn" }>, "kind"> }[];
 	branches: string[]; held: string[]; stops: string[]; done: string[];
 	script?: { goal: string[]; guidance: string[]; steps: string[]; completion?: string[]; reevaluate: string[] };
 };
@@ -78,6 +79,19 @@ function inPlanOrder<T extends { id: string }>(options: readonly T[], state: Ret
 /** The same canonical grouping drives inspection and the question's facts. */
 export function decisionChoices(frame: Frame) { return choices(inPlanOrder(frame.decision?.options ?? [], planState(frame))); }
 
+/** A remaining occurrence is a schedule fact, not future action availability. */
+function scheduled(when: When, frame: Frame): PlanSlice["next"][number]["scheduled"] {
+	const at = frame.view.window;
+	if (at.kind !== "turn" || matches(when, frame)) return;
+	for (const step of frame.view.remainingSteps?.slice(1) ?? []) {
+		const window = { ...at, step, phase: STEPS[step].phase };
+		if (matches(when, { seat: frame.seat, view: { window } })) {
+			const { kind, ...next } = window;
+			return next;
+		}
+	}
+}
+
 export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; inspection?: Inspection; capacity?: number };
 /** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
 export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet {
@@ -95,8 +109,11 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const plan = state && !view.resolution ? {
 		...(state.plan.throughTurn === undefined ? {} : { throughTurn: state.plan.throughTurn }),
 		...(dueAt !== undefined ? { due: instruction(state.plan.steps[dueAt]!) } : {}),
-		next: state.waiting.map((one) => ({ label: instruction(state.plan.steps[one.at]!), when: structuredClone(state.plan.steps[one.at]!.when),
-			status: matches(state.plan.steps[one.at]!.when, frame) ? "condition-false" as const : "outside-window" as const })),
+		next: state.waiting.map((one) => {
+			const step = state.plan.steps[one.at]!, next = scheduled(step.when, frame);
+			return { label: instruction(step), when: structuredClone(step.when),
+				status: matches(step.when, frame) ? "condition-false" as const : "outside-window" as const, ...(next ? { scheduled: next } : {}) };
+		}),
 		branches: state.branches.map((one) => `${one.waiting ? "Waiting for the stack to empty: " : ""}${instruction(state.plan.may![one.at]!)}`),
 		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
 		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
