@@ -57,13 +57,13 @@ const SUBMIT = {
 
 /** Luna low reasons in its output, so the arithmetic is written before the plan. No code checks it. */
 const text = (description: string) => ({ type: "string", minLength: 1, description });
-const ASSESSMENT = { type: "object", additionalProperties: false, required: ["hand", "zones", "opponents", "combat", "rollup"],
+const ASSESSMENT = { type: "object", additionalProperties: false, required: ["hand", "zones", "opponents", "combat", "combinations", "rollup"],
 	description: "Survey the position piece by piece before writing any plan field: your own working, which Jev never reads. Look at each item for what could materially change the game.",
 	properties: {
 		hand: { type: "array", description: "One entry for every card in decisionFacts.yourHand.", items: { type: "object", additionalProperties: false, required: ["card", "play", "impact"], properties: {
 			card: text("Its name."),
 			play: text("Whether and when you can cast or play it in the planned turn, with its cost against your mana, or why not."),
-			impact: text("What it would change if played: damage, an attacker or blocker this turn (haste attacks the turn it is cast), removal, mana, cards. Say plainly if it could swing or win the game."),
+			impact: text("What it would change if played, alone and with your other cards: damage, an attacker or blocker this turn (haste attacks the turn it is cast), removal, mana, cards. Say plainly if it could swing or win the game."),
 		} } },
 		zones: { type: "array", description: "Your battlefield, graveyard and exile, and the stack.", items: { type: "object", additionalProperties: false, required: ["zone", "opportunity"], properties: {
 			zone: text("The zone."), opportunity: text("Any ability, untapped source, creature-land, permission or pending object there that materially changes the game, or none."),
@@ -79,9 +79,12 @@ const ASSESSMENT = { type: "object", additionalProperties: false, required: ["ha
 			status: text("Can it attack or block this turn, and why: tapped, summoning-sick, haste, already in combat."),
 			best: text("Its best use and what happens: which creature could block it or it could block, what dies, damage that gets through."),
 		} } },
+		combinations: { type: "array", description: "Cards and permanents that together do what none does alone: damage from several spells added on one creature against its toughness, removal that clears a blocker before an attack, a pump before a block, a land before a landfall payoff. Check every opposing creature that matters against the total damage your spells can deal this turn.", items: { type: "object", additionalProperties: false, required: ["cards", "effect"], properties: {
+			cards: text("The cards and their total cost against your mana."), effect: text("What they achieve together that none achieves alone, or why it is not worth it."),
+		} } },
 		rollup: { type: "object", additionalProperties: false, required: ["win", "priorities"], properties: {
 			win: text("All your attackers from combat attacking together, castable haste included: total damage, minus the largest attacker each untapped opposing creature can block, plus burn, against their life. The winning line in order, or why not."),
-			priorities: { type: "array", items: { type: "string" }, description: "The opportunities above ranked by impact. The plan carries out the first ones." },
+			priorities: { type: "array", items: { type: "string" }, description: "The opportunities above, combinations included, ranked by impact. The plan carries out the first ones." },
 		} },
 	} };
 
@@ -203,9 +206,9 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		} },
 		// A fourth reply lets a winning line survive a refusal over a side problem.
 		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 4,
-		// Observed ordinary replies take 6-28s; retry a stalled critical-path
-		// request without replacing its task, model, or accepted plan.
-		...(options.nextTurn ? {} : { timeoutMs: 45_000 }),
+		// With the survey, ordinary replies take 10-45s; retry a stalled
+		// critical-path request without replacing its task, model, or plan.
+		...(options.nextTurn ? {} : { timeoutMs: 75_000 }),
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");

@@ -403,7 +403,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.
 			// One request per decision: once answered, the pilot chooses among the actual options.
-			const help = !!options.plan && !!frame.view.work && helped !== frame.version && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
+			// No revised plan can change a decision whose only options pass or finish an empty declaration.
+			const movable = frame.decision.options.some((one) => !["pass", "attack:done", "block:done"].includes(one.id));
+			const help = !!options.plan && !!frame.view.work && movable && helped !== frame.version && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
 			for (;;) {
 				const rules = options.rules && walked.length < budget ? options.rules : undefined;

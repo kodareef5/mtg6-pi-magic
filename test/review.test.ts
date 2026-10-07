@@ -157,6 +157,16 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.match(reason, /The stack is empty\./);
 	assert.match(reason, /Cast Hydra/, "the unfinished line is named, not left for the writer to guess");
 	assert.equal((await help.answer(workFrame(table, 0))).kind, "pick", "the pilot chooses an actual option after its one request");
+	const passing = workFrame(table, 0);
+	passing.decision = { ...passing.decision!, options: passing.decision!.options.filter((one) => one.id === "pass") };
+	const idle = aiSeat({ name: "Idle", intent: startingIntent(0), onGap: assert.fail, plan: async () => { throw new Error("No plan is asked for"); }, api: { named: "fixture", async ask(request) {
+		const question = request.questions.pick!;
+		if (question.type !== "choice") assert.fail();
+		assert.ok(!Object.hasOwn(question.criteria, "ask:help"), "a decision that can only pass offers no help: no revised plan changes it");
+		return { pick: { type: "choice", choice: "pass", confidence: 1, probabilities: { pass: 1 } } };
+	} } });
+	assert.equal((await idle.answer(passing)).kind, "pick");
+	await idle.close();
 	await help.close();
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Retain the cards.", steps: [] } }], "amend");
 	assert.equal(table.work[0]!.reviews, undefined, "a changed plan cannot inherit the old judgment");
