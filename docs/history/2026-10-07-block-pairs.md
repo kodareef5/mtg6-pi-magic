@@ -99,3 +99,63 @@ The attacks and intervening passes are supplied inputs, not model strategy.
 
 No result here adopts the arm by default, closes lethal generation or objection
 coverage, demonstrates post-rollback recovery, or authorizes a full-game gate.
+
+## Generation result
+
+The three preparations ran at clean `e35a6f7`, with Luna low and the unchanged
+4,000-token ceiling. Each first request equals the frozen treatment request
+after removing message timestamps. The trace contains only submit calls, with
+no lookups. All three sessions returned an accepted plan; acceptance and the
+runner's structural PASS do not certify the manual construction gate.
+
+| Run | Accepted block commitment | Binding gate |
+| --- | --- | --- |
+| 0 | Only `Finish blockers`; the phase says to prioritize a legal Kellan block | Inconclusive. No existing blocker is selected, and proposed development can supply other bodies. |
+| 1 | `Block Kellan with Forest`, using the broad Forest selector | Imprecise binding. It can mark another attacker, and its condition tests Kellan's presence instead of whether it attacks. |
+| 2 | Exact Forest-Kellan pair, chosen in both submissions | Pass. The exact pair, correct execution policy and explicit finish satisfy the declared rubric. |
+
+One of three preparations used a new pair key, or one of two with intent tied to
+an existing blocker. That establishes that the writer can select it through the
+production protocol. It does not establish reliable binding or a better defense.
+Run 2's presence-only condition is weaker than its stated attack condition, but
+the exact pair cannot match unless Kellan attacks. Its general guidance falsely
+says Forest survives and Kellan dies; the purpose and combat phases correctly
+say Forest dies. The false rationale is a quality defect, not a failed binding
+or an instruction delivered beside the block. No pilot failure was observed.
+
+All three plans contain a finish-blockers step. Run 0's unspecific blocking prose
+does not prove a current-card pairing opportunity: its own-turn line proposes
+Ascension and Explorer, which can supply other bodies. Neither that future board
+nor its defense was simulated. Run 1's explicit current Forest-Kellan binding is
+imprecise regardless of later development. The gate records one pass, one fail
+and one inconclusive result. It stops on runs 0 and 1, so no supplied declaration
+continuation or full game followed. Separately, none of the three plans is free
+of policy or rationale contradictions. That quality observation does not tighten
+the frozen gate or turn run 2's binding pass into a failure. Both existing
+committee reviewers confirmed that distinction, request parity and accounting.
+
+Acceptance needed three, one and two submissions, taking 64.534, 30.463 and
+60.014 seconds respectively. Two submissions were refused for schema errors:
+`step` inside `releaseWhen`, and `name` inside a hold's object query. One was
+refused for holding all five Forests while proposing Ascension. Run 0 kept that
+conflict in its accepted answer: the existing budget warning is advisory after
+its first refusal, and the saved final resource forecast still reports it.
+Runs 1 and 2 have unchecked resource dependencies, not complete payment witnesses.
+No absence of a reported conflict is counted as proof of payment coherence.
+
+The six strategy requests used 156,004 input tokens, including 96,256 cached
+tokens, and 8,734 output tokens. Reported cost was $0.01130436; summed and active
+model time were both 154.793 seconds. All six requests have usage, with no failed,
+cancelled, pending or truncated call. Reported reasoning was zero; this is usage
+metadata, not evidence about inaccessible computation. There were no pilot or
+judge calls and no physical decisions.
+
+Reject default adoption. Keep the catalog as an opt-in benchmark arm and stop
+this gate without another prompt variant. Generated commitments, coherent policy,
+lethal selection and post-ruling recovery remain open. Types, all 179 tests and
+all 43 saved benchmark prefixes passed for the experimental source.
+
+Artifacts are under `.pi/resume-20261007/block-pairs/`: complete frozen requests
+and parity in the parent directory; `live/results.json`, `live/calls.jsonl` and
+`live/audit.json` hold the accepted plans, raw replies, accounting and manual
+classification. Source revision and clean-tree status are saved in the result.
