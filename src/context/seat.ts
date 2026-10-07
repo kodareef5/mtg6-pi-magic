@@ -169,7 +169,7 @@ export function coveredDraw(from: Frame, frame: Frame): boolean {
 		packages: seen.view.work?.packages, notebook: seen.view.work?.notebook,
 	});
 	return isDeepStrictEqual(position(from, false), position(frame, true)) &&
-		settled(frame, basePlan(frame), changes(from, frame));
+		settled(frame, basePlan(frame), { quiet: true, lines: [], drawn: received });
 }
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */

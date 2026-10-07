@@ -1593,6 +1593,8 @@ test("a counter on a permanent is a change, and a draw is covered only by a step
 	taken.may![0]!.when.phase = "combat";
 	assert.equal(settled(frame, taken, draw), true, "the future step is checked in its own phase, rather than the current main phase");
 	const covered = position(); main(covered, 0, 3, "upkeep");
+	const [opposing] = place(covered, 1, "battlefield", "Mountain");
+	commit(covered, [{ do: "tap", what: opposing!.id }], "resolve");
 	const policy: Plan = { objective: "Use a covered draw", guidance: "Keep the accepted line", throughTurn: 4,
 		steps: [{ label: "Finish main", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }],
 		may: Object.keys(covered.seats[0]!.deck.main).map((card) => ({ label: `Use ${card} if drawn`, when: { active: "self", step: "precombat-main" },
@@ -1601,7 +1603,7 @@ test("a counter on a permanent is a change, and a draw is covered only by a step
 	const accepted = workFrame(covered, 0);
 	main(covered, 0, 3, "draw");
 	const current = workFrame(covered, 0);
-	assert.equal(coveredDraw(accepted, current), true);
+	assert.equal(coveredDraw(accepted, current), true, "an opponent's already-tapped permanent is unchanged across our draw");
 	for (const change of [
 		(one: Frame) => { one.view.work!.request = "Changed line"; },
 		(one: Frame) => { one.view.work!.plan!.may = []; },
