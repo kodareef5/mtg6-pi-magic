@@ -84,7 +84,9 @@ export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Univer
 	/** Benchmark experiment; ordinary planning keeps the saved examples inline. */
 	policyExamples?: "lookup";
 	/** Benchmark experiment; ordinary planning retains its movement catalog. */
-	blockPairs?: boolean };
+	blockPairs?: boolean;
+	/** Benchmark experiment; require the writer to supply window completion. */
+	completionCoverage?: boolean };
 
 /** Pregame decisions are the initial phase defaults, not paragraphs to rewrite on turn one. */
 export function initialPlan(brief: Brief): Plan {

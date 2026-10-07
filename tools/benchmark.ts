@@ -42,7 +42,7 @@ const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { t
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" }, arm: { type: "string", default: "production" },
 	"repair-source": { type: "string" }, receipts: { type: "string" }, "brief-source": { type: "string", multiple: true } } });
-if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs", "recognize", "transfer", "brief-content"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
+if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs", "recognize", "transfer", "brief-content", "completion"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
 const comparingBriefs = values.arm === "brief-content";
 if (comparingBriefs ? values["brief-source"]?.length !== 2 || values.play || values.answers || values.review : !!values["brief-source"])
 	throw new Error("Brief comparison requires exactly two --brief-source files, without --play, --answers or --review.");
@@ -64,7 +64,7 @@ if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))
 if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers || values.arm !== "production")) throw new Error("Continuation cases require --play and the production arm, without --answers: they resume the prefix's existing work.");
 if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
 if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
-if (values.arm === "block-pairs" && selected.some((one) => !["prepare", "plan", "amend", "repair"].includes(one.task))) throw new Error("Block-pair arms require planning cases.");
+if (["block-pairs", "completion"].includes(values.arm!) && selected.some((one) => !["prepare", "plan", "amend", "repair"].includes(one.task))) throw new Error("Catalog and completion arms require planning cases.");
 if (repairing && selected.some((one) => !["plan", "amend", "repair"].includes(one.task))) throw new Error("Receipt arms require current-position planning cases.");
 if (comparingBriefs && selected.some((one) => one.task !== "plan")) throw new Error("Brief comparison requires current-position planning cases.");
 if (transferring && selected.some((one) => one.task !== "plan" || !one.suppliedLines)) throw new Error("Recognition and transfer require a current planning case with supplied lines.");
@@ -176,7 +176,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
 				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
 			} else if (one.task !== "pilot") {
-				const context = { brief: briefSource ? comparisonBrief(briefSource, frame) : brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}), ...(arm === "block-pairs" ? { blockPairs: true } : {}) };
+				const context = { brief: briefSource ? comparisonBrief(briefSource, frame) : brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}), ...(arm === "block-pairs" ? { blockPairs: true } : {}), ...(arm === "completion" ? { completionCoverage: true } : {}) };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
 					answer = { plan: frame.view.work.plan, fromPrefix: true };

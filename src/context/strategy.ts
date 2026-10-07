@@ -22,6 +22,7 @@ import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 import { combatLookup } from "./strategy-combat.ts";
 import { policyExamples } from "./playbook.ts";
+import { completionProblems, completionWindows } from "./strategy-completion.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
 export function worthPlanning(table: Table): boolean {
@@ -148,16 +149,19 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
 	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request && !!frame.view.work.plan;
+	const coverage = context.completionCoverage ? completionWindows(frame, base.throughTurn, options.nextTurn ? "preparation" : response ? "response" : "turn") : undefined;
+	const closure = coverage ? "\nSupply an explicit phases complete: pass or ask for every window listed in completionCoverage. An authored broad when may cover several windows. Keep overlapping completion choices consistent. Missing policy grants no pass; the check supplies no default and certifies neither response choices nor strategy." : "";
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
 		parameters: { ...SUBMIT.parameters, properties: { ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection }, ...(response ? { required: ["current"] } : {}) } };
 	const current = at.kind === "turn" ? options.nextTurn ? `Planning target: your turn ${at.turn + 1}, from upkeep through the opponent's following turn. You are seat ${frame.seat}. Use the forecast position; you are not answering the opponent's current priority decision.`
 		: `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
 	const resources = paymentForecast(frame, base);
-	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts, ...(coverage ? completionProblems(base, coverage, frame.seat) : [])],
+		...(coverage ? { completionCoverage: coverage } : {}),
 		...(resources.responses.length ? { optionalResponseFunding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined, context.blockPairs),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), examples }, options.nextTurn ? "preparation" : response ? "response" : "turn"),
-		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {
+		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}${closure}` }, {
 		submit: { ...submit, check(args) {
 			const { notes, objection: raised, ...changes } = args;
 			let plan: Plan;
@@ -165,7 +169,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			plan.throughTurn = base.throughTurn;
 			const objection = raised as Objection | undefined;
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
-			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes, options.nextTurn), ...registrationProblems(plan.packages ?? [])];
+			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes, options.nextTurn), ...registrationProblems(plan.packages ?? []), ...(coverage ? completionProblems(plan, coverage, frame.seat) : [])];
 			if (!plan.steps.length && (options.nextTurn || !frame.view.work?.plan && !options.prepared && !plan.may?.length))
 				wrong.push('This turn has no ordered actions. Write the known line, or explicitly choose passing with a step whose action is {"option":"pass"}. Conditional branches do not replace the known turn line.');
 			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");

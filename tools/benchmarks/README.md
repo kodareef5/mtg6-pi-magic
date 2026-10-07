@@ -248,3 +248,9 @@ the configured structural checks; [the manual gate](../../docs/history/2026-10-0
 grades binding, policy and execution. `block-kellan-zhao` and `block-zhao-only`
 are supplied declaration inputs for accepted plans through `--answers`, not
 additional planning calls.
+
+`--arm completion` checks explicit window completion after ordinary plan
+expansion. It reports missing or conflicting `phases[].complete` policies and
+never supplies a default. The [coverage gate](../../docs/history/2026-10-07-completion-coverage.md)
+keeps authored coverage, strategy and bounded execution separate. Default
+planning and pilot rendering are unchanged.
