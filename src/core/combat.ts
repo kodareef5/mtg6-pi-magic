@@ -16,7 +16,7 @@
  * actual damage assignments under the same combat rules.
  */
 import { characteristics, has, sick, type Traits } from "./characteristics.ts";
-import { cardsIn, playing, type Table, type Thing } from "./table.ts";
+import { cardsIn, playing, type LedgerRow, type Table, type Thing } from "./table.ts";
 import type { Change } from "./syntax.ts";
 import type { Chosen } from "./selectors.ts";
 import type { Move, Pending } from "./moves.ts";
@@ -28,6 +28,35 @@ const same = (a: ObjectRef, b: ObjectRef) => a.id === b.id && a.incarnation === 
 const name = (object: Thing) => object.card ?? object.token?.name ?? object.id;
 const body = (traits?: Traits) => `${traits?.power ?? "?"}/${traits?.toughness ?? "?"}`;
 const words = (traits?: Traits) => traits?.words.length ? `, ${traits.words.join(", ")}` : "";
+
+/** Provisional choices can be withdrawn until done. These ids never match attack:/block: selectors. */
+function withdrawals(table: Table): Move[] {
+	return (table.combat?.choosing ?? []).map((pick): Move => {
+		const attacker = table.things.get(pick.attacker.id)!, blocker = "blocker" in pick && table.things.get(pick.blocker.id)!;
+		return { option: { id: blocker ? `unblock:${blocker.id}:${attacker.id}` : `unattack:${attacker.id}`,
+			label: blocker ? `Withdraw ${name(blocker)} blocking ${name(attacker)}` : `Withdraw ${name(attacker)} from the pending attack`,
+			objects: blocker ? [ref(blocker), ref(attacker)] : [ref(attacker)],
+			shows: "Withdraws this pending choice without finishing the declaration. No card moves or taps; it can be selected again." },
+			changes: [{ do: "combat", action: "remove", pick: structuredClone(pick) }], reason: "combat" };
+	}).sort((a, b) => a.option.id.localeCompare(b.option.id));
+}
+
+/** The core's recorded choice ids identify picks within a declaration; no object can change incarnation inside it.
+ * Bookkeeping has no receipt. Retain every row, but a withdrawn pick no longer carries out its commitment. */
+export function withdrawnChoices(rows: readonly LedgerRow[]): Set<number> {
+	const pending = new Map<string, number>(), withdrawn = new Set<number>();
+	for (const row of rows) {
+		if (row.situation !== "turn-based") continue;
+		const id = row.picked;
+		if (id === "attack:done" || id === "block:done") pending.clear();
+		else if (id.startsWith("unattack:") || id.startsWith("unblock:")) {
+			const original = id.slice(2), at = pending.get(original);
+			if (at !== undefined) withdrawn.add(at);
+			pending.delete(original);
+		} else if (id.startsWith("attack:") || id.startsWith("block:")) pending.set(id, row.seq);
+	}
+	return withdrawn;
+}
 
 /** A creature still in combat: the same object, on the battlefield, still a creature (506.4). */
 function present(table: Table, wanted: ObjectRef): Thing | undefined {
@@ -66,7 +95,8 @@ export function declareAttackers(table: Table): Pending {
 			...attackers.filter((object) => !has(traitsOf(table, object), "vigilance")).map((object): Change => ({ do: "tap", what: object.id })),
 			{ do: "attack", attackers: attackers.map((object) => ({ ...ref(object), defending })) },
 		], reason: "combat" });
-	return { situation: "turn-based", seat: active, question: chosen.length ? `Declare attackers: ${attackers.map(name).join(", ")} so far. Add another or finish.` : "Declare attackers, one at a time, then finish.", moves };
+	moves.push(...withdrawals(table));
+	return { situation: "turn-based", seat: active, question: chosen.length ? `Declare attackers: ${attackers.map(name).join(", ")} so far. Add another, withdraw a pending choice, or finish.` : "Declare attackers, one at a time, then finish.", moves };
 }
 
 /** 509.1: the defending player picks blocks one at a time, then finishes. */
@@ -104,7 +134,8 @@ export function declareBlockers(table: Table): Pending {
 	moves.push({ option: { id: "block:done", label: declared.size ? `Finish: ${[...declared.values()].map((entry) => `${name(entry.blocker)} blocks ${entry.blocking.map((one) => name(table.things.get(one.id)!)).join(", ")}`).join("; ")}` : "Block nothing",
 		...(lone.length ? { shows: lone.map((attacker) => `${name(attacker)} conflicts with menace: one creature blocks it.`).join(" ") } : {}) },
 		changes: [{ do: "block", blockers: [...declared.values()].map((entry) => ({ ...ref(entry.blocker), blocking: entry.blocking })) }], reason: "combat" });
-	return { situation: "turn-based", seat: defending, question: blocks.length ? `Declare blockers: ${blocks.length} chosen so far. Add another or finish.` : "Declare blockers, one at a time, then finish.", moves };
+	moves.push(...withdrawals(table));
+	return { situation: "turn-based", seat: defending, question: blocks.length ? `Declare blockers: ${blocks.length} chosen so far. Add another, withdraw a pending choice, or finish.` : "Declare blockers, one at a time, then finish.", moves };
 }
 
 /** Every way to divide `total` among `parts` recipients, in order. */

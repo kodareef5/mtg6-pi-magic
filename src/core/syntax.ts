@@ -116,7 +116,7 @@ export type Change =
 	 * creature's damage division, or the first-strike step beginning, which adds
 	 * a second damage step after it.
 	 */
-	| { do: "combat"; action: "choose"; pick: Combat["choosing"][number] }
+	| { do: "combat"; action: "choose" | "remove"; pick: Combat["choosing"][number] }
 	| { do: "combat"; action: "assign"; source: ObjectRef; division: { to: Chosen; amount: number }[] }
 	| { do: "combat"; action: "strike"; first: ObjectRef[] }
 	/**

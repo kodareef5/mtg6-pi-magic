@@ -78,6 +78,12 @@ Finishing an attacker declaration names the available ordered attack steps it
 would leave unfinished. Their choices remain offered, including finishing;
 optional branches create no obligation.
 
+Pending attack and block selections can be withdrawn before finishing. Their
+original ledger rows remain, but withdrawn rows supply neither completed steps
+nor worked actions. A new selection can earn new credit. Withdrawing across an
+amendment does not restore a deleted step; a later declaration cannot cancel
+earlier finalized work. Withdrawal IDs do not match `attack:` or `block:`.
+
 Tactical work expires after its selected own turn and the following opponent
 turn. Fresh preparation starts from the pregame playbook, accepted equipment
 and current facts. Repairs preserve the scope and unfinished commitments; no
@@ -197,6 +203,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   [Strategy cycle](history/2026-10-06-strategy-cycle.md).
 - [x] Keep one saved-position manifest with offline replay and live probes.
   [Benchmark guide](../tools/benchmarks/README.md).
+- [x] Allow a seat to revise pending combat selections before finishing, with
+  ledger-derived progress and historical replay menus preserved.
+  [Declaration recovery](history/2026-10-07-declaration-recovery.md).
 - [ ] Finish the ordered resource forecast, including earlier entries, activation
   costs, planned attackers and scoped response warnings. Validate future source
   bindings against physical continuations before grading the planner.

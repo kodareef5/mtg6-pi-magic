@@ -23,6 +23,7 @@ import type { Frame, SeatId, SeatView, Viewer, Window } from "./types.ts";
 import type { Plan } from "./language.ts";
 import { purposes } from "./purpose.ts";
 import { currentPlan } from "./query.ts";
+import { withdrawnChoices } from "./combat.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
@@ -67,6 +68,7 @@ function window(table: Table): Window {
  * fixes that.
  */
 export function project(table: Table, viewer: Viewer, since = table.log.length): SeatView {
+	const withdrawn = withdrawnChoices(table.ledger);
 	const cursor = table.cursor;
 	const at = window(table);
 	const holder = cursor.priority === null ? "nobody" : seat(table, cursor.priority).name;
@@ -177,17 +179,18 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
-			row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
-		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer) } : {}),
+			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
+		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
 }
 
 /** This seat's plan steps and branches its ledger rows carried out, latest first among ten distinct actions, given back in game order. */
-function worked(table: Table, viewer: SeatId): NonNullable<SeatView["worked"]> {
+function worked(table: Table, viewer: SeatId, withdrawn: Set<number>): NonNullable<SeatView["worked"]> {
 	const plans = new Map<number, Plan>();
 	for (const entry of table.workLog) if (entry.seat === viewer && entry.workspace.plan && entry.workspace.planned !== undefined) plans.set(entry.workspace.planned, entry.workspace.plan);
 	const found: NonNullable<SeatView["worked"]> = [], seen = new Set<string>();
 	for (let at = table.ledger.length - 1; at >= 0 && found.length < 10; at--) {
+		if (withdrawn.has(table.ledger[at]!.seq)) continue;
 		const execution = table.ledger[at]!.seat === viewer ? table.ledger[at]!.execution : undefined, plan = execution && plans.get(execution.plan);
 		const one = plan && (execution.step !== undefined ? plan.steps[execution.step] : execution.branch !== undefined ? plan.may?.[execution.branch] : undefined);
 		if (!one || seen.has(JSON.stringify(one.action))) continue;

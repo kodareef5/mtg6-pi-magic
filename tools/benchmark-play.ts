@@ -15,7 +15,7 @@ import { gameResult, saveReport } from "./game-report.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 
 export async function playProposal(input: { journal: string; version: number; seat: number; plan?: Plan },
-	options: { out: string; inference: Inference; roster: Cast[]; throughTurn?: number }) {
+	options: { out: string; inference: Inference; roster: Cast[]; throughTurn?: number; decisions?: number }) {
 	mkdirSync(options.out, { recursive: true });
 	const path = join(options.out, "game.jsonl"), trace = join(options.out, "calls.jsonl");
 	const header = fork(input.journal, input.version, "benchmark", path);
@@ -39,11 +39,18 @@ export async function playProposal(input: { journal: string; version: number; se
 		{ format: "standard", journal, rules: loadRules(matchup.rules.path), prepared: copied.prepared });
 	const through = options.throughTurn ?? table.cursor.turn + (table.cursor.active === input.seat ? 1 : 2);
 	const stop = new Error("Benchmark boundary");
+	const beganAt = table.ledger.length;
+	let stoppedBy: "gap" | "turn" | "decisions" | undefined;
 	let failure: unknown;
 	seated.timing.playStartedAt = Date.now();
 	try {
 		await play(table, seated.players, seated.intents, {
-			watch: () => { save(journal, table); if (table.gaps.length || table.cursor.turn > through) throw stop; },
+			checkpoint: () => {
+				save(journal, table);
+				stoppedBy = table.gaps.length ? "gap" : table.cursor.turn > through ? "turn"
+					: !table.outcome && options.decisions !== undefined && table.ledger.length - beganAt >= options.decisions ? "decisions" : undefined;
+				if (stoppedBy) throw stop;
+			},
 			judge: judgeFor(table, seated, journal),
 			onTurnStart: (turn, active) => seated.timing.turns!.push({ at: Date.now(), turn, active, source: "recorded" }),
 		});
@@ -53,13 +60,16 @@ export async function playProposal(input: { journal: string; version: number; se
 		await Promise.all(Object.values(seated.players).map((one) => one.close()));
 		save(journal, table);
 	}
-	while (!table.outcome && !nextDecision(table)) advance(table);
+	if (!stoppedBy) while (!table.outcome && !nextDecision(table)) advance(table);
 	const rebuilt = replay(path, (h) => matchTable(h.seed)).table;
+	const compared = structuredClone(table);
+	while (!compared.outcome && !nextDecision(compared)) advance(compared);
 	const same = (one: typeof table) => ({ ledger: one.ledger, log: one.log, things: [...one.things], cursor: one.cursor,
 		work: one.work, resolution: one.resolution, outcome: one.outcome?.results });
 	seated.timing.finishedAt = Date.now();
-	const result = gameResult(table, seated, { replayMatches: isDeepStrictEqual(same(table), same(rebuilt)), journal: path, trace,
+	const result = gameResult(table, seated, { replayMatches: isDeepStrictEqual(same(compared), same(rebuilt)), journal: path, trace,
 		...(failure ? { error: String(failure) } : {}) });
 	const paths = saveReport(join(options.out, "game.result.json"), result);
-	return { result, paths, cloneMatches: true, throughTurn: through };
+	return { result, paths, cloneMatches: true, throughTurn: through, ...(stoppedBy ? { stoppedBy } : {}),
+		...(options.decisions === undefined ? {} : { decisionLimit: options.decisions }), decisions: table.ledger.length - beganAt };
 }

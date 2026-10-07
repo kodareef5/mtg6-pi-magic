@@ -118,6 +118,9 @@ test("replay rebuilds the game and refuses data it was not played against", asyn
 	assert.deepEqual(again.table.ledger, table.ledger);
 	assert.deepEqual(again.table.outcome, table.outcome);
 	assert.equal(again.prepared.length, 2, "a replay carries what was prepared");
+	const drifted = structuredClone(table.ledger);
+	drifted[0]!.offered.push("invented-menu-option");
+	assert.throws(() => relive(dealt(made), drifted), /offered choices changed/, "historical menu restoration must not conceal unrelated drift");
 
 	// Stopping short is a position, not a different game.
 	const half = Math.floor(table.ledger.length / 2);

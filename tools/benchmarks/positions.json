@@ -13,9 +13,40 @@
     "readyPartialAttack": "test/fixtures/benchmarks/ready-partial-attack.jsonl.gz",
     "readyBeforeHelp": "test/fixtures/benchmarks/ready-before-help.jsonl.gz",
     "redUpkeepLethal": "test/fixtures/benchmarks/red-upkeep-lethal.jsonl.gz",
-    "redBeforeUpkeep": "test/fixtures/benchmarks/red-before-upkeep.jsonl.gz"
+    "redBeforeUpkeep": "test/fixtures/benchmarks/red-before-upkeep.jsonl.gz",
+    "menacePartialBlock": "test/fixtures/benchmarks/menace-partial-block.jsonl.gz"
   },
   "cases": [
+    {
+      "id": "menace-before-block",
+      "journal": "menacePartialBlock",
+      "version": 284,
+      "seat": 0,
+      "task": "pilot",
+      "property": "Follow the accepted no-lone-block policy: Forest cannot block menace Zhao alone; finish with no blockers.",
+      "expect": {
+        "id": "block:done"
+      }
+    },
+    {
+      "id": "menace-partial-block",
+      "journal": "menacePartialBlock",
+      "version": 285,
+      "seat": 0,
+      "task": "pilot",
+      "property": "Recover the unfinished lone-Forest block on menace Zhao by withdrawing that selection before finishing. This measures recovery, not prevention or a game outcome.",
+      "expect": {
+        "id": "unblock:0-25:1-58"
+      }
+    },
+    {
+      "id": "menace-recovery",
+      "journal": "menacePartialBlock",
+      "version": 285,
+      "seat": 0,
+      "task": "continue",
+      "property": "Withdraw the pending lone-Forest block on menace Zhao, then finish coherently under the accepted phase policy. Grade the declaration trace, help and repetition separately from physical outcomes; a decision boundary is not a recovery pass."
+    },
     {
       "id": "red-upkeep-lethal",
       "journal": "redUpkeepLethal",

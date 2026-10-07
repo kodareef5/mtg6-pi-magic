@@ -327,7 +327,16 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 			);
 		}
 		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why, ...(row.execution ? { execution: row.execution } : {}) }, row.registered ?? {});
-		else apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});
+		else {
+			apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});
+			// Preserve historical menus, allowing only the appended declaration withdrawals.
+			// Other menu drift still fails replay instead of being hidden by restoring the record.
+			const offered = table.ledger.at(-1)!.offered, extra = offered.slice(row.offered.length);
+			if (JSON.stringify(offered.slice(0, row.offered.length)) !== JSON.stringify(row.offered) ||
+				extra.length && !(row.situation === "turn-based" && row.offered.some((id) => id === "attack:done" || id === "block:done") && extra.every((id) => id.startsWith("unattack:") || id.startsWith("unblock:"))))
+				throw new Error(`Record ${row.seq}: offered choices changed during replay.`);
+			table.ledger.at(-1)!.offered = [...row.offered];
+		}
 	}
 	return table;
 }

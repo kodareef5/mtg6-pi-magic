@@ -15,9 +15,9 @@ import { test } from "node:test";
 import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { apply, nextDecision } from "../src/core/decisions.ts";
+import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { play } from "../src/core/loop.ts";
-import { fork, open, reopen, replay, save, type Header } from "../src/core/journal.ts";
+import { fork, open, reopen, replay, rollback, save, type Header } from "../src/core/journal.ts";
 import { annotate, execution, planDue, planReason, planState } from "../src/core/planning.ts";
 import { checklist } from "../src/core/review.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
@@ -168,8 +168,8 @@ test("the pilot flies the plan: actions and passes are chosen, and progress live
 	assert.deepEqual(workFrame(table, 0).view.worked![1]!.action, line.steps[1]!.action);
 	const kinds = new Set(asked.map((frame) => frame.decision!.options.some((option) => option.id.startsWith("discard:")) ? "discard" : frame.decision!.situation));
 	assert.deepEqual([...kinds].sort(), ["discard", "pregame", "priority", "resolution", "turn-based"]);
-	assert.ok(asked.some((frame) => frame.decision!.options.length === 1 && frame.decision!.options[0]!.id === "attack:done"),
-		"the pilot ends the declaration even when there is nobody to attack with");
+	assert.ok(asked.some((frame) => frame.decision!.options.some((one) => one.id === "attack:done") && !frame.decision!.options.some((one) => one.id.startsWith("attack:") && one.id !== "attack:done")),
+		"the pilot ends the declaration when no further attacker can be selected, even with withdrawal offered");
 	assert.ok(table.ledger.filter((row) => row.situation === "priority").every((row) => row.why === "chosen"), "both seats answer every priority window");
 	assert.equal(cardsIn(table, "battlefield", 0).find((one) => one.card === "Sazh's Chocobo")!.counters["+1/+1"], 2, "both land entries triggered");
 
@@ -217,7 +217,7 @@ test("a stop asks for a new plan once, a stop that already holds waits for a cha
 	assert.match(refusal, /requests for a new plan are spent/, "a third request in the turn is refused");
 });
 
-test("a branch and a held resource are marked on the options they touch, and nothing is removed", () => {
+test("a branch and a held resource are marked on the options they touch, and nothing is removed", async () => {
 	const table = matchup("branches");
 	const chocobo = establish(table, 0, "Sazh's Chocobo", []);
 	place(table, 0, "battlefield", "Forest");
@@ -328,6 +328,64 @@ test("a branch and a held resource are marked on the options they touch, and not
 		assert.equal(finishMark(workFrame(replay(cloned, (header) => matchTable(header.seed)).table, 1)), finishMark(workFrame(partial, 1)), "a cloned prefix and replay reconstruct the same remaining commitment");
 		apply(partial, "attack:1-50", "model", "chosen", execution(planState(workFrame(partial, 1))!, "attack:1-50"));
 		assert.equal(finishMark(workFrame(partial, 1)), undefined, "all selected attackers permit completion without an unfinished-step mark");
+		const selectedRows = structuredClone(partial.ledger);
+		assert.equal(execution(planState(workFrame(partial, 1))!, "unattack:1-58"), undefined, "withdrawing is not an attack commitment");
+		apply(partial, "unattack:1-58", "model", "chosen");
+		assert.deepEqual(partial.ledger.slice(0, selectedRows.length), selectedRows, "withdrawal preserves historical execution rows");
+		assert.ok(!workFrame(partial, 1).view.done!.includes(2));
+		assert.match(finishMark(workFrame(partial, 1))!, /Zhao/, "withdrawn steps become due again");
+		const rewound = structuredClone(partial);
+		rollback(rewound, { case: { row: selectedRows.length, raisedBy: 0, claim: "Test rewinding a provisional withdrawal." }, ruling: { legal: false, rule: "508.1", remedy: "rollback", because: "Restore the earlier prefix." } }, () => matchTable(partial.rng.seed));
+		assert.ok(workFrame(rewound, 1).view.done!.includes(2));
+		assert.ok(rewound.combat!.choosing.some((one) => one.attacker.id === "1-58"), "rollback derives both pending selection and progress from its retained rows");
+		save(journal, partial);
+		const child = join(scratch, "withdrawn-clone.jsonl"); fork(cloned, partial.ledger.length, "withdrawn", child);
+		for (const file of [cloned, child]) assert.deepEqual(workFrame(replay(file, (header) => matchTable(header.seed)).table, 1), workFrame(partial, 1), "replay and clone recover pending choices and effective progress");
+		const bounded = replay(child, (header) => matchTable(header.seed)).table, from = bounded.ledger.length, logSize = bounded.log.length;
+		const boundedJournal = reopen(child, replay(child, (header) => matchTable(header.seed)).header, bounded);
+		const withdrawer: Player = { name: "Withdraw", observe() {}, close() {}, async answer() { return { kind: "pick", option: "unattack:1-50", actionId: "withdraw" }; } };
+		await assert.rejects(play(bounded, { 1: withdrawer }, {}, { checkpoint: () => { if (bounded.ledger.length - from === 1) throw stop; } }), (error) => error === stop);
+		assert.equal(bounded.ledger.length, from + 1, "the host pauses before another decision");
+		assert.equal(bounded.log.length, logSize, "a boundary observes even unlogged declaration bookkeeping");
+		assert.equal(bounded.outcome, null); assert.deepEqual(bounded.gaps, []);
+		assert.ok(nextDecision(bounded)!.options.some((one) => one.id === "attack:1-50"), "external pause leaves the declaration pending");
+		const finisher: Player = { ...withdrawer, async answer() { return { kind: "pick", option: "attack:done", actionId: "finish" }; } };
+		await assert.rejects(play(bounded, { 1: finisher }, {}, { checkpoint: () => { if (bounded.ledger.length - from === 2) throw stop; } }), (error) => error === stop);
+		assert.equal(bounded.cursor.stepDone, true, "a host stop after finish precedes the next control transition");
+		assert.equal(nextDecision(bounded), null);
+		save(boundedJournal, bounded);
+		const stoppedClone = join(scratch, "stopped-clone.jsonl"); fork(child, bounded.ledger.length, "stopped", stoppedClone);
+		const normalized = structuredClone(bounded);
+		while (!nextDecision(normalized)) advance(normalized);
+		for (const file of [child, stoppedClone]) assert.deepEqual(workFrame(replay(file, (header) => matchTable(header.seed)).table, 1), workFrame(normalized, 1));
+		assert.equal(bounded.cursor.stepDone, true, "comparison normalization never advances the paused table");
+		apply(partial, "attack:1-58", "model", "chosen", execution(planState(workFrame(partial, 1))!, "attack:1-58"));
+		assert.equal(workFrame(partial, 1).view.done!.filter((step) => step === 2).length, 1, "reselection credits only its new row");
+		apply(partial, "unattack:1-15", "model", "chosen");
+		assert.ok(!workFrame(partial, 1).view.done!.includes(0), "an original prefix selection can also be withdrawn");
+		const amended = structuredClone(partial), plan = structuredClone(amended.work[1]!.plan!);
+		plan.steps = plan.steps.filter((one) => one.label !== "Attack with Soulstone Sanctuary");
+		editWork(amended, 1, [{ do: "plan.put", plan }], "amend declaration");
+		apply(amended, "unattack:1-50", "model", "chosen");
+		assert.ok(!workFrame(amended, 1).view.work!.plan!.steps.some((one) => one.label === "Attack with Soulstone Sanctuary"), "withdrawal across an amendment resurrects no deleted commitment");
+		apply(partial, "attack:done", "model", "chosen", execution(planState(workFrame(partial, 1))!, "attack:done"));
+		assert.ok(!workFrame(partial, 1).view.done!.includes(0), "finishing does not restore withdrawn credit");
+		save(journal, partial);
+		while (!nextDecision(partial)) advance(partial);
+		assert.deepEqual(workFrame(replay(cloned, (header) => matchTable(header.seed)).table, 1), workFrame(partial, 1));
+
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/menace-partial-block.jsonl.gz")));
+		const blocks = replay(path, (header) => matchTable(header.seed), 284).table;
+		editWork(blocks, 0, [{ do: "plan.put", plan: { objective: "Exercise declaration credit.", guidance: "Test matching, not block legality.", steps: [{ label: "Select a block", when: { active: "opponent", step: "declare-blockers" }, action: { prefix: "block:" } }] } }], "block credit");
+		const choose = () => apply(blocks, "block:0-25:1-58", "model", "chosen", execution(planState(workFrame(blocks, 0))!, "block:0-25:1-58"));
+		choose();
+		assert.deepEqual(workFrame(blocks, 0).view.done, [0]);
+		assert.equal(execution(planState(workFrame(blocks, 0))!, "unblock:0-25:1-58"), undefined);
+		editWork(blocks, 0, [{ do: "plan.put", plan: { ...blocks.work[0]!.plan!, guidance: "Amended while the block is pending." } }], "amend pending block");
+		apply(blocks, "unblock:0-25:1-58", "model", "chosen");
+		assert.deepEqual(workFrame(blocks, 0).view.done, []);
+		assert.ok(!workFrame(blocks, 0).view.worked!.some((one) => one.label === "Select a block"), "withdrawn work is excluded before history deduplication");
+		choose(); assert.deepEqual(workFrame(blocks, 0).view.done, [0]);
 	} finally { rmSync(scratch, { recursive: true, force: true }); }
 });
 

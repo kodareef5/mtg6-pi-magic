@@ -318,8 +318,11 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "combat": {
 				const combat = table.combat ??= { attackers: [], blockers: [], blocked: [], choosing: [], assigned: [] };
 				if (change.action === "choose") combat.choosing.push(structuredClone(change.pick));
+				else if (change.action === "remove") combat.choosing = combat.choosing.filter((pick) =>
+					pick.attacker.id !== change.pick.attacker.id || pick.attacker.incarnation !== change.pick.attacker.incarnation ||
+					("blocker" in pick ? !("blocker" in change.pick) || pick.blocker.id !== change.pick.blocker.id || pick.blocker.incarnation !== change.pick.blocker.incarnation : "blocker" in change.pick));
 				else if (change.action === "assign") combat.assigned.push(...change.division.map((part) => ({ source: structuredClone(change.source), ...structuredClone(part) })));
-				else {
+				else if (change.action === "strike") {
 					combat.first = structuredClone(change.first);
 					table.cursor.steps.splice(1, 0, "combat-damage");
 				}

@@ -58,6 +58,13 @@ combat damage              assign, deal, then priority
 end of combat              priority only
 ```
 
+The seat selects attackers or blocker pairs, then finishes the declaration.
+Before finishing, it can withdraw any pending selection with `unattack:` or
+`unblock:` and select it again. Withdrawal moves no card, taps nothing and
+triggers nothing. It cannot change a finished declaration. Both the selection
+and withdrawal remain recorded decisions; no automatic correction or finish
+occurs. Rule conflicts remain marked choices.
+
 ### Damage assignment, 510.1
 
 A turn-based action with real decisions in it. The active player announces how

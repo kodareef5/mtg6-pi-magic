@@ -46,6 +46,8 @@ export type Watcher = (line: string) => void;
 export type TurnWatcher = (turn: number, active: SeatId, from: number) => Promise<void> | void;
 export type PlayOptions = {
 	watch?: Watcher;
+	/** Synchronous host boundary before the next operation, including bookkeeping. Throwing leaves the game pending. */
+	checkpoint?: () => void;
 	onTurn?: TurnWatcher;
 	/** Presentation only, including the first turn after the opening. */
 	onTurnStart?: (turn: number, active: SeatId) => void;
@@ -81,7 +83,7 @@ export async function play(
 	table: Table,
 	players: Record<SeatId, Player>,
 	intents: Record<SeatId, Intent>,
-	{ watch, onTurn, onTurnStart, workBudget = 32, judge }: PlayOptions = {},
+	{ watch, checkpoint, onTurn, onTurnStart, workBudget = 32, judge }: PlayOptions = {},
 ): Promise<Outcome | null> {
 	if (!Number.isSafeInteger(workBudget) || workBudget < 1) throw new Error("The work edit budget must be a positive integer.");
 	let told = 0;
@@ -90,6 +92,7 @@ export async function play(
 	let observedTurn: string | undefined;
 
 	while (table.outcome === null) {
+		checkpoint?.();
 		const turn = `${table.cursor.turn}:${table.cursor.active}`;
 		if (onTurnStart && turn !== observedTurn && mulligansSettled(table)) {
 			observedTurn = turn;

@@ -36,6 +36,13 @@ be repeated; `--out` chooses a fresh output directory, otherwise the runner uses
 Pilot cases include the loop's accepted procedures and plan/resource annotations
 before entering the actual seat context and inspection path. Earlier probes
 omitted these annotations; their results are historical, not packet parity.
+`menace-before-block` and `menace-partial-block` freeze the initial lone-Forest
+block on menace Zhao and the unfinished declaration after that selection.
+Their baseline requests exactly reproduce the saved parent packets. The former
+grades the initial choice; the latter grades withdrawal, separately from help.
+`menace-recovery` continues the partial declaration. Run it with `--live --play
+--repeat 3 --decisions 12 --through 10` and inspect whether Green withdraws, then
+finishes coherently. Repeated select/withdraw cycles fail recovery.
 The held-vigilance case preserves a plan whose listed attack and preservation
 prose disagree. Correct consumption marks alone do not prove it will execute.
 `attack-before-help` freezes the October 7 ready-lethal control after Kellan
@@ -111,6 +118,11 @@ off. `--through N` changes that diagnostic boundary. It checks the cloned prefix
 before installing the plan and replay after play, and saves a separate game
 journal, call trace, report and timeline. A stopped continuation is not an outcome.
 Planning time and usage remain separate from the continuation's report.
+`--decisions N` stops a continuation after N recorded decisions following the
+prefix, counting forced and delegated rows as well as seat choices. The report
+names `stoppedBy`, `decisionLimit` and the actual count. This is an external
+observation boundary, not a seat action, outcome, gap or fallback. A stopped
+declaration remains pending. The production loop has no such cap.
 To execute an existing answer without paying for another planning question:
 
 ```sh

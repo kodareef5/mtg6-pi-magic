@@ -37,7 +37,7 @@ type Case = PlanCheck & { id: string; journal: string; version: number; seat: nu
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
-	answers: { type: "string" }, through: { type: "string" }, arm: { type: "string", default: "production" },
+	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, arm: { type: "string", default: "production" },
 	"repair-source": { type: "string" }, receipts: { type: "string" } } });
 if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
 const repairing = values.arm!.startsWith("receipt-");
@@ -45,6 +45,7 @@ if (repairing !== !!values["repair-source"] || repairing !== !!values.receipts |
 	throw new Error("Receipt arms need --repair-source and --receipts, without --answers.");
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
 if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
+if (values.decisions && (!values.play || !/^[1-9]\d*$/.test(values.decisions))) throw new Error("--decisions needs --play and a positive recorded-decision boundary.");
 const repeat = Number(values.repeat), pilots = values.pilot === "both" ? ["jev", "luna"] : [values.pilot!];
 if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "luna"].includes(one))) throw new Error("Use a positive --repeat and --pilot jev, luna or both.");
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
@@ -167,7 +168,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				decisionMs = Date.now() - began;
 				if (values.play) {
 					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
-						{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}) });
+						{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}) });
 					const game = continuation.result;
 					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
 				}
