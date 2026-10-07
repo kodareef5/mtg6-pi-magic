@@ -136,10 +136,16 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.equal(afterLand.checklist!.find((one) => one.label === "Cast Hydra")!.status, "unavailable");
 	assert.deepEqual(afterLand.checklist!.map((one) => one.kind), ["phase", "step", "branch"], "unmentioned cards do not create strategic review jobs");
 	assert.ok(afterLand.cards["Mossborn Hydra"], "a completion check retains the unavailable planned card's actual text");
+	let asks = 0;
 	const help = aiSeat({ name: "Help", intent: startingIntent(0), onGap: assert.fail,
 		plan: async () => { throw new Error("Only the help request is being tested"); }, api: { named: "fixture", async ask(request) {
 			const question = request.questions.pick!;
 			if (question.type !== "choice") assert.fail();
+			if (asks++) {
+				assert.ok(!Object.hasOwn(question.criteria, "ask:help"), "an answered request is not offered again at the same decision");
+				const first = Object.keys(question.criteria).find((id) => id === "pass") ?? Object.keys(question.criteria)[0]!;
+				return { pick: { type: "choice", choice: first, confidence: 1, probabilities: { [first]: 1 } } };
+			}
 			assert.ok(Object.hasOwn(question.criteria, "ask:help"));
 			return { pick: { type: "choice", choice: "ask:help", confidence: 1, probabilities: { "ask:help": 1 } } };
 		} } });
@@ -150,6 +156,7 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.match(reason, /asked for help at your turn \d+, precombat-main/, "the request names the window the pilot saw");
 	assert.match(reason, /The stack is empty\./);
 	assert.match(reason, /Cast Hydra/, "the unfinished line is named, not left for the writer to guess");
+	assert.equal((await help.answer(workFrame(table, 0))).kind, "pick", "the pilot chooses an actual option after its one request");
 	await help.close();
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Retain the cards.", steps: [] } }], "amend");
 	assert.equal(table.work[0]!.reviews, undefined, "a changed plan cannot inherit the old judgment");

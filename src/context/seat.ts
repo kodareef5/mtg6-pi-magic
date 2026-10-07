@@ -279,6 +279,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let closed = false;
 	// A preparation installed at upkeep without review, and the frame it was prepared from.
 	let unreviewed: { turn: number; from: Frame } | undefined;
+	let helped: number | undefined;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
 	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;
@@ -291,7 +292,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 	const begin = (frame: Frame) => {
 		const at = frame.view.window;
 		if (closed || !options.prepare || at.kind !== "turn" || at.active === frame.seat || !frame.view.work?.eachTurn || frame.view.work.request) return;
-		const key = `${at.turn + 1}:${frame.view.work.planned ?? 0}`;
+		// The preparation starts from the playbook, not the standing plan, so a response
+		// repair does not restart it; the post-draw review reads that change.
+		const key = `${at.turn + 1}`;
 		if (began === key) return;
 		const cancelled = cancel();
 		began = key;
@@ -399,7 +402,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 				}
 			}
 			// Help is offered while a planner exists and this decision has not already been refused a new plan.
-			const help = !!options.plan && !!frame.view.work && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
+			// One request per decision: once answered, the pilot chooses among the actual options.
+			const help = !!options.plan && !!frame.view.work && helped !== frame.version && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
 			for (;;) {
 				const rules = options.rules && walked.length < budget ? options.rules : undefined;
@@ -441,6 +445,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 					continue;
 				}
 				if (answer.choice === HELP && help) {
+					helped = frame.version;
 					return { kind: "work", tools: [{ do: "plan.request", reason: helpRequest(frame, packet) }],
 						revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
 				}
@@ -454,10 +459,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 
 		observe(frame) {
 			remember(frame);
-			if (preparation && (frame.version < preparation.from.version || frame.view.work?.planned !== preparation.from.view.work?.planned)) cancel();
+			if (preparation && frame.version < preparation.from.version) cancel();
 			begin(frame);
 		},
-		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; },
+		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; unreviewed = undefined; helped = undefined; },
 		close() { closed = true; return cancel()?.then(() => {}); },
 	};
 }

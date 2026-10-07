@@ -1366,10 +1366,10 @@ test("one unfinished preparation is awaited at upkeep or draw without a second p
  editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", ...(deadline === "upkeep" ? { throughTurn: 4 } : {}), steps: [] } }], "planned");
  main(table, 1, 4);
  let finish: (value: Prepared) => void = () => {};
- let amended = 0, resolved = false;
+ let amended = 0, resolved = false, prepared = 0;
  const waits: Planned[] = [];
  const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
-  prepare: () => new Promise((resolve) => { finish = resolve; }),
+  prepare: () => { prepared++; return new Promise((resolve) => { finish = resolve; }); },
   plan: async (_frame, made, changed) => {
    amended++;
    if (deadline === "upkeep") { assert.equal(made, undefined, "the installed line is the base"); assert.match(changed!.join(" "), /Emberheart Challenger.*you drew/, "the one review reads the opponent's turn and the draw together"); return { tools: [{ do: "plan.keep", reason: "Still fits." }] }; }
@@ -1379,6 +1379,10 @@ test("one unfinished preparation is awaited at upkeep or draw without a second p
  seat.observe(workFrame(table, 0));
  await new Promise((resolve) => setImmediate(resolve));
  if (deadline === "upkeep") place(table, 1, "battlefield", "Emberheart Challenger");
+ // A response repair on the opponent's turn changes the standing plan, not the preparation.
+ editWork(table, 0, [{ do: "plan.put", plan: { objective: "Respond.", guidance: "g", ...(deadline === "upkeep" ? { throughTurn: 4 } : {}), steps: [] } }], `repair-${deadline}`);
+ seat.observe(workFrame(table, 0));
+ assert.equal(prepared, 1, "the background preparation survives a response repair");
  main(table, 0, 5, deadline);
  const answer = seat.answer(workFrame(table, 0)).then((value) => { resolved = true; return value; });
  await new Promise((resolve) => setImmediate(resolve));

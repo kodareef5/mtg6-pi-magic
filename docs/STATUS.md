@@ -25,9 +25,13 @@ post-draw review reads every change since it was prepared: writer calls per own
 turn fell from about 1.8 to 1.27 on two new seeds. The writer now submits a
 required `assessment` first, counting the whole attack through the opponent's
 best blocks, castable haste creatures and burn; the plan follows its verdict.
-No code computes or checks lethal. Saved lethal positions rose from 7/15 to
-about 11/15 with the non-lethal guards unchanged; the blocked Smaug line still
-wins only 2/6.
+No code computes or checks lethal. The assessment is now a structured survey:
+one entry per hand card, zone, opponent and possible combatant, then a rollup
+that totals the whole attack and ranks opportunities. In the blocked Smaug
+position the rollup found the win in 5 of 10 replies against about 1 in 5
+for free text; decisions take about 50% longer. The pilot asks for help once
+per decision, and a response repair no longer restarts the background
+preparation.
 
 Run notes live in `design-ref/experiments/2026-10-07-reset/`; traces and reports
 live in `.pi/renewed-20261007/`. Neither directory ships. Keep contracts in
