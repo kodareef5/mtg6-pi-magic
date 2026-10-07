@@ -247,6 +247,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   selected winning attack sets in two of three repairs, but failed its gate and
   left completion coverage incomplete. No physical expansion followed that gate;
   its frozen repairs later served as controls for the separate completion test.
+  An [offline repair-authority audit](history/2026-10-07-repair-authority.md)
+  rejected switching own-turn help directly to the response writer: its format
+  preserves future steps but still accepts false replacements of phase policies.
 - [ ] Reuse a prepared line only with positive coverage for the observed change.
   First test an ordinary opposing land play and a draw covered by a land branch;
   a changed blocker must still trigger reconsideration. Syntax, an empty stop
