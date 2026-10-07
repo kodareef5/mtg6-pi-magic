@@ -603,3 +603,78 @@ line that Jev misses fails clean execution without disproving the input
 hypothesis. Log example lookups and whole-session latency. Reject adoption if
 Red fails; record the outcome without another immediate prompt variant. No
 full game precedes the Red and feasible Green gates.
+
+At clean `a74e84a`, the paired runs used the same Jev/Luna-low roster, carried
+briefs, summary off and physical turn boundaries: 12 for ready lethal and 14
+for blocked lethal. Both arms used the ordinary planner during continuations;
+only the initial treatment session relocated examples. The saved initial
+requests differ by 6,305 characters: 79,841 to 73,536 for ready, and 81,545 to
+75,240 for blocked. Restoring the five original examples makes every treatment
+facts object equal to its control. The added lookup supplies them losslessly.
+
+| Position and arm | Wins | Wins without Red repair | Wins without either seat repairing | Initial planning seconds |
+|---|---:|---:|---:|---|
+| Ready, production | 1/3 | 1/3 | 0/3 | 10.87, 5.72, 6.60 |
+| Ready, lookup | 3/3 | 3/3 | 1/3 | 7.46, 7.88, 4.20 |
+| Blocked, production | 0/3 | 0/3 | 0/3 | 10.06, 6.68, 5.54 |
+| Blocked, lookup | 0/3 | 0/3 | 0/3 | 17.31, 21.43, 17.87 |
+
+Complete winning commitments appeared in 2/3 ready control plans and 3/3
+treatment plans, including the two-spell burn line. That generation difference
+is one run, not the two-run difference in physical wins. Three repetitions do
+not establish an improvement in planning strength.
+
+Ready treatment used no example lookup. Its first two answers selected all
+three attackers and won; Green requested defensive help once in each run. Its
+third answer selected Lightning Strike and Burst at the opponent, with an
+empty-stack prerequisite on Burst, and won without any foreground planning.
+The first answer still calls Kellan plus Sanctuary "guaranteed 9 damage" despite
+a blocker. The second uses an opponent-life bound of three for Burst while its
+purpose permits casting only at two or less. Winning commitments do not make
+these execution policies coherent.
+
+The ready control's second answer invents Sanctuary's summoning sickness and
+claims blocked Kellan deals its second-strike damage to the player. Its third
+answer includes all three attackers, but Jev asks for help while Sanctuary and
+Zhao are available and then finishes with Kellan alone. Repairs do not recover
+the win. This is an execution failure alongside a planner window mismatch:
+Burst's broad own-turn window allows it before combat, despite its stated
+postcombat purpose. Do not count this as an omitted-attack generation failure.
+
+Every blocked treatment retrieved the combat example before submitting. Across
+those sessions, seven example lookups occupied four replies; sequencing,
+resources and recovery were also fetched. The initial request excludes examples,
+but the later replies read them again. The first answer casts Smaug without
+selecting its attack: its steps select Kellan and Sanctuary while its phase
+orders Smaug alone. It also tells Jev to pay with both Sanctuaries despite
+selecting the animated Sanctuary as an attacker. Repair attacks with Kellan and Smaug,
+leaving no win through Explorer's block. The other two answers deliberately
+attack with Smaug alone, preserve ground blockers, and call Explorer an 8/10
+trampler. One calls eight damage lethal at eighteen life. These are generation
+failures with the current facts supplied, not merely failed pilot execution.
+
+All twelve continuations have zero gaps and fallback and match replay and their
+cloned prefixes. Initial planning plus play used 394 calls: 339 Jev and 55
+strategy, with 3,214,960 reported input tokens, 418,816 cached, 44,900 output and
+$0.15212. Twenty-four cancelled background preparations lack usage; the price
+is the reported total, not an estimate for those missing calls. There were no
+failed or truncated calls. Combined planning/play costs by three-run group were
+$0.04230 ready control, $0.02300 ready lookup, $0.04107 blocked control and
+$0.04575 blocked lookup. Play times were respectively 19.85/15.57/24.83,
+10.75/9.93/4.13, 12.72/8.99/28.23 and 26.13/10.81/10.16 seconds.
+
+Reject adoption. The ready result is a small observed improvement; the blocked
+result fails generation and the adoption gate. Because lookup use differs,
+this comparison does not isolate permanent removal of examples. Keep the arm
+for reproducibility and keep production unchanged. No Green gate, full game or
+new prompt variant follows this failed gate. Evidence is in
+`.pi/resume-20261007/examples-ready/`, `examples-blocked/` and
+`examples-audit.json`; each directory saves initial replies, physical journals,
+call traces, reports and timelines. Types, all 179 tests and all 24 saved-prefix
+replays passed before the clean-source live comparison.
+
+Both reviewers confirm rejection. Jev's premature attacker completion repeats
+the ready-lethal execution failure at `59f1624`; the complete winning attack
+set was available in both cases. A factual finish-option mark naming the planned
+attackers still undeclared is a separate execution proposal. It must retain the
+finish option and cannot claim obedience merely because the mark is rendered.
