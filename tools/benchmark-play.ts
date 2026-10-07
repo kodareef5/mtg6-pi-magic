@@ -14,7 +14,7 @@ import { load as loadRules } from "../src/core/rules.ts";
 import { gameResult, saveReport } from "./game-report.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 
-export async function playProposal(input: { journal: string; version: number; seat: number; plan: Plan },
+export async function playProposal(input: { journal: string; version: number; seat: number; plan?: Plan },
 	options: { out: string; inference: Inference; roster: Cast[]; throughTurn?: number }) {
 	mkdirSync(options.out, { recursive: true });
 	const path = join(options.out, "game.jsonl"), trace = join(options.out, "calls.jsonl");
@@ -23,7 +23,12 @@ export async function playProposal(input: { journal: string; version: number; se
 	const copied = replay(path, (h) => matchTable(h.seed), undefined, { cards: matchup.cards, rules: matchup.rules });
 	if (!isDeepStrictEqual(copied.table, original.table) || !isDeepStrictEqual(copied.prepared, original.prepared)) throw new Error("Benchmark clone differs from its prefix.");
 	const table = copied.table, journal = reopen(path, header, table);
-	editWork(table, input.seat, [{ do: "plan.put", plan: input.plan }], "benchmark-proposal");
+	if (input.plan) {
+		const used = new Set(table.workLog.filter((entry) => entry.seat === input.seat).map((entry) => entry.actionId));
+		let proposalId = "benchmark-proposal";
+		for (let suffix = 1; used.has(proposalId); suffix++) proposalId = `benchmark-proposal:${suffix}`;
+		editWork(table, input.seat, [{ do: "plan.put", plan: input.plan }], proposalId);
+	}
 	save(journal, table);
 	writeFileSync(trace, "", { flag: "wx", mode: 0o600 });
 	const observed = traceInference(options.inference, (event) => {

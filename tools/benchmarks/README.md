@@ -27,16 +27,18 @@ before entering the actual seat context and inspection path. Earlier probes
 omitted these annotations; their results are historical, not packet parity.
 The held-vigilance case preserves a plan whose listed attack and preservation
 prose disagree. Correct consumption marks alone do not prove it will execute.
-`finish-with-attacks-due` freezes the October 7 ready-lethal control immediately
-before Jev finished with Kellan alone. Both remaining attacks satisfy its pilot
-check; their order is immaterial. `ready-partial-attack` uses the same prefix for
-`--answers --play` continuations of its accepted remaining plan. No new strategy
-is needed at that prefix. Report whether Sanctuary and Zhao were declared before
-finishing, help requests, and the physical outcome separately. A repaired win
-does not establish obedience to the original declaration.
-The three unchanged supplied plans are committed in
-`test/fixtures/benchmarks/partial-attack-plans.json`; use `--repeat 3` with that
-answers file and `--through 12` for the physical control.
+`attack-before-help` freezes the October 7 ready-lethal control after Kellan
+is selected, before any help request. `finish-after-help-refusal` freezes the
+same declaration after both repairs, adding the exact saved transient refusal
+to the pilot frame. Both remaining attacks satisfy each check; their order is
+immaterial. Refusals belong to a pending question and are not journaled, so the
+manifest records that missing question field explicitly.
+`ready-partial-attack` is a `continue` case starting before help. With
+`--live --play --repeat 3 --through 12`, it resumes existing work without
+installing a new plan or resetting its progress. Report whether Sanctuary and
+Zhao were declared before finishing, help before `attack:done`, and the physical
+outcome separately. Help against unchanged available commitments is a separate
+pilot failure; a repaired win does not establish obedience.
 Luna receives the
 same classifier question through a chat adapter with an exact-id submission,
 one request attempt per question and a 256-token output ceiling. The adapter
@@ -91,7 +93,8 @@ Neither acceptance nor a shorter request passes the gate. Only after Red passes
 should feasible supplied Green defenses establish the development/defense gate;
 no full game precedes both gates. Attack-disposition schemas remain unadopted.
 
-`--play` installs the answer in a clone and continues through the opponent's
+`--play` installs the answer in a clone (or retains existing work for a
+`continue` case) and continues through the opponent's
 next turn, or an earlier outcome, using the ordinary Jev/Luna roster with summary
 off. `--through N` changes that diagnostic boundary. It checks the cloned prefix
 before installing the plan and replay after play, and saves a separate game

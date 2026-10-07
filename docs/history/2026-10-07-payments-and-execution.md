@@ -678,3 +678,28 @@ the ready-lethal execution failure at `59f1624`; the complete winning attack
 set was available in both cases. A factual finish-option mark naming the planned
 attackers still undeclared is a separate execution proposal. It must retain the
 finish option and cannot claim obedience merely because the mark is rendered.
+
+## Premature attacker completion
+
+The next execution control freezes version 365 of the ready control's third
+run, after Kellan is selected. One prefix ends before any help request; another
+contains both accepted repairs. The accepted remaining steps are Sanctuary,
+Zhao, then finishing. Both attackers are physically offered; either may go first.
+The second pilot case adds the exact saved help-budget refusal to the frame.
+Physical controls start before help and count both attackers selected before
+`attack:done`, help before that finish, and wins separately.
+
+The first baseline attempt at `f05ae22` made no inference calls: all three
+continuations stopped because their cloned prefix already held the runner's
+fixed `benchmark-proposal` action ID with a different earlier plan. Core's
+idempotency rejection was correct. The runner now chooses the first unused
+proposal ID for that seat from its copied work history. This changes only
+benchmark bookkeeping. Repeat the unchanged baseline before adding the mark;
+these failed attempts are not gameplay evidence.
+
+Review also found that freezing only the post-repair prefix omits the help
+loop and its transient refusal. The two pilot cases preserve those separate
+questions. The physical `continue` case now resumes the original accepted work
+without installing a proposal, retaining completed steps and available help
+budget. It replaces the redundant supplied-plan copies. This restores the
+measured decision sequence before testing the new mark.

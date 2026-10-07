@@ -29,7 +29,7 @@ import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
 import { candidatePlan } from "./benchmark-candidates.ts";
 
-type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan"; property: string; winner?: number; picks?: string[];
+type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue"; property: string; winner?: number; picks?: string[]; refused?: string[];
 	prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
@@ -43,6 +43,7 @@ if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "lu
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
 if (values.play && selected.some((one) => one.task === "pilot")) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
+if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers || values.arm !== "production")) throw new Error("Continuation cases require --play and the production arm, without --answers: they resume the prefix's existing work.");
 if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
 if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
 const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; arm?: string; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
@@ -63,6 +64,10 @@ const positions = selected.map((one) => {
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
+	if (one.refused) {
+		if (one.task !== "pilot") throw new Error("Saved transient refusals apply only to a pilot question.");
+		frame.refused = one.refused;
+	}
 	if (one.task === "pilot" && !frame.decision) throw new Error(`${one.id}: this seat has no decision at the recorded prefix.`);
 	// Match the physical loop: accepted procedures and plan/resource marks are
 	// part of the offered decision, not added by the player adapter.
@@ -118,7 +123,10 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				model: luna.model as never, thinking: luna.thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
 			if (one.task !== "pilot") {
 				const context = { brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}) };
-				if (savedAnswers) {
+				if (one.task === "continue") {
+					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
+					answer = { plan: frame.view.work.plan, fromPrefix: true };
+				} else if (savedAnswers) {
 					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration && (row.arm ?? "production") === arm);
 					const plan = rows[0]?.plan ?? rows[0]?.answer?.plan;
 					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case, arm and repetition.");
@@ -137,7 +145,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				passed = checks.passed;
 				decisionMs = Date.now() - began;
 				if (values.play) {
-					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, plan },
+					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
 						{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}) });
 					const game = continuation.result;
 					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
