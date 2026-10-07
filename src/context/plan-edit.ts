@@ -201,7 +201,10 @@ export function changedPlan(base: Plan, changes: unknown, available: ReturnType<
 	}
 	const shape = problems(PlanSchema, plan);
 	if (shape.length) throw new Error(`The resulting plan does not match the schema: ${shape.join("; ")}.`);
-	const conditions = conditionProblems(plan);
+	// Only conditions this answer wrote need a bound; inherited ones were accepted under older rules and are reported, not refused.
+	const written = changes as Partial<Plan>;
+	const conditions = conditionProblems({ objective: "", guidance: "", steps: written.steps ? plan.steps : [], ...(written.may ? { may: plan.may } : {}),
+		...(written.askWhen ? { askWhen: plan.askWhen } : {}), ...(written.holds ? { holds: plan.holds } : {}) });
 	if (conditions.length) throw new Error(conditions.join("; "));
 	return plan;
 }
