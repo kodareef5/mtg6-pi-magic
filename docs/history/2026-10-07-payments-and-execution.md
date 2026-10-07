@@ -508,3 +508,20 @@ and generation quality remain open work.
 Types, all 179 tests and all 24 saved-position replay checks pass before the
 live controls. The first test run exposed a missing test-only import; the
 completed run includes its correction and the final canonical-order contract.
+
+At clean `f15843b`, `hold-matching-coherent/` paid the specified two Mountains
+(`1-19` and `1-25`) 3/3, with no foreground planning. Red won all three in
+8.88, 7.33 and 7.39 seconds of play. Each run used 26 Jev calls and one cancelled
+background preparation, with 167,602 reported input tokens, 2,434 output and
+$0.00704; the cancelled call lacks usage.
+
+`hold-matching-conflict/` still failed exception handling 3/3. Both payment
+groups now carry the step and Treasure purpose, and the Treasure group also
+names its hold, but Jev pays Mountain `1-19` without help every time. The three
+physical wins took 7.46, 7.54 and 7.10 seconds. Each used 26 Jev calls and one
+cancelled preparation, with 147,116 reported input tokens, 2,073 output and
+$0.00618; the cancelled call lacks usage. All six continuations have no gaps or
+fallback and match replay and cloning. The correction restores honest action
+matching, not reliable contradiction detection. No new prompt variant follows
+this failed control. The next separate execution question is ordered waiting
+while effects from earlier commitments remain on the stack.
