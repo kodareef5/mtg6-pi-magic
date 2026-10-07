@@ -32,16 +32,18 @@ import { playProposal } from "./benchmark-play.ts";
 import { candidatePlan } from "./benchmark-candidates.ts";
 import { commitmentReceipt } from "./benchmark-receipt.ts";
 import { checkedReceipt, freezeSource, repairPlan, type RepairSource, type ReviewedReceipt } from "./benchmark-repair.ts";
+import { suppliedChoices, transferPlan, type SuppliedLines } from "./benchmark-transfer.ts";
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
-	pilotPolicy?: string; prepared?: { file: string; name: string } };
+	pilotPolicy?: string; suppliedLines?: string; prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" }, arm: { type: "string", default: "production" },
 	"repair-source": { type: "string" }, receipts: { type: "string" } } });
-if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
+if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs", "recognize", "transfer"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
 const repairing = values.arm!.startsWith("receipt-");
+const transferring = values.arm === "recognize" || values.arm === "transfer";
 if (repairing !== !!values["repair-source"] || repairing !== !!values.receipts || repairing && values.answers)
 	throw new Error("Receipt arms need --repair-source and --receipts, without --answers.");
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
@@ -58,6 +60,8 @@ if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.t
 if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
 if (values.arm === "block-pairs" && selected.some((one) => !["prepare", "plan", "amend", "repair"].includes(one.task))) throw new Error("Block-pair arms require planning cases.");
 if (repairing && selected.some((one) => !["plan", "amend", "repair"].includes(one.task))) throw new Error("Receipt arms require current-position planning cases.");
+if (transferring && selected.some((one) => one.task !== "plan" || !one.suppliedLines)) throw new Error("Recognition and transfer require a current planning case with supplied lines.");
+if (transferring && values.play && (values.arm === "recognize" || !values.answers)) throw new Error("Transfer play requires manually reviewed --answers; recognition never plays.");
 const repairSource = repairing ? JSON.parse(readFileSync(values["repair-source"]!, "utf8")) as RepairSource : undefined;
 const reviewed = repairing ? JSON.parse(readFileSync(values.receipts!, "utf8")) as { receipts: ReviewedReceipt[] } : undefined;
 const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; arm?: string; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
@@ -112,7 +116,9 @@ const positions = selected.map((one) => {
 		const frozen = freezeSource(repairSource, one, path, iteration, frame);
 		checkedReceipt(reviewed!.receipts, one.id, iteration, frozen.hash);
 	}
-	return { one, frame, brief, prior, earlier, table: saved.table };
+	const supplied = transferring ? JSON.parse(readFileSync(one.suppliedLines!, "utf8")) as SuppliedLines : undefined;
+	if (supplied) suppliedChoices(frame, supplied, 0);
+	return { one, frame, brief, prior, earlier, supplied, table: saved.table };
 });
 if (values.review) {
 	if (values.live) throw new Error("--review checks saved answers offline; it cannot be combined with --live.");
@@ -142,7 +148,7 @@ mkdirSync(out, { recursive: true });
 const measured = tally(), spent: Spend[] = [], results: Record<string, unknown>[] = [], rules = loadRules(matchup.rules.path);
 const inference = traceInference({ classify: (...args) => runtime.classify(...args), stream: (model, request, options) => runtime.streamSimple(model, request as never, options) as never },
 	(event) => appendFileSync(join(out, "calls.jsonl"), JSON.stringify(event) + "\n"));
-for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, table } of positions) {
+for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, supplied, table } of positions) {
 	// Alternate order so one model does not always receive the earlier request.
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
 	const pair = values.arm === "both" ? ["one", "two"] : values.arm === "examples-paired" ? ["production", "examples-lookup"] : values.arm === "receipt-paired" ? ["receipt-control", "receipt-consequence"] : [values.arm!];
@@ -173,6 +179,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					const receipt = checkedReceipt(reviewed!.receipts, one.id, iteration, frozen.hash);
 					answer = await repairPlan(frame, context, writer, frozen, arm === "receipt-consequence" ? receipt.counterexample : undefined);
 				} else if (arm === "one" || arm === "two") answer = await candidatePlan(frame, context, writer, arm === "one" ? 1 : 2);
+				else if (arm === "recognize" || arm === "transfer") answer = await transferPlan(frame, context, writer, supplied!, iteration, arm);
 				else if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
 				else {
 					const result = await planWork(frame, context, writer, prior ? { plan: prior.plan } : undefined, earlier ? changes(earlier, frame).lines : undefined);
@@ -180,17 +187,23 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					if (put?.do !== "plan.put") throw new Error("Amendment returned no accepted plan.");
 					answer = { ...result, plan: put.plan };
 				}
-				const plan = (answer as { plan: Plan }).plan;
-				checks = checkPlan(plan, one, frame);
-				resources = paymentForecast(frame, plan);
-				commitment = commitmentReceipt(frame, plan);
-				passed = checks.passed;
-				decisionMs = Date.now() - began;
-				if (values.play) {
-					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
-						{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
-					const game = continuation.result;
-					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+				const plan = (answer as { plan?: Plan }).plan;
+				if (!plan) {
+					if (arm !== "recognize") throw new Error("Planning returned no accepted plan.");
+					passed = !!(answer as { transfer: { selected?: string } }).transfer.selected;
+				} else {
+					checks = checkPlan(plan, one, frame);
+					resources = paymentForecast(frame, plan);
+					commitment = commitmentReceipt(frame, plan);
+					// Transfer keeps historical flags, but acceptance is independent of a particular attack set.
+					passed = arm === "transfer" || checks.passed;
+					decisionMs = Date.now() - began;
+					if (values.play) {
+						continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
+							{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
+						const game = continuation.result;
+						passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+					}
 				}
 			} else {
 				const api: DecisionApi = pilot === "jev" ? decisionApi(inference.classify, jev.model as never, { tally: measured, seat: one.seat }) : {
@@ -220,6 +233,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			error = String(caught);
 			if (caught && typeof caught === "object" && "candidates" in caught) answer = { candidates: caught.candidates, attempts: (caught as { attempts?: unknown }).attempts };
 			if (caught && typeof caught === "object" && "repair" in caught) answer = { repair: caught.repair };
+			if (caught && typeof caught === "object" && "transfer" in caught) answer = { transfer: caught.transfer };
 		}
 		const calls = [...measured.spent().slice(startCall), ...(continuation?.result.calls ?? [])];
 		spent.push(...calls);

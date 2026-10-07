@@ -12,6 +12,15 @@ spent all four sources on Sanctuary. Two Lightning Strikes can deal Green's
 remaining six life. Use `good-upkeep-lethal.json` with `--answers`, `--repeat 3`
 and `--play --through 10` for the supplied-line delivery control; omit `--answers`
 to measure the production planner. Both require physical outcome review.
+`red-blocked-lethal-fresh --arm recognize` selects from four supplied alternatives;
+`--arm transfer` asks the ordinary planner to encode one. Both use the same
+projected facts and candidate evidence, with rotated IDs. Their runner PASS
+means an accepted answer, not a winning selection or coherent transfer. Follow
+the [predeclared gate](../../docs/history/2026-10-07-recognition-transfer.md):
+review three recognition results before three transfers, then review transfers
+before any play. Transfer play requires `--answers`; recognition cannot play.
+Witness plans and private outcome checks remain outside model input. These
+controls measure supplied-choice preservation, not candidate generation.
 `red-before-upkeep` starts at decision 219, Green's turn-9 untap, before Red's
 background job starts. Run it with `--live --play --through 10` to measure early
 acceptance and changed-board amendment. Report generation, execution and

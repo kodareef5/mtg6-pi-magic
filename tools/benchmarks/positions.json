@@ -442,7 +442,8 @@
           "source": "Soulstone Sanctuary",
           "prefix": "attack:"
         }
-      ]
+      ],
+      "suppliedLines": "test/fixtures/benchmarks/blocked-recognition.json"
     },
     {
       "id": "red-ready-lethal",

@@ -1,0 +1,1528 @@
+{
+  "source": {
+    "journal": "blocked-lethal",
+    "version": 579,
+    "seat": 1,
+    "verifiedAt": "2064a39"
+  },
+  "projectionHash": "ca0af3c897c6bf79cd79dba516316fb91641634fc8707f0afb0fce73536863c6",
+  "assumptions": [
+    "Each line starts from the same current position and plays its named land first.",
+    "The listed spells resolve in order without intervening responses. These conditional post-main boards are not the current board.",
+    "Payments are concrete examples under accepted terms, not recommendations. The attack set is proposed, not already declared.",
+    "No combat result, unknown draw or hidden response is supplied. These hand-authored alternatives test recognition and transfer, not candidate generation."
+  ],
+  "candidates": [
+    {
+      "line": {
+        "land": "Mountain from hand",
+        "casts": [
+          "Smaug the Magnificent"
+        ],
+        "attackers": [
+          "Kellan, Planar Trailblazer",
+          "Soulstone Sanctuary",
+          "Smaug the Magnificent"
+        ],
+        "keepUntappedDuringPayment": [
+          "1-50"
+        ]
+      },
+      "payments": [
+        {
+          "card": "Smaug the Magnificent",
+          "cost": {
+            "generic": 2,
+            "colors": [
+              "R",
+              "R"
+            ]
+          },
+          "floating": [],
+          "funding": [
+            {
+              "source": {
+                "id": "1-19",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-26",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-31",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-51",
+                "incarnation": 2
+              },
+              "card": "Soulstone Sanctuary",
+              "colors": [
+                "C"
+              ]
+            }
+          ]
+        }
+      ],
+      "afterMain": [
+        {
+          "id": "1-15",
+          "card": "Kellan, Planar Trailblazer",
+          "tapped": false,
+          "traits": {
+            "name": "Kellan, Planar Trailblazer",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Human",
+              "Faerie",
+              "Rogue"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 3,
+            "toughness": 2,
+            "words": [
+              "double strike"
+            ],
+            "registrations": [
+              {
+                "basis": "{1}{R}: If Kellan is a Scout, it becomes a Human Faerie Detective and gains \"Whenever Kellan deals combat damage to a player, exile the top card of your library. You may play that card this turn.\"",
+                "kind": "watch",
+                "event": {
+                  "on": "combat-damage",
+                  "of": {
+                    "is": "this"
+                  },
+                  "player": true
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "move",
+                      "what": {
+                        "top": 1,
+                        "of": "you"
+                      },
+                      "to": "exile",
+                      "reason": "exile",
+                      "as": "card"
+                    },
+                    {
+                      "do": "permit",
+                      "what": "bound:card",
+                      "who": "you",
+                      "until": "end-of-turn"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-19",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-26",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-31",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-32",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-49",
+          "card": "Smaug the Magnificent",
+          "tapped": false,
+          "traits": {
+            "name": "Smaug the Magnificent",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Dragon"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 4,
+            "toughness": 3,
+            "words": [
+              "flying",
+              "haste"
+            ],
+            "registrations": [
+              {
+                "basis": "Flying, haste",
+                "kind": "continuous",
+                "affects": {
+                  "is": "this"
+                },
+                "change": {
+                  "words": [
+                    "flying",
+                    "haste"
+                  ]
+                }
+              },
+              {
+                "basis": "Whenever Smaug attacks, he deals damage equal to the number of Treasures you control to any target.",
+                "kind": "watch",
+                "event": {
+                  "on": "attacks",
+                  "of": {
+                    "is": "this"
+                  }
+                },
+                "effect": {
+                  "targets": [
+                    {
+                      "object": {
+                        "types": [
+                          "creature",
+                          "planeswalker",
+                          "battle"
+                        ]
+                      },
+                      "player": "any"
+                    }
+                  ],
+                  "instructions": [
+                    {
+                      "do": "damage",
+                      "to": "target:0",
+                      "amount": {
+                        "count": {
+                          "subtypes": [
+                            "Treasure"
+                          ],
+                          "controller": "you"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "basis": "At the beginning of your upkeep, create a Treasure token.",
+                "kind": "watch",
+                "event": {
+                  "on": "step",
+                  "step": "upkeep",
+                  "whose": "you"
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "token",
+                      "count": 1,
+                      "spec": {
+                        "name": "Treasure",
+                        "types": [
+                          "artifact"
+                        ],
+                        "subtypes": [
+                          "Treasure"
+                        ],
+                        "colors": [],
+                        "registers": [
+                          {
+                            "basis": "{T}, Sacrifice this token: Add one mana of any color.",
+                            "kind": "mana",
+                            "cost": {
+                              "tap": true,
+                              "sacrifice": "this"
+                            },
+                            "any": 1
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-50",
+          "card": "Soulstone Sanctuary",
+          "tapped": false,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land",
+              "creature"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [
+              "vigilance"
+            ],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ],
+            "allCreatureTypes": true,
+            "power": 3,
+            "toughness": 3
+          }
+        },
+        {
+          "id": "1-51",
+          "card": "Soulstone Sanctuary",
+          "tapped": true,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "line": {
+        "land": "Mountain from hand",
+        "casts": [
+          "Smaug the Magnificent",
+          "Emberheart Challenger"
+        ],
+        "attackers": [
+          "Kellan, Planar Trailblazer",
+          "Smaug the Magnificent",
+          "Emberheart Challenger"
+        ],
+        "keepUntappedDuringPayment": []
+      },
+      "payments": [
+        {
+          "card": "Smaug the Magnificent",
+          "cost": {
+            "generic": 2,
+            "colors": [
+              "R",
+              "R"
+            ]
+          },
+          "floating": [],
+          "funding": [
+            {
+              "source": {
+                "id": "1-19",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-26",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-50",
+                "incarnation": 2
+              },
+              "card": "Soulstone Sanctuary",
+              "colors": [
+                "C"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-51",
+                "incarnation": 2
+              },
+              "card": "Soulstone Sanctuary",
+              "colors": [
+                "C"
+              ]
+            }
+          ]
+        },
+        {
+          "card": "Emberheart Challenger",
+          "cost": {
+            "generic": 1,
+            "colors": [
+              "R"
+            ]
+          },
+          "floating": [],
+          "funding": [
+            {
+              "source": {
+                "id": "1-31",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-32",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            }
+          ]
+        }
+      ],
+      "afterMain": [
+        {
+          "id": "1-6",
+          "card": "Emberheart Challenger",
+          "tapped": false,
+          "traits": {
+            "name": "Emberheart Challenger",
+            "supertypes": [],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Mouse",
+              "Warrior"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 2,
+            "toughness": 2,
+            "words": [
+              "haste"
+            ],
+            "registrations": [
+              {
+                "basis": "Haste",
+                "kind": "continuous",
+                "affects": {
+                  "is": "this"
+                },
+                "change": {
+                  "words": [
+                    "haste"
+                  ]
+                }
+              },
+              {
+                "basis": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+                "kind": "watch",
+                "event": {
+                  "on": "cast",
+                  "of": {
+                    "zones": [
+                      "stack"
+                    ],
+                    "not": {
+                      "types": [
+                        "creature"
+                      ]
+                    }
+                  },
+                  "by": "you"
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "modify",
+                      "what": "this",
+                      "until": "end-of-turn",
+                      "change": {
+                        "power": 1,
+                        "toughness": 1
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "basis": "Valiant — Whenever this creature becomes the target of a spell or ability you control for the first time each turn, exile the top card of your library. Until end of turn, you may play that card.",
+                "kind": "watch",
+                "event": {
+                  "on": "targeted",
+                  "of": {
+                    "is": "this"
+                  },
+                  "by": "you"
+                },
+                "limit": "once-per-turn",
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "move",
+                      "what": {
+                        "top": 1,
+                        "of": "you"
+                      },
+                      "to": "exile",
+                      "reason": "exile",
+                      "as": "card"
+                    },
+                    {
+                      "do": "permit",
+                      "what": "bound:card",
+                      "who": "you",
+                      "until": "end-of-turn"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-15",
+          "card": "Kellan, Planar Trailblazer",
+          "tapped": false,
+          "traits": {
+            "name": "Kellan, Planar Trailblazer",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Human",
+              "Faerie",
+              "Rogue"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 3,
+            "toughness": 2,
+            "words": [
+              "double strike"
+            ],
+            "registrations": [
+              {
+                "basis": "{1}{R}: If Kellan is a Scout, it becomes a Human Faerie Detective and gains \"Whenever Kellan deals combat damage to a player, exile the top card of your library. You may play that card this turn.\"",
+                "kind": "watch",
+                "event": {
+                  "on": "combat-damage",
+                  "of": {
+                    "is": "this"
+                  },
+                  "player": true
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "move",
+                      "what": {
+                        "top": 1,
+                        "of": "you"
+                      },
+                      "to": "exile",
+                      "reason": "exile",
+                      "as": "card"
+                    },
+                    {
+                      "do": "permit",
+                      "what": "bound:card",
+                      "who": "you",
+                      "until": "end-of-turn"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-19",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-26",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-31",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-32",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-49",
+          "card": "Smaug the Magnificent",
+          "tapped": false,
+          "traits": {
+            "name": "Smaug the Magnificent",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Dragon"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 4,
+            "toughness": 3,
+            "words": [
+              "flying",
+              "haste"
+            ],
+            "registrations": [
+              {
+                "basis": "Flying, haste",
+                "kind": "continuous",
+                "affects": {
+                  "is": "this"
+                },
+                "change": {
+                  "words": [
+                    "flying",
+                    "haste"
+                  ]
+                }
+              },
+              {
+                "basis": "Whenever Smaug attacks, he deals damage equal to the number of Treasures you control to any target.",
+                "kind": "watch",
+                "event": {
+                  "on": "attacks",
+                  "of": {
+                    "is": "this"
+                  }
+                },
+                "effect": {
+                  "targets": [
+                    {
+                      "object": {
+                        "types": [
+                          "creature",
+                          "planeswalker",
+                          "battle"
+                        ]
+                      },
+                      "player": "any"
+                    }
+                  ],
+                  "instructions": [
+                    {
+                      "do": "damage",
+                      "to": "target:0",
+                      "amount": {
+                        "count": {
+                          "subtypes": [
+                            "Treasure"
+                          ],
+                          "controller": "you"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "basis": "At the beginning of your upkeep, create a Treasure token.",
+                "kind": "watch",
+                "event": {
+                  "on": "step",
+                  "step": "upkeep",
+                  "whose": "you"
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "token",
+                      "count": 1,
+                      "spec": {
+                        "name": "Treasure",
+                        "types": [
+                          "artifact"
+                        ],
+                        "subtypes": [
+                          "Treasure"
+                        ],
+                        "colors": [],
+                        "registers": [
+                          {
+                            "basis": "{T}, Sacrifice this token: Add one mana of any color.",
+                            "kind": "mana",
+                            "cost": {
+                              "tap": true,
+                              "sacrifice": "this"
+                            },
+                            "any": 1
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-50",
+          "card": "Soulstone Sanctuary",
+          "tapped": true,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land",
+              "creature"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [
+              "vigilance"
+            ],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ],
+            "allCreatureTypes": true,
+            "power": 3,
+            "toughness": 3
+          }
+        },
+        {
+          "id": "1-51",
+          "card": "Soulstone Sanctuary",
+          "tapped": true,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "line": {
+        "land": "Mountain from hand",
+        "casts": [],
+        "attackers": [
+          "Kellan, Planar Trailblazer"
+        ],
+        "keepUntappedDuringPayment": []
+      },
+      "payments": [],
+      "afterMain": [
+        {
+          "id": "1-15",
+          "card": "Kellan, Planar Trailblazer",
+          "tapped": false,
+          "traits": {
+            "name": "Kellan, Planar Trailblazer",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Human",
+              "Faerie",
+              "Rogue"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 3,
+            "toughness": 2,
+            "words": [
+              "double strike"
+            ],
+            "registrations": [
+              {
+                "basis": "{1}{R}: If Kellan is a Scout, it becomes a Human Faerie Detective and gains \"Whenever Kellan deals combat damage to a player, exile the top card of your library. You may play that card this turn.\"",
+                "kind": "watch",
+                "event": {
+                  "on": "combat-damage",
+                  "of": {
+                    "is": "this"
+                  },
+                  "player": true
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "move",
+                      "what": {
+                        "top": 1,
+                        "of": "you"
+                      },
+                      "to": "exile",
+                      "reason": "exile",
+                      "as": "card"
+                    },
+                    {
+                      "do": "permit",
+                      "what": "bound:card",
+                      "who": "you",
+                      "until": "end-of-turn"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-19",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-26",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-31",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-32",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-50",
+          "card": "Soulstone Sanctuary",
+          "tapped": false,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land",
+              "creature"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [
+              "vigilance"
+            ],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ],
+            "allCreatureTypes": true,
+            "power": 3,
+            "toughness": 3
+          }
+        },
+        {
+          "id": "1-51",
+          "card": "Soulstone Sanctuary",
+          "tapped": false,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "line": {
+        "land": "Mountain from hand",
+        "casts": [
+          "Smaug the Magnificent"
+        ],
+        "attackers": [
+          "Smaug the Magnificent"
+        ],
+        "keepUntappedDuringPayment": []
+      },
+      "payments": [
+        {
+          "card": "Smaug the Magnificent",
+          "cost": {
+            "generic": 2,
+            "colors": [
+              "R",
+              "R"
+            ]
+          },
+          "floating": [],
+          "funding": [
+            {
+              "source": {
+                "id": "1-19",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-26",
+                "incarnation": 2
+              },
+              "card": "Mountain",
+              "colors": [
+                "R"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-50",
+                "incarnation": 2
+              },
+              "card": "Soulstone Sanctuary",
+              "colors": [
+                "C"
+              ]
+            },
+            {
+              "source": {
+                "id": "1-51",
+                "incarnation": 2
+              },
+              "card": "Soulstone Sanctuary",
+              "colors": [
+                "C"
+              ]
+            }
+          ]
+        }
+      ],
+      "afterMain": [
+        {
+          "id": "1-15",
+          "card": "Kellan, Planar Trailblazer",
+          "tapped": false,
+          "traits": {
+            "name": "Kellan, Planar Trailblazer",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Human",
+              "Faerie",
+              "Rogue"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 3,
+            "toughness": 2,
+            "words": [
+              "double strike"
+            ],
+            "registrations": [
+              {
+                "basis": "{1}{R}: If Kellan is a Scout, it becomes a Human Faerie Detective and gains \"Whenever Kellan deals combat damage to a player, exile the top card of your library. You may play that card this turn.\"",
+                "kind": "watch",
+                "event": {
+                  "on": "combat-damage",
+                  "of": {
+                    "is": "this"
+                  },
+                  "player": true
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "move",
+                      "what": {
+                        "top": 1,
+                        "of": "you"
+                      },
+                      "to": "exile",
+                      "reason": "exile",
+                      "as": "card"
+                    },
+                    {
+                      "do": "permit",
+                      "what": "bound:card",
+                      "who": "you",
+                      "until": "end-of-turn"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-19",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-26",
+          "card": "Mountain",
+          "tapped": true,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-31",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-32",
+          "card": "Mountain",
+          "tapped": false,
+          "traits": {
+            "name": "Mountain",
+            "supertypes": [
+              "basic"
+            ],
+            "types": [
+              "land"
+            ],
+            "subtypes": [
+              "Mountain"
+            ],
+            "colors": [],
+            "words": [],
+            "registrations": []
+          }
+        },
+        {
+          "id": "1-49",
+          "card": "Smaug the Magnificent",
+          "tapped": false,
+          "traits": {
+            "name": "Smaug the Magnificent",
+            "supertypes": [
+              "legendary"
+            ],
+            "types": [
+              "creature"
+            ],
+            "subtypes": [
+              "Dragon"
+            ],
+            "colors": [
+              "R"
+            ],
+            "power": 4,
+            "toughness": 3,
+            "words": [
+              "flying",
+              "haste"
+            ],
+            "registrations": [
+              {
+                "basis": "Flying, haste",
+                "kind": "continuous",
+                "affects": {
+                  "is": "this"
+                },
+                "change": {
+                  "words": [
+                    "flying",
+                    "haste"
+                  ]
+                }
+              },
+              {
+                "basis": "Whenever Smaug attacks, he deals damage equal to the number of Treasures you control to any target.",
+                "kind": "watch",
+                "event": {
+                  "on": "attacks",
+                  "of": {
+                    "is": "this"
+                  }
+                },
+                "effect": {
+                  "targets": [
+                    {
+                      "object": {
+                        "types": [
+                          "creature",
+                          "planeswalker",
+                          "battle"
+                        ]
+                      },
+                      "player": "any"
+                    }
+                  ],
+                  "instructions": [
+                    {
+                      "do": "damage",
+                      "to": "target:0",
+                      "amount": {
+                        "count": {
+                          "subtypes": [
+                            "Treasure"
+                          ],
+                          "controller": "you"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "basis": "At the beginning of your upkeep, create a Treasure token.",
+                "kind": "watch",
+                "event": {
+                  "on": "step",
+                  "step": "upkeep",
+                  "whose": "you"
+                },
+                "effect": {
+                  "instructions": [
+                    {
+                      "do": "token",
+                      "count": 1,
+                      "spec": {
+                        "name": "Treasure",
+                        "types": [
+                          "artifact"
+                        ],
+                        "subtypes": [
+                          "Treasure"
+                        ],
+                        "colors": [],
+                        "registers": [
+                          {
+                            "basis": "{T}, Sacrifice this token: Add one mana of any color.",
+                            "kind": "mana",
+                            "cost": {
+                              "tap": true,
+                              "sacrifice": "this"
+                            },
+                            "any": 1
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1-50",
+          "card": "Soulstone Sanctuary",
+          "tapped": true,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land",
+              "creature"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [
+              "vigilance"
+            ],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ],
+            "allCreatureTypes": true,
+            "power": 3,
+            "toughness": 3
+          }
+        },
+        {
+          "id": "1-51",
+          "card": "Soulstone Sanctuary",
+          "tapped": true,
+          "traits": {
+            "name": "Soulstone Sanctuary",
+            "supertypes": [],
+            "types": [
+              "land"
+            ],
+            "subtypes": [],
+            "colors": [],
+            "words": [],
+            "registrations": [
+              {
+                "basis": "{T}: Add {C}.",
+                "kind": "mana",
+                "cost": {
+                  "tap": true
+                },
+                "colors": [
+                  "C"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

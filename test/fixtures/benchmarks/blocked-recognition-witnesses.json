@@ -1,0 +1,1019 @@
+{
+  "projectionHash": "ca0af3c897c6bf79cd79dba516316fb91641634fc8707f0afb0fce73536863c6",
+  "scope": "Offline representability witnesses only. Not supplied to the model. Costs and future attack prerequisites are not certified by schema acceptance.",
+  "witnesses": [
+    {
+      "index": 0,
+      "changes": {
+        "objective": "Execute the selected supplied line.",
+        "guidance": "Offline witness for candidate index 0. Not sent to the model.",
+        "steps": [
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "land Mountain from hand"
+            }
+          },
+          {
+            "label": "Cast Smaug the Magnificent",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "prepared:41 Cast Smaug the Magnificent"
+            },
+            "purpose": "Pay with Mountain (1-19), Mountain (1-26), Mountain (1-31), Soulstone Sanctuary (1-51). Let this spell resolve before the next step."
+          },
+          {
+            "label": "Attack with Kellan, Planar Trailblazer",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "reuse": "attack 1-15@3"
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Attack with Soulstone Sanctuary",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "reuse": "attack 1-50@2"
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Attack with Smaug the Magnificent",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Smaug the Magnificent"
+              }
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "holds": [
+          {
+            "objects": {
+              "ids": [
+                "1-50"
+              ],
+              "zones": [
+                "battlefield"
+              ],
+              "controller": "self"
+            },
+            "purpose": "Keep this Sanctuary untapped through the selected attack."
+          }
+        ],
+        "may": [],
+        "askWhen": [],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "draw"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "end"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "land:1-31",
+          "seat": 1
+        },
+        {
+          "picked": "cast:29:0:1-49@1:1-19,1-26,1-31,1-51",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:1-49:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "attack:1-15",
+          "seat": 1
+        },
+        {
+          "picked": "attack:1-50",
+          "seat": 1
+        },
+        {
+          "picked": "attack:1-49",
+          "seat": 1
+        },
+        {
+          "picked": "attack:done",
+          "seat": 1
+        },
+        {
+          "picked": "trigger:trigger-1018-0:t0=0-34@3",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:ability-1019:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "block:0-34:1-15",
+          "seat": 0
+        },
+        {
+          "picked": "block:done",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "lose:0",
+          "seat": 0
+        }
+      ],
+      "greenLife": -1
+    },
+    {
+      "index": 1,
+      "changes": {
+        "objective": "Execute the selected supplied line.",
+        "guidance": "Offline witness for candidate index 1. Not sent to the model.",
+        "steps": [
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "land Mountain from hand"
+            }
+          },
+          {
+            "label": "Cast Smaug the Magnificent",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "prepared:41 Cast Smaug the Magnificent"
+            },
+            "purpose": "Pay with Mountain (1-19), Mountain (1-26), Soulstone Sanctuary (1-50), Soulstone Sanctuary (1-51). Let this spell resolve before the next step."
+          },
+          {
+            "label": "Cast Emberheart Challenger",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "prepared:4 Cast Emberheart Challenger"
+            },
+            "purpose": "Pay with Mountain (1-31), Mountain (1-32). Let this spell resolve before the next step."
+          },
+          {
+            "label": "Attack with Kellan, Planar Trailblazer",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "reuse": "attack 1-15@3"
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Attack with Smaug the Magnificent",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Smaug the Magnificent"
+              }
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Attack with Emberheart Challenger",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Emberheart Challenger"
+              }
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "holds": [],
+        "may": [],
+        "askWhen": [],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "draw"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "end"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "land:1-31",
+          "seat": 1
+        },
+        {
+          "picked": "cast:29:0:1-49@1:1-19,1-26,1-50,1-51",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:1-49:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "cast:2:0:1-6@1:1-31,1-32",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:1-6:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "attack:1-15",
+          "seat": 1
+        },
+        {
+          "picked": "attack:1-49",
+          "seat": 1
+        },
+        {
+          "picked": "attack:1-6",
+          "seat": 1
+        },
+        {
+          "picked": "attack:done",
+          "seat": 1
+        },
+        {
+          "picked": "trigger:trigger-1023-0:t0=0-34@3",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:ability-1024:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "block:0-34:1-15",
+          "seat": 0
+        },
+        {
+          "picked": "block:done",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "lose:0",
+          "seat": 0
+        }
+      ],
+      "greenLife": 0
+    },
+    {
+      "index": 2,
+      "changes": {
+        "objective": "Execute the selected supplied line.",
+        "guidance": "Offline witness for candidate index 2. Not sent to the model.",
+        "steps": [
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "land Mountain from hand"
+            }
+          },
+          {
+            "label": "Attack with Kellan, Planar Trailblazer",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "reuse": "attack 1-15@3"
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "holds": [],
+        "may": [],
+        "askWhen": [],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "draw"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "end"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "land:1-31",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "attack:1-15",
+          "seat": 1
+        },
+        {
+          "picked": "attack:done",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "block:0-34:1-15",
+          "seat": 0
+        },
+        {
+          "picked": "block:done",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "lose:",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        }
+      ],
+      "greenLife": 6
+    },
+    {
+      "index": 3,
+      "changes": {
+        "objective": "Execute the selected supplied line.",
+        "guidance": "Offline witness for candidate index 3. Not sent to the model.",
+        "steps": [
+          {
+            "label": "Play Mountain",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "land Mountain from hand"
+            }
+          },
+          {
+            "label": "Cast Smaug the Magnificent",
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "waitFor": "empty-stack",
+            "action": {
+              "reuse": "prepared:41 Cast Smaug the Magnificent"
+            },
+            "purpose": "Pay with Mountain (1-19), Mountain (1-26), Soulstone Sanctuary (1-50), Soulstone Sanctuary (1-51). Let this spell resolve before the next step."
+          },
+          {
+            "label": "Attack with Smaug the Magnificent",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "prefix": "attack:",
+              "objects": {
+                "zones": [
+                  "battlefield"
+                ],
+                "controller": "self",
+                "card": "Smaug the Magnificent"
+              }
+            },
+            "purpose": "Declare this attacker before finishing the declaration."
+          },
+          {
+            "label": "Finish attackers",
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "action": {
+              "option": "attack:done"
+            }
+          }
+        ],
+        "holds": [],
+        "may": [],
+        "askWhen": [],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "draw"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "precombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "begin-combat"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "declare-attackers"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "postcombat-main"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          },
+          {
+            "when": {
+              "active": "self",
+              "step": "end"
+            },
+            "guidance": "Follow the listed commitments. While a spell or ability is pending, pass priority to resolve it unless an intervening response invalidates this line; then ask for help. Put required triggers on the stack; target Explorer (0-34@3) with Smaug's attack trigger. Do not count unknown responses or draws as absent.",
+            "complete": "pass"
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "land:1-31",
+          "seat": 1
+        },
+        {
+          "picked": "cast:29:0:1-49@1:1-19,1-26,1-50,1-51",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:1-49:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "attack:1-49",
+          "seat": 1
+        },
+        {
+          "picked": "attack:done",
+          "seat": 1
+        },
+        {
+          "picked": "trigger:trigger-1016-0:t0=0-34@3",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "resolve:ability-1017:1:0:do",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "block:done",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "damage",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        },
+        {
+          "picked": "pass",
+          "seat": 1
+        },
+        {
+          "picked": "pass",
+          "seat": 0
+        }
+      ],
+      "greenLife": 2
+    }
+  ]
+}

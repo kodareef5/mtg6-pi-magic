@@ -31,6 +31,7 @@ import { checkPlan } from "../tools/benchmark-checks.ts";
 import { candidateCatalog, candidatePlan, compileCandidate } from "../tools/benchmark-candidates.ts";
 import { checkedReceipt, freezeSource, repairPlan, type Counterexample } from "../tools/benchmark-repair.ts";
 import { commitmentReceipt } from "../tools/benchmark-receipt.ts";
+import { projectionHash, suppliedChoices, transferPlan, type SuppliedLines } from "../tools/benchmark-transfer.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
@@ -645,6 +646,71 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	}), frozen, counterexample), /did not submit an accepted answer/);
 	assert.equal(refusedCalls, 1, "a refused review has no extra reply or fallback proposal");
 	assert.deepEqual(frame, snapshot, "paired repair neither installs nor executes the proposed work");
+	// Recognition receives the same projected facts as production transfer, but
+	// cannot install a fixture plan or expose its private outcome grading.
+	const temp = mkdtempSync(join(tmpdir(), "magic-recognition-"));
+	try {
+		const path = join(temp, "position.jsonl");
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/blocked-lethal.jsonl.gz")));
+		const loaded = replay(path, (header) => matchTable(header.seed), 579);
+		const at = workFrame(loaded.table, 1), before = structuredClone(at);
+		const supplied = JSON.parse(readFileSync("test/fixtures/benchmarks/blocked-recognition.json", "utf8")) as SuppliedLines;
+		const witnesses = JSON.parse(readFileSync("test/fixtures/benchmarks/blocked-recognition-witnesses.json", "utf8")) as {
+			projectionHash: string; witnesses: { index: number; changes: Record<string, unknown>; decisions: { seat: number; picked: string }[]; greenLife: number }[] };
+		assert.equal(witnesses.projectionHash, projectionHash(at));
+		assert.deepEqual(suppliedChoices(at, supplied, 1).indices, [1, 2, 3, 0]);
+		assert.throws(() => suppliedChoices({ ...at, version: at.version + 1 }, supplied, 0), /exact projected position/);
+		const compared: Parameters<import("../src/context/reason.ts").Reasoner["work"]>[] = [];
+		const request = async (...args: Parameters<import("../src/context/reason.ts").Reasoner["work"]>) => {
+			compared.push(args);
+			const minimal = compared.length === 1;
+			const answer = minimal ? { id: "B" } : witnesses.witnesses[0]!.changes;
+			assert.equal(args[2].submit.check(answer), null);
+			return answer;
+		};
+		const recognized = await transferPlan(at, {}, { work: request }, supplied, 1, "recognize");
+		assert.equal(recognized.transfer.selectedIndex, 2);
+		assert.equal(recognized.plan, undefined, "recognizing even a losing alternative installs nothing");
+		const transferred = await transferPlan(at, {}, { work: request }, supplied, 1, "transfer");
+		assert.ok(transferred.plan);
+		assert.equal(compared[0]![1].user, compared[1]![1].user, "complete fact packets are identical across contracts");
+		assert.equal(compared[0]![3], compared[1]![3], "output ceiling stays shared");
+		assert.equal(compared[0]![2].turns, 1);
+		assert.equal(compared[1]![2].turns, 3);
+		assert.ok(!compared[0]![1].user.includes('"greenLife"') && !compared[0]![1].user.includes('"witnesses"'));
+		const production: Parameters<import("../src/context/reason.ts").Reasoner["work"]>[] = [];
+		await planWork(at, {}, { async work(...args) { production.push(args); assert.equal(args[2].submit.check(witnesses.witnesses[0]!.changes), null); return witnesses.witnesses[0]!.changes; } });
+		const enriched = JSON.parse(compared[1]![1].user); delete enriched.suppliedAlternatives;
+		assert.deepEqual(enriched, JSON.parse(production[0]![1].user));
+		assert.equal(compared[1]![1].system, production[0]![1].system);
+		assert.deepEqual(compared[1]![2].submit.parameters, production[0]![2].submit.parameters);
+		assert.deepEqual(at, before, "neither diagnostic task changes the position");
+		for (const witness of witnesses.witnesses) {
+			const made = await planWork(at, {}, { async work(_about, _prompt, tools) { assert.equal(tools.submit.check(witness.changes), null); return witness.changes; } });
+			const plan = made.tools.find((one) => one.do === "plan.put"); assert.ok(plan?.do === "plan.put");
+			assert.deepEqual(paymentForecast(at, plan.plan).conflicts, []);
+			const played = structuredClone(loaded.table);
+			editWork(played, 1, [{ do: "plan.put", plan: plan.plan }], `witness-${witness.index}`);
+			const credited = new Set<number>();
+			let afterMain: unknown;
+			for (const row of witness.decisions) {
+				let advances = 0;
+				while (!nextDecision(played) && !played.outcome) { assert.ok(advances++ < 100); advance(played); }
+				const decision = nextDecision(played)!;
+				assert.equal(decision.seat, row.seat);
+				assert.ok(decision.options.some((one) => one.id === row.picked), row.picked);
+				const acting = workFrame(played, row.seat), state = planState(acting);
+				const carried = state ? execution(state, row.picked) : undefined;
+				if (row.seat === 1 && carried?.step !== undefined) credited.add(carried.step);
+				if (row.seat === 1 && decision.options.some((one) => one.id === "attack:done")) afterMain ??= acting.view.objects?.filter((one) => one.zone === "battlefield" && one.controller === 1)
+					.map((one) => ({ id: one.id, card: one.card, tapped: !!one.tapped, traits: one.traits }));
+				apply(played, row.picked, "model", "chosen", carried);
+			}
+			assert.equal(played.seats[0]!.life, witness.greenLife);
+			assert.equal(credited.size, plan.plan.steps.length, "the ordinary plan credits every intended commitment, including future attackers");
+			assert.deepEqual(afterMain, supplied.candidates[witness.index]!.afterMain, "candidate boards come from the seat projection after the actual casts");
+		}
+	} finally { rmSync(temp, { recursive: true, force: true }); }
 });
 
 test("strategy accepts scoped work before upkeep and reviews after draw, with no extra opening call", async () => {
