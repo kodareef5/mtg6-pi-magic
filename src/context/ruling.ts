@@ -11,7 +11,7 @@
  * on disk is refused back to the judge rather than recorded.
  */
 
-import type { Case, Ruling } from "../core/judge.ts";
+import { declarationEvidence, type Case, type Ruling } from "../core/judge.ts";
 import type { Rules } from "../core/rules.ts";
 import type { Table } from "../core/table.ts";
 import type { Universe } from "../core/cards.ts";
@@ -21,7 +21,7 @@ import type { Reasoner, Submission } from "./reason.ts";
 
 const SYSTEM = [
 	"You are the judge at a game of Magic: The Gathering. One seat objects to another seat's action. You are given the objection,",
-	"what the action did in public words, the text of the cards involved, and the public table now. Look rules up with the rule tool.",
+	"what the action did, the text of the cards involved, and the public table now. For a combat declaration, declarationTime reconstructs the public position before it. Its characteristics and effects are accepted interpretations, not certified card meaning. Judge that declaration against its own time, not the table now. Look rules up with the rule tool.",
 	"",
 	"Decide three things. Was the action legal under the Comprehensive Rules and the cards' text. Which rule decides it, by number.",
 	"What happens now:",
@@ -53,12 +53,16 @@ export async function rule(table: Table, open: Case, judge: Pick<Reasoner, "work
 	const named = new Set<string>([...(row.activation ? [table.things.get(row.activation.source.id)?.card] : []),
 		...receipts.flatMap((receipt) => [...Object.values(receipt.before), ...Object.values(receipt.after)].filter((thing) => !thing.faceDown && thing.zone !== "hand" && thing.zone !== "library").map((thing) => thing.card))]
 		.filter((name): name is string => !!name));
+	let declaration: ReturnType<typeof declarationEvidence>;
+	try { declaration = declarationEvidence(table, open.row, sources.universe); }
+	catch (error) { throw new Error(`Declaration evidence reconstruction failed: ${String(error)}`); }
+	for (const object of declaration?.objects ?? []) if (object.card && !object.faceDown) named.add(object.card);
 	const cited = open.rule ? sources.rules.byRef.get(open.rule) : undefined;
 	const user = JSON.stringify({
 		objection: { by: seat(open.raisedBy), claim: open.claim, ...(open.rule ? { cites: cited ? `${cited.ref}  ${cited.text}` : `${open.rule} (not found in the rules on disk)` } : {}) },
 		action: { by: seat(row.seat), number: open.row, decisionsSince: table.ledger.length - open.row - 1, picked: row.picked,
 			...(row.activation ? { announced: row.activation.claim, basis: row.activation.basis } : {}),
-			happened: receipts.map((receipt) => describe(table, receipt)).filter(Boolean) },
+			...(declaration ? { declarationTime: declaration } : { happened: receipts.map((receipt) => describe(table, receipt)).filter(Boolean) }) },
 		cards: [...named].flatMap((name) => { const card = sources.universe.cards.get(name); return card ? [`${card.name}  ${card.mana}  ${card.type}  ${card.stats}\n${card.oracle}`] : []; }),
 		table: project(table, "spectator").table,
 	});

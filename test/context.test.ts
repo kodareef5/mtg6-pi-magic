@@ -1,3 +1,4 @@
+import { load as loadRules } from "../src/core/rules.ts";
 import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
@@ -230,7 +231,10 @@ test("inspection preserves every complete choice within provider capacity and ne
 		assert.deepEqual([...found.keys()].sort(), facts.options.map((one) => one.id).sort());
 		return found;
 	};
-	const facts = choices(decision.options), capacity = CHOICE_LIMIT - 1;
+	const rules = loadRules("rules/cr.tsv");
+	const boundary = { ...frame, decision: { ...decision, situation: "priority" as const }, view: { ...frame.view,
+		blockDeclaration: { row: 10, clock: 20, seat: 1, blockers: [{ ...ref(blockers[0]!), blocking: [ref(hydra)] }], heard: false, current: [], conflicts: [] } } };
+	const facts = choices(decision.options), capacity = CHOICE_LIMIT - 3;
 	const routes = paths(facts, capacity);
 	assert.match(inspect(facts, {}, capacity).field!, /^Damage to /);
 	const packet = focus(frame, startingIntent(0), { inspection: {}, capacity });
@@ -241,7 +245,7 @@ test("inspection preserves every complete choice within provider capacity and ne
 	paths(facts, 8);
 	paths(choices(decision.options.map(({ parameters: _, ...one }) => one)), capacity);
 	const selected = decision.options.at(-1)!, path = [...routes.get(selected.id)!];
-	const pilot = aiSeat({ name: "Large inspection", intent: startingIntent(0), onGap: assert.fail,
+	const pilot = aiSeat({ name: "Large inspection", judge: true, rules, intent: startingIntent(0), onGap: assert.fail,
 		plan: async () => { throw new Error("Inspection cannot invoke strategy"); },
 		api: { named: "fixture", async ask(request) {
 			assert.deepEqual(table, before);
@@ -249,11 +253,13 @@ test("inspection preserves every complete choice within provider capacity and ne
 			assert.equal(question.type, "choice"); if (question.type !== "choice") assert.fail();
 			assert.ok(Object.keys(question.criteria).length <= CHOICE_LIMIT);
 			assert.ok(Object.hasOwn(question.criteria, "ask:help"), "capacity includes the help route");
+			assert.ok(Object.hasOwn(question.criteria, "rules:priority"));
+			assert.ok(Object.hasOwn(question.criteria, "object:block:10"));
 			const choice = path.shift()!;
 			assert.ok(Object.hasOwn(question.criteria, choice));
 			return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
 		} } });
-	const answer = await pilot.answer(frame);
+	const answer = await pilot.answer(boundary);
 	assert.equal(answer.kind, "pick"); if (answer.kind !== "pick") assert.fail();
 	assert.equal(answer.option, selected.id); assert.equal(path.length, 0);
 	await pilot.close();

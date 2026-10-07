@@ -6,15 +6,22 @@
  * skips them, and every seat is told it happened.
  */
 import { strict as assert } from "node:assert";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+import { focus } from "../src/context/packet.ts";
+import { aiSeat } from "../src/context/seat.ts";
+import { startingIntent } from "../src/context/plan.ts";
+import { heard, declarationEvidence } from "../src/core/judge.ts";
+import { matchTable, universe } from "../tools/matchup-fixture.ts";
+import { CHOICE_LIMIT } from "../src/context/model.ts";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { start } from "../src/core/commit.ts";
-import { advance, nextDecision } from "../src/core/decisions.ts";
+import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { append, fork, open, reopen, replay, rollback, save, type Header } from "../src/core/journal.ts";
+import { append, fork, open, reopen, replay, relive, rollback, save, type Header } from "../src/core/journal.ts";
 import { play, type Judge } from "../src/core/loop.ts";
 import type { Ruling } from "../src/core/judge.ts";
 import { PlayerUnavailable, type Answer, type Player } from "../src/core/player.ts";
@@ -168,4 +175,111 @@ test("the writer objects only to an action the opponent took since its last plan
 	assert.match(verdicts[0]!, /614\.1c/, "the judge is shown the rule the objection cites");
 	assert.match(verdicts[1]!, /999\.99.*not an entry/, "a rule that is not on disk is refused");
 	assert.deepEqual(ruling, { legal: false, rule: "614.1c", remedy: "rollback", because: "It enters tapped." });
+
+	// The recorded menace block has no receipt snapshots. Replay supplies event-time evidence.
+	const dir = mkdtempSync(join(tmpdir(), "magic-declaration-case-")), path = join(dir, "block.jsonl");
+	writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/menace-partial-block.jsonl.gz")));
+	const source = replay(path, (header) => matchTable(header.seed));
+	const blocked = source.table;
+	apply(blocked, "block:done", "model", "chosen");
+	const row = blocked.ledger.at(-1)!.seq;
+	const journal = reopen(path, source.header, replay(path, (header) => matchTable(header.seed)).table);
+	save(journal, blocked);
+	assert.deepEqual(blocked.log.at(-1)!.before, {});
+	const immediate = project(blocked, 1).blockDeclaration!;
+	assert.equal(immediate.row, row); assert.match(immediate.conflicts.join(" "), /menace/);
+	while (!nextDecision(blocked)) advance(blocked);
+	assert.deepEqual(project(blocked, 1).blockDeclaration, immediate, "ordinary priority grant preserves the offer");
+	const original = structuredClone(blocked), evidence = declarationEvidence(blocked, row, universe)!;
+	assert.deepEqual(blocked, original, "evidence reconstruction is pure");
+	assert.ok(evidence.objects?.every((one) => one.zone === "battlefield"));
+	assert.ok(evidence.objects?.find((one) => one.card === "Zhao, the Moon Slayer")?.traits?.words.includes("menace"));
+	assert.ok(evidence.notes?.some((one) => one.kind === "label"), "accepted effects include the animated Forest's label");
+	let requested: Record<string, any> | undefined;
+	await rule(blocked, { row, raisedBy: 1, claim: "Check the block." }, { async work(_about, prompt) {
+		requested = JSON.parse(prompt.user!);
+		return { legal: false, rule: "509.1b", remedy: "rollback", because: "The sole block does not satisfy menace." };
+	} }, { universe, rules: loadRules("rules/cr.tsv") });
+	assert.match(JSON.stringify(requested!.cards), /Zhao, the Moon Slayer.*Menace/s);
+	assert.deepEqual(requested!.action.declarationTime, evidence);
+	assert.equal(requested!.action.happened, undefined, "current objects never narrate historical declaration identities");
+
+	const frameAt = (now: Table) => ({ ...workFrame(now, 1), decision: nextDecision(now)! });
+	for (const available of [false, true]) {
+		let criteria: Record<string, unknown> = {};
+		const pilot = aiSeat({ name: "Red", judge: available, intent: startingIntent(1), onGap: assert.fail,
+			api: { named: "offline", async ask(request) {
+				const question = request.questions.pick!;
+				assert.equal(question.type, "choice");
+				criteria = (question as { criteria: Record<string, unknown> }).criteria;
+				assert.ok(Object.keys(criteria).length <= CHOICE_LIMIT);
+				return { pick: { type: "choice", choice: available ? `object:block:${row}` : "pass", probabilities: {}, confidence: 1 } };
+			} } });
+		const answer = await pilot.answer(frameAt(blocked));
+		assert.equal(answer.kind, available ? "object" : "pick");
+		assert.equal(Object.hasOwn(criteria, `object:block:${row}`), available);
+		await pilot.close();
+	}
+	const edited = structuredClone(blocked);
+	editWork(edited, 1, [{ do: "plan.keep", reason: "Same physical decision." }], "case-work");
+	assert.deepEqual(project(edited, 1).blockDeclaration, immediate, "work does not consume the opportunity");
+	apply(edited, "pass", "model", "chosen");
+	assert.equal(project(edited, 1).blockDeclaration, undefined, "a physical decision closes it");
+	const ended = structuredClone(blocked); ended.cursor.steps.shift();
+	assert.equal(project(ended, 1).blockDeclaration, undefined, "an unlogged step transition cannot carry the offer");
+	const changed = structuredClone(blocked); changed.cursor.clock += 1;
+	assert.equal(project(changed, 1).blockDeclaration, undefined, "other control transitions close it");
+
+	// An accepted effect conditional on blocking changes as the block completes.
+	const rows = structuredClone(blocked.ledger);
+	const registrations = rows[70]!.registered!["1-58"]!;
+	const menace = registrations.find((one) => one.kind === "continuous" && one.change.words?.includes("menace"))!;
+	assert.equal(menace.kind, "continuous");
+	if (menace.kind !== "continuous") throw new Error("Missing continuous fixture.");
+	menace.if = { amount: { count: { blocking: true } }, atLeast: 1 };
+	const layered = relive(matchTable(blocked.rng.seed), rows, blocked.workLog);
+	assert.ok(project(layered, 1).blockDeclaration!.conflicts.some((line) => line.includes("menace")));
+	assert.ok(!declarationEvidence(layered, row, universe)!.objects!.find((one) => one.id === "1-58")!.traits!.words.includes("menace"), "current hints are not declaration-time evidence");
+	layered.things.get("1-58")!.card = "Mountain";
+	assert.equal(declarationEvidence(layered, row, universe)!.objects!.find((one) => one.id === "1-58")!.card, "Zhao, the Moon Slayer", "later identities do not rename historical participants");
+
+	const failed = structuredClone(blocked);
+	let attempts = 0;
+	const failing = aiSeat({ name: "Red", judge: true, intent: startingIntent(1), onGap: assert.fail,
+		api: { named: "offline", async ask(request) {
+			const criteria = (request.questions.pick as { criteria: Record<string, unknown> }).criteria;
+			if (!Object.hasOwn(criteria, `object:block:${row}`)) {
+				assert.deepEqual((request.state.blockDeclaration as { result: unknown }).result, { failed: "Fixture judge failure" });
+				throw new PlayerUnavailable("No repeated case.");
+			}
+			return { pick: { type: "choice", choice: `object:block:${row}`, probabilities: {}, confidence: 1 } };
+		} } });
+	await play(failed, { 1: failing }, {}, { judge: { async rule() { attempts++; throw new Error("Fixture judge failure"); }, restart: () => matchTable(failed.rng.seed) } });
+	assert.equal(attempts, 1);
+	assert.equal(failed.rulings.at(-1)!.ruling, null);
+	assert.ok(heard(failed, row));
+	assert.match(project(failed, 1).table.join(" "), /did not rule.*Fixture judge failure/);
+	save(journal, failed);
+	assert.deepEqual(replay(path, (header) => matchTable(header.seed)).table.rulings, failed.rulings);
+	const child = join(dir, "child.jsonl"); fork(path, failed.ledger.length, "child", child);
+	const resumed = replay(child, (header) => matchTable(header.seed)).table;
+	assert.deepEqual(resumed.rulings, failed.rulings);
+	await assert.rejects(failing.answer(frameAt(resumed)), /No repeated case/, "a cloned request delivers the same failure explanation");
+	rollback(failed, { case: { row, raisedBy: 1, claim: "Revisit declaration." }, ruling: { legal: false, rule: "509.1b", remedy: "rollback", because: "Fixture rewind." } }, () => matchTable(failed.rng.seed));
+	assert.equal(heard(failed, row), undefined, "a reused row belongs to a new branch");
+	assert.ok(nextDecision(failed)!.options.some((one) => one.id.startsWith("unblock:")));
+	const restored = workFrame(failed, 0), recoveryPacket = focus(restored, startingIntent(0));
+	assert.equal(recoveryPacket.declarationReview!.row, row);
+	assert.match(recoveryPacket.options.find((one) => one.id === "block:done")!.label, /judge ruled action.*illegal/);
+	const revision = structuredClone(failed);
+	apply(revision, "unblock:0-25:1-58", "model", "chosen");
+	assert.equal(project(revision, 0).declarationReview!.row, row, "the ruling stays during revision, without claiming the new choice is illegal");
+	apply(revision, "block:done", "model", "chosen");
+	assert.equal(project(revision, 0).declarationReview, undefined);
+	apply(failed, "block:done", "model", "chosen");
+	assert.equal(project(failed, 1).blockDeclaration!.heard, false);
+	failed.rulings.push({ case: { row, raisedBy: 1, claim: "Heard." }, ruling: { legal: true, rule: "509.1b", remedy: "stand", because: "Fixture stand." }, at: failed.ledger.length });
+	assert.equal(project(failed, 1).blockDeclaration!.heard, true);
+	assert.equal(project(failed, 1).blockDeclaration!.result!.ruling!.remedy, "stand");
+
 });

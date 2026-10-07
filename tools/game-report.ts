@@ -17,7 +17,7 @@ export type GameResult = {
 	timing?: RunTiming; fromVersion?: number; version?: number;
 	replayMatches?: boolean; journal?: string; trace?: string; error?: string;
 	reasons?: Record<string, number>;
-	interruptions?: { stops: number; essential: number; help: number; rulings: number; upheld: number };
+	interruptions?: { stops: number; essential: number; help: number; rulings: number; unruled?: number; upheld: number };
 	judged?: { cases: number; failed: number };
 	plans?: { accepted: number; steps: number; branches: number };
 	recaps?: number; dials?: Record<string, number>;
@@ -47,7 +47,7 @@ export function gameResult(table: Table, seated: Seated, extra: Pick<GameResult,
 			stops: requests.filter((reason) => reason.startsWith("Stop:") && !/^Stop: Step \d+ cannot be taken now/.test(reason)).length,
 			essential: requests.filter((reason) => /^Stop: Step \d+ cannot be taken now/.test(reason)).length,
 			help: requests.filter((reason) => reason.startsWith("The pilot asked")).length,
-			rulings: table.rulings.length, upheld: table.rulings.filter((one) => one.kept !== undefined).length,
+			rulings: table.rulings.filter((one) => one.ruling).length, unruled: table.rulings.filter((one) => !one.ruling).length, upheld: table.rulings.filter((one) => one.kept !== undefined).length,
 		},
 		judged: { ...seated.judged }, recaps: seated.chronicle.recaps.length, dials: { ...seated.dials },
 		plans: {
@@ -91,7 +91,7 @@ export function report(result: GameResult): string[] {
 		`jev       ${byRole("decide")} calls  ${purpose("pick")} picks  ${purpose("review")} reviews  ${byRole("decide") - purpose("pick") - purpose("review")} other`,
 		`strategy  ${byRole("strategy")} calls  ${planned.length} sessions${plans ? `  ${plans.accepted} plans  ${plans.steps} steps  ${plans.branches} branches` : ""}${stops ? `; help ${stops.help}  stops ${stops.stops}  essential ${stops.essential}` : ""}`,
 		`planning  ready ${preparations.filter((one) => one.ready).length}/${preparations.length}  unfinished wait ${preparations.some((one) => one.preparation) ? duration(preparationWait) : "?"}  timeouts ${result.calls.filter((one) => one.role === "strategy" && /timed out/.test(one.failed ?? "")).length}`,
-		`judge     ${byRole("judge")} calls  ${result.judged?.cases ?? "?"} cases this run (${result.judged?.failed ?? "?"} failed); ${stops?.rulings ?? "?"} game rulings  ${stops?.upheld ?? "?"} rollbacks`,
+		`judge     ${byRole("judge")} calls  ${result.judged?.cases ?? "?"} cases this run (${result.judged?.failed ?? "?"} failed); ${stops?.rulings ?? "?"} game rulings  ${stops?.unruled ?? 0} unruled cases  ${stops?.upheld ?? "?"} rollbacks`,
 		`summary   ${byRole("summary")} calls  ${result.recaps ?? "?"} recaps; rule lookups ${result.dials ? Object.values(result.dials).reduce((sum, n) => sum + n, 0) : "?"}`,
 		...bill(result.calls, now),
 		...(result.error ? [`error     ${result.error}`] : []),

@@ -277,6 +277,7 @@ async function object(table: Table, open: Case, judge?: Judge): Promise<boolean>
 	if (!judge) { table.gaps.push(`Seat ${open.raisedBy} objected to action ${open.row}, and this game has no judge.`); return false; }
 	let ruling: Ruling;
 	try { ruling = await judge.rule(table, open); } catch (error) {
+		table.rulings.push({ case: structuredClone(open), ruling: null, failed: error instanceof Error ? error.message : String(error), at: table.ledger.length });
 		table.gaps.push(`The judge could not rule on seat ${open.raisedBy}'s objection to action ${open.row}: ${error instanceof Error ? error.message : String(error)}`);
 		return false;
 	}

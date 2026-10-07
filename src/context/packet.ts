@@ -42,6 +42,9 @@ export type Packet = {
 	opening?: NonNullable<SeatView["opening"]> & { hand: ReturnType<typeof openingHand>; retained?: { option: string; hand: ReturnType<typeof openingHand> }[] };
 	retained?: { option: string; hand: ReturnType<typeof openingHand> }[];
 	plan?: PlanSlice;
+	blockDeclaration?: SeatView["blockDeclaration"];
+	declarationReview?: SeatView["declarationReview"];
+	objection?: { id: string; row: number; claim: string };
 	options: Choice[]; uses: Record<string, Use>; payments: Record<string, Payment>; funding: Record<string, Funding>; pools: SeatView["pools"];
 	resources: string[]; known: string[]; objects: Seen[];
 	watches: ReturnType<typeof activeWatches>; cards: Record<string, Printed>;
@@ -148,7 +151,8 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		kind: view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
 		...(view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
 		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => ({ ...structuredClone(item), available: options.length })) } : {}),
-		options: listed, uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
+		options: listed.map((one) => one.id === "block:done" && view.declarationReview ? { ...one,
+			label: `${one.label}. The judge ruled action ${view.declarationReview.row} illegal (${view.declarationReview.ruling.rule}: ${view.declarationReview.ruling.because}). Review the revised selection before finishing.` } : one), uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
 		payments: Object.fromEntries(Object.entries(data.payments).filter(([id]) => paid.has(id))),
 		funding: Object.fromEntries(Object.entries(data.funding).filter(([id]) => taps.has(id))), pools: structuredClone(view.pools),
 		...(menu ? { inspection: { stage: menu.stage, ...(menu.selected ? { selected: menu.selected } : {}),
@@ -162,6 +166,8 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		watches: view.resolution ? watches.filter((one) => names.has(one.source.name)) : watches,
 		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => names.has(name)).map(([name, card]) => [name, structuredClone(card)])),
 		...(view.window.kind === "turn" ? { history: structuredClone(view.history ?? []) } : {}),
+		...(view.declarationReview ? { declarationReview: structuredClone(view.declarationReview) } : {}),
+		...(view.blockDeclaration ? { blockDeclaration: structuredClone(view.blockDeclaration) } : {}),
 		...(view.combat ? { combat: structuredClone(view.combat) } : {}),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		...(ability ? { resolving: { claim: ability.claim, basis: ability.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),

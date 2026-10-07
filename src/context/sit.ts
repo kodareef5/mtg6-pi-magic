@@ -112,6 +112,7 @@ export async function seat(
 
 	const parts = new Map<SeatId, Cast[]>();
 	for (const at of table.seats) parts.set(at.id, await rosters(at.id));
+	const judging = table.seats.map((at) => pick(parts.get(at.id)!, "judge")).find((part) => part && !part.off && part.model && part.model.type !== "classifier");
 
 	/**
 	 * Take a brief, however it arrived.
@@ -151,7 +152,7 @@ export async function seat(
 			table.work[at.id]?.request === "Plan the opening: your first turn and the opponent's first turn.")
 			editWork(table, at.id, [{ do: "plan.keep", reason: "The brief covers the opening; strategy follows the draw." }], `opening-covered-${at.id}`);
 		players[at.id] = aiSeat({
-			name: at.name,
+			name: at.name, judge: !!judging && !!options.rules,
 			api: decisionApi(inference.classify, decide.model as ClassifierModel<ClassifierApi>, { tally: counted, seat: at.id }),
 			intent: intents[at.id]!,
 			chronicle,
@@ -255,7 +256,7 @@ export async function seat(
 	);
 
 	// The judge is the table's: the first seat's roster that names a chat model for it.
-	const judging = table.seats.map((at) => pick(parts.get(at.id)!, "judge")).find((part) => part && !part.off && part.model && part.model.type !== "classifier");
+
 	timing.preparedAt = Date.now();
 	return {
 		timing, fromVersion, judged: { cases: 0, failed: 0 },

@@ -23,6 +23,8 @@ import type { Frame, SeatId, SeatView, Viewer, Window } from "./types.ts";
 import type { Plan } from "./language.ts";
 import { purposes } from "./purpose.ts";
 import { currentPlan } from "./query.ts";
+import { recentBlock, pendingBlockRuling } from "./judge.ts";
+import { blockConflicts } from "./combat-facts.ts";
 import { withdrawnChoices } from "./combat.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
@@ -129,7 +131,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
-	const objects = [...table.things.values()]
+	const objects: NonNullable<SeatView["objects"]> = [...table.things.values()]
 		.filter((item) => PUBLIC.has(item.zone) || (viewer !== "spectator" && item.zone === "hand" && item.owner === viewer))
 		.map((item) => {
 			const { card, ...seen } = structuredClone(item);
@@ -149,8 +151,9 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
 	}
 	// A rollback does not make anyone forget: every seat is told it happened.
-	for (const { case: open, ruling, kept } of table.rulings) {
+	for (const { case: open, ruling, kept, failed } of table.rulings) {
 		const by = seat(table, open.raisedBy).name;
+		if (!ruling) { lines.push(`The judge did not rule on ${by}'s objection to action ${open.row}: ${failed}. No verdict was recorded.`); continue; }
 		lines.push(kept !== undefined ? `The judge upheld ${by}'s objection to action ${open.row} (${ruling.rule}: ${ruling.because}); the game went back to just before it, and what was seen since stays known.`
 			: `The judge heard ${by}'s objection to action ${open.row} and let it stand (${ruling.rule}: ${ruling.because}).`);
 	}
@@ -165,6 +168,14 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		return object && object.owner === viewer ? [{ id: object.id, incarnation: object.incarnation,
 			...(!object.faceDown && object.card ? { card: object.card } : {}) }] : [];
 	});
+	const declaration = recentBlock(table), declarationReview = pendingBlockRuling(table);
+	const involved = declaration?.blockers.flatMap((one) => [one, ...one.blocking]) ?? [];
+	const current = objects.filter((object) => involved.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
+	const conflicts = declaration?.blockers.flatMap((blocker) => blocker.blocking.flatMap((ref) => {
+		const attack = current.find((one) => one.id === ref.id && one.incarnation === ref.incarnation), block = current.find((one) => one.id === blocker.id && one.incarnation === blocker.incarnation);
+		const others = new Set(declaration.blockers.filter((one) => one.blocking.some((aim) => aim.id === ref.id && aim.incarnation === ref.incarnation)).map((one) => `${one.id}@${one.incarnation}`)).size - 1;
+		return attack && block ? blockConflicts(attack, block, others).map((conflict) => `${block.card ?? block.token?.name ?? block.id} blocking ${attack.card ?? attack.token?.name ?? attack.id}: ${conflict}`) : [];
+	})) ?? [];
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		...(at.kind === "opening" && viewer !== "spectator" ? { opening: { starting: table.seats[0]!.id, mulligans: table.opening?.taken[viewer] ?? 0,
 			bottom: at.action === "bottom" ? table.opening?.owed[viewer] ?? 0 : table.format.mulliganBottom === "on-keep" ? owedFor(table, viewer) : 0 } } : {}),
@@ -176,6 +187,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
 		...(viewer !== "spectator" ? { purposes: purposes(table, viewer) } : {}),
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
+		...(declarationReview ? { declarationReview } : {}),
+		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts } } : {}),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>

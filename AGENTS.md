@@ -162,7 +162,8 @@ replacement planner. docs/PLANS.md explains the lifecycle. A phase change alone
 spends nothing.
 
 **`judge` runs only on an objection.** The strategy writer may object to one
-of the opponent's actions since its last plan, beside its plan. The judge looks
+of the opponent's actions since its last plan, beside its plan. Jev can also
+object directly to a just-finished opposing block when a judge is seated. The judge looks
 up the rules on disk, rules legal or not with a cited rule, and names the
 remedy: the action stands, or the game rolls back to just before it. The judge
 decides; no seat is asked to agree. A rollback is a journal line, the lines it

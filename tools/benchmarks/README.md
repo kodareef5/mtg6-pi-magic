@@ -209,3 +209,12 @@ fails both checks. `--review` prints the structural and prose results separately
 and accepts the
 runner's results and the older component runner's named plan answers. It
 requires an answer for every selected case and cannot be combined with `--live`.
+
+`--task judge` runs a cited ruling against a frozen declaration without moving
+the table. Judge cases name the contested row and expected legality. Pilot cases
+can separately expect an objection or measure avoiding one.
+
+`--play --judge-attempts N` stops after N actual judge attempts, including failures
+and successful rollbacks. This external probe boundary complements `--decisions`,
+whose net ledger growth can shrink on rollback. Reports retain the stopped
+position and separate `judge-attempts` from outcomes, gaps and recovery.

@@ -283,3 +283,7 @@ failure, fix its smallest reproduction before another full run.
 
 Both `npm test` and `npm run check` pass before every commit. The remaining work
 stays on this checklist; progress does not silently change its acceptance terms.
+
+The direct recorded-block objection contract and its separate pilot, judge and
+recovery gate are in [block objections](history/2026-10-07-block-objections.md).
+Current conflict hints are not declaration-time verdicts.

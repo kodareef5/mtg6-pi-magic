@@ -61,8 +61,8 @@ reaches a decision is a short plan plus the facts.
   lifecycle and its cancellation rules.
 - **summary** runs beside the game, never awaited inside the loop, and is built
   from the spectator projection so it cannot hold a private fact.
-- **judge** runs only on an objection, which the strategy writer raises beside
-  its plan: one reasoner session with the rules to look up, a cited rule, and a
+- **judge** runs only on an objection, raised by the strategy writer beside
+  its plan or by the pilot for a just-recorded opposing block: one reasoner session with the rules to look up, a cited rule, and a
   remedy, stand or rollback, that the loop carries out.
 
 Every call goes through `spend.ts` and carries an output ceiling. The ceiling is

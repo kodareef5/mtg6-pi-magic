@@ -129,6 +129,7 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	pick(table, `block:${chocobo.id}:${zhao.id}`);
 	pick(table, "block:done");
 	assert.deepEqual(table.combat!.blocked.map((one) => one.id), [zhao.id]);
+	assert.deepEqual(project(table, 1).blockDeclaration!.conflicts, [], "the complete menace pair has no provisional one-blocker warning");
 
 	// Two blockers: Zhao's controller divides its 2 damage as it likes (510.1c), with no lethal-first order.
 	const divide = reach(table, "combat-damage", 2);

@@ -14,7 +14,9 @@
     "readyBeforeHelp": "test/fixtures/benchmarks/ready-before-help.jsonl.gz",
     "redUpkeepLethal": "test/fixtures/benchmarks/red-upkeep-lethal.jsonl.gz",
     "redBeforeUpkeep": "test/fixtures/benchmarks/red-before-upkeep.jsonl.gz",
-    "menacePartialBlock": "test/fixtures/benchmarks/menace-partial-block.jsonl.gz"
+    "menacePartialBlock": "test/fixtures/benchmarks/menace-partial-block.jsonl.gz",
+    "menace-objection": "test/fixtures/benchmarks/menace-objection.jsonl.gz",
+    "menace-legal-pair": "test/fixtures/benchmarks/menace-legal-pair.jsonl.gz"
   },
   "cases": [
     {
@@ -446,6 +448,52 @@
       "task": "plan",
       "winner": 1,
       "property": "Win this turn through the visible 1/1 Hydra. All three established creatures can attack; burn supplies other winning lines. Grade the physical outcome, not one required attack set."
+    },
+    {
+      "id": "menace-objection-pilot",
+      "journal": "menace-objection",
+      "version": 286,
+      "seat": 1,
+      "task": "pilot",
+      "objectionRow": 285,
+      "property": "Choose the optional objection to the recorded lone block; no physical decision is taken."
+    },
+    {
+      "id": "menace-objection-judge",
+      "journal": "menace-objection",
+      "version": 286,
+      "seat": 1,
+      "task": "judge",
+      "judgeRow": 285,
+      "legal": false,
+      "property": "Rule on declaration-time menace with a citation and rollback remedy."
+    },
+    {
+      "id": "menace-objection-recovery",
+      "journal": "menace-objection",
+      "version": 286,
+      "seat": 1,
+      "task": "continue",
+      "property": "Observe optional objection, ruling and post-rollback recovery separately; runner PASS measures replay health only."
+    },
+    {
+      "id": "menace-legal-pilot",
+      "journal": "menace-legal-pair",
+      "version": 240,
+      "seat": 1,
+      "task": "pilot",
+      "avoidObjection": true,
+      "property": "Observe whether Jev objects to a legal two-creature menace block; no physical decision is taken."
+    },
+    {
+      "id": "menace-legal-judge",
+      "journal": "menace-legal-pair",
+      "version": 240,
+      "seat": 1,
+      "task": "judge",
+      "judgeRow": 239,
+      "legal": true,
+      "property": "A forced objection to a legal two-creature menace block must stand."
     }
   ]
 }

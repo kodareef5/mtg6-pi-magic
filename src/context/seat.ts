@@ -34,6 +34,8 @@ import { decisionChoices } from "./packet.ts";
 
 export type AiSeatOptions = {
 	name: string;
+	/** A judge is seated and can hear a chosen objection. */
+	judge?: boolean;
 	api: DecisionApi;
 	/** This seat's plan. Held by the core, filled by whoever holds the seat. */
 	intent: Intent;
@@ -186,6 +188,7 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.checklist?.length ? ["checklist describes the plan now: available means a listed use; later means after an earlier commitment; waiting means the use or its chosen prerequisite requires an empty stack; condition-false means its stated condition is false; unavailable means no current option. None completes a step or grants a pass. recorded means the phase's explicit steps are in the ledger, not that its goal is guaranteed. Follow the order and prepared response policies; do not optimize a new line.",
 			"Before choosing a pass or declaration ending, check remaining actions against the phase guidance. Confirm that no planned action is required now. A pending effect can require waiting. An unavailable required line or an uncovered change needs help; silence in the plan alone is not a passing policy."] : []),
 		...(help ? ["Ask for help when the position contradicts the line and no prepared alternative covers it. Explain the conflict through the supplied use, targets, payments and remaining work; do not invent a strategy."] : []),
+		...(packet.blockDeclaration ? ["blockDeclaration records the completed assignment and its row. Its current characteristics and conflict hints do not establish legality at declaration time."] : []),
 		...(packet.routes.length ? ["Rule asks show the named rule and return to this decision without acting."] : []),
 		...(packet.learned?.length ? ["learned contains the cited rules you asked to see; they are reference text, not actions."] : []),
 		...(packet.refused?.length ? ["refused explains the previous unusable answer. The physical decision is unchanged."] : []),
@@ -194,6 +197,7 @@ export function question(packet: Packet, help: boolean): Question {
 		...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.length
 			? `Confirm the plan's current completion or waiting conditions, then choose ${option.label}. This records the physical choice, not completion of any unperformed step.`
 			: `Select the option with this id: ${option.label}. Read its bindings, payment and notes in options.`]),
+		...(packet.objection ? [[packet.objection.id, `Ask the judge whether action ${packet.objection.row} declared legal blocks. The judge reconstructs declaration-time evidence and may let it stand or roll back. This choice takes no physical action and does not revise strategy.`]] : []),
 		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
 		...(help ? [[HELP, "Request a revision of the unfinished line. Moves nothing."]] : []),
 	]) };
@@ -308,7 +312,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 
 			for (;;) {
 				const rules = options.rules && walked.length < budget ? options.rules : undefined;
-				const capacity = CHOICE_LIMIT - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
+				const declaration = frame.view.blockDeclaration;
+				const objection = options.judge && declaration && declaration.seat !== frame.seat && declaration.blockers.length && !declaration.heard
+					? { id: `object:block:${declaration.row}`, row: declaration.row, claim: `Check whether the complete blocking assignment at action ${declaration.row} satisfies declaration-time blocking restrictions.` } : undefined;
+				const capacity = CHOICE_LIMIT - (objection ? 1 : 0) - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
 				const menu = inspect(decisionChoices(frame), navigation.selected, capacity);
 				const whole = focus(frame, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
@@ -320,7 +327,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// A route already followed is not offered again. Its answer is
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
-				const packet = { ...whole, routes: whole.routes.filter((route) => !walked.includes(route.id)) };
+				const packet = { ...whole, ...(objection ? { objection } : {}), routes: whole.routes.filter((route) => !walked.includes(route.id)) };
 				const ask = question(packet, help);
 				asked += 1;
 				options.onAsk?.(packet);
@@ -337,6 +344,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 					options.onGap(`${options.name} via ${options.api.named}: ${answer}`);
 					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 				}
+				if (objection && answer.choice === objection.id) return { kind: "object", row: objection.row, claim: objection.claim };
 				if (Object.hasOwn(menu.enter, answer.choice)) {
 					navigation.selected = menu.enter[answer.choice]!;
 					continue;

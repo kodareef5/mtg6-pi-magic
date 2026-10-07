@@ -5,6 +5,7 @@
  * State lives in table.ts. Nothing here describes a card, a zone or a motion.
  */
 
+import type { recentBlock, pendingBlockRuling } from "./judge.ts";
 import type { Phase, Step } from "./steps.ts";
 import type { SeenObject, Workspace } from "./work.ts";
 import type { Activation, Combat, Mana, Note, Resolution } from "./table.ts";
@@ -134,6 +135,9 @@ export type SeatView = {
 	/** The public notepad: labels, registrations added after entry, links, permissions. */
 	notes?: Note[];
 	combat?: Combat | null;
+	/** Just-finished block and current public characteristics; no declaration-time verdict. */
+	declarationReview?: ReturnType<typeof pendingBlockRuling>;
+	blockDeclaration?: NonNullable<ReturnType<typeof recentBlock>> & { current: SeenObject[]; conflicts: string[] };
 	/** This turn's public events that cards count. */
 	history?: Happened[];
 };

@@ -26,18 +26,19 @@ import { tally, type Spend } from "../src/context/spend.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { usageReport, bill } from "../src/context/metrics.ts";
 import type { Brief } from "../src/context/brief.ts";
+import { rule } from "../src/context/ruling.ts";
 import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
 import { candidatePlan } from "./benchmark-candidates.ts";
 import { commitmentReceipt } from "./benchmark-receipt.ts";
 import { checkedReceipt, freezeSource, repairPlan, type RepairSource, type ReviewedReceipt } from "./benchmark-repair.ts";
 
-type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue"; property: string; winner?: number; picks?: string[]; refused?: string[];
+type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
 	prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
-	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, arm: { type: "string", default: "production" },
+	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" }, arm: { type: "string", default: "production" },
 	"repair-source": { type: "string" }, receipts: { type: "string" } } });
 if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
 const repairing = values.arm!.startsWith("receipt-");
@@ -46,11 +47,12 @@ if (repairing !== !!values["repair-source"] || repairing !== !!values.receipts |
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
 if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
 if (values.decisions && (!values.play || !/^[1-9]\d*$/.test(values.decisions))) throw new Error("--decisions needs --play and a positive recorded-decision boundary.");
+if (values["judge-attempts"] && (!values.play || !/^[1-9]\d*$/.test(values["judge-attempts"]))) throw new Error("--judge-attempts needs --play and a positive limit.");
 const repeat = Number(values.repeat), pilots = values.pilot === "both" ? ["jev", "luna"] : [values.pilot!];
 if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "luna"].includes(one))) throw new Error("Use a positive --repeat and --pilot jev, luna or both.");
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
-if (values.play && selected.some((one) => one.task === "pilot")) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
+if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
 if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers || values.arm !== "production")) throw new Error("Continuation cases require --play and the production arm, without --answers: they resume the prefix's existing work.");
 if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
 if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
@@ -97,7 +99,7 @@ const positions = selected.map((one) => {
 		const frozen = freezeSource(repairSource, one, path, iteration, frame);
 		checkedReceipt(reviewed!.receipts, one.id, iteration, frozen.hash);
 	}
-	return { one, frame, brief, prior, earlier };
+	return { one, frame, brief, prior, earlier, table: saved.table };
 });
 if (values.review) {
 	if (values.live) throw new Error("--review checks saved answers offline; it cannot be combined with --live.");
@@ -116,7 +118,8 @@ if (!values.live) process.exit(0);
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
 const parts = cast(rosterFor({ every: { strategy: "gpt-6-luna:low", summary: "off" } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") });
-const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!;
+const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!, judging = parts.find((one) => one.role === "judge")!;
+if (selected.some((one) => one.task === "judge") && (!judging?.model || judging.off || judging.model.type === "classifier")) throw new Error("Judge probes require the prescribed judge model.");
 if (!jev.model || jev.off || !luna.model || luna.off) throw new Error("The prescribed Jev and Luna low models must both resolve.");
 const out = values.out ?? `.pi/benchmarks/${Date.now()}`;
 const source = { revision: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
@@ -126,7 +129,7 @@ mkdirSync(out, { recursive: true });
 const measured = tally(), spent: Spend[] = [], results: Record<string, unknown>[] = [], rules = loadRules(matchup.rules.path);
 const inference = traceInference({ classify: (...args) => runtime.classify(...args), stream: (model, request, options) => runtime.streamSimple(model, request as never, options) as never },
 	(event) => appendFileSync(join(out, "calls.jsonl"), JSON.stringify(event) + "\n"));
-for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier } of positions) {
+for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, table } of positions) {
 	// Alternate order so one model does not always receive the earlier request.
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
 	const pair = values.arm === "both" ? ["one", "two"] : values.arm === "examples-paired" ? ["production", "examples-lookup"] : values.arm === "receipt-paired" ? ["receipt-control", "receipt-consequence"] : [values.arm!];
@@ -136,9 +139,13 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
 		let commitment: ReturnType<typeof commitmentReceipt> | undefined;
 		try {
-			const writer = reasoner({ role: one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
-				model: luna.model as never, thinking: luna.thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
-			if (one.task !== "pilot") {
+			const writer = reasoner({ role: one.task === "judge" ? "judge" : one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
+				model: (one.task === "judge" ? judging : luna).model as never, thinking: (one.task === "judge" ? judging : luna).thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
+			if (one.task === "judge") {
+				if (one.judgeRow === undefined || one.legal === undefined) throw new Error("Judge cases need judgeRow and legal.");
+				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
+				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
+			} else if (one.task !== "pilot") {
 				const context = { brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}) };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
@@ -168,7 +175,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				decisionMs = Date.now() - began;
 				if (values.play) {
 					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
-						{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}) });
+						{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
 					const game = continuation.result;
 					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
 				}
@@ -185,14 +192,14 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 						return { pick: { type: "choice", choice: String(chosen.id), probabilities: {}, confidence: 0 } };
 					},
 				};
-				const seat = aiSeat({ name: "Benchmark", api, intent: startingIntent(one.seat), onGap: (note) => { throw new Error(note); }, rules,
+				const seat = aiSeat({ name: "Benchmark", judge: parts.some((part) => part.role === "judge" && !part.off && !!part.model), api, intent: startingIntent(one.seat), onGap: (note) => { throw new Error(note); }, rules,
 					chronicle: { briefs: brief ? { [one.seat]: brief } : {}, recaps: [] },
 					plan: async () => { throw new Error("This position requests strategy before it can be piloted."); } });
 				try { answer = await seat.answer(frame); } finally { await seat.close(); }
 				const pick = (answer as { kind: string; option?: string }).option, expected = one.expect!;
 				const use = frame.decision!.options.find((option) => option.id === pick)?.use;
 				const name = (ref: { id: string; incarnation: number }) => frame.view.objects?.find((o) => o.id === ref.id && o.incarnation === ref.incarnation)?.card;
-				passed = one.picks ? !!pick && one.picks.includes(pick) : expected.id ? pick === expected.id : !!use && name(use.source) === expected.source && (!expected.timing || use.timing === expected.timing) &&
+				passed = one.avoidObjection ? (answer as { kind: string }).kind !== "object" : one.objectionRow !== undefined ? (answer as { kind: string; row?: number }).kind === "object" && (answer as { row?: number }).row === one.objectionRow : one.picks ? !!pick && one.picks.includes(pick) : expected.id ? pick === expected.id : !!use && name(use.source) === expected.source && (!expected.timing || use.timing === expected.timing) &&
 					(!expected.target || use.targets.flat().some((target) => "id" in target && name(target) === expected.target));
 			}
 			if (!isDeepStrictEqual(frame, before)) throw new Error("Benchmark mutated the projected frame.");

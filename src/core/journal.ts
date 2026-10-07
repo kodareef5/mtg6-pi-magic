@@ -22,7 +22,7 @@ import type { SeatId } from "./types.ts";
 import type { WorkEntry } from "./work.ts";
 import { activate } from "./procedures.ts";
 import type { Deck } from "./decks.ts";
-import type { Ruled } from "./judge.ts";
+import type { Ruled, Case, Ruling } from "./judge.ts";
 
 export type Header = {
 	/** The game id. Also the directory a published game lives in. */
@@ -355,7 +355,7 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
  * go back to that version too. Save the journal first: what the rolled-back
  * table no longer holds cannot be written afterwards.
  */
-export function rollback(table: Table, ruled: Pick<Ruled, "case" | "ruling">, restart: () => Table): void {
+export function rollback(table: Table, ruled: { case: Case; ruling: Ruling }, restart: () => Table): void {
 	const to = ruled.case.row;
 	const fresh = relive(restart(), table.ledger.slice(0, to), table.workLog.filter((entry) => entry.at <= to));
 	fresh.workLog = table.workLog.filter((entry) => entry.at <= to).map((entry) => structuredClone(entry));

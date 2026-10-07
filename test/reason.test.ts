@@ -560,7 +560,7 @@ test("a game bill counts attempts and separates overlapping time, role, model an
 	assert.equal(failed.llm!.total.calls, 6, "refused preparation does not lose its bill");
 	assert.equal(failed.error, "Card meaning missing.");
 	const reading = report({ ...failed, error: undefined, interruptions: { stops: 0, essential: 0, help: 0, rulings: 1, upheld: 0 }, judged: { cases: 1, failed: 0 } }).join("\n");
-	assert.match(reading, /judge\s+3 calls\s+1 cases this run.*1 game rulings\s+0 rollbacks/);
+	assert.match(reading, /judge\s+3 calls\s+1 cases this run.*1 game rulings\s+0 unruled cases\s+0 rollbacks/);
 	assert.match(reading, /unmetered 3 calls lack usage/);
 	const plotted = { ...failed, calls: [base, { ...base, at: 500 }, { ...base, at: 1500, ms: 200 }] };
 	const chart = timelineData(plotted, [{ at: 700, turn: 1, active: 0, source: "first-observed" }]);
