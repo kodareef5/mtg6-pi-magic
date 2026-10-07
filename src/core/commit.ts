@@ -379,6 +379,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		seq: table.log.length,
 		clock: table.cursor.clock + 1,
 		at: table.ledger.length,
+		turn: table.cursor.turn,
 		changes: structuredClone(changes),
 		reason,
 		before,

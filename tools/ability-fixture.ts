@@ -55,7 +55,8 @@ export async function abilityExercise() {
 	const upkeep = (active: "self" | "opponent") => ({ active, step: "upkeep" as const, fromTurn: 3, throughTurn: 3 });
 	const thinking: Pick<Reasoner, "work"> = { async work(_about, prompt, { submit }) {
 		plans += 1;
-		const { seat } = JSON.parse(prompt.user) as { seat: number };
+		// The dossier names the seat in its situation section.
+		const seat = Number(/^- You are .*? \(seat (\d+)\)/m.exec(prompt.user)?.[1]);
 		const plan: Plan = seat === 0
 			? { objective: "Loot at the third upkeep, then let the opponent respond.", guidance: "Pay with the Island; choose the discard after seeing the draw.",
 				steps: [{ label: "Loot with the Merchant", when: upkeep("self"), action: { procedure: lootProcedure(basis) } }] }

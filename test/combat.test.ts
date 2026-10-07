@@ -21,7 +21,7 @@ import { withdrawnChoices } from "../src/core/combat.ts";
 import { combatLookup } from "../src/context/strategy-combat.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { facts } from "../src/context/strategy-facts.ts";
+import { dossier } from "../src/context/dossier.ts";
 import { establish, finish, matchup, pack, quiet } from "./play.ts";
 
 /** Answer quietly until the table asks this step's turn-based question on this turn. */
@@ -60,7 +60,7 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	}
 	const pilot = focus(frame, startingIntent(1)).objects.find((one) => one.id === claws[0]!.id)!;
 	assert.equal(pilot.summoningSick, false); assert.ok(pilot.subtypes!.includes("Lizard"));
-	assert.equal(JSON.parse(facts(frame, {})).objects.battlefield.you.find((one: { id: string }) => one.id === claws[0]!.id).summoningSick, false);
+	assert.ok(!dossier({ frame }).split("\n").find((line) => line.startsWith(`| ${claws[0]!.id}@`))!.includes("summoning-sick"), "the dossier row shows the same readiness");
 	assert.deepEqual(table, before, "projecting readiness and watch matches moves nothing and stores no derived value");
 	label(table, kellan, "vigilance until end of turn", ["vigilance"]);
 	pick(table, `attack:${claws[0]!.id}`);
@@ -232,7 +232,7 @@ test("double strike deals damage in both steps, and a creature killed by first s
 		assert.equal(read.attackerDestroyed, !trample);
 		assert.equal(read.blockerDestroyed, trample);
 		assert.equal(JSON.parse(combatLookup(frame).answer({ attacker: striker.id, blocker: wall.id })).exchange.toPlayer, read.toPlayer);
-		assert.equal(JSON.parse(facts(frame, {})).decisionFacts.combat, undefined, "pair arithmetic remains available by lookup, not repeated in every plan request");
+		assert.ok(!dossier({ frame }).includes("toPlayer"), "pair arithmetic remains available by lookup, not repeated in every plan request");
 		const unblocked = JSON.parse(combatLookup(frame).answer({ attacker: striker.id }));
 		assert.equal(unblocked.exchange.toPlayer, trample ? 4 : 6);
 		assert.deepEqual(game, original, "arithmetic applies no hypothetical damage or state-based action");

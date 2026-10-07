@@ -202,6 +202,6 @@ export function planReason(frame: Frame): string | undefined {
 	if (!planDue(frame)) return;
 	const accepted = frame.view.work?.accepted;
 	if (accepted === undefined || accepted < (frame.view.began ?? 0))
-		return "Accept or amend this turn's plan from current facts and the pregame playbook. Cover the remaining turn and the opponent's next turn. No future draw is known.";
-	return "Review the unfinished line after the turn draw. view.turnDraw records what arrived. Keep completed work completed and cover the opponent's next turn.";
+		return "Accept or amend this turn's plan from the current board and your matchup plan. Cover the rest of this turn and the opponent's next turn. Your draw is still unknown.";
+	return "Review the unfinished line after this turn's draw; the situation names the card you drew. Keep completed work completed and cover the opponent's next turn.";
 }

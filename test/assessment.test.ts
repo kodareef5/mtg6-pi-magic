@@ -24,7 +24,7 @@ import { sick } from "../src/core/funding.ts";
 import { project } from "../src/core/view.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
+import { dossier } from "../src/context/dossier.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { main, place, quiet, passBoth, finish, example } from "./play.ts";
 import { matchTable, universe } from "../tools/matchup-fixture.ts";
@@ -199,7 +199,7 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	assert.equal(offered.length, 2, "normal and warp casts come from preparation, with no bare duplicate");
 	const frame = workFrame(table, 1), available = actions(frame);
 	assert.equal(focus(frame, startingIntent(1)).watches.some((one) => one.source.name === pack.card), false, "a prepared card still in hand supplies no active watch");
-	assert.equal(JSON.parse(strategyFacts(frame, {})).watches.some((one: { source: { name: string } }) => one.source.name === pack.card), false, "the writer reads the same battlefield facts");
+	assert.ok(!dossier({ frame }).split("## Triggers on the battlefield")[1]!.split("\n## ")[0]!.includes(pack.card), "the writer reads the same battlefield facts");
 	const preparedKey = `prepared:0 ${pack.procedures![0]!.claim}`;
 	assert.deepEqual(available[preparedKey]!.action, { procedure: pack.procedures![0] });
 	const plan = changedPlan({ objective: "Attack in the air.", guidance: "Cast before combat.", steps: [] }, {

@@ -16,7 +16,7 @@ import { test } from "node:test";
 
 import type { Api, Model } from "@earendil-works/pi-ai";
 
-import { brief, current, emptyBrief, needsNote } from "../src/context/brief.ts";
+import { brief, current, emptyBrief, needsNote, say } from "../src/context/brief.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
@@ -27,7 +27,7 @@ import { timeline, timelineData } from "../tools/game-timeline.ts";
 import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
-import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
+import { dossier } from "../src/context/dossier.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { splits } from "../src/core/odds.ts";
@@ -160,14 +160,11 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	assert.ok(spent.every((one) => !one.pending), "settling an attempt clears pending without adding another call");
 	assert.match(bill(spent).join("\n"), /pregame/);
 	const frame = { seat: me!.id, version: built.cursor.clock, view: project(built, me!.id) };
-	const forTurn = JSON.parse(strategyFacts(frame, { brief: written }));
-	assert.deepEqual(forTurn.brief.policies, written.policies, "turn preparation keeps dependencies and contingency examples across all five families");
-	const forResponse = JSON.parse(strategyFacts(frame, { brief: written }, {}, "response"));
-	assert.deepEqual(Object.keys(forResponse.brief.policies), ["resources", "responses", "combat"], "a current response repair does not plan next turn's development");
-	assert.equal(forTurn.brief.route, undefined, "the new policies replace duplicate legacy strategic paragraphs");
-	assert.equal(forTurn.brief.opening, undefined, "completed opening decisions do not accompany a turn question");
-	assert.equal(forTurn.brief.steps, undefined, "existing phase scripts arrive through the base plan, not twice");
-	assert.equal(forTurn.brief.cards["Snakeskin Veil"], undefined, "a card note does not follow an unidentified library object");
+	const plan = dossier({ frame, brief: written }).split("## Your matchup plan")[1]!.split("\n## Your notebook")[0]!;
+	for (const family of ["sequencing", "resources", "responses", "combat", "recovery"]) assert.match(plan, new RegExp(`### Policy: ${family}`), "every strategy call reads all five policy families");
+	for (const [, policy] of Object.entries(written.policies!)) assert.ok(plan.includes(policy.example.exception), "worked examples keep their exceptions");
+	if (say(written.route)) assert.ok(plan.includes(say(written.route)), "the whole brief reaches the strategist, not a filtered slice");
+	assert.match(plan, /Written before the game by your pregame analysts/, "model-written strategy is marked as advice");
 
 });
 

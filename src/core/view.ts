@@ -186,6 +186,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		})) } : {}),
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
 		...(viewer !== "spectator" ? { purposes: purposes(table, viewer) } : {}),
+		seats: table.seats.map((one) => ({ id: one.id, name: one.name })),
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		...(declarationReview ? { declarationReview } : {}),
 		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts } } : {}),
@@ -194,7 +195,22 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
-		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean) };
+		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table) } : {}) };
+}
+
+/** The last five turns by each receipt's recorded turn, read backwards from now and never to the start of the game. */
+function recent(table: Table): NonNullable<SeatView["recent"]> {
+	const order = table.seats.map((one) => one.id), current = table.cursor.turn, now = order.indexOf(table.cursor.active);
+	const active = (turn: number) => order[(((now - (current - turn)) % order.length) + order.length) % order.length]!;
+	const turns = new Map<number, string[]>();
+	for (let at = table.log.length - 1; at >= 0; at--) {
+		const receipt = table.log[at]!;
+		if (receipt.turn === undefined || receipt.reason === "game-setup") continue;
+		if (receipt.turn <= current - 5) break;
+		const line = describe(table, receipt);
+		if (line) turns.set(receipt.turn, [line, ...turns.get(receipt.turn) ?? []]);
+	}
+	return [...turns].sort(([a], [b]) => a - b).map(([turn, lines]) => ({ turn, active: active(turn), lines }));
 }
 
 /** This seat's plan steps and branches its ledger rows carried out, latest first among ten distinct actions, given back in game order. */

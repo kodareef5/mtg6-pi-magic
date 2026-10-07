@@ -6,8 +6,6 @@ import type { Selector } from "../core/language.ts";
 import type { Universe } from "../core/cards.ts";
 import type { Rules } from "../core/rules.ts";
 import { say, type Brief } from "./brief.ts";
-import { strategyBrief } from "./playbook.ts";
-import { planningChoices } from "./strategy-actions.ts";
 import type { Plan } from "../core/language.ts";
 import type { Step } from "../core/steps.ts";
 import type { Recap } from "./summary.ts";
@@ -19,39 +17,14 @@ import { TURN } from "../core/steps.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
-import { activeWatches } from "../core/triggers.ts";
 import { useSources } from "../core/readiness.ts";
-import { cardDefinition, decisionFacts } from "./strategy-position.ts";
-
-/** Off-field cards have not installed their battlefield abilities. Keep their
- * base type/stats and any explicit terms, without claiming empty printed keywords. */
-function characteristics(object: SeenObject) {
-	if (!object.traits) return {};
-	if (object.zone === "battlefield" || object.token) return { traits: object.traits };
-	const { words, registrations, ...base } = object.traits;
-	return { baseCharacteristics: base,
-		...(words.length ? { explicitKeywords: words } : {}), ...(registrations.length ? { registrations } : {}) };
-}
-
-/** The seat's objects as the writer reads them: what each is and its state, with ids to point at. */
-function objects(frame: Frame) {
-	const listed = (frame.view.objects ?? []).filter((object) => object.zone !== "library").map((object) => ({
-	id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim, zone: object.zone, owner: object.owner, controller: object.controller,
-	...(object.tapped ? { tapped: true } : {}), ...(object.faceDown ? { faceDown: true } : {}),
-	...(Object.keys(object.counters).length ? { counters: object.counters } : {}), ...(object.damage ? { damage: object.damage } : {}),
-	...characteristics(object), ...(object.attached ? { attached: object.attached } : {}),
-	...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
-	...(object.entered === undefined ? {} : { entered: object.entered }), ...(object.position === undefined ? {} : { position: object.position }),
-	...(object.ability ? { ability: object.ability } : {}),
-	}));
-	const zones = new Set(["battlefield", "hand", "stack", "exile", "graveyard", ...listed.map((one) => one.zone)]);
-	return Object.fromEntries([...zones].map((zone) => [zone, {
-		you: listed.filter((one) => one.zone === zone && one.controller === frame.seat),
-		others: listed.filter((one) => one.zone === zone && one.controller !== frame.seat),
-	}]));
-}
 
 export function mana(frame: Frame): string {
+	return manaLines(frame).join(" ");
+}
+
+/** The seat's mana now, one statement per line: sources, maximum, tapped sources, land plays, and the tapping rule. */
+export function manaLines(frame: Frame): string[] {
 	const only = (selector: Selector) => selector.types || selector.subtypes ? `only to cast a ${[...(selector.subtypes ?? []), ...(selector.types ?? [])].join(" or ")} spell` : `only on ${JSON.stringify(selector)}`;
 	const describe = (yields: ReturnType<typeof sources>[number]["yields"]) => [...new Set(yields.map((one) =>
 		`${one.colors.join("")}${one.spendOnly ? ` (${only(one.spendOnly)})` : ""}${one.sacrifice ? " (sacrificing it)" : ""}`))].join(" or ");
@@ -77,7 +50,7 @@ export function mana(frame: Frame): string {
 	lines.push(left ? `Land plays left this turn: ${left}. In hand: ${from("hand")}.${[...new Set(lands.filter((one) => one.zone !== "hand").map((one) => one.zone))].map((zone) => ` Permitted from ${zone}: ${from(zone)}.`).join("")}`
 		: "No land play left this turn.");
 	lines.push("Tap each source once: its yields are alternatives, not added together. Each step spends what earlier steps leave. A held source stays available for its response. A land that enters tapped makes nothing this turn.");
-	return lines.join(" ");
+	return lines;
 }
 
 export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules;
@@ -92,19 +65,6 @@ export function initialPlan(brief: Brief): Plan {
 			const guidance = say(sides?.[side]);
 			return guidance ? [{ when: { active: side === "own" ? "self" as const : "opponent" as const, step: step as Step }, guidance }] : [];
 		})) };
-}
-
-/** A forecast, separate from current facts: normal untap and no resource-changing reply. */
-export function nextMana(frame: Frame): string {
-	return mana(afterUntap(frame));
-}
-
-/** Whose turns are whose, by number: the table's global turns alternate, and a window on the wrong seat's turn never opens. */
-function turns(frame: Frame): string {
-	const at = frame.view.window;
-	if (at.kind !== "turn" || (frame.view.players?.length ?? 2) !== 2) return "";
-	const mine = at.active === frame.seat ? at.turn : at.turn + 1, next = (from: number) => [from, from + 2, from + 4].join(", ");
-	return `Your turns are ${next(mine)}…; the opponent's are ${next(mine === at.turn ? at.turn + 1 : at.turn)}….`;
 }
 
 /**
@@ -145,36 +105,4 @@ export function planningFrame(frame: Frame, scope: "turn" | "response" | "prepar
 		remainingSteps: TURN.filter((step) => step !== "untap"),
 		drawnAt: undefined, turnDraw: undefined, landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
 	} };
-}
-
-export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}, scope: "turn" | "response" | "preparation" = "turn"): string {
-	const observed = frame;
-	frame = planningFrame(frame, scope);
-	// Pilot receipt windows do not define strategic history. Actions and history
-	// carry the recorded events in both live and saved-position requests.
-	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, since: _since, ...view } = frame.view;
-	const at = frame.view.window;
-	const decision = decisionFacts(frame, context.cards);
-	const inHand = new Set(decision.yourHand.filter((one) => one.printed).map((one) => one.name));
-	// The position the decision binds comes first; the brief and prior intent follow it.
-	return JSON.stringify({
-		seat: frame.seat, decisionFacts: decision,
-		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
-		mana: mana(frame),
-		...(more.survey ? { survey: more.survey } : {}),
-		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn"),
-		...Object.fromEntries(Object.entries(more).filter(([key]) => key !== "survey")),
-		...(scope === "preparation" ? { positionBasis: {
-			kind: "forecast", observedWindow: observed.view.window,
-			assumptions: "Your next upkeep after normal untap, before the unknown draw or any upkeep effects. Your current permanents survive and untap; current characteristics and abilities are retained. Nonpersistent floating mana expires. This is not the current position or a prediction of the opponent's actions or intervening effects.",
-			observedHistory: observed.view.history, observedActions: observed.view.actions,
-		} } : { positionBasis: { kind: "observed" } }),
-		notebook: work?.notebook ?? [],
-		packages: (work?.packages ?? []).map((pack) => pack.card),
-		cards: [...new Set((frame.view.objects ?? []).flatMap((object) => object.card ? [object.card] : []))]
-			.flatMap((name) => { const card = !inHand.has(name) && cardDefinition(frame, name, context.cards); return card ? [card] : []; }),
-		recaps: context.recaps?.slice(-3),
-		turns: turns(frame), view, objects: objects(frame), watches: activeWatches(frame),
-		choices: planningChoices(frame), refused: frame.refused,
-	});
 }

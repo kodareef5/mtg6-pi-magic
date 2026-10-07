@@ -27,7 +27,7 @@ import { annotate, planState } from "../src/core/planning.ts";
 import { combatDamage, declareBlockers } from "../src/core/combat.ts";
 import { CHOICE_LIMIT, decisionApi, type DecisionApi } from "../src/context/model.ts";
 import { tally } from "../src/context/spend.ts";
-import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
+import { dossier } from "../src/context/dossier.ts";
 import { matchTable, universe } from "../tools/matchup-fixture.ts";
 import type { Brief } from "../src/context/brief.ts";
 
@@ -160,7 +160,7 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 				chronicle: { briefs: { 1: brief }, recaps: [] },
 				plan: async (frame) => {
 					const context = { brief, cards: universe };
-					strategies.push([strategyFacts(frame, context), strategyFacts(workFrame(position, frame.seat), context)]);
+					strategies.push([dossier({ frame, ...context }), dossier({ frame: workFrame(position, frame.seat), ...context })]);
 					return { tools: [{ do: "plan.keep", reason: "Continue the same attacks." }] };
 				},
 				api: { named: "offline", async ask(request) {
@@ -188,9 +188,9 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 			offline.decision = { ...offline.decision!, options: annotate(offline.decision!.options, planState(offline)!) };
 			assert.deepEqual(offline, frame, "the benchmark pilot builds the loop's exact frame");
 			const context = { brief, cards: universe };
-			const expected = strategyFacts(offline, context);
-			for (const [loopFacts, savedFacts] of live.strategies) assert.equal(loopFacts, savedFacts, "planning receives the same facts from loop and saved-position frames");
-			assert.equal(strategyFacts({ ...frame, view: { ...frame.view, since: ["A prior pilot receipt."] } }, context), expected, "pilot receipt slices do not change strategy facts");
+			const expected = dossier({ frame: offline, ...context });
+			for (const [loopFacts, savedFacts] of live.strategies) assert.equal(loopFacts, savedFacts, "planning receives the same dossier from loop and saved-position frames");
+			assert.equal(dossier({ frame: { ...frame, view: { ...frame.view, since: ["A prior pilot receipt."] } }, ...context }), expected, "pilot receipt slices do not change the dossier");
 			if (retry) assert.deepEqual(live.requests.map((one) => (one.state as unknown as Packet).known), [request.known, request.known, request.known]);
 		}
 	} finally { rmSync(dir, { recursive: true, force: true }); }

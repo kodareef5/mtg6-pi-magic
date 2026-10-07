@@ -16,10 +16,12 @@ import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget, paymentForecast } from "../core/budget.ts";
 import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
-import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
-import { facts, chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
-import { compactFacts, surveyPosition } from "./survey.ts";
-import { perspectiveReports } from "./perspectives.ts";
+import { actionFacts, bindingFacts, choiceProblems, planFacts, planningChoices } from "./strategy-actions.ts";
+import { chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
+import { findingsSection, surveyPosition } from "./survey.ts";
+import { perspectiveReports, reportsSection } from "./perspectives.ts";
+import { dossier } from "./dossier.ts";
+import { ASSESSMENT, ROLLUP, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
 import { combatLookup } from "./strategy-combat.ts";
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
@@ -57,99 +59,9 @@ const SUBMIT = {
 	}, additionalProperties: false },
 };
 
-/** Luna low reasons in its output, so the arithmetic is written before the plan. No code checks it. */
-const text = (description: string) => ({ type: "string", minLength: 1, description });
-const ASSESSMENT = { type: "object", additionalProperties: false, required: ["hand", "zones", "opponents", "combat", "combinations", "rollup"],
-	description: "Survey the position piece by piece before writing any plan field: your own working, which Jev never reads. Look at each item for what could materially change the game.",
-	properties: {
-		hand: { type: "array", description: "One entry for every card in decisionFacts.yourHand.", items: { type: "object", additionalProperties: false, required: ["card", "play", "impact"], properties: {
-			card: text("Its name."),
-			play: text("Whether and when you can cast or play it in the planned turn, with its cost against your mana, or why not."),
-			impact: text("What it would change if played, alone and with your other cards: damage, an attacker or blocker this turn (haste attacks the turn it is cast), removal, mana, cards. Say plainly if it could swing or win the game."),
-		} } },
-		zones: { type: "array", description: "Your battlefield, graveyard and exile, and the stack.", items: { type: "object", additionalProperties: false, required: ["zone", "opportunity"], properties: {
-			zone: text("The zone."), opportunity: text("Any ability, untapped source, creature-land, permission or pending object there that materially changes the game, or none."),
-		} } },
-		opponents: { type: "array", description: "One entry per opponent.", items: { type: "object", additionalProperties: false, required: ["state", "threats", "leverage"], properties: {
-			state: text("Life, creatures and whether each is tapped, cards in hand, open mana."),
-			threats: text("What they can do to you before and during their next turn."),
-			leverage: text("What you can exploit: low life, tapped or missing blockers, no flying or reach, an empty hand, a key creature to remove."),
-		} } },
-		combat: { type: "array", description: "One entry for every creature that could attack or block in the planned turn on either side, including haste creatures you can cast before combat. Tapped creatures cannot block; summoning-sick creatures can block.", items: { type: "object", additionalProperties: false, required: ["creature", "side", "status", "best"], properties: {
-			creature: text("Name, power/toughness and listed abilities only."),
-			side: { type: "string", enum: ["yours", "theirs"] },
-			status: text("Can it attack or block this turn, and why: tapped, summoning-sick, haste, already in combat."),
-			best: text("Its best use and what happens: which creature could block it or it could block, what dies, damage that gets through."),
-		} } },
-		combinations: { type: "array", description: "Cards and permanents that together do what none does alone: damage from several spells added on one creature against its toughness, removal that clears a blocker before an attack, a pump before a block, a land before a landfall payoff. Check every opposing creature that matters against the total damage your spells can deal this turn.", items: { type: "object", additionalProperties: false, required: ["cards", "effect"], properties: {
-			cards: text("The cards and their total cost against your mana."), effect: text("What they achieve together that none achieves alone, or why it is not worth it."),
-		} } },
-		rollup: { type: "object", additionalProperties: false, required: ["win", "priorities"], properties: {
-			win: text("All your attackers from combat attacking together, castable haste included: total damage, minus the largest attacker each untapped opposing creature can block, plus burn, against their life. The winning line in order, or why not."),
-			priorities: { type: "array", items: { type: "string" }, description: "The opportunities above, combinations included, ranked by impact. The plan carries out the first ones." },
-		} },
-	} };
-
-/** With the focused survey supplied, the writer's own working is only the rollup. */
-const ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "adopted", "win", "priorities"],
-	description: "Write first. You are the coordinator: survey.findings rank threats and opportunities from focused questions, and survey.reports propose whole lines from a defender, a punisher, a long-horizon planner, a sequencer, the opponent's view and a removal analyst. Both can be wrong. Jev never reads this.",
-	properties: {
-		corrections: text("Findings or report claims that contradict the facts or the card text, corrected, or none."),
-		adopted: text("Which reports or parts of them you adopt and why, and which you reject. Prefer a line whose arithmetic you checked; merge only parts that fit the same mana and order."),
-		win: text("All your attackers together, castable haste included: total damage, minus the largest attacker each untapped opposing creature can block, plus burn, against their life. Write the sum. The winning line in order, or why not."),
-		priorities: { type: "array", items: { type: "string" }, description: "The opportunities from the survey, combinations and removal included, ranked by impact. The plan carries out the first ones." },
-	} };
-
-const SYSTEM = [
-	"You strategize for one Magic seat. A small, fast pilot, Jev, executes your plan. The pregame brief is your matchup analysis: build on it instead of researching the deck again.",
-	"Organize a line using brief.policies and their worked examples. Match the position to their applicability and priorities, bind the actual sources and targets, then check their reconsider conditions. A policy is guidance, not proof it fits. Spend new strategic reasoning on changed facts or an uncovered case. Check both clocks and the last answer window before committing resources. Use registered counts and earned knowledge for odds, never assume a hidden card or order.",
-	"SURVEY, THEN FIND THE WIN. Fill assessment before any plan field as its schema asks, then let its rollup decide the line. The opponent blocks to stop the most damage: each untapped creature blocks one attacker, menace needs two blockers, only flying or reach blocks a flyer, and summoning-sick creatures block normally. Count the whole attack together: losing a blocked attacker does not matter when the rest is lethal. A haste creature cast before combat attacks this turn; one cast after combat adds nothing. A creature or creature-land tapped for mana cannot attack, so pay with other sources. Burn to the player counts at any window, upkeep included. When attack damage that gets through plus burn reaches the opponent's life, that line comes before development or a defensive reserve, and holds it needs are released. Only when no attack wins, keep pressure: attack with every creature no untapped opposing creature can block and kill while surviving, since damage not dealt is lost and an empty or tapped board takes all of it. Do not attack into a blocker that kills the attacker and survives. Keep back only the blockers needed to survive the next attack. Use only abilities listed on the cards; trample matters only for a blocked attacker. Play a land each turn you hold one. Spend burn when it removes a blocker that stops lethal or a key threat, or finishes the opponent. A reserve must name an actual card in hand and its useful window; an unknown draw is not a response.",
-	"Bind the line to decisionFacts: the complete current creature roster, your hand, untapped mana sources and land allowance under positionBasis. Empty lists mean none. Use view.window and remainingSteps for timing; objects, watches and choices carry the full detail and restrictions. base is earlier intent, not a record of current facts. Recheck its combat and response commitments against decisionFacts, including steps whose labels name an old creature or response. Replace contradicted steps, guidance, phase scripts and holds together. Completed windows cannot be used again unless remainingSteps contains them.",
-	"positionBasis distinguishes an observed position from a next-turn forecast. In a forecast, window, objects and mana describe the stated upcoming turn under its assumptions; choose that turn's actual line, not actions during the opponent's current turn. Check every inherited card, cost and combat claim against those facts. A creature already in play does not need another cast.",
-	"objects groups the current position by zone and controller. Movement actions bind selectedNow to current characteristics and obstaclesNow; their labels are earlier intent, not facts. An attack or block needs a creature, with any transformation or entry occurring first. Holds show releasedNow under their recorded conditions. Check these bindings before carrying a commitment forward; a later prerequisite can change them, but merely naming it does not execute it.",
-	"Before submitting, check mana across the whole line, holds and spending restrictions; the order in which permanents enter and triggers happen; targets; attacks and blocks. Current offers state manaRequired and untappedSourcesAfterPayment. Use those counts; do not invent a leftover source. State resource holds and their release condition, then let Jev select the payment. The table checks physical payments and structured terms. It does not certify card meaning or expert play.",
-	"Each visible creature's summoningSick is the current restriction, read from its controller's turn and haste. False does not establish that an attack is legal or useful. A watch's matchingNow names visible objects meeting its selector now, not events or guaranteed future triggers.",
-	"watches lists registered triggers on visible permanents now. A permanent cannot see events that finished before it entered; its own entry can trigger it. A watch's you and this refer to its source's controller and source. Distinguish forecasts from events already recorded in view.history.",
-	"",
-	"YOUR ANSWER",
-	"- Update base with changed fields directly: no plan or changes wrapper. Omitted fields stay; lists replace, [] clears. Packages join by card name. Fresh turns start from pregame policies, never prior tactical prose. Amendments retain unfinished work within base.throughTurn, which context sets. Do not restore completed steps. objective and guidance are audit rationale, not pilot instructions.",
-	"- actions describes accepted uses by their claim, quoted card meaning, source, cost and targets. Set action.reuse to the exact listed key, including its readable name. sameAs refers to another complete action description; both keys are usable. A normal cast and an alternate-cost cast are different uses. Prefer prepared: or printed: keys for spells and activations; an old step may bind an obsolete payment or target. Reuse copies the accepted executable body unchanged. equipment reads that body when an interpretation needs inspection. These terms were prepared by a model, not certified as correct.",
-	"- packages persist in private work. Standing abilities are assessed before play. Some spell effects and activations remain identified in deferred until their source is available; a separate interpretation call prepares them before the pilot acts. Use accepted actions instead of rewriting their meaning as part of strategy. Correct a package only when its interpretation was wrong; a new line does not change a card's abilities. Registrations quote the card's own text. printedCast selects the shared ordinary permanent cast; set it false if a correction needs a special casting procedure.",
-	"- notes is optional [{topic, note}]. Add only a useful new conclusion or correction; an empty note retires a topic. Notes do not require another call. The notebook is memory, not a task to fill. Do not restate the brief or unchanged facts.",
-	"",
-	"WHAT JEV NEEDS",
-	"- steps: ordered actions, each with label, when and action. Reuse the supplied land and combat actions as well as accepted spells and activations. Movement selectors name candidates, not promises that they can move now: check sickness, windows and land plays. For a creature entering later, write prefix attack: with objects naming that future battlefield creature only if it will be eligible. Essential means the line fails if that step cannot be taken. A step is an action Jev takes; keeping a card or mana is a hold, never a step. When assessment finds a win, steps carry exactly that line: its casts before combat, an attack step for every attacker it counts, then attack:done.",
-	'- action.option is an exact listed button id, or pass, attack:done, block:done. Never construct it from a card name. A future land uses {"prefix":"land:","objects":{"zones":["hand"],"card":"<visible card name>"}} or a supplied reusable action. objects is a query with card, zones, controller, types, tapped or refs. types matches any listed current type.',
-	"- purpose is the step or response's execution policy: targets, payment preferences, search and optional choices. Jev reads it at announcement, target and payment selection, and resolution. A later amendment cannot rewrite an announced use. Put rationale in guidance. Keep purpose consistent with holds; a contradiction needs repair.",
-	"- Phase guidance supplies responses, trigger choices and exceptions for its window. Context derives action order and progress from steps. A holds query reserves EVERY match. Use refs for one incarnation or ids to follow an identified physical card across zone changes. Bind draw branches to the visible hand, never an unknown library object. Check restrictions when preserving response mana; name the covered alternative if a resource is lost.",
-	"- Steps order announcements. Set waitFor: empty-stack when the commitment must wait for the whole stack to resolve, including landfall before a fetch. Absence adds no prerequisite. Carry the chosen search and trigger policy through resolution; do not repeat a pending activation.",
-	"- Give opening bottom, combat, search and optional-instruction choices a policy with a visible exception. Compare the hand left after bottoming. Use current characteristics.",
-	"- Repair the unfinished line and its guidance together. history names actions already taken this turn; do not reintroduce them when the new base omits completed steps. Phase instructions should say what to do while an effect is pending and after it resolves, not keep ordering an already completed activation.",
-	"- phases: [{when, guidance, complete?, reevaluate?}]. Cover relevant upkeep, draw, main, combat, end and opponent windows, including responses, trigger targets, searches and optional instructions. complete is pass or ask after that window's commitments finish; absence grants no pass. Waiting for the stack uses the response policy separately. reevaluate names uncovered changes, not routine events.",
-	"- may: conditional standing responses or alternative lines. Cover likely draw classes that change the line, rather than one branch per registered card. holds keeps sources for a purpose; releaseWhen ends it on a visible fact and releaseAt at a window, such as active self and step declare-attackers. askWhen stops on a visible fact that makes the line impossible; it must not cause routine replanning.",
-	'- Conditions count visible objects: {"amount":{"count":{"zones":["hand"],"controller":"you","types":["creature"]}},"atLeast":1} tests a creature in your hand after the draw. A battlefield threat uses zones ["battlefield"], controller "opponent" and its name or characteristics. Combine tests with all/any/not. top refers only to library objects; it never means a card in hand or in play. Query objects use controller "self"; condition selectors accept "you" or "self". An unconditional known action needs no presence condition: its options already require the source.',
-	"- Use active self/opponent and step names for windows. active means whose TURN it is, not whose choice. currentWindow is the exact when for a response now: copy it for a pending-spell response. Leave absolute turn numbers out unless necessary. Untap, the turn draw and cleanup discard happen through the rules, not plan steps.",
-	"- A normal non-Aura permanent is cast: for its printed cost, without targets or resolution instructions. Its abilities come from its package. Instants and sorceries need procedures. Do not give a creature spell its trigger's targets.",
-	"- choices.options lists direct decisions such as land plays, blocks and passes. choices.uses describes available spell and activation modes with explicit locked costs and target bindings, without payment combinations. Use action.reuse for that mode, then state target priorities and exact resource holds. Jev selects the offered target and payment; do not copy a payment id into a reusable turn line.",
-	"- Printed definitions appear beside your hand cards in decisionFacts.yourHand[].printed; cards holds the other visible definitions. Battlefield traits describe current characteristics; off-field baseCharacteristics describe base types and stats, not installed battlefield abilities. Read printed text for a cast's abilities, never infer their absence from an uninstalled package. Registered lists remain in view.decks; card or equipment reads an absent card. Use syntax only before changing card terms; ordinary sequencing needs no reinterpretation.",
-	'- Combat is sequential: attack: or block: per creature, then finish. Finish your attacks with {"label":"Finish attackers","when":{"active":"self","step":"declare-attackers"},"action":{"option":"attack:done"}}. Finish blocks on their turn with {"label":"Finish blockers","when":{"active":"opponent","step":"declare-blockers"},"action":{"option":"block:done"}}. Your own turn never needs a block step. Jev handles listed trigger, resolution and damage choices with your phase guidance.',
-	"",
-	"Object only to a listed opponent action that broke a rule or misread a card: objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
-	"Call submit once with the updates. You may look up a needed fact first. If refused, correct all named problems together. Give Jev the final consistent conclusion, not a running calculation followed by a correction. Remove superseded statements before submitting.",
-	"",
-	"The submit tool defines ordinary plan fields, object queries and windows. The definitions below cover its conditions and amounts. Procedure and Package definitions are available through syntax when you need to change card terms. The complete schema is checked locally.",
-	JSON.stringify(planReference),
-].join("\n");
-
-const RESPONSE_SYSTEM = [
-	"You repair one current Magic response or combat decision for a seat. Jev executes the resulting actions and every voluntary pass. Use the supplied pregame policies, current facts and accepted action claims; do not research or plan the next own turn.",
-	"Prior intent can be stale. The current window, objects, mana and choices are facts. Read the actual hand and available sources before reserving a response; a card named in a policy is not necessarily in hand. Arithmetic attached to a block or payment is a fact under its stated assumptions, not a prediction of responses or later triggers.",
-	"Fill assessment first, the same survey for this decision: the attack you face, the damage that gets through your best blocks against your life, and any win you hold next turn. Tapped creatures cannot block; trample and other abilities exist only where listed. Chump-block when the attack would otherwise be lethal. Choose the line that wins now, otherwise prevents a concrete loss, otherwise preserves the relevant engine and response resources. For blocks, name the creature preserved or lost; a blocker dying does not imply it kills the attacker. Use damage and survival facts in the offered choice.",
-	"Submit current: an ordered list of {label, action, purpose?}. action is {reuse: exact action key} for an accepted use, or a listed {option: id}, or {prefix, objects}. Include the intended pass or block:done when needed. The context builder binds every current action to this turn and step. Do not write when or a next-turn line. Unaffected steps stay.",
-	"purpose carries each action's target, payment and resolution choices. Optional phases replaces execution policies; keep unaffected windows and fix contradicted policies. complete is pass or ask after commitments finish; absent means unspecified. guidance is audit rationale Jev does not read. holds replaces reserves; [] releases them. Use exact refs for one source. notes and objection use the schema; equipment reads accepted terms without rewriting them.",
-	"The table validates resources and syntax, not card meaning or playing strength. You can object to a listed opposing action that broke a rule; strategic disagreement is not an objection. If refused, fix all named problems without pretending an action was executed.",
-	JSON.stringify(ResponseSchema),
-].join("\n");
+const SYSTEM = coordinatorSystem(JSON.stringify(planReference));
+const RESPONSE_SYSTEM = responseSystem(JSON.stringify(ResponseSchema));
+const FORECAST = "It shows your next upkeep after a normal untap, before the unknown draw and any upkeep effects. Your permanents survive and untap with their current characteristics; floating mana that does not persist is gone. It does not predict the opponent's actions or other effects before then.";
 
 /** Interpreter checks: activated effects need procedures, and cast selectors must reach the stack. */
 export function registrationProblems(packages: readonly Package[]): string[] {
@@ -187,21 +99,24 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
 		parameters: { ...SUBMIT.parameters, properties: { assessment: context.survey ? ROLLUP : ASSESSMENT, ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
 			required: ["assessment", ...(response ? ["current"] : [])] } };
-	const current = at.kind === "turn" ? options.nextTurn ? `Planning target: your turn ${at.turn + 1}, from upkeep through the opponent's following turn. You are seat ${frame.seat}. Use the forecast position; you are not answering the opponent's current priority decision.`
-		: `Current decision: ${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}. You are seat ${frame.seat}. ${frame.decision?.question ?? "You are preparing while the other seat acts."}` : "";
-	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
+	const decision = !options.nextTurn && frame.decision ? ` The decision in front of the pilot: ${frame.decision.question}` : "";
+	const request = response ? `${frame.view.work?.request}\nRepair this response or combat decision and the rest of the opponent's turn. Your next turn is prepared separately, so do not write its line. Keep the phase policies this decision does not touch.${decision}`
+		: `${task}${decision}`;
 	const resources = paymentForecast(frame, base);
 	const scoped = options.nextTurn ? "preparation" : response ? "response" : "turn";
-	// Two concurrent rounds before the writer: rated findings, then whole lines from several outlooks.
+	// One dossier for every call in the session, then two concurrent rounds of analysts before the coordinator.
 	const planned = planningFrame(frame, scoped);
-	const findings = context.survey ? await surveyPosition(planned, !!options.nextTurn, reasoner, context.cards) : undefined;
-	const reported = findings ? await perspectiveReports(compactFacts(planned, !!options.nextTurn, context.cards), findings, reasoner) : undefined;
-	const survey = findings && reported ? { findings: findings.findings, reports: reported.reports,
-		...(findings.failed || reported.failed ? { failed: [...findings.failed ?? [], ...reported.failed ?? []] } : {}) } : undefined;
-	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
-		...(resources.responses.length ? { optionalResponseFunding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
-		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), ...(survey ? { survey } : {}), examples }, scoped),
-		task: `${response ? `YOUR TASK: ${frame.view.work?.request}\n` : ""}${scope}\n${current}` }, {
+	const doc = dossier({ frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
+		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}) });
+	const findings = context.survey ? await surveyPosition(planned, doc, reasoner) : undefined;
+	const reported = findings ? await perspectiveReports(doc, findings, reasoner) : undefined;
+	const work = workSections({ base: planFacts(base), problems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
+		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
+		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
+		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
+		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
+		...(findings && reported ? { analysts: [findingsSection(findings), reportsSection(reported)] } : {}) });
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped)}` }, {
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.
 			const { notes, objection: raised, assessment: _assessment, ...changes } = args;
@@ -242,8 +157,8 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
 	const repair = !!frame.view.work?.request && !!frame.view.work.plan;
-	const task = `YOUR TASK: ${request}\n${repair ? "Answer the request from the current window. Change what the conflict requires and replace stale guidance and phase decisions along with the actions; an answer with only assessment keeps the line when nothing needs to change."
-		: prepared || changed ? "Amend the base for the listed changes since it was prepared or accepted. Keep what still fits; replace what the changes contradict." : "Advance the pregame strategy from this position; write only what changes."}\nSubmit the line, mana commitments and phase decisions through the opponent's next turn. Check them together before submitting.`;
+	const task = `${request}\n${repair ? "Answer the request from the current window. Change what the conflict requires, and replace stale guidance and phase decisions along with the actions. An answer with only assessment keeps the line when nothing needs to change."
+		: prepared || changed ? "Amend the plan you are editing for the listed changes since it was prepared or accepted. Keep what still fits and replace what the changes contradict." : "Build on your matchup plan from this position and write only what changes."}`;
 	const about = frame.view.work?.request ? "plan on request" : prepared || changed ? "turn amendment" : "turn plan";
 	const made = await write(frame, context, reasoner, task, about, { ...(prepared ? { prepared } : {}), ...(changed ? { changed } : {}) });
 	return { tools: putting(made), ...(made.objection ? { objection: made.objection } : {}) };
@@ -253,6 +168,6 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
 export async function prepareTurn(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work"> & Partial<Pick<Reasoner, "think">>, signal?: AbortSignal): Promise<Prepared> {
 	const at = frame.view.window;
 	if (at.kind !== "turn" || at.active === frame.seat) throw new Error("Prepare the next own turn during the opponent's turn.");
-	return write(frame, context, reasoner, `YOUR TASK: PREPARE YOUR NEXT TURN, ${at.turn + 1} on the table's alternating counter (your own turn ${Math.ceil((at.turn + 1) / 2)}), during the opponent's turn ${at.turn}. The table turn number is not your land count or mana budget.\nBuild on the brief's policies. The supplied position is a labelled next-turn forecast with untapped resources and the known hand. Write its concrete ordered line and useful responses. Inherited phase prose can name old cards or costs; retain only decisions that still fit the forecast. Anticipate changed draw classes with visible-hand conditions; the next draw is unknown. Keep sound phase policies. Notes are optional; submit once, with no separate research or note-taking pass.`,
+	return write(frame, context, reasoner, `Prepare your next turn: turn ${at.turn + 1} on the table counter, your own turn ${Math.ceil((at.turn + 1) / 2)}, while the opponent plays turn ${at.turn}. The table turn number is not your land count or mana.\nThe dossier is a forecast of that turn, with your known hand and no draw. Write its ordered line and useful responses. Inherited phase prose can name old cards or costs, so keep only the decisions that fit the forecast. Cover the draws that would change the line with conditions on your hand. Notes are optional; submit once.`,
 		"preparation", { nextTurn: true, ...(signal ? { signal } : {}) });
 }

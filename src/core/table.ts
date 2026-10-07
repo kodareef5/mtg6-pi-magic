@@ -255,6 +255,8 @@ export type Receipt = {
 	 * that decision n or earlier produced.
 	 */
 	at: number;
+	/** The table turn the group committed in; turn changes write no receipt, so this is how a log is read by turn. */
+	turn?: number;
 	changes: Change[];
 	reason: Reason;
 	/** Facts read before the group, because cards watch what a thing looked like. */

@@ -89,3 +89,20 @@ export const finish = (table: Table) => {
 		else apply(table, quiet(decision.options).id, "engine", "forced");
 	}
 };
+
+/** What a test needs from a dossier's situation: the seat, the window and whether it is a forecast. */
+export function readDossier(text: string) {
+	const seat = Number(/^- You are .*? \(seat (\d+)\)/m.exec(text)?.[1]);
+	const now = /^- (?:Now|Planned): (your|.+?'s) turn (\d+) on the table counter, (.+?) step\./m.exec(text);
+	return { seat, opening: /The game is in its opening/.test(text), forecast: /This is a forecast/.test(text),
+		turn: now ? Number(now[2]) : undefined, mine: now?.[1] === "your", step: now?.[3]!.replace(/ /g, "-") };
+}
+
+/** The quoted Oracle text under each card heading in a dossier's card text section. */
+export function cardTexts(text: string): Map<string, string> {
+	const section = text.split("\n## Card text\n")[1]?.split("\n## ")[0] ?? "";
+	return new Map(section.split("\n### ").slice(1).map((block) => {
+		const [head, ...rest] = block.split("\n");
+		return [head!.trim(), rest.filter((line) => line.startsWith(">")).map((line) => line.replace(/^> ?/, "")).join("\n")];
+	}));
+}
