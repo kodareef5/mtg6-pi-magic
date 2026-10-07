@@ -294,6 +294,6 @@ remained narrow. Generated coverage and post-rollback recovery remain unproven.
 The [exact-pair catalog experiment](history/2026-10-07-block-pairs.md) produced
 one binding pass, one failure and one inconclusive preparation.
 No physical expansion followed; the production catalog remains unchanged.
-The next [recognition-transfer diagnostic](history/2026-10-07-recognition-transfer.md)
-tests whether checked alternatives survive ordinary plan writing before any
-candidate generator is built. It supplies lines and measures no search strength.
+The [recognition-transfer diagnostic](history/2026-10-07-recognition-transfer.md)
+stopped at recognition: two of three selections named winning supplied lines.
+No transfer or physical expansion followed; production remains unchanged.

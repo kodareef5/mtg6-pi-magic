@@ -110,3 +110,49 @@ and the optional hold are graded under the rule above, fixed before inference.
 
 Types, all 179 tests and all 43 saved-position preflights pass. Both diagnostic
 arms also pass their offline CLI preflight. No live call preceded this record.
+
+## Recognition result at `4226596`
+
+Three calls ran from the clean experimental commit. Every first request and
+setting matched its frozen rotation exactly, after removing message timestamps.
+All three submissions were valid IDs on the first reply. The manual outcome
+check failed the declared recognition gate:
+
+| Run | Selected ID | Candidate | Scoped result |
+| --- | --- | --- | --- |
+| 0 | B | 1: Smaug, Challenger, three attacks | Green at 0 |
+| 1 | C | 3: Smaug alone | Green at 2 |
+| 2 | D | 1: Smaug, Challenger, three attacks | Green at 0 |
+
+The runner printed PASS for each accepted ID. That reports protocol health;
+only two selections named winning alternatives. Both chose candidate 1; candidate
+0, which preserves Sanctuary for attacking, was never selected. Three calls do
+not estimate a success rate or establish a preference. One miss is enough to
+stop this declared gate. No transfer calls or physical
+continuations followed. Transfer preservation remains untested.
+
+The three calls used 73,353 input tokens and 51 output tokens, with no reported
+cache or reasoning tokens. Reported reasoning is not evidence about internal
+computation. Request time was 5.285 seconds, whole sessions totaled 5.313 seconds,
+and catalog cost was $0.0073608. Usage was returned for all calls; none failed,
+was cancelled or truncated. Raw replies contain only IDs, so they provide no
+explanation for the nonwinning choice. The unchanged roster was Luna low.
+
+The historical six-of-six screen is not an identical control. It also supplied
+current facts, the brief, card texts and checked alternatives, but omitted the
+production base, base problems, bindings, action catalog and examples fields.
+It used different instructions and a 256-token ceiling, versus 4,000 here.
+The old tool request used 19,500 input tokens; each new request used 24,451.
+Several facts and contracts changed between revisions. This result cannot
+attribute the miss to request size, a particular field or the output schema.
+
+The bounded conclusion is that supplied-choice recognition did not meet the
+required reliability in this production fact packet. It provides no evidence
+about whether an ordinary plan would preserve a correctly selected line. No
+candidate generator, production review round, default change or full game is
+justified by this result. Evidence is saved under
+`.pi/resume-20261007/recognition-transfer/recognize/`, including exact calls,
+source revision, accepted IDs, rotation mapping, usage and request parity.
+
+Both committee reviewers independently checked the rotations, request parity and
+accounting, and agreed to stop. The overall gameplay goal remains unfinished.
