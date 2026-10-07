@@ -97,8 +97,8 @@ under `.pi/resume-20261007/brief-content/`.
 Types, all 179 invariants and 43 saved-position preflights pass. The focused
 isolation check preserves all base fields except objective, guidance and phases;
 it also covers wrong deck order, failed preparation and inherited tactical work.
-Both reviewers cleared the runner and declared gate. Real requests must still be
-frozen and compared after the ordinary pregame runs finish, before planning.
+Both reviewers cleared the runner and declared gate. The subsequent real-request
+freeze and provenance review passed before planning.
 
 ## Frozen pregame results
 
@@ -129,10 +129,9 @@ only brief plus base objective, guidance and phases leaves identical facts,
 scope and commitments. The parity record does not exclude the whole base.
 Both fixtures naturally start from their pregame defaults.
 
-The blocked batch will still complete the carried and A sessions and record
-B's three slots as unresolved without inference. It cannot meet the declared
-two-brief gate, so there will be no upkeep, physical or full-game expansion.
-These preparation failures do not establish worse tactical content in B.
+The blocked batch completed the carried and A sessions and recorded B's three
+slots as unresolved without inference. It did not meet the declared two-brief
+gate. These preparation failures do not establish worse tactical content in B.
 
 The benchmark deliberately excludes gapped preparations. Production instead
 retains the analyst gap and can use the synthesized brief; it does not refuse
@@ -140,3 +139,75 @@ these outputs as missing briefs. This stage compares complete briefs only.
 Normal-load pregame timeout measurement remains required before a full-game gate.
 With B unresolved, A's result can neither estimate variation between complete
 briefs nor authorize expansion, even if its construction improves.
+
+## Blocked-position result
+
+The nine slots ran at clean `429d42b`, in the declared rotating order. All six
+real sessions' first requests and settings match the freeze exactly after
+removing message timestamps. B's slots match the frozen preparation error and
+made no calls. No request or brief was revised after seeing a result.
+
+| Brief | Accepted plans | Winning commitments | Unresolved slots |
+| --- | --- | --- | --- |
+| Carried | 3 | 0 | 0 |
+| A Red | 3 | 0 | 0 |
+| B Red | 0 | Not tested | 3 |
+
+These are construction grades against the visible 8/10 Explorer, with Green at
+6 life and no intervening responses. They are not physical outcomes. Explorer
+is untapped and can block; its summoning sickness does not prevent blocking.
+
+| Brief/run | Accepted commitment | Visible counterexample or contradiction |
+| --- | --- | --- |
+| Carried 0 | Play Mountain, animate Sanctuary, attack Kellan and the already animated Sanctuary | Explorer blocks Kellan; Sanctuary deals 3. The objective claims guaranteed lethal while the delivered blocker policy acknowledges Green survives at 3. |
+| Carried 1 | Play Mountain, cast Smaug, attack Smaug alone | Smaug deals 4; its trigger deals 0 with no Treasures. Opponent-turn policies invent trample and contradict one another about blocking. |
+| Carried 2 | Attack Kellan alone | Explorer blocks for zero player damage. Both guidance and the attack phase falsely say sickness prevents that block. |
+| A 0 | Play Mountain, cast Claw and Challenger, attack Kellan alone | Explorer blocks Kellan. Challenger gets no attack; Sanctuary stays back. Guidance calls Explorer tapped while also acknowledging it can block. |
+| A 1 | Play Mountain, cast Smaug, attack Kellan and Sanctuary | Smaug gets no attack despite haste. Its payment purpose taps both Sanctuaries, including the selected attacker. Even preserving Sanctuary would yield only 3 past Explorer. |
+| A 2 | Attack Kellan alone | Explorer blocks for zero player damage. Guidance and the attack phase invent the absence of a blocker. |
+
+A 1 also miscounts sources: the land play supplies six, and Smaug spends four,
+leaving two. The forecast finds a payable example that preserves the animated
+Sanctuary, but that witness neither overrides the conflicting payment purpose
+nor supplies Smaug's omitted attack. Carried 1's authored payment can preserve
+a Sanctuary although its advisory witness spends both. Neither discrepancy is
+evidence of pilot behavior; no pilot was called.
+
+Some omissions follow spending on the necessary pieces. A 0 casts Claw and
+Challenger, but leaves out Challenger and Sanctuary; those attackers together
+with Kellan and Claw's Lizard-attack trigger could deal six through a Kellan
+block. A 1 casts Smaug then forbids counting its same-turn damage. Carried 0's
+animation source is unbound between the two Sanctuaries; its purpose promises
+an additional attacker, but only the existing animated Sanctuary has an attack
+step. These are incomplete commitments alongside the false strategic choices,
+not proof that each writer found a full winning line internally.
+
+The false haste and conflicting payment instructions in A 1 are step purposes,
+so they would reach Jev at announcement. Carried 1's invented trample and both
+run-2 plans' false blocker claims also appear in delivered policies. A 0's
+incorrect tapped claim is in general guidance; its own combat script correctly
+states that a blocked Kellan deals no player damage. Keep those channels distinct.
+
+Five sessions accepted their first submission. A 0 first omitted a bound on
+`holds[0].releaseWhen`; the next submission was accepted with an always-false
+release condition. This is one syntax refusal, not an infrastructure failure.
+No session used a lookup, exhausted its budget or hit the output ceiling.
+
+| Brief | Calls | Input including cache | Cached input | Output | Call time | Whole sessions | Cost |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Carried | 3 | 82,584 | 81,408 | 2,623 | 46.113 s | 46.200 s | $0.00224318 |
+| A Red | 4 | 106,148 | 78,336 | 3,352 | 27.377 s | 27.466 s | $0.00524056 |
+
+All seven calls used Luna low and reported usage: 188,732 input tokens including
+159,744 cached, 5,975 output, 73.490 seconds of call time and $0.00748374.
+Reported reasoning was zero; that does not describe inaccessible computation.
+These planning costs are separate from the pregame costs above.
+
+Stop this comparison without upkeep, physical continuation, brief regeneration
+or default adoption. A's replacement content did not fix this construction
+failure. B's unresolved preparation leaves the intended comparison between two
+complete fresh briefs untested. The result does not rule out other pregame
+content, prove a staging mechanism or establish general playing strength.
+The exact requests, plans, accounting and manual counterexamples are in
+`.pi/resume-20261007/brief-content/blocked/`; `audit.json` records request parity
+and the six separate plan reviews.
