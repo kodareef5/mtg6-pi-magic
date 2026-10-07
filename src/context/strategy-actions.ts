@@ -3,7 +3,7 @@
 import type { Frame, Option } from "../core/types.ts";
 import type { Plan, PlanOption } from "../core/language.ts";
 import type { SeenObject } from "../core/work.ts";
-import { matches, select } from "../core/query.ts";
+import { matches, reached, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
@@ -115,7 +115,7 @@ export function bindingFacts(frame: Frame, base: Plan, nextTurn = false) {
 				fact: "Not offered at this decision. An earlier prerequisite may still enable it, but a stale payment or zone incarnation will not become valid. Use a prepared action for the intended cast." }];
 		}),
 		holds: (base.holds ?? []).map((hold) => ({ purpose: hold.purpose,
-			releasedNow: !!hold.releaseWhen && holds(scope, hold.releaseWhen), selected: select(hold.objects, frame).map(sourceFact) })),
+			releasedNow: !!hold.releaseWhen && holds(scope, hold.releaseWhen) || !!hold.releaseAt && reached(hold.releaseAt, frame), selected: select(hold.objects, frame).map(sourceFact) })),
 	};
 }
 

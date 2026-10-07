@@ -33,8 +33,16 @@ function selectorAliases(value: unknown, condition = false): unknown {
 function writerChanges(value: unknown): unknown {
 	const changed = lifted(selectorAliases(value));
 	if (!changed || typeof changed !== "object" || Array.isArray(changed)) return changed;
-	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key,
+	// A hold released by a window rather than a visible fact moves to releaseAt.
+	const windowKeys = ["active", "step", "phase", "fromTurn", "throughTurn"];
+	// Object queries say self where conditions accept you or self; the writer uses both.
+	const query = (objects: unknown) => objects && typeof objects === "object" && (objects as { controller?: unknown }).controller === "you" ? { ...objects, controller: "self" } : objects;
+	const holdsFixed = (list: unknown) => Array.isArray(list) ? list.map((hold) => hold?.objects ? { ...hold, objects: query(hold.objects) } : hold).map((one) => one?.releaseWhen && typeof one.releaseWhen === "object" && !Array.isArray(one.releaseWhen) &&
+		Object.keys(one.releaseWhen).length && Object.keys(one.releaseWhen).every((key) => windowKeys.includes(key))
+		? (({ releaseWhen, ...rest }) => ({ ...rest, releaseAt: releaseWhen }))(one) : one) : list;
+	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key, key === "holds" ? holdsFixed(list) :
 		["steps", "may", "phases", "askWhen"].includes(key) && Array.isArray(list) ? list.map((one) => {
+			if (one?.action?.objects) one = { ...one, action: { ...one.action, objects: query(one.action.objects) } };
 			if (!one?.when || typeof one.when !== "object" || Array.isArray(one.when)) return one;
 			const { step, ...when } = one.when;
 			if (step === "any") return { ...one, when };

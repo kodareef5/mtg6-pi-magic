@@ -9,7 +9,7 @@
  * Past 150 lines to keep matching, resource marks and execution credit together.
  */
 import { holds as condition, viewWorld, type Scope } from "./selectors.ts";
-import { currentPlan, matches, select } from "./query.ts";
+import { currentPlan, matches, reached, select } from "./query.ts";
 import { procedureOptions, type ProcedureOption } from "./procedures.ts";
 import type { Plan, PlanOption, Procedure } from "./language.ts";
 import type { Frame, Option } from "./types.ts";
@@ -82,7 +82,7 @@ export function planState(frame: Frame): PlanState | null {
 	const done = new Set(frame.view.done ?? []);
 	const open = (option: PlanOption) => matches(option.when, frame) && (!option.if || condition(scope, option.if));
 	const procedures: ProcedureOption[] = [];
-	const held = (plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
+	const held = (plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, frame)))
 		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);

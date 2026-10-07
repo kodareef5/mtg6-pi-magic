@@ -2,6 +2,7 @@
 import type { Frame, SeatId, Window } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import type { Query, When } from "./work-language.ts";
+import { STEPS, TURN, type Step } from "./steps.ts";
 
 /** Tactical intent expires together, including holds without their own window. */
 export function currentPlan(frame: Frame) {
@@ -17,6 +18,16 @@ export function matches(when: When, frame: { seat: SeatId; view: { window: Windo
 		(!when.step || when.step === at.step) && (!when.phase || when.phase === at.phase) &&
 		(when.fromTurn === undefined || at.turn >= when.fromTurn) &&
 		(when.throughTurn === undefined || at.turn <= when.throughTurn);
+}
+
+/** A window this turn has reached: the named side's turn at its step or phase or any later step. Released holds use it. */
+export function reached(when: When, frame: { seat: SeatId; view: { window: Window } }): boolean {
+	const at = frame.view.window;
+	if (at.kind !== "turn" || when.throughTurn !== undefined && at.turn > when.throughTurn) return at.kind === "turn";
+	if (when.fromTurn !== undefined && at.turn < when.fromTurn) return false;
+	if (when.active && when.active !== "any" && (when.active === "self") !== (at.active === frame.seat)) return false;
+	const first = when.step ?? TURN.find((step) => STEPS[step].phase === when.phase);
+	return !first || TURN.indexOf(at.step as Step) >= TURN.indexOf(first);
 }
 
 /** Queries operate only on already projected objects. Missing names stay missing. */

@@ -24,7 +24,7 @@ import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget, manaBudget, paymentForecast } from "../src/core/budget.ts";
 import { activate, printedCast, procedureOptions } from "../src/core/procedures.ts";
-import { select } from "../src/core/query.ts";
+import { select, reached } from "../src/core/query.ts";
 import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
@@ -1792,4 +1792,20 @@ test("a failed preparation falls back once to current information and failed pla
  await assert.rejects(seat.answer(workFrame(table, 0)), /writer failed/);
  assert.equal(written, 1); assert.equal(waited[0]!.failed, true);
  await seat.close();
+});
+
+test("a hold can end at a window, and object queries accept the writer's you", () => {
+	const base: Plan = { objective: "o", guidance: "g", steps: [] };
+	const changed = changedPlan(base, { holds: [{ objects: { zones: ["battlefield"], controller: "you", card: "Mountain" }, purpose: "Burst after blocks", releaseWhen: { active: "self", step: "declare-blockers" } }],
+		steps: [{ label: "Attack", when: { active: "self", step: "declare-attackers" }, action: { prefix: "attack:", objects: { zones: ["battlefield"], controller: "you" } } }] }, {});
+	assert.deepEqual(changed.holds![0]!.releaseAt, { active: "self", step: "declare-blockers" }, "a window under releaseWhen becomes releaseAt");
+	assert.equal(changed.holds![0]!.releaseWhen, undefined);
+	assert.equal(changed.holds![0]!.objects.controller, "self");
+	assert.equal("action" in changed.steps[0]! && "objects" in changed.steps[0]!.action ? changed.steps[0]!.action.objects!.controller : undefined, "self");
+	const at = (active: number, step: string) => ({ seat: 0, view: { window: { kind: "turn" as const, turn: 3, active, step: step as never, phase: "combat" as never } } });
+	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(0, "declare-attackers")), false, "before its step the hold stands");
+	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(0, "declare-blockers")), true);
+	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(0, "end")), true, "any later step this turn has reached it");
+	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(1, "end")), false, "the other seat's turn is not the named window");
+	assert.equal(reached({ active: "self", phase: "combat" }, at(0, "begin-combat")), true, "a phase begins at its first step");
 });

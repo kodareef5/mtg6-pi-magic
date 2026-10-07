@@ -26,7 +26,7 @@ import { symbols } from "./announce.ts";
 import { fundings, sick, sources, type Funding, type Price } from "./funding.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, playable } from "./permits.ts";
-import { select } from "./query.ts";
+import { reached, select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
 import { intrinsic } from "./characteristics.ts";
 import { permanentSpell } from "./printed.ts";
@@ -101,7 +101,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	// Use the same current release condition as execution. Future releases
 	// caused by resolving effects are outside this resource-only forecast.
 	const scope = { world: viewWorld(hypothetical.view), controller: frame.seat };
-	const held = new Set((plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
+	const held = new Set((plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, hypothetical)))
 		.flatMap((hold) => select(hold.objects, hypothetical).map((object) => object.id)));
 	let plays = allowance(viewWorld(hypothetical.view), frame.seat).lands - (now ? frame.view.landsPlayed ?? 0 : 0);
 	let honest = true;

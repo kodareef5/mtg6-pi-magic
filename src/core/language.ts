@@ -343,7 +343,9 @@ export const PlanDefs = { ...Defs,
 		may: Type.Optional(Type.Array(Type.Ref("Option"))),
 		/** A stop, watched at every decision or only in its window. */
 		askWhen: Type.Optional(Type.Array(object({ label: text, when: Type.Optional(WhenSchema), if: Type.Ref("Condition") }))),
-		holds: Type.Optional(Type.Array(object({ objects: QuerySchema, purpose: text, releaseWhen: Type.Optional(Type.Ref("Condition")) }))),
+		holds: Type.Optional(Type.Array(object({ objects: QuerySchema, purpose: text, releaseWhen: Type.Optional(Type.Ref("Condition")),
+			/** Released once this window is reached in the turn: its step or phase, or any later step. */
+			releaseAt: Type.Optional(WhenSchema) }))),
 		/**
 		 * The pilot's script for a window, read while it is open: the goal, the decisions in it (what to do and why), and the
 		 * few situations that justify asking strategy again. Anything else in the window is normal play.
