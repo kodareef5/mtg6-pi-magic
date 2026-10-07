@@ -33,6 +33,7 @@ import { candidatePlan } from "./benchmark-candidates.ts";
 import { commitmentReceipt } from "./benchmark-receipt.ts";
 import { checkedReceipt, freezeSource, repairPlan, type RepairSource, type ReviewedReceipt } from "./benchmark-repair.ts";
 import { suppliedChoices, transferPlan, type SuppliedLines } from "./benchmark-transfer.ts";
+import { readBriefs, freshBriefBase, comparisonBrief } from "./benchmark-briefs.ts";
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
 	pilotPolicy?: string; suppliedLines?: string; prepared?: { file: string; name: string } };
@@ -40,8 +41,13 @@ const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/po
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" }, arm: { type: "string", default: "production" },
-	"repair-source": { type: "string" }, receipts: { type: "string" } } });
-if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs", "recognize", "transfer"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
+	"repair-source": { type: "string" }, receipts: { type: "string" }, "brief-source": { type: "string", multiple: true } } });
+if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs", "recognize", "transfer", "brief-content"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
+const comparingBriefs = values.arm === "brief-content";
+if (comparingBriefs ? values["brief-source"]?.length !== 2 || values.play || values.answers || values.review : !!values["brief-source"])
+	throw new Error("Brief comparison requires exactly two --brief-source files, without --play, --answers or --review.");
+const briefSources = (values["brief-source"] ?? []).map((file) => readBriefs(file, matchup.decks));
+if (briefSources.length && briefSources[0]!.hash === briefSources[1]!.hash) throw new Error("Supply two distinct ordinary pregame runs.");
 const repairing = values.arm!.startsWith("receipt-");
 const transferring = values.arm === "recognize" || values.arm === "transfer";
 if (repairing !== !!values["repair-source"] || repairing !== !!values.receipts || repairing && values.answers)
@@ -60,6 +66,7 @@ if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.t
 if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
 if (values.arm === "block-pairs" && selected.some((one) => !["prepare", "plan", "amend", "repair"].includes(one.task))) throw new Error("Block-pair arms require planning cases.");
 if (repairing && selected.some((one) => !["plan", "amend", "repair"].includes(one.task))) throw new Error("Receipt arms require current-position planning cases.");
+if (comparingBriefs && selected.some((one) => one.task !== "plan")) throw new Error("Brief comparison requires current-position planning cases.");
 if (transferring && selected.some((one) => one.task !== "plan" || !one.suppliedLines)) throw new Error("Recognition and transfer require a current planning case with supplied lines.");
 if (transferring && values.play && (values.arm === "recognize" || !values.answers)) throw new Error("Transfer play requires manually reviewed --answers; recognition never plays.");
 const repairSource = repairing ? JSON.parse(readFileSync(values["repair-source"]!, "utf8")) as RepairSource : undefined;
@@ -82,6 +89,7 @@ const positions = selected.map((one) => {
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
+	if (comparingBriefs) freshBriefBase(frame);
 	if (one.task === "pilot") frame.view = project(saved.table, one.seat, sinceDecision(saved.table, one.seat));
 	// Supplied coverage changes only plan content, preserving the prefix's progress and physical facts.
 	if (one.pilotPolicy) {
@@ -105,6 +113,7 @@ const positions = selected.map((one) => {
 	const state = one.task === "pilot" && planState(frame);
 	if (state && frame.decision) frame.decision = { ...frame.decision, options: annotate(frame.decision.options, state) };
 	const brief = saved.prepared.find((entry) => entry.seat === one.seat)?.made as Brief | undefined;
+	if (comparingBriefs && !brief) throw new Error("Brief comparison needs the recorded carried control brief.");
 	const preparation = one.prepared && JSON.parse(readFileSync(one.prepared.file, "utf8"));
 	const prior = preparation?.results.find((row: { name: string }) => row.name === one.prepared!.name) as { version: number; seat: number; plan: Plan } | undefined;
 	if (one.task === "amend" && (!prior?.plan || prior.seat !== one.seat || preparation.source !== path || prior.version >= one.version)) throw new Error(`${one.id}: preparation does not match this position.`);
@@ -151,8 +160,10 @@ const inference = traceInference({ classify: (...args) => runtime.classify(...ar
 for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, supplied, table } of positions) {
 	// Alternate order so one model does not always receive the earlier request.
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
-	const pair = values.arm === "both" ? ["one", "two"] : values.arm === "examples-paired" ? ["production", "examples-lookup"] : values.arm === "receipt-paired" ? ["receipt-control", "receipt-consequence"] : [values.arm!];
-	for (const arm of iteration % 2 ? [...pair].reverse() : pair) {
+	const pair = comparingBriefs ? ["production", "brief-1", "brief-2"] : values.arm === "both" ? ["one", "two"] : values.arm === "examples-paired" ? ["production", "examples-lookup"] : values.arm === "receipt-paired" ? ["receipt-control", "receipt-consequence"] : [values.arm!];
+	const order = comparingBriefs ? [...pair.slice(iteration % pair.length), ...pair.slice(0, iteration % pair.length)] : iteration % 2 ? [...pair].reverse() : pair;
+	for (const arm of order) {
+		const briefSource = arm.startsWith("brief-") ? briefSources[Number(arm.slice(6)) - 1] : undefined;
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
@@ -165,7 +176,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
 				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
 			} else if (one.task !== "pilot") {
-				const context = { brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}), ...(arm === "block-pairs" ? { blockPairs: true } : {}) };
+				const context = { brief: briefSource ? comparisonBrief(briefSource, frame) : brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}), ...(arm === "block-pairs" ? { blockPairs: true } : {}) };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
 					answer = { plan: frame.view.work.plan, fromPrefix: true };
@@ -195,8 +206,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					checks = checkPlan(plan, one, frame);
 					resources = paymentForecast(frame, plan);
 					commitment = commitmentReceipt(frame, plan);
-					// Transfer keeps historical flags, but acceptance is independent of a particular attack set.
-					passed = arm === "transfer" || checks.passed;
+					// These comparisons keep historical flags; acceptance does not require one particular attack set.
+					passed = comparingBriefs || arm === "transfer" || checks.passed;
 					decisionMs = Date.now() - began;
 					if (values.play) {
 						continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
@@ -238,10 +249,10 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 		const calls = [...measured.spent().slice(startCall), ...(continuation?.result.calls ?? [])];
 		spent.push(...calls);
 		const entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
-			arm, ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
+			arm, ...(briefSource ? { briefSource: { file: briefSource.file, hash: briefSource.hash } } : {}), ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
 			...(commitment ? { commitment } : {}), ...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
 		results.push(entry); console.log(`${one.id} ${pilot} ${arm} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
-		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, results, calls: spent }, null, 2) + "\n");
+		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, ...(comparingBriefs ? { briefSources: briefSources.map(({ file, hash, model, elapsedMs }) => ({ file, hash, model, elapsedMs })) } : {}), results, calls: spent }, null, 2) + "\n");
 	}
 	}
 }

@@ -297,3 +297,7 @@ No physical expansion followed; the production catalog remains unchanged.
 The [recognition-transfer diagnostic](history/2026-10-07-recognition-transfer.md)
 stopped at recognition: two of three selections named winning supplied lines.
 No transfer or physical expansion followed; production remains unchanged.
+
+The [blind pregame content comparison](history/2026-10-07-brief-content.md) tests
+two ordinary fresh briefs against the carried brief before adding a new planning
+contract. Its staged construction and execution gates remain open.

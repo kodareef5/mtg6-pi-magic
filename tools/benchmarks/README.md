@@ -21,6 +21,11 @@ review three recognition results before three transfers, then review transfers
 before any play. Transfer play requires `--answers`; recognition cannot play.
 Witness plans and private outcome checks remain outside model input. These
 controls measure supplied-choice preservation, not candidate generation.
+`--arm brief-content --brief-source <A.briefs.json> --brief-source <B.briefs.json>`
+compares two ordinary baseline pregame outputs with the carried brief, rotating
+order across repetitions. It requires a naturally fresh `plan` case and refuses
+physical play. Failed preparations remain unresolved. Only advice and its initial
+plan defaults may change; see the [staged gate](../../docs/history/2026-10-07-brief-content.md).
 `red-before-upkeep` starts at decision 219, Green's turn-9 untap, before Red's
 background job starts. Run it with `--live --play --through 10` to measure early
 acceptance and changed-board amendment. Report generation, execution and

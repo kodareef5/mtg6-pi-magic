@@ -32,7 +32,8 @@ import { candidateCatalog, candidatePlan, compileCandidate } from "../tools/benc
 import { checkedReceipt, freezeSource, repairPlan, type Counterexample } from "../tools/benchmark-repair.ts";
 import { commitmentReceipt } from "../tools/benchmark-receipt.ts";
 import { projectionHash, suppliedChoices, transferPlan, type SuppliedLines } from "../tools/benchmark-transfer.ts";
-import { matchTable } from "../tools/matchup-fixture.ts";
+import { matchTable, matchup as pinnedMatchup } from "../tools/matchup-fixture.ts";
+import { readBriefs, freshBriefBase, comparisonBrief } from "../tools/benchmark-briefs.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -45,7 +46,7 @@ import { reasoner, type Stream } from "../src/context/reason.ts";
 import { seat as seatTable, run } from "../src/context/sit.ts";
 import { CEILING, tally } from "../src/context/spend.ts";
 import { focus } from "../src/context/packet.ts";
-import { emptyBrief } from "../src/context/brief.ts";
+import { emptyBrief, type Brief } from "../src/context/brief.ts";
 import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
@@ -685,6 +686,42 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 		assert.equal(compared[1]![1].system, production[0]![1].system);
 		assert.deepEqual(compared[1]![2].submit.parameters, production[0]![2].submit.parameters);
 		assert.deepEqual(at, before, "neither diagnostic task changes the position");
+		// A fresh brief changes advice through the normal reader, never the board,
+		// equipment, action vocabulary or submission contract.
+		freshBriefBase(at);
+		const carriedBrief = loaded.prepared.find((one) => one.seat === 1)!.made as Brief;
+		const newBrief = structuredClone(carriedBrief);
+		newBrief.objective = "Fresh pregame objective for this offline isolation check.";
+		newBrief.matchup = "Fresh matchup note.";
+		newBrief.steps = { ...newBrief.steps, "declare-attackers": { own: "Fresh attack policy." } };
+		newBrief.cards = { ...newBrief.cards, "Smaug the Magnificent": "Fresh visible card note." };
+		newBrief.policies!.combat.priorities = ["Fresh combat priority."];
+		const briefPath = join(temp, "briefs.json");
+		writeFileSync(briefPath, JSON.stringify({ decks: pinnedMatchup.decks, model: "gpt-6.1-sol:high", elapsedMs: 0, briefs: [newBrief] }));
+		const source = readBriefs(briefPath, pinnedMatchup.decks);
+		assert.equal(source.hash.length, 64);
+		assert.deepEqual(comparisonBrief(source, at), newBrief);
+		assert.throws(() => readBriefs(briefPath, [...pinnedMatchup.decks].reverse()), /seat order/);
+		assert.throws(() => comparisonBrief({ ...source, briefs: [{ seat: 1, failed: "recorded analyst failure" }] }, at), /Unresolved pregame/);
+		assert.throws(() => comparisonBrief({ ...source, briefs: [{ ...newBrief, gaps: ["missing analyst"] }] }, at), /Unresolved pregame/);
+		const inherited = structuredClone(at);
+		inherited.view.work!.plan = { ...initialPlan(carriedBrief), throughTurn: 15 };
+		assert.throws(() => freshBriefBase(inherited), /naturally fresh/);
+		const briefCalls: Parameters<import("../src/context/reason.ts").Reasoner["work"]>[] = [];
+		for (const brief of [carriedBrief, comparisonBrief(source, at)]) await planWork(at, { brief }, { async work(...args) {
+			briefCalls.push(args); assert.equal(args[2].submit.check(witnesses.witnesses[0]!.changes), null); return witnesses.witnesses[0]!.changes;
+		} });
+		const briefFacts = briefCalls.map((one) => JSON.parse(one[1].user));
+		assert.notDeepEqual(briefFacts[0].brief, briefFacts[1].brief);
+		assert.notDeepEqual(briefFacts[0].base, briefFacts[1].base);
+		for (const one of briefFacts) {
+			delete one.brief;
+			for (const field of ["objective", "guidance", "phases"]) delete one.base[field];
+		}
+		assert.deepEqual(briefFacts[0], briefFacts[1], "all non-brief facts and action keys remain identical");
+		assert.deepEqual({ ...briefCalls[0]![1], user: "" }, { ...briefCalls[1]![1], user: "" });
+		assert.deepEqual(briefCalls[0]![2].submit.parameters, briefCalls[1]![2].submit.parameters);
+		assert.deepEqual(at, before);
 		for (const witness of witnesses.witnesses) {
 			const made = await planWork(at, {}, { async work(_about, _prompt, tools) { assert.equal(tools.submit.check(witness.changes), null); return witness.changes; } });
 			const plan = made.tools.find((one) => one.do === "plan.put"); assert.ok(plan?.do === "plan.put");
