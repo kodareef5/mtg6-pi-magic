@@ -1818,29 +1818,32 @@ test("a hold can end at a window, and object queries accept the writer's you", (
 	assert.equal(reached({ active: "self", phase: "combat" }, at(0, "begin-combat")), true, "a phase begins at its first step");
 });
 
-test("the survey asks a focused question per hand card and creature in parallel, and the writer rolls them up", async () => {
+test("focused questions rate findings, outlooks propose lines in parallel, and the coordinator weighs them", async () => {
 	const table = matchup("survey");
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest");
 	place(table, 0, "hand", "Mossborn Hydra", "Forest");
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const before = structuredClone(table);
-	const questions: string[] = [], writer: string[] = [];
+	const questions: string[] = [], outlooks: string[] = [], writer: string[] = [], coordinated: string[] = [];
 	const stream: Stream = (_model, request) => {
-		if (!request.tools?.length) { questions.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "text", text: "Castable for 3: 2 + 1 = 3 sources." }], stopReason: "stop" }) }; }
-		writer.push(JSON.stringify(request.messages));
-		return { result: async () => ({ content: [{ type: "toolCall", id: "w", name: "submit", arguments: { assessment: { corrections: "none", win: "No attackers.", priorities: ["Develop"] },
-			steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
+		const submit = request.tools?.find((one) => one.name === "submit")?.parameters as { properties: Record<string, unknown> } | undefined;
+		const reply = (args: Record<string, unknown>) => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: args }], stopReason: "toolUse" }) });
+		if (submit && "findings" in submit.properties) { questions.push(JSON.stringify(request.messages)); return reply({ findings: [{ kind: "opportunity", what: "Hydra: 2 + 1 = 3 sources pay {2}{G}.", relevance: questions.length % 5 + 1, when: "now" }] }); }
+		if (submit && "line" in submit.properties) { outlooks.push(request.systemPrompt!); return reply({ line: ["Play Forest", "Cast Mossborn Hydra"], hold: "none", opponentTurn: "Block with Hydra", risks: "none", outcome: "20 to 20", confidence: 3 }); }
+		writer.push(JSON.stringify(request.messages)); coordinated.push(JSON.stringify(submit));
+		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
+			steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] });
 	};
-	const submitted: string[] = [];
-	const wrapped: Stream = (model, request) => { if (request.tools?.length) submitted.push(JSON.stringify(request.tools.find((one) => one.name === "submit")!.parameters)); return stream(model, request); };
-	await planWork(workFrame(table, 0), { survey: true }, reasoner({ role: "strategy", stream: wrapped, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	await planWork(workFrame(table, 0), { survey: true }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	const hand = new Set(cardsIn(table, "hand", 0).map((one) => one.card));
 	for (const card of hand) assert.ok(questions.some((one) => one.includes(`Your card ${card}.`)), `a focused question for ${card}`);
-	for (const kind of ["The opponent:", "Their next attack:", "Your whole attack this turn:", "Your battlefield abilities"]) assert.ok(questions.some((one) => one.includes(kind)));
+	for (const kind of ["The opponent:", "Their next attack:", "Your whole attack this turn:", "Orders of operations", "For each opposing creature", "Your battlefield abilities"]) assert.ok(questions.some((one) => one.includes(kind)));
+	for (const outlook of ["expert defender", "aggressive punisher", "long-horizon planner", "sequencing specialist", "the opponent looking", "removal analyst"]) assert.ok(outlooks.some((one) => one.includes(outlook)), outlook);
 	const sent = JSON.parse(JSON.parse(writer[0]!)[0].content);
 	assert.ok(Object.keys(sent).indexOf("survey") < Object.keys(sent).indexOf("brief") || !("brief" in sent), "the survey precedes the brief");
-	assert.equal(Object.keys(sent.survey.hand).length, hand.size);
-	assert.match(submitted[0]!, /corrections/, "the writer's assessment is the rollup when the survey is supplied");
+	assert.deepEqual(sent.survey.findings.map((one: { relevance: number }) => one.relevance), [...sent.survey.findings.map((one: { relevance: number }) => one.relevance)].sort((a, b) => b - a), "findings arrive ranked by relevance");
+	assert.equal(Object.keys(sent.survey.reports).length, 6);
+	assert.match(coordinated[0]!, /adopted/, "the coordinator records which reports it adopts");
 	assert.deepEqual(table, before, "asking questions changes nothing on the table");
 });

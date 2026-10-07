@@ -18,7 +18,8 @@ import { budget, paymentForecast } from "../core/budget.ts";
 import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
-import { surveyPosition } from "./survey.ts";
+import { compactFacts, surveyPosition } from "./survey.ts";
+import { perspectiveReports } from "./perspectives.ts";
 import { combatLookup } from "./strategy-combat.ts";
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
@@ -90,10 +91,11 @@ const ASSESSMENT = { type: "object", additionalProperties: false, required: ["ha
 	} };
 
 /** With the focused survey supplied, the writer's own working is only the rollup. */
-const ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "win", "priorities"],
-	description: "Write first. Roll the survey up: it answers focused questions about each hand card, your creatures, the opponent, their next attack, your whole attack and other zones. Jev never reads this.",
+const ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "adopted", "win", "priorities"],
+	description: "Write first. You are the coordinator: survey.findings rank threats and opportunities from focused questions, and survey.reports propose whole lines from a defender, a punisher, a long-horizon planner, a sequencer, the opponent's view and a removal analyst. Both can be wrong. Jev never reads this.",
 	properties: {
-		corrections: text("Survey statements that contradict the facts or the card text, corrected, or none."),
+		corrections: text("Findings or report claims that contradict the facts or the card text, corrected, or none."),
+		adopted: text("Which reports or parts of them you adopt and why, and which you reject. Prefer a line whose arithmetic you checked; merge only parts that fit the same mana and order."),
 		win: text("All your attackers together, castable haste included: total damage, minus the largest attacker each untapped opposing creature can block, plus burn, against their life. Write the sum. The winning line in order, or why not."),
 		priorities: { type: "array", items: { type: "string" }, description: "The opportunities from the survey, combinations and removal included, ranked by impact. The plan carries out the first ones." },
 	} };
@@ -190,7 +192,12 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const scope = response ? "Repair this response or combat decision and the affected remainder of the opponent's current turn. Do not write the next own turn's line: its scheduled preparation and draw amendment handle that. Keep unaffected phase policies; change the actions, holds and guidance needed for this decision." : task;
 	const resources = paymentForecast(frame, base);
 	const scoped = options.nextTurn ? "preparation" : response ? "response" : "turn";
-	const survey = context.survey && reasoner.think ? await surveyPosition(planningFrame(frame, scoped), !!options.nextTurn, { think: reasoner.think }, context.cards) : undefined;
+	// Two concurrent rounds before the writer: rated findings, then whole lines from several outlooks.
+	const planned = planningFrame(frame, scoped);
+	const findings = context.survey ? await surveyPosition(planned, !!options.nextTurn, reasoner, context.cards) : undefined;
+	const reported = findings ? await perspectiveReports(compactFacts(planned, !!options.nextTurn, context.cards), findings, reasoner) : undefined;
+	const survey = findings && reported ? { findings: findings.findings, reports: reported.reports,
+		...(findings.failed || reported.failed ? { failed: [...findings.failed ?? [], ...reported.failed ?? []] } : {}) } : undefined;
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: facts(frame, context, { base: planFacts(base), baseProblems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { optionalResponseFunding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn), actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}), ...(survey ? { survey } : {}), examples }, scoped),

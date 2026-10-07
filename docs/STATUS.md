@@ -33,8 +33,12 @@ for free text; decisions take about 50% longer. The pilot asks for help once
 per decision, and a response repair no longer restarts the background
 preparation. Before each strategy session, focused questions now run in
 parallel: one per hand card and per own creature, plus the opponent, their
-next attack, the whole attack, removal and other zones. The writer then rolls
-them up. On saved positions this raised lethal cases to 14/15 and attack
+next attack, the whole attack, removal and other zones. Their answers are rated
+findings (threat, opportunity, risk or resource, relevance 1-5), ranked and
+handed to six outlooks writing whole lines in parallel: defender, punisher,
+long-horizon planner, sequencer, the opponent's view and a removal analyst.
+The writer acts as coordinator: it records which reports it adopts and why,
+then writes the plan. On saved positions this raised lethal cases to 14/15 and attack
 pressure to 9/9, and halved median decision time to about 15 seconds, at
 about two to three times the strategy cost.
 
