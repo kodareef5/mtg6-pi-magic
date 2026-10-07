@@ -28,9 +28,8 @@ successful complete preparation. Never substitute an empty or carried brief.
 The carried briefs exactly match both seats in
 `.pi/next-version-20261005/scoped-pregame/Mono-Green-Landfall-vs-Mono-Red-Aggro-gpt-6-1-sol-high-1791246062582.briefs.json`.
 The eight initial analyst requests match run A's system prompts, schemas, deck
-facts and tasks after removing timestamps. Model and settings also match. Check
-synthesis separately once the new requests exist; generated findings themselves
-are expected to differ.
+facts and tasks after removing timestamps. Model and settings also match. Both new synthesis contracts also match the old system prompt, tool schemas,
+registered-list facts and settings. Their generated findings differ as expected.
 
 The ordinary command calls the seats A/B internally, while saved games use
 Green/Red. Check the written advice for names that depend on that difference;
@@ -100,3 +99,35 @@ isolation check preserves all base fields except objective, guidance and phases;
 it also covers wrong deck order, failed preparation and inherited tactical work.
 Both reviewers cleared the runner and declared gate. Real requests must still be
 frozen and compared after the ordinary pregame runs finish, before planning.
+
+## Frozen pregame results
+
+Both runs finished with failed analysts. A took 866.707 seconds and B took
+869.638 seconds. They ran concurrently, so these are not isolated single-game
+latency measurements. Only A's Red brief has no gaps. A Green, B Green and B Red
+each lost the matchup analyst after three 240-second request timeouts. Their
+syntheses preserve that failure; none is a complete replacement. No brief was
+regenerated or edited, and none uses seat-name aliases A/B in its advice.
+
+| Run | Calls | Failed | Usage reported | Input | Output | Reported cost |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | 18 | 4 | 14/18 | 77,417 | 45,660 | $0.5693604 |
+| B | 17 | 8 | 9/17 | 53,516 | 39,566 | $0.4851816 |
+
+All calls resolved to the baseline Sol high. Neither run reports pending,
+cancelled or truncated calls. Twelve failed calls lack usage and cost, so the
+reported $1.054542 total excludes those unknown amounts. Retried requests are
+retained in both traces. A/B are frozen by complete-file hashes
+`f6bf522a826802401e744e51482bcaef855052d904cf3c90b639aecb0a89c778`
+and `861fc62221f81a82412d1999dd1e31bd1b3130a52cea85d718e7537dc822df17`.
+
+The real request freeze contains carried and A requests for blocked and upkeep;
+B is explicitly unresolved. Contract and settings are identical, and removing
+only brief plus base objective, guidance and phases leaves identical facts,
+scope and commitments. The parity record does not exclude the whole base.
+Both fixtures naturally start from their pregame defaults.
+
+The blocked batch will still complete the carried and A sessions and record
+B's three slots as unresolved without inference. It cannot meet the declared
+two-brief gate, so there will be no upkeep, physical or full-game expansion.
+These preparation failures do not establish worse tactical content in B.
