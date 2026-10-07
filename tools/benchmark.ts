@@ -29,29 +29,13 @@ import type { Brief } from "../src/context/brief.ts";
 import { rule } from "../src/context/ruling.ts";
 import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
-import { candidatePlan } from "./benchmark-candidates.ts";
-import { commitmentReceipt } from "./benchmark-receipt.ts";
-import { checkedReceipt, freezeSource, repairPlan, type RepairSource, type ReviewedReceipt } from "./benchmark-repair.ts";
-import { suppliedChoices, transferPlan, type SuppliedLines } from "./benchmark-transfer.ts";
-import { readBriefs, freshBriefBase, comparisonBrief } from "./benchmark-briefs.ts";
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
-	pilotPolicy?: string; suppliedLines?: string; prepared?: { file: string; name: string } };
+	pilotPolicy?: string; prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
-	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" }, arm: { type: "string", default: "production" },
-	"repair-source": { type: "string" }, receipts: { type: "string" }, "brief-source": { type: "string", multiple: true } } });
-if (!["production", "one", "two", "both", "examples-lookup", "examples-paired", "receipt-control", "receipt-consequence", "receipt-paired", "block-pairs", "recognize", "transfer", "brief-content", "completion"].includes(values.arm!)) throw new Error("Unknown benchmark arm.");
-const comparingBriefs = values.arm === "brief-content";
-if (comparingBriefs ? values["brief-source"]?.length !== 2 || values.play || values.answers || values.review : !!values["brief-source"])
-	throw new Error("Brief comparison requires exactly two --brief-source files, without --play, --answers or --review.");
-const briefSources = (values["brief-source"] ?? []).map((file) => readBriefs(file, matchup.decks));
-if (briefSources.length && briefSources[0]!.hash === briefSources[1]!.hash) throw new Error("Supply two distinct ordinary pregame runs.");
-const repairing = values.arm!.startsWith("receipt-");
-const transferring = values.arm === "recognize" || values.arm === "transfer";
-if (repairing !== !!values["repair-source"] || repairing !== !!values.receipts || repairing && values.answers)
-	throw new Error("Receipt arms need --repair-source and --receipts, without --answers.");
+	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
 if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
 if (values.decisions && (!values.play || !/^[1-9]\d*$/.test(values.decisions))) throw new Error("--decisions needs --play and a positive recorded-decision boundary.");
@@ -61,17 +45,8 @@ if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "lu
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
 if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
-if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers || values.arm !== "production")) throw new Error("Continuation cases require --play and the production arm, without --answers: they resume the prefix's existing work.");
-if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
-if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
-if (["block-pairs", "completion"].includes(values.arm!) && selected.some((one) => !["prepare", "plan", "amend", "repair"].includes(one.task))) throw new Error("Catalog and completion arms require planning cases.");
-if (repairing && selected.some((one) => !["plan", "amend", "repair"].includes(one.task))) throw new Error("Receipt arms require current-position planning cases.");
-if (comparingBriefs && selected.some((one) => one.task !== "plan")) throw new Error("Brief comparison requires current-position planning cases.");
-if (transferring && selected.some((one) => one.task !== "plan" || !one.suppliedLines)) throw new Error("Recognition and transfer require a current planning case with supplied lines.");
-if (transferring && values.play && (values.arm === "recognize" || !values.answers)) throw new Error("Transfer play requires manually reviewed --answers; recognition never plays.");
-const repairSource = repairing ? JSON.parse(readFileSync(values["repair-source"]!, "utf8")) as RepairSource : undefined;
-const reviewed = repairing ? JSON.parse(readFileSync(values.receipts!, "utf8")) as { receipts: ReviewedReceipt[] } : undefined;
-const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; arm?: string; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
+if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers)) throw new Error("Continuation cases require --play, without --answers: they resume the prefix's existing work.");
+const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
 // the selected inputs and remove temporary copies even when a probe fails.
 const scratch = mkdtempSync(join(tmpdir(), "magic-bench-"));
@@ -89,7 +64,6 @@ const positions = selected.map((one) => {
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
-	if (comparingBriefs) freshBriefBase(frame);
 	if (one.task === "pilot") frame.view = project(saved.table, one.seat, sinceDecision(saved.table, one.seat));
 	// Supplied coverage changes only plan content, preserving the prefix's progress and physical facts.
 	if (one.pilotPolicy) {
@@ -113,7 +87,6 @@ const positions = selected.map((one) => {
 	const state = one.task === "pilot" && planState(frame);
 	if (state && frame.decision) frame.decision = { ...frame.decision, options: annotate(frame.decision.options, state) };
 	const brief = saved.prepared.find((entry) => entry.seat === one.seat)?.made as Brief | undefined;
-	if (comparingBriefs && !brief) throw new Error("Brief comparison needs the recorded carried control brief.");
 	const preparation = one.prepared && JSON.parse(readFileSync(one.prepared.file, "utf8"));
 	const prior = preparation?.results.find((row: { name: string }) => row.name === one.prepared!.name) as { version: number; seat: number; plan: Plan } | undefined;
 	if (one.task === "amend" && (!prior?.plan || prior.seat !== one.seat || preparation.source !== path || prior.version >= one.version)) throw new Error(`${one.id}: preparation does not match this position.`);
@@ -121,13 +94,7 @@ const positions = selected.map((one) => {
 	if (one.task === "amend") frame.view.work = { ...frame.view.work!, request: "Review the prepared line after the draw against this current position." };
 	if (one.task === "repair" && !frame.view.work?.request) throw new Error(`${one.id}: repair fixture needs a pending planning request.`);
 	console.log(`${one.id}: ${one.task}, seat ${one.seat}, decision ${one.version}; ${one.property}`);
-	if (repairSource) for (let iteration = 0; iteration < repeat; iteration++) {
-		const frozen = freezeSource(repairSource, one, path, iteration, frame);
-		checkedReceipt(reviewed!.receipts, one.id, iteration, frozen.hash);
-	}
-	const supplied = transferring ? JSON.parse(readFileSync(one.suppliedLines!, "utf8")) as SuppliedLines : undefined;
-	if (supplied) suppliedChoices(frame, supplied, 0);
-	return { one, frame, brief, prior, earlier, supplied, table: saved.table };
+	return { one, frame, brief, prior, earlier, table: saved.table };
 });
 if (values.review) {
 	if (values.live) throw new Error("--review checks saved answers offline; it cannot be combined with --live.");
@@ -157,17 +124,12 @@ mkdirSync(out, { recursive: true });
 const measured = tally(), spent: Spend[] = [], results: Record<string, unknown>[] = [], rules = loadRules(matchup.rules.path);
 const inference = traceInference({ classify: (...args) => runtime.classify(...args), stream: (model, request, options) => runtime.streamSimple(model, request as never, options) as never },
 	(event) => appendFileSync(join(out, "calls.jsonl"), JSON.stringify(event) + "\n"));
-for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, supplied, table } of positions) {
+for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, table } of positions) {
 	// Alternate order so one model does not always receive the earlier request.
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
-	const pair = comparingBriefs ? ["production", "brief-1", "brief-2"] : values.arm === "both" ? ["one", "two"] : values.arm === "examples-paired" ? ["production", "examples-lookup"] : values.arm === "receipt-paired" ? ["receipt-control", "receipt-consequence"] : [values.arm!];
-	const order = comparingBriefs ? [...pair.slice(iteration % pair.length), ...pair.slice(0, iteration % pair.length)] : iteration % 2 ? [...pair].reverse() : pair;
-	for (const arm of order) {
-		const briefSource = arm.startsWith("brief-") ? briefSources[Number(arm.slice(6)) - 1] : undefined;
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
-		let commitment: ReturnType<typeof commitmentReceipt> | undefined;
 		try {
 			const writer = reasoner({ role: one.task === "judge" ? "judge" : one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
 				model: (one.task === "judge" ? judging : luna).model as never, thinking: (one.task === "judge" ? judging : luna).thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
@@ -176,22 +138,16 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
 				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
 			} else if (one.task !== "pilot") {
-				const context = { brief: briefSource ? comparisonBrief(briefSource, frame) : brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}), ...(arm === "block-pairs" ? { blockPairs: true } : {}), ...(arm === "completion" ? { completionCoverage: true } : {}) };
+				const context = { brief, cards: universe, rules };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
 					answer = { plan: frame.view.work.plan, fromPrefix: true };
 				} else if (savedAnswers) {
-					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration && (row.arm ?? "production") === arm);
+					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration);
 					const plan = rows[0]?.plan ?? rows[0]?.answer?.plan;
-					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case, arm and repetition.");
+					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case and repetition.");
 					answer = { plan, fromAnswers: values.answers };
-				} else if (repairSource) {
-					const frozen = freezeSource(repairSource, one, catalog.journals[one.journal]!, iteration, frame);
-					const receipt = checkedReceipt(reviewed!.receipts, one.id, iteration, frozen.hash);
-					answer = await repairPlan(frame, context, writer, frozen, arm === "receipt-consequence" ? receipt.counterexample : undefined);
-				} else if (arm === "one" || arm === "two") answer = await candidatePlan(frame, context, writer, arm === "one" ? 1 : 2);
-				else if (arm === "recognize" || arm === "transfer") answer = await transferPlan(frame, context, writer, supplied!, iteration, arm);
-				else if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
+				} else if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
 				else {
 					const result = await planWork(frame, context, writer, prior ? { plan: prior.plan } : undefined, earlier ? changes(earlier, frame).lines : undefined);
 					const put = result.tools.find((tool) => tool.do === "plan.put");
@@ -199,22 +155,16 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					answer = { ...result, plan: put.plan };
 				}
 				const plan = (answer as { plan?: Plan }).plan;
-				if (!plan) {
-					if (arm !== "recognize") throw new Error("Planning returned no accepted plan.");
-					passed = !!(answer as { transfer: { selected?: string } }).transfer.selected;
-				} else {
-					checks = checkPlan(plan, one, frame);
-					resources = paymentForecast(frame, plan);
-					commitment = commitmentReceipt(frame, plan);
-					// These comparisons keep historical flags; acceptance does not require one particular attack set.
-					passed = comparingBriefs || arm === "transfer" || checks.passed;
-					decisionMs = Date.now() - began;
-					if (values.play) {
-						continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
-							{ out: join(out, `${one.id}-${iteration}${arm === "production" ? "" : `-${arm}`}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
-						const game = continuation.result;
-						passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
-					}
+				if (!plan) throw new Error("Planning returned no accepted plan.");
+				checks = checkPlan(plan, one, frame);
+				resources = paymentForecast(frame, plan);
+				passed = checks.passed;
+				decisionMs = Date.now() - began;
+				if (values.play) {
+					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
+						{ out: join(out, `${one.id}-${iteration}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
+					const game = continuation.result;
+					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
 				}
 			} else {
 				const api: DecisionApi = pilot === "jev" ? decisionApi(inference.classify, jev.model as never, { tally: measured, seat: one.seat }) : {
@@ -242,18 +192,14 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			if (!isDeepStrictEqual(frame, before)) throw new Error("Benchmark mutated the projected frame.");
 		} catch (caught) {
 			error = String(caught);
-			if (caught && typeof caught === "object" && "candidates" in caught) answer = { candidates: caught.candidates, attempts: (caught as { attempts?: unknown }).attempts };
-			if (caught && typeof caught === "object" && "repair" in caught) answer = { repair: caught.repair };
-			if (caught && typeof caught === "object" && "transfer" in caught) answer = { transfer: caught.transfer };
 		}
 		const calls = [...measured.spent().slice(startCall), ...(continuation?.result.calls ?? [])];
 		spent.push(...calls);
 		const entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
-			arm, ...(briefSource ? { briefSource: { file: briefSource.file, hash: briefSource.hash } } : {}), ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
-			...(commitment ? { commitment } : {}), ...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
-		results.push(entry); console.log(`${one.id} ${pilot} ${arm} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
-		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, ...(comparingBriefs ? { briefSources: briefSources.map(({ file, hash, model, elapsedMs }) => ({ file, hash, model, elapsedMs })) } : {}), results, calls: spent }, null, 2) + "\n");
-	}
+			ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
+			...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
+		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
+		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, results, calls: spent }, null, 2) + "\n");
 	}
 }
 console.log(bill(spent).join("\n")); console.log(`Saved ${out}`);

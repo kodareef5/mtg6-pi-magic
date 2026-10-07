@@ -102,10 +102,10 @@ export function responseChanges(frame: Frame, base: Plan, changes: unknown) {
 }
 
 /** The actions available to reuse, with readable labels and their complete accepted syntax. */
-export function actions(frame: Frame, prepared?: Plan, turn?: number, blockPairs = false): Record<string, { label: string; action: PlanOption["action"] }> {
+export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<string, { label: string; action: PlanOption["action"] }> {
 	const plan = prepared ?? currentPlan(frame);
 	return Object.fromEntries([
-		...Object.entries(movementActions(frame, turn, blockPairs)),
+		...Object.entries(movementActions(frame, turn)),
 		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),

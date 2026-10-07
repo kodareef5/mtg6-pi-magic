@@ -22,7 +22,7 @@ work for a `continue` case. It plays through the opponent's next turn unless an
 outcome occurs first. `--through N` selects another turn boundary.
 
 `--answers FILE` plays saved answers without generating replacements. Entries
-must match case, arm and repetition. An unresolved answer is not silently
+must match case and repetition. An unresolved answer is not silently
 replaced. `--review FILE` checks saved plans offline and cannot use `--live`.
 
 `--decisions N` bounds recorded decisions after the prefix, including forced
@@ -42,6 +42,5 @@ policy obedience, legal play, help and repairs separately. Record external
 stops, refusals, canceled calls and missing usage explicitly. Repeated identical
 pilot packets measure score stability rather than independent success rates.
 
-Retired candidate, receipt, coverage and catalog arms are pending code removal.
-Their run notes are local under `design-ref/experiments/2026-10-07-reset/`.
-They are not the current tuning workflow. See [gameplay status](../../docs/STATUS.md).
+Retired experiments remain in Git history. Local notes live under ignored
+`design-ref/experiments/`. See [gameplay status](../../docs/STATUS.md).

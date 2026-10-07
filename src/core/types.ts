@@ -2,6 +2,7 @@
  * The vocabulary of a decision. Everything that crosses between the engine, a
  * player and a reader is one of these shapes.
  *
+ * Past 150 lines to keep the shared decision and projection contract together.
  * State lives in table.ts. Nothing here describes a card, a zone or a motion.
  */
 
