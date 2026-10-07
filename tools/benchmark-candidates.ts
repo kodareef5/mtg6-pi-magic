@@ -5,9 +5,11 @@ import { Type, type Static } from "typebox";
 import { PlanSchema, problems, type Plan, type PlanOption } from "../src/core/language.ts";
 import type { Frame } from "../src/core/types.ts";
 import type { Reasoner, Lookup } from "../src/context/reason.ts";
-import { actions, basePlan, equipment, submissionFields } from "../src/context/plan-edit.ts";
-import { facts, type Context } from "../src/context/strategy-facts.ts";
-import { actionFacts } from "../src/context/strategy-actions.ts";
+import { actions, basePlan, changedPlan, equipment, submissionFields } from "../src/context/plan-edit.ts";
+import { facts, chancing, type Context } from "../src/context/strategy-facts.ts";
+import { actionFacts, bindingFacts, planFacts } from "../src/context/strategy-actions.ts";
+import { planReference, syntaxLookup, exampleReference } from "../src/context/strategy.ts";
+import { combatLookup } from "../src/context/strategy-combat.ts";
 import { planProblems } from "../src/core/work-tools.ts";
 import { select } from "../src/core/query.ts";
 import { STEPS, type Step } from "../src/core/steps.ts";
@@ -94,10 +96,10 @@ export function compileCandidate(frame: Frame, candidate: Candidate, catalog = c
 			candidate.responses, candidate.triggers, candidate.exceptions,
 		].filter(Boolean).join(" ") };
 	});
-	return { objective: "Execute the selected commitments and their explicit policies.", guidance: "Use the current window's instructions and the recorded step status.",
+	return changedPlan({ objective: "", guidance: "", steps: [] }, { objective: "Execute the selected commitments and their explicit policies.", guidance: "Use the current window's instructions and the recorded step status.",
 		steps: [...steps, ...base.steps.filter(outsideAction)], holds: structuredClone(candidate.holds) as Plan["holds"],
 		may: (base.may ?? []).filter(outsideAction), askWhen: base.askWhen,
-		phases: [...(base.phases ?? []).flatMap(outside), ...phases] };
+		phases: [...(base.phases ?? []).flatMap(outside), ...phases] }, {});
 }
 
 /** Both arms differ only in the number requested. Three replies include final selection. */
@@ -136,10 +138,10 @@ export async function candidatePlan(frame: Frame, context: Context, writer: Reas
 	const system = `Prepare ${count} distinct candidate${count === 1 ? "" : "s"} for the remaining own turn using the complete supplied position and carried playbook. Choose useful development, attacks and explicit target, response, trigger, reserve, completion and exception policies. Register proposals, inspect their receipts, then submit one immutable candidate id on a later reply. A changed proposal needs its own receipt. You have at most three replies, including selection; unresolved exhaustion selects nothing. Accepted equipment is available even when an earlier action must supply its source. Attackers have one separate representation. Current sickness prevents attacking, not blocking. Compare combat against the visible opposing blockers. Payments are examples, not locked choices. Receipts do not simulate resolution or certify legality, future traits, damage or strategy. Reasons are kept for review and never sent to the pilot; execution choices belong in policies. Uncovered windows retain production policy. Do not infer a pass from an empty list.`;
 	try {
 		const selected = await writer.work(`candidate comparison ${count}`, { system, user: facts(frame, context, {
-			priorIntent: basePlan(frame),
+			priorIntent: planFacts(basePlan(frame)), bindings: bindingFacts(frame, basePlan(frame)), conditions: planReference,
 			actions: Object.fromEntries(Object.entries(catalog.available).map(([key, value]) => [key, availableFacts[key] ?? { ...value, scope: "Accepted equipment without a currently permitted source; an earlier action must supply it." }])), attackers: catalog.attackers,
 		}), task: `Register ${count} candidate${count === 1 ? "" : "s"}, then select after reading the exact receipts.` }, {
-			lookups: [register, equipment(frame, catalog.available)], turns: 3,
+			lookups: [register, equipment(frame, catalog.available), syntaxLookup, exampleReference, combatLookup(frame), chancing(frame)], turns: 3,
 			submit: { name: "submit", description: "Select one unchanged candidate after reading its receipt on an earlier reply. Selection does not execute it or certify its strategy.",
 				parameters: Type.Object({ id: Type.String() }, { additionalProperties: false }), check(args, session) {
 					const one = records.find((one) => one.id === args.id && one.reply < (session?.reply ?? 0));

@@ -430,6 +430,8 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	const compiled = compileCandidate(frame, candidate);
 	assert.ok(compiled.phases!.filter((one) => one.when.active === "self").every((one) => one.guidance.includes("grants no permission to pass")), "an empty list never invents a completion policy");
 	assert.ok(!JSON.stringify(compiled).includes(candidate.reason), "audit rationale is absent from executable guidance");
+	const aliasCandidate = { ...candidate, holds: [{ objects: { card: "Forest" }, purpose: "An explicit reserve", releaseWhen: { amount: { count: { card: "Snakeskin Veil", zones: ["hand"] } }, atMost: 0 } }] };
+	assert.deepEqual(compileCandidate(frame, aliasCandidate).holds![0]!.releaseWhen, { amount: { count: { name: "Snakeskin Veil", zones: ["hand"] } }, atMost: 0 }, "the experiment shares production's canonical condition reader");
 	const broad = structuredClone(frame);
 	broad.view.work!.plan!.phases = [{ when: { active: "self", phase: "beginning" }, guidance: "Retain upkeep choices." }, { when: { active: "opponent" }, guidance: "Retain defense." }];
 	const withBroad = compileCandidate(broad, candidate);

@@ -41,7 +41,7 @@ export const syntaxLookup: Lookup = {
 // Ordinary planning reads visible counts, life and history. Instruction-local
 // bindings and library references belong in the full syntax lookup, not here.
 const planningDefs = ChangesSchema.$defs;
-const planReference = { $ref: "#/$defs/Condition", $defs: {
+export const planReference = { $ref: "#/$defs/Condition", $defs: {
 	Condition: { anyOf: planningDefs.Condition.anyOf.filter((one) => !("bound" in one.properties) && !("is" in one.properties)) },
 	Amount: { anyOf: planningDefs.Amount.anyOf.filter((one) => one.type === "integer" || Object.keys(one.properties ?? {}).some((key) => ["count", "life", "history", "sum", "negate", "distinct"].includes(key))) },
 	Selector: { ...planningDefs.Selector, properties: Object.fromEntries(Object.entries(planningDefs.Selector.properties).filter(([key]) => !["is", "attachedTo", "linked", "other"].includes(key))) } } };

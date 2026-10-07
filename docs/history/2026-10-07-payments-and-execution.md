@@ -264,3 +264,11 @@ review their visible opposing responses. Then run a full game if the focused
 evidence supports it. If both arms fail, classify the missing dependency or
 policy instead of starting another wording sweep. Full-game completion, replay
 integrity and strategic quality remain separate gates.
+
+The first four sessions under `candidate-comparison/` are preflight evidence,
+not the comparison gate. They exposed a missing shared reader: the experimental
+compiler skipped production's condition aliases and comparison-bound checks.
+It now uses `changedPlan`, and the prompt supplies the same condition reference,
+binding facts and reference tools. The stopped run also produced real stale-Veil
+claims; those remain examples to review, not a scored arm result. Its interrupted
+request may lack completed usage. The corrected run uses a fresh output directory.
