@@ -201,7 +201,8 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			accepted = { plan, ...(edits.length ? { edits } : {}), ...(objection ? { objection } : {}) };
 			return null;
 		} },
-		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
+		// A fourth reply lets a winning line survive a refusal over a side problem.
+		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 4,
 		// Observed ordinary replies take 6-28s; retry a stalled critical-path
 		// request without replacing its task, model, or accepted plan.
 		...(options.nextTurn ? {} : { timeoutMs: 45_000 }),
