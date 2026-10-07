@@ -32,10 +32,11 @@ import { playProposal } from "./benchmark-play.ts";
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
 	pilotPolicy?: string; prepared?: { file: string; name: string } };
-const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
-const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
+const { values } = parseArgs({ options: { positions: { type: "string" }, live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
+const manifest = values.positions ?? join(import.meta.dirname, "benchmarks/positions.json");
+const catalog = JSON.parse(readFileSync(manifest, "utf8")) as { journals: Record<string, string>; cases: Case[] };
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
 if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
 if (values.decisions && (!values.play || !/^[1-9]\d*$/.test(values.decisions))) throw new Error("--decisions needs --play and a positive recorded-decision boundary.");
@@ -199,7 +200,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
 			...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
 		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
-		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", source, results, calls: spent }, null, 2) + "\n");
+		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest, source, results, calls: spent }, null, 2) + "\n");
 	}
 }
 console.log(bill(spent).join("\n")); console.log(`Saved ${out}`);

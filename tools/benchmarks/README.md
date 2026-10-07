@@ -1,5 +1,8 @@
 # Saved-position benchmarks
 
+Use `--positions FILE` for a local manifest under `.pi/`. New run inputs and
+results belong there; only reusable invariant fixtures belong in Git.
+
 `npm run benchmark` replays the cases in `positions.json` without model calls.
 Each case names a journal prefix, seat, task and expected property. Compressed
 journals in `test/fixtures/benchmarks/` are expanded into a temporary directory
