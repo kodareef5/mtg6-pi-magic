@@ -31,7 +31,12 @@ that totals the whole attack and ranks opportunities. In the blocked Smaug
 position the rollup found the win in 5 of 10 replies against about 1 in 5
 for free text; decisions take about 50% longer. The pilot asks for help once
 per decision, and a response repair no longer restarts the background
-preparation.
+preparation. Before each strategy session, focused questions now run in
+parallel: one per hand card and per own creature, plus the opponent, their
+next attack, the whole attack, removal and other zones. The writer then rolls
+them up. On saved positions this raised lethal cases to 14/15 and attack
+pressure to 9/9, and halved median decision time to about 15 seconds, at
+about two to three times the strategy cost.
 
 Run notes live in `design-ref/experiments/2026-10-07-reset/`; traces and reports
 live in `.pi/renewed-20261007/`. Neither directory ships. Keep contracts in

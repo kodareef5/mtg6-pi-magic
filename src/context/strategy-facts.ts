@@ -51,7 +51,7 @@ function objects(frame: Frame) {
 	}]));
 }
 
-function mana(frame: Frame): string {
+export function mana(frame: Frame): string {
 	const only = (selector: Selector) => selector.types || selector.subtypes ? `only to cast a ${[...(selector.subtypes ?? []), ...(selector.types ?? [])].join(" or ")} spell` : `only on ${JSON.stringify(selector)}`;
 	const describe = (yields: ReturnType<typeof sources>[number]["yields"]) => [...new Set(yields.map((one) =>
 		`${one.colors.join("")}${one.spendOnly ? ` (${only(one.spendOnly)})` : ""}${one.sacrifice ? " (sacrificing it)" : ""}`))].join(" or ");
@@ -80,7 +80,9 @@ function mana(frame: Frame): string {
 	return lines.join(" ");
 }
 
-export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules };
+export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules;
+	/** Ask the focused board questions before the writer; seated games and benchmarks set it. */
+	survey?: boolean };
 
 /** Pregame decisions are the initial phase defaults, not paragraphs to rewrite on turn one. */
 export function initialPlan(brief: Brief): Plan {
@@ -134,16 +136,20 @@ export function chancing(frame: Frame): Lookup {
 	};
 }
 
+/** The position a session plans for: the observed frame, or for a preparation the labelled next-turn forecast. */
+export function planningFrame(frame: Frame, scope: "turn" | "response" | "preparation"): Frame {
+	if (scope !== "preparation" || frame.view.window.kind !== "turn") return frame;
+	const projected = afterUntap(frame), { decision: _decision, refused: _refused, ...rest } = projected;
+	return { ...rest, view: { ...projected.view,
+		window: { kind: "turn", turn: frame.view.window.turn + 1, active: frame.seat, step: "upkeep", phase: "beginning" },
+		remainingSteps: TURN.filter((step) => step !== "untap"),
+		drawnAt: undefined, turnDraw: undefined, landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
+	} };
+}
+
 export function facts(frame: Frame, context: Context, more: Record<string, unknown> = {}, scope: "turn" | "response" | "preparation" = "turn"): string {
 	const observed = frame;
-	if (scope === "preparation" && frame.view.window.kind === "turn") {
-		const projected = afterUntap(frame), { decision: _decision, refused: _refused, ...rest } = projected;
-		frame = { ...rest, view: { ...projected.view,
-			window: { kind: "turn", turn: frame.view.window.turn + 1, active: frame.seat, step: "upkeep", phase: "beginning" },
-			remainingSteps: TURN.filter((step) => step !== "untap"),
-			drawnAt: undefined, turnDraw: undefined, landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
-		} };
-	}
+	frame = planningFrame(frame, scope);
 	// Pilot receipt windows do not define strategic history. Actions and history
 	// carry the recorded events in both live and saved-position requests.
 	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, since: _since, ...view } = frame.view;
@@ -155,8 +161,9 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 		seat: frame.seat, decisionFacts: decision,
 		currentWindow: at.kind === "turn" ? { active: at.active === frame.seat ? "self" : "opponent", step: at.step } : undefined,
 		mana: mana(frame),
+		...(more.survey ? { survey: more.survey } : {}),
 		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn"),
-		...more,
+		...Object.fromEntries(Object.entries(more).filter(([key]) => key !== "survey")),
 		...(scope === "preparation" ? { positionBasis: {
 			kind: "forecast", observedWindow: observed.view.window,
 			assumptions: "Your next upkeep after normal untap, before the unknown draw or any upkeep effects. Your current permanents survive and untap; current characteristics and abilities are retained. Nonpersistent floating mana expires. This is not the current position or a prediction of the opponent's actions or intervening effects.",

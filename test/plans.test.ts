@@ -553,7 +553,7 @@ test("strategy accepts scoped work before upkeep and reviews after draw, with no
 	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "work");
 	// A prepared version-zero position can hold card equipment without a planning policy.
 	editWork(table, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "carried-equipment");
-	const seated = await seatTable(table, roster, inference, universe, { format: standard.name });
+	const seated = await seatTable(table, roster, inference, universe, { format: standard.name, survey: false });
 	assert.equal(prompts.length, 0, "seating spends no strategy before a decision");
 	assert.ok(table.work[0]!.eachTurn && table.work[1]!.eachTurn, "both a prepared seat and a fresh seat plan each turn");
 	assert.deepEqual(table.work[0]!.packages, [{ card: "Forest", registers: [] }], "enabling strategy preserves carried card equipment");
@@ -754,7 +754,7 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "o", guidance: "g", steps: null } }], stopReason: "toolUse" }) })) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "unplanned");
-	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
+	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name, survey: false }), inference, undefined);
 	assert.ok(outcome, "the game reaches an outcome");
 	assert.ok(table.gaps.some((gap) => gap.includes("/steps must be array") && gap.endsWith("The standing plan is kept. Play goes on.")), "each failed session is a gap that names why");
 
@@ -1816,4 +1816,31 @@ test("a hold can end at a window, and object queries accept the writer's you", (
 	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(0, "end")), true, "any later step this turn has reached it");
 	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(1, "end")), false, "the other seat's turn is not the named window");
 	assert.equal(reached({ active: "self", phase: "combat" }, at(0, "begin-combat")), true, "a phase begins at its first step");
+});
+
+test("the survey asks a focused question per hand card and creature in parallel, and the writer rolls them up", async () => {
+	const table = matchup("survey");
+	main(table, 0, 3);
+	place(table, 0, "battlefield", "Forest", "Forest");
+	place(table, 0, "hand", "Mossborn Hydra", "Forest");
+	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	const before = structuredClone(table);
+	const questions: string[] = [], writer: string[] = [];
+	const stream: Stream = (_model, request) => {
+		if (!request.tools?.length) { questions.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "text", text: "Castable for 3: 2 + 1 = 3 sources." }], stopReason: "stop" }) }; }
+		writer.push(JSON.stringify(request.messages));
+		return { result: async () => ({ content: [{ type: "toolCall", id: "w", name: "submit", arguments: { assessment: { corrections: "none", win: "No attackers.", priorities: ["Develop"] },
+			steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
+	};
+	const submitted: string[] = [];
+	const wrapped: Stream = (model, request) => { if (request.tools?.length) submitted.push(JSON.stringify(request.tools.find((one) => one.name === "submit")!.parameters)); return stream(model, request); };
+	await planWork(workFrame(table, 0), { survey: true }, reasoner({ role: "strategy", stream: wrapped, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	const hand = new Set(cardsIn(table, "hand", 0).map((one) => one.card));
+	for (const card of hand) assert.ok(questions.some((one) => one.includes(`Your card ${card}.`)), `a focused question for ${card}`);
+	for (const kind of ["The opponent:", "Their next attack:", "Your whole attack this turn:", "Your battlefield abilities"]) assert.ok(questions.some((one) => one.includes(kind)));
+	const sent = JSON.parse(JSON.parse(writer[0]!)[0].content);
+	assert.ok(Object.keys(sent).indexOf("survey") < Object.keys(sent).indexOf("brief") || !("brief" in sent), "the survey precedes the brief");
+	assert.equal(Object.keys(sent.survey.hand).length, hand.size);
+	assert.match(submitted[0]!, /corrections/, "the writer's assessment is the rollup when the survey is supplied");
+	assert.deepEqual(table, before, "asking questions changes nothing on the table");
 });

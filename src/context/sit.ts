@@ -90,6 +90,8 @@ export async function seat(
 		rules?: Rules;
 		/** How many routes a seat may follow per decision. */
 		dials?: number;
+		/** Ask the focused board questions before each strategy session; on unless false. */
+		survey?: boolean;
 		/** Written to as the game runs, so a clone of this game is a prefix of it. */
 		journal?: Journal;
 		/**
@@ -163,7 +165,7 @@ export async function seat(
 			onPlanned: (one) => void planned.push(one),
 			...(planning ? (() => {
 				// What every writer session reads beside the position: the brief, the recaps, and the cards and rules to look up.
-				const context = () => ({ brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe, ...(options.rules ? { rules: options.rules } : {}) });
+				const context = () => ({ brief: chronicle.briefs[at.id], recaps: chronicle.recaps, cards: universe, survey: options.survey !== false, ...(options.rules ? { rules: options.rules } : {}) });
 				return {
 					interpret: (frame) => interpret(frame, planning, universe, options.rules),
 					plan: (frame, prepared, changed) => planWork(frame, context(), planning, prepared, changed),
