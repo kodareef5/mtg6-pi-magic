@@ -18,6 +18,14 @@ npm run benchmark -- --case red-ready-lethal
 npm run benchmark -- --live --case red-ready-lethal --out .pi/benchmarks/ready
 ```
 
+For pilot comparisons, repeat `--pilot` with available Pi classifier patterns.
+Both models receive the same packet; order alternates across cases. `jev` uses
+the baseline classifier; `luna` is the older chat-pilot control, not Decisions.
+
+```sh
+npm run benchmark -- --live --task pilot --pilot jev --pilot openai/gpt-6-luna-decisions --out .pi/benchmarks/decisions
+```
+
 ## Continuations
 
 `--live --play` installs an accepted answer in a clone, or preserves existing

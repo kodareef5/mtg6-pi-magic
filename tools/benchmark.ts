@@ -33,7 +33,7 @@ import { playProposal } from "./benchmark-play.ts";
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
 	pilotPolicy?: string; prepared?: { file: string; name: string } };
 const { values } = parseArgs({ options: { positions: { type: "string" }, live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
-	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
+	pilot: { type: "string", multiple: true, default: ["jev"] }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
 const manifest = values.positions ?? join(import.meta.dirname, "benchmarks/positions.json");
 const catalog = JSON.parse(readFileSync(manifest, "utf8")) as { journals: Record<string, string>; cases: Case[] };
@@ -41,8 +41,8 @@ if (values.play && !values.live || values.answers && !values.play) throw new Err
 if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
 if (values.decisions && (!values.play || !/^[1-9]\d*$/.test(values.decisions))) throw new Error("--decisions needs --play and a positive recorded-decision boundary.");
 if (values["judge-attempts"] && (!values.play || !/^[1-9]\d*$/.test(values["judge-attempts"]))) throw new Error("--judge-attempts needs --play and a positive limit.");
-const repeat = Number(values.repeat), pilots = values.pilot === "both" ? ["jev", "luna"] : [values.pilot!];
-if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "luna"].includes(one))) throw new Error("Use a positive --repeat and --pilot jev, luna or both.");
+const repeat = Number(values.repeat), pilots = [...new Set(values.pilot!.flatMap((one) => one === "both" ? ["jev", "luna"] : [one]))];
+if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !one.trim())) throw new Error("Use a positive --repeat and a nonempty --pilot model pattern.");
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
 if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
@@ -113,8 +113,14 @@ if (!values.live) process.exit(0);
 
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
-const parts = cast(rosterFor({ every: { strategy: "gpt-6-luna:low", summary: "off" } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") });
+const available = { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") };
+const parts = cast(rosterFor({ every: { strategy: "gpt-6-luna:low", summary: "off" } }), available);
 const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!, judging = parts.find((one) => one.role === "judge")!;
+const classifiers = new Map(pilots.filter((pilot) => pilot !== "luna").map((pilot) => {
+	const chosen = pilot === "jev" ? jev : cast({ decide: pilot }, available).find((one) => one.role === "decide")!;
+	if (!chosen.model || chosen.model.type !== "classifier") throw new Error(chosen.problem ?? `${pilot} is not an available classifier.`);
+	return [pilot, chosen.model] as const;
+}));
 if (selected.some((one) => one.task === "judge") && (!judging?.model || judging.off || judging.model.type === "classifier")) throw new Error("Judge probes require the prescribed judge model.");
 if (!jev.model || jev.off || !luna.model || luna.off) throw new Error("The prescribed Jev and Luna low models must both resolve.");
 const out = values.out ?? `.pi/benchmarks/${Date.now()}`;
@@ -125,9 +131,9 @@ mkdirSync(out, { recursive: true });
 const measured = tally(), spent: Spend[] = [], results: Record<string, unknown>[] = [], rules = loadRules(matchup.rules.path);
 const inference = traceInference({ classify: (...args) => runtime.classify(...args), stream: (model, request, options) => runtime.streamSimple(model, request as never, options) as never },
 	(event) => appendFileSync(join(out, "calls.jsonl"), JSON.stringify(event) + "\n"));
-for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier, table } of positions) {
+for (let iteration = 0; iteration < repeat; iteration++) for (const [position, { one, frame, brief, prior, earlier, table }] of positions.entries()) {
 	// Alternate order so one model does not always receive the earlier request.
-	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
+	for (const pilot of one.task !== "pilot" ? ["luna"] : (iteration + position) % 2 ? [...pilots].reverse() : pilots) {
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
@@ -168,7 +174,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
 				}
 			} else {
-				const api: DecisionApi = pilot === "jev" ? decisionApi(inference.classify, jev.model as never, { tally: measured, seat: one.seat }) : {
+				const api: DecisionApi = pilot !== "luna" ? decisionApi(inference.classify, classifiers.get(pilot)!, { tally: measured, seat: one.seat }) : {
 					named: "benchmark Luna pilot", async ask(request) {
 						const pick = request.questions.pick;
 						if (pick?.type !== "choice") throw new Error("The pilot benchmark needs one choice question.");
