@@ -29,7 +29,7 @@ import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
 import { candidatePlan } from "./benchmark-candidates.ts";
 
-type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan"; property: string; winner?: number;
+type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan"; property: string; winner?: number; picks?: string[];
 	prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
@@ -162,7 +162,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 				const pick = (answer as { kind: string; option?: string }).option, expected = one.expect!;
 				const use = frame.decision!.options.find((option) => option.id === pick)?.use;
 				const name = (ref: { id: string; incarnation: number }) => frame.view.objects?.find((o) => o.id === ref.id && o.incarnation === ref.incarnation)?.card;
-				passed = expected.id ? pick === expected.id : !!use && name(use.source) === expected.source && (!expected.timing || use.timing === expected.timing) &&
+				passed = one.picks ? !!pick && one.picks.includes(pick) : expected.id ? pick === expected.id : !!use && name(use.source) === expected.source && (!expected.timing || use.timing === expected.timing) &&
 					(!expected.target || use.targets.flat().some((target) => "id" in target && name(target) === expected.target));
 			}
 			if (!isDeepStrictEqual(frame, before)) throw new Error("Benchmark mutated the projected frame.");

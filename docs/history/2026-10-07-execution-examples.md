@@ -121,3 +121,20 @@ first case remains an ordinary opposing land change plus a drawn land covered
 by the prepared branch, with the response and combat conditions still valid.
 A changed blocker is the counterexample. Syntactic validity, a payable line and
 an empty stop list do not establish that coverage.
+
+## Completing a partial attacker declaration
+
+Kellan is already selected. The accepted remaining steps name Sanctuary, Zhao
+and then finishing. Both attackers remain offered. Their order is immaterial.
+The finish option should state which currently available plan steps finishing
+would leave unfinished, naming their offered attack choices. It stays available
+and retains its normal execution credit if selected. This is a fact about the
+accepted plan, not a requirement imposed by the table.
+
+After either attacker is selected, the mark names only the other unfinished
+step. Once both are selected, it disappears. False conditions, completed steps,
+unavailable attackers and optional branches do not create this mark. A broad
+step that itself matches finishing cannot be labelled unfinished by that action.
+Jev must choose both attacks before finishing; displaying the mark does not
+prove obedience. Repeat the saved partial-declaration continuation unchanged
+before and after adding the mark, with outcomes and help counted separately.

@@ -27,6 +27,16 @@ before entering the actual seat context and inspection path. Earlier probes
 omitted these annotations; their results are historical, not packet parity.
 The held-vigilance case preserves a plan whose listed attack and preservation
 prose disagree. Correct consumption marks alone do not prove it will execute.
+`finish-with-attacks-due` freezes the October 7 ready-lethal control immediately
+before Jev finished with Kellan alone. Both remaining attacks satisfy its pilot
+check; their order is immaterial. `ready-partial-attack` uses the same prefix for
+`--answers --play` continuations of its accepted remaining plan. No new strategy
+is needed at that prefix. Report whether Sanctuary and Zhao were declared before
+finishing, help requests, and the physical outcome separately. A repaired win
+does not establish obedience to the original declaration.
+The three unchanged supplied plans are committed in
+`test/fixtures/benchmarks/partial-attack-plans.json`; use `--repeat 3` with that
+answers file and `--through 12` for the physical control.
 Luna receives the
 same classifier question through a chat adapter with an exact-id submission,
 one request attempt per question and a 256-token output ceiling. The adapter

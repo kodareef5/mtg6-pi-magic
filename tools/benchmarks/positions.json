@@ -9,9 +9,28 @@
     "green-tapped-vein": "test/fixtures/benchmarks/green-tapped-vein.jsonl.gz",
     "green-upkeep-fetch": "test/fixtures/benchmarks/green-upkeep-fetch.jsonl.gz",
     "red-treasure-lethal": "test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz",
-    "readyLethal": "test/fixtures/benchmarks/red-ready-lethal.jsonl.gz"
+    "readyLethal": "test/fixtures/benchmarks/red-ready-lethal.jsonl.gz",
+    "readyPartialAttack": "test/fixtures/benchmarks/ready-partial-attack.jsonl.gz"
   },
   "cases": [
+    {
+      "id": "finish-with-attacks-due",
+      "journal": "readyPartialAttack",
+      "version": 365,
+      "seat": 1,
+      "task": "pilot",
+      "property": "Kellan is already selected. Select either remaining planned attacker, Sanctuary or Zhao, before finishing the declaration.",
+      "picks": ["attack:1-50", "attack:1-58"]
+    },
+    {
+      "id": "ready-partial-attack",
+      "journal": "readyPartialAttack",
+      "version": 365,
+      "seat": 1,
+      "task": "plan",
+      "winner": 1,
+      "property": "With --answers, execute the saved remaining plan: declare Sanctuary and Zhao, then finish. Grade declaration obedience separately from any later repaired win."
+    },
     {
       "id": "keep-opening",
       "journal": "oct6",
