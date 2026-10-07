@@ -43,7 +43,19 @@ function writerChanges(value: unknown): unknown {
 	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key, key === "holds" ? holdsFixed(list) :
 		["steps", "may", "phases", "askWhen"].includes(key) && Array.isArray(list) ? list.map((one) => {
 			if (one?.action?.objects) one = { ...one, action: { ...one.action, objects: query(one.action.objects) } };
+			// purpose belongs to the step; written inside the action it means the same.
+			if (one?.action && typeof one.action === "object" && "purpose" in one.action && one.purpose === undefined) {
+				const { purpose, ...action } = one.action;
+				one = { ...one, action, purpose };
+			}
 			if (!one?.when || typeof one.when !== "object" || Array.isArray(one.when)) return one;
+			// An attack or block has one step it can happen in; a window that names no step or only combat means that step.
+			const move = String(one.action?.prefix ?? one.action?.option ?? "");
+			const declare = move.startsWith("attack:") ? "declare-attackers" : move.startsWith("block:") ? "declare-blockers" : undefined;
+			if (declare && !one.when.step && (!one.when.phase || one.when.phase === "combat")) {
+				const { phase: _phase, ...rest } = one.when;
+				one = { ...one, when: { ...rest, step: declare } };
+			}
 			const { step, ...when } = one.when;
 			if (step === "any") return { ...one, when };
 			if (typeof step === "string" && !(step in STEPS) && phases.includes(step as typeof phases[number]) && (when.phase === undefined || when.phase === step))

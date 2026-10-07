@@ -1802,6 +1802,14 @@ test("a hold can end at a window, and object queries accept the writer's you", (
 	assert.equal(changed.holds![0]!.releaseWhen, undefined);
 	assert.equal(changed.holds![0]!.objects.controller, "self");
 	assert.equal("action" in changed.steps[0]! && "objects" in changed.steps[0]!.action ? changed.steps[0]!.action.objects!.controller : undefined, "self");
+	const moves = changedPlan(base, { steps: [
+		{ label: "Block the Hydra", when: { active: "opponent" }, action: { prefix: "block:", objects: { zones: ["battlefield"], controller: "self" }, purpose: "Chump only if lethal." } },
+		{ label: "Attack", when: { active: "self", phase: "combat" }, action: { prefix: "attack:", objects: { zones: ["battlefield"], controller: "self" } } },
+		{ label: "Land", when: { active: "self" }, action: { prefix: "land:", objects: { zones: ["hand"], card: "Mountain" } } }] }, {});
+	assert.equal(moves.steps[0]!.when.step, "declare-blockers", "a block has one step it can happen in");
+	assert.equal(moves.steps[0]!.purpose, "Chump only if lethal.", "purpose written inside the action belongs to the step");
+	assert.deepEqual(moves.steps[1]!.when, { active: "self", step: "declare-attackers" });
+	assert.equal(moves.steps[2]!.when.step, undefined, "a land play has two possible windows and keeps the one written");
 	const at = (active: number, step: string) => ({ seat: 0, view: { window: { kind: "turn" as const, turn: 3, active, step: step as never, phase: "combat" as never } } });
 	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(0, "declare-attackers")), false, "before its step the hold stands");
 	assert.equal(reached({ active: "self", step: "declare-blockers" }, at(0, "declare-blockers")), true);
