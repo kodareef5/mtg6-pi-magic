@@ -215,6 +215,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   opponent turns, triggers and resolution before making it the default. An empty
   list grants no permission to pass.
   [Execution controls](history/2026-10-07-payments-and-execution.md).
+  The opt-in [completion coverage check](history/2026-10-07-completion-coverage.md)
+  produced three covered plans, but showed no execution benefit: both arms
+  needed three Red repairs at beginning of combat. Production remains unchanged.
 - [x] Compare one versus two generated candidates in the shared benchmark runner.
   Neither arm justified adoption. Keep generation experimental and grade useful
   strategy and physical outcomes separately from syntax.
@@ -229,7 +232,8 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   separates omitted actions from false choices and payment conflicts; requiring
   complete attack dispositions remains unadopted. A [post-entry repair diagnostic](history/2026-10-07-post-entry.md)
   selected winning attack sets in two of three repairs, but failed its gate and
-  left completion coverage incomplete. No physical expansion followed.
+  left completion coverage incomplete. No physical expansion followed that gate;
+  its frozen repairs later served as controls for the separate completion test.
 - [ ] Reuse a prepared line only with positive coverage for the observed change.
   First test an ordinary opposing land play and a draw covered by a land branch;
   a changed blocker must still trigger reconsideration. Syntax, an empty stop
