@@ -288,3 +288,6 @@ Recorded-block objections and declaration-time evidence are implemented. The
 [live gate](history/2026-10-07-block-objections.md) found 6/6 correct supplied
 judge verdicts but 0/3 pilot objections and 0/3 recovery on the illegal case;
 exception handling remains open. Current hints are not historical verdicts.
+The [supplied coverage controls](history/2026-10-07-supplied-coverage.md) selected
+the authored finish and objection in all six replies. Green's lead over help
+remained narrow. Generated coverage and post-rollback recovery remain unproven.
