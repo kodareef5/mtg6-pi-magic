@@ -75,3 +75,71 @@ The legal pair is a supplied control, produced by recorded choices from the
 carried version-zero opening: develop Green creatures, cast Zhao, attack only
 with Zhao, then block with Explorer and Hydra. It is not evidence of model
 strategy. Frozen inputs are in the shared benchmark manifest.
+
+## Measured result at 5865600
+
+Types, all 179 tests and all 37 saved-prefix checks passed. The live runs used
+clean commit `5865600`, Jev for decisions, Luna low for judging and strategy,
+and summary off. No pregame was regenerated.
+
+| Measure | Illegal lone Forest block | Legal Explorer/Hydra pair |
+| --- | --- | --- |
+| Pilot objections | 0/3 | 0/3 |
+| Pilot passes | 3/3 | 3/3 |
+| Supplied judge verdicts | 3/3 rollback | 3/3 stand |
+
+Each illegal packet named the complete assignment, supplied the current menace
+hint and offered `object:block:285`. Jev assigned objection probabilities
+0.35-0.36 and pass probabilities 0.45-0.47, then selected pass. The legal pair
+had no conflict hint; objection probabilities were 0.31-0.35 and pass
+probabilities 0.52-0.54. These are observations of six replies, not calibrated
+odds or proof of discrimination between legality cases. Repeated identical
+packets measure a stable score margin, not independent samples or a win rate.
+The illegal packet favors pass by 0.09-0.12. Objection scores much closer to pass
+than withdrawal did in the earlier Green control.
+
+The six judge verdicts were correct, with citations to pinned entries 509.1,
+509.1b or 702.111b. Legal run 2 made three unsuccessful rule queries combining
+numbers with prose, then cited 509.1 and disclosed the lookup limitation. Its
+verdict passes the legality check; this does not establish successful source
+retrieval in every case. Judge sessions took 2.98-8.41 seconds each, including
+lookups, and used 21 inference requests in total.
+
+The three physical continuations started immediately after the illegal block.
+Their first full pilot requests exactly matched the frozen illegal pilot
+request. Each chose pass, requested no help and made no objection. No judge or
+rollback ran, so none reached withdrawal or post-ruling recovery. All three
+stopped at 12 new recorded decisions, with no outcome, zero recorded gaps and
+fallback, and matching replay and clone. The illegal combat remained. Recovery
+is **0/3**; runner PASS means only execution and replay health. The judge-attempt
+boundary was not exercised live because no case was opened.
+
+The complete gate used 54 requests: 30 Jev, 21 judge and three cancelled
+background strategy requests. Reported usage totals 342,571 input tokens,
+3,892 output tokens and $0.014642304. The three cancelled preparations have no
+reported usage or cost and are excluded from those totals. The bounded
+continuations took 5.31, 4.46 and 4.37 seconds including report/replay work.
+
+Evidence is under `.pi/resume-20261007/`:
+
+- `block-objections/{results.json,calls.jsonl}`: exact pilot requests, probability
+  vectors, judge tool calls, verdicts and per-call accounting.
+- `block-objection-recovery/{results.json,audit.json,summary.json}`: full request
+  parity, every new physical row, help/ruling counts and aggregate accounting.
+- Child directories contain journals, traces, reports and timelines.
+
+Keep the optional objection capability and declaration-time evidence correction.
+The measured failure is now choosing to invoke that capability. No exception
+handling, strategic improvement or legal full-game pass follows, and this round
+starts no immediate prompt variant. Generation remains open independently.
+
+The committee distinguishes failed entry into recovery from post-rollback
+recovery, which was not exercised live. The next bounded question is supplied
+coverage: Green's earlier v555 packet has correct phase prose but no structured
+steps or branches; Red's v558 packet has no applicable objection policy. Six
+exact-packet calls can test a supplied Green finish step with a conditional
+Kellan-block branch, and a supplied Red phase objection policy. Hold facts and
+physical choices fixed. Report each seat's score margins separately. A flip
+establishes supplied execution only; failure does not prove that another plan
+mark is required. Automatic referral, a new prompt warning and a full game
+remain outside that diagnostic.

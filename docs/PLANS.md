@@ -284,6 +284,7 @@ failure, fix its smallest reproduction before another full run.
 Both `npm test` and `npm run check` pass before every commit. The remaining work
 stays on this checklist; progress does not silently change its acceptance terms.
 
-The direct recorded-block objection contract and its separate pilot, judge and
-recovery gate are in [block objections](history/2026-10-07-block-objections.md).
-Current conflict hints are not declaration-time verdicts.
+Recorded-block objections and declaration-time evidence are implemented. The
+[live gate](history/2026-10-07-block-objections.md) found 6/6 correct supplied
+judge verdicts but 0/3 pilot objections and 0/3 recovery on the illegal case;
+exception handling remains open. Current hints are not historical verdicts.
