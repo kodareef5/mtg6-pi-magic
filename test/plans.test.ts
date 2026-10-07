@@ -29,6 +29,8 @@ import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
 import { candidateCatalog, candidatePlan, compileCandidate } from "../tools/benchmark-candidates.ts";
+import { checkedReceipt, freezeSource, repairPlan, type Counterexample } from "../tools/benchmark-repair.ts";
+import { commitmentReceipt } from "../tools/benchmark-receipt.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
@@ -500,6 +502,42 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 		} }, 1);
 	assert.equal(selected.candidates.length, 2);
 	assert.deepEqual(frame, snapshot, "registration, receipts and selection move nothing");
+	// Consequence feedback changes one field, uses the production validator and
+	// cannot silently reuse an amended candidate's or another position's receipt.
+	const frozenPosition = { id: "fixture", seat: frame.seat, version: 0, journal: "fixture" };
+	const source = { source: { revision: "fixture", dirty: "" }, results: [{ id: "fixture", iteration: 0, arm: "production",
+		case: frozenPosition, journal: "fixture.jsonl", answer: { plan: base }, commitment: commitmentReceipt(frame, base) }] };
+	const frozen = freezeSource(source, frozenPosition, "fixture.jsonl", 0, frame);
+	const counterexample: Counterexample = { assumptions: ["Unchanged characteristics."], consequence: "Fixture counterexample.", unchecked: ["Responses."], inconclusive: true };
+	const receipt = { id: "fixture", iteration: 0, hash: frozen.hash, initial: "inconclusive" as const, counterexample, reviewedBy: ["offline reviewer"] };
+	assert.equal(checkedReceipt([receipt], "fixture", 0, frozen.hash), receipt);
+	assert.throws(() => checkedReceipt([receipt], "fixture", 0, "other"), /exact candidate hash/);
+	assert.throws(() => checkedReceipt([{ ...receipt, reviewedBy: [] }], "fixture", 0, frozen.hash), /reviewed/);
+	assert.throws(() => freezeSource(source, { ...frozenPosition, version: 1 }, "fixture.jsonl", 0, frame), /exactly one/);
+	const altered = structuredClone(source); altered.results[0]!.answer.plan.guidance = "A different proposal.";
+	assert.notEqual(freezeSource(altered, frozenPosition, "fixture.jsonl", 0, frame).hash, frozen.hash);
+	const requests: Parameters<import("../src/context/reason.ts").Reasoner["work"]>[] = [];
+	for (const consequence of [undefined, counterexample]) {
+		const repaired = await repairPlan(frame, {}, { async work(...args) {
+			requests.push(args);
+			assert.equal(args[2].turns, 1);
+			assert.equal(args[2].submit.check({}), null);
+			return {};
+		} }, frozen, consequence);
+		assert.deepEqual(repaired.plan, base, "an empty confirmation preserves the frozen proposal");
+	}
+	const [control, treatment] = requests;
+	const facts = JSON.parse(treatment![1].user); delete facts.proposalReceipt.counterexample;
+	assert.deepEqual(facts, JSON.parse(control![1].user));
+	assert.deepEqual({ ...treatment![1], user: "" }, { ...control![1], user: "" });
+	assert.deepEqual(treatment![2].submit.parameters, control![2].submit.parameters);
+	assert.equal(treatment![3], control![3]);
+	let refusedCalls = 0;
+	await assert.rejects(repairPlan(frame, {}, reasoner({ role: "strategy", model: { id: "fixture", provider: "offline" } as never, tally: tally(), attempts: 1,
+		stream: () => { refusedCalls++; return { result: async () => ({ content: [{ type: "toolCall", id: "invalid", name: "submit", arguments: { steps: [{ action: { reuse: "missing" } }] } }], stopReason: "toolUse" }) }; },
+	}), frozen, counterexample), /did not submit an accepted answer/);
+	assert.equal(refusedCalls, 1, "a refused review has no extra reply or fallback proposal");
+	assert.deepEqual(frame, snapshot, "paired repair neither installs nor executes the proposed work");
 });
 
 test("strategy accepts scoped work before upkeep and reviews after draw, with no extra opening call", async () => {

@@ -213,6 +213,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
 - [x] Compare inline pregame examples with lossless lookup. Ready wins improved,
   but both arms missed every blocked-lethal win; production remains unchanged.
   [Paired generation gate](history/2026-10-07-payments-and-execution.md#saved-examples-as-references).
+- [ ] Test whether checked consequence feedback repairs a frozen generated line
+  beyond a second look alone. Keep production unchanged and classify initial
+  winning lines separately. [Diagnostic gate](history/2026-10-07-consequence-feedback.md).
 - [ ] Reuse a prepared line only with positive coverage for the observed change.
   First test an ordinary opposing land play and a draw covered by a land branch;
   a changed blocker must still trigger reconsideration. Syntax, an empty stop
