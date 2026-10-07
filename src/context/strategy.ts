@@ -5,8 +5,6 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Table } from "../core/table.ts";
-import { nextDecision } from "../core/decisions.ts";
 import type { Frame } from "../core/types.ts";
 import { NoteEditsSchema, type NoteEdit, type WorkCommand } from "../core/work-language.ts";
 import type { Prepared } from "./seat.ts";
@@ -21,12 +19,6 @@ import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditio
 import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 import { combatLookup } from "./strategy-combat.ts";
-
-/** Retained for comparing call policies; it does not start a session. */
-export function worthPlanning(table: Table): boolean {
-	const decision = nextDecision(table);
-	return decision?.situation === "priority" && decision.options.length > 1;
-}
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
 export const exampleIndex = readFileSync(join(docs, "examples", "README.md"), "utf8").trim();

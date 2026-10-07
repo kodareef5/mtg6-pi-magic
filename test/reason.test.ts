@@ -27,7 +27,6 @@ import { timeline, timelineData } from "../tools/game-timeline.ts";
 import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
-import { worthPlanning } from "../src/context/strategy.ts";
 import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { load as loadRules } from "../src/core/rules.ts";
@@ -332,29 +331,6 @@ test("a recap is two sentences of public events and skips a turn where nothing h
 	// all the request carries about what is still hidden.
 	assert.match(sent.at(-1)!.user, /Island/);
 	assert.match(sent.at(-1)!.user, /\d+ in hand/);
-});
-
-test("a phase is planned only when it has a choice that could be lost", () => {
-	const built = table();
-	// Before the hands are dealt there is no phase at all.
-	assert.equal(worthPlanning(built), false);
-	advance(built);
-	assert.equal(worthPlanning(built), false, "a mulligan declaration is not a phase plan");
-	apply(built, "keep", "model", "chosen");
-	apply(built, "keep", "model", "chosen");
-	advance(built);
-
-	// Walk a turn. A plan is worth a call only where more than one move is listed:
-	// the main phases, where a land or a spell can be played, and nowhere else.
-	const planned = new Set<string>();
-	while (built.cursor.turn === 1) {
-		if (worthPlanning(built)) planned.add(built.cursor.steps[0]!);
-		const decision = nextDecision(built);
-		if (!decision) { advance(built); continue; }
-		const land = decision.options.find((option) => option.id.startsWith("land:"));
-		apply(built, (land ?? decision.options[0]!).id, "model", "chosen");
-	}
-	assert.deepEqual([...planned], ["precombat-main", "postcombat-main"]);
 });
 
 test("the whole table is seated, briefed and played, and the recaps do not block it", async () => {
