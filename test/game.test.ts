@@ -193,6 +193,7 @@ test("no leak: public deck counts never identify hidden objects", async () => {
 	assert.equal(describe(hidden, tap).includes("Gigantosaurus"), false);
 	commit(hidden, [{ do: "move", what: giant.id, to: "battlefield", reason: "resolve" }], "resolve");
 	assert.equal(describe(hidden, tap).includes("Gigantosaurus"), false, "later reveals do not rewrite history");
+	assert.equal(project(hidden, 1, 0).since.find((line) => line.startsWith("tapped"))?.includes("Gigantosaurus"), false, "receipt windows retain event-time visibility");
 	const card = hidden.things.get(giant.id)!;
 	card.faceDown = true;
 	const faceDownTap = commit(hidden, [{ do: "tap", what: card.id }], "cost-payment");

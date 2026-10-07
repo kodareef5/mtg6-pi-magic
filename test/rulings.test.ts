@@ -17,7 +17,7 @@ import { standard } from "../src/core/format.ts";
 import { append, fork, open, reopen, replay, rollback, save, type Header } from "../src/core/journal.ts";
 import { play, type Judge } from "../src/core/loop.ts";
 import type { Ruling } from "../src/core/judge.ts";
-import type { Answer, Player } from "../src/core/player.ts";
+import { PlayerUnavailable, type Answer, type Player } from "../src/core/player.ts";
 import type { Table } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
 import { project } from "../src/core/view.ts";
@@ -65,7 +65,12 @@ test("an upheld objection takes the game back to just before the action, and the
 	let rebuiltAt = -1;
 	const judge: Judge = { async rule(_table, open) { assert.equal(open.raisedBy, 1); return ruling; }, restart: dealt,
 		flush() { save(journal, table); rebuiltAt = table.ledger.length; } };
-	await playThrough(table, { 0: steady("A"), 1: objector(table, contested) }, judge, 4);
+	let rolled: { at: number; frame: Frame } | undefined;
+	const capture = (player: Player): Player => ({ ...player, async answer(frame) {
+		if (table.rulings.length && !rolled) rolled = { at: table.ledger.length, frame: structuredClone(frame) };
+		return player.answer(frame);
+	} });
+	await playThrough(table, { 0: capture(steady("A")), 1: capture(objector(table, contested)) }, judge, 4);
 	save(journal, table);
 
 	assert.ok(contested.row !== undefined && rebuiltAt > contested.row, "B objected to a land A had already played");
@@ -76,6 +81,15 @@ test("an upheld objection takes the game back to just before the action, and the
 	const contestedRows = file.filter((line) => line.row?.seq === contested.row);
 	assert.equal(contestedRows.length, 2, "the rolled-past action stays in the file, behind the ruling, beside the one played after it");
 	assert.equal(physical(replay(journal.path, dealt).table), physical(table), "and replay reads the game that was played on");
+	assert.ok(rolled);
+	const branch = replay(journal.path, dealt, rolled.at).table;
+	let resumedFrame: Frame | undefined;
+	const probe: Player = { name: "Probe", observe() {}, close() {}, async answer(frame) {
+		resumedFrame = structuredClone(frame);
+		throw new PlayerUnavailable("Captured the post-ruling frame.");
+	} };
+	await play(branch, { 0: probe, 1: probe }, {});
+	assert.deepEqual(resumedFrame, rolled.frame, "rollback and resume derive the same receipts from the kept branch");
 
 	// Resuming the journal holds the same game and owes it nothing.
 	const back = replay(journal.path, dealt).table;

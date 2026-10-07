@@ -28,6 +28,16 @@ const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command",
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
 const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.token?.name ?? thing.ability?.claim ?? "an unnamed object" : "an unknown card";
 
+/** Receipt index before this seat's last nonautomatic decision, including a fallback.
+ * Its own action stays visible. Looking, asking for help and editing work consume nothing. */
+export function sinceDecision(table: Table, viewer: SeatId): number {
+	const row = table.ledger.findLast((one) => one.seat === viewer && one.by !== "judge" &&
+		(one.why === "chosen" || one.why === "declared" || one.why === "fallback"));
+	if (!row) return 0;
+	const first = table.log.findIndex((receipt) => receipt.at > row.seq);
+	return first < 0 ? table.log.length : first;
+}
+
 function window(table: Table): Window {
 	if (table.outcome) return { kind: "finished" };
 	const opening = table.opening;
@@ -304,7 +314,7 @@ export function render(frame: Frame): string {
 	];
 	if (frame.view.yours.length) out.push("", ...frame.view.yours);
 	for (const deck of frame.view.decks ?? []) out.push(`Registered deck for seat ${deck.seat}: ${Object.entries(deck.cards).map(([name, count]) => `${count} ${name}`).join(", ")}. Counts do not identify a hand or library order.`);
-	if (frame.view.since.length) out.push("", "Since your last look:", ...frame.view.since.map((l) => `  ${l}`));
+	if (frame.view.since.length) out.push("", "Recent recorded events:", ...frame.view.since.map((l) => `  ${l}`));
 	if (frame.view.work) {
 		const work = frame.view.work, plan = currentPlan(frame);
 		const done = new Set(frame.view.done ?? []);

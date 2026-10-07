@@ -10,6 +10,7 @@ import { execFileSync } from "node:child_process";
 import { parseArgs, isDeepStrictEqual } from "node:util";
 import { replay } from "../src/core/journal.ts";
 import { workFrame } from "../src/core/work-tools.ts";
+import { project, sinceDecision } from "../src/core/view.ts";
 import { annotate, planState } from "../src/core/planning.ts";
 import type { Plan } from "../src/core/language.ts";
 import { checkPlan, type PlanCheck } from "./benchmark-checks.ts";
@@ -64,6 +65,7 @@ const positions = selected.map((one) => {
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
+	if (one.task === "pilot") frame.view = project(saved.table, one.seat, sinceDecision(saved.table, one.seat));
 	if (one.refused) {
 		if (one.task !== "pilot") throw new Error("Saved transient refusals apply only to a pilot question.");
 		frame.refused = one.refused;

@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { play } from "../src/core/loop.ts";
-import type { Answer, Player } from "../src/core/player.ts";
+import { PlayerUnavailable, type Answer, type Player } from "../src/core/player.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { cardsIn } from "../src/core/table.ts";
 import type { Frame } from "../src/core/types.ts";
@@ -86,4 +86,25 @@ test("unusable answers retry the same decision and never masquerade as choices",
 		assert.deepEqual(nextDecision(built), nextDecision(before));
 		assert.match(built.gaps[0]!, /not implemented/);
 	}
+
+	// Work, help and a retry leave the receipt window intact. Stopping an
+	// unavailable adapter and resuming the same question cannot consume it.
+	const built = table(), frames: Frame[] = [];
+	const work = player(async (frame) => {
+		frames.push(structuredClone(frame));
+		const revision = frame.view.work?.revision ?? 0;
+		if (frames.length === 1) return { kind: "work", revision, actionId: "note", tools: [{ do: "notebook.edit", edits: [{ topic: "role", note: "Keep this opening." }] }] };
+		if (frames.length === 2) return { kind: "work", revision, actionId: "help", tools: [{ do: "plan.request", reason: "Review the opening." }] };
+		if (frames.length === 3) return { kind: "work", revision, actionId: "repair", tools: [{ do: "plan.keep", reason: "Keep the opening policy." }] };
+		if (frames.length === 4) return { kind: "pick", option: "bogus", actionId: "refused" };
+		throw new PlayerUnavailable("Receipt continuity probe.");
+	});
+	assert.equal(await play(built, { 0: work, 1: work }, {}), null);
+	assert.equal(frames.length, 5);
+	assert.ok(frames[0]!.view.since.length > 0);
+	for (const frame of frames) assert.deepEqual(frame.view.since, frames[0]!.view.since);
+	assert.match(frames[4]!.refused![0]!, /bogus/);
+	assert.equal(built.ledger.length, 0, "no work or failed answer chose a physical action");
+	assert.equal(await play(built, { 0: work, 1: work }, {}), null);
+	assert.deepEqual({ ...frames[5], refused: undefined }, { ...frames[4], refused: undefined }, "resume reconstructs the unchanged frame; the prior retry's transient refusal is not journaled");
 });

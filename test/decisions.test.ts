@@ -10,7 +10,7 @@ import { relive } from "../src/core/journal.ts";
 import { endingPhase } from "../src/core/turn.ts";
 import { example, main, matchup, passBoth, place, step } from "./play.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
-import { project } from "../src/core/view.ts";
+import { project, sinceDecision } from "../src/core/view.ts";
 
 const table = () => start(standard, [
 	{ name: "A", deck: deck("Green Stompy") },
@@ -23,6 +23,8 @@ test("listing a decision never changes the table, including pending losses", () 
 		const before = structuredClone(built);
 		const first = nextDecision(built);
 		const view = project(built, 0);
+		const recent = project(built, 0, sinceDecision(built, 0));
+		assert.deepEqual(project(built, 0, sinceDecision(built, 0)), recent);
 		assert.deepEqual(view.remainingSteps, view.window.kind === "turn" ? built.cursor.steps : undefined);
 		if (view.remainingSteps) { view.remainingSteps.length = 0; assert.deepEqual(built.cursor.steps, before.cursor.steps); }
 		assert.deepEqual(nextDecision(built), first);
@@ -41,6 +43,41 @@ test("listing a decision never changes the table, including pending losses", () 
 	apply(built, loss.options[0]!.id, "engine", "forced");
 	assert.deepEqual(built.outcome?.results, { 0: "lose", 1: "win" });
 	assert.equal(inspect(), null);
+
+	const boundary = table();
+	advance(boundary);
+	assert.equal(sinceDecision(boundary, 0), 0, "before any seat answer, setup receipts are included");
+	apply(boundary, "keep", "model", "chosen");
+	const afterKeep = sinceDecision(boundary, 0);
+	assert.match(project(boundary, 0, afterKeep).since.join("\n"), /A declared keep/);
+	apply(boundary, "keep", "model", "chosen");
+	assert.match(project(boundary, 0, afterKeep).since.join("\n"), /B declared keep/, "opposing actions extend the same window");
+	main(boundary, 0);
+	assert.equal(sinceDecision(boundary, 0), afterKeep, "forced rows do not consume receipts");
+	const land = nextDecision(boundary)!.options.find((one) => one.id.startsWith("land:"))!;
+	apply(boundary, land.id, "model", "chosen");
+	const afterLand = sinceDecision(boundary, 0);
+	assert.ok(afterLand > afterKeep);
+	assert.match(project(boundary, 0, afterLand).since[0]!, /play-land/, "the action's own receipt is included");
+	apply(boundary, "pass", "engine", "delegated");
+	assert.equal(sinceDecision(boundary, 0), afterLand, "delegation does not mean a new seat answer");
+	apply(boundary, "pass", "engine", "forced");
+	while (!nextDecision(boundary)) advance(boundary);
+	apply(boundary, "pass", "judge", "chosen");
+	assert.equal(sinceDecision(boundary, 0), afterLand, "a judge row is not the seat's answer");
+	apply(boundary, "pass", "engine", "forced");
+	while (!nextDecision(boundary)) advance(boundary);
+	apply(boundary, "attack:done", "model", "chosen");
+	while (!nextDecision(boundary)) advance(boundary);
+	apply(boundary, "pass", "engine", "fallback");
+	assert.equal(sinceDecision(boundary, 0), boundary.log.length, "a fallback pass advances the boundary even with no receipt");
+	commit(boundary, [{ do: "change-life", who: 0, amount: 1, reason: "resolve" }], "resolve");
+	commit(boundary, [{ do: "change-life", who: 1, amount: 1, reason: "resolve" }], "resolve");
+	assert.equal(project(boundary, 0, sinceDecision(boundary, 0)).since.length, 2, "all receipts associated with the last decision remain visible");
+	assert.deepEqual(project(boundary, 0).since, []);
+	assert.deepEqual(workFrame(boundary, 0).view.since, []);
+	assert.deepEqual(project(boundary, "spectator").since, []);
+	assert.equal(project(boundary, "spectator", boundary.log.length - 2).since.length, 2, "explicit receipt slices retain their meaning");
 });
 
 test("an outcome accounts for every loss in the simultaneous group", () => {

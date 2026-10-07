@@ -1,15 +1,21 @@
 import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { gunzipSync } from "node:zlib";
 
 import { focus, type Packet } from "../src/context/packet.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import type { Intent } from "../src/core/intent.ts";
 import { play } from "../src/core/loop.ts";
-import type { Player } from "../src/core/player.ts";
+import { PlayerUnavailable, type Player } from "../src/core/player.ts";
 import { commit, start } from "../src/core/commit.ts";
-import { project } from "../src/core/view.ts";
+import { project, sinceDecision } from "../src/core/view.ts";
+import { fork, replay } from "../src/core/journal.ts";
+import type { Frame } from "../src/core/types.ts";
 import { abilityExercise } from "../tools/ability-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { choices, inspect, type Inspection } from "../src/context/choices.ts";
@@ -18,8 +24,11 @@ import { establish, example, main, matchup, offered, place } from "./play.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { annotate, planState } from "../src/core/planning.ts";
 import { combatDamage, declareBlockers } from "../src/core/combat.ts";
-import { CHOICE_LIMIT, decisionApi } from "../src/context/model.ts";
+import { CHOICE_LIMIT, decisionApi, type DecisionApi } from "../src/context/model.ts";
 import { tally } from "../src/context/spend.ts";
+import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
+import { matchTable, universe } from "../tools/matchup-fixture.ts";
+import type { Brief } from "../src/context/brief.ts";
 
 test("context preserves the seat's options, shows the plan the seat flies, and carries neither deck lists nor registrations", async () => {
 	const table = start(standard, [
@@ -132,6 +141,58 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	assert.deepEqual(choiceFrame, originalChoices, "factoring and every inspection leave the original offers intact");
 	const entered = inspect(facts, inspect(facts, {}).enter["inspect:use:0"]!);
 	assert.deepEqual(inspect(facts, entered.enter["inspect:back"]!).options, inspect(facts, {}).options, "backtracking restores all choices");
+
+	// Reproduce the real partial declaration continuously from before Kellan,
+	// then from its saved prefix. Compare full pilot requests, not just the board.
+	const dir = mkdtempSync(join(tmpdir(), "magic-context-"));
+	try {
+		const path = join(dir, "parent.jsonl"), child = join(dir, "child.jsonl");
+		writeFileSync(path, gunzipSync(readFileSync(new URL("fixtures/benchmarks/ready-before-help.jsonl.gz", import.meta.url))));
+		fork(path, 365, "child", child);
+		const saved = replay(path, (header) => matchTable(header.seed));
+		const brief = saved.prepared.find((one) => one.seat === 1)!.made as Brief;
+		type Request = Parameters<DecisionApi["ask"]>[0];
+		const capture = async (source: string, version: number, retry: boolean) => {
+			const position = replay(source, (header) => matchTable(header.seed), version).table;
+			const requests: Request[] = [], frames: Frame[] = [], strategies: [string, string][] = [];
+			const pilot = aiSeat({ name: "Probe", intent: startingIntent(1), onGap: assert.fail,
+				chronicle: { briefs: { 1: brief }, recaps: [] },
+				plan: async (frame) => {
+					const context = { brief, cards: universe };
+					strategies.push([strategyFacts(frame, context), strategyFacts(workFrame(position, frame.seat), context)]);
+					return { tools: [{ do: "plan.keep", reason: "Continue the same attacks." }] };
+				},
+				api: { named: "offline", async ask(request) {
+					requests.push(structuredClone(request));
+					if (retry && requests.length <= 2) return { pick: { type: "choice", choice: requests.length === 1 ? "ask:help" : "bogus", confidence: 1, probabilities: {} } };
+					throw new PlayerUnavailable("Captured the declaration question.");
+				} },
+			});
+			const player: Player = { ...pilot, async answer(frame) {
+				if (position.ledger.length === 364) return { kind: "pick", option: saved.table.ledger[364]!.picked, actionId: "Kellan" };
+				frames.push(structuredClone(frame));
+				return pilot.answer(frame);
+			} };
+			try { await play(position, { 0: player, 1: player }, {}); } finally { await pilot.close(); }
+			return { requests, frames, strategies };
+		};
+		for (const retry of [false, true]) {
+			const live = await capture(path, 364, retry), resumed = await capture(child, 365, retry);
+			assert.equal(live.requests.length, retry ? 3 : 1);
+			assert.deepEqual(resumed, live, "a clone reaches the same full frames, pilot packets and questions, including help and refusal retry");
+			const request = live.requests[0]!.state as unknown as Packet;
+			assert.equal(request.known.length, 2, "the real v365 question has no additional receipt history");
+			const frame = live.frames[0]!, offline = workFrame(saved.table, 1);
+			offline.view = project(saved.table, 1, sinceDecision(saved.table, 1));
+			offline.decision = { ...offline.decision!, options: annotate(offline.decision!.options, planState(offline)!) };
+			assert.deepEqual(offline, frame, "the benchmark pilot builds the loop's exact frame");
+			const context = { brief, cards: universe };
+			const expected = strategyFacts(offline, context);
+			for (const [loopFacts, savedFacts] of live.strategies) assert.equal(loopFacts, savedFacts, "planning receives the same facts from loop and saved-position frames");
+			assert.equal(strategyFacts({ ...frame, view: { ...frame.view, since: ["A prior pilot receipt."] } }, context), expected, "pilot receipt slices do not change strategy facts");
+			if (retry) assert.deepEqual(live.requests.map((one) => (one.state as unknown as Packet).known), [request.known, request.known, request.known]);
+		}
+	} finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("inspection preserves every complete choice within provider capacity and never commits a partial action", async () => {

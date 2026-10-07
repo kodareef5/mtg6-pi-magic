@@ -209,10 +209,10 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   seeds for resource reuse, missed wins, wasted temporary development and missing
   phase coverage. Keep Jev and the baseline roster. Completion alone is not a
   strategic pass. [Latest full game](history/2026-10-07-payments-and-execution.md).
-- [ ] Restore decision-context continuity when resuming a prefix. A fresh loop
-  repeats the full visible receipt history in the first pilot packet. Use exact
-  saved packets for behavioral comparisons until this discrepancy is resolved.
-  [Partial-declaration controls](history/2026-10-07-payments-and-execution.md#premature-attacker-completion).
+- [x] Derive pilot receipt windows from recorded decisions in live play and
+  resumed prefixes. Strategy reads structured history without the pilot slice.
+  Historical unrecorded looks remain unrecoverable.
+  [Continuity checks](history/2026-10-07-payments-and-execution.md#receipt-continuity).
 
 Each cycle starts with the reviewed journal and exact request. Save the smallest
 position that exhibits the mistake, state the preferred decision and its

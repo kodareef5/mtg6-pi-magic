@@ -24,6 +24,13 @@ briefs and rollback history. The manifest names individual earlier positions.
 Regenerate a fixture from its source journal, never by editing physical facts
 or deleting inconvenient records. `npm run benchmark` checks all prefixes
 against the pinned cards and rules without inference.
+
+Pilot cases use the loop's receipt boundary: include the seat's last recorded
+nonautomatic decision and subsequent events. Strategy facts omit this pilot
+slice and retain structured actions and history. This reconstructs the current
+context contract, not every historical packet: earlier loops consumed receipt
+history on unrecorded looks. Transient refusals must be supplied explicitly.
+
 # Blocked lethal continuation
 
 `blocked-lethal.jsonl.gz` is the prefix of

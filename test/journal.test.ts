@@ -53,9 +53,10 @@ const header = (id: string, seed: string): Header => ({
 const dealt = (from: Header) =>
 	start(standard, from.seats.map((at) => ({ name: at.name, deck: at.deck })), from.seed);
 
-const seat = (name: string): Player => ({
+const seat = (name: string, shown?: (frame: Frame) => void): Player => ({
 	name,
 	async answer(frame: Frame) {
+		shown?.(structuredClone(frame));
 		const options = frame.decision!.options;
 		const land = options.find((option) => option.id.startsWith("land:"));
 		return { kind: "pick", option: (land ?? options[0]!).id, actionId: `${name}` };
@@ -65,7 +66,7 @@ const seat = (name: string): Player => ({
 });
 
 /** One finished game, written to a journal with a brief kept at version zero. */
-async function recorded(dir: string, id = "one", seed = "journal") {
+async function recorded(dir: string, id = "one", seed = "journal", shown?: (frame: Frame, at: number) => void) {
 	const made = header(id, seed);
 	const table = dealt(made);
 	const journal = open(join(dir, `${id}.jsonl`), made);
@@ -75,7 +76,8 @@ async function recorded(dir: string, id = "one", seed = "journal") {
 			opening: "Keep any seven.", against: {}, phases: {}, cards: {}, gaps: [],
 		});
 	}
-	const outcome = await play(table, { 0: seat("A"), 1: seat("B") }, {});
+	const capture = (frame: Frame) => shown?.(frame, table.ledger.length);
+	const outcome = await play(table, { 0: seat("A", capture), 1: seat("B", capture) }, {});
 	for (const line of linesOf(table)) append(journal, line);
 	return { made, table, journal, outcome };
 }
@@ -139,7 +141,8 @@ test("replay rebuilds the game and refuses data it was not played against", asyn
 
 test("forking at version zero reuses the pregame, and later forks carry the position", async () => {
 	const dir = where();
-	const { table, journal } = await recorded(dir, "parent");
+	const parent = new Map<number, Frame>();
+	const { table, journal } = await recorded(dir, "parent", "journal", (frame, at) => parent.set(at, frame));
 
 	// Version zero: the briefs and nothing else. This is the one to fork when
 	// the thing being tested is the game and not the pregame.
@@ -171,7 +174,11 @@ test("forking at version zero reuses the pregame, and later forks carry the posi
 	// Playing on from the position finishes a game, and the prefix it shares
 	// with its parent is identical.
 	const onward = position.table;
-	assert.ok(await play(onward, { 0: seat("A"), 1: seat("B") }, {}));
+	const frames = new Map<number, Frame>();
+	const capture = (frame: Frame) => frames.set(onward.ledger.length, frame);
+	assert.ok(await play(onward, { 0: seat("A", capture), 1: seat("B", capture) }, {}));
+	assert.ok(frames.size > 1);
+	for (const [version, frame] of frames) assert.deepEqual(frame, parent.get(version), `resumed decision ${version} preserves the parent's whole frame, including receipts`);
 	assert.deepEqual(
 		onward.ledger.slice(0, position.table.ledger.length).map((row) => row.picked),
 		table.ledger.slice(0, position.table.ledger.length).map((row) => row.picked),

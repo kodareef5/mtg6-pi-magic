@@ -47,7 +47,7 @@ the next write would turn the fragment into a corrupt middle line.
 | Frame version | physical table revisions | refuse stale answers |
 | Journal `v` | answered physical decisions | select a clone point |
 | Equipment revision | one seat's accepted private edits | validate preparation |
-| Receipt index | committed event groups with receipts | show events since a view |
+| Receipt index | committed event groups with receipts | select an explicit event-history slice |
 
 A pass can change the frame revision without writing a receipt. Several
 private edits can occur at one journal version without moving a card. These
@@ -63,6 +63,21 @@ The prefix includes private equipment and accepted instructions.
 `relive` applies each ledger row with its recorded reason. A fallback remains a
 fallback. A row that carried out a plan step names it, so plan progress is
 read from the ledger and a torn equipment write cannot lose or repeat it.
+
+Pilot frames show receipts from the seat's latest recorded `chosen`, `declared`
+or `fallback` decision, including that decision's own receipts. Forced,
+delegated and judge-authored rows do not reset the window. Before the seat has
+such a row, the window starts at setup. Help, repairs, retries and observation
+do not consume it. The loop and pilot benchmarks derive the same boundary from
+the ledger; no receipt cursor is stored. Rollback uses the kept branch.
+
+Generic projections and `workFrame` still omit receipts unless a caller asks
+for a slice. Strategy reads structured actions and history, excluding the pilot
+receipt slice. This preserves table-derived pilot packets and strategy facts.
+Unaccepted background preparation, inspection progress, summary recaps and
+retry text are not journaled and restart on resume. Historical journals cannot
+reconstruct unrecorded looks made under the old loop; exact historical packets
+remain separate evidence.
 
 The commands have separate meanings:
 

@@ -146,7 +146,9 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 			landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
 		} };
 	}
-	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, ...view } = frame.view;
+	// Pilot receipt windows do not define strategic history. Actions and history
+	// carry the recorded events in both live and saved-position requests.
+	const { work, done: _done, worked: _worked, objects: _objects, printed: _printed, table: _table, yours: _yours, since: _since, ...view } = frame.view;
 	const at = frame.view.window;
 	const decision = decisionFacts(frame, context.cards);
 	const inHand = new Set(decision.yourHand.filter((one) => one.printed).map((one) => one.name));

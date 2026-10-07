@@ -6,8 +6,8 @@
  *
  * The version is the table's revision, which is what a stale pick has to be
  * caught against: anything that commits moves it, whether or not a decision was
- * answered. How much of the log a seat has read is a different number and is
- * tracked here, because nothing about it bears on an outcome.
+ * answered. A seat's recent receipts are derived from its recorded decisions,
+ * so a resumed game supplies the same window as uninterrupted play.
  * Past 150 lines to keep answer dispatch and recovery in the same serial loop.
  */
 
@@ -21,7 +21,7 @@ import { refuse, PlayerUnavailable, type Answer, type Player } from "./player.ts
 import type { Table } from "./table.ts";
 import { endingPhase } from "./turn.ts";
 import type { Decision, Frame, Outcome, SeatId } from "./types.ts";
-import { describe, project } from "./view.ts";
+import { describe, project, sinceDecision } from "./view.ts";
 import { annotate, execution, planReason, planState, type PlanState } from "./planning.ts";
 import { editWork, prepareWork, recordWork, workFrame } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
@@ -84,10 +84,6 @@ export async function play(
 	{ watch, onTurn, onTurnStart, workBudget = 32, judge }: PlayOptions = {},
 ): Promise<Outcome | null> {
 	if (!Number.isSafeInteger(workBudget) || workBudget < 1) throw new Error("The work edit budget must be a positive integer.");
-	// What each seat has already been shown, so a frame's "since" is the part it
-	// has not seen. Presentation only: nothing here bears on an outcome, which
-	// is why it may live outside the table.
-	const seen: Record<SeatId, number> = {};
 	let told = 0;
 	let began = table.log.length;
 	let walk: { version: number; edits: number } | undefined;
@@ -112,7 +108,7 @@ export async function play(
 				began = table.log.length;
 				// Every seat sees the new turn begin, however its decisions go: forced and delegated play asks nobody.
 				for (const one of table.seats) {
-					const view = project(table, one.id, seen[one.id] ?? 0);
+					const view = project(table, one.id, sinceDecision(table, one.id));
 					players[one.id]?.observe({ seat: one.id, version: table.cursor.clock, view });
 				}
 			}
@@ -140,9 +136,8 @@ export async function play(
 			report(table, told, watch);
 			return null;
 		}
-		const frame = (seat: SeatId, answering = false): Frame => {
-			const view = project(table, seat, seen[seat] ?? 0);
-			if (answering) seen[seat] = table.log.length;
+		const frame = (seat: SeatId): Frame => {
+			const view = project(table, seat, sinceDecision(table, seat));
 			return { seat, version, view };
 		};
 
@@ -158,7 +153,7 @@ export async function play(
 		// Asking the identical question twice is one question, not two. A plan's
 		// announcements join the listed options, each marked with what the plan says.
 		const offered: Decision = state ? { ...decision, options: annotate(decision.options, state) } : decision;
-		const asked = { ...frame(decision.seat, !attention), decision: offered };
+		const asked = { ...frame(decision.seat), decision: offered };
 		let answer: Answer | undefined;
 		const failures: string[] = [];
 		for (let attempt = 0; attempt < 2; attempt++) {
@@ -214,7 +209,6 @@ export async function play(
 		if (objection && await object(table, { row: objection.row, raisedBy: decision.seat, claim: objection.claim, ...(objection.rule ? { rule: objection.rule } : {}) }, judge)) {
 			for (const player of Object.values(players)) player.reset?.();
 			told = table.log.length;
-			for (const one of table.seats) seen[one.id] = table.log.length;
 			continue;
 		}
 

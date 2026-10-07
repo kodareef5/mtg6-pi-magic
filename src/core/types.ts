@@ -101,7 +101,7 @@ export type SeatView = {
 	table: string[];
 	/** What only this seat knows. */
 	yours: string[];
-	/** What happened since this seat's last frame, as a player would say it. */
+	/** Public receipt text from the requested index. Pilot frames start before the seat's last nonautomatic decision. */
 	since: string[];
 	/** Visible objects only; unknown public identities have no card field. */
 	objects?: SeenObject[];

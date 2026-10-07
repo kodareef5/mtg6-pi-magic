@@ -760,3 +760,50 @@ execution/replay/clone health, not a repair of the parent's behavior. Until that
 context discrepancy is resolved, use exact saved packets to support pilot
 behavior claims. No full-game gate follows; generation and upkeep coverage
 remain open. Types, all 179 tests and all 27 saved-position replays pass.
+
+## Receipt continuity
+
+The next correction addresses the resumed context discrepancy before another
+behavior comparison. A new assertion in the existing clone invariant failed at
+decision 40: the resumed packet repeated nine old receipt lines that its parent
+omitted. The physical table and remaining frame fields matched. The failed
+check is saved in `.pi/resume-20261007/receipt-continuity-before.log`.
+
+`sinceDecision` now derives the receipt boundary from the seat's latest
+`chosen`, `declared` or `fallback` row, excluding judge-authored rows. It includes
+that action's own receipts. Forced and delegated rows extend the history without
+resetting it. Before any qualifying row, the window starts at setup. The loop's
+answer and observation frames and the benchmark pilot runner share this reader.
+Help, work, refusals and unavailable answers consume nothing. Rollback reads the
+kept branch; there is no stored cursor to repair.
+
+The review also found that receipt history entered strategy through live loop
+frames. An offline recount confirmed 53 strategy requests in the scoped full
+game with zero or one receipt line, but four of thirteen requests in
+`combat-facts-blocked/calls.jsonl` with 211 lines. Strategy facts now omit only
+`view.since`; structured `actions` and `history` remain. Generic projections,
+`workFrame`, spectators and explicit receipt-index slices retain their previous
+semantics. This is an input continuity correction, not evidence of stronger
+planning.
+
+The offline gates now establish:
+
+- Every subsequent full frame in the scripted parent and clone matches.
+- The actual partial declaration at decision 365, reached continuously after
+  Kellan from decision 364, produces the same full Jev packet and question as a
+  clone resumed at 365. Its `known` has two seat facts and no repeated receipts.
+- The same comparison passes through help, `plan.keep`, an invalid pick and its
+  refusal retry. Foreground strategy facts match the saved-position facts at
+  the help boundary and are independent of the pilot receipt slice.
+- Unavailable answers, explicit work, forced/delegated rows, fallback passes
+  with no receipt, multiple receipts, rollback, purity and event-time visibility
+  retain their stated behavior. Types, 179 tests and 27 saved replays pass.
+
+These checks establish continuity of facts derived from the table. Unaccepted
+background preparation, inspection progress, summary recaps and retry text are
+not journaled and restart on resume. Continuation reports must retain preparation
+timing; summary remains off in comparisons. Historical packets from unrecorded
+looks cannot be reconstructed. This limitation covers both pilot behavior and
+strategy calls inside older physical continuations; their observed outcomes and
+replay results remain facts. Initial planning probes built from `workFrame` did
+not receive the repeated receipt history.
