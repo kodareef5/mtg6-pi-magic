@@ -20,7 +20,8 @@
     "green-block-preparation": "test/fixtures/benchmarks/green-block-preparation.jsonl.gz",
     "green-multi-attack": "test/fixtures/benchmarks/green-multi-attack.jsonl.gz",
     "block-kellan-zhao": "test/fixtures/benchmarks/block-kellan-zhao.jsonl.gz",
-    "block-zhao-only": "test/fixtures/benchmarks/block-zhao-only.jsonl.gz"
+    "block-zhao-only": "test/fixtures/benchmarks/block-zhao-only.jsonl.gz",
+    "red-post-development": "test/fixtures/benchmarks/red-post-development.jsonl.gz"
   },
   "cases": [
     {
@@ -556,6 +557,15 @@
       "seat": 0,
       "task": "plan",
       "property": "Supplied opposing declaration for accepted generated-policy execution via --answers; runner health is not a legality or strategy grade."
+    },
+    {
+      "id": "red-post-development-combat",
+      "journal": "red-post-development",
+      "version": 590,
+      "seat": 1,
+      "task": "repair",
+      "winner": 1,
+      "property": "Repair the inherited line after supplied execution of its Mountain, Claw and Challenger development. Runner PASS means accepted structure only; manually grade feasible winning commitments and consistent delivered policies before any physical expansion."
     }
   ]
 }

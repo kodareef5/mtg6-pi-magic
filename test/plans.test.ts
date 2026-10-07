@@ -747,6 +747,50 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 			assert.equal(credited.size, plan.plan.steps.length, "the ordinary plan credits every intended commitment, including future attackers");
 			assert.deepEqual(afterMain, supplied.candidates[witness.index]!.afterMain, "candidate boards come from the seat projection after the actual casts");
 		}
+		// The post-entry diagnostic amends the actual remainder. Supplied
+		// development and a private feasibility proof do not become writer advice.
+		const postPath = join(temp, "post-entry.jsonl");
+		writeFileSync(postPath, gunzipSync(readFileSync("test/fixtures/benchmarks/red-post-development.jsonl.gz")));
+		const post = replay(postPath, (header) => matchTable(header.seed));
+		const postFrame = workFrame(post.table, 1), postBefore = structuredClone(postFrame);
+		const original = postFrame.view.work!.plan!, remainder = basePlan(postFrame);
+		assert.equal(post.table.ledger.length, 590);
+		assert.equal(postFrame.version, 1011);
+		assert.equal(postFrame.view.work!.request, "Review the unfinished plan from the current position.");
+		assert.deepEqual(postFrame.view.done, [0, 1, 2]);
+		assert.deepEqual(remainder.steps, original.steps.slice(3));
+		assert.deepEqual(remainder.holds, original.holds);
+		assert.deepEqual(remainder.phases, original.phases);
+		assert.equal(remainder.throughTurn, 15);
+		assert.match(JSON.stringify(remainder.phases), /Do not attack with Sanctuary/);
+		const postBrief = post.prepared.find((one) => one.seat === 1)!.made as Brief;
+		const proof = JSON.parse(readFileSync("test/fixtures/benchmarks/red-post-development-witness.json", "utf8")) as {
+			changes: Record<string, unknown>; decisions: { seat: number; picked: string }[] };
+		const repaired = await planWork(postFrame, { brief: postBrief }, { async work(_about, prompt, tools) {
+			const sent = JSON.parse(prompt.user);
+			assert.deepEqual(sent.base, planFacts(remainder));
+			assert.equal(sent.brief.objective, postBrief.objective);
+			assert.ok(!prompt.user.includes("Private supplied witness"));
+			assert.equal(tools.submit.check(proof.changes), null);
+			return proof.changes;
+		} });
+		assert.deepEqual(postFrame, postBefore);
+		const postClone = join(temp, "post-entry-clone.jsonl");
+		fork(postPath, 590, "post-entry-clone", postClone);
+		assert.deepEqual(workFrame(replay(postClone, (header) => matchTable(header.seed)).table, 1), postBefore);
+		editWork(post.table, 1, repaired.tools, "private-feasibility-proof");
+		for (const row of proof.decisions) {
+			let advances = 0;
+			while (!nextDecision(post.table) && !post.table.outcome) { assert.ok(advances++ < 100); advance(post.table); }
+			const decision = nextDecision(post.table)!;
+			assert.equal(decision.seat, row.seat);
+			assert.ok(decision.options.some((one) => one.id === row.picked), row.picked);
+			const state = planState(workFrame(post.table, row.seat));
+			apply(post.table, row.picked, "model", "chosen", state ? execution(state, row.picked) : undefined);
+		}
+		assert.equal(post.table.seats[0]!.life, 0);
+		assert.equal(post.table.outcome?.results[1], "win");
+		assert.deepEqual(post.table.gaps, []);
 	} finally { rmSync(temp, { recursive: true, force: true }); }
 });
 

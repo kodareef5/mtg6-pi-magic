@@ -225,6 +225,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
 - [x] Compare checked consequence feedback with a second look at frozen plans.
   Each arm selected one winning action set in three; treatment had no clean
   repaired-line win. No adoption. [Diagnostic result](history/2026-10-07-consequence-feedback.md).
+- [ ] Produce complete, coherent turn commitments. The [attack audit](history/2026-10-07-attack-commitments.md)
+  separates omitted actions from false choices and payment conflicts; requiring
+  complete attack dispositions remains unadopted.
 - [ ] Reuse a prepared line only with positive coverage for the observed change.
   First test an ordinary opposing land play and a draw covered by a land branch;
   a changed blocker must still trigger reconsideration. Syntax, an empty stop
