@@ -72,3 +72,61 @@ The existing invariants now cover withdrawal and reselection, multiple pending
 choices, both finish boundaries, a later combat, plan amendment, rollback,
 replay/clone and external pauses after both withdrawal and finishing. The
 paseo-committee reviewers found no remaining consequential correctness issue.
+
+## Live result at 77216e5
+
+The interface correction is retained. Pilot recovery failed: 0/3 withdrawals
+in the isolated question and 0/3 coherent recoveries in physical continuations.
+No further prompt variant or full-game gate follows this result.
+
+| Measure | Before withdrawal support | With withdrawal support |
+|---|---|---|
+| Initial question: correctly finish without blocking | 0/3 | 0/3 |
+| Initial question: illegal block / help | 3/3 / 0/3 | 1/3 / 2/3 |
+| Pending question: withdraw / help / finish illegal block | unavailable / 0/3 / 3/3 | 0/3 / 0/3 / 3/3 |
+| Physical continuation: coherent recovery | Not run | 0/3 |
+
+The initial question is byte-for-byte equivalent as parsed JSON across these
+samples. Its two later help requests do not establish a benefit from the
+change. The pending question adds the withdrawal option and criteria, names
+withdrawal in the question, and updates the checklist's available choice and
+associated cards. Every physical continuation's first full pilot request equals
+the corresponding new isolated question. No extra resume context explains the
+result.
+
+All three continuations first choose `block:done`, finalize Forest alone on
+Zhao, and make no withdrawal or help request. Forest and Zhao trade in the
+ensuing illegal combat. There is no select/withdraw cycle. Each continuation
+stops exactly 12 recorded decisions after the prefix: eight chosen and four
+forced. All have `stoppedBy: "decisions"`, no outcome, zero recorded gaps and
+fallback, and matching replay/clone. The runner's generic `PASS` describes its
+structural and replay checks; it does not pass the declaration recovery gate
+or certify legality.
+
+Evidence under `.pi/resume-20261007`:
+
+- `menace-withdrawal/{results.json,calls.jsonl,packet-diff.json}` holds the six
+  post-change pilot calls and their exact request differences.
+- `menace-recovery/{results.json,declaration-audit.json,packet-parity.json}`
+  holds the three continuations, their declaration events and all new rows.
+  Child directories hold the complete journals, traces, reports and timelines.
+- `menace-recovery/summary.json` combines the baseline and new measurements.
+
+The continuations took 4.67, 4.30 and 4.33 seconds including replay/report work.
+Across both pilot samples and the three continuations, 39 calls include 36 Jev
+calls with 178,488 input and 2,846 output tokens. Three background preparations
+were cancelled at the boundary without reported usage or cost. The recorded
+cost is about $0.0075 and excludes those unmetered calls. No foreground strategy
+repair ran. Correct context and a complete recovery interface still did not
+make Jev follow this accepted policy.
+
+The review also found an open rules-integrity gap beyond Green's failure. After
+the illegal block committed, Red's next pilot packet offered no objection
+choice and did not mark the committed menace conflict in its combat facts.
+Red had an `ask:help` choice and passed instead. No objection or judge call
+occurred in any continuation. Help can reach the strategy writer, which can
+object through its existing submission, but no foreground strategy session was
+invoked there. The current decision path therefore did
+not challenge the illegal declaration before combat damage. Reporting the
+committed conflict and exposing an objection at that decision is a candidate
+for separate design work, not part of this correction.
