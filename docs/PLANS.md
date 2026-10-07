@@ -234,6 +234,11 @@ without separate invitations for Jev to invent a strategy for each one.
   No new planning stage was adopted. Next, expose scoped payment witnesses and
   check candidate commitments before binding the phase instructions. Generated
   plans must execute coherently before the full-game gate.
+  The [October 7 payment and execution round](history/2026-10-07-payments-and-execution.md)
+  adds payment witnesses and marks payments that tap planned attackers. A
+  supplied line executed three times when phase instructions came directly from
+  its selected actions. Candidate generation remains unreliable; the new
+  proposal and instruction-rendering experiments are not production policy.
 
 The [October 6 review and tune round](history/2026-10-06-review-tune.md) compared
 Jev and Luna low on identical pilot questions. Jev matched 27/27 expected
