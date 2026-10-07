@@ -439,3 +439,72 @@ without changing the planner prompt, schema, model or effort. The damage
 invariant checks the supplied values against physically executed first- and
 double-strike combats. Types, all 179 tests and all 24 saved-position replay
 checks pass. Live outcome probes follow separately.
+
+At clean `59f1624`, `combat-facts-ready/` won 2/3 physical continuations through
+turn 12. Both wins needed Red repairs, one and two respectively. The failed
+answer described Burst plus three attacks in its audit prose but submitted
+only `Finish attackers`. One winning answer called a two-damage Burst lethal
+against four life; the other selected all three attackers but left incomplete
+phase coverage. Their play times were 12.8, 30.9 and 67.3 seconds. Generation
+and continuation together used 100 calls, 871,985 input tokens, 16,991 output
+and $0.0450 reported cost; four cancelled calls lack usage.
+
+`combat-facts-blocked/` won 0/3 through turn 14. The first cast Smaug but said
+Explorer could block it, and invented trample on Explorer. The second spent on
+redundant Kellan upgrades and kept the attackers back. The third explicitly
+recognized that Explorer prevents Kellan's player damage, yet sent only Kellan.
+Play times were 9.1, 37.5 and 7.6 seconds. Generation and continuation used 104
+calls, 810,773 input tokens, 12,364 output and $0.0358; six cancelled calls lack
+usage. Every clone and replay matched and every run had zero gaps or fallback.
+There were no clean generated wins across the six trials. Supplied arithmetic
+does not establish improved strategy. The review below retains these accurate
+facts without claiming a selection improvement.
+
+The remaining contradiction control also ran at `59f1624`. It repeats the
+unchanged candidate-two Treasure plan, whose purpose spends Treasure while its
+hold reserves Treasure until Smaug attacks. `execution-treasure-conflict-controls/`
+won 3/3 in 7.86, 7.15 and 7.48 seconds, with matching replay/cloning and no gaps
+or fallback, but failed the required help behavior 3/3. Jev always paid with a
+Mountain and made no foreground help request. Each run used 26 Jev calls; their
+reported costs were $0.00620, $0.00620 and $0.00657, each missing one cancelled
+background call's usage. The physical win checker cannot score this exception
+policy, so the trace audit overrides its displayed PASS for this question.
+
+Both contradictory policies were visible. The held Treasure was labelled by its
+token id, while the payment named Treasure. Also, `planning.spare` marks only
+hold-preserving payments as fitting the step when such a payment exists. The
+selected Mountain therefore carried the plan-step mark with the instruction
+to pay Treasure, while the Treasure payment carried only its hold warning.
+These findings were returned to the two continuing paseo-committee reviewers;
+the protocol must not silently give either policy precedence.
+
+## Holds describe conflicts without changing execution credit
+
+The continuing paseo-committee reviewers converged on deleting `spare()`.
+Every structurally matching payment now carries the step or branch mark and
+execution policy, in canonical payment order. Spending a held resource adds
+its warning; it does not remove execution credit or the announcement's policy
+at resolution. This also prevents a completed cast from remaining unfinished
+solely because its payment spent a held source. Locked action matching is
+unchanged. Hold and attacker-tap marks use token names as well as card names;
+the packet's hold list retains exact identity.
+
+The existing invariant covers both payments, steps and branches, complete
+option reachability, canonical ordering, hold release, and announcement policy
+recovery after either payment. The token fixture checks readable Treasure
+warnings and identity. The correction grants no precedence to a purpose or a
+hold and does not parse either policy's prose.
+
+The focused live gate repeats the unchanged contradictory Treasure plan three
+times and the unchanged coherent two-Mountain plan three times. The former
+requires help before announcement or spending; the latter requires the stated
+payment without foreground repair. Both require matching replay and cloning
+and no gaps or fallback. Wins are recorded separately. A failed exception
+control does not justify reverting honest matching, claiming exception handling
+works, or immediately starting another prompt variant. The committee retains
+the accurate single-pair combat facts. Upkeep coverage, ordered stack waiting
+and generation quality remain open work.
+
+Types, all 179 tests and all 24 saved-position replay checks pass before the
+live controls. The first test run exposed a missing test-only import; the
+completed run includes its correction and the final canonical-order contract.

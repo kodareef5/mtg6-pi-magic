@@ -84,16 +84,11 @@ export function planState(frame: Frame): PlanState | null {
 	const procedures: ProcedureOption[] = [];
 	const held = (plan.holds ?? []).filter((hold) => !hold.releaseWhen || !condition(scope, hold.releaseWhen))
 		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
-	// Where some ways of carrying a step out spare what the plan holds, only those fit it.
-	const keeps = new Set(held.flatMap((hold) => hold.objects.map((object) => object.id)));
-	const spare = (options: Option[]) => {
-		const sparing = options.filter((option) => !spent(option).some((ref) => keeps.has(ref.id)));
-		return sparing.length ? sparing : options;
-	};
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
 		procedures.push(...found.procedures);
-		return { at, label: option.label, candidates: spare(found.options) };
+		// Holds warn about spending; they cannot change which action was carried out.
+		return { at, label: option.label, candidates: found.options };
 	};
 	const due: Fit[] = [], waiting: PlanState["waiting"] = [];
 	plan.steps.forEach((step, at) => {
@@ -159,13 +154,13 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
-			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.id).join(", ")}, held: ${hold.purpose}.`);
+			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.token?.name ?? object.id).join(", ")}, held: ${hold.purpose}.`);
 		}
 		if (option.use) {
 			const { cost, source, funding } = option.use;
 			const taps = [...(funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.tap ? [source] : [])];
 			for (const attack of state.attacks) for (const object of attack.objects) if (taps.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation))
-				marks.push(`This payment taps ${object.card ?? object.id}, named by the remaining attack step "${attack.label}". It would need to untap before attacking.`);
+				marks.push(`This payment taps ${object.card ?? object.token?.name ?? object.id}, named by the remaining attack step "${attack.label}". It would need to untap before attacking.`);
 		}
 		return marks.length ? { ...option, notes: [...(option.notes ?? []), ...marks], shows: [option.shows, ...marks].filter(Boolean).join(" ") } : option;
 	});

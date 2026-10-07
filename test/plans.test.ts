@@ -25,6 +25,7 @@ import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work
 import { budget, manaBudget, paymentForecast } from "../src/core/budget.ts";
 import { printedCast, procedureOptions } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
+import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
 import { candidateCatalog, candidatePlan, compileCandidate } from "../tools/benchmark-candidates.ts";
@@ -282,6 +283,14 @@ test("a branch and a held resource are marked on the options they touch, and not
 		assert.ok(checklist(earlier).filter((one) => one.kind === "step" && one.options.some((id) => id.startsWith("attack:") && id !== "attack:done")).every((one) => one.status === "available"), "the checklist treats those attackers as available together");
 		earlier.view.work!.plan!.holds!.push({ objects: { card: "Smaug the Magnificent", zones: ["battlefield"] }, purpose: "Keep this blocker untapped" });
 		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.shows!, /Uses Smaug the Magnificent, held:/);
+		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz")));
+		const tokens = workFrame(replay(path, (header) => matchTable(header.seed), 236).table, 1);
+		const treasure = tokens.view.objects!.find((one) => one.token?.name === "Treasure")!;
+		assert.ok(treasure);
+		tokens.view.work!.plan!.holds = [{ objects: { refs: [{ id: treasure.id, incarnation: treasure.incarnation }] }, purpose: "Keep Treasure for Smaug." }];
+		const markedTokens = annotate(tokens.decision!.options, planState(tokens)!);
+		assert.ok(markedTokens.some((one) => one.shows?.includes("Uses Treasure, held: Keep Treasure for Smaug.")), "token hold warnings use the payment's name");
+		assert.match(focus(tokens, startingIntent(1)).plan!.held[0]!, /^Treasure \(token-/, "the hold retains both its name and exact identity");
 	} finally { rmSync(scratch, { recursive: true, force: true }); }
 });
 
@@ -905,20 +914,39 @@ test("an essential step that cannot be taken where it belongs asks for a new pla
 	}
 });
 
-test("the pilot can select the payment that spares what the plan holds", async () => {
+test("a held payment still carries out its matching step or branch and preserves its policy", () => {
 	const table = matchup("sparing");
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest");
 	place(table, 0, "hand", "Llanowar Elves");
 	const [kept] = cardsIn(table, "battlefield", 0).filter((one) => one.card === "Forest");
-	editWork(table, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", holds: [{ objects: { refs: [{ id: kept!.id, incarnation: kept!.incarnation }] }, purpose: "Snakeskin Veil" }],
-		steps: [{ label: "Cast Llanowar Elves", when: { ...turn3, step: "precombat-main" }, action: { prefix: "cast:", objects: { card: "Llanowar Elves" } } }] } }], "plan");
-	const due = planState(workFrame(table, 0))!.due[0]!;
-	assert.equal(due.candidates.length, 1, "of the two Forests, only the free one fits the step");
-	assert.ok(!due.candidates[0]!.objects!.some((ref) => ref.id === kept!.id));
-	await playUntil(table, { 0: pilot([]), 1: opponent }, 3);
-	assert.equal(table.things.get(kept!.id)!.tapped, false, "the held Forest is still untapped");
-	assert.ok(table.ledger.some((row) => row.picked.startsWith("cast:") && row.why === "chosen"), "the pilot selected the marked cast");
+	const step: PlanOption = { label: "Cast Llanowar Elves", purpose: "Resolve the chosen Elf cast.", when: { ...turn3, step: "precombat-main" }, action: { prefix: "cast:", objects: { card: "Llanowar Elves" } } };
+	for (const branch of [false, true]) {
+		const position = structuredClone(table);
+		editWork(position, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", holds: [{ objects: { refs: [{ id: kept!.id, incarnation: kept!.incarnation }] }, purpose: "Snakeskin Veil" }],
+			steps: branch ? [] : [step], ...(branch ? { may: [step] } : {}) } }], "plan");
+		const frame = workFrame(position, 0), state = planState(frame)!, fit = (branch ? state.branches : state.due)[0]!;
+		const physical = frame.decision!.options.filter((one) => one.use?.timing === "spell");
+		assert.equal(fit.candidates.length, 2, "both matching payments carry out the commitment");
+		assert.deepEqual(fit.candidates.map((one) => one.id), physical.map((one) => one.id), "holds preserve canonical payment order");
+		const marked = annotate(physical, state);
+		assert.ok(marked.every((one) => one.shows?.includes(branch ? "Plan branch:" : "Plan step 1") && one.shows.includes(step.purpose!)));
+		assert.equal(marked.filter((one) => one.shows?.includes("Uses Forest, held:")).length, 1);
+		const packet = focus(frame, startingIntent(0));
+		assert.deepEqual(packet.options.filter((one) => one.use).map((one) => one.id), physical.map((one) => one.id));
+		assert.deepEqual(new Set(packet.options.map((one) => one.id)), new Set(frame.decision!.options.map((one) => one.id)), "every original option remains reachable");
+		for (const pick of fit.candidates) {
+			const chosen = structuredClone(position), carried = execution(state, pick.id);
+			assert.deepEqual(carried, branch ? { plan: state.revision, branch: 0 } : { plan: state.revision, step: 0 });
+			apply(chosen, pick.id, "model", "chosen", carried);
+			assert.deepEqual(workFrame(chosen, 0).view.done, branch ? [] : [0], "either payment records the actual commitment");
+			assert.equal(project(chosen, 0).purposes![0]!.use, step.purpose, "resolution retains the step or branch policy");
+		}
+		frame.view.work!.plan!.holds![0]!.releaseWhen = { amount: { life: "you" }, atLeast: 0 };
+		const released = planState(frame)!;
+		assert.deepEqual((branch ? released.branches : released.due)[0]!.candidates, fit.candidates);
+		assert.ok(annotate(physical, released).every((one) => !one.shows?.includes("held:")), "release removes only the hold warning");
+	}
 });
 
 test("in a scripted window the pilot reads the script and nothing else of the plan, and asks only for what the script names", () => {
