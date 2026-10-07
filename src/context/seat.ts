@@ -124,6 +124,7 @@ export function changes(from: Frame, now: Frame): { lines: string[]; drawn: Seen
  * branch whose condition holds selects.
  */
 export function settled(frame: Frame, prepared: Plan, changed: ReturnType<typeof changes>): boolean {
+	if (prepared.throughTurn !== undefined && frame.view.window.kind === "turn" && frame.view.window.turn > prepared.throughTurn) return false;
 	if (!changed.quiet || planProblems(frame, prepared).length || budget(frame, prepared).length) return false;
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	const takes = (one: PlanOption, card: SeenObject) => {
@@ -180,7 +181,7 @@ export function question(packet: Packet, help: boolean): Question {
 			...(help ? ["If an uncovered change requires failing to find, ask for help."] : [])] : []),
 		...(packet.objects.some((one) => one.zone === "stack") && !packet.resolving ? ["The stack is waiting. Land plays and uses at sorcery speed need an empty stack. Their absence alone does not require a new plan. Apply the prepared response policy now. Passing lets the top object resolve after every seat passes; it does not end the phase or guarantee a later use will become available.",
 			"Read named stack targets and order before responding. An effect already pending on a target has not resolved; paying again starts another use."] : []),
-		...(packet.plan ? ["Follow the current plan and phase guidance. A held resource can be spent only under its release policy. A waiting prerequisite is not an unavailable line; a contradicted assumption may need a covered alternative or a revision."] : []),
+		...(packet.plan ? ["Follow the step's Choices and applicable phase policies. A hold needs its release policy; if it contradicts a chosen payment, request help rather than inventing precedence. script.completion applies after this window's commitments finish; absence or an empty list grants no pass. Waiting uses the response policy."] : []),
 		...(packet.plan?.next.length ? ["plan.next names unfinished actions whose window is closed or condition is false. Read when beside each label. A main-phase cast cannot happen during upkeep or draw; use the current response policy and choose the passes needed to reach its window. An unrelated available activation is not a substitute for that later action and may spend its mana. Ask for help if an uncovered event requires changing the line."] : []),
 		...(packet.checklist?.length ? ["checklist describes the plan now: available means a listed use; later means after an earlier available step; waiting means a use requiring an empty stack; condition-false means its stated condition is false; unavailable means no current option. None completes a step. recorded means the phase's explicit steps are in the ledger, not that its goal is guaranteed. Follow the order and prepared response policies; do not optimize a new line.",
 			"Before choosing a pass or declaration ending, check remaining actions against the phase guidance. Confirm that no planned action is required now. A pending effect can require waiting. An unavailable required line or an uncovered change needs help; silence in the plan alone is not a passing policy."] : []),

@@ -15,7 +15,8 @@ import { startingIntent } from "../src/context/plan.ts";
 import { choices, inspect, type Inspection } from "../src/context/choices.ts";
 import { aiSeat } from "../src/context/seat.ts";
 import { establish, example, main, matchup, offered, place } from "./play.ts";
-import { workFrame } from "../src/core/work-tools.ts";
+import { editWork, workFrame } from "../src/core/work-tools.ts";
+import { annotate, planState } from "../src/core/planning.ts";
 import { combatDamage, declareBlockers } from "../src/core/combat.ts";
 import { CHOICE_LIMIT, decisionApi } from "../src/context/model.ts";
 import { tally } from "../src/context/spend.ts";
@@ -62,7 +63,7 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	assert.equal(JSON.stringify(compact.objects).includes("registrations"), false, "registrations stay with strategy");
 	for (const object of compact.objects) if (paused.view.printed?.[object.name])
 		assert.deepEqual(compact.cards[object.name], paused.view.printed[object.name], "public permanents and stack objects retain their source text");
-	assert.equal(compact.resolving?.objective, paused.view.work!.plan!.objective);
+	assert.equal(compact.resolving?.objective, undefined, "audit rationale does not instruct resolution");
 	assert.equal(compact.plan, undefined, "resolution carries its purpose, not the next phase's casting line");
 	const withoutWork = focus({ ...paused, view: { ...paused.view, work: undefined } }, startingIntent(paused.seat));
 	assert.equal(withoutWork.plan, undefined);
@@ -78,9 +79,13 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	main(targets, 1, 2);
 	const offers = offered(targets, example("Cast Shock"));
 	assert.ok(offers.length > 2, "the fixture compares actual target and payment combinations");
+	const policy = "Target the opposing Llanowar Elves; pay with an untapped Mountain.";
+	editWork(targets, 1, [{ do: "plan.put", plan: { objective: "Audit only", guidance: "Audit rationale only", throughTurn: 3,
+		steps: [{ label: "Remove the Elf", purpose: policy, when: { step: "precombat-main" }, action: { procedure: example("Cast Shock") } }] } }], "choices-policy");
 	const sourceFrame = workFrame(targets, 1);
 	const decision = { ...sourceFrame.decision!, options: [...offers.map((one) => one.option), { id: "pass", label: "Pass priority" }] };
 	const choiceFrame = { ...sourceFrame, decision };
+	decision.options = annotate(decision.options, planState(choiceFrame)!);
 	const originalChoices = structuredClone(choiceFrame), facts = choices(decision.options);
 	const paths = new Map<string, string[]>(), visited = new Set<string>();
 	const walk = (selected: Inspection, path: string[]) => {
@@ -99,6 +104,9 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 		const pilot = aiSeat({ name: "Inspection", intent: startingIntent(1), onGap: assert.fail, api: { named: "fixture", async ask(request) {
 			assert.deepEqual(targets, physical, "inspection never moves the table or edits equipment");
 			const packet = request.state as unknown as Packet, choice = path.shift()!;
+			assert.match(packet.plan!.due!, /Target the opposing Llanowar Elves; pay with an untapped Mountain/, "choices survive every use, target and payment inspection");
+			assert.ok(JSON.stringify([packet.options, packet.uses]).includes(policy), "marked options retain the policy through inspection");
+			assert.doesNotMatch(JSON.stringify(packet), /Audit rationale only/);
 			const question = request.questions.pick!;
 			assert.equal(question.type, "choice");
 			if (question.type !== "choice") assert.fail();

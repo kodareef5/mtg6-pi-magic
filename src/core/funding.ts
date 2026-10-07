@@ -4,7 +4,7 @@
  * leave mana floating is not used. Keeping floating mana and tapping instead is
  * a different payment and is offered too.
  */
-import { select } from "./query.ts";
+import { currentPlan, select } from "./query.ts";
 import { intrinsic } from "./characteristics.ts";
 import type { Mana } from "./table.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
@@ -28,7 +28,7 @@ const COLORS: Color[] = ["W", "U", "B", "R", "G"];
 export const sick = (frame: Frame, object: SeenObject) => !!object.traits?.types.includes("creature") && !object.traits.words.includes("haste") &&
 	(object.entered ?? 0) >= (frame.view.began ?? 0);
 /** What the seat's plan holds: a held source is not interchangeable with a free one, so a payment can spare it. */
-const heldBy = (frame: Frame): Set<string> => new Set((frame.view.work?.plan?.holds ?? []).flatMap((hold) => select(hold.objects, frame).map((object) => object.id)));
+const heldBy = (frame: Frame): Set<string> => new Set((currentPlan(frame)?.holds ?? []).flatMap((hold) => select(hold.objects, frame).map((object) => object.id)));
 /** Two objects are interchangeable only when every fact this seat can see about them matches, and the plan holds both or neither. */
 export const sameness = (frame: Frame, object: SeenObject): string => [
 	object.card, object.zone, object.tapped, heldBy(frame).has(object.id), JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),

@@ -36,8 +36,10 @@ Keep every fact needed for the decision, including restrictions and unresolved
 public stack instructions. Registered deck counts are public; hidden object
 identities and library order are not.
 
-The classifier receives the plan's objective, the current phase's decisions and
-steps, live branches, holds and stops, and the options marked with the plan.
+The classifier receives the current phase's execution policies and steps,
+their choices, live branches, holds and stops, and marked options. General
+objective and guidance remain audit rationale. Tactical instructions expire
+with their plan; empty instructions grant no permission to pass.
 Jev also receives full printed text for visible cards relevant to the decision,
 beside their current characteristics. Full procedure bodies and private card
 packages stay with strategy. Strategy receives

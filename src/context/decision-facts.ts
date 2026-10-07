@@ -3,7 +3,7 @@ import type { Frame, Option } from "../core/types.ts";
 import type { ReviewItem } from "../core/review.ts";
 import type { Selector } from "../core/language.ts";
 import { matches, viewWorld } from "../core/selectors.ts";
-import { select } from "../core/query.ts";
+import { currentPlan, select } from "../core/query.ts";
 
 export function decisionFacts(frame: Frame, options: readonly Option[], attention: readonly ReviewItem[] = []) {
 	const all = frame.view.objects ?? [], world = viewWorld(frame.view), reasons = new Map<string, Set<string>>();
@@ -17,7 +17,7 @@ export function decisionFacts(frame: Frame, options: readonly Option[], attentio
 			if (one.zone === "stack") add(one.id, "pending stack effect");
 			if (frame.view.window.kind === "turn" && frame.view.window.phase === "combat" && one.zone === "battlefield" && one.traits?.types.includes("creature")) add(one.id, "combat participant or potential blocker");
 		}
-		for (const hold of frame.view.work?.plan?.holds ?? []) for (const one of select(hold.objects, frame)) add(one.id, "reserved resource");
+		for (const hold of currentPlan(frame)?.holds ?? []) for (const one of select(hold.objects, frame)) add(one.id, "reserved resource");
 	}
 	// Read only structured selectors and references. Never interpret printed prose.
 	const dependencies = (value: unknown, source?: typeof all[number]) => {

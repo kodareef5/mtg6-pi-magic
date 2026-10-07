@@ -21,13 +21,14 @@ import { openingHand } from "../core/pregame.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { choices, inspect, type Choice, type Inspection, type Menu, type Payment, type Use, type Funding } from "./choices.ts";
 import { decisionFacts } from "./decision-facts.ts";
+import type { PlanOption } from "../core/language.ts";
 
 export type Chronicle = { briefs: Record<SeatId, Brief>; recaps: Recap[] };
 export type PlanSlice = {
-	objective: string; guidance?: string; due?: string;
+	throughTurn?: number; guidance?: string; due?: string;
 	next: { label: string; when: When; status: "outside-window" | "condition-false" }[];
 	branches: string[]; held: string[]; stops: string[]; done: string[];
-	script?: { goal: string[]; guidance: string[]; steps: string[]; reevaluate: string[] };
+	script?: { goal: string[]; guidance: string[]; steps: string[]; completion?: string[]; reevaluate: string[] };
 };
 export type Seen = {
 	id: string; incarnation: number; name: string; controller: SeatId; zone: string; position?: number;
@@ -82,16 +83,22 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const state = planState(frame);
 	const scripts = (state?.plan.phases ?? []).filter((one) => matches(one.when, frame));
 	const dueAt = state?.due.find((one) => one.candidates.length)?.at, done = new Set(view.done ?? []);
+	const instruction = (step: PlanOption) => `${step.label}${step.purpose ? `. Choices: ${step.purpose}` : ""}`;
+	const here = state?.plan.steps.some((one) => matches(one.when, frame));
+	const completion = scripts.flatMap((one) => one.complete ? [one.complete === "pass"
+		? "After this window's commitments and pending effects finish, choose its pass or declaration ending. Apply the response policy while the stack waits."
+		: "Ask for help after this window's commitments finish, before ending it."] : []);
 	const plan = state && !view.resolution ? {
-		objective: state.plan.objective, ...(scripts.length ? {} : { guidance: state.plan.guidance }),
-		...(dueAt !== undefined ? { due: state.plan.steps[dueAt]!.label } : {}),
-		next: state.waiting.map((one) => ({ label: one.label, when: structuredClone(state.plan.steps[one.at]!.when),
+		...(state.plan.throughTurn === undefined ? {} : { throughTurn: state.plan.throughTurn }),
+		...(dueAt !== undefined ? { due: instruction(state.plan.steps[dueAt]!) } : {}),
+		next: state.waiting.map((one) => ({ label: instruction(state.plan.steps[one.at]!), when: structuredClone(state.plan.steps[one.at]!.when),
 			status: matches(state.plan.steps[one.at]!.when, frame) ? "condition-false" as const : "outside-window" as const })),
-		branches: state.branches.map((one) => one.label),
+		branches: state.branches.map((one) => instruction(state.plan.may![one.at]!)),
 		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
 		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
-		...(scripts.length ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
-			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : state.due.some((one) => one.at === at && one.candidates.length) && !laterStep(state, at) ? "Now" : "Then"}: ${step.label}`] : []),
+		...(scripts.length || here ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
+			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : state.due.some((one) => one.at === at && one.candidates.length) && !laterStep(state, at) ? "Now" : "Then"}: ${done.has(at) ? step.label : instruction(step)}`] : []),
+			...(completion.length ? { completion } : {}),
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;
 	const all = inPlanOrder(decision.options, state);
@@ -147,8 +154,8 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		...(view.combat ? { combat: structuredClone(view.combat) } : {}),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		...(ability ? { resolving: { claim: ability.claim, basis: ability.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),
-			...(purpose ? { objective: purpose.objective, purpose: purpose.use, guidance: purpose.guidance } : state ? { objective: state.plan.objective } : {}) } } : {}),
-		guidance: plan?.script || ability ? [] : guidance, lately: [], routes: dial(decision, context.rules),
+			...(purpose?.use ? { purpose: purpose.use } : {}), guidance: purpose?.guidance || guidance.join("\n") } } : {}),
+		guidance: scripts.length || ability ? [] : guidance, lately: [], routes: dial(decision, context.rules),
 		...(context.learned?.length ? { learned: [...context.learned] } : {}), ...(refused?.length ? { refused: [...refused] } : {}),
 	};
 }

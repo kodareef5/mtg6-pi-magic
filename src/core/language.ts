@@ -325,7 +325,7 @@ export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Pac
 export const PlanDefs = { ...Defs,
 	Option: object({
 		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")), essential: Type.Optional(Type.Literal(true)),
-		purpose: Type.Optional(text),
+		purpose: Type.Optional(Type.String({ minLength: 1, description: "Execution choices: targets, payment, search and optional instructions. Rationale belongs in the plan's audit guidance." })),
 		/** A listed table option by id or prefix and objects, or a procedure to announce. */
 		action: Type.Union([
 			object({ option: Type.Optional(text), prefix: Type.Optional(text), objects: Type.Optional(QuerySchema) }),
@@ -336,6 +336,8 @@ export const PlanDefs = { ...Defs,
 	Package: PackageDef,
 	Plan: object({
 		objective: text, guidance: text,
+		/** Last table turn covered by this tactical plan. Omitted in legacy plans. */
+		throughTurn: Type.Optional(Type.Integer({ minimum: 1 })),
 		steps: Type.Array(Type.Ref("Option")),
 		may: Type.Optional(Type.Array(Type.Ref("Option"))),
 		/** A stop, watched at every decision or only in its window. */
@@ -345,7 +347,8 @@ export const PlanDefs = { ...Defs,
 		 * The pilot's script for a window, read while it is open: the goal, the decisions in it (what to do and why), and the
 		 * few situations that justify asking strategy again. Anything else in the window is normal play.
 		 */
-		phases: Type.Optional(Type.Array(object({ when: WhenSchema, goal: Type.Optional(text), guidance: text, reevaluate: Type.Optional(Type.Array(text)) }))),
+		phases: Type.Optional(Type.Array(object({ when: WhenSchema, goal: Type.Optional(text), guidance: text,
+			complete: Type.Optional(Type.Union([Type.Literal("pass"), Type.Literal("ask")])), reevaluate: Type.Optional(Type.Array(text)) }))),
 		packages: Type.Optional(Type.Array(Type.Ref("Package"))),
 	}),
 };

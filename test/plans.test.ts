@@ -303,7 +303,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	};
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const { tools } = await planWork(frame, {}, writer);
-	assert.deepEqual(tools, [{ do: "plan.put", plan: line }]);
+	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...line, throughTurn: 2 } }]);
 	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[1]!, /is not an option id; use prefix/, "an invented action shorthand is refused before it bypasses the resource forecast");
 	assert.match(seen[0]!, /YOUR TASK: Plan the turn\./);
@@ -764,6 +764,12 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	const unfunded: Plan = { objective: "Develop", guidance: "Use Veil if available", steps: [cast(three, "Mossborn Hydra")], may: veil(three) };
 	assert.match(paymentForecast(workFrame(three, 0), unfunded).responses.join(" "), /may\[0\] \(Veil a targeted creature\): costs \{G\} but the steps before it leave no untapped source/);
 	assert.deepEqual(budget(workFrame(three, 0), unfunded), [], "an unfunded optional response never refuses the payable ordered line");
+	const mixed = structuredClone(three);
+	const tunnel = establish(mixed, 0, "Escape Tunnel", [{ kind: "mana", basis: "{T}: Add {C}.", cost: { tap: true }, colors: ["C"] }]);
+	const preserving = paymentForecast(workFrame(mixed, 0), unfunded);
+	assert.deepEqual(preserving.responses, [], "prefer a Hydra payment that leaves green for Veil over one leaving only colorless");
+	assert.ok(preserving.payments[0]!.funding.taps.some((tap) => tap.source.id === tunnel.id));
+	assert.ok(preserving.payments[0]!.untappedManaSourcesAfter.some((ref) => mixed.things.get(ref.id)?.card === "Forest"));
 	const forest = cardsIn(three, "battlefield", 0).find((one) => one.card === "Forest")!;
 	assert.match(problems(three, { steps: [cast(three, "Mossborn Hydra")], may: veil(three), holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "Veil" }] }),
 		/steps\[\d\] \(Cast Mossborn Hydra\): costs \{2\}\{G\} but the steps before it leave Forest \(G\), Forest \(G\), and the plan holds Forest/);
@@ -934,8 +940,35 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	// A window without a script keeps today's view of the plan.
 	editWork(table, 0, [{ do: "plan.put", plan: line }], "unscripted");
 	const plain = focus(workFrame(table, 0), startingIntent(0), { brief });
-	assert.equal(plain.plan!.script, undefined);
+	assert.deepEqual(plain.plan!.script!.steps, ["Now: Play a Forest", "Then: Crack Fabled Passage"], "steps supply order without authored narrative");
+	assert.equal(plain.plan!.script!.completion, undefined, "an absent completion policy grants no pass");
 	assert.deepEqual(plain.guidance, ["Develop before combat."]);
+	const scoped = { ...line, throughTurn: 4, objective: "Yesterday's objective", guidance: "Yesterday's tactical story",
+		phases: [{ when: { active: "any" as const }, guidance: "Yesterday's phase policy", complete: "pass" as const }],
+		holds: [{ objects: { card: "Forest" }, purpose: "Yesterday's reserve" }] };
+	editWork(table, 0, [{ do: "plan.put", plan: scoped }], "finite-plan");
+	const live = focus(workFrame(table, 0), startingIntent(0));
+	assert.doesNotMatch(JSON.stringify(live), /Yesterday's (objective|tactical story)/, "audit rationale never instructs the pilot");
+	assert.ok(live.plan!.script!.completion!.some((one) => one.includes("choose its pass")));
+	const repair = basePlan(workFrame(table, 0));
+	assert.equal(repair.throughTurn, 4);
+	assert.deepEqual(repair.steps[0]!.when, line.steps[0]!.when, "repairs preserve original window bounds");
+	main(table, 1, 4);
+	const next = basePlan(workFrame(table, 0), undefined, true, initialPlan(brief));
+	assert.equal(next.throughTurn, 6);
+	assert.doesNotMatch(JSON.stringify(next), /Yesterday/, "fresh preparation carries the playbook, never tactical work");
+	assert.deepEqual(next.steps, []);
+	main(table, 0, 5, "upkeep");
+	const expired = workFrame(table, 0), upkeep = focus(expired, startingIntent(0), { brief: { ...brief, steps: { upkeep: { own: "Apply the standing upkeep response policy." } } } });
+	assert.equal(planState(expired), null, "expiry covers holds, stops, steps and unbounded phase policies before draw replanning");
+	assert.equal(upkeep.plan, undefined);
+	assert.deepEqual(upkeep.guidance, ["Apply the standing upkeep response policy."]);
+	assert.doesNotMatch(JSON.stringify(upkeep), /Yesterday/);
+	assert.doesNotMatch(JSON.stringify(basePlan(expired)), /Yesterday/);
+	assert.ok(expired.view.work!.packages!.some((one) => one.card === "Sazh's Chocobo"), "package corrections outlive their tactical plan");
+	assert.equal(table.work[0]!.plan!.guidance, scoped.guidance, "expiry changes no recorded work");
+	const legacy = structuredClone(expired); delete legacy.view.work!.plan!.throughTurn;
+	assert.ok(planState(legacy), "legacy journals retain their unbounded semantics");
 });
 
 test("the turn before ours prepares our next one; a quiet turn offers it as it is, a changed one uses the same planner for a short amendment", async () => {
@@ -1177,7 +1210,7 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.equal(seen.length, 2, "refused once, then accepted");
 	assert.match(seen[1]!, /costs \{2\}\{G\}/);
-	assert.deepEqual(tools, [{ do: "plan.put", plan }]);
+	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...plan, throughTurn: 4 } }]);
 });
 
 test("the arithmetic counts each card once, lets floating mana go when its step ends, and tries every payment", () => {

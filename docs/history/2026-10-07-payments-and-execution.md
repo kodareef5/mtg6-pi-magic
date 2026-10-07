@@ -300,3 +300,52 @@ Registration, resource feasibility, coherent execution policy and useful play
 must therefore remain distinct. The candidate path stays experimental. The next
 production decision concerns derived execution and stale carried narrative,
 including coverage outside own main phases, not a larger candidate count.
+
+Both selected iteration-zero Treasure lines won through the shared physical
+runner (`candidate-treasure-play/`): 9.20 seconds for one, 8.05 for two, each with
+26 Jev calls and no foreground planning. Clone and replay matched, with no gaps
+or fallback. Each cancelled one unfinished background preparation at game end;
+reported costs were $0.0069 and $0.0062, excluding its missing usage.
+
+These wins expose an execution limitation rather than remove it. The first
+proposal specified two Mountains for Kellan's upgrade; Jev used Mountain and
+Treasure, then won through Hydra blocking Kellan. The second specified Treasure
+for Burst; Jev used Mountain, killed Hydra and attacked with all three creatures.
+`choices` was compiled only to a step's resolution purpose, so its casting
+payment instruction did not reach the action question. Payments chosen by Jev
+were valid, but this is not proof that the full proposed policy was delivered.
+The [preferred question sequences](2026-10-07-execution-examples.md) identify the
+announcement, trigger, resolution and opponent-turn coverage needed next.
+
+## Scoped execution contract
+
+The continued paseo-committee review converged on one production change, using
+the existing plan representation. `throughTurn` expires all tactical work,
+including holds without a window. Fresh planning starts from pregame policy,
+equipment and current facts. Repairs preserve scope; no old windows are rebased.
+The reviewers initially differed over field bounds versus whole-plan expiry and
+current versus original trigger guidance. Both accepted whole-plan expiry and
+announcement-time recovery. Both rejected automatic precedence between a hold
+and a contradictory payment purpose: show both and request a repair.
+
+Jev now receives step and branch purpose during announcement and every target
+and payment inspection. Context derives ordering and progress. General objective
+and guidance stay in the audit record; phase guidance supplies scoped response,
+trigger and continuation policies. Optional phase `complete` is `pass` or `ask`;
+absence grants no permission. Ordinary and triggered resolution recover the
+phase policy from work accepted when the ability was announced, preserving it
+through amendments, replay and cloning. Missing tactical coverage can still use
+the immutable pregame policy, not a later tactical rewrite.
+
+The resource forecast again prefers a payment that leaves each priced response
+funded separately. If none exists, it returns a payable ordered-line witness and
+advisory response warnings. Preference failures cannot become ordered conflicts.
+The shared benchmark adds a fresh-planning variant of blocked lethal so old
+saved preparation does not enter a test of fresh-turn lifetime.
+
+Offline checks cover expiration before upkeep, package persistence, exact window
+retention during repair, purpose delivery through all inspection stages, trigger
+policy after amendment/replay/clone, and explicit completion. The existing
+two-Merchant fixture now requests each plan within its intended turn pair;
+it still checks the same turn-3 response, discards and replay. No model roster or
+effort changed. Live execution and strategic quality remain to be measured.

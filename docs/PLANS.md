@@ -68,6 +68,15 @@ conditions in the same physical choice. An unavailable required line needs help;
 no status marks it completed. Unmentioned cards remain inspectable options,
 without separate invitations for Jev to invent a strategy for each one.
 
+Tactical work expires after its selected own turn and the following opponent
+turn. Fresh preparation starts from the pregame playbook, accepted equipment
+and current facts. Repairs preserve the scope and unfinished commitments; no
+old windows are re-dated. Context renders each step's execution choices before
+announcement and throughout inspection. Resolution recovers the announcing
+plan's step and phase policy, including triggers. General objective and guidance
+remain audit rationale. Completion is explicit per window; missing instructions
+grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
+
 ## Commit sequence and acceptance
 
 1. [x] Record the approved contract and preserve the previous experiments.
@@ -161,7 +170,7 @@ without separate invitations for Jev to invent a strategy for each one.
 - [x] Reject fabricated button ids and preserve paid search continuations.
   [Strategy cycle](history/2026-10-06-strategy-cycle.md).
 - [x] Keep one saved-position manifest with offline replay and live probes.
-  Eighteen prefixes are retained. [Benchmark guide](../tools/benchmarks/README.md).
+  [Benchmark guide](../tools/benchmarks/README.md).
 - [ ] Finish the ordered resource forecast, including earlier entries, activation
   costs, planned attackers and scoped response warnings. Validate future source
   bindings against physical continuations before grading the planner.
@@ -171,9 +180,9 @@ without separate invitations for Jev to invent a strategy for each one.
   opponent turns, triggers and resolution before making it the default. An empty
   list grants no permission to pass.
   [Execution controls](history/2026-10-07-payments-and-execution.md).
-- [ ] Compare one versus two generated candidates in the shared benchmark runner,
-  with identical informational receipts, complete continuations and immutable
-  selection. Grade useful strategy and physical outcomes separately from syntax.
+- [x] Compare one versus two generated candidates in the shared benchmark runner.
+  Neither arm justified adoption. Keep generation experimental and grade useful
+  strategy and physical outcomes separately from syntax.
   [Reviewed experiment](history/2026-10-07-payments-and-execution.md).
 - [ ] Reuse a prepared line only with positive coverage for the observed change.
   First test an ordinary opposing land play and a draw covered by a land branch;

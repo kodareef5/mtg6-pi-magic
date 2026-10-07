@@ -6,7 +6,7 @@ import type { Frame } from "../core/types.ts";
 import { planDue } from "../core/planning.ts";
 import type { Lookup } from "./reason.ts";
 import { printedCast } from "../core/procedures.ts";
-import { matches } from "../core/query.ts";
+import { currentPlan, matches } from "../core/query.ts";
 import { movementActions } from "./strategy-actions.ts";
 import { permissionForecasts } from "./strategy-permissions.ts";
 import { STEPS } from "../core/steps.ts";
@@ -62,7 +62,8 @@ const submittedOption = Type.Object({ ...PlanDefs.Option.properties, when: Write
 		Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false }),
 		Type.Object({ procedure: terms }, { additionalProperties: false })]),
 }, { additionalProperties: false });
-export const submissionFields = { ...planFields.properties,
+const { throughTurn: _expiry, ...writableFields } = planFields.properties;
+export const submissionFields = { ...writableFields,
 	steps: Type.Array(submittedOption), may: Type.Array(submittedOption),
 	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, when: Type.Optional(WriterWhen), if: terms }, { additionalProperties: false })),
 	phases: Type.Array(Type.Object({ ...planFields.properties.phases.items.properties, when: WriterWhen }, { additionalProperties: false })),
@@ -76,6 +77,7 @@ export const ResponseSchema = Type.Object({
 		action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!, Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false })]),
 	}, { additionalProperties: false }), { minItems: 1 }),
 	guidance: Type.Optional(Type.String()),
+	phases: Type.Optional(submissionFields.phases),
 	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }) }, { additionalProperties: false }))),
 }, { additionalProperties: false });
 
@@ -101,15 +103,11 @@ export function responseChanges(frame: Frame, base: Plan, changes: unknown) {
 
 /** The actions available to reuse, with readable labels and their complete accepted syntax. */
 export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<string, { label: string; action: PlanOption["action"] }> {
-	const plan = prepared ?? frame.view.work?.plan;
+	const plan = prepared ?? currentPlan(frame);
 	return Object.fromEntries([
 		...Object.entries(movementActions(frame, turn)),
 		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
-		// A historical pick fixed a past incarnation and payment. It is evidence
-		// in history, not reusable equipment. Procedures and selectors remain useful.
-		...(frame.view.worked ?? []).flatMap((one, at) => "option" in one.action && one.action.option ? []
-			: [[`worked:${at} ${one.label}`, { label: one.label, action: one.action }]]),
 		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),
 		...(frame.view.work?.packages ?? []).filter((pack) => pack.printedCast && frame.view.printed?.[pack.card]).map((pack) =>
 			[`printed:${pack.card}`, { label: `Cast ${pack.card} for its printed cost`, action: { procedure: printedCast(pack.card, frame.view.printed![pack.card]!) } }]),
@@ -129,32 +127,21 @@ export function equipment(frame: Frame, available: ReturnType<typeof actions>): 
 }
 
 /**
- * Keep strategic defaults; a new turn gets a new ordered line. A midturn edit
+ * Fresh work starts from the pregame playbook. A midturn edit
  * starts from the unfinished steps, so an unchanged step cannot execute twice.
  * Existing packages live in work and need no repetition in the next answer.
  */
-export function basePlan(frame: Frame, prepared?: Plan, nextTurn = false): Plan {
-	if (prepared) return structuredClone(prepared);
-	const plan = frame.view.work?.plan;
-	if (!plan) return { objective: "", guidance: "", steps: [] };
+export function basePlan(frame: Frame, prepared?: Plan, nextTurn = false, playbook?: Plan): Plan {
 	const at = frame.view.window;
-	const fresh = nextTurn || planDue(frame);
+	if (prepared && (prepared.throughTurn === undefined || at.kind === "turn" && at.turn <= prepared.throughTurn)) return structuredClone(prepared);
+	const plan = currentPlan(frame);
+	const fresh = nextTurn || planDue(frame) || !plan;
 	const done = new Set(frame.view.done ?? []);
-	const base = structuredClone({ ...plan, steps: fresh ? [] : plan.steps.filter((_, n) => !done.has(n)) });
+	const base = structuredClone(fresh ? playbook ?? { objective: "Plan the current position.", guidance: "No tactical rationale supplied.", steps: [] }
+		: { ...plan!, steps: plan!.steps.filter((_, n) => !done.has(n)) });
 	delete base.packages;
-	if (fresh && at.kind === "turn") {
-		const turn = at.active === frame.seat ? at.turn : at.turn + 1;
-		// Carry a window's defaults into the new pair of turns. The writer sees
-		// this base and changes any default that no longer fits the position.
-		for (const one of [...(base.may ?? []), ...(base.phases ?? []), ...(base.askWhen ?? [])]) {
-			const when = one.when;
-			if (!when || when.fromTurn === undefined || when.throughTurn === undefined) continue;
-			const start = when.active === "opponent" ? turn + 1 : turn;
-			const width = when.throughTurn - when.fromTurn;
-			when.fromTurn = start;
-			when.throughTurn = start + width;
-		}
-	}
+	if (at.kind === "turn" && (fresh || base.throughTurn === undefined))
+		base.throughTurn = nextTurn ? at.turn + 2 : at.active === frame.seat ? at.turn + 1 : at.turn;
 	return base;
 }
 

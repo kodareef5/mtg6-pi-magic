@@ -318,6 +318,35 @@
       "task": "plan",
       "property": "Count a spent Treasure once and include the visible Hydra block when choosing the attack.",
       "winner": 1
+    },
+    {
+      "id": "red-blocked-lethal-fresh",
+      "winner": 1,
+      "journal": "blockedLethal",
+      "version": 579,
+      "seat": 1,
+      "task": "plan",
+      "property": "Build fresh turn intent from the pregame playbook and current draw position; no prior combat narrative may become current instructions. Winning strategy is graded separately.",
+      "order": [
+        {
+          "source": "Smaug the Magnificent",
+          "timing": "spell"
+        },
+        {
+          "source": "Smaug the Magnificent",
+          "prefix": "attack:"
+        }
+      ],
+      "require": [
+        {
+          "source": "Kellan, Planar Trailblazer",
+          "prefix": "attack:"
+        },
+        {
+          "source": "Soulstone Sanctuary",
+          "prefix": "attack:"
+        }
+      ]
     }
   ]
 }

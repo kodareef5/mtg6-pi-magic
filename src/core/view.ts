@@ -22,6 +22,7 @@ import { characteristics, sick } from "./characteristics.ts";
 import type { Frame, SeatId, SeatView, Viewer, Window } from "./types.ts";
 import type { Plan } from "./language.ts";
 import { purposes } from "./purpose.ts";
+import { currentPlan } from "./query.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
@@ -305,11 +306,11 @@ export function render(frame: Frame): string {
 	for (const deck of frame.view.decks ?? []) out.push(`Registered deck for seat ${deck.seat}: ${Object.entries(deck.cards).map(([name, count]) => `${count} ${name}`).join(", ")}. Counts do not identify a hand or library order.`);
 	if (frame.view.since.length) out.push("", "Since your last look:", ...frame.view.since.map((l) => `  ${l}`));
 	if (frame.view.work) {
-		const work = frame.view.work;
+		const work = frame.view.work, plan = currentPlan(frame);
 		const done = new Set(frame.view.done ?? []);
 		out.push("", `Your equipment, revision ${work.revision}:`,
-			...(work.plan ? [`Objective: ${work.plan.objective}`, ...work.plan.steps.map((step, at) => `${done.has(at) ? "Done" : "Step"} ${at + 1}: ${step.label}`),
-				...(work.plan.may ?? []).map((branch) => `Branch: ${branch.label}`)] : ["No plan accepted."]),
+			...(plan ? [`Objective: ${plan.objective}`, ...plan.steps.map((step, at) => `${done.has(at) ? "Done" : "Step"} ${at + 1}: ${step.label}`),
+				...(plan.may ?? []).map((branch) => `Branch: ${branch.label}`)] : [work.plan ? "The tactical plan has expired." : "No plan accepted."]),
 			...(work.request ? [`Strategy requested: ${work.request}`] : []));
 	}
 

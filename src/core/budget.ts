@@ -255,7 +255,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	const failed = new Set<string>();
 	const spending = (act: { source?: SeenObject; spell?: true }) => act.spell ? { ...act.source!, zone: "stack" as const } : act.source!;
 	const cannotTap = (position: Frame, source: SeenObject, spent: ReadonlySet<string>) => source.tapped || spent.has(source.id) || sick(position, source);
-	let visits = 0;
+	let visits = 0, preferResponses = branches.length > 0, unfunded = false;
 	const ref = (object: SeenObject): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 	const go = (index: number, position: Frame, spent: ReadonlySet<string>): boolean => {
 		const key = `${index}|${[...spent].sort().join(",")}|${pool(position).map((mana) => mana.id).sort().join(",")}`;
@@ -267,11 +267,14 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			if (!item) {
 				// A branch is on the opponent's turn, when nothing floats; a hold may be what it is for, so held sources pay for it.
 				const later = drained(position);
+				const responses: string[] = [];
 				for (const { at, act } of branches) {
-					if (act.tap && cannotTap(later, act.source!, spent)) { report.responses.push(`${at}: its source cannot pay the tap cost after this example line`); continue; }
+					if (act.tap && cannotTap(later, act.source!, spent)) { responses.push(`${at}: its source cannot pay the tap cost after this example line`); continue; }
 					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act)).length)
-						report.responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
+						responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
 				}
+				if (preferResponses && responses.length) { unfunded = true; return false; }
+				report.responses = responses;
 				return true;
 			}
 			if (item.kind === "entry") return go(index + 1, entered(position, item.source), spent);
@@ -310,12 +313,18 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		if (!ok) failed.add(key);
 		return ok;
 	};
-	try {
-		if (!go(0, initial, new Set()) && deepest) found.push(deepest.message);
-	} catch (error) {
-		// Too many payments to try them all: no conflict is shown, so none is named.
-		if (error !== INCOMPLETE) throw error;
-		report.unchecked.push("The payment search exceeded its resource bound. No complete payment witness.");
+	for (;;) {
+		try {
+			if (go(0, initial, new Set())) break;
+			if (!preferResponses || !unfunded) { if (deepest) found.push(deepest.message); break; }
+		} catch (error) {
+			if (error !== INCOMPLETE) throw error;
+			if (!preferResponses) { report.unchecked.push("The payment search exceeded its resource bound. No complete payment witness."); break; }
+			report.unchecked.push("The response-preserving payment search exceeded its bound; the ordered line is checked separately.");
+		}
+		// Prefer a witness that funds every response separately. Optional responses
+		// cannot reject an ordered line when that preference cannot be satisfied.
+		preferResponses = false; visits = 0; deepest = undefined; failed.clear();
 	}
 	return report;
 }

@@ -1,10 +1,16 @@
 /** Reading a seat's frame for a plan: whether a window is now, and which projected objects a query names. */
-import type { Frame } from "./types.ts";
+import type { Frame, SeatId, Window } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import type { Query, When } from "./work-language.ts";
 
+/** Tactical intent expires together, including holds without their own window. */
+export function currentPlan(frame: Frame) {
+	const plan = frame.view.work?.plan, at = frame.view.window;
+	return plan && (plan.throughTurn === undefined || at.kind === "turn" && at.turn <= plan.throughTurn) ? plan : undefined;
+}
+
 /** Whether this window is now: whose turn, which step or phase, which turns. Only turn windows match. */
-export function matches(when: When, frame: Frame): boolean {
+export function matches(when: When, frame: { seat: SeatId; view: { window: Window } }): boolean {
 	const at = frame.view.window;
 	if (at.kind !== "turn") return false;
 	return (!when.active || when.active === "any" || (when.active === "self" ? at.active === frame.seat : at.active !== frame.seat)) &&

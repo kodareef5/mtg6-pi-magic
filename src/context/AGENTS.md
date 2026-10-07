@@ -175,8 +175,9 @@ steps, routes, gaps, tokens, cost and elapsed time. Focus makes no model call.
 
 `aiSeat` returns equipment commands to the core loop. It never writes the table.
 
-The pilot's packet carries the plan's objective, the due step, waiting steps,
-live branches, holds and stops, and what is done. It does not carry the deck
+The pilot's packet carries the due step, waiting steps, their execution choices,
+live branches, holds and stops, and what is done. General objective and guidance
+are audit rationale. Tactical policies expire with the plan. It does not carry the deck
 lists, card registrations, procedure bodies or the brief's matchup reading;
 those are strategy's. Strategy receives the unfinished plan and reusable actions,
 the visible objects with their current characteristics, accepted stack terms and

@@ -276,12 +276,18 @@ New games with that role off prepare complete uses in pregame instead.
 
 A **plan** is what jev flies.
 
-- `objective` and `guidance`: what this stretch is for.
+- `objective` and `guidance`: audit rationale. The pilot does not read them as
+  execution instructions.
+- `throughTurn`: the last table turn covered by the tactical plan. Context sets
+  an own-turn plan to that turn plus the following opponent turn. Repairs keep
+  its scope. Expiry includes holds and unbounded policies; it removes no equipment
+  and changes no recorded work. Legacy plans without this field stay unbounded.
 - `steps`: the line, in order. Each option has a label, a window (`when`), an
   optional `if`, and an action: a listed table option by id, prefix or objects,
-  or a procedure to announce. Optional `purpose` carries the intended later
-  resolution choice, such as which basic land to find. It authorizes no automatic
-  action. The announcing seat's purpose survives later plan changes.
+  or a procedure to announce. Optional `purpose` supplies execution choices at
+  announcement, target and payment inspection, and resolution, such as the target,
+  payment preference or basic land to find. It authorizes no automatic action.
+  The announcing seat's purpose survives later plan changes.
 - `may`: standing alternatives jev may take without asking when their window and
   `if` hold. "If they Shock my Chocobo, Veil it."
 - `askWhen`: visible facts that mean the plan no longer fits, as conditions,
@@ -293,6 +299,16 @@ A **plan** is what jev flies.
   targeting a held creature or attacking with vigilance does not spend it.
   A nonvigilant attack commits its tap when the declaration finishes.
 - `packages`: corrections to the seat's prepared registrations and procedures.
+- `phases`: window policies for responses, triggers, searches and exceptions.
+  Optional `complete: "pass" | "ask"` states what to choose after the window's
+  commitments finish. Absence and empty lists grant no pass. Waiting for a stack
+  object uses the response policy separately. Trigger and ordinary resolution
+  read the phase policy in force at announcement, even after an amendment.
+
+Fresh preparation uses the pregame playbook, accepted equipment and current
+facts. It never re-dates prior tactical windows. Only amendments within the same
+scope retain unfinished steps, branches and holds. A purpose that contradicts
+a hold needs repair; context neither parses it nor invents precedence.
 
 `docs/PLANS.md` says how the table flies a plan.
 

@@ -7,7 +7,6 @@ import { standard } from "../src/core/format.ts";
 import { card, load } from "../src/core/cards.ts";
 import { deck } from "../src/core/decks.ts";
 import { cardsIn, type Mana } from "../src/core/table.ts";
-import { editWork } from "../src/core/work-tools.ts";
 import { play } from "../src/core/loop.ts";
 import type { Frame } from "../src/core/types.ts";
 import type { Procedure } from "../src/core/work-language.ts";
@@ -82,11 +81,15 @@ export async function abilityExercise() {
 	};
 	const model = { type: "classifier", id: "jev-latest", provider: "typesafe", api: "typesafe-system-one" } as never;
 	const players = Object.fromEntries(table.seats.map((seat) => {
-		editWork(table, seat.id, [{ do: "plan.request", reason: "Prepare the fixture's one activation and response." }], `prepare-${seat.id}`);
 		const player = aiSeat({ name: seat.name, api: decisionApi(classify, model, { tally: counted }), intent: startingIntent(seat.id), dials: 0,
 			plan: (frame) => planWork(frame, { cards: universe }, thinking), onGap: (gap) => table.gaps.push(gap) });
 		return [seat.id, { ...player, async answer(frame: Frame) {
-			if (frame.view.window.kind === "turn" && frame.view.window.turn === 3 && frame.view.window.step === "upkeep") exchange.push(structuredClone(frame));
+			if (frame.view.window.kind === "turn" && frame.view.window.step === "upkeep") {
+				if (frame.view.window.turn === 3) exchange.push(structuredClone(frame));
+				// B prepares its response on turn 2, before A's turn-3 announcement.
+				if (frame.view.window.turn === (seat.id === 0 ? 3 : 2) && !frame.view.work?.plan && !frame.view.work?.request) return { kind: "work" as const, revision: frame.view.work?.revision ?? 0,
+					actionId: `prepare-${seat.id}`, tools: [{ do: "plan.request" as const, reason: "Prepare the fixture's one activation and response." }] };
+			}
 			if (frame.decision?.situation === "resolution") paused.push({ version: table.ledger.length, seat: seat.id, frame: structuredClone(frame) });
 			return player.answer(frame);
 		} }];

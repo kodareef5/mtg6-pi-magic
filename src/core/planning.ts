@@ -9,7 +9,7 @@
  * Past 150 lines to keep matching, resource marks and execution credit together.
  */
 import { holds as condition, viewWorld, type Scope } from "./selectors.ts";
-import { matches, select } from "./query.ts";
+import { currentPlan, matches, select } from "./query.ts";
 import { procedureOptions, type ProcedureOption } from "./procedures.ts";
 import type { Plan, PlanOption, Procedure } from "./language.ts";
 import type { Frame, Option } from "./types.ts";
@@ -75,7 +75,7 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 
 /** The seat's plan as it stands at this frame, or null without one. */
 export function planState(frame: Frame): PlanState | null {
-	const work = frame.view.work, plan = work?.plan;
+	const work = frame.view.work, plan = currentPlan(frame);
 	if (!work || !plan || work.planned === undefined) return null;
 	const revision = work.planned;
 	const scope: Scope = { world: viewWorld(frame.view), controller: frame.seat };
@@ -155,8 +155,8 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
-		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.`);
-		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.`);
+		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
+		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
 			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.id).join(", ")}, held: ${hold.purpose}.`);

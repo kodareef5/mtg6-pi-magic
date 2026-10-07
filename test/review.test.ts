@@ -13,7 +13,7 @@ import { project } from "../src/core/view.ts";
 import { aiSeat } from "../src/context/seat.ts";
 import { focus, type Packet } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { announce, example, finish, main, matchup, passBoth, place } from "./play.ts";
+import { announce, establish, example, finish, main, matchup, passBoth, place } from "./play.ts";
 import { question as moveQuestion } from "../src/context/seat.ts";
 import { activate } from "../src/core/procedures.ts";
 
@@ -196,4 +196,31 @@ test("a pilot executes with derived plan status, while private judgments neither
 	select.from.is = { top: 1, of: "you" };
 	assert.doesNotMatch(moveQuestion(limited, false).instructions, /deliberate exception requiring a prepared reason/, "choosing from a limited library set is not a whole-library search");
 	assert.deepEqual(limited.options, resolving.options, "search guidance never removes an optional decline");
+
+	const triggerPosition = () => { const table = matchup("review-trigger");
+		establish(table, 0, "Sazh's Chocobo", [{ kind: "watch", basis: "Landfall — Whenever a land you control enters, put a +1/+1 counter on this creature.",
+			event: { on: "enters", of: { types: ["land"], controller: "you" } }, effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } }]);
+		place(table, 0, "hand", "Forest"); return table; };
+	const triggered = triggerPosition(); main(triggered, 0);
+	const triggerPolicy = "Apply the Chocobo's landfall counter, then use the prepared response policy.";
+	editWork(triggered, 0, [{ do: "plan.put", plan: { objective: "Trigger audit", guidance: "Never display this rationale", throughTurn: 2, steps: [],
+		phases: [{ when: { active: "self", step: "precombat-main" }, guidance: triggerPolicy }] } }], "trigger-policy");
+	apply(triggered, nextDecision(triggered)!.options.find((one) => one.label === "Play Forest")!.id, "model", "chosen");
+	assert.equal(nextDecision(triggered)!.situation, "trigger-order");
+	assert.deepEqual(focus(workFrame(triggered, 0), startingIntent(0)).plan!.script!.guidance, [triggerPolicy]);
+	apply(triggered, nextDecision(triggered)!.options[0]!.id, "model", "chosen");
+	const announced = project(triggered, 0).purposes;
+	assert.equal(announced![0]!.guidance, triggerPolicy, "trigger puts recover policy just like ordinary announcements");
+	assert.deepEqual(project(triggered, 1).purposes, []);
+	editWork(triggered, 0, [{ do: "plan.put", plan: { objective: "Later", guidance: "Later rationale", steps: [],
+		phases: [{ when: { active: "self" }, guidance: "Later trigger policy must not rewrite the stack." }] } }], "amended-trigger-policy");
+	assert.deepEqual(project(triggered, 0).purposes, announced);
+	passBoth(triggered);
+	const resolvingTrigger = focus(workFrame(triggered, 0), startingIntent(0));
+	assert.equal(resolvingTrigger.resolving!.guidance, triggerPolicy);
+	assert.doesNotMatch(JSON.stringify(resolvingTrigger), /Later trigger policy|Never display this rationale/);
+	const triggerJournal = open(join(dir, "trigger.jsonl"), { ...header, id: "trigger", seed: triggered.rng.seed }); save(triggerJournal, triggered);
+	assert.deepEqual(project(replay(triggerJournal.path, triggerPosition).table, 0).purposes, announced);
+	fork(triggerJournal.path, triggered.ledger.length, "trigger-child", join(dir, "trigger-child.jsonl"));
+	assert.deepEqual(project(replay(join(dir, "trigger-child.jsonl"), triggerPosition).table, 0).purposes, announced, "clones recover the original trigger policy after amendment");
 });
