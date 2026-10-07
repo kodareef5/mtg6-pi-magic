@@ -4,6 +4,17 @@ These compressed journal prefixes preserve the full game knowledge needed for
 replay. They are committed regression inputs, not spectator exports. `test/`
 is excluded from the published package.
 
+`red-upkeep-lethal.jsonl.gz` freezes decision 270 (physical clock 530), turn 10
+upkeep, of `.pi/resume-20261007/scoped-full-game/next-version-gate-20261005-1791339573156.jsonl`.
+Red's tactical plan has expired. Three Mountains and Sanctuary are untapped;
+two Lightning Strikes can deal six to Green. The parent instead spent all four
+sources animating Sanctuary. `good-upkeep-lethal.json` contains three identical
+supplied lines using the accepted Strike procedure and the actual hand refs.
+They test target, payment, waiting and resolution obedience, not generation.
+Until the upkeep planning lifecycle is implemented, use this case with
+`--answers test/fixtures/benchmarks/good-upkeep-lethal.json --repeat 3 --play`;
+ordinary planning is not yet due at this window.
+
 - `oct5.jsonl.gz`: prefix 475 of
   `next-version-gate-20261005-1791250809663`.
 - `oct6.jsonl.gz`: prefix 235 of

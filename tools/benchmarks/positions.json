@@ -11,9 +11,19 @@
     "red-treasure-lethal": "test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz",
     "readyLethal": "test/fixtures/benchmarks/red-ready-lethal.jsonl.gz",
     "readyPartialAttack": "test/fixtures/benchmarks/ready-partial-attack.jsonl.gz",
-    "readyBeforeHelp": "test/fixtures/benchmarks/ready-before-help.jsonl.gz"
+    "readyBeforeHelp": "test/fixtures/benchmarks/ready-before-help.jsonl.gz",
+    "redUpkeepLethal": "test/fixtures/benchmarks/red-upkeep-lethal.jsonl.gz"
   },
   "cases": [
+    {
+      "id": "red-upkeep-lethal",
+      "journal": "redUpkeepLethal",
+      "version": 270,
+      "seat": 1,
+      "task": "plan",
+      "winner": 1,
+      "property": "Win from upkeep with the actual four untapped lands and two Lightning Strikes against six life. Grade physical outcome and policy obedience separately; avoid spending the sources on unnecessary animation."
+    },
     {
       "id": "attack-before-help",
       "journal": "readyBeforeHelp",

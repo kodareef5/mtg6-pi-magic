@@ -1,0 +1,385 @@
+{
+  "results": [
+    {
+      "id": "red-upkeep-lethal",
+      "iteration": 0,
+      "plan": {
+        "objective": "Deal six damage to the opponent during upkeep.",
+        "guidance": "Two Lightning Strikes cost four mana, including two red, and deal six to the opponent. The four untapped lands can pay both. No animation or Kellan upgrade is needed.",
+        "throughTurn": 11,
+        "steps": [
+          {
+            "label": "Cast Lightning Strike 1 at the opponent",
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "waitFor": "empty-stack",
+            "purpose": "Target the opponent. Pay one red and one generic while retaining funding for the remaining Strike. Apply the printed three damage to its locked player target.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "refs": [
+                    {
+                      "id": "1-17",
+                      "incarnation": 1
+                    }
+                  ]
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Cast Lightning Strike 2 at the opponent",
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "waitFor": "empty-stack",
+            "purpose": "Target the opponent. Pay one red and one generic while retaining funding for the remaining Strike. Apply the printed three damage to its locked player target.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "refs": [
+                    {
+                      "id": "1-18",
+                      "incarnation": 1
+                    }
+                  ]
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "guidance": "Cast the two specified Lightning Strikes at the opponent. While a Strike is on the stack, pass priority to resolve it unless an actual opposing response invalidates the line. Resolve damage to the locked opponent target. Do not animate Sanctuary or upgrade Kellan; use the four lands to pay these spells. If the opponent survives both spells or a response defeats this line, request help.",
+            "complete": "ask"
+          }
+        ]
+      }
+    },
+    {
+      "id": "red-upkeep-lethal",
+      "iteration": 1,
+      "plan": {
+        "objective": "Deal six damage to the opponent during upkeep.",
+        "guidance": "Two Lightning Strikes cost four mana, including two red, and deal six to the opponent. The four untapped lands can pay both. No animation or Kellan upgrade is needed.",
+        "throughTurn": 11,
+        "steps": [
+          {
+            "label": "Cast Lightning Strike 1 at the opponent",
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "waitFor": "empty-stack",
+            "purpose": "Target the opponent. Pay one red and one generic while retaining funding for the remaining Strike. Apply the printed three damage to its locked player target.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "refs": [
+                    {
+                      "id": "1-17",
+                      "incarnation": 1
+                    }
+                  ]
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Cast Lightning Strike 2 at the opponent",
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "waitFor": "empty-stack",
+            "purpose": "Target the opponent. Pay one red and one generic while retaining funding for the remaining Strike. Apply the printed three damage to its locked player target.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "refs": [
+                    {
+                      "id": "1-18",
+                      "incarnation": 1
+                    }
+                  ]
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "guidance": "Cast the two specified Lightning Strikes at the opponent. While a Strike is on the stack, pass priority to resolve it unless an actual opposing response invalidates the line. Resolve damage to the locked opponent target. Do not animate Sanctuary or upgrade Kellan; use the four lands to pay these spells. If the opponent survives both spells or a response defeats this line, request help.",
+            "complete": "ask"
+          }
+        ]
+      }
+    },
+    {
+      "id": "red-upkeep-lethal",
+      "iteration": 2,
+      "plan": {
+        "objective": "Deal six damage to the opponent during upkeep.",
+        "guidance": "Two Lightning Strikes cost four mana, including two red, and deal six to the opponent. The four untapped lands can pay both. No animation or Kellan upgrade is needed.",
+        "throughTurn": 11,
+        "steps": [
+          {
+            "label": "Cast Lightning Strike 1 at the opponent",
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "waitFor": "empty-stack",
+            "purpose": "Target the opponent. Pay one red and one generic while retaining funding for the remaining Strike. Apply the printed three damage to its locked player target.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "refs": [
+                    {
+                      "id": "1-17",
+                      "incarnation": 1
+                    }
+                  ]
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "label": "Cast Lightning Strike 2 at the opponent",
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "waitFor": "empty-stack",
+            "purpose": "Target the opponent. Pay one red and one generic while retaining funding for the remaining Strike. Apply the printed three damage to its locked player target.",
+            "action": {
+              "procedure": {
+                "source": {
+                  "card": "Lightning Strike",
+                  "zones": [
+                    "hand",
+                    "graveyard",
+                    "exile"
+                  ],
+                  "controller": "any",
+                  "refs": [
+                    {
+                      "id": "1-18",
+                      "incarnation": 1
+                    }
+                  ]
+                },
+                "claim": "Cast Lightning Strike",
+                "basis": "Lightning Strike deals 3 damage to any target.",
+                "timing": "spell",
+                "targets": [
+                  {
+                    "object": {
+                      "types": [
+                        "creature",
+                        "planeswalker",
+                        "battle"
+                      ]
+                    },
+                    "player": "any"
+                  }
+                ],
+                "instructions": [
+                  {
+                    "do": "damage",
+                    "to": "target:0",
+                    "amount": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "phases": [
+          {
+            "when": {
+              "active": "self",
+              "step": "upkeep",
+              "fromTurn": 10,
+              "throughTurn": 10
+            },
+            "guidance": "Cast the two specified Lightning Strikes at the opponent. While a Strike is on the stack, pass priority to resolve it unless an actual opposing response invalidates the line. Resolve damage to the locked opponent target. Do not animate Sanctuary or upgrade Kellan; use the four lands to pay these spells. If the opponent survives both spells or a response defeats this line, request help.",
+            "complete": "ask"
+          }
+        ]
+      }
+    }
+  ]
+}
