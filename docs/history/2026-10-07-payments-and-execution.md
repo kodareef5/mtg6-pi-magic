@@ -191,3 +191,21 @@ and journals retain the canonical syntax. No system-prompt paragraph was added.
 Derived execution instructions, the shared candidate comparison and the narrow
 prepared-plan reuse case remain pending. Experimental proposal and instruction
 renderers remain outside production.
+
+## Physical benchmark continuations
+
+The shared runner now accepts `--play` and a saved `--answers` file. It installs
+the exact selected plan in a clone, verifies the copied table and preparation,
+and runs the ordinary seats through the next opponent turn or an explicit turn
+boundary. Each continuation saves its journal, trace, outcome, timing, cost and
+replay check. Planning and continuation costs remain separate. A fixture with an
+expected winner grades the observed outcome instead of requiring one attack set.
+That outcome does not prove a win against every legal response.
+
+The first physical recheck used after-Explorer answer zero. Green cast Hydra,
+played Passage from the graveyard, activated it and searched. Hydra reached 16
+counters. Red won on the following turn. The continuation took 90.2 seconds,
+118 Jev and seven strategy calls, 1,113,323 input and 14,272 output tokens, and
+$0.0567. Clone and replay matched, with no gap or fallback. This validates the
+repaired source path without claiming that development saved the position.
+Evidence is under `entry-recheck-play/`.

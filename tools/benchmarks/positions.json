@@ -232,6 +232,7 @@
     },
     {
       "id": "red-blocked-lethal",
+      "winner": 1,
       "journal": "blockedLethal",
       "version": 579,
       "seat": 1,

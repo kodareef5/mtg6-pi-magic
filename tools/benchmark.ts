@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Saved decision probes. Default is offline validation; --live spends on explicit model comparisons.
- * A matching property is a narrow regression result, never a gameplay-strength score. */
+ * A matching property is a narrow regression result, never a gameplay-strength score.
+ * Past 150 lines so input validation, model accounting and result saving share one runner. */
 import { readFileSync, mkdirSync, writeFileSync, appendFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -23,16 +24,23 @@ import { tally } from "../src/context/spend.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { usageReport, bill } from "../src/context/metrics.ts";
 import type { Brief } from "../src/context/brief.ts";
+import { paymentForecast } from "../src/core/budget.ts";
+import { playProposal } from "./benchmark-play.ts";
 
-type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair"; property: string;
+type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair"; property: string; winner?: number;
 	prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
-	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" } } });
+	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
+	answers: { type: "string" }, through: { type: "string" } } });
+if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
+if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
 const repeat = Number(values.repeat), pilots = values.pilot === "both" ? ["jev", "luna"] : [values.pilot!];
 if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "luna"].includes(one))) throw new Error("Use a positive --repeat and --pilot jev, luna or both.");
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
+if (values.play && selected.some((one) => one.task === "pilot")) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
+const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
 // the selected inputs and remove temporary copies even when a probe fails.
 const scratch = mkdtempSync(join(tmpdir(), "magic-bench-"));
@@ -81,7 +89,7 @@ if (!values.live) process.exit(0);
 
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
-const parts = cast(rosterFor({ every: { strategy: "gpt-6-luna:low" } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") });
+const parts = cast(rosterFor({ every: { strategy: "gpt-6-luna:low", summary: "off" } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") });
 const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!;
 if (!jev.model || jev.off || !luna.model || luna.off) throw new Error("The prescribed Jev and Luna low models must both resolve.");
 const out = values.out ?? `.pi/benchmarks/${Date.now()}`;
@@ -95,20 +103,35 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
+		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
 		try {
 			const writer = reasoner({ role: one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
 				model: luna.model as never, thinking: luna.thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
 			if (one.task !== "pilot") {
 				const context = { brief, cards: universe, rules };
-				if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
+				if (savedAnswers) {
+					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration);
+					const plan = rows[0]?.plan ?? rows[0]?.answer?.plan;
+					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case and repetition.");
+					answer = { plan, fromAnswers: values.answers };
+				} else if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
 				else {
 					const result = await planWork(frame, context, writer, prior ? { plan: prior.plan } : undefined, earlier ? changes(earlier, frame).lines : undefined);
 					const put = result.tools.find((tool) => tool.do === "plan.put");
 					if (put?.do !== "plan.put") throw new Error("Amendment returned no accepted plan.");
 					answer = { ...result, plan: put.plan };
 				}
-				checks = checkPlan((answer as { plan: Plan }).plan, one, frame);
+				const plan = (answer as { plan: Plan }).plan;
+				checks = checkPlan(plan, one, frame);
+				resources = paymentForecast(frame, plan);
 				passed = checks.passed;
+				decisionMs = Date.now() - began;
+				if (values.play) {
+					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, plan },
+						{ out: join(out, `${one.id}-${iteration}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}) });
+					const game = continuation.result;
+					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+				}
 			} else {
 				const api: DecisionApi = pilot === "jev" ? decisionApi(inference.classify, jev.model as never, { tally: measured, seat: one.seat }) : {
 					named: "benchmark Luna pilot", async ask(request) {
@@ -135,7 +158,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			if (!isDeepStrictEqual(frame, before)) throw new Error("Benchmark mutated the projected frame.");
 		} catch (caught) { error = String(caught); }
 		const calls = measured.spent().slice(startCall), entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
-			ms: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
+			ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
+			...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
 		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.ms}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
 		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest: "tools/benchmarks/positions.json", results, calls: measured.spent() }, null, 2) + "\n");
 	}

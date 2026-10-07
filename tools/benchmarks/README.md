@@ -48,6 +48,9 @@ accepted. The automatic property checks Smaug's cast before its attack and
 requires attacks from Kellan and Sanctuary, the verified winning commitment.
 Review payments, conditions and instruction consistency separately. Another
 winning line can fail this specific property and needs human review.
+With `--play`, its pass criterion is instead Red's actual win in the continuation,
+with no gaps or fallback and matching replay. The structural result remains in
+the report. This measures the observed game, not every possible opposing response.
 `zone` matches a projected source in that zone; it does not assert that a future
 zone change or permission has happened.
 
@@ -56,6 +59,24 @@ individual calls, model, effort, tokens, cost and complete request/response
 trace. Repeated pilot comparisons alternate model order. `results.json` holds
 the answers and metrics; `calls.jsonl` holds the trace. Use a new output
 directory for each run. Any failed property or call makes the command fail.
+Planning results include the scoped resource forecast, with optional unfunded
+responses separate from ordered-step conflicts.
+
+`--play` installs the answer in a clone and continues through the opponent's
+next turn, or an earlier outcome, using the ordinary Jev/Luna roster with summary
+off. `--through N` changes that diagnostic boundary. It checks the cloned prefix
+before installing the plan and replay after play, and saves a separate game
+journal, call trace, report and timeline. A stopped continuation is not an outcome.
+Planning time and usage remain separate from the continuation's report.
+To execute an existing answer without paying for another planning question:
+
+```sh
+npm run benchmark -- --live --case after-explorer-repair --play --answers .pi/benchmarks/example/results.json --out .pi/benchmarks/example-play
+```
+
+`--answers` requires exactly one matching case and repetition. `--repeat` selects
+successive recorded repetitions; it does not repeat the first answer silently.
+Both new and saved-answer continuations require `--live` because play uses models.
 
 Checks are deliberately narrow. Pilot cases compare a listed id or a use's
 source, timing and target. Plan cases require or forbid named actions in the
