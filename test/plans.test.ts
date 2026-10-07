@@ -675,6 +675,16 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.deepEqual(laterWitness.conflicts, []);
 	assert.ok(laterWitness.payments[0]!.funding.taps.some((tap) => tap.source.id === elf.id), "vigilance allows paying after the declaration");
 	place(attacking, 0, "battlefield", "Forest");
+	editWork(attacking, 0, [{ do: "plan.put", plan: commitment }], "attack-commitment");
+	const paymentFrame = workFrame(attacking, 0), paymentState = planState(paymentFrame)!;
+	const markedPayments = annotate(paymentFrame.decision!.options, paymentState);
+	assert.equal(markedPayments.length, paymentFrame.decision!.options.length + paymentState.procedures.length, "a payment conflict adds guidance without removing a move");
+	const usesElf = (one: (typeof markedPayments)[number]) => one.use?.funding?.some((tap) => tap.source.id === elf.id);
+	assert.ok(markedPayments.some((one) => usesElf(one) && one.shows?.includes('remaining attack step "Attack with the Elf"')));
+	assert.ok(markedPayments.some((one) => one.use && !usesElf(one) && !one.shows?.includes("This payment taps")), "the payment preserving the attacker stays unmarked");
+	const conditionalFrame = structuredClone(paymentFrame);
+	conditionalFrame.view.work!.plan!.steps[1]!.if = { amount: { life: "opponent" }, atMost: 0 };
+	assert.ok(annotate(conditionalFrame.decision!.options, planState(conditionalFrame)!).every((one) => !one.shows?.includes("This payment taps")), "a false attack condition creates no commitment mark");
 	const beforeWitness = structuredClone(attacking), witness = paymentForecast(workFrame(attacking, 0), commitment);
 	assert.deepEqual(witness.conflicts, []);
 	assert.deepEqual(witness.unchecked, []);

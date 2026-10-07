@@ -35,6 +35,8 @@ export type PlanState = {
 	/** Unarmed stops that are false now, and so arm. */
 	arming: string[];
 	held: { purpose: string; objects: SeenObject[] }[];
+	/** Current sources named by unfinished attacks in this turn's remaining combat. */
+	attacks: { label: string; objects: SeenObject[] }[];
 	/** The announcements due steps and branches offer, beside the table's own options. */
 	procedures: ProcedureOption[];
 };
@@ -109,11 +111,18 @@ export function planState(frame: Frame): PlanState | null {
 	const next = due.find((one) => one.candidates.length);
 	const unmet = due.find((one) => plan.steps[one.at]!.essential && !one.candidates.length && (!next || one.at < next.at) && belongs(plan.steps[one.at]!));
 	const blocked = unmet ? [`Step ${unmet.at + 1} cannot be taken now: ${unmet.label}`] : [];
+	const combat = at.kind === "turn" && at.active === frame.seat && (at.step === "declare-attackers" || frame.view.remainingSteps?.includes("declare-attackers"))
+		? { ...frame, view: { ...frame.view, window: { ...at, step: "declare-attackers", phase: "combat" } } } as Frame : undefined;
+	const attacks = combat ? plan.steps.flatMap((step, index) => {
+		const action = step.action;
+		if (done.has(index) || !matches(step.when, combat) || "procedure" in action || action.prefix !== "attack:" || !action.objects || step.if && !condition(scope, step.if)) return [];
+		return [{ label: step.label, objects: select(action.objects, frame).filter((one) => one.zone === "battlefield" && one.controller === frame.seat) }];
+	}) : [];
 	return {
 		revision, plan, due, waiting, branches, procedures, ...(unmet ? { unmet: unmet.at } : {}),
 		stops: [...(plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label), ...blocked],
 		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && ((stop.when && !matches(stop.when, frame)) || !condition(scope, stop.if))).map((stop) => stop.label),
-		held,
+		held, attacks,
 	};
 }
 
@@ -141,6 +150,12 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
 			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.id).join(", ")}, held: ${hold.purpose}.`);
+		}
+		if (option.use) {
+			const { cost, source, funding } = option.use;
+			const taps = [...(funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.tap ? [source] : [])];
+			for (const attack of state.attacks) for (const object of attack.objects) if (taps.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation))
+				marks.push(`This payment taps ${object.card ?? object.id}, named by the remaining attack step "${attack.label}". It would need to untap before attacking.`);
 		}
 		return marks.length ? { ...option, notes: [...(option.notes ?? []), ...marks], shows: [option.shows, ...marks].filter(Boolean).join(" ") } : option;
 	});
