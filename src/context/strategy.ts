@@ -21,6 +21,7 @@ import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditio
 import { actionFacts, bindingFacts, choiceProblems, planFacts } from "./strategy-actions.ts";
 import { facts, chancing, initialPlan, type Context } from "./strategy-facts.ts";
 import { combatLookup } from "./strategy-combat.ts";
+import { policyExamples } from "./playbook.ts";
 
 /** Retained for comparing call policies; it does not start a session. */
 export function worthPlanning(table: Table): boolean {
@@ -177,7 +178,8 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			accepted = { plan, ...(edits.length ? { edits } : {}), ...(objection ? { objection } : {}) };
 			return null;
 		} },
-		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 3,
+		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : []),
+			...(context.policyExamples === "lookup" ? policyExamples(context.brief) : [])], turns: 3,
 		// Observed ordinary replies take 6-28s; retry a stalled critical-path
 		// request without replacing its task, model, or accepted plan.
 		...(options.nextTurn ? {} : { timeoutMs: 45_000 }),

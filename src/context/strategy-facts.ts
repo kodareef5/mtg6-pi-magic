@@ -80,7 +80,9 @@ function mana(frame: Frame): string {
 	return lines.join(" ");
 }
 
-export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules };
+export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules;
+	/** Benchmark experiment; ordinary planning keeps the saved examples inline. */
+	policyExamples?: "lookup" };
 
 /** Pregame decisions are the initial phase defaults, not paragraphs to rewrite on turn one. */
 export function initialPlan(brief: Brief): Plan {
@@ -149,7 +151,7 @@ export function facts(frame: Frame, context: Context, more: Record<string, unkno
 	const decision = decisionFacts(frame, context.cards);
 	const inHand = new Set(decision.yourHand.filter((one) => one.printed).map((one) => one.name));
 	return JSON.stringify({
-		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn"),
+		brief: strategyBrief(context.brief, frame, scope === "response" ? "response" : "turn", context.policyExamples),
 		...more,
 		...(scope === "preparation" ? { positionBasis: {
 			kind: "forecast", observedWindow: observed.view.window,

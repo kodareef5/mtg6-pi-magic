@@ -62,6 +62,25 @@ directory for each run. Any failed property or call makes the command fail.
 Planning results include the scoped resource forecast, with optional unfunded
 responses separate from ordered-step conflicts.
 
+`--arm examples-paired` compares ordinary `planWork` with `examples-lookup`,
+alternating their order by repetition. The treatment replaces only saved
+`brief.policies.*.example` values with a `policyExample` lookup reference. That
+lookup returns the complete original position, line and exception. Policies,
+current facts, phase defaults, SYSTEM, submit schema and reply budget stay the
+same. Ordinary planning keeps examples inline. Continuations use the same
+production planner in both arms, so count foreground repairs separately from
+the initial proposal. The trace records lookup use and all replies; `ms`
+includes the whole initial planning session and `totalMs` includes play.
+
+The first gate is three repetitions each of `red-ready-lethal` and
+`red-blocked-lethal-fresh`, with physical play through their own turn. Require
+three clean wins per case, no foreground repair, zero gaps/fallback and matching
+replay/clone, plus improvement over the paired control. Record a winning initial
+line that Jev fails to execute as generation success and execution failure.
+Neither acceptance nor a shorter request passes the gate. Only after Red passes
+should feasible supplied Green defenses establish the development/defense gate;
+no full game precedes both gates. Attack-disposition schemas remain unadopted.
+
 `--play` installs the answer in a clone and continues through the opponent's
 next turn, or an earlier outcome, using the ordinary Jev/Luna roster with summary
 off. `--through N` changes that diagnostic boundary. It checks the cloned prefix

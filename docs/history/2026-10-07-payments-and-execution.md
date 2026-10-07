@@ -577,3 +577,29 @@ reported costs were $0.03236, $0.02583 and $0.02615. Across the three runs:
 background calls lacking usage. The prior Green controls took 56.62, 48.24 and
 52.55 seconds and all needed repairs. The new waiting and target/search checks
 pass; complete pilot obedience passes only 2/3, and generation remains unproven.
+
+## Saved examples as references
+
+The next generation experiment changes only where the saved pregame worked
+examples appear. The blocked-lethal failures invent a trample race resembling
+the combat example, whose hypothetical seat has six life against an 8/8 Hydra.
+The real seat has eighteen life against a nontrampling Explorer. This resemblance
+supports a test of interference; it does not establish the cause. Complete
+attack dispositions would expose omitted commitments but could still encode
+these deliberate defensive mistakes. They remain unadopted.
+
+Both committee reviewers endorse one input-only arm in the shared runner.
+`examples-lookup` uses production `planWork`, replacing each policy example with
+a reference to its lossless lookup. Every policy, current fact, phase default,
+submit field and reply budget stays unchanged. The ordinary path remains the
+control. Offline checks restore the examples and compare the complete request,
+task, SYSTEM and protocol. Carried briefs are never edited.
+
+Run fresh paired controls and treatment at the same clean revision, alternating
+order, three repetitions per Red position. Require three clean physical wins
+in each position and improvement over control before the Green development and
+defense gate. Record generation and execution separately: a winning initial
+line that Jev misses fails clean execution without disproving the input
+hypothesis. Log example lookups and whole-session latency. Reject adoption if
+Red fails; record the outcome without another immediate prompt variant. No
+full game precedes the Red and feasible Green gates.

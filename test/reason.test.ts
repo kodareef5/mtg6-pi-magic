@@ -19,7 +19,7 @@ import type { Api, Model } from "@earendil-works/pi-ai";
 import { brief, current, emptyBrief, needsNote } from "../src/context/brief.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import { reasoner, type Stream } from "../src/context/reason.ts";
+import { reasoner, type Stream, type Reasoner } from "../src/context/reason.ts";
 import { degraded, run, seat as seatTable } from "../src/context/sit.ts";
 import { gameResult, report, preparationFailure, saveReport } from "../tools/game-report.ts";
 import { totals, usageReport } from "../src/context/metrics.ts";
@@ -27,7 +27,7 @@ import { timeline, timelineData } from "../tools/game-timeline.ts";
 import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
-import { worthPlanning } from "../src/context/strategy.ts";
+import { planWork, worthPlanning } from "../src/context/strategy.ts";
 import { facts as strategyFacts } from "../src/context/strategy-facts.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { load as loadRules } from "../src/core/rules.ts";
@@ -169,6 +169,43 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	assert.equal(forTurn.brief.opening, undefined, "completed opening decisions do not accompany a turn question");
 	assert.equal(forTurn.brief.steps, undefined, "existing phase scripts arrive through the base plan, not twice");
 	assert.equal(forTurn.brief.cards["Snakeskin Veil"], undefined, "a card note does not follow an unidentified library object");
+
+	// Compare the actual writer boundary: the experiment can change only saved
+	// example placement and its lookup, not the task, validation schema or facts.
+	const capture = async (lookup: boolean) => {
+		let request: Parameters<Reasoner["work"]> | undefined;
+		const stop = new Error("Captured before inference");
+		const requested = { ...frame, view: { ...frame.view,
+			window: { kind: "turn" as const, active: frame.seat, turn: 1, step: "precombat-main" as const, phase: "precombat-main" as const },
+			work: { ...frame.view.work!, request: "Plan this position." } } };
+		await assert.rejects(planWork(requested, { brief: written, ...(lookup ? { policyExamples: "lookup" as const } : {}) }, {
+			async work(...args) { request = args; throw stop; },
+		}), (error) => error === stop);
+		return request!;
+	};
+	const control = await capture(false), treatment = await capture(true);
+	const reference = treatment[2].lookups!.find((one) => one.name === "policyExample")!;
+	for (const scope of ["turn", "response", "preparation"] as const) {
+		const original = JSON.parse(strategyFacts(frame, { brief: written }, {}, scope));
+		const relocated = JSON.parse(strategyFacts(frame, { brief: written, policyExamples: "lookup" }, {}, scope));
+		for (const [family, policy] of Object.entries(relocated.brief.policies) as [string, { example: unknown }][]) {
+			assert.deepEqual(policy.example, { lookup: reference.name, family });
+			policy.example = JSON.parse(reference.answer({ family }));
+		}
+		assert.deepEqual(relocated, original, "every policy, fact and visible card note survives relocation losslessly");
+	}
+	assert.equal(reference.answer({ family: "missing" }), "Choose a listed policy family.");
+	const restored = JSON.parse(treatment[1].user);
+	for (const [family, policy] of Object.entries(restored.brief.policies) as [string, { example: unknown }][])
+		policy.example = JSON.parse(reference.answer({ family }));
+	assert.deepEqual(restored, JSON.parse(control[1].user));
+	assert.deepEqual({ ...treatment[1], user: undefined }, { ...control[1], user: undefined }, "system and task are unchanged");
+	const protocol = (request: Parameters<Reasoner["work"]>) => ({ about: request[0], ceiling: request[3],
+		...request[2], submit: { ...request[2].submit, check: undefined },
+		lookups: request[2].lookups!.filter((one) => one.name !== "policyExample").map(({ answer: _answer, ...spec }) => spec) });
+	assert.deepEqual(protocol(treatment), protocol(control), "schema, reply budget, timeout and existing tools are unchanged");
+	assert.equal(control[2].lookups!.some((one) => one.name === "policyExample"), false);
+	assert.deepEqual(JSON.parse(strategyFacts(frame, { brief: written })), forTurn, "the experiment never edits the carried brief");
 });
 
 test("the analysts read both lists and computed odds, look rules up, and a failed analyst reaches the synthesis as a failure", async () => {

@@ -35,7 +35,7 @@ const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/po
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, arm: { type: "string", default: "production" } } });
-if (!["production", "one", "two", "both"].includes(values.arm!)) throw new Error("Use --arm production, one, two or both.");
+if (!["production", "one", "two", "both", "examples-lookup", "examples-paired"].includes(values.arm!)) throw new Error("Use --arm production, one, two, both, examples-lookup or examples-paired.");
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
 if (values.through && (!values.play || !/^\d+$/.test(values.through))) throw new Error("--through needs --play and a nonnegative turn boundary.");
 const repeat = Number(values.repeat), pilots = values.pilot === "both" ? ["jev", "luna"] : [values.pilot!];
@@ -43,7 +43,8 @@ if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "lu
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
 if (values.play && selected.some((one) => one.task === "pilot")) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
-if (values.arm !== "production" && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
+if (["one", "two", "both"].includes(values.arm!) && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
+if (values.arm!.startsWith("examples-") && selected.some((one) => one.task === "pilot")) throw new Error("Example arms require planning cases.");
 const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; arm?: string; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
 // the selected inputs and remove temporary copies even when a probe fails.
@@ -107,7 +108,8 @@ const inference = traceInference({ classify: (...args) => runtime.classify(...ar
 for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame, brief, prior, earlier } of positions) {
 	// Alternate order so one model does not always receive the earlier request.
 	for (const pilot of one.task !== "pilot" ? ["luna"] : iteration % 2 ? [...pilots].reverse() : pilots) {
-	for (const arm of values.arm === "both" ? iteration % 2 ? ["two", "one"] : ["one", "two"] : [values.arm!]) {
+	const pair = values.arm === "both" ? ["one", "two"] : values.arm === "examples-paired" ? ["production", "examples-lookup"] : [values.arm!];
+	for (const arm of iteration % 2 ? [...pair].reverse() : pair) {
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
@@ -115,13 +117,13 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			const writer = reasoner({ role: one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
 				model: luna.model as never, thinking: luna.thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
 			if (one.task !== "pilot") {
-				const context = { brief, cards: universe, rules };
+				const context = { brief, cards: universe, rules, ...(arm === "examples-lookup" ? { policyExamples: "lookup" as const } : {}) };
 				if (savedAnswers) {
 					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration && (row.arm ?? "production") === arm);
 					const plan = rows[0]?.plan ?? rows[0]?.answer?.plan;
 					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case, arm and repetition.");
 					answer = { plan, fromAnswers: values.answers };
-				} else if (arm !== "production") answer = await candidatePlan(frame, context, writer, arm === "one" ? 1 : 2);
+				} else if (arm === "one" || arm === "two") answer = await candidatePlan(frame, context, writer, arm === "one" ? 1 : 2);
 				else if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
 				else {
 					const result = await planWork(frame, context, writer, prior ? { plan: prior.plan } : undefined, earlier ? changes(earlier, frame).lines : undefined);
