@@ -118,6 +118,7 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 				assert.deepEqual(option.targets, offer.activation.targets);
 				assert.deepEqual(packet.payments[option.payment!]!.paid, offer.activation.paid);
 				assert.deepEqual(packet.payments[option.payment!]!.funding?.map((id) => packet.funding[id]), offer.activation.funding);
+				for (const tap of offer.activation.funding ?? []) assert.ok(option.label.includes(`tap Mountain (${tap.source.id}@${tap.source.incarnation}) for R`), "payment alternatives name their physical sources directly");
 			}
 			return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
 		} } });

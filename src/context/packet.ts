@@ -126,7 +126,18 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const selection = view.window.kind === "opening" && view.window.action === "bottom" || decision.situation === "turn-based" && view.window.kind === "turn" && view.window.step === "cleanup";
 	const available = !view.resolution && view.window.kind === "turn" ? sources(frame).map(({ object, yields }) =>
 		`${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}): ${[...new Set(yields.map((one) => `${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`) : [];
-	const listed = menu?.options ?? data.options;
+	// A payment question must name the resources being compared. The structured
+	// references remain authoritative; reading a label spends nothing.
+	const listed = (menu?.options ?? data.options).map((one) => {
+		const payment = one.payment && data.payments[one.payment];
+		if (!payment) return one;
+		const mana = [...payment.paid.map((id) => `${view.pools?.flatMap((pool) => pool.mana).find((unit) => unit.id === id)?.color ?? "?"} floating (${id})`),
+			...(payment.funding ?? []).map((id) => {
+				const tap = data.funding[id]!, object = view.objects?.find((object) => object.id === tap.source.id && object.incarnation === tap.source.incarnation);
+				return `${tap.sacrifice ? "sacrifice" : "tap"} ${object?.card ?? object?.token?.name ?? tap.source.id} (${tap.source.id}@${tap.source.incarnation}) for ${tap.colors.join("")}`;
+			})];
+		return { ...one, label: `${one.label}; mana payment: ${mana.join("; ") || "none"}` };
+	});
 	const used = new Set(listed.flatMap((one) => one.use ? [one.use] : []));
 	const paid = new Set(listed.flatMap((one) => one.payment ? [one.payment] : []));
 	const taps = new Set([...paid].flatMap((id) => data.payments[id]?.funding ?? []));

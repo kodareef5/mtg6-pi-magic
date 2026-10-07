@@ -349,3 +349,27 @@ policy after amendment/replay/clone, and explicit completion. The existing
 two-Merchant fixture now requests each plan within its intended turn pair;
 it still checks the same turn-3 response, discards and replay. No model roster or
 effort changed. Live execution and strategic quality remain to be measured.
+
+At `b68b6db`, fresh blocked-lethal planning accepted all three answers in four
+calls, but none found the win. The old midcombat base was absent; new wrong
+claims about sickness, blocking, mana and attacks remained. This passes the
+lifetime correction, not strategy quality.
+
+Supplied blocked lethal won 3/3 in 16.5, 18.0 and 21.5 seconds. All runs needed
+Green's blocking repair; the last also needed a needless Red priority repair.
+The supplied Hydra, Passage and Forest-search line completed 3/3 through its
+own turn in 56.6, 48.2 and 52.6 seconds, each with a trigger-order repair. Both
+sets had zero gaps/fallback and matching replay, but failed the no-routine-repair
+execution gate. These are authored control policies, not generated strategy wins.
+Their data is in `.pi/resume-20261007/execution-controls.json`; traces are in
+`execution-blocked-controls/` and `execution-green-controls/` beside it.
+
+The unchanged Treasure control won in 8.69 seconds without foreground planning,
+but paid Mountain plus Sanctuary instead of its specified two Mountains. The
+payment question now contained that purpose in the due step, script and use
+notes: delivery was verified, obedience failed. Every alternative still had
+the same action label and required following payment/funding/object references
+to identify its sources. The next small change names each payment's actual
+sources, colors and sacrifices in its choice label, without selecting or
+removing any option. Its unchanged-policy repetition is kept separate from
+the earlier delivery control.
