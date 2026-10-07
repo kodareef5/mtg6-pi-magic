@@ -1,0 +1,8 @@
+{
+  "phases": [
+    {
+      "when": { "active": "self", "step": "declare-blockers", "fromTurn": 10, "throughTurn": 10 },
+      "guidance": "Object to the completed lone-Forest block on Zhao before passing: Zhao has menace and exactly one creature was assigned to it. The judge decides the remedy. After a stand ruling or a failed ruling, continue under the remaining response policy."
+    }
+  ]
+}

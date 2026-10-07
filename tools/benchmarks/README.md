@@ -218,3 +218,10 @@ can separately expect an objection or measure avoiding one.
 and successful rollbacks. This external probe boundary complements `--decisions`,
 whose net ledger growth can shrink on rollback. Reports retain the stopped
 position and separate `judge-attempts` from outcomes, gaps and recovery.
+
+A pilot fixture may name a `pilotPolicy` JSON file containing only appended
+`steps`, `may` and `phases`. The runner validates the combined plan but preserves
+its revision and ledger progress. This is a supplied execution control, not a
+production plan acceptance. Its normal marks, ordering and phase precedence are
+part of the measured representation. The table and physical choice set remain
+unchanged. See [the supplied coverage diagnostic](../../docs/history/2026-10-07-supplied-coverage.md).

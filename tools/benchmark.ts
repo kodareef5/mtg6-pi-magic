@@ -9,10 +9,10 @@ import { gunzipSync } from "node:zlib";
 import { execFileSync } from "node:child_process";
 import { parseArgs, isDeepStrictEqual } from "node:util";
 import { replay } from "../src/core/journal.ts";
-import { workFrame } from "../src/core/work-tools.ts";
+import { workFrame, planProblems } from "../src/core/work-tools.ts";
 import { project, sinceDecision } from "../src/core/view.ts";
 import { annotate, planState } from "../src/core/planning.ts";
-import type { Plan } from "../src/core/language.ts";
+import { PlanSchema, check, type Plan } from "../src/core/language.ts";
 import { checkPlan, type PlanCheck } from "./benchmark-checks.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { load as loadRules } from "../src/core/rules.ts";
@@ -34,7 +34,7 @@ import { commitmentReceipt } from "./benchmark-receipt.ts";
 import { checkedReceipt, freezeSource, repairPlan, type RepairSource, type ReviewedReceipt } from "./benchmark-repair.ts";
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
-	prepared?: { file: string; name: string } };
+	pilotPolicy?: string; prepared?: { file: string; name: string } };
 const catalog = JSON.parse(readFileSync(join(import.meta.dirname, "benchmarks/positions.json"), "utf8")) as { journals: Record<string, string>; cases: Case[] };
 const { values } = parseArgs({ options: { live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", default: "jev" }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
@@ -78,6 +78,18 @@ const positions = selected.map((one) => {
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
 	if (one.task === "pilot") frame.view = project(saved.table, one.seat, sinceDecision(saved.table, one.seat));
+	// Supplied coverage changes only plan content, preserving the prefix's progress and physical facts.
+	if (one.pilotPolicy) {
+		if (one.task !== "pilot" || !frame.view.work?.plan) throw new Error("Supplied pilot coverage requires a pilot case with a plan.");
+		const added = JSON.parse(readFileSync(one.pilotPolicy, "utf8")) as Partial<Pick<Plan, "steps" | "may" | "phases">>;
+		if (Object.keys(added).some((key) => !["steps", "may", "phases"].includes(key))) throw new Error("Pilot coverage only appends steps, branches and phases.");
+		const plan = structuredClone(frame.view.work.plan);
+		for (const key of ["steps", "may", "phases"] as const) if (added[key]) Object.assign(plan, { [key]: [...(plan[key] ?? []), ...added[key]!] });
+		check(PlanSchema, plan, "Supplied pilot coverage");
+		const problems = planProblems(frame, plan);
+		if (problems.length) throw new Error(problems.join("; "));
+		frame.view.work.plan = plan;
+	}
 	if (one.refused) {
 		if (one.task !== "pilot") throw new Error("Saved transient refusals apply only to a pilot question.");
 		frame.refused = one.refused;

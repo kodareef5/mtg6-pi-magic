@@ -1,0 +1,20 @@
+{
+  "steps": [
+    {
+      "label": "Finish blockers",
+      "when": { "active": "opponent", "step": "declare-blockers", "fromTurn": 10, "throughTurn": 10 },
+      "action": { "option": "block:done" },
+      "purpose": "Finish the blocker declaration under the existing phase policy.",
+      "essential": true
+    }
+  ],
+  "may": [
+    {
+      "label": "Block attacking Kellan with the Forest",
+      "when": { "active": "opponent", "step": "declare-blockers", "fromTurn": 10, "throughTurn": 10 },
+      "if": { "amount": { "count": { "name": "Kellan, Planar Trailblazer", "controller": "opponent", "zones": ["battlefield"], "attacking": true } }, "atLeast": 1 },
+      "action": { "option": "block:0-25:1-15" },
+      "purpose": "Use the Forest to block Kellan only when Kellan is attacking."
+    }
+  ]
+}

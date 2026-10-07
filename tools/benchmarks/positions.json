@@ -494,6 +494,28 @@
       "judgeRow": 239,
       "legal": true,
       "property": "A forced objection to a legal two-creature menace block must stand."
+    },
+    {
+      "id": "menace-supplied-block",
+      "journal": "menacePartialBlock",
+      "version": 284,
+      "seat": 0,
+      "task": "pilot",
+      "property": "Execute the supplied structured finish and conditional Kellan block under unchanged facts; no generation claim.",
+      "expect": {
+        "id": "block:done"
+      },
+      "pilotPolicy": "test/fixtures/benchmarks/green-block-coverage.json"
+    },
+    {
+      "id": "menace-supplied-objection",
+      "journal": "menace-objection",
+      "version": 286,
+      "seat": 1,
+      "task": "pilot",
+      "objectionRow": 285,
+      "property": "Execute the supplied phase objection policy under unchanged facts; no generation claim.",
+      "pilotPolicy": "test/fixtures/benchmarks/red-objection-coverage.json"
     }
   ]
 }
