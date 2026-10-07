@@ -557,3 +557,23 @@ Grade whether Passage waits through the entire preceding landfall stack,
 separately from outcome, subsequent repairs and target/search obedience.
 Generated instant-speed continuations that omit a necessary prerequisite remain
 planner omissions, not proof that the execution contract failed.
+
+At clean `c80f30f`, `stack-wait-green/` passed waiting obedience 3/3. Each run
+activated Passage at decision 540 with an empty stack, after both the original
+landfall abilities and their reflexive rewards finished. Each searched for
+Forest `0-21`, placed Hydra below the Ascensions in both landfall groups, and
+targeted Hydra `0-49@3` with all four rewards. Replay and cloning matched, with
+no gaps or fallback. These are supplied-line continuations through turn 13,
+not generated wins or full games.
+
+Two runs completed without foreground planning. The first asked for help at
+clock 991, postcombat main, after all three commitments were done. Its packet
+already contained explicit completion by passing and no additional selected
+cast or land play; no changed source, target or payment justified that request.
+The repair waited 26.74 seconds. Play times were 50.55, 26.08 and 24.77 seconds;
+wall times were 51.77, 27.28 and 25.96 seconds. Total calls were 86, 83 and 83;
+reported costs were $0.03236, $0.02583 and $0.02615. Across the three runs:
+1,929,899 input tokens, 87,552 cached, 19,857 output, with three cancelled
+background calls lacking usage. The prior Green controls took 56.62, 48.24 and
+52.55 seconds and all needed repairs. The new waiting and target/search checks
+pass; complete pilot obedience passes only 2/3, and generation remains unproven.
