@@ -21,7 +21,9 @@
     "green-multi-attack": "test/fixtures/benchmarks/green-multi-attack.jsonl.gz",
     "block-kellan-zhao": "test/fixtures/benchmarks/block-kellan-zhao.jsonl.gz",
     "block-zhao-only": "test/fixtures/benchmarks/block-zhao-only.jsonl.gz",
-    "red-post-development": "test/fixtures/benchmarks/red-post-development.jsonl.gz"
+    "red-post-development": "test/fixtures/benchmarks/red-post-development.jsonl.gz",
+    "red-begin-combat": "test/fixtures/benchmarks/red-begin-combat.jsonl.gz",
+    "red-prose-block": "test/fixtures/benchmarks/red-prose-block.jsonl.gz"
   },
   "cases": [
     {
@@ -566,6 +568,39 @@
       "task": "repair",
       "winner": 1,
       "property": "Repair the inherited line after supplied execution of its Mountain, Claw and Challenger development. Runner PASS means accepted structure only; manually grade feasible winning commitments and consistent delivered policies before any physical expansion."
+    },
+    {
+      "id": "red-begin-combat",
+      "journal": "red-begin-combat",
+      "version": 592,
+      "seat": 1,
+      "task": "pilot",
+      "expect": {
+        "id": "pass"
+      },
+      "property": "Exact T14 begin-combat before completion-treatment2 first help; explicit pass and future attackers. Compare full requests and score margins."
+    },
+    {
+      "id": "red-prose-block",
+      "journal": "red-prose-block",
+      "version": 638,
+      "seat": 1,
+      "task": "pilot",
+      "picks": [
+        "block:1-12:0-34",
+        "block:1-50:0-34",
+        "block:1-6:0-34"
+      ],
+      "property": "Supplied prose-only defensive guard: original T15 policy and completion, with recorded attacks and structured finish removed. A legal Explorer block must remain preferred."
+    },
+    {
+      "id": "red-begin-combat-play",
+      "journal": "red-begin-combat",
+      "version": 592,
+      "seat": 1,
+      "task": "continue",
+      "winner": 1,
+      "property": "Continue the unchanged winning plan before first begin-combat help; classify repair, declarations, obedience and outcomes separately from runner health."
     }
   ]
 }
