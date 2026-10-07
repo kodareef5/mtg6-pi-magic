@@ -74,7 +74,9 @@ To execute an existing answer without paying for another planning question:
 npm run benchmark -- --live --case after-explorer-repair --play --answers .pi/benchmarks/example/results.json --out .pi/benchmarks/example-play
 ```
 
-`--answers` requires exactly one matching case and repetition. `--repeat` selects
+`--answers` requires exactly one matching case, arm and repetition. Use the
+original `--arm one`, `two` or `both` to continue generated candidates.
+`--repeat` selects
 successive recorded repetitions; it does not repeat the first answer silently.
 Both new and saved-answer continuations require `--live` because play uses models.
 

@@ -272,3 +272,31 @@ It now uses `changedPlan`, and the prompt supplies the same condition reference,
 binding facts and reference tools. The stopped run also produced real stale-Veil
 claims; those remain examples to review, not a scored arm result. Its interrupted
 request may lack completed usage. The corrected run uses a fresh output directory.
+
+The corrected 48-session gate (`candidate-comparison-v2/`, commit `0d64ec2`)
+did not qualify either arm. One candidate yielded 18 accepted plans out of 24;
+two yielded 19. Median session times were 12.52 and 15.38 seconds. The old narrow
+flags passed 13 and 16 respectively; those are not strategy scores. Total spend
+was 124 calls, 3,273,063 input tokens (1,984,000 cached), 40,480 output tokens,
+11m38s request time and $0.1690 reported cost. One WebSocket failure lacks usage.
+
+Neither arm produced a winning blocked-lethal line in its three sessions. Some
+sessions failed schema or named-reference handling; their raw proposals also
+missed the win. Two accepted one-candidate replies treated the old attack as
+already declared, put Red at six life instead of eighteen and preserved a
+blocker against a nonexistent trampling Forest. Their current position said draw
+step, untapped Kellan, nontrampling Explorer and eighteen life. The supplied old
+phase narrative remained more influential than these facts.
+
+Two candidates put Hydra before the land in two after-Explorer sessions; the
+one-candidate arm put the land first in all three. Other errors remained: stale
+Veil reservations, fictional remaining mana, excess land plays, and an unfunded
+Ascension after a fetch whose effects the payment forecast leaves unchecked.
+Both arms often chose Mountain then Zhao correctly. Several reasons still
+claimed an unspent Mountain after spending both. Some Treasure-position lines
+can win while their reasons or execution policies miscount Treasure or blocking.
+
+Registration, resource feasibility, coherent execution policy and useful play
+must therefore remain distinct. The candidate path stays experimental. The next
+production decision concerns derived execution and stale carried narrative,
+including coverage outside own main phases, not a larger candidate count.

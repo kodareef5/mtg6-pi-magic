@@ -43,8 +43,8 @@ if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !["jev", "lu
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
 if (values.play && selected.some((one) => one.task === "pilot")) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
-if (values.arm !== "production" && (values.answers || selected.some((one) => one.task === "pilot" || one.task === "prepare"))) throw new Error("Candidate arms require current-turn planning cases and generate their own answers.");
-const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
+if (values.arm !== "production" && selected.some((one) => one.task === "pilot" || one.task === "prepare")) throw new Error("Candidate arms require current-turn planning cases.");
+const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; arm?: string; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
 // the selected inputs and remove temporary copies even when a probe fails.
 const scratch = mkdtempSync(join(tmpdir(), "magic-bench-"));
@@ -117,9 +117,9 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const { one, frame
 			if (one.task !== "pilot") {
 				const context = { brief, cards: universe, rules };
 				if (savedAnswers) {
-					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration);
+					const rows = savedAnswers.results.filter((row) => row.id === one.id && row.iteration === iteration && (row.arm ?? "production") === arm);
 					const plan = rows[0]?.plan ?? rows[0]?.answer?.plan;
-					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case and repetition.");
+					if (rows.length !== 1 || !plan) throw new Error("The saved answer must identify exactly one plan for this case, arm and repetition.");
 					answer = { plan, fromAnswers: values.answers };
 				} else if (arm !== "production") answer = await candidatePlan(frame, context, writer, arm === "one" ? 1 : 2);
 				else if (one.task === "prepare") answer = await prepareTurn(frame, context, writer);
