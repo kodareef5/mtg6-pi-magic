@@ -373,3 +373,69 @@ to identify its sources. The next small change names each payment's actual
 sources, colors and sacrifices in its choice label, without selecting or
 removing any option. Its unchanged-policy repetition is kept separate from
 the earlier delivery control.
+
+At `abeacae`, the unchanged two-Mountain control obeyed its stated payment 3/3
+and won 3/3. Play took 8.63, 7.85 and 7.55 seconds, with 26 Jev calls and no
+foreground planning each. Replay and cloning matched, with no gaps or fallback.
+Reported cost was $0.00704 each; each cancelled one background preparation with
+missing usage. `named-payment-controls/` preserves these repetitions.
+
+The separate pilot probes in `execution-pilot-controls/` found Forest in 2/3
+paid Vein searches and 3/3 paid Passage searches. All three Chocobo response
+probes passed instead of using Burst. The latter policy asks Jev to decide what
+is consequential; the failed choice cannot be attributed to missing purpose.
+These archived policies and partial passes do not meet the execution gate.
+
+## Scoped-plan full game
+
+The same version-zero game continued at clean `abeacae`, with the carried
+pregame, baseline roster and summary off. Red won on turn 13 by casting Burst
+at Green's two life. Replay and full-game cloning matched, with zero gaps and
+fallback. The journal, calls, report and timeline are under
+`.pi/resume-20261007/scoped-full-game/next-version-gate-20261005-1791339573156.*`.
+
+Wall time was 10m05s, play 10m04s and strategy wait 8m09s, against 5m26s, 5m25s
+and 4m11s in the preceding game. The new run used 380 Jev calls and 53 strategy
+attempts, with 19 foreground sessions, five help requests and one essential-step
+repair. Six of twelve preparations were ready; all twelve consumed preparations
+were amended. There were no timeouts, failures or truncations. Three cancelled
+preparations lack usage. Reported totals: 2,456,304 input tokens, 308,224 cached,
+65,469 output and $0.1592. Sixteen requests followed refusals: eight resource
+conflicts, four missing comparison bounds, three other schema errors and one
+invented action id.
+
+Lifetime and payment delivery are better defined, but this game is a strategic
+regression, not an accepted quality gate:
+
+- Green correctly treats Zhao-tapped fetch lands as unavailable mana. At turn 9
+  it still proposes Ascension followed by Hydra using the remaining Forest and
+  a searched tapped Forest. The unchecked continuation is accepted and then
+  requires an essential-step repair. A resource witness with unchecked effects
+  is not a feasibility proof for the remaining line.
+- Red animates Sanctuary during turn-10 upkeep using that Sanctuary and three
+  Mountains. No tactical plan applies before draw; the standing card note does
+  warn that this payment prevents an immediate attack. Jev spends the resources
+  anyway. This is a standing-policy execution failure, not stale tactical prose.
+- At turn 12, Red has untapped Kellan, Sanctuary and Zhao, five sources and burn;
+  Green has four life and one 1/1 Hydra. The facts and action catalogue correctly
+  include Sanctuary. The accepted line attacks only Kellan and Zhao, leaving
+  a winning attacker idle. Its rationale says Sanctuary may attack "if desired"
+  and counts Kellan's six only if unblocked. Hydra blocks it; only Zhao connects.
+- At turn 13, Green again says Explorer cannot enable a land play without a land
+  in hand, despite visible graveyard lands and its accepted permission. Another
+  repair repeats the lost development. Red finally requests help and gets the
+  explicit lethal Burst target.
+
+`red-ready-lethal` freezes the new turn-12 draw position before the accepted
+plan. Its physical win is the property, allowing attacks or burn. The existing
+blocked-lethal case still tests a win requiring development before combat.
+The next focused question is whether supplying the existing checked single-pair
+combat arithmetic directly, beside every current creature, improves these
+missed wins. It will not simulate future casts, choose attackers or certify a
+whole combat.
+
+The roster now includes that pair arithmetic from the existing core reader,
+without changing the planner prompt, schema, model or effort. The damage
+invariant checks the supplied values against physically executed first- and
+double-strike combats. Types, all 179 tests and all 24 saved-position replay
+checks pass. Live outcome probes follow separately.

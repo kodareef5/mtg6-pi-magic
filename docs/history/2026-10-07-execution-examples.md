@@ -36,6 +36,14 @@ the planner explicitly permits ending each window after its commitments finish.
 A newly tapped attacker or new blocker invalidates the relevant commitment;
 the old instruction does not override current characteristics or legal options.
 
+Before choosing a line, strategy receives the existing damage arithmetic for
+each current creature, unblocked and against each single opposing blocker.
+A double striker blocked by a creature deals no player damage without trample,
+even if first strike kills the blocker. Keyword conflicts and tapped blockers
+remain explicit. These are separate hypothetical pairs, not a whole combat or
+a prediction of triggers, responses, future entries or chosen blocks. The
+planner must still choose its attackers and account for creatures left idle.
+
 ## Beneficiary, fetch, targets and search
 
 Green controls a sick Explorer, two Ascensions and three untapped Forests, with

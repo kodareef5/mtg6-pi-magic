@@ -51,3 +51,10 @@ private artifact directory. It preserves the actual accepted Luna plan from
 the compact-question experiment, after Kellan and Smaug were selected and
 before Jev omitted Sanctuary. The plan passed the attack-list property but
 missed lethal when played. Its conflicting prose remains in the fixture.
+
+`red-ready-lethal.jsonl.gz` freezes decision 354 of
+`scoped-full-game/next-version-gate-20261005-1791339573156.jsonl` under
+`.pi/resume-20261007/`, before Red's accepted turn-12 plan. The prefix is cut at
+that work row after `journal.fork`. Three established creatures and burn can
+win through Green's lone Hydra; the recorded line omitted Sanctuary. The
+manifest grades a physically observed win rather than one specific attack set.

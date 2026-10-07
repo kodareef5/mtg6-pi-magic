@@ -8,7 +8,8 @@
     "red-two-red-mana": "test/fixtures/benchmarks/red-two-red-mana.jsonl.gz",
     "green-tapped-vein": "test/fixtures/benchmarks/green-tapped-vein.jsonl.gz",
     "green-upkeep-fetch": "test/fixtures/benchmarks/green-upkeep-fetch.jsonl.gz",
-    "red-treasure-lethal": "test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz"
+    "red-treasure-lethal": "test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz",
+    "readyLethal": "test/fixtures/benchmarks/red-ready-lethal.jsonl.gz"
   },
   "cases": [
     {
@@ -347,6 +348,15 @@
           "prefix": "attack:"
         }
       ]
+    },
+    {
+      "id": "red-ready-lethal",
+      "journal": "readyLethal",
+      "version": 354,
+      "seat": 1,
+      "task": "plan",
+      "winner": 1,
+      "property": "Win this turn through the visible 1/1 Hydra. All three established creatures can attack; burn supplies other winning lines. Grade the physical outcome, not one required attack set."
     }
   ]
 }

@@ -5,6 +5,7 @@ import { viewWorld } from "../core/selectors.ts";
 import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
 import type { Universe } from "../core/cards.ts";
+import { combatFacts } from "./strategy-combat.ts";
 
 /** Only call for an identity already earned in the projected objects. No text is interpreted. */
 export function cardDefinition(frame: Frame, name: string, cards?: Universe) {
@@ -25,6 +26,7 @@ export function decisionFacts(frame: Frame, cards?: Universe) {
 		yourHand: objects.filter((one) => one.zone === "hand" && one.controller === frame.seat).map((one) => ({ ...ref(one),
 			...(one.card ? { printed: cardDefinition(frame, one.card, cards) } : {}) })),
 		yourCreatures: creatures(true), opposingCreatures: creatures(false),
+		combat: combatFacts(frame),
 		mana: { untappedSources: sources(frame).map(({ object, yields }) => ({ ...ref(object), yields })),
 			floating: frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? [] },
 		landPlays: { allowance: lands, used: frame.view.landsPlayed ?? 0, remaining: Math.max(0, lands - (frame.view.landsPlayed ?? 0)),

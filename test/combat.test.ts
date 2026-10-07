@@ -198,6 +198,13 @@ test("double strike deals damage in both steps, and a creature killed by first s
 		assert.equal(read.attackerDestroyed, !trample);
 		assert.equal(read.blockerDestroyed, trample);
 		assert.equal(JSON.parse(combatLookup(frame).answer({ attacker: striker.id, blocker: wall.id })).exchange.toPlayer, read.toPlayer);
+		const sheet = JSON.parse(facts(frame, {})).decisionFacts.combat;
+		const sent = sheet.creatures.find((one: { attacker: { id: string } }) => one.attacker.id === striker.id);
+		assert.equal(sent.unblocked.toPlayer, trample ? 4 : 6);
+		assert.deepEqual(sent.blocks[0].damage, { toPlayer: read.toPlayer, attackerDestroyed: read.attackerDestroyed, blockerDestroyed: read.blockerDestroyed },
+			"the planning request receives the same checked exchange as the physical damage control");
+		assert.deepEqual(sent.blocks[0].conflicts, [], "a sick untapped creature is still a blocker");
+		assert.match(sheet.scope, /do not predict a whole combat/);
 		assert.deepEqual(game, original, "arithmetic applies no hypothetical damage or state-based action");
 		pick(game, `attack:${striker.id}`); pick(game, "attack:done");
 		reach(game, "declare-blockers", 2); pick(game, `block:${wall.id}:${striker.id}`); pick(game, "block:done");
