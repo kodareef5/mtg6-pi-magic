@@ -74,6 +74,7 @@ export const submissionFields = { ...writableFields,
 /** A current response has a known window. The model chooses actions, not that metadata. */
 export const ResponseSchema = Type.Object({
 	current: Type.Array(Type.Object({ label: Type.String({ minLength: 1 }), purpose: Type.Optional(Type.String()),
+		waitFor: PlanDefs.Option.properties.waitFor,
 		action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!, Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false })]),
 	}, { additionalProperties: false }), { minItems: 1 }),
 	guidance: Type.Optional(Type.String()),

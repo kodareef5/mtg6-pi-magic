@@ -525,3 +525,35 @@ fallback and match replay and cloning. The correction restores honest action
 matching, not reliable contradiction detection. No new prompt variant follows
 this failed control. The next separate execution question is ordered waiting
 while effects from earlier commitments remain on the stack.
+
+## Explicit waiting for resolution
+
+Both reviewers converged on optional `waitFor: "empty-stack"` for a step or
+branch, also available in current-response submissions. Ordered actions already
+mean announcement order. A universal wait derived from earlier ledger rows
+would alter intentional stacking, such as a second burn above an opponent's
+Veil, and would lose its anchor when an amendment resets the plan revision.
+The explicit prerequisite needs no lineage or new stored state. Absence keeps
+legacy behavior; a retained commitment keeps its prerequisite after amendment.
+
+Core derives waiting from current stack objects. Checklist, script and marks
+show it without removing options, purpose or execution credit. A waiting step
+keeps later commitments later, even if the waiting use has no current option.
+Waiting grants no pass. Pass credit is unchanged: a structured `pass` denotes
+that action, and a label saying "finish" cannot change its meaning.
+
+The existing waiting invariant now covers landfall before an instant-speed
+fetch, retained waiting after amendment, explicit response replacement, branches,
+physical option access, early execution credit and policy recovery, deliberate
+ordered stacking, and replay/clone reconstruction. Types, all 179 tests and all
+24 saved-position replays pass. The planner's sequencing instruction was
+replaced with the explicit field contract; the rest of its strategy prompt is
+unchanged.
+
+The next live control uses `stack-wait-controls.json`, derived from the existing
+three Green execution controls. Only the land play and Passage activation gain
+`waitFor`; removing those two fields reproduces each original plan exactly.
+Grade whether Passage waits through the entire preceding landfall stack,
+separately from outcome, subsequent repairs and target/search obedience.
+Generated instant-speed continuations that omit a necessary prerequisite remain
+planner omissions, not proof that the execution contract failed.

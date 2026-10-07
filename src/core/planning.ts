@@ -18,12 +18,12 @@ import type { LedgerRow } from "./table.ts";
 import { isDeepStrictEqual } from "node:util";
 
 /** A step or branch that applies now, and the listed options that fit it. */
-export type Fit = { at: number; label: string; candidates: Option[] };
+export type Fit = { at: number; label: string; candidates: Option[]; waiting?: true };
 export type PlanState = {
 	/** The equipment revision that accepted this plan. */
 	revision: number;
 	plan: Plan;
-	/** Steps due now, in plan order: their window is open and their `if` holds. The next is the first with a fitting option; one with none is passed over. */
+	/** Steps whose window and condition hold, in order. An explicit stack wait keeps later steps later even when no option fits yet. */
 	due: Fit[];
 	/** Steps not yet taken and not due now, in plan order. */
 	waiting: { at: number; label: string }[];
@@ -88,7 +88,8 @@ export function planState(frame: Frame): PlanState | null {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
 		procedures.push(...found.procedures);
 		// Holds warn about spending; they cannot change which action was carried out.
-		return { at, label: option.label, candidates: found.options };
+		return { at, label: option.label, candidates: found.options,
+			...(option.waitFor === "empty-stack" && frame.view.objects?.some((one) => one.zone === "stack") ? { waiting: true as const } : {}) };
 	};
 	const due: Fit[] = [], waiting: PlanState["waiting"] = [];
 	plan.steps.forEach((step, at) => {
@@ -96,7 +97,7 @@ export function planState(frame: Frame): PlanState | null {
 		if (open(step)) due.push(fit(step, at, "s"));
 		else waiting.push({ at, label: step.label });
 	});
-	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length);
+	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length || one.waiting);
 	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase.
 	// Only with an empty stack: while a spell waits to resolve, passing so it can is the procedure, not a failed line.
 	const at = frame.view.window;
@@ -132,8 +133,9 @@ export function execution(state: PlanState, id: string): Execution | undefined {
 
 /** Attack choices in one declaration form a set; finishing the declaration still follows them. */
 export function laterStep(state: PlanState, at: number): boolean {
-	const next = state.due.find((one) => one.candidates.length);
+	const next = state.due.find((one) => one.candidates.length || one.waiting);
 	if (!next || at <= next.at) return false;
+	if (next.waiting) return true;
 	const attack = (index: number) => {
 		const action = state.plan.steps[index]!.action;
 		return !("procedure" in action) && (action.prefix === "attack:" || !!action.option?.startsWith("attack:") && action.option !== "attack:done");
@@ -150,8 +152,8 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
-		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
-		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
+		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
+		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
 			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.token?.name ?? object.id).join(", ")}, held: ${hold.purpose}.`);

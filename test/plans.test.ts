@@ -23,7 +23,7 @@ import { checklist } from "../src/core/review.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget, manaBudget, paymentForecast } from "../src/core/budget.ts";
-import { printedCast, procedureOptions } from "../src/core/procedures.ts";
+import { activate, printedCast, procedureOptions } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
@@ -1317,6 +1317,64 @@ test("an essential step waits while a spell resolves; an impossible line returns
 	assert.ok(cardsIn(table, "stack").length, "the Elf is on the stack");
 	const state = planState(workFrame(table, 0))!;
 	assert.deepEqual([state.stops, state.unmet], [[], undefined], "passing so the Elf resolves is the procedure, not a failed line");
+
+	// An instant-speed continuation can explicitly wait for landfall, across amendments.
+	const green = position(); main(green, 0, 3);
+	const fetch: PlanOption = { ...line.steps[1]!, waitFor: "empty-stack", purpose: "Find a Forest after landfall resolves." };
+	const { waitFor: _wait, ...stackedFetch } = fetch;
+	const end: PlanOption = { label: "Pass after the fetch", when: window, action: { option: "pass" } };
+	editWork(green, 0, [{ do: "plan.put", plan: { ...line, steps: [line.steps[0]!, fetch, end],
+		may: [{ ...stackedFetch, label: "Fetch in response", if: { amount: { count: { zones: ["stack"], controller: "you" } }, atLeast: 1 } }] } }], "wait-line");
+	const landState = planState(workFrame(green, 0))!, land = landState.due[0]!.candidates[0]!;
+	apply(green, land.id, "model", "chosen", execution(landState, land.id));
+	assert.equal(nextDecision(green)!.situation, "trigger-order");
+	apply(green, nextDecision(green)!.options[0]!.id, "model", "chosen");
+	const pending = workFrame(green, 0), pendingState = planState(pending)!;
+	assert.equal(pendingState.due[0]!.waiting, true);
+	assert.ok(pendingState.due[0]!.candidates.length, "waiting leaves the physical activation available");
+	assert.equal(checklist(pending).find((one) => one.id === "step:1")!.status, "waiting");
+	assert.equal(checklist(pending).find((one) => one.id === "step:2")!.status, "later", "waiting cannot promote a later commitment");
+	assert.equal(checklist(pending).find((one) => one.id === "branch:0")!.status, "available", "a branch can deliberately respond to our own stack");
+	const waitingBranch = structuredClone(pending); waitingBranch.view.work!.plan!.may![0]!.waitFor = "empty-stack";
+	assert.equal(checklist(waitingBranch).find((one) => one.id === "branch:0")!.status, "waiting", "branches can also choose a prerequisite");
+	const waitingPacket = focus(pending, startingIntent(0));
+	assert.equal(waitingPacket.plan!.due, undefined);
+	assert.ok(waitingPacket.plan!.script!.steps.some((one) => one.startsWith("Waiting for the stack to empty: Crack")));
+	assert.equal(waitingPacket.plan!.script!.completion, undefined, "waiting grants no pass");
+	const marked = annotate(pending.decision!.options, pendingState);
+	assert.ok(marked.some((one) => one.shows?.includes("Plan step 2") && one.shows.includes("Waiting for the stack to empty") && one.shows.includes(fetch.purpose!)));
+	assert.ok(pending.decision!.options.every((one) => marked.some((listed) => listed.id === one.id)), "every physical option remains reachable");
+	const early = structuredClone(green), use = pendingState.procedures.find((one) => pendingState.due[0]!.candidates.some((pick) => pick.id === one.option.id))!;
+	activate(early, use.activation, { picked: use.option.id, offered: marked.map((one) => one.id), by: "model", why: "chosen", execution: execution(pendingState, use.option.id) });
+	assert.deepEqual(workFrame(early, 0).view.done, [0, 1], "an early choice still records the actual activation");
+	assert.ok(project(early, 0).purposes!.some((one) => one.use === fetch.purpose));
+	const amended = basePlan(pending);
+	assert.equal(amended.steps[0]!.waitFor, "empty-stack");
+	editWork(green, 0, [{ do: "plan.put", plan: amended }], "amend-wait");
+	assert.equal(planState(workFrame(green, 0))!.due[0]!.waiting, true, "the first retained step waits after a revision reset");
+	const response = responseChanges(pending, amended, { current: [{ label: "Fetch later", action: { prefix: "use:" }, waitFor: "empty-stack" }] });
+	assert.equal(response.steps[0]!.waitFor, "empty-stack", "response replacements can choose the same prerequisite");
+	const stacked = structuredClone(green);
+	place(stacked, 0, "hand", "Snakeskin Veil");
+	editWork(stacked, 0, [{ do: "plan.put", plan: { objective: "Respond in order", guidance: "Announce both above the pending landfall.", steps: [
+		{ label: "Veil the Chocobo", when: window, action: { procedure: example("Cast Snakeskin Veil") } }, stackedFetch] } }], "stacked-response");
+	const responseState = planState(workFrame(stacked, 0))!;
+	assert.equal(responseState.due[0]!.waiting, undefined, "a fresh response can act on a preexisting stack");
+	const veil = responseState.procedures.find((one) => responseState.due[0]!.candidates.some((pick) => pick.id === one.option.id))!;
+	activate(stacked, veil.activation, { picked: veil.option.id, offered: [veil.option.id], by: "model", why: "chosen", execution: execution(responseState, veil.option.id) });
+	assert.equal(checklist(workFrame(stacked, 0)).find((one) => one.id === "step:1")!.status, "available", "a second ordered response can go above the first without an empty-stack prerequisite");
+	const scratch = mkdtempSync(join(tmpdir(), "stack-wait-"));
+	try {
+		const header: Header = { id: "stack-wait", format: standard.name, seed: green.rng.seed, seats: green.seats.map(({ id, name, deck }) => ({ id, name, deck })),
+			cards: { path: "cards/standard.tsv", generated: "fixture" }, rules: { path: "rules/cr.tsv", effective: "fixture" }, created: "fixture" };
+		const journal = open(join(scratch, "parent.jsonl"), header); save(journal, green);
+		const child = join(scratch, "child.jsonl"); fork(journal.path, green.ledger.length, "child", child);
+		for (const path of [journal.path, child]) assert.deepEqual(planState(workFrame(replay(path, () => position()).table, 0)), planState(workFrame(green, 0)), "replay and cloning derive the same wait");
+	} finally { rmSync(scratch, { recursive: true, force: true }); }
+	passBoth(green); finish(green);
+	const resolved = workFrame(green, 0);
+	assert.equal(checklist(resolved).find((one) => one.id === "step:0")!.status, "available");
+	assert.ok(focus(resolved, startingIntent(0)).plan!.script!.steps[0]!.startsWith("Now:"), "the same commitment becomes Now after resolution");
 
 	// Nothing in hand and nothing in play: pass is the only option, and the replanned line still needs a card Green does not hold.
 	const bare = matchup("forced");

@@ -325,6 +325,7 @@ export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Pac
 export const PlanDefs = { ...Defs,
 	Option: object({
 		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")), essential: Type.Optional(Type.Literal(true)),
+		waitFor: Type.Optional(Type.Literal("empty-stack", { description: "Wait until the whole stack is empty before this commitment. Absence adds no prerequisite. This does not choose a pass or remove physical options." })),
 		purpose: Type.Optional(Type.String({ minLength: 1, description: "Execution choices: targets, payment, search and optional instructions. Rationale belongs in the plan's audit guidance." })),
 		/** A listed table option by id or prefix and objects, or a procedure to announce. */
 		action: Type.Union([

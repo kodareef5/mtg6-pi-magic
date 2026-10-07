@@ -68,6 +68,12 @@ conditions in the same physical choice. An unavailable required line needs help;
 no status marks it completed. Unmentioned cards remain inspectable options,
 without separate invitations for Jev to invent a strategy for each one.
 
+A commitment can explicitly require `waitFor: "empty-stack"`. While any object
+remains on the stack, its checklist, script and marks show waiting and keep
+later steps later. Every physical option stays available and a chosen action
+still records execution. An omitted prerequisite preserves announcement order,
+so a second response can go above the first. Waiting grants no pass.
+
 Tactical work expires after its selected own turn and the following opponent
 turn. Fresh preparation starts from the pregame playbook, accepted equipment
 and current facts. Repairs preserve the scope and unfinished commitments; no

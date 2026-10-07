@@ -82,7 +82,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
 	const state = planState(frame);
 	const scripts = (state?.plan.phases ?? []).filter((one) => matches(one.when, frame));
-	const dueAt = state?.due.find((one) => one.candidates.length)?.at, done = new Set(view.done ?? []);
+	const dueAt = state?.due.find((one) => one.candidates.length && !one.waiting && !laterStep(state, one.at))?.at, done = new Set(view.done ?? []);
 	const instruction = (step: PlanOption) => `${step.label}${step.purpose ? `. Choices: ${step.purpose}` : ""}`;
 	const here = state?.plan.steps.some((one) => matches(one.when, frame));
 	const completion = scripts.flatMap((one) => one.complete ? [one.complete === "pass"
@@ -93,11 +93,11 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		...(dueAt !== undefined ? { due: instruction(state.plan.steps[dueAt]!) } : {}),
 		next: state.waiting.map((one) => ({ label: instruction(state.plan.steps[one.at]!), when: structuredClone(state.plan.steps[one.at]!.when),
 			status: matches(state.plan.steps[one.at]!.when, frame) ? "condition-false" as const : "outside-window" as const })),
-		branches: state.branches.map((one) => instruction(state.plan.may![one.at]!)),
+		branches: state.branches.map((one) => `${one.waiting ? "Waiting for the stack to empty: " : ""}${instruction(state.plan.may![one.at]!)}`),
 		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
 		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
 		...(scripts.length || here ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
-			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : state.due.some((one) => one.at === at && one.candidates.length) && !laterStep(state, at) ? "Now" : "Then"}: ${done.has(at) ? step.label : instruction(step)}`] : []),
+			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : laterStep(state, at) ? "Then" : state.due.some((one) => one.at === at && one.waiting) ? "Waiting for the stack to empty" : state.due.some((one) => one.at === at && one.candidates.length) ? "Now" : "Then"}: ${done.has(at) ? step.label : instruction(step)}`] : []),
 			...(completion.length ? { completion } : {}),
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;

@@ -71,7 +71,7 @@ export function checklist(frame: Frame): ReviewItem[] {
 		const card = "procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card;
 		const status = one.if && !holds(scope, one.if) ? "condition-false"
 			: kind === "step" && state && laterStep(state, at) ? "later"
-				: fit?.candidates.length ? "available" : waitsForStack(one, frame) ? "waiting" : "unavailable";
+				: fit?.waiting ? "waiting" : fit?.candidates.length ? "available" : waitsForStack(one, frame) ? "waiting" : "unavailable";
 		add(`${kind}:${at}`, one.label, kind, status, fit?.candidates ?? [], card ? [card] : []);
 	});
 	return items;

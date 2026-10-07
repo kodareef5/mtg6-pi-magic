@@ -288,6 +288,12 @@ A **plan** is what jev flies.
   announcement, target and payment inspection, and resolution, such as the target,
   payment preference or basic land to find. It authorizes no automatic action.
   The announcing seat's purpose survives later plan changes.
+  Optional `waitFor: "empty-stack"` requires the whole stack to empty before
+  that commitment. It displays waiting without removing options or granting a
+  pass. An early choice still records the action taken. Absence adds no
+  prerequisite: ordered steps order announcements, not completed resolutions.
+  The field stays on retained steps after an amendment and is also available
+  on `may` branches and current-response submissions.
 - `may`: standing alternatives jev may take without asking when their window and
   `if` hold. "If they Shock my Chocobo, Veil it."
 - `askWhen`: visible facts that mean the plan no longer fits, as conditions,

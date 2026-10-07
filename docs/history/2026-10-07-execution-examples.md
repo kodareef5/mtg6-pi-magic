@@ -58,7 +58,10 @@ that declaration.
 2. Landfall presents ordering and target questions. Their instructions must be
    visible at announcement, before targets are locked. A later resolution
    purpose cannot repair a target already selected incorrectly.
-3. Jev activates the entered Passage. The source is the same physical card with
+3. The land play and Passage activation explicitly use `waitFor: "empty-stack"`.
+   While landfall remains on the stack, the activation is physically available
+   but its commitment reads waiting. Once the stack empties, Jev activates the
+   entered Passage. The source is the same physical card with
    a new incarnation. The instruction for finding Forest belongs to that use.
 4. During the paid search, Jev reads that original instruction even if another
    plan has since been accepted. Choosing none means finding nothing; it cannot
@@ -73,6 +76,12 @@ that declaration.
 If Explorer leaves before the graveyard play, its permission is gone. If Hydra
 leaves, its target policy needs the stated alternate or a request for help.
 Neither exception grants an automatic pass or a replacement line.
+
+An amendment retains the prerequisite on an unfinished step, including when it
+becomes the first step of the amended plan. A new response that must go above
+an existing spell omits it. Two ordered responses can deliberately stack;
+announcement order alone never implies waiting for resolution. Taking a waiting
+action still records what the seat did, and fails the obedience check.
 
 ## Upkeep, responses and the opponent's turn
 
