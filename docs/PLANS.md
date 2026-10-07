@@ -218,6 +218,9 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   a changed blocker must still trigger reconsideration. Syntax, an empty stop
   list and a payable line do not establish strategic validity.
   [Playbook acceptance cases](PLAYBOOK.md).
+- [x] Accept scoped work before upkeep choices and review its unfinished line
+  after the actual draw. Opening exceptions, trigger snapshots and replay pass;
+  generated upkeep wins remain unreliable. [Lifecycle gate](history/2026-10-07-payments-and-execution.md#accepting-the-turn-before-upkeep-work).
 - [ ] Preserve future permissions and source dependencies without predicting
   hidden cards or unresolved effects. A reserve must identify its actual use and
   useful window. [Grounded repairs](history/2026-10-06-grounded-repairs.md).

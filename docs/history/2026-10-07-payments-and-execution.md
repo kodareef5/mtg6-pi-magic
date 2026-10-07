@@ -903,3 +903,54 @@ this turn began. A wholly skipped draw causes no second review after upkeep
 acceptance; the later first-acceptance deadline remains when no plan was accepted.
 The draw fact comes only from the receipt at the rules-draw row's clock, not
 other groups sharing its decision boundary.
+
+At clean `5ae5069`, `upkeep-production/` ran three ordinary production planner
+probes at the same decision-270 prefix, followed by play through turn 10.
+None selected the two-Strike upkeep win. Runs 0 and 1 selected Kellan and Zhao,
+then failed to win by the stop. Run 1 explicitly computed that Forest blocking
+Kellan leaves Green at four, then reserved the burn instead of winning. Run 2
+cast one Strike before attacking, which supplies only five through that block;
+a combat-damage help request and Burst repair finally won. It is a physical
+win with repair, not a clean initial line. All three preserved upkeep mana,
+recorded no gaps or fallback, and matched replay/clone.
+
+Both reviewers checked the input: the two Strike identities appear separately
+in the hand and in the reusable action's current sources with their mana budgets.
+The same key can be reused for distinct cards. Combat facts explicitly report
+zero player damage from Kellan when Forest blocks it. No missing multiplicity
+or delivery defect explains these decisions. The draw reviews received Hired
+Claw, retained scope 11, and run 2's base removed the completed upkeep pass.
+`upkeep-production/audit.json` records initial steps, actual uses and repairs.
+Whole cases took 25.22, 40.93 and 32.09 seconds. The aggregate was 128 calls,
+114 Jev and 14 strategy, 908,529 input tokens including 125,952 cached, 19,948
+output and $0.0473 reported cost. Three cancelled calls lack usage; no request
+failed or truncated.
+
+The earlier-prefix continuation at the same commit, `upkeep-preparation-play/`,
+won on turn 10 by attacking with Kellan and Zhao. Green's earthbent 2/2 Forest
+was tapped, so the winning board differed from the original frozen upkeep.
+This does not rescue the three blocked-position generation failures.
+
+The lifecycle trace does establish:
+
+- Red prepared for upkeep during Green's turn. A response repair superseded its
+  first job; the replacement began from clock 505 and was still running when
+  needed. The seat awaited it without a competing writer.
+- Red amended the prepared line at clock 524, before its first upkeep pass at
+  525. Changed facts reported Forests becoming tapped. The new blocker already
+  existed in this replacement job's snapshot; the live run therefore tests
+  changed-position validation, while the offline test covers a newly added blocker.
+- The actual draw occurred at 528 and review was accepted at 529. The request
+  received Hired Claw, retained scope 11 and the unfinished attack commitments.
+  Green also received upkeep acceptance and draw review, with its completed
+  upkeep pass removed from the base.
+- Replay/clone matched with zero gaps or fallback. There were two scheduled
+  sessions per seat's own turn, plus one Green help and one Red response help
+  during turn 9. Physical play took 98.21 seconds, including 78.15 seconds of
+  foreground planning wait; the complete benchmark took 100.04 seconds.
+
+That continuation used 79 calls, 69 Jev and 10 strategy, 498,386 input tokens
+including 30,208 cached, 11,863 output and $0.0329 reported cost. One cancelled
+preparation lacks usage. Both reviewers support retaining the lifecycle repair;
+generation remains open. Types, all 179 tests and all 29 saved prefixes pass.
+No full game or additional prompt variant follows this failed generation gate.
