@@ -703,3 +703,27 @@ questions. The physical `continue` case now resumes the original accepted work
 without installing a proposal, retaining completed steps and available help
 budget. It replaces the redundant supplied-plan copies. This restores the
 measured decision sequence before testing the new mark.
+
+At clean `8a29457`, `finish-mark-before-resume/` won 3/3 with all planned
+attackers selected and no Red help. Green needed two, two and one foreground
+repairs. These resumed games do not reproduce the original classifier question:
+the new loop's first `since` projection contains the whole visible receipt
+history, adding 104 `known` lines. Its physical position and plan progress match.
+Keep that limitation in the comparison; a later 3/3 result cannot establish a
+win-rate improvement over this baseline.
+
+The isolated pilot cases in `finish-mark-pilots-before/` reproduce both original
+requests exactly, including state and classifier criteria: original call 15
+before help and call 21 after the budget refusal. Before help, Jev selected a
+planned attack 1/3. After refusal it did so 0/3. The finished-declaration and
+summoning-sick counterexamples both passed 3/3. These are decision probes,
+not physical continuations or wins.
+
+The new finish mark reads only due structured matches. Each available unfinished
+attack step names its offered choices; multiple choices remain alternatives.
+Done steps, false conditions, unavailable attacks and optional branches contribute
+nothing. A step that itself matches `attack:done` is not falsely labelled
+unfinished. Every option, canonical order and execution credit remains intact.
+The extended marks invariant covers both attack orders, shrinking marks, early
+finish credit, unchanged state and reconstruction after cloning and replay.
+Displaying the fact alone establishes no pilot obedience.

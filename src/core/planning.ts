@@ -153,6 +153,14 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		const marks: string[] = [];
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
 		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
+		if (option.id === "attack:done") {
+			const unfinished = state.due.flatMap((one) => {
+				if (one.candidates.some((candidate) => candidate.id === option.id)) return [];
+				const attacks = one.candidates.filter((candidate) => candidate.id.startsWith("attack:"));
+				return attacks.length ? [`step ${one.at + 1} (${attacks.map((candidate) => candidate.label).join(" or ")})`] : [];
+			});
+			if (unfinished.length) marks.push(`Finishing now leaves available plan steps unfinished: ${unfinished.join("; ")}.`);
+		}
 		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
