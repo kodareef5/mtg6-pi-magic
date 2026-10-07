@@ -160,12 +160,10 @@ strategic context merely because the old plan passed syntax validation.
 
 Accepting unchanged fields must be deliberate. A narrow question should allow
 `{}` when the line remains sound, without encouraging it to keep stale advice.
-The October 6 experiment failed that distinction; its production shortcut was
-withdrawn. The [review record](history/2026-10-06-review-tune.md) and
-[benchmark instructions](../tools/benchmarks/README.md) preserve the evidence.
+The earlier shortcut was withdrawn after retaining stale advice. Current
+results are summarized in [Gameplay status](STATUS.md).
 
-The [second tuning round](history/2026-10-06-binding-review.md) confirms that
-correct action order can coexist with unusable guidance. Next, bind response
+Correct action order can coexist with unusable guidance. Bind response
 reservations to actual sources and expose continuations enabled by a proposed
 resolved permanent. For example, a graveyard land unavailable now can become a
 candidate after the prepared spell grants permission. Keep that forecast

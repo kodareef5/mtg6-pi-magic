@@ -85,4 +85,4 @@ before Green selects a block against Kellan, Zhao and Smaug. It supports a suppl
 matching test, not a claim about the instruction accepted after that declaration.
 `block-kellan-zhao.jsonl.gz` and `block-zhao-only.jsonl.gz` descend from the first
 prefix through recorded passes and supplied T12 attacks. No physical fact was
-edited. See [the pair-catalog gate](../../../docs/history/2026-10-07-block-pairs.md).
+edited. The pair-catalog experiment was not adopted.

@@ -173,4 +173,4 @@ A finished block exposes its recorded assignment until the next physical
 decision, within the initial declare-blockers priority window. A model-backed
 seat with a judge may object directly. The judge reads a publicly reconstructed
 pre-declaration position; current conflict hints do not decide historical
-legality. See [the objection contract](history/2026-10-07-block-objections.md).
+legality. See [the objection contract](PLANS.md#objections).

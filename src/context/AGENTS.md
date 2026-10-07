@@ -124,8 +124,8 @@ required facts. A large request needs an explanation of its contents and a
 complete way to inspect the decision in smaller questions. Preserve original
 move ids, visible restrictions and access to every choice. Inspection moves
 nothing. Record capacity failures as infrastructure failures, never as a seat's
-wish to pass. `docs/history/2026-10-05-plans.md`, "Focused Jev context", preserves the earlier
-builders and examples. `docs/PLANS.md` records the approved replacement contract.
+wish to pass. `docs/PLANS.md` records the current contract. Historical builders and examples
+belong in the ignored `design-ref/` archive.
 
 Design from preferred uses before editing those builders or planner prompts.
 Write representative simple and complex question sequences, including changed

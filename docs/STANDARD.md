@@ -2,10 +2,10 @@
 
 The pinned decks, card data and rules are in `decks/standard-matchup.json`.
 The next version's approved contract and commit sequence are in [Plans](PLANS.md).
-The full October 5 experiments, request references and findings are preserved in
-[the run archive](history/2026-10-05-standard-runs.md).
+Current measurements are summarized in [Gameplay status](STATUS.md).
+Detailed historical runs are local reference material under `design-ref/`.
 
-## Current evidence
+## Earlier shared-mechanics gate
 
 The shared-mechanics gate finished on turn 16 with Red winning, no recorded gaps
 or fallback, and matched replay. With carried preparation it used 15m14s of play,
@@ -13,8 +13,7 @@ or fallback, and matched replay. With carried preparation it used 15m14s of play
 Strategy waiting remained 12m07s. The exact-request review found strategic errors
 and a missing pending-window fact in Jev context; that fact was added and checked
 against the saved decision. This is not an expert-play result or a complete
-legality audit. See [the validation record](history/2026-10-05-next-version.md)
-for separate pregame measurements, clone checks, limits and the next priorities.
+legality audit. This earlier result does not establish current playing strength.
 
 ## Previous batch
 

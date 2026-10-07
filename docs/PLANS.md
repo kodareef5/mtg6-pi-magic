@@ -2,10 +2,9 @@
 
 ## Next version: shared mechanics and prepared strategy
 
-Approved October 5 and delivered through the reviewed gate. This document
-records the contract, completed work and the next review cycle. The previous design,
-worked question sequences and implementation notes remain in
-[the October 5 archive](history/2026-10-05-plans.md).
+The October 5 contract defines shared mechanics and prepared strategy.
+Implementation and playing strength are separate: [current results](STATUS.md)
+have not established coherent full-game strategy.
 
 The engine executes shared Magic mechanics and maintains visibility, resources,
 identity, timing and replay. Models interpret card meaning into those mechanics.
@@ -107,223 +106,52 @@ Context renders each step's execution choices before
 announcement and throughout inspection. Resolution recovers the announcing
 plan's step and phase policy, including triggers. General objective and guidance
 remain audit rationale. Completion is explicit per window; missing instructions
-grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
+grant no pass.
 
-## Commit sequence and acceptance
+## Objections
 
-1. [x] Record the approved contract and preserve the previous experiments.
-   Separate current decisions from historical run logs. Identify which current
-   requirements this version replaces; do not claim the migration is complete.
-2. [x] Make inspection reversible and provider-sized for every decision kind.
-   Re-entering a use must work. Damage, blocks, search, targets and payments must
-   remain reachable without an oversized request. Test real saved positions and
-   compare the reachable leaves with the original offered ids. No table changes
-   occur during inspection and no navigation limit chooses an action for a seat.
-   Verified against the stopped turn: all 1,040 assignments are reachable through
-   51 inspection menus, each with at most 50 choices. Compound actions expose
-   named components; a large single domain uses inclusive ranges. Target and
-   payment stages carry their own facts instead of every combination at once.
-3. [x] Simplify card meaning around shared mechanics and explicit readiness.
-   Start with the uses above. Add canonical vocabulary where it removes repeated
-   expressions. Separate standing terms from deferred uses and remove mandatory
-   whole-card compilation from setup. Missing relevant meaning requests work
-   before the affected operation; it cannot silently drop an ability or an option.
-   Preserve old accepted journal terms. Test hand, battlefield, exile and graveyard
-   uses, source coverage, delayed effects, control changes and clone parity.
-   `printedCast` selects the shared ordinary permanent cast. Standing terms and
-   a source-backed inventory precede dealing; `deferred` uses need bodies when a
-   visible source enters their accepted scope. A separate strategy-role call
-   interprets them before a priority action or pass. This conservative gate does
-   not yet test affordability or timing. Old complete assessments remain usable.
-4. [x] Refocus Jev on executing prepared instructions.
-   Replace duplicate review-then-pick questions with a direct execution question
-   when the plan and facts settle the purpose. Keep necessary completion and
-   exception checks. Distinguish waiting from a broken line. Remove strategic
-   reassessment of each otherwise unmentioned card as a routine obligation.
-   The action question now carries derived checklist status and completion
-   conditions. Card/response review jobs and the automatic review-then-pick
-   loop are removed. All voluntary actions and passes still reach Jev.
-   Phase prose has no bound option count. With no explicit current-window step
-   or branch, its display is `policy`, not unfinished executable work. Prose can
-   still require an action; the label grants no pass and changes no core review
-   record. [Phase display comparison](history/2026-10-07-phase-policy.md).
-   A future commitment may name its first matching remaining window this turn.
-   That schedule fact certifies no future action availability or pass permission.
-   [Schedule comparison](history/2026-10-07-scheduled-window.md).
-5. [x] Make pregame a reusable playbook and Luna its turn organizer.
-   File policies by opening, sequencing, resources, responses, combat and recovery,
-   with applicability, priorities, worked examples and reversing conditions.
-   Supply relevant policies and changed facts to each turn session. Ordinary turn
-   plans select known actions and choices; they should not rewrite card meaning.
-   Remove pinned-matchup names from shared instructions. Reject missing bindings
-   clearly. Measure accepted plans, repairs and waiting with Luna low unchanged.
-   `docs/PLAYBOOK.md` defines the preferred examples. Fresh briefs now require
-   all five turn-policy families with ordered priorities, resources and worked
-   examples. Carried briefs retain their original shape. Turn context selects
-   strategic fields and visible card notes; repeated offer terms are factored.
-   Source/condition bindings and unknown reuse keys still receive explicit
-   refusals. The live gate must measure whether these changes improve planning.
-   The first component run exposed duplicate work across the analyst questions.
-   Each family now has one analyst, and synthesis can carry draft policies
-   unchanged instead of rewriting them. This changes the question structure;
-   it does not trim returned text or change model effort.
-6. [x] Close verified integrity gaps and reconcile the interface.
-   Reproduce the missing alternate-zone cast, weak source checks, rollback id
-   collision and delayed-trigger look-back report. Fix each supported reproduction
-   in its invariant test. Make delegation documentation match executable handlers.
-   Keep visualization assets outside decision context and simplify display hooks.
-   Bounded replay and clones now retain the ruling history behind an included
-   rollback. Departure events read delayed triggers from the prior world, so a
-   source-tied watch sees its own departure and then expires. Both reproduced
-   failures have invariant coverage, including a clone's subsequent rollback.
-   Source checks require complete sentences or printed lines, including short
-   keyword lines, and preserve the order of joined quotations. Cost symbols
-   and arbitrary word fragments no longer pass. The worked examples use the
-   same check; accepted meaning remains a separate judgment.
-   An older empty printed-cost procedure no longer suppresses the shared cast
-   in an earned graveyard or exile permission. Alternative costs, special
-   instructions, conditions and an explicit withdrawal remain distinct. All
-   four previous games still replay to their original outcome or stopping point.
-   Reports and timeline rendering now live in `tools/`. Loop observers use
-   named options. The unused `Decision.delegated` flag is removed; documentation
-   identifies the explicit intent permission that core actually honors.
-7. [x] Validate the complete path, then run one live gate.
-   Run offline invariants, focused model-contract exercises and replay/clone checks
-   before paid full games. Use registered decks and ordinary setup. Review the
-   gate's exact requests, strategic decisions, legality and timeline. A finished
-   game alone is insufficient. Stop a failing gate at its first diagnostic gap.
-   The gate finished on turn 16 with no recorded gaps or fallback and matched
-   replay. It took 15m14s of play with carried preparation, 675 Jev calls and
-   67 strategy calls. Strategy wait was 12m07s; playing strength and the fivefold
-   speed target remain unmet. Review found missing pending-action windows in
-   Jev's packet. The corrected packet passed the exact saved draw-step check:
-   Jev waited for the planned cast instead of spending its mana elsewhere.
-   Types and all 179 offline tests pass. The full evidence, limits and separate
-   preparation measurements are in [the validation record](history/2026-10-05-next-version.md).
+The pilot can object to a just-finished opposing block before the next physical
+decision. Current conflict hints are facts, not historical verdicts. The judge
+receives the position reconstructed before the declaration, its participants,
+accepted characteristics and printed text. A stand or failed ruling suppresses
+another offer for that action on the same branch. A failed ruling is not a
+verdict; its explanation survives resume. A rollback reopens a revised action,
+restores pending choices and requests new plans from both seats.
 
-## Next priorities from the gate
+The current policy suppresses an objection after a failed judge session,
+including exhausted transient retries. Repeated illegal declarations after
+rollback remain an unresolved recovery risk. Do not claim that replay or zero
+gaps certifies legality.
 
-- [x] Bind reusable actions to visible sources, current characteristics and exact
-  accepted terms. Keep absent equipment available through lookup.
-  [Binding review](history/2026-10-06-binding-review.md).
-- [x] Reject fabricated button ids and preserve paid search continuations.
-  [Strategy cycle](history/2026-10-06-strategy-cycle.md).
-- [x] Keep one saved-position manifest with offline replay and live probes.
-  [Benchmark guide](../tools/benchmarks/README.md).
-- [x] Allow a seat to revise pending combat selections before finishing, with
-  ledger-derived progress and historical replay menus preserved.
-  [Declaration recovery](history/2026-10-07-declaration-recovery.md).
-- [ ] Finish the ordered resource forecast, including earlier entries, activation
-  costs, planned attackers and scoped response warnings. Validate future source
-  bindings against physical continuations before grading the planner.
-  [Payment review](history/2026-10-07-payments-and-execution.md).
-- [ ] Derive execution instructions from chosen commitments while preserving
-  explicit completion, response, target and exception policies. Cover upkeep,
-  opponent turns, triggers and resolution before making it the default. An empty
-  list grants no permission to pass.
-  [Execution controls](history/2026-10-07-payments-and-execution.md).
-  The opt-in [completion coverage check](history/2026-10-07-completion-coverage.md)
-  produced three covered plans, but showed no execution benefit: both arms
-  needed three Red repairs at beginning of combat. The production writer remains unchanged.
-  The later [phase display correction](history/2026-10-07-phase-policy.md)
-  removes unsupported phase availability counts. Its supplied block guard held,
-  but begin-combat still selected help; no execution expansion followed.
-  [Scheduled-window facts](history/2026-10-07-scheduled-window.md) then produced
-  two near-tied passes and one help, failing the declared margin. Further
-  presentation tuning on that frame stopped without physical expansion.
-- [x] Compare one versus two generated candidates in the shared benchmark runner.
-  Neither arm justified adoption. Keep generation experimental and grade useful
-  strategy and physical outcomes separately from syntax.
-  [Reviewed experiment](history/2026-10-07-payments-and-execution.md).
-- [x] Compare inline pregame examples with lossless lookup. Ready wins improved,
-  but both arms missed every blocked-lethal win; production remains unchanged.
-  [Paired generation gate](history/2026-10-07-payments-and-execution.md#saved-examples-as-references).
-- [x] Compare checked consequence feedback with a second look at frozen plans.
-  Each arm selected one winning action set in three; treatment had no clean
-  repaired-line win. No adoption. [Diagnostic result](history/2026-10-07-consequence-feedback.md).
-- [ ] Produce complete, coherent turn commitments. The [attack audit](history/2026-10-07-attack-commitments.md)
-  separates omitted actions from false choices and payment conflicts; requiring
-  complete attack dispositions remains unadopted. A [post-entry repair diagnostic](history/2026-10-07-post-entry.md)
-  selected winning attack sets in two of three repairs, but failed its gate and
-  left completion coverage incomplete. No physical expansion followed that gate;
-  its frozen repairs later served as controls for the separate completion test.
-  An [offline repair-authority audit](history/2026-10-07-repair-authority.md)
-  rejected switching own-turn help directly to the response writer: its format
-  preserves future steps but still accepts false replacements of phase policies.
-- [ ] Reuse a prepared line only with positive coverage for the observed change.
-  First test an ordinary opposing land play and a draw covered by a land branch;
-  a changed blocker must still trigger reconsideration. Syntax, an empty stop
-  list and a payable line do not establish strategic validity.
-  [Playbook acceptance cases](PLAYBOOK.md).
-- [x] Accept scoped work before upkeep choices and review its unfinished line
-  after the actual draw. Opening exceptions, trigger snapshots and replay pass;
-  generated upkeep wins remain unreliable. [Lifecycle gate](history/2026-10-07-payments-and-execution.md#accepting-the-turn-before-upkeep-work).
-- [ ] Preserve future permissions and source dependencies without predicting
-  hidden cards or unresolved effects. A reserve must identify its actual use and
-  useful window. [Grounded repairs](history/2026-10-06-grounded-repairs.md).
-- [ ] After the saved cases improve, audit a full game and three further declared
-  seeds for resource reuse, missed wins, wasted temporary development and missing
-  phase coverage. Keep Jev and the baseline roster. Completion alone is not a
-  strategic pass. [Latest full game](history/2026-10-07-payments-and-execution.md).
-- [x] Derive pilot receipt windows from recorded decisions in live play and
-  resumed prefixes. Strategy reads structured history without the pilot slice.
-  Historical unrecorded looks remain unrecoverable.
-  [Continuity checks](history/2026-10-07-payments-and-execution.md#receipt-continuity).
+## Remaining work
 
-Each cycle starts with the reviewed journal and exact request. Save the smallest
-position that exhibits the mistake, state the preferred decision and its
-exceptions, then check the context and physical continuation there. Run another
-full game after those positions improve. Review that game before choosing the
-next changes; a completed game does not close a strategic-quality problem.
-An ordinary option and a planned procedure can name the same announcement under
-different ids. Both carry out the step when their accepted terms, source, targets
-and payment match exactly. The physical ledger row records that progress; a
-different mode does not count merely because it plays the same card.
+- Simplify strategy authoring without changing the model roster. Choose a line
+  and preserve its commitments through executable instructions, including
+  resources, targets, waiting, combat and completion.
+- Reuse accepted preparation and covered draws without redundant writing.
+  A changed blocker or uncovered draw still needs reconsideration. Syntax and
+  payment validity alone do not establish strategic coverage.
+- Preserve resource and permission dependencies across unresolved effects.
+  Distinguish an unavailable action from one enabled by an earlier commitment.
+- Exercise objection recovery and repeated rulings without silently choosing
+  for either seat.
+- Measure whole games on fresh seeds. Report missed wins, false rules beliefs,
+  policy obedience and legality separately from outcomes and replay health.
 
-## Measurements and completion
+## Change and measurement rules
 
-The October 5 four-game batch is the baseline: three outcomes, one classifier
-capacity stop, 61-75% of play spent waiting on strategy, and 156 of 393 strategy
-requests following refused submissions. The three regular games reused card
-assessments; their 7-20 minute preparations were fresh briefs, including timeouts.
-Removing whole-card assessment alone will not repair that briefing cost.
+A factual or interface correction needs a reproducible offline invariant.
+A prompting or behavior change needs comparison across varied positions before
+adoption. An unchanged packet repeated three times is a stability check, not
+three independent cases. A failed behavior experiment is removed rather than
+left as a production flag.
 
-Record per-role and per-model calls, tokens, cost, failures, request time and
-active time; preparation, play and strategy wait; Jev purposes; plan repairs;
-judge requests and rulings; gaps, fallback and replay. Compare cold preparation
-and carried preparation separately. Keep the report and timeline for each gate.
-Consumed preparations record their queue, start, finish and needed-at times,
-with the source turn and version. Reports separate unfinished preparation wait
-from total strategy wait and count strategy timeouts. Foreground turn planning
-retries the same request after 45 seconds; background preparation retains its
-150-second request limit. A retry neither installs a replacement plan nor
-changes the model or question. Measure the effect before claiming a speed gain.
+Use the shared runner for paid probes. Record calls, tokens, costs, wall time,
+strategy waiting, preparation readiness, repairs, judge attempts, gaps, fallback
+and replay/clone parity. Preserve failed and canceled calls in the accounting.
+Keep hypotheses, raw results and long reviews in ignored `design-ref/` or `.pi/`.
+Published notes contain only current decisions and a short results summary.
 
-Completion requires implemented readiness and execution paths, passing offline
-checks, replay/clone parity, and a live gate reviewed without known machinery
-failures. Report the observed speed and strategic mistakes honestly. The user's
-roughly fivefold speed improvement and expert gameplay are targets to measure,
-not claims made by changing a schema or finishing a game. If the gate exposes a
-failure, fix its smallest reproduction before another full run.
-
-Both `npm test` and `npm run check` pass before every commit. The remaining work
-stays on this checklist; progress does not silently change its acceptance terms.
-
-Recorded-block objections and declaration-time evidence are implemented. The
-[live gate](history/2026-10-07-block-objections.md) found 6/6 correct supplied
-judge verdicts but 0/3 pilot objections and 0/3 recovery on the illegal case;
-exception handling remains open. Current hints are not historical verdicts.
-The [supplied coverage controls](history/2026-10-07-supplied-coverage.md) selected
-the authored finish and objection in all six replies. Green's lead over help
-remained narrow. Generated coverage and post-rollback recovery remain unproven.
-The [exact-pair catalog experiment](history/2026-10-07-block-pairs.md) produced
-one binding pass, one failure and one inconclusive preparation.
-No physical expansion followed; the production catalog remains unchanged.
-The [recognition-transfer diagnostic](history/2026-10-07-recognition-transfer.md)
-stopped at recognition: two of three selections named winning supplied lines.
-No transfer or physical expansion followed; production remains unchanged.
-
-The [blind pregame content comparison](history/2026-10-07-brief-content.md) stopped:
-carried and fresh A each produced zero winning commitments in three accepted
-plans; B's three slots were unresolved after an analyst failure. No expansion
-followed. Normal-load pregame reliability and strategic construction remain open.
+Both `npm test` and `npm run check` must pass before every commit. No inference
+runs in either. Full-game completion requires coherent choices and legal play,
+not merely reaching an outcome with a healthy journal.
