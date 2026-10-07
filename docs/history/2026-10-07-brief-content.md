@@ -104,7 +104,9 @@ frozen and compared after the ordinary pregame runs finish, before planning.
 
 Both runs finished with failed analysts. A took 866.707 seconds and B took
 869.638 seconds. They ran concurrently, so these are not isolated single-game
-latency measurements. Only A's Red brief has no gaps. A Green, B Green and B Red
+latency measurements. Two runs doubled the usual analyst concurrency; these
+timeouts do not establish failure frequency under normal game load. Only A's Red
+brief has no gaps. A Green, B Green and B Red
 each lost the matchup analyst after three 240-second request timeouts. Their
 syntheses preserve that failure; none is a complete replacement. No brief was
 regenerated or edited, and none uses seat-name aliases A/B in its advice.
@@ -131,3 +133,10 @@ The blocked batch will still complete the carried and A sessions and record
 B's three slots as unresolved without inference. It cannot meet the declared
 two-brief gate, so there will be no upkeep, physical or full-game expansion.
 These preparation failures do not establish worse tactical content in B.
+
+The benchmark deliberately excludes gapped preparations. Production instead
+retains the analyst gap and can use the synthesized brief; it does not refuse
+these outputs as missing briefs. This stage compares complete briefs only.
+Normal-load pregame timeout measurement remains required before a full-game gate.
+With B unresolved, A's result can neither estimate variation between complete
+briefs nor authorize expansion, even if its construction improves.
