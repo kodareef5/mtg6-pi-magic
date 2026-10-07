@@ -143,6 +143,10 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
    The action question now carries derived checklist status and completion
    conditions. Card/response review jobs and the automatic review-then-pick
    loop are removed. All voluntary actions and passes still reach Jev.
+   Phase prose has no bound option count. With no explicit current-window step
+   or branch, its display is `policy`, not unfinished executable work. Prose can
+   still require an action; the label grants no pass and changes no core review
+   record. [Phase display comparison](history/2026-10-07-phase-policy.md).
 5. [x] Make pregame a reusable playbook and Luna its turn organizer.
    File policies by opening, sequencing, resources, responses, combat and recovery,
    with applicability, priorities, worked examples and reversing conditions.

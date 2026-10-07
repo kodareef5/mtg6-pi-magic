@@ -15,7 +15,7 @@ validation do not change.
 
 `policy` means guidance without explicit current-window action bindings. Prose
 can still require a block or response. The row neither completes an action nor
-grants a pass; authored completion does not override the phase instructions.
+grants or withholds a pass; completion applies as authored.
 No physical option, order, mark, payment, progress or planning schedule changes.
 
 ## Gate declared before inference

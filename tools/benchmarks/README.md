@@ -254,3 +254,9 @@ expansion. It reports missing or conflicting `phases[].complete` policies and
 never supplies a default. The [coverage gate](../../docs/history/2026-10-07-completion-coverage.md)
 keeps authored coverage, strategy and bounded execution separate. Default
 planning and pilot rendering are unchanged.
+
+`red-begin-combat` reproduces the first help question before a saved winning
+attack set. `red-prose-block` is a supplied defensive control with phase prose
+and completion but no structured action bindings. Their [phase display gate](../../docs/history/2026-10-07-phase-policy.md)
+compares full requests and score margins. `red-begin-combat-play` continues the
+existing plan only after that gate passes; no new plan is installed.

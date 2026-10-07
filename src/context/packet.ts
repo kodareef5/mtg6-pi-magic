@@ -49,7 +49,8 @@ export type Packet = {
 	resources: string[]; known: string[]; objects: Seen[];
 	watches: ReturnType<typeof activeWatches>; cards: Record<string, Printed>;
 	guidance: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
-	history?: SeatView["history"]; resolution?: SeatView["resolution"]; checklist?: (Omit<ReviewItem, "options"> & { available: number })[]; combat?: SeatView["combat"];
+	history?: SeatView["history"]; resolution?: SeatView["resolution"]; combat?: SeatView["combat"];
+	checklist?: (Omit<ReviewItem, "options" | "cards" | "status"> & { status: ReviewItem["status"] | "policy"; cards?: string[]; available?: number })[];
 	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
 	inspection?: Pick<Menu, "stage" | "selected" | "field" | "path" | "facts">;
 };
@@ -109,6 +110,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const inspected = menu?.scope && new Set(menu.scope);
 	const offered = inspected ? all.filter((one) => inspected.has(one.id)) : all, data = factored;
 	const itemList = checklist(frame);
+	const bindingsHere = here || state?.plan.may?.some((one) => matches(one.when, frame));
 	const attention = context.inspection?.use ? [] : itemList.filter((one) => ["unavailable", "waiting"].includes(one.status));
 	const scoped = decisionFacts(frame, offered, attention), names = new Set(scoped.objects.flatMap((one) => one.card ? [one.card] : []));
 	for (const option of offered) for (const card of option.cards ?? []) names.add(card);
@@ -150,7 +152,12 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		actor: seat, window: structuredClone(view.window), version, obligation: decision.question,
 		kind: view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
 		...(view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
-		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => ({ ...structuredClone(item), available: options.length })) } : {}),
+		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => {
+			if (item.kind !== "phase") return { ...structuredClone(item), available: options.length };
+			// Core keeps options for private assessments. Phase prose binds none of them.
+			const { cards, ...policy } = structuredClone(item);
+			return { ...policy, ...(!bindingsHere ? { status: "policy" as const } : {}) };
+		}) } : {}),
 		options: listed.map((one) => one.id === "block:done" && view.declarationReview ? { ...one,
 			label: `${one.label}. The judge ruled action ${view.declarationReview.row} illegal (${view.declarationReview.ruling.rule}: ${view.declarationReview.ruling.because}). Review the revised selection before finishing.` } : one), uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
 		payments: Object.fromEntries(Object.entries(data.payments).filter(([id]) => paid.has(id))),

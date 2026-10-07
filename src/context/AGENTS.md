@@ -82,7 +82,10 @@ for rather than the reply returned.
 The action question includes the phase instructions and core's derived checklist.
 It distinguishes available actions, later steps, false conditions, stack
 prerequisites and unavailable uses. Jev chooses directly under that policy;
-passing confirms the current completion or waiting conditions. It does not
+passing confirms the current completion or waiting conditions. Phase rows carry
+no action availability count or option-derived card list. A phase with no
+matching explicit step or branch is labelled `policy`. Its prose can still
+require an action; completion applies as authored. Jev does not
 receive a separate response review or one strategic question per unmentioned
 card. Private review notes remain available as seat work, without completing
 steps. Resolution receives the accepted effect and its remaining instructions,

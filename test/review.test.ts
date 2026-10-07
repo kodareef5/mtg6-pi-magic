@@ -65,7 +65,7 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:1", verdict: "act", reason: "Use Hydra" }], "unavailable"), /has no current option/);
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "made-up", verdict: "skip", reason: "Skip" }], "unknown"), /No checklist item/);
 	assert.equal(JSON.stringify(items).includes('"zone":"library"'), false);
-	for (const [item, verdict] of [["step:0", "act"], ["step:1", "skip"]] as const) {
+	for (const [item, verdict] of [["step:0", "act"], ["step:1", "skip"], ["phase:0", "act"]] as const) {
 		const tools = [{ do: "review.record" as const, item, verdict, reason: "Explicit seat note." }];
 		editWork(table, 0, tools, item);
 		assert.equal(editWork(table, 0, tools, item), false, "redelivery is idempotent");
@@ -77,6 +77,14 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.equal(project(table, "spectator").work, undefined);
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:0", verdict: "act", reason: "Again" }], "duplicate-review"), /already reviewed/);
 	const frame = workFrame(table, 0), packet = focus(frame, startingIntent(0));
+	const shownPhase = packet.checklist!.find((one) => one.kind === "phase")!;
+	assert.equal(shownPhase.status, "open");
+	assert.equal(shownPhase.judgment!.verdict, "act", "phase assessments remain available without earning action credit");
+	assert.equal(Object.hasOwn(shownPhase, "available"), false, "unbound physical options are not phase availability");
+	assert.equal(Object.hasOwn(shownPhase, "cards"), false, "unrelated options supply no phase card list");
+	assert.ok(checklist(frame).find((one) => one.kind === "phase")!.options.length, "core keeps its private assessment options");
+	assert.deepEqual(packet.checklist!.filter((one) => one.kind !== "phase"), checklist(frame).filter((one) => one.kind !== "phase")
+		.map(({ options, ...item }) => ({ ...item, available: options.length })), "step and branch presentation stays exact");
 	const missing = packet.checklist!.find((one) => one.label === "Cast Hydra")!;
 	assert.equal(missing.judgment!.verdict, "skip");
 	assert.equal(missing.status, "later", "a recorded skip cannot complete or remove the planned use");
@@ -114,6 +122,31 @@ test("a pilot executes with derived plan status, while private judgments neither
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Retain the cards.", steps: [] } }], "amend");
 	assert.equal(table.work[0]!.reviews, undefined, "a changed plan cannot inherit the old judgment");
 	await pilot.close();
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Keep resources.", guidance: "Use the current policy.", throughTurn: 1, steps: [],
+		phases: [{ when: { active: "self", step: "precombat-main" }, guidance: "Keep the hand; reassess a listed response if needed." }] } }], "prose-policy");
+	const policyFrame = workFrame(table, 0), policyBefore = structuredClone(policyFrame), corePolicy = checklist(policyFrame);
+	const policy = focus(policyFrame, startingIntent(0));
+	assert.equal(policy.checklist!.find((one) => one.kind === "phase")!.status, "policy");
+	assert.deepEqual(policy.plan!.script!.guidance, ["Keep the hand; reassess a listed response if needed."]);
+	assert.equal(policy.plan!.script!.completion, undefined, "policy supplies no completion default");
+	assert.match(moveQuestion(policy, true).instructions!, /Its prose can still require an action/);
+	assert.match(moveQuestion(policy, true).instructions!, /neither grants nor withholds a pass/);
+	assert.deepEqual(policyFrame, policyBefore, "display changes no facts or physical menu");
+	assert.deepEqual(checklist(policyFrame), corePolicy, "context does not change the core checklist");
+	for (const remainingSteps of [["precombat-main", "declare-attackers"], ["precombat-main", "precombat-main", "end"], ["precombat-main", "end"]] as const) {
+		const scheduled = structuredClone(policyFrame);
+		scheduled.view.remainingSteps = [...remainingSteps];
+		assert.deepEqual(focus(scheduled, startingIntent(0)), policy, "repeated or skipped future steps do not alter current binding status");
+	}
+	const falseBranch = structuredClone(policyFrame);
+	falseBranch.view.work!.plan!.may = structuredClone(frame.view.work!.plan!.may);
+	const conditional = focus(falseBranch, startingIntent(0));
+	assert.equal(conditional.checklist!.find((one) => one.kind === "phase")!.status, "open", "a false branch is still an explicit binding");
+	assert.equal(conditional.checklist!.find((one) => one.kind === "branch")!.status, "condition-false");
+	const expired = structuredClone(policyFrame);
+	if (expired.view.window.kind !== "turn") assert.fail();
+	expired.view.window.turn = 2;
+	assert.equal(focus(expired, startingIntent(0)).checklist, undefined, "expired guidance has no policy row");
 
 	const response = matchup("review-response");
 	place(response, 1, "hand", "Shock", "Shock", "Mountain"); place(response, 1, "battlefield", "Mountain", "Mountain");
@@ -130,6 +163,12 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.ok(waiting.checklist!.some((one) => one.kind === "branch" && one.available), "an instant response remains available");
 	assert.match(moveQuestion(waiting, true).instructions!, /absence alone does not require a new plan/);
 	assert.match(moveQuestion(waiting, true).instructions!, /does not end the phase/);
+	const stackPolicyFrame = workFrame(response, 1);
+	stackPolicyFrame.view.work!.plan!.steps = []; stackPolicyFrame.view.work!.plan!.may = [];
+	const stackPolicy = focus(stackPolicyFrame, startingIntent(1));
+	assert.equal(stackPolicy.checklist![0]!.status, "policy");
+	assert.match(moveQuestion(stackPolicy, true).instructions!, /The stack is waiting/);
+	assert.deepEqual(stackPolicy.plan!.script!.guidance, waiting.plan!.script!.guidance, "response prose survives policy display");
 	editWork(response, 1, [{ do: "review.record", item: land.id, verdict: "hold", reason: "Wait for the spell to resolve." }], "wait-for-stack");
 	apply(response, "pass", "model", "chosen");
 	assert.equal(nextDecision(response)!.seat, 0);
