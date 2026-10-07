@@ -19,6 +19,7 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { play } from "../src/core/loop.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { annotate, execution, planDue, planState } from "../src/core/planning.ts";
+import { checklist } from "../src/core/review.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
 import { budget, manaBudget, paymentForecast } from "../src/core/budget.ts";
@@ -26,6 +27,7 @@ import { printedCast, procedureOptions } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
+import { candidateCatalog, candidatePlan, compileCandidate } from "../tools/benchmark-candidates.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
@@ -275,6 +277,9 @@ test("a branch and a held resource are marked on the options they touch, and not
 		assert.equal(saved.things.get("1-50")!.tapped, false);
 		assert.equal(saved.things.get("1-49")!.tapped, true, "the nonvigilant attacker does tap when the declaration finishes");
 		const earlier = workFrame(replay(path, (header) => matchTable(header.seed), 591).table, 1);
+		const attackMarks = annotate(earlier.decision!.options, planState(earlier)!);
+		assert.ok(attackMarks.filter((one) => one.id.startsWith("attack:") && one.id !== "attack:done").every((one) => !one.shows?.includes("out of order")), "one declaration does not order its attackers");
+		assert.ok(checklist(earlier).filter((one) => one.kind === "step" && one.options.some((id) => id.startsWith("attack:") && id !== "attack:done")).every((one) => one.status === "available"), "the checklist treats those attackers as available together");
 		earlier.view.work!.plan!.holds!.push({ objects: { card: "Smaug the Magnificent", zones: ["battlefield"] }, purpose: "Keep this blocker untapped" });
 		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.shows!, /Uses Smaug the Magnificent, held:/);
 	} finally { rmSync(scratch, { recursive: true, force: true }); }
@@ -417,6 +422,38 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	assert.equal(defaults.phases![0]!.guidance, "Creature before land; keep protection.");
 	assert.equal(changedPlan(defaults, { steps: [line.steps[0]] }, {}).objective, "Develop. Grow the Chocobo.", "turn one builds on pregame instead of rewriting its decisions");
 	assert.equal(initialPlan({ ...brief, objective: "Grow the Chocobo, keep protection." }).objective, "Grow the Chocobo, keep protection.", "the pilot receives the pregame's short objective, not all its reasoning");
+	const catalog = candidateCatalog(frame), snapshot = structuredClone(frame);
+	assert.ok(Object.keys(catalog.available).every((key) => !/^(worked:|attack |block )/.test(key)), "fresh candidate main actions cannot contain historical or combat choices");
+	assert.ok(catalog.available[shockKey], "a future source's accepted equipment remains selectable");
+	const candidate = { reason: "Audit rationale only", beforeCombat: [], attackers: [], afterCombat: [],
+		completion: { beforeCombat: "unspecified", attackers: "unspecified", afterCombat: "unspecified" }, responses: "", triggers: "", exceptions: "", holds: [] };
+	const compiled = compileCandidate(frame, candidate);
+	assert.ok(compiled.phases!.filter((one) => one.when.active === "self").every((one) => one.guidance.includes("grants no permission to pass")), "an empty list never invents a completion policy");
+	assert.ok(!JSON.stringify(compiled).includes(candidate.reason), "audit rationale is absent from executable guidance");
+	const broad = structuredClone(frame);
+	broad.view.work!.plan!.phases = [{ when: { active: "self", phase: "beginning" }, guidance: "Retain upkeep choices." }, { when: { active: "opponent" }, guidance: "Retain defense." }];
+	const withBroad = compileCandidate(broad, candidate);
+	assert.ok(withBroad.phases!.some((one) => one.when.step === "upkeep" && one.guidance === "Retain upkeep choices."));
+	assert.ok(withBroad.phases!.some((one) => one.when.active === "opponent" && one.guidance === "Retain defense."));
+	const selected = await candidatePlan(frame, {}, { named: "checked double", broken: () => null, think: async () => { throw new Error("Unexpected text call"); },
+		async work(_about, _prompt, tools) {
+			const register = tools.lookups!.find((one) => one.name === "register")!;
+			assert.match(register.answer({ candidates: [{ ...candidate, beforeCombat: [{ action: "attack 0-1@1", choices: "" }] }] }, { reply: 1 }), /errors/, "wrong-phase action keys are refused before a receipt");
+			const first = JSON.parse(register.answer({ candidates: [candidate] }, { reply: 1 }));
+			assert.equal(first.informational, true);
+			const id = first.candidates[0].id;
+			assert.deepEqual(first.candidates[0].problems, []);
+			assert.match(tools.submit.check({ id }, { reply: 1 })!, /earlier reply/, "a model cannot select a receipt it has not read");
+			assert.equal(tools.submit.check({ id }, { reply: 2 }), null);
+			const changed = JSON.parse(register.answer({ candidates: [{ ...candidate, completion: { ...candidate.completion, beforeCombat: "pass" } }] }, { reply: 2 }));
+			const newer = changed.candidates[0].id;
+			assert.notEqual(id, newer);
+			assert.match(tools.submit.check({ id: newer }, { reply: 2 })!, /earlier reply/);
+			assert.equal(tools.submit.check({ id: newer }, { reply: 3 }), null, "a repaired proposal can be selected on the third reply");
+			return { id: newer };
+		} }, 1);
+	assert.equal(selected.candidates.length, 2);
+	assert.deepEqual(frame, snapshot, "registration, receipts and selection move nothing");
 });
 
 test("strategy plans after the draw, with no extra opening strategy call, with one cached prompt", async () => {
@@ -783,6 +820,12 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	editWork(developing, 1, [{ do: "package.put", package: { card: "Kellan, Planar Trailblazer", printedCast: true, registers: [] } }], "kellan-package");
 	const upgrade: Plan = { objective: "Cast and develop Kellan", guidance: "Pay for the cast before its activation", steps: [
 		cast(developing, "Kellan, Planar Trailblazer"), { ...detective, when: now(developing) }] };
+	const inHand = workFrame(developing, 1).view.objects!.find((one) => one.card === "Kellan, Planar Trailblazer" && one.zone === "hand")!;
+	const followCard = { zones: ["battlefield"], ids: [inHand.id] };
+	const futureAttack: Plan = { ...upgrade, steps: [...upgrade.steps, { label: "Attack with this card when eligible", when: { active: "self", step: "declare-attackers" }, action: { prefix: "attack:", objects: followCard } }] };
+	assert.deepEqual(planProblems(workFrame(developing, 1), futureAttack), [], "a visible card can be named before its future entry without inventing an incarnation");
+	assert.deepEqual(select(followCard, workFrame(developing, 1)), [], "a future battlefield query does not treat the card in hand as entered");
+	assert.match(planProblems(workFrame(developing, 1), { ...futureAttack, steps: [{ ...futureAttack.steps.at(-1)!, action: { prefix: "attack:", objects: { ids: ["unknown-card"] } } }] }).join(" "), /not identified/);
 	const upgradeForecast = paymentForecast(workFrame(developing, 1), upgrade);
 	assert.deepEqual(upgradeForecast.conflicts, []);
 	assert.equal(upgradeForecast.payments.length, 2, "both the cast and the newly entered source's activation are priced");
@@ -790,6 +833,10 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	assert.match(paymentForecast(workFrame(developing, 1), { ...upgrade, steps: [upgrade.steps[0]!, upgrade.steps[0]!] }).conflicts.join(" "), /already taken|hold no Kellan/, "entry cannot make the same card castable twice");
 	announce(developing, printedCast("Kellan, Planar Trailblazer", developing.printed["Kellan, Planar Trailblazer"]!));
 	passBoth(developing); finish(developing);
+	const followed = select(followCard, workFrame(developing, 1));
+	assert.deepEqual(followed.map((one) => [one.id, one.incarnation]), [[inHand.id, inHand.incarnation + 2]], "the intention follows the chosen card through cast and resolution");
+	assert.deepEqual(select({ zones: ["battlefield"], refs: [{ id: inHand.id, incarnation: inHand.incarnation }] }, workFrame(developing, 1)), [], "an exact old incarnation still expires");
+	assert.equal(followed[0]!.summoningSick, true, "binding a future card does not grant attack eligibility");
 	const realUpgrade = procedureOptions(detective.action.procedure, workFrame(developing, 1), "check")[0]!;
 	assert.ok(realUpgrade, "the actual cast leaves enough mana for the newly entered creature's activation");
 	assert.deepEqual(realUpgrade.activation.source, upgradeForecast.payments[1]!.source);

@@ -7,7 +7,7 @@ import type { Intent } from "../core/intent.ts";
 import { openingGuidance, say, type Brief } from "./brief.ts";
 import { dial, type Route } from "./dial.ts";
 import type { Recap } from "./summary.ts";
-import { planState } from "../core/planning.ts";
+import { laterStep, planState } from "../core/planning.ts";
 import { matches } from "../core/query.ts";
 import type { When } from "../core/work-language.ts";
 import type { SeenObject } from "../core/work.ts";
@@ -65,7 +65,7 @@ const seen = (object: SeenObject): Seen => {
 function inPlanOrder<T extends { id: string }>(options: readonly T[], state: ReturnType<typeof planState>): T[] {
 	if (!state) return [...options];
 	const rank = new Map<string, number>();
-	state.due.find((one) => one.candidates.length)?.candidates.forEach((option) => rank.set(option.id, 0));
+	state.due.filter((one) => !laterStep(state, one.at)).forEach((one) => one.candidates.forEach((option) => rank.set(option.id, 0)));
 	for (const branch of state.branches) for (const option of branch.candidates) if (!rank.has(option.id)) rank.set(option.id, 1);
 	return [...options].sort((a, b) => (rank.get(a.id) ?? 2) - (rank.get(b.id) ?? 2));
 }
@@ -91,7 +91,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
 		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
 		...(scripts.length ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
-			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : at === dueAt ? "Now" : "Then"}: ${step.label}`] : []),
+			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : state.due.some((one) => one.at === at && one.candidates.length) && !laterStep(state, at) ? "Now" : "Then"}: ${step.label}`] : []),
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;
 	const all = inPlanOrder(decision.options, state);

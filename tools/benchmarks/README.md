@@ -83,6 +83,35 @@ source, timing and target. Plan cases require or forbid named actions in the
 ordered line, or require their relative order. These checks do not establish
 correct phase guidance, combat quality, conditional execution or game strength.
 Read the accepted answer as well as the pass count.
+
+`--arm one` and `--arm two` run the shared candidate experiment on current-turn
+planning cases. `--arm both` alternates their order by repetition. Both arms use
+the same facts, action catalogue, receipts, roster and output ceiling. Candidates
+register through an informational tool; final selection names an immutable id
+whose receipt was returned on an earlier reply. Three replies cover registration,
+repair and selection. Exhaustion records failure and selects nothing.
+
+The experimental compiler derives instructions for the remaining own precombat
+main, attacker declaration and postcombat main. Luna explicitly supplies
+completion, response, trigger, target and exception policies. An empty list
+grants no permission to pass. Reasons remain in results and never enter pilot
+guidance. Other windows retain production behavior; this is not a production
+default. Receipts describe current creatures and resources and proposed entries,
+not a simulated future battlefield. Payments remain examples.
+
+Four `plan` cases preserve October 7 prefixes immediately before the accepted
+plan at their recorded version. They therefore contain the prior policy and
+position, but not the bad answer being tested. The input files are ordinary
+compressed journals, replayed by the same reader as every other case.
+
+```sh
+npm run benchmark -- --live --arm both --repeat 3 \
+  --case red-blocked-lethal --case after-explorer-repair \
+  --case red-two-red-mana --case green-tapped-vein \
+  --case green-upkeep-fetch --case red-treasure-lethal \
+  --case green-landfall-order --case red-established-attacker \
+  --out .pi/benchmarks/candidate-comparison
+```
 Order uses the first matching step and does not inspect `may` branches. A
 `prefix` matches a movement selector, not a procedure. Repeated land drops and
 conditional lines need a more specific property before they can be scored.

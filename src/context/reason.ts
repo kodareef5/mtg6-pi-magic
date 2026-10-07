@@ -37,9 +37,9 @@ type Reply = { provider?: string; model?: string; role?: "assistant"; content: u
 /** A tool as the provider reads it: a name, what it is for, and JSON Schema parameters. */
 export type ToolSpec = { name: string; description: string; parameters: object };
 /** A tool our code answers while the model works, such as looking up a rule. */
-export type Lookup = ToolSpec & { answer(args: Record<string, unknown>): string };
+export type Lookup = ToolSpec & { answer(args: Record<string, unknown>, session?: { reply: number }): string };
 /** The one tool that ends the work. `check` says what is wrong with an answer, or null to take it. */
-export type Submission = ToolSpec & { check(args: Record<string, unknown>): string | null };
+export type Submission = ToolSpec & { check(args: Record<string, unknown>, session?: { reply: number }): string | null };
 
 /**
  * Worth trying again, or not.
@@ -251,13 +251,13 @@ export function reasoner(options: {
 				for (const used of calls) {
 					const lookup = !finishing && tools.lookups?.find((one) => one.name === used.name);
 					let answer: string;
-					if (lookup) answer = lookup.answer(used.arguments);
+					if (lookup) answer = lookup.answer(used.arguments, { reply: turn });
 					else if (used.name !== tools.submit.name) answer = `There is no tool named ${used.name}.`;
 					else if (reply.stopReason === "length") answer = "Your answer was cut off at the output limit. Call submit again with a shorter answer.";
 					else {
 						// A check that throws on a malformed answer is one more problem to correct, not the end of the session.
 						let problem: string | null;
-						try { problem = tools.submit.check(used.arguments); } catch (error) { problem = `The answer could not be read: ${error instanceof Error ? error.message : String(error)}.`; }
+						try { problem = tools.submit.check(used.arguments, { reply: turn }); } catch (error) { problem = `The answer could not be read: ${error instanceof Error ? error.message : String(error)}.`; }
 						if (!problem) return used.arguments;
 						answer = `Not accepted: ${problem} Fix that and call ${tools.submit.name} again with corrected arguments.`;
 						problems.push(problem);

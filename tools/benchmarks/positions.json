@@ -4,7 +4,11 @@
     "oct5": "test/fixtures/benchmarks/oct5.jsonl.gz",
     "afterExplorer": "test/fixtures/benchmarks/after-explorer.jsonl.gz",
     "blockedLethal": "test/fixtures/benchmarks/blocked-lethal.jsonl.gz",
-    "heldVigilance": "test/fixtures/benchmarks/held-vigilance.jsonl.gz"
+    "heldVigilance": "test/fixtures/benchmarks/held-vigilance.jsonl.gz",
+    "red-two-red-mana": "test/fixtures/benchmarks/red-two-red-mana.jsonl.gz",
+    "green-tapped-vein": "test/fixtures/benchmarks/green-tapped-vein.jsonl.gz",
+    "green-upkeep-fetch": "test/fixtures/benchmarks/green-upkeep-fetch.jsonl.gz",
+    "red-treasure-lethal": "test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz"
   },
   "cases": [
     {
@@ -243,12 +247,24 @@
         "name": "red-blocked-lethal"
       },
       "order": [
-        { "source": "Smaug the Magnificent", "timing": "spell" },
-        { "source": "Smaug the Magnificent", "prefix": "attack:" }
+        {
+          "source": "Smaug the Magnificent",
+          "timing": "spell"
+        },
+        {
+          "source": "Smaug the Magnificent",
+          "prefix": "attack:"
+        }
       ],
       "require": [
-        { "source": "Kellan, Planar Trailblazer", "prefix": "attack:" },
-        { "source": "Soulstone Sanctuary", "prefix": "attack:" }
+        {
+          "source": "Kellan, Planar Trailblazer",
+          "prefix": "attack:"
+        },
+        {
+          "source": "Soulstone Sanctuary",
+          "prefix": "attack:"
+        }
       ]
     },
     {
@@ -261,6 +277,47 @@
       "expect": {
         "id": "attack:1-50"
       }
+    },
+    {
+      "id": "red-two-red-mana",
+      "journal": "red-two-red-mana",
+      "version": 64,
+      "seat": 1,
+      "task": "plan",
+      "property": "Two Mountains pay Zhao's {1}{R}; account for every source actually spent.",
+      "expect": {
+        "source": "Zhao, the Moon Slayer",
+        "timing": "spell"
+      }
+    },
+    {
+      "id": "green-tapped-vein",
+      "journal": "green-tapped-vein",
+      "version": 94,
+      "seat": 0,
+      "task": "plan",
+      "property": "Vein enters tapped under Zhao; develop without spending it as current mana."
+    },
+    {
+      "id": "green-upkeep-fetch",
+      "journal": "green-upkeep-fetch",
+      "version": 148,
+      "seat": 0,
+      "task": "plan",
+      "property": "After the upkeep fetch, retain the available Passage land play; only one current Forest is untapped.",
+      "expect": {
+        "prefix": "land:",
+        "source": "Fabled Passage"
+      }
+    },
+    {
+      "id": "red-treasure-lethal",
+      "journal": "red-treasure-lethal",
+      "version": 236,
+      "seat": 1,
+      "task": "plan",
+      "property": "Count a spent Treasure once and include the visible Hydra block when choosing the attack.",
+      "winner": 1
     }
   ]
 }

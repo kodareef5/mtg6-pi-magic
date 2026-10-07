@@ -57,6 +57,9 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 		const when = checkWhen(one.when);
 		if (when) found.push(`${where} (${one.label}): ${when}`);
 		const action = one.action;
+		const query = "procedure" in action ? action.procedure.source : action.objects;
+		for (const id of query?.ids ?? []) if (!(frame.view.objects ?? []).some((object) => object.id === id && (object.card || object.token)))
+			found.push(`${where} (${one.label}): card ${id} is not identified in your view.`);
 		if ("procedure" in action) {
 			try { checkProcedure(action.procedure); } catch (error) { found.push(`${where} (${one.label}): ${error instanceof Error ? error.message : String(error)}`); }
 			const card = action.procedure.source.card;

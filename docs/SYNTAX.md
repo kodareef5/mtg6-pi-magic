@@ -314,7 +314,11 @@ canonical fields; replay does not reinterpret old answers.
 A plan points at the table's own options by id prefix and objects, so it never
 needs an object id in advance.
 An `objects` query can narrow by `card`, `zones`, `controller`, `types`,
-`tapped` and exact incarnation `refs`. `types` matches any listed current type;
+`tapped`, physical card `ids` and exact incarnation `refs`. An `ids` query names
+an identified visible card across a future zone change, such as casting a card
+then attacking with it. It does not promise that the entry succeeds or that the
+card can attack. A `refs` query stops matching when the incarnation changes.
+`types` matches any listed current type;
 other fields narrow that match. It reads projected characteristics, including
 type changes, and cannot discover the type of a hidden object.
 

@@ -20,11 +20,11 @@ export function assessmentProblems(printed: Printed, pack: Package): string[] {
 	for (const paragraph of printed.oracle.split("\n").map(plain).filter(Boolean))
 		if (!covered.some((basis) => basis.includes(paragraph))) problems.push(`Unassessed text on ${pack.card}: ${paragraph}`);
 	for (const procedure of pack.procedures ?? []) {
-		if (procedure.source.card !== pack.card || procedure.source.refs?.length) problems.push(`A prepared procedure for ${pack.card} names that card, without game object ids.`);
+		if (procedure.source.card !== pack.card || procedure.source.refs?.length || procedure.source.ids?.length) problems.push(`A prepared procedure for ${pack.card} names that card, without game object ids.`);
 		try { checkProcedure(procedure); } catch (error) { problems.push(String(error)); }
 	}
 	for (const use of pack.deferred ?? []) {
-		if (use.source.card !== pack.card || use.source.refs?.length || !use.source.zones?.length || !use.source.controller)
+		if (use.source.card !== pack.card || use.source.refs?.length || use.source.ids?.length || !use.source.zones?.length || !use.source.controller)
 			problems.push(`Deferred use ${use.claim} must name ${pack.card}, its source zones and controller, without game object ids.`);
 	}
 	return problems;

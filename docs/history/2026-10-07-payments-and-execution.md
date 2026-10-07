@@ -209,3 +209,58 @@ counters. Red won on the following turn. The continuation took 90.2 seconds,
 $0.0567. Clone and replay matched, with no gap or fallback. This validates the
 repaired source path without claiming that development saved the position.
 Evidence is under `entry-recheck-play/`.
+
+## Shared candidate comparison gate
+
+Preflight found that exact future incarnation references were rejected as absent
+from the current view. Queries now distinguish physical card `ids`, which follow
+an identified card through a proposed zone change, from `refs`, which retain
+their exact-incarnation meaning. The candidate catalogue binds a cast to one
+visible card and its later attack to that card's id. This avoids both a guessed
+future incarnation and an ambiguous name when several copies are visible.
+Binding grants no timing, source permission, entry or attack eligibility. Shared
+card packages still reject game-specific ids. The invariant test follows a real
+cast through resolution and confirms that the old exact reference expires.
+
+Attackers within one declaration are also marked available together. Finishing
+the declaration still follows them. Core marks, checklist status and the pilot's
+Now/Then script use the same ordering reader; every action remains a seat choice.
+
+Before running inference, the comparison is fixed at eight positions, three
+repetitions per arm. Arms request one or two distinct candidates, with identical
+facts, receipts, three-reply budget, 4,000-token output ceiling and roster.
+The runner alternates arm order. Registration, repair and final selection are
+recorded separately. Selection must follow that exact candidate's receipt;
+exhaustion is unresolved and never selects a candidate automatically.
+
+Review the eight cases as follows:
+
+- Blocked lethal: choose a winning line through the visible block, with legal
+  attackers and feasible resources. Accept either winning construction.
+- After Explorer: retain useful lasting development before the land and fetch
+  when payable. A pointless warp with no attacker fails.
+- Two red mana: recognize that two Mountains pay Zhao's generic-plus-red cost;
+  no source can remain available after it was spent.
+- Tapped Vein: never fund current development with the Vein entering tapped.
+- Upkeep fetch: use the remaining land play. Do not demand a three-mana spell
+  when only one current Forest is untapped.
+- Treasure lethal: spend each Treasure once and account for Hydra's block.
+- Landfall order: preserve useful beneficiary-before-land development within
+  the actual mana budget and without an absent response reserve.
+- Established attacker: use the ready Zhao against the empty creature board,
+  without carrying the earlier sickness claim into this turn.
+
+A promising arm must pass all three blocked-lethal repetitions, at least two
+of three in every other case, and have at most three outright failures across
+24 sessions. Reasons and explicit execution policies are reviewed separately;
+a structural pass cannot excuse their resource or combat contradictions. The
+two-candidate arm must add at least three reviewed successes, regress no case by
+more than one and stay within twice the one-candidate median planning latency
+to justify its extra generation. These small samples select the next work; they
+do not establish playing strength.
+
+Physically continue selected lethal proposals through the shared runner and
+review their visible opposing responses. Then run a full game if the focused
+evidence supports it. If both arms fail, classify the missing dependency or
+policy instead of starting another wording sweep. Full-game completion, replay
+integrity and strategic quality remain separate gates.

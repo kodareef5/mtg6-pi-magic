@@ -718,10 +718,14 @@ test("work takes its answer only through submit, and tells the model what was wr
 	const thinking = reasoner({ role: "strategy", stream, model: sol, tally: counted, backoffMs: 0 });
 	const submit = { name: "submit", description: "The answer.", parameters: { type: "object" },
 		check: (args: Record<string, unknown>) => (args.commands as unknown[]).length ? null : "The commands are empty." };
-	const lookup = { name: "lookup", description: "A rule.", parameters: { type: "object" }, answer: (args: Record<string, unknown>) => `Rule ${args.rule}: summoning sickness.` };
+	const repliesSeen: number[] = [];
+	const lookup = { name: "lookup", description: "A rule.", parameters: { type: "object" }, answer: (args: Record<string, unknown>, session?: { reply: number }) => {
+		repliesSeen.push(session!.reply); return `Rule ${args.rule}: summoning sickness.`;
+	} };
 	const answer = await thinking.work("seat plan", { system: "S", user: "facts", task: "Plan now." }, { submit, lookups: [lookup], turns: 3 });
 	assert.deepEqual(answer, { commands: ["plan"] });
 	assert.equal(counted.spent().length, 3, "every reply is a metered call");
+	assert.deepEqual(repliesSeen, [2], "a receipt knows which reply produced it, independently of submission acceptance");
 	const second = JSON.stringify(seen[1]), third = JSON.stringify(seen[2]);
 	assert.match(second, /replied with text and did not call a tool/);
 	assert.match(third, /Rule 302.6: summoning sickness/, "a lookup is answered");

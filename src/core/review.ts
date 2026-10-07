@@ -1,6 +1,6 @@
 /** A seat's checklist at one decision. Assessing an item neither takes it nor ends the window. */
 import type { Frame, Option } from "./types.ts";
-import { planState } from "./planning.ts";
+import { laterStep, planState } from "./planning.ts";
 import { matches } from "./query.ts";
 import type { Review } from "./work.ts";
 import { select } from "./query.ts";
@@ -64,14 +64,13 @@ export function checklist(frame: Frame): ReviewItem[] {
 			decision.options.filter((one) => !["pass", "attack:done", "block:done"].includes(one.id)), [],
 			remaining);
 	});
-	const next = state?.due.find((one) => one.candidates.length)?.at;
 	const scope = { world: viewWorld(view), controller: frame.seat };
 	for (const [kind, list] of [["step", state?.plan.steps ?? []], ["branch", state?.plan.may ?? []]] as const) list.forEach((one, at) => {
 		if ((kind === "step" && done.has(at)) || !matches(one.when, frame)) return;
 		const fit = (kind === "step" ? state?.due : state?.branches)?.find((one) => one.at === at);
 		const card = "procedure" in one.action ? one.action.procedure.source.card : one.action.objects?.card;
 		const status = one.if && !holds(scope, one.if) ? "condition-false"
-			: kind === "step" && next !== undefined && at > next ? "later"
+			: kind === "step" && state && laterStep(state, at) ? "later"
 				: fit?.candidates.length ? "available" : waitsForStack(one, frame) ? "waiting" : "unavailable";
 		add(`${kind}:${at}`, one.label, kind, status, fit?.candidates ?? [], card ? [card] : []);
 	});
