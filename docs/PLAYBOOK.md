@@ -233,6 +233,27 @@ checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved
 calls before claiming the playbook made Luna stronger or faster.
 
+## Checking a proposed payment sequence
+
+A payment forecast answers whether the stated line can pay its costs while
+preserving its stated commitments. It returns one concrete payment per priced
+action, the sources left afterwards, and the parts it did not price. It never
+chooses a line, installs a plan or promises that a spell resolves.
+
+| Proposed use | Required answer |
+|---|---|
+| Play an untapped land, then cast a creature | Name the new land in the available payment and show what remains |
+| Cast a threat, then attack with an existing creature-land | Find a payment leaving that attacker untapped, or report a conflict |
+| Attack, then use that creature for mana | Account for the attack's tap; vigilance preserves the source only if it was untapped before attacking |
+| Cast twice and reserve a response | Price the whole sequence and the response from the remaining sources |
+| Search, draw, transform or untap to enable a later action | Identify the unchecked dependency; an empty conflict list is not a payment witness |
+
+The strategist can compare and revise candidates with this evidence before
+writing phase instructions. A payment that works for one spell in isolation
+does not establish that the chosen attack or second spell remains possible.
+Repeated proposals and their physical execution, including a defensive control,
+must improve before this experiment changes the production planning lifecycle.
+
 ## Card definitions and current characteristics
 
 A turn question distinguishes a card available to cast from a permanent already

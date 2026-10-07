@@ -21,7 +21,7 @@ import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { annotate, execution, planDue, planState } from "../src/core/planning.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { editWork, planProblems, prepareWork, workFrame } from "../src/core/work-tools.ts";
-import { budget, manaBudget } from "../src/core/budget.ts";
+import { budget, manaBudget, paymentForecast } from "../src/core/budget.ts";
 import { printedCast, procedureOptions } from "../src/core/procedures.ts";
 import { select } from "../src/core/query.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
@@ -655,6 +655,41 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	place(restricted, 1, "battlefield", "Mountain");
 	assert.deepEqual(budget(workFrame(restricted, 1), { objective: "Develop", guidance: "Use unrestricted red", steps: [detective] }), []);
 	assert.ok(procedureOptions(detective.action.procedure, workFrame(restricted, 1), "check").length, "Village colorless and Mountain red really pay the activation");
+
+	// A creature's mana and attack cannot both be spent in the same line.
+	const attacking = matchup("payment-witness");
+	const elf = establish(attacking, 0, "Llanowar Elves");
+	place(attacking, 0, "battlefield", "Forest", "Forest");
+	main(attacking, 0, 3);
+	place(attacking, 0, "hand", "Mossborn Hydra");
+	const attack = { label: "Attack with the Elf", when: { active: "self" as const, step: "declare-attackers" as const },
+		action: { prefix: "attack:", objects: { refs: [{ id: elf.id, incarnation: elf.incarnation }] } } };
+	const commitment: Plan = { objective: "Develop and attack", guidance: "Keep the attacker available", steps: [cast(attacking, "Mossborn Hydra"), attack] };
+	assert.match(paymentForecast(workFrame(attacking, 0), commitment).conflicts.join(" "), /later attacks also need/, "the forecast cannot pay with its planned attacker");
+	const afterAttack = { ...commitment, steps: [attack, { ...commitment.steps[0]!, when: { active: "self" as const, step: "postcombat-main" as const } }] };
+	assert.match(paymentForecast(workFrame(attacking, 0), afterAttack).conflicts.join(" "), /costs \{2\}\{G\}/, "a normal attack spends the source before a later cast");
+	const vigilant = workFrame(attacking, 0);
+	vigilant.view.objects!.find((one) => one.id === elf.id)!.traits!.words.push("vigilance");
+	assert.match(paymentForecast(vigilant, commitment).conflicts.join(" "), /later attacks also need/, "vigilance cannot rescue an attacker already tapped for mana");
+	const laterWitness = paymentForecast(vigilant, afterAttack);
+	assert.deepEqual(laterWitness.conflicts, []);
+	assert.ok(laterWitness.payments[0]!.funding.taps.some((tap) => tap.source.id === elf.id), "vigilance allows paying after the declaration");
+	place(attacking, 0, "battlefield", "Forest");
+	const beforeWitness = structuredClone(attacking), witness = paymentForecast(workFrame(attacking, 0), commitment);
+	assert.deepEqual(witness.conflicts, []);
+	assert.deepEqual(witness.unchecked, []);
+	assert.equal(witness.payments.length, 1);
+	assert.ok(witness.payments[0]!.untappedAfter.some((one) => one.id === elf.id));
+	assert.ok(witness.payments[0]!.funding.taps.every((tap) => tap.source.id !== elf.id));
+	assert.deepEqual(attacking, beforeWitness, "the receipt leaves both physical and private state unchanged");
+	const receipt = witness.payments[0]!;
+	announce(attacking, printedCast("Mossborn Hydra", attacking.printed["Mossborn Hydra"]!), (one) => JSON.stringify(one.option.use!.funding) === JSON.stringify(receipt.funding.taps));
+	assert.ok(receipt.funding.taps.every((tap) => attacking.things.get(tap.source.id)!.tapped), "the witnessed payment exists in real physical options");
+	assert.equal(attacking.things.get(elf.id)!.tapped, false);
+	const unknown = paymentForecast(workFrame(beforeWitness, 0), { ...commitment, steps: [{ ...commitment.steps[0]!, action: { procedure: {
+		...printedCast("Mossborn Hydra", beforeWitness.printed["Mossborn Hydra"]!), cost: { mana: "{X}{G}" } } } }] });
+	assert.equal(unknown.payments.length, 0);
+	assert.ok(unknown.unchecked.length, "an unpriced line is explicit, never a successful empty witness");
 
 	const three = matchup("arithmetic");
 	place(three, 0, "battlefield", "Forest", "Forest", "Forest");

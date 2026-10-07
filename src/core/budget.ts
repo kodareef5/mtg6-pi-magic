@@ -28,7 +28,7 @@ import { select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
 import { intrinsic } from "./characteristics.ts";
 import { STEPS } from "./steps.ts";
-import type { Frame } from "./types.ts";
+import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true };
@@ -70,11 +70,21 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 
 /** Conflicts found within the resource forecast's scope. Empty does not certify a feasible line. */
 export function budget(frame: Frame, plan: Plan): string[] {
+	return paymentForecast(frame, plan).conflicts;
+}
+
+type Payment = { step: string; source: ObjectRef; funding: Funding; tapSource: boolean; untappedAfter: ObjectRef[] };
+export type PaymentForecast = { conflicts: string[]; payments: Payment[]; unchecked: string[]; scope: string };
+
+/** One payment witness for the stated sequence, never a choice or a simulated resolution. */
+export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
+	const report: PaymentForecast = { conflicts: [], payments: [], unchecked: [],
+		scope: "Resource forecast under normal untap and successful resolution. Current attackers keep their current traits. No hidden cards, instructions, triggers, replacements, untaps or transformations are simulated. Payments are examples, not locked choices; timing, targets, future attackers and combat outcomes remain separate." };
 	const at = frame.view.window;
-	if (at.kind !== "turn") return [];
+	if (at.kind !== "turn") { report.unchecked.push("No turn window."); return report; }
 	const now = at.active === frame.seat;
 	// Only two seats make "our next turn" one turn away.
-	if (!now && (frame.view.players?.length ?? 2) !== 2) return [];
+	if (!now && (frame.view.players?.length ?? 2) !== 2) { report.unchecked.push("Next-turn resources need two seats."); return report; }
 	const turn = now ? at.turn : at.turn + 1;
 	// Conditional steps, such as "if I drew a land", are not counted: they may not happen.
 	const ours = (one: PlanOption) => !one.if && one.when.active !== "opponent" && (one.when.fromTurn ?? 0) <= turn && turn <= (one.when.throughTurn ?? Infinity);
@@ -94,7 +104,7 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	// A step that resolves instructions may put cards in hand: after it, a missing card is not a mistake.
 	let drawing = false;
 	let expired = false;
-	const found: string[] = [];
+	const found = report.conflicts;
 	// Each step takes its own card: two land steps are two lands, and a card cast once is gone.
 	const used = new Set<string>();
 	let taken = false;
@@ -145,13 +155,22 @@ export function budget(frame: Frame, plan: Plan): string[] {
 		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
-	type Item = { at: string; expired: boolean } & ({ kind: "land"; land: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true });
+	type Item = { at: string; expired: boolean } & ({ kind: "land"; land: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true });
 	const items: Item[] = [];
 	for (const [at, step] of plan.steps.entries()) {
-		if (!ours(step)) continue;
+		if (!ours(step)) { if (step.if) report.unchecked.push(`steps[${at}]: conditional action not priced.`); continue; }
+		const where = `steps[${at}] (${step.label})`;
+		const movement = !("procedure" in step.action) && step.action;
+		if (movement && (movement.prefix === "attack:" || movement.option?.startsWith("attack:") && movement.option !== "attack:done")) {
+			const refs = movement.option && frame.decision?.options.find((one) => one.id === movement.option)?.objects;
+			const selected = select(refs ? { refs } : movement.objects ?? {}, hypothetical);
+			if (selected.length === 1 && selected[0]!.zone === "battlefield" && selected[0]!.traits?.types.includes("creature"))
+				items.push({ at: where, expired: true, kind: "attack", source: selected[0]! });
+			else report.unchecked.push(`${where}: attack source depends on a future entry, transformation or selection.`);
+			continue;
+		}
 		const act = read(step);
 		if (!act) continue;
-		const where = `steps[${at}] (${step.label})`;
 		const drew = drawing;
 		if ("procedure" in step.action && step.action.procedure.instructions.length) drawing = true;
 		if (!act.source) {
@@ -180,7 +199,7 @@ export function budget(frame: Frame, plan: Plan): string[] {
 		// A permanent cast now permits more land plays from then on.
 		if (act.spell) for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
 	}
-	if (!honest) return found;
+	if (!honest) { report.unchecked.push("The line depends on unpriced costs, missing sources, mana-producing instructions or uncertain land entry. No complete payment witness."); return report; }
 
 	// Then the payments: each cast from what the earlier ones left, trying other payments when a later step or a branch cannot be paid.
 	// Responses on the opponent's turn must be paid from what the turn leaves; a branch on our own turn is an alternative, not an addition.
@@ -201,6 +220,7 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	const spending = (act: { source?: SeenObject; spell?: true }) => act.spell ? { ...act.source!, zone: "stack" as const } : act.source!;
 	const cannotTap = (position: Frame, source: SeenObject, spent: ReadonlySet<string>) => source.tapped || spent.has(source.id) || sick(position, source);
 	let visits = 0;
+	const ref = (object: SeenObject): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 	const go = (index: number, position: Frame, spent: ReadonlySet<string>): boolean => {
 		const key = `${index}|${[...spent].sort().join(",")}|${pool(position).map((mana) => mana.id).sort().join(",")}`;
 		if (failed.has(key)) return false;
@@ -219,8 +239,16 @@ export function budget(frame: Frame, plan: Plan): string[] {
 				return true;
 			}
 			if (item.kind === "land") return go(index + 1, { ...position, view: { ...position.view, objects: (position.view.objects ?? []).map((object) => object.id === item.land.id ? item.land : object) } }, spent);
+			if (item.kind === "attack") {
+				if (cannotTap(position, item.source, spent)) return fail(index, `${item.at}: ${item.source.card ?? item.source.id} cannot attack while tapped, spent or summoning sick under the forecast's current traits`);
+				return go(index + 1, position, item.source.traits!.words.includes("vigilance") ? spent : new Set([...spent, item.source.id]));
+			}
 			if (item.tap && (cannotTap(position, item.source, spent) || held.has(item.source.id))) return fail(index, `${item.at}: its source cannot pay the tap cost while spent, unavailable or held`);
-			const reserved = new Set([...spent, ...held, ...(item.tap ? [item.source.id] : [])]);
+			// Keep future declared attackers distinct even when funding groups otherwise
+			// interchangeable sources. After a vigilant attack the source is free again.
+			const attackers = items.slice(index + 1).flatMap((one) => one.kind === "attack" ? [one.source.id] : []);
+			const reserved = new Set([...spent, ...held, ...attackers, ...(item.tap ? [item.source.id] : [])]);
+			if (item.tap && attackers.includes(item.source.id)) return fail(index, `${item.at}: its tap cost spends a later planned attacker`);
 			let paymentPosition = position;
 			if (item.fixed) {
 				const selected = new Set(item.fixed.taps.map((tap) => tap.source.id));
@@ -229,14 +257,18 @@ export function budget(frame: Frame, plan: Plan): string[] {
 			}
 			const ways = fundings(paymentPosition, item.price, reserved, spending(item))
 				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
-			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent)}; reorder the steps, drop one, or release the hold`);
+			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
 			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}${mana?.persists ? "+" : ""}${JSON.stringify(mana?.spendOnly ?? null)}`; };
 			const distinct = new Map(ways.map((way) => [`${way.funding.taps.map((tap) => tap.source.id).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}`, way]));
 			return [...distinct.values()].some(({ funding }) => {
 				const paid = new Set(funding.paid);
 				const after = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => !paid.has(mana.id)) })) } };
-				return go(index + 1, after, new Set([...spent, ...funding.taps.map((tap) => tap.source.id), ...(item.tap ? [item.source.id] : [])]));
+				const used = new Set([...spent, ...funding.taps.map((tap) => tap.source.id), ...(item.tap ? [item.source.id] : [])]);
+				if (!go(index + 1, after, used)) return false;
+				report.payments.unshift({ step: item.at, source: ref(item.source), funding, tapSource: !!item.tap,
+					untappedAfter: sources(after).filter(({ object }) => !used.has(object.id)).map(({ object }) => ref(object)) });
+				return true;
 			});
 		})();
 		if (!ok) failed.add(key);
@@ -247,8 +279,9 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	} catch (error) {
 		// Too many payments to try them all: no conflict is shown, so none is named.
 		if (error !== INCOMPLETE) throw error;
+		report.unchecked.push("The payment search exceeded its resource bound. No complete payment witness.");
 	}
-	return found;
+	return report;
 }
 
 /**
