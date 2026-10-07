@@ -224,10 +224,13 @@ grant no pass. [Question sequences](history/2026-10-07-execution-examples.md).
   [Execution controls](history/2026-10-07-payments-and-execution.md).
   The opt-in [completion coverage check](history/2026-10-07-completion-coverage.md)
   produced three covered plans, but showed no execution benefit: both arms
-  needed three Red repairs at beginning of combat. Production remains unchanged.
+  needed three Red repairs at beginning of combat. The production writer remains unchanged.
   The later [phase display correction](history/2026-10-07-phase-policy.md)
   removes unsupported phase availability counts. Its supplied block guard held,
   but begin-combat still selected help; no execution expansion followed.
+  [Scheduled-window facts](history/2026-10-07-scheduled-window.md) then produced
+  two near-tied passes and one help, failing the declared margin. Further
+  presentation tuning on that frame stopped without physical expansion.
 - [x] Compare one versus two generated candidates in the shared benchmark runner.
   Neither arm justified adoption. Keep generation experimental and grade useful
   strategy and physical outcomes separately from syntax.
