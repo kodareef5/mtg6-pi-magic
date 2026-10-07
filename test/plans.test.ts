@@ -45,7 +45,7 @@ import { emptyBrief } from "../src/context/brief.ts";
 import { facts, initialPlan, nextMana } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { planWork, prepareTurn, syntaxReference } from "../src/context/strategy.ts";
-import { aiSeat, changes, question, settled, coveredDraw, type Prepared, type Planned } from "../src/context/seat.ts";
+import { aiSeat, changes, question, settled, coveredDraw, installable, type Prepared, type Planned } from "../src/context/seat.ts";
 import { actions, basePlan, changedPlan, equipment, responseChanges, selectionFields } from "../src/context/plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
@@ -1370,7 +1370,11 @@ test("one unfinished preparation is awaited at upkeep or draw without a second p
  const waits: Planned[] = [];
  const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
   prepare: () => new Promise((resolve) => { finish = resolve; }),
-  plan: async (_frame, made, changed) => { amended++; assert.equal(made!.plan.objective, "Ready."); if (deadline === "upkeep") assert.match(changed!.join(" "), /Emberheart Challenger/); return { tools: [{ do: "plan.put", plan: made!.plan }] }; },
+  plan: async (_frame, made, changed) => {
+   amended++;
+   if (deadline === "upkeep") { assert.equal(made, undefined, "the installed line is the base"); assert.match(changed!.join(" "), /Emberheart Challenger.*you drew/, "the one review reads the opponent's turn and the draw together"); return { tools: [{ do: "plan.keep", reason: "Still fits." }] }; }
+   assert.equal(made!.plan.objective, "Ready."); return { tools: [{ do: "plan.put", plan: made!.plan }] };
+  },
   onPlanned: (one) => waits.push(one) });
  seat.observe(workFrame(table, 0));
  await new Promise((resolve) => setImmediate(resolve));
@@ -1380,8 +1384,18 @@ test("one unfinished preparation is awaited at upkeep or draw without a second p
  await new Promise((resolve) => setImmediate(resolve));
  assert.equal(resolved, false); assert.equal(amended, 0, "unfinished work does not start a competing writer");
  finish({ plan: { objective: "Ready.", guidance: "Pass", steps: [] } });
- assert.equal((await answer).kind, "work");
- assert.equal(amended, 1, "a changed blocker or uncovered draw gets one amendment");
+ const first = await answer;
+ assert.equal(first.kind, "work");
+ if (deadline === "upkeep") {
+  assert.equal(amended, 0, "a sound preparation stands through a plain upkeep without a writer call");
+  assert.equal(waits[0]!.how, "prepared");
+  if (first.kind === "work") editWork(table, 0, first.tools, first.actionId, first.revision);
+  main(table, 0, 5, "precombat-main");
+  const review = await seat.answer(workFrame(table, 0));
+  assert.equal(review.kind, "work");
+  assert.equal(amended, 1, "the changed blocker and the draw get one review after the draw");
+  assert.ok(installable(workFrame(table, 0), { objective: "o", guidance: "g", steps: [] }) === false, "only a plain upkeep installs without review");
+ } else assert.equal(amended, 1, "a changed blocker or uncovered draw gets one amendment");
  assert.equal(waits[0]!.ready, false); assert.ok(waits[0]!.waitedMs >= 0);
  const timing = waits[0]!.preparation!;
  assert.equal(timing.fromTurn, 4);

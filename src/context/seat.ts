@@ -13,7 +13,7 @@
  */
 
 import { isDeepStrictEqual } from "node:util";
-import { basePlan } from "./plan-edit.ts";
+import { basePlan, conditionProblems } from "./plan-edit.ts";
 import { PlayerUnavailable, type Answer, type Objection, type Player } from "../core/player.ts";
 import type { Rules } from "../core/rules.ts";
 import type { Frame } from "../core/types.ts";
@@ -172,6 +172,45 @@ export function coveredDraw(from: Frame, frame: Frame): boolean {
 		settled(frame, basePlan(frame), { quiet: true, lines: [], drawn: received });
 }
 
+/**
+ * A preparation that can stand through upkeep unreviewed: a plain upkeep priority
+ * with an empty stack, a mechanically sound line, and nothing it would do before
+ * the draw. The post-draw review then reads everything that changed since it was
+ * prepared, so one writer session covers the opponent's turn and the draw together.
+ */
+export function installable(frame: Frame, plan: Plan): boolean {
+	const at = frame.view.window;
+	if (at.kind !== "turn" || at.active !== frame.seat || at.step !== "upkeep" || frame.decision?.situation !== "priority" || frame.view.work?.request) return false;
+	if (plan.throughTurn !== undefined && at.turn > plan.throughTurn) return false;
+	if ((frame.view.objects ?? []).some((one) => one.zone === "stack")) return false;
+	if (planProblems(frame, plan).length || conditionProblems(plan).length || budget(frame, plan).length) return false;
+	return ![...plan.steps, ...(plan.may ?? [])].some((one) => matches(one.when, frame));
+}
+
+/**
+ * What the pilot was looking at when it asked: the window, the stack, the due step
+ * and the remaining steps with the windows they are scheduled for. With nothing due
+ * and an empty stack the question is narrow: act in this window, or keep the line.
+ */
+export function helpRequest(frame: Frame, packet: Packet): string {
+	const at = frame.view.window;
+	const where = at.kind === "turn" ? `${at.active === frame.seat ? "your" : "the opponent's"} turn ${at.turn}, ${at.step}` : "the opening";
+	const stack = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+		.map((one) => one.card ?? one.token?.name ?? "an ability");
+	const plan = packet.plan;
+	const next = (plan?.next ?? []).map((one) => `${one.label} (${one.status === "condition-false" ? "its condition is false now"
+		: one.scheduled ? `${one.scheduled.step}${at.kind === "turn" && one.scheduled.turn !== at.turn ? ` of turn ${one.scheduled.turn}` : ""}` : "no window left this turn"})`);
+	const blocked = (packet.checklist ?? []).filter((one) => one.kind !== "phase" && ["unavailable", "waiting", "condition-false"].includes(one.status))
+		.map((one) => `${one.label} (${one.status})`);
+	return [`The pilot asked for help at ${where}: ${frame.decision?.question ?? ""}`,
+		...(plan?.due ? [`Due step: ${plan.due}.`] : []),
+		...(blocked.length ? [`Unfinished in this window: ${blocked.join("; ")}.`] : []),
+		stack.length ? `On the stack: ${stack.join(", ")}.` : "The stack is empty.",
+		next.length ? `Later planned steps: ${next.join("; ")}.` : "No later step is planned this turn.",
+		!plan?.due && !stack.length && !blocked.length ? "Nothing is due in this window. Decide whether an action belongs here; if not, submit {} to keep the line and the pilot continues it."
+			: "Review the conflict with the current position and repair the unfinished line."].join(" ");
+}
+
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
 const KEY = "pick";
 /** The pilot's way to say the plan no longer fits. */
@@ -238,6 +277,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 		if (frame.version === frame.view.work?.accepted) accepted = frame;
 	};
 	let closed = false;
+	// A preparation installed at upkeep without review, and the frame it was prepared from.
+	let unreviewed: { turn: number; from: Frame } | undefined;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
 	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;
@@ -306,7 +347,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 				let ready: boolean | undefined, failed = true;
 				let preparationTiming: PreparationTiming | undefined;
 				try {
-					if (accepted && coveredDraw(accepted, frame)) {
+					const turnNow = at.kind === "turn" ? at.turn : -1;
+					// A line installed unreviewed at upkeep still owes its review of the opponent's turn.
+					if (accepted && unreviewed?.turn !== turnNow && coveredDraw(accepted, frame)) {
 						how = "kept"; failed = false;
 						return { kind: "work", tools: [{ do: "plan.keep", reason: "Only the rules draw changed; the accepted line covers every drawn card." }],
 							revision, actionId: `${options.name}-${frame.version}-${revision}-keep-${++asked}` };
@@ -324,7 +367,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 							preparation = undefined;
 							if (made) {
 								const delta = changes(job.from, frame);
-								if (settled(frame, made.plan, delta)) {
+								const install = !settled(frame, made.plan, delta) && installable(frame, made.plan);
+								if (install || settled(frame, made.plan, delta)) {
+									if (install) unreviewed = { turn: turnNow, from: job.from };
 									how = "prepared";
 									failed = false;
 									return { kind: "work", tools: putting(made), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}` };
@@ -333,7 +378,15 @@ export function aiSeat(options: AiSeatOptions): Player {
 								how = "amended";
 							}
 						} else made = undefined;
-					} else await cancel();
+					} else {
+						await cancel();
+						// The post-draw review reads what changed since the line was prepared or last accepted.
+						const since = unreviewed?.turn === turnNow ? unreviewed.from : accepted?.view.began === frame.view.began ? accepted : undefined;
+						const draw = frame.view.drawnAt;
+						if (since && !frame.view.work?.request && at.kind === "turn" && at.active === frame.seat && draw !== undefined &&
+							(frame.view.work?.accepted ?? -1) < draw) changed = changes(since, frame).lines;
+						unreviewed = undefined;
+					}
 					if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);
 					const { tools, objection } = await options.plan(frame, made, changed);
 					if (closed) throw new Error(`${options.name} closed while planning.`);
@@ -388,8 +441,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 					continue;
 				}
 				if (answer.choice === HELP && help) {
-					const due = packet.plan?.due ? ` Due step: ${packet.plan.due}.` : "";
-					return { kind: "work", tools: [{ do: "plan.request", reason: `The pilot asked for help: ${frame.decision.question}${due} Review the conflict with the current position and repair the unfinished line.` }],
+					return { kind: "work", tools: [{ do: "plan.request", reason: helpRequest(frame, packet) }],
 						revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
 				}
 				const route = packet.routes.find((candidate) => candidate.id === answer.choice);

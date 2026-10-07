@@ -146,6 +146,10 @@ test("a pilot executes with derived plan status, while private judgments neither
 	const requested = await help.answer(workFrame(table, 0));
 	assert.equal(requested.kind, "work"); if (requested.kind !== "work") assert.fail();
 	assert.equal(requested.tools[0]!.do, "plan.request");
+	const reason = (requested.tools[0] as { reason: string }).reason;
+	assert.match(reason, /asked for help at your turn \d+, precombat-main/, "the request names the window the pilot saw");
+	assert.match(reason, /The stack is empty\./);
+	assert.match(reason, /Cast Hydra/, "the unfinished line is named, not left for the writer to guess");
 	await help.close();
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Retain the cards.", steps: [] } }], "amend");
 	assert.equal(table.work[0]!.reviews, undefined, "a changed plan cannot inherit the old judgment");

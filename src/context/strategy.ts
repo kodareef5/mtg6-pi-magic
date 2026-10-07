@@ -186,8 +186,10 @@ export const putting = (made: Prepared): WorkCommand[] => [{ do: "plan.put", pla
 export async function planWork(frame: Frame, context: Context, reasoner: Pick<Reasoner, "work">, prepared?: Prepared, changed?: string[]): Promise<{ tools: WorkCommand[]; objection?: Objection }> {
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
-	const task = `YOUR TASK: ${request}\n${prepared ? "Amend the prepared base for the observed changes. Keep what still fits; no future draw is known." : frame.view.work?.request && frame.view.work.plan ? "Repair the unfinished line from the current window. Replace stale guidance and affected phase decisions along with the actions; keep only what still agrees with the position." : "Advance the pregame strategy from this position; write only what changes."}\nSubmit the line, mana commitments and phase decisions through the opponent's next turn. Check them together before submitting.`;
-	const about = frame.view.work?.request ? "plan on request" : prepared ? "turn amendment" : "turn plan";
+	const repair = !!frame.view.work?.request && !!frame.view.work.plan;
+	const task = `YOUR TASK: ${request}\n${repair ? "Answer the request from the current window. Change what the conflict requires and replace stale guidance and phase decisions along with the actions; {} keeps the line when nothing needs to change."
+		: prepared || changed ? "Amend the base for the listed changes since it was prepared or accepted. Keep what still fits; replace what the changes contradict." : "Advance the pregame strategy from this position; write only what changes."}\nSubmit the line, mana commitments and phase decisions through the opponent's next turn. Check them together before submitting.`;
+	const about = frame.view.work?.request ? "plan on request" : prepared || changed ? "turn amendment" : "turn plan";
 	const made = await write(frame, context, reasoner, task, about, { ...(prepared ? { prepared } : {}), ...(changed ? { changed } : {}) });
 	return { tools: putting(made), ...(made.objection ? { objection: made.objection } : {}) };
 }
