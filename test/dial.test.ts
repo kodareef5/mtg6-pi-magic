@@ -126,7 +126,7 @@ test("following a route changes what the seat knows and nothing else", async () 
 	assert.deepEqual(moves(asked.sent[1]!.ids), moves(asked.sent[0]!.ids));
 
 	// The rule arrived, with its number and its text, and it is labelled as asked for.
-	assert.match(asked.sent[1]!.instructions, /learned contains the cited rules you asked/);
+	assert.match(asked.sent[1]!.instructions, /learned holds the rules you looked up/);
 	assert.match(asked.sent[1]!.learned!.join(" "), /305\.2/);
 	assert.match(asked.sent[1]!.learned!.join(" "), /one land during their turn/);
 	assert.equal(asked.sent[0]!.learned, undefined, "not before it was asked for");
@@ -189,8 +189,8 @@ test("a route reads as an ask and never as a move, and the budget ends the walk"
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
 	assert.match(asked.criteria["rules:priority"]!, /Acts on nothing/);
-	assert.match(asked.instructions, /Rule asks show the named rule and return to this decision without acting/);
-	assert.match(asked.instructions, /Acceptance does not certify card meaning or rules legality/);
+	assert.match(asked.instructions, /A rules: option shows a rule and returns to this decision/);
+	assert.match(asked.instructions, /Choose one id from the criteria/);
 	// And it still never says what is good.
 	for (const word of ["should", "best", "recommend"]) {
 		assert.equal(asked.instructions.toLowerCase().includes(word), false, word);

@@ -1173,12 +1173,12 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	const asked = question(packet, true).instructions;
 	assert.equal(asked.includes("Land first, then the Passage."), false, "the script is carried once in state, not repeated in instructions");
 	assert.deepEqual(packet.plan!.script!.reevaluate, ["Red flashes in a blocker"]);
-	assert.match(asked, /position contradicts the line/);
+	assert.match(asked, /contradicts something the plan relies on/);
 	// A window without a script keeps today's view of the plan.
 	editWork(table, 0, [{ do: "plan.put", plan: line }], "unscripted");
 	const plain = focus(workFrame(table, 0), startingIntent(0), { brief });
 	assert.deepEqual(plain.plan!.script!.steps, ["Now: Play a Forest", "Then: Crack Fabled Passage"], "steps supply order without authored narrative");
-	assert.equal(plain.plan!.script!.completion, undefined, "an absent completion policy grants no pass");
+	assert.equal(plain.plan!.script!.askWhenDone, undefined, "only a phase that asks for help changes what help says");
 	assert.deepEqual(plain.guidance, ["Develop before combat."]);
 	const scoped = { ...line, throughTurn: 4, objective: "Yesterday's objective", guidance: "Yesterday's tactical story",
 		phases: [{ when: { active: "any" as const }, guidance: "Yesterday's phase policy", complete: "pass" as const }],
@@ -1186,7 +1186,7 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	editWork(table, 0, [{ do: "plan.put", plan: scoped }], "finite-plan");
 	const live = focus(workFrame(table, 0), startingIntent(0));
 	assert.doesNotMatch(JSON.stringify(live), /Yesterday's (objective|tactical story)/, "audit rationale never instructs the pilot");
-	assert.ok(live.plan!.script!.completion!.some((one) => one.includes("choose its pass")));
+	assert.equal(live.plan!.script!.askWhenDone, undefined, "a pass completion adds nothing: passing is described by the pass option itself");
 	const repair = basePlan(workFrame(table, 0));
 	assert.equal(repair.throughTurn, 4);
 	assert.deepEqual(repair.steps[0]!.when, line.steps[0]!.when, "repairs preserve original window bounds");
@@ -1604,7 +1604,7 @@ test("an essential step waits while a spell resolves; an impossible line returns
 	const waitingPacket = focus(pending, startingIntent(0));
 	assert.equal(waitingPacket.plan!.due, undefined);
 	assert.ok(waitingPacket.plan!.script!.steps.some((one) => one.startsWith("Waiting for the stack to empty: Crack")));
-	assert.equal(waitingPacket.plan!.script!.completion, undefined, "waiting grants no pass");
+	assert.equal(waitingPacket.plan!.script!.askWhenDone, undefined);
 	const marked = annotate(pending.decision!.options, pendingState);
 	assert.ok(marked.some((one) => (one.notes ?? []).join(" ").includes("Plan step 2") && one.notes!.join(" ").includes("Waiting for the stack to empty") && one.notes!.join(" ").includes(fetch.purpose!)));
 	assert.ok(pending.decision!.options.every((one) => marked.some((listed) => listed.id === one.id)), "every physical option remains reachable");

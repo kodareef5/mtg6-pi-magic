@@ -274,7 +274,7 @@ test("a brief snippet reaches the decision and a card note only when its card is
 	const asked = question(packet, false);
 	assert.equal(asked.type, "choice");
 	if (asked.type !== "choice") throw new Error("Expected a choice");
-	assert.match(asked.instructions, /supplied facts and this seat's preparation/);
+	assert.match(asked.instructions, /Choose one id from the criteria/);
 	assert.equal("ask:help" in asked.criteria, false, "no planner, no help to ask for");
 
 	// A packet with no brief still builds. A missing plan costs quality; refusing

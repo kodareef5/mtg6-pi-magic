@@ -11,7 +11,7 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { fork, open, replay, save, type Header } from "../src/core/journal.ts";
 import { project } from "../src/core/view.ts";
 import { aiSeat } from "../src/context/seat.ts";
-import { focus, type Packet } from "../src/context/packet.ts";
+import { focus, STATUS, type Packet } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { announce, establish, example, finish, main, matchup, passBoth, place } from "./play.ts";
 import { question as moveQuestion } from "../src/context/seat.ts";
@@ -41,8 +41,8 @@ test("a pilot executes with derived plan status, while private judgments neither
 		], "a pilot waiting for main phase sees the required windows even without a current checklist");
 		assert.deepEqual(draw.plan!.next.map((one) => one.scheduled), [0, 1].map(() => ({ turn: 1, active: 0, step: "precombat-main", phase: "precombat-main" })));
 		assert.doesNotMatch(moveQuestion(draw, true).instructions!, /window is closed/);
-		assert.match(moveQuestion(draw, true).instructions!, /does not promise that conditions, sources or actions will be available/);
-		assert.match(moveQuestion(draw, true).instructions!, /unrelated available activation is not a substitute/);
+		assert.match(moveQuestion(draw, true).instructions!, /plan.next lists later steps with their windows/);
+		assert.match(moveQuestion(draw, true).instructions!, /an unrelated option taken now can spend what they need/);
 		assert.deepEqual(drawFrame.view.work!.plan!.steps, table.work[0]!.plan!.steps, "slicing pending windows changes no intent");
 	}
 	const later = focus(drawFrame, startingIntent(0));
@@ -78,9 +78,9 @@ test("a pilot executes with derived plan status, while private judgments neither
 		prompts.push(question.instructions ?? "");
 		const packet = request.state as unknown as Packet;
 		assert.equal(Object.hasOwn(question.criteria, "review:hold"), false, "the physical question includes the completion check");
-		assert.equal(packet.checklist!.find((one) => one.label === "Play Forest")!.status, "available");
-		assert.equal(packet.checklist!.find((one) => one.label === "Cast Hydra")!.status, "later");
-		assert.equal(packet.checklist!.find((one) => one.kind === "branch")!.status, "condition-false");
+		assert.equal(packet.checklist!.find((one) => one.label === "Play Forest")!.status, STATUS.available);
+		assert.equal(packet.checklist!.find((one) => one.label === "Cast Hydra")!.status, STATUS.later);
+		assert.equal(packet.checklist!.find((one) => one.kind === "branch")!.status, STATUS["condition-false"]);
 		assert.ok(packet.checklist!.every((one) => !("options" in one)), "checklist facts do not repeat every target/payment id");
 		const choice = packet.options.find((one) => one.id.startsWith("land:"))!.id;
 		assert.ok(Object.hasOwn(question.criteria, choice));
@@ -106,16 +106,16 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:0", verdict: "act", reason: "Again" }], "duplicate-review"), /already reviewed/);
 	const frame = workFrame(table, 0), packet = focus(frame, startingIntent(0));
 	const shownPhase = packet.checklist!.find((one) => one.kind === "phase")!;
-	assert.equal(shownPhase.status, "open");
+	assert.equal(shownPhase.status, STATUS.open);
 	assert.equal(shownPhase.judgment!.verdict, "act", "phase assessments remain available without earning action credit");
 	assert.equal(Object.hasOwn(shownPhase, "available"), false, "unbound physical options are not phase availability");
 	assert.equal(Object.hasOwn(shownPhase, "cards"), false, "unrelated options supply no phase card list");
 	assert.ok(checklist(frame).find((one) => one.kind === "phase")!.options.length, "core keeps its private assessment options");
 	assert.deepEqual(packet.checklist!.filter((one) => one.kind !== "phase"), checklist(frame).filter((one) => one.kind !== "phase")
-		.map(({ options, ...item }) => ({ ...item, available: options.length })), "step and branch presentation stays exact");
+		.map(({ options, ...item }) => ({ ...item, status: STATUS[item.status], available: options.length })), "step and branch presentation stays exact, in plain status words");
 	const missing = packet.checklist!.find((one) => one.label === "Cast Hydra")!;
 	assert.equal(missing.judgment!.verdict, "skip");
-	assert.equal(missing.status, "later", "a recorded skip cannot complete or remove the planned use");
+	assert.equal(missing.status, STATUS.later, "a recorded skip cannot complete or remove the planned use");
 	const dir = mkdtempSync(join(tmpdir(), "magic-review-"));
 	const header: Header = { id: "review", seed: table.rng.seed, format: table.format.name,
 		seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })), cards: { path: "cards/standard.tsv", generated: "fixture" }, rules: { path: "rules/cr.tsv", effective: "fixture" }, created: "fixture" };
@@ -133,7 +133,7 @@ test("a pilot executes with derived plan status, while private judgments neither
 	const afterLand = focus(workFrame(table, 0), startingIntent(0));
 	assert.deepEqual(afterLand.plan!.done, ["Play Forest"], "reviews carry execution progress in state alongside the phase guidance");
 	assert.deepEqual(afterLand.checklist!.find((one) => one.kind === "phase")!.remaining, ["Cast Hydra"], "an unavailable unfinished action is not counted as complete");
-	assert.equal(afterLand.checklist!.find((one) => one.label === "Cast Hydra")!.status, "unavailable");
+	assert.equal(afterLand.checklist!.find((one) => one.label === "Cast Hydra")!.status, STATUS.unavailable);
 	assert.deepEqual(afterLand.checklist!.map((one) => one.kind), ["phase", "step", "branch"], "unmentioned cards do not create strategic review jobs");
 	assert.ok(afterLand.cards["Mossborn Hydra"], "a completion check retains the unavailable planned card's actual text");
 	let asks = 0;
@@ -175,11 +175,10 @@ test("a pilot executes with derived plan status, while private judgments neither
 		phases: [{ when: { active: "self", step: "precombat-main" }, guidance: "Keep the hand; reassess a listed response if needed." }] } }], "prose-policy");
 	const policyFrame = workFrame(table, 0), policyBefore = structuredClone(policyFrame), corePolicy = checklist(policyFrame);
 	const policy = focus(policyFrame, startingIntent(0));
-	assert.equal(policy.checklist!.find((one) => one.kind === "phase")!.status, "policy");
+	assert.equal(policy.checklist!.find((one) => one.kind === "phase")!.status, STATUS.policy);
 	assert.deepEqual(policy.plan!.script!.guidance, ["Keep the hand; reassess a listed response if needed."]);
-	assert.equal(policy.plan!.script!.completion, undefined, "policy supplies no completion default");
-	assert.match(moveQuestion(policy, true).instructions!, /Its prose can still require an action/);
-	assert.match(moveQuestion(policy, true).instructions!, /neither grants nor withholds a pass/);
+	assert.equal(policy.plan!.script!.askWhenDone, undefined);
+	assert.doesNotMatch(moveQuestion(policy, true).instructions!, /grants? (no )?pass|passing policy|withholds a pass/, "the pilot is never told when it may pass; the pass option says what passing does");
 	assert.deepEqual(policyFrame, policyBefore, "display changes no facts or physical menu");
 	assert.deepEqual(checklist(policyFrame), corePolicy, "context does not change the core checklist");
 	for (const remainingSteps of [["precombat-main", "declare-attackers"], ["precombat-main", "precombat-main", "end"], ["precombat-main", "end"]] as const) {
@@ -190,8 +189,8 @@ test("a pilot executes with derived plan status, while private judgments neither
 	const falseBranch = structuredClone(policyFrame);
 	falseBranch.view.work!.plan!.may = structuredClone(frame.view.work!.plan!.may);
 	const conditional = focus(falseBranch, startingIntent(0));
-	assert.equal(conditional.checklist!.find((one) => one.kind === "phase")!.status, "open", "a false branch is still an explicit binding");
-	assert.equal(conditional.checklist!.find((one) => one.kind === "branch")!.status, "condition-false");
+	assert.equal(conditional.checklist!.find((one) => one.kind === "phase")!.status, STATUS.open, "a false branch is still an explicit binding");
+	assert.equal(conditional.checklist!.find((one) => one.kind === "branch")!.status, STATUS["condition-false"]);
 	const expired = structuredClone(policyFrame);
 	if (expired.view.window.kind !== "turn") assert.fail();
 	expired.view.window.turn = 2;
@@ -207,11 +206,12 @@ test("a pilot executes with derived plan status, while private judgments neither
 	editWork(response, 0, [{ do: "plan.put", plan: { objective: "Keep resources.", guidance: "Respond if needed.", steps: [] } }], "respond");
 	announce(response, example("Cast Shock"), (one) => one.activation.targets[0]!.some((target) => "player" in target && target.player === 0));
 	const waiting = focus(workFrame(response, 1), startingIntent(1)), land = waiting.checklist!.find((one) => one.id === "step:0")!;
-	assert.equal(land.status, "waiting");
+	assert.equal(land.status, STATUS.waiting);
 	assert.equal(land.available, 0, "the land stays unfinished while the spell is on the stack");
 	assert.ok(waiting.checklist!.some((one) => one.kind === "branch" && one.available), "an instant response remains available");
-	assert.match(moveQuestion(waiting, true).instructions!, /absence alone does not require a new plan/);
-	assert.match(moveQuestion(waiting, true).instructions!, /does not end the phase/);
+	assert.match(moveQuestion(waiting, true).instructions!, /their absence now is no reason to ask for help/);
+	const waitingQuestion = moveQuestion(waiting, true);
+	assert.match(waitingQuestion.type === "choice" ? waitingQuestion.criteria.pass! : "", /Shock begins resolving/, "the pass option says what passing does while the stack waits");
 	const futureOnStack = workFrame(response, 1);
 	futureOnStack.view.work!.plan!.steps.push({ label: "Finish attackers", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" } });
 	const scheduledOnStack = focus(futureOnStack, startingIntent(1));
@@ -219,12 +219,12 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.deepEqual(scheduledOnStack.checklist, waiting.checklist, "a future hint leaves current waits and response bindings intact");
 	assert.deepEqual(scheduledOnStack.options, waiting.options);
 	assert.deepEqual(moveQuestion(scheduledOnStack, true).criteria, moveQuestion(waiting, true).criteria, "the hint grants no new passing policy");
-	assert.match(moveQuestion(scheduledOnStack, true).instructions!, /The stack is waiting/);
+	assert.match(moveQuestion(scheduledOnStack, true).instructions!, /The stack is not empty/);
 	const stackPolicyFrame = workFrame(response, 1);
 	stackPolicyFrame.view.work!.plan!.steps = []; stackPolicyFrame.view.work!.plan!.may = [];
 	const stackPolicy = focus(stackPolicyFrame, startingIntent(1));
-	assert.equal(stackPolicy.checklist![0]!.status, "policy");
-	assert.match(moveQuestion(stackPolicy, true).instructions!, /The stack is waiting/);
+	assert.equal(stackPolicy.checklist![0]!.status, STATUS.policy);
+	assert.match(moveQuestion(stackPolicy, true).instructions!, /The stack is not empty/);
 	assert.deepEqual(stackPolicy.plan!.script!.guidance, waiting.plan!.script!.guidance, "response prose survives policy display");
 	editWork(response, 1, [{ do: "review.record", item: land.id, verdict: "hold", reason: "Wait for the spell to resolve." }], "wait-for-stack");
 	apply(response, "pass", "model", "chosen");
@@ -247,14 +247,14 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.match(nextDecision(response)!.options.find((one) => one.id === "pass")!.shows!, /Shock begins resolving/);
 	apply(response, "pass", "model", "chosen"); finish(response);
 	const cleared = focus(workFrame(response, 1), startingIntent(1));
-	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.status, "available", "resolution restores the land use without a new plan");
+	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.status, STATUS.available, "resolution restores the land use without a new plan");
 	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.judgment, undefined, "waiting is reassessed against the new position");
-	assert.doesNotMatch(moveQuestion(cleared, true).instructions!, /absence alone does not require a new plan/, "empty-stack passes still end the step or phase");
+	assert.doesNotMatch(moveQuestion(cleared, true).instructions!, /their absence now is no reason to ask for help/, "empty-stack passes still end the step or phase");
 	const playLand = checklist(workFrame(response, 1)).find((one) => one.id === land.id)!.options[0]!;
 	apply(response, playLand, "model", "chosen", execution(planState(workFrame(response, 1))!, playLand));
 	const complete = focus(workFrame(response, 1), startingIntent(1)), phase = complete.checklist!.find((one) => one.kind === "phase")!;
 	assert.deepEqual(phase.remaining, [], "phase progress comes from recorded actions");
-	assert.equal(phase.status, "recorded");
+	assert.equal(phase.status, STATUS.recorded);
 	assert.ok(complete.checklist!.some((one) => one.kind === "branch" && one.available), "completing the line does not remove response uses");
 
 	const fetchPosition = () => { const table = matchup("review-fetch"); place(table, 0, "battlefield", "Fabled Passage"); return table; };
@@ -283,7 +283,7 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.match(resolving.resolving!.basis, /Search your library/);
 	assert.ok(resolving.objects.some((one) => one.effect?.some((line) => line.includes("Search your library"))), "accepted stack instructions survive compact projection");
 	assert.equal(resolving.plan, undefined, "a new turn's casting guidance cannot displace an already resolving use");
-	assert.match(moveQuestion(resolving, false).instructions, /costs are already paid/);
+	assert.match(moveQuestion(resolving, false).instructions, /whose costs are paid/);
 	assert.doesNotMatch(moveQuestion(resolving, false).instructions, /Stale guidance/);
 	assert.ok(resolving.options.some((one) => one.label.includes("Decline")), "declining the search remains the seat's choice");
 	const limited = structuredClone(resolving);

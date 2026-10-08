@@ -20,7 +20,7 @@ import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import { dial, follow } from "./dial.ts";
 import { asState, chose, CHOICE_LIMIT, type DecisionApi, type Question } from "./model.ts";
-import { compact, focus, type Chronicle, type Packet } from "./packet.ts";
+import { compact, focus, STATUS, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
 import { planProblems } from "../core/work-tools.ts";
@@ -202,7 +202,7 @@ export function helpRequest(frame: Frame, packet: Packet): string {
 	const plan = packet.plan;
 	const next = (plan?.next ?? []).map((one) => `${one.label} (${one.status === "condition-false" ? "its condition is false now"
 		: one.scheduled ? `${one.scheduled.step}${at.kind === "turn" && one.scheduled.turn !== at.turn ? ` of turn ${one.scheduled.turn}` : ""}` : "no window left this turn"})`);
-	const blocked = (packet.checklist ?? []).filter((one) => one.kind !== "phase" && ["unavailable", "waiting"].includes(one.status))
+	const blocked = (packet.checklist ?? []).filter((one) => one.kind !== "phase" && [STATUS.unavailable, STATUS.waiting].includes(one.status))
 		.map((one) => `${one.label} (${one.status})`);
 	return [`The pilot asked for help at ${where}: ${frame.decision?.question ?? ""}`,
 		...(plan?.due ? [`Due step: ${plan.due}.`] : []),
@@ -240,39 +240,35 @@ export function question(packet: Packet, help: boolean): Question {
 	const instruction = packet.resolution?.program[0]?.instruction;
 	const search = instruction?.do === "choose" && instruction.from.zones?.length === 1 && instruction.from.zones[0] === "library" &&
 		!instruction.from.is && !instruction.from.linked && packet.resolution?.program.some((one) => one.instruction.do === "shuffle" && one.instruction.who === instruction.who);
+	const options = packet.options, stacked = packet.objects.some((one) => one.zone === "stack");
 	const instructions = [packet.obligation,
-		"Choose one listed id using the supplied facts and this seat's preparation. Acceptance does not certify card meaning or rules legality.",
-		"options describes the choices; uses holds shared source, timing, effect, target-slot terms and notes; payments holds costs and paid mana ids; funding holds the referenced mana abilities, while pools names existing mana and its restrictions. Read these references together. Printed cards and current characteristics are separate.",
-		...(stage ? [stage === "use" ? "Listed uses describe accepted card terms. Choose a listed use, pass or route under the phase policy and unfinished plan. Inspection reads alternatives and moves nothing."
-			: stage === "component" ? "Inspect the named component or inclusive range. inspection.path records earlier filters; these are not committed choices. A later question asks for a complete original action. Backtracking restores alternatives."
-			: stage === "choice" ? "Choose a complete original action. parameters names its components. Earlier inspection filters committed nothing; the selected action includes every listed component."
-			: stage === "binding" ? "Choose the targets and X for this prepared use. Inspection declares no targets and spends nothing."
-			: "Choose a complete original move with these bindings and a payment that preserves the plan's commitments. Back returns to all uses without acting."] : []),
-		...(packet.opening ? ["Apply the opening policy to this hand and its remaining obligation. For bottom choices, retained shows the hand after each choice; preserve the policy's resource requirements."] : []),
-		...(packet.retained ? ["retained shows the hand after each discard. Apply the prepared retention policy to the remaining cards and resources."] : []),
-		...(packet.combat ? ["combat shows the developing declaration and assignments. Compare the plan with current flying, reach, menace, sickness and damage. Finish the declaration explicitly; selecting a creature is not finishing combat."] : []),
-		...(packet.resolving ? ["Complete the accepted use under resolving.purpose and its original guidance. Its costs are already paid. This is an instruction choice, not priority. Declining a search deliberately finds nothing; it is not a pass.",
-			"resolution holds the current instruction and earlier bindings. Resolve against the actual locked targets, including their legality; a completed announcement is not a completed effect."] : []),
-		...(search ? ["The accepted search is already being carried out. Choose a listed card that fulfills its instruction and recorded purpose. Failing to find is a deliberate exception requiring a prepared reason, not a way to pass or postpone the paid action. If no eligible card remains, finish the search.",
-			...(help ? ["If an uncovered change requires failing to find, ask for help."] : [])] : []),
-		...(packet.objects.some((one) => one.zone === "stack") && !packet.resolving ? ["The stack is waiting. Land plays and uses at sorcery speed need an empty stack. Their absence alone does not require a new plan. Apply the prepared response policy now. Passing lets the top object resolve after every seat passes; it does not end the phase or guarantee a later use will become available.",
-			"Read named stack targets and order before responding. An effect already pending on a target has not resolved; paying again starts another use."] : []),
-		...(packet.plan ? ["Follow the step's Choices and applicable phase policies. A hold needs its release policy; if it contradicts a chosen payment, request help rather than inventing precedence. script.completion applies after this window's commitments finish; absence or an empty list grants no pass. Waiting uses the response policy."] : []),
-		...(packet.plan?.next.length ? ["plan.next names unfinished actions outside the current window or with a false condition. Read when beside each label. scheduled, when present, is the first matching window currently scheduled later this turn; it does not promise that conditions, sources or actions will be available there. A main-phase cast cannot happen during upkeep or draw; use the current response policy and choose the passes needed to reach its window. An unrelated available activation is not a substitute for that later action and may spend its mana. Ask for help if an uncovered event requires changing the line."] : []),
-		...(packet.checklist?.length ? ["checklist describes the plan now: available means a listed use; later means after an earlier commitment; waiting means the use or its chosen prerequisite requires an empty stack; condition-false means its stated condition is false; unavailable means no current option. None completes a step or grants a pass. recorded means the phase's explicit steps are in the ledger, not that its goal is guaranteed. Follow the order and prepared response policies; do not optimize a new line.",
-			"Before choosing a pass or declaration ending, check remaining actions against the phase guidance. Confirm that no planned action is required now. A pending effect can require waiting. An unavailable required line or an uncovered change needs help; silence in the plan alone is not a passing policy."] : []),
-		...(packet.checklist?.some((one) => one.status === "policy") ? ["policy means this window's phase guidance has no explicit step or branch bindings. Its prose can still require an action. The row lists no executable options and credits no action. It neither grants nor withholds a pass; authored completion applies as written."] : []),
-		...(help ? ["Ask for help when the position contradicts the line and no prepared alternative covers it. Explain the conflict through the supplied use, targets, payments and remaining work; do not invent a strategy."] : []),
-		...(packet.blockDeclaration ? ["blockDeclaration records the completed assignment and its row. Its current characteristics and conflict hints do not establish legality at declaration time."] : []),
-		...(packet.routes.length ? ["Rule asks show the named rule and return to this decision without acting."] : []),
-		...(packet.learned?.length ? ["learned contains the cited rules you asked to see; they are reference text, not actions."] : []),
-		...(packet.refused?.length ? ["refused explains the previous unusable answer. The physical decision is unchanged."] : []),
+		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
+		...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an unrelated option taken now can spend what they need." : ""}`] : []),
+		...(packet.guidance.length ? [packet.plan ? "state.guidance is advice written before the game; your plan outranks it." : "state.guidance is advice written before the game."] : []),
+		"state.objects is the board now; state.cards is printed card text.",
+		...(packet.window.kind === "turn" && !packet.resolving && packet.kind !== "trigger-order" ? [stacked
+			? "The stack is not empty, so lands and sorcery-speed actions wait until it is; their absence now is no reason to ask for help. An object on the stack has not resolved yet; using its card again starts another use."
+			: "The stack is empty."] : []),
+		...(options.some((one) => one.id.startsWith("inspect:use") || one.id.startsWith("inspect:binding")) ? ["An inspect option opens one use's targets and payments; it takes no action."] : []),
+		...(stage === "binding" ? ["Choose the targets; the payment comes next."] : stage === "payment" ? ["Choose how to pay. inspect:back returns to all uses."] : stage === "component" ? ["Choose a range to narrow the options; this takes no action."] : []),
+		...(options.some((one) => one.parameters) ? ["An option with parameters takes all of its parts at once."] : []),
+		...(packet.opening ? ["state.opening shows your hand. Follow the opening advice in state.guidance."] : []),
+		...(packet.retained ? ["retained shows the hand left after each choice."] : []),
+		...(packet.combat ? ["Choosing a creature adds it to the declaration; only the finish option ends it. state.combat shows the declaration so far."] : []),
+		...(packet.resolving ? ["You are resolving an effect whose costs are paid. Follow resolving.purpose."] : []),
+		...(search ? ["Choose the card the search's purpose names. Declining finds nothing; it is not a pass."] : []),
+		...(packet.checklist?.length ? ["checklist shows each planned action for this window and whether an option here takes it."] : []),
+		...(help ? ["ask:help asks your strategist for a new plan and takes no action. Use it when your plan's step for this window has no option here, or the board contradicts something the plan relies on."] : []),
+		...(packet.blockDeclaration ? ["blockDeclaration shows the block assignment just made."] : []),
+		...(packet.routes.length ? ["A rules: option shows a rule and returns to this decision."] : []),
+		...(packet.learned?.length ? ["learned holds the rules you looked up."] : []),
+		...(packet.refused?.length ? ["refused says why your last answer could not be used."] : []),
 	].join("\n");
 	return { type: "choice", instructions, criteria: Object.fromEntries([
 		...packet.options.map((option) => [option.id, criterion(option, packet)]),
 		...(packet.objection ? [[packet.objection.id, `Ask the judge whether action ${packet.objection.row} declared legal blocks. The judge reconstructs declaration-time evidence and may let it stand or roll back. This choice takes no physical action and does not revise strategy.`]] : []),
 		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
-		...(help ? [[HELP, "Request a revision of the unfinished line. Moves nothing."]] : []),
+		...(help ? [[HELP, sentences(["Ask your strategist for a new plan. This takes no action", packet.plan?.script?.askWhenDone ? "Your plan asks for help once this window's planned actions are done" : undefined])]] : []),
 	]) };
 }
 

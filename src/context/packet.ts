@@ -29,7 +29,7 @@ export type PlanSlice = {
 	throughTurn?: number; guidance?: string; due?: string;
 	next: { label: string; when: When; status: "outside-window" | "condition-false"; scheduled?: Omit<Extract<Window, { kind: "turn" }>, "kind"> }[];
 	branches: string[]; held: string[]; stops: string[]; done: string[];
-	script?: { goal: string[]; guidance: string[]; steps: string[]; completion?: string[]; reevaluate: string[] };
+	script?: { goal: string[]; guidance: string[]; steps: string[]; askWhenDone?: true; reevaluate: string[] };
 };
 export type Seen = {
 	id: string; incarnation: number; name: string; controller: SeatId; zone: string; position?: number;
@@ -51,7 +51,7 @@ export type Packet = {
 	watches: ReturnType<typeof activeWatches>; cards: Record<string, Printed>;
 	guidance: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
 	history?: SeatView["history"]; resolution?: SeatView["resolution"]; combat?: SeatView["combat"];
-	checklist?: (Omit<ReviewItem, "options" | "cards" | "status"> & { status: ReviewItem["status"] | "policy"; cards?: string[]; available?: number })[];
+	checklist?: (Omit<ReviewItem, "options" | "cards" | "status"> & { status: string; cards?: string[]; available?: number })[];
 	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
 	inspection?: Pick<Menu, "stage" | "selected" | "field" | "path" | "facts">;
 };
@@ -92,6 +92,12 @@ function scheduled(when: When, frame: Frame): PlanSlice["next"][number]["schedul
 	}
 }
 
+/** Checklist statuses in plain words, as the pilot reads them. */
+export const STATUS: Record<ReviewItem["status"] | "policy", string> = {
+	available: "an option here takes it now", later: "after an earlier step", waiting: "waits for the stack to empty", "condition-false": "its condition is false now",
+	unavailable: "no option here takes it", open: "guidance for this window", recorded: "guidance for this window; its steps are done", policy: "guidance for this window",
+};
+
 export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; inspection?: Inspection; capacity?: number };
 /** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
 export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet {
@@ -103,9 +109,6 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const dueAt = state?.due.find((one) => one.candidates.length && !one.waiting && !laterStep(state, one.at))?.at, done = new Set(view.done ?? []);
 	const instruction = (step: PlanOption) => `${step.label}${step.purpose ? `. Choices: ${step.purpose}` : ""}`;
 	const here = state?.plan.steps.some((one) => matches(one.when, frame));
-	const completion = scripts.flatMap((one) => one.complete ? [one.complete === "pass"
-		? "After this window's commitments and pending effects finish, choose its pass or declaration ending. Apply the response policy while the stack waits."
-		: "Ask for help after this window's commitments finish, before ending it."] : []);
 	const plan = state && !view.resolution ? {
 		...(state.plan.throughTurn === undefined ? {} : { throughTurn: state.plan.throughTurn }),
 		...(dueAt !== undefined ? { due: instruction(state.plan.steps[dueAt]!) } : {}),
@@ -119,7 +122,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		stops: state.stops, done: (view.done ?? []).map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
 		...(scripts.length || here ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
 			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : laterStep(state, at) ? "Then" : state.due.some((one) => one.at === at && one.waiting) ? "Waiting for the stack to empty" : state.due.some((one) => one.at === at && one.candidates.length) ? "Now" : "Then"}: ${instruction(step)}`] : []),
-			...(completion.length ? { completion } : {}),
+			...(scripts.some((one) => one.complete === "ask") ? { askWhenDone: true as const } : {}),
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;
 	const all = inPlanOrder(decision.options, state);
@@ -176,10 +179,10 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		kind: view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
 		...(view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
 		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => {
-			if (item.kind !== "phase") return { ...structuredClone(item), available: options.length };
+			if (item.kind !== "phase") return { ...structuredClone(item), status: STATUS[item.status], available: options.length };
 			// Core keeps options for private assessments. Phase prose binds none of them.
 			const { cards, ...policy } = structuredClone(item);
-			return { ...policy, ...(!bindingsHere ? { status: "policy" as const } : {}) };
+			return { ...policy, label: policy.label.replace(/^Phase strategy: /, "Guidance: "), status: STATUS[!bindingsHere ? "policy" : item.status] };
 		}) } : {}),
 		options: listed.map((one) => one.id === "block:done" && view.declarationReview ? { ...one,
 			label: `${one.label}. The judge ruled action ${view.declarationReview.row} illegal (${view.declarationReview.ruling.rule}: ${view.declarationReview.ruling.because}). Review the revised selection before finishing.` } : one), uses: Object.fromEntries(Object.entries(data.uses).filter(([id]) => used.has(id))),
