@@ -77,7 +77,10 @@ const name = (object: Seen) => object.card ?? object.token?.name ?? object.id;
 
 /** Each target slot as an option shows it, then any choice that conflicts with hexproof. One wording for spells, abilities and triggers. */
 export function aiming(targets: Chosen[][], world: World, controller: SeatId): string[] {
-	const named = (chosen: Chosen) => { if ("player" in chosen) return `${chosen.player === controller ? "you" : "opponent"} (seat ${chosen.player})`; const object = world.lastKnown(chosen)?.object; return `${object ? name(object) : chosen.id} (${chosen.id}@${chosen.incarnation})`; };
+	const named = (chosen: Chosen) => { if ("player" in chosen) {
+		const role = chosen.player === controller ? "you" : "opponent", player = world.players.find((one) => one.id === chosen.player)?.name;
+		return player ? `player ${player} (seat ${chosen.player}, ${role})` : `player ${role} (seat ${chosen.player})`;
+	} const object = world.lastKnown(chosen)?.object; return `${object ? name(object) : chosen.id} (${chosen.id}@${chosen.incarnation})`; };
 	const marks = targetConflicts(targets.flat(), world, controller).map((one) => one.reason);
 	return [...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map(named).join(", ") : "none"}.`), ...marks];
 }

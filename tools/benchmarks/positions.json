@@ -32,7 +32,8 @@
     "reserve-authoring": "test/fixtures/benchmarks/reserve-authoring.jsonl.gz",
     "response-authoring": "test/fixtures/benchmarks/response-authoring.jsonl.gz",
     "k-preserve-elf-response": "test/fixtures/benchmarks/k-preserve-elf-response.jsonl.gz",
-    "l-hydra-response": "test/fixtures/benchmarks/l-hydra-response.jsonl.gz"
+    "l-hydra-response": "test/fixtures/benchmarks/l-hydra-response.jsonl.gz",
+    "final-k-smaug-player": "test/fixtures/benchmarks/final-k-smaug-player.jsonl.gz"
   },
   "cases": [
     {
@@ -842,6 +843,17 @@
         }
       ],
       "property": "Execute the accepted attack and postcombat Zhao cast through turn4. Grade actual Zhao entry separately from plan acceptance; preserve the two Mountain payment against an unplanned Kellan upgrade."
+    },
+    {
+      "id": "final-k-smaug-player",
+      "journal": "final-k-smaug-player",
+      "version": 224,
+      "seat": 1,
+      "task": "pilot",
+      "property": "Choose player Green under the delivered zero-damage Smaug policy. This tests target-label matching, not strategy authoring or a game outcome.",
+      "expect": {
+        "id": "trigger:trigger-434-1:t0=seat-0"
+      }
     }
   ]
 }

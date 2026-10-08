@@ -156,7 +156,7 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 	if (targetQuestion.type !== "choice") assert.fail();
 	const descriptions = triggerPacket.options.map((option) => targetQuestion.criteria[option.id]);
 	assert.equal(new Set(descriptions).size, descriptions.length, "each target has a distinct readable choice");
-	assert.ok(descriptions.some((text) => text!.includes("Target 1: opponent (seat 0)")));
+	assert.ok(descriptions.some((text) => text!.includes("Target 1: player Green (seat 0, opponent)")));
 	assert.ok(descriptions.some((text) => text!.includes("Target 1: Icetill Explorer")));
 	assert.ok(triggerPacket.known.some((text) => text.includes("Green, opponent")), "the policy's player name is tied to its seat id");
 	assert.deepEqual(triggerPacket.options.map((option) => option.id), triggerFrame.decision!.options.map((option) => option.id));

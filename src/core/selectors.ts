@@ -25,7 +25,7 @@ export type Happened =
 export type World = {
 	objects: Seen[];
 	read(object: Seen): Traits | undefined;
-	players: { id: SeatId; life: number }[];
+	players: { id: SeatId; life: number; name?: string }[];
 	notes: Note[];
 	combat: Combat | null;
 	history: Happened[];
@@ -56,7 +56,7 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 	let events: Happened[] | undefined;
 	return {
 		objects: [...table.things.values()], read: reader,
-		players: playing(table).map((one) => ({ id: one.id, life: one.life })),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life, name: one.name })),
 		notes: table.notes, combat: table.combat,
 		get history() { return (events ??= happened(table)); },
 		lastKnown(ref) {
@@ -88,7 +88,8 @@ function hidden(view: SeatView): Seen[] {
 export function viewWorld(view: SeatView): World {
 	const seen = view.objects ?? [], objects = [...seen, ...hidden(view)];
 	return {
-		objects, read: (object) => (object as SeenObject).traits, players: view.players ?? [], notes: view.notes ?? [],
+		objects, read: (object) => (object as SeenObject).traits,
+		players: (view.players ?? []).map((one) => ({ ...one, name: view.seats?.find((seat) => seat.id === one.id)?.name })), notes: view.notes ?? [],
 		combat: view.combat ?? null, history: view.history ?? [],
 		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
 	};

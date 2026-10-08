@@ -139,6 +139,14 @@ the original options and physical facts stay. In three repeats the original
 policy picked Explorer each time, while this supplied wording picked the player
 each time. The `smaug-explicit-player` case tests execution, not plan generation.
 
+`final-k-smaug-player.jsonl.gz` ends at decision 224, physical clock 435, of
+`engine-feedback-20261008-k-1791479095957`. It includes the accepted help answer
+before Jev chooses Smaug's zero-damage target. The phase policy names Green
+(seat 0) and forbids targeting an opposing creature for zero. Jev nevertheless
+picked Explorer. This is a delivered-policy case with no Surrak on the board,
+so the wrong target caused no observed card draw. The pilot case checks the
+target id, not strategy authoring or a game outcome.
+
 `hydra-postcombat-response` reuses the earlier decision 119 of the Smaug journal.
 Green has a fetch on the stack in postcombat main and a 1/1 Hydra; Red holds
 Shock and Burst with an unrestricted red source. The original plan has no
