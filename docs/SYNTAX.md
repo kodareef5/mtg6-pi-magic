@@ -277,7 +277,8 @@ New games with that role off prepare complete uses in pregame instead.
 A **plan** is what jev flies.
 
 - `objective` and `guidance`: audit rationale. The pilot does not read them as
-  execution instructions.
+  execution instructions. Strategy submissions no longer offer them; the
+  writer's assessment fills them.
 - `throughTurn`: the last table turn covered by the tactical plan. Context sets
   an own-turn plan to that turn plus the following opponent turn. Repairs keep
   its scope. Expiry includes holds and unbounded policies; it removes no equipment
@@ -322,6 +323,13 @@ New strategy submissions require `atLeast` or `atMost` on every plan `amount`
 condition, including nested stops and hold releases. An explicit zero is valid.
 An omitted comparison is refused instead of silently making the condition
 always true. Previously accepted journal terms keep their original semantics.
+
+A turn or preparation submission requires `theirTurn: {guidance, complete}`,
+which becomes a phase for the whole opponent turn (`when: {active: "opponent"}`).
+Written phases require `complete`. A written phase replaces the inherited phase
+with the same window and the others stay; `phases: []` over inherited phases is
+refused. A stop that already holds where it is watched is refused, since it
+would fire at once.
 
 The strategy submission tool accepts two explicit window shorthands before
 checking the canonical plan: `when.step: "any"` omits the step constraint, and

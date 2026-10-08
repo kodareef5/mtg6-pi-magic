@@ -121,12 +121,17 @@ incarnation. Naming only a side can leave the pilot choosing one of its creature
 when the writer intended the player.
 
 Strategy analysts read the projected position and pregame matchup advice without
-the notebook or standing plan. The coordinator receives their proposals and
-that prior tactical intent, and must reconcile them. Pregame advice is revisable,
-not a conclusion about the current position. No physical facts or card text are
-removed from analyst context. Reset, close and supersession cancel the survey,
-outlook and coordinator rounds through the same signal; canceled attempts stay
-in the bill and cannot publish later work.
+the notebook or standing plan. For a turn or a preparation, one analyst per first
+action (each land play and each accepted cast or activation with a visible
+source) writes the line after it as an ordered ledger, beside the focused
+questions; context lists the actions and ranks nothing. The coordinator receives
+their proposals and that prior tactical intent, and must reconcile them. Pregame
+advice is revisable, not a conclusion about the current position; worked
+examples stay behind a lookup. No physical facts or card text are removed from
+analyst context. Reset, close and supersession cancel every analyst round and the
+coordinator through the same signal; canceled attempts stay in the bill and
+cannot publish later work. A repair during the opponent's turn leaves the next
+turn's preparation running.
 
 A response normally edits only its current window. If the inherited plan is
 invalid, strategy instead exposes the existing full editor: validation of the
@@ -134,8 +139,8 @@ whole plan cannot be repaired through fields that preserve the invalid part.
 The writer must explicitly remove or replace those commitments. Context never
 rebinds an old incarnation or drops a step on the player's behalf.
 For a valid inherited response, the opponent, defense and removal questions
-run in parallel before the coordinator, without the six outlooks. The full
-analysis remains for invalid inherited work, turn planning and preparation.
+run in parallel before the coordinator. Invalid inherited work keeps the
+full survey and six outlooks.
 The current editor uses the actual decision: priority and declaring blockers
 are different decisions even when both occur during declare-blockers.
 

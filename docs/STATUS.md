@@ -2,9 +2,74 @@
 
 Jev pilots, Sol 6.1 high prepared the carried matchup briefs, and Luna low
 writes strategy and judges. The roster stayed fixed. Playing strength remains
-unproven. The retained changes reduce measured response-planning work, repair
-one execution case, clarify projected facts and correct benchmark grading.
-No coded lethal search, move filtering or automatic voluntary choice was added.
+unproven. No coded lethal search, move filtering or automatic voluntary choice
+was added.
+
+## October 8 strategy overhaul
+
+A review of the strategy requests found the prompts teaching the wrong game.
+The win count named attackers, haste and burn but not growth, and 32 of 60
+Hydra coordinators rejected Harmonizer because it could not attack. The pregame
+brief filled about 71% of every dossier, sat last before the request, and its
+worked examples put absent cards such as Resolve into later hands. 181 answers
+said summoning sickness stops blocking. Decisions left in unread rationale,
+`phases: []` wipes and step-only opponent policies lost intent before Jev.
+
+Retained, in five commits from `eed3495` to `260fd03`:
+
+- Rules of play lead with blocking, limit sickness to creatures, and state that
+  tapped creatures cannot attack, a permanent taps once, land entries trigger
+  landfall, and until-end-of-turn bonuses add to later counters.
+- The dossier no longer offers a land play on the opponent's turn, names the
+  seat's own draws, evaluates registered entry conditions, scopes sickness by
+  turn, lists lands' accepted activations and hands' accepted casts with their
+  costs, and puts visible card text first. Reuse keys cover the seat's own cards.
+- The win counts everything before combat, land entries and doublings included.
+  A larger damage claim must be recounted and repaired before it is rejected.
+  Responses assess the threat and their answers instead of an own-turn win.
+- Plan objective and guidance leave the submission; the assessment fills them.
+  A turn or preparation requires `theirTurn`, a policy for the whole opponent
+  turn. Phases merge by window and `[]` cannot wipe them; written phases state
+  completion; a stop that already holds is refused. Pregame step notes stay
+  pilot guidance instead of inherited phases.
+- The matchup plan sits before the facts, keeps worked examples behind a
+  lookup, shows notes only for visible cards, and gives responses only their
+  response and combat policies.
+- Own turns and preparations ask one branch analyst per first action beside the
+  focused questions, instead of attack, ordering and zones questions followed by
+  six outlooks. Analysts time out after 45 seconds.
+- A repair during the opponent's turn no longer discards the next turn's
+  preparation, which had forced an extra full session at upkeep.
+
+Saved-position screens, initial plans only. The first column is the rules,
+facts and wording commit alone; earlier October 8 arms scored 0/6 on growth
+and 0/3 on both authoring cases.
+
+| Case | Rules and facts only | All changes |
+| --- | --- | --- |
+| Lethal set, five cases | 13/15 | 13/15 |
+| Median lethal planning | 35.8s | 24.8s |
+| Opponent-turn response authoring | 0/3 | 3/3 |
+| Own-step reserve authoring | 0/3 | 0/3 |
+| Surrak and Hydra growth sequences | 1/12 | 1/12 |
+
+Matched games from version zero with carried preparations. Seeds k and l
+compare with the final `62de8c1` games below; seed m with `de643a5`.
+
+| Seed | Before | After | Wall time | Strategy wait | Cost | Help |
+| --- | --- | --- | --- | --- | --- | --- |
+| m | Red turn 12 | Green turn 7 | 14m57s to 5m30s | 13m00s to 4m10s | $0.98 to $0.31 | 3 to 1 |
+| k | Red turn 10 | Red turn 10 | 13m07s to 7m31s | 10m53s to 5m35s | $0.69 to $0.49 | 3 to 3 |
+| l | Green turn 13 | Green turn 11 | 17m13s to 10m43s | 14m26s to 7m52s | $0.90 to $0.68 | 2 to 4 |
+| n | - | Green turn 11 | 10m11s | 7m54s | $0.57 | 5 |
+
+Every game finished with zero gaps or fallback and matching replay. Seed m's
+turn-7 win was the growth line the fixtures look for: warped Harmonizer, then
+Elven Passage played and sacrificed, doubling Chocobo twice for 22. Seeds k
+and m games used `710b5e1`; l and n used `260fd03`, after the phase fix (the
+`710b5e1` l game won on turn 13 with nine help requests, mostly windows whose
+inherited step-note scripts granted no completion). One game per seed does not
+establish playing strength.
 
 ## Retained changes
 
@@ -74,7 +139,11 @@ establish full-game speed or playing strength.
 ## What remains unresolved
 
 Strategy still misses the supplied turn-7 growth wins: Surrak from 4 to 8 to
-16, and Hydra to 24 after warped Harmonizer and two Tunnel entries. Jev has
+16, and Hydra to 24 after warped Harmonizer and two Tunnel entries. Branch
+analysts claimed 16 for Surrak in two of twelve October 8 runs; the
+coordinator adopted one and refuted the other with a false entry count. Hydra
+branch arithmetic still undercounts doubling. Moving the step notes out of the
+analysts' dossier scored 0/12 and was not kept. Jev has
 executed both witnesses. The first accepted plan is graded before an
 irreversible land choice, separately from the physical outcome. Source,
 cost, window and order checks do not certify targets or power arithmetic.
@@ -87,14 +156,18 @@ search, played a land before its payoff, spent an Elf and counted it attacking,
 or rejected Harmonizer because it could not itself attack. Removing advice
 from the damage analyst did not establish that advice was the main cause.
 
-Both coordinator-example arms scored 0/3 for hold authoring and 0/3 for a
-response policy covering the opponent's whole turn. Earlier passes measured
+Own-step reserve authoring still scores 0/3; the whole-turn response policy
+now scores 3/3 through the required `theirTurn`. Earlier passes measured
 acceptance only. Broader response-editor experiments did not improve both
 Elf preservation and Hydra removal and remain outside production. Own-turn
 shortcuts were also removed after counting a summoning-sick creature as an
 attacker. Full own-turn writers also leave tactical choices in unread rationale
 and clear execution policies. In final l, that lost Kellan and a later block.
-Reliable response authoring and broader pilot adherence remain unresolved.
+Elf preservation and Hydra removal stay at one of three or none at both the
+base and the final commit. Help requests remain at one to five per game, mostly
+the pilot asking in windows where nothing is due or before a due step.
+Broader pilot adherence remains unresolved. A fresh Sol pregame timed out its
+matchup analyst three times at 240 seconds for both seats on October 8.
 
 ## Matched games and validation
 
@@ -122,13 +195,13 @@ Missing usage affected five control-k calls, one candidate-k call and three
 candidate-l calls; control l had none.
 Replay and clone parity establish consistency, not rules legality.
 
-All 181 offline tests, type checks and saved-prefix checks pass. New physical
+All 183 offline tests, type checks and saved-prefix checks pass. New physical
 fixture checks require a completed continuation boundary or actual outcome;
 an earlier decision limit cannot pass them. They check Elf preservation, Hydra
 removal and Zhao's entry rather than treating acceptance as success.
 
 Raw requests, replies, interrupted runs, failed patches and audits remain in
-ignored `.pi/round3-20261008/`. Reusable positions and execution witnesses live
+ignored `.pi/round3-20261008/` and `.pi/claude-20261008/`. Reusable positions and execution witnesses live
 in `test/fixtures/benchmarks/`, outside the published package. The
 [benchmark runner](../tools/benchmarks/README.md) documents what each check
 establishes.
