@@ -57,12 +57,15 @@ function spent(option: Option) {
 function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[] } {
 	const { action } = option;
 	if ("procedure" in action) {
-		const procedures = procedureOptions(action.procedure as Procedure, frame, prefix);
+		const offered = procedureOptions(action.procedure as Procedure, frame, prefix);
 		// Ordinary equipment can offer the same announcement under another id.
-		// Credit that physical action too, only when all accepted terms, targets
-		// and payment match. A card name alone cannot identify its chosen mode.
-		const equivalent = (frame.decision?.options ?? []).filter((listed) => listed.use &&
-			procedures.some((choice) => isDeepStrictEqual(listed.use, choice.activation)));
+		// That listed option carries out the step when all accepted terms, targets
+		// and payment match; a card name alone cannot identify its chosen mode.
+		// The plan adds its own id only for an announcement nothing listed makes,
+		// so one physical action is offered once.
+		const listed = (frame.decision?.options ?? []).filter((one) => one.use);
+		const equivalent = listed.filter((one) => offered.some((choice) => isDeepStrictEqual(one.use, choice.activation)));
+		const procedures = offered.filter((choice) => !listed.some((one) => isDeepStrictEqual(one.use, choice.activation)));
 		return { options: [...procedures.map((choice) => choice.option), ...equivalent], procedures };
 	}
 	const objects = action.objects ? select(action.objects, frame) : null;

@@ -2086,3 +2086,18 @@ test("a repair during the opponent's turn leaves the next turn's preparation run
 	const closing = seat.close(); assert.equal(signals[0]!.aborted, true);
 	finishes[0]!({ plan: line }); await closing;
 });
+
+test("a planned cast the table already lists is offered once, under the table's id, and carries the step", () => {
+	const table = position();
+	place(table, 0, "hand", "Sazh's Chocobo");
+	main(table, 0, 3);
+	const frame = workFrame(table, 0);
+	frame.view.work = prepareWork(frame, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [{ label: "Cast the Chocobo", when: { active: "self", step: "precombat-main" },
+		action: { procedure: printedCast("Sazh's Chocobo", frame.view.printed!["Sazh's Chocobo"]!) } }] } }]);
+	const state = planState(frame)!, listed = frame.decision!.options.filter((one) => one.use?.timing === "spell" && /Sazh's Chocobo/.test(one.label));
+	assert.ok(listed.length > 0, "the table lists the ordinary cast");
+	const marked = annotate(frame.decision!.options, state);
+	assert.equal(marked.length, frame.decision!.options.length, "no second id for the same physical action");
+	assert.ok(marked.filter((one) => listed.some((cast) => cast.id === one.id)).every((one) => one.notes?.some((note) => note.startsWith("Plan step 1: Cast the Chocobo"))));
+	assert.deepEqual(execution(state, listed[0]!.id), { plan: state.revision, step: 0 }, "the listed option carries out the step");
+});
