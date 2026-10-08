@@ -51,16 +51,19 @@ const ask = (outlook: string) => [
 	"Do not write plan syntax.",
 ].join("\n");
 
-export async function perspectiveReports(dossier: string, survey: Survey, reasoner: Pick<Reasoner, "work">): Promise<Reports> {
+export async function perspectiveReports(dossier: string, survey: Survey, reasoner: Pick<Reasoner, "work">, signal?: AbortSignal): Promise<Reports> {
+	signal?.throwIfAborted();
 	const result: Reports = { reports: {} };
 	const findings = findingsSection(survey);
 	await Promise.all(Object.entries(PERSPECTIVES).map(async ([name, outlook]) => {
 		try {
-			result.reports[name] = await reasoner.work(`perspective ${name}`, { system: ANALYST_SYSTEM, user: dossier, task: `${findings}\n\n${ask(outlook)}` }, { submit: REPORT, turns: 2 }, 1200) as Report;
+			result.reports[name] = await reasoner.work(`perspective ${name}`, { system: ANALYST_SYSTEM, user: dossier, task: `${findings}\n\n${ask(outlook)}` }, { submit: REPORT, turns: 2, signal }, 1200) as Report;
 		} catch (error) {
+			signal?.throwIfAborted();
 			(result.failed ??= []).push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
 		}
 	}));
+	signal?.throwIfAborted();
 	return result;
 }
 

@@ -1677,6 +1677,31 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
  finishes[1]!({ plan: line }); await closing;
  seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
  assert.equal(signals.length, 2, "closed seats start nothing more");
+
+	// Exercise the real preparation pipeline with a provider that never finishes.
+	// Cancellation must stop either analyst round before the coordinator starts.
+	for (const stage of ["survey", "perspective"] as const) {
+		const pending: AbortSignal[] = [], calls = tally();
+		let coordinated = 0;
+		const stream: Stream = (_model, request, options) => {
+			const schema = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
+			const survey = "findings" in schema.properties;
+			if (stage === "perspective" && survey) return { result: async () => ({ content: [{ type: "toolCall", id: "finding", name: "submit", arguments: { findings: [] } }], stopReason: "toolUse" }) };
+			if (!survey && !("line" in schema.properties)) coordinated++;
+			pending.push(options!.signal!);
+			return { result: () => new Promise(() => {}) };
+		};
+		const planner = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: calls });
+		const pilot = aiSeat({ name: "Cancellation", api: {} as never, intent: startingIntent(0), onGap: assert.fail,
+			prepare: (frame, signal) => prepareTurn(frame, { survey: true }, planner, signal) });
+		pilot.observe(workFrame(table, 0));
+		await new Promise((resolve) => setImmediate(resolve));
+		assert.ok(pending.length > 1, `${stage} calls began together`);
+		await pilot.close();
+		assert.ok(pending.every((signal) => signal.aborted), `closing cancels every ${stage} request`);
+		assert.equal(coordinated, 0, "a canceled round cannot launch the coordinator");
+		assert.ok(calls.spent().every((call) => !call.pending), "canceled attempts settle in the bill");
+	}
 });
 
 test("a package registers only what its card says: Elven Passage is refused Ba Sing Se's mana ability", () => {
