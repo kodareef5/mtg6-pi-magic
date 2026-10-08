@@ -109,9 +109,10 @@ function hand(frame: Frame): string {
 
 function stack(frame: Frame, name: (seat: SeatId) => string): string {
 	const items = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-	if (!items.length) return "## Stack\nEmpty.";
-	return `## Stack\nTop first. The top object resolves first once every player passes in a row.\n\n${items.map((one, at) =>
-		`${at + 1}. ${name(one.controller)}: ${named(one)} (${ref(one)})${one.ability && one.ability.claim !== named(one) ? `, ${one.ability.claim}` : ""}${one.ability?.targets?.length ? `, targets ${JSON.stringify(one.ability.targets)}` : ""}`).join("\n")}`;
+	const waiting = frame.view.table.filter((line) => line.startsWith("Waiting to go on the stack:"));
+	return ["## Stack", items.length ? `Top first. The top object resolves first once every player passes in a row.\n\n${items.map((one, at) =>
+		`${at + 1}. ${name(one.controller)}: ${named(one)} (${ref(one)})${one.ability && one.ability.claim !== named(one) ? `, ${one.ability.claim}` : ""}${one.ability?.targets?.length ? `, targets ${JSON.stringify(one.ability.targets)}` : ""}`).join("\n")}` : "Empty.",
+		...(waiting.length ? ["### Waiting triggers", "These observed triggers have not reached the stack. A forecast does not predict how they resolve.", ...waiting] : [])].join("\n\n");
 }
 
 function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
@@ -132,7 +133,8 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 
 function triggers(frame: Frame, name: (seat: SeatId) => string): string {
 	const watched = activeWatches(frame);
-	return `## Triggers on the battlefield\n${watched.length ? watched.map((one) => `- ${one.source.name} (${one.source.id}, ${one.source.controller === frame.seat ? "yours" : name(one.source.controller)}): "${one.basis}"${one.matchingNow?.length ? `. Matching now: ${one.matchingNow.map((match) => match.name).join(", ")}.` : ""}`).join("\n") : "None."}`;
+	return ["## Triggers on the battlefield", "Registered watches, not pending triggers. Selector matches are visible objects, not events that happened.",
+		watched.length ? watched.map((one) => `- ${one.source.name} (${ref(one.source)}, ${one.source.controller === frame.seat ? "yours" : name(one.source.controller)}): "${one.basis}"${one.matchingNow?.length ? `. Current selector matches: ${one.matchingNow.map((match) => `${match.name} (${ref(match)})`).join(", ")}.` : ""}`).join("\n") : "None."].join("\n");
 }
 
 function decks(frame: Frame, name: (seat: SeatId) => string): string {

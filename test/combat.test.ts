@@ -61,6 +61,10 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	const pilot = focus(frame, startingIntent(1)).objects.find((one) => one.id === claws[0]!.id)!;
 	assert.equal(pilot.summoningSick, false); assert.ok(pilot.subtypes!.includes("Lizard"));
 	assert.ok(!dossier({ frame }).split("\n").find((line) => line.startsWith(`| ${claws[0]!.id}@`))!.includes("summoning-sick"), "the dossier row shows the same readiness");
+	assert.match(dossier({ frame }), /Registered watches, not pending triggers/);
+	const selectorText = dossier({ frame }).split("\n").find((line) => line.includes("Current selector matches:"))!.split("Current selector matches:")[1]!;
+	for (const claw of claws) assert.ok(selectorText.includes(`Hired Claw (${claw.id}@${claw.incarnation})`), "selector matches name objects and incarnations, not occurrences");
+	assert.ok(!dossier({ frame }).includes("### Waiting triggers"), "a selector match alone creates no pending event");
 	assert.deepEqual(table, before, "projecting readiness and watch matches moves nothing and stores no derived value");
 	label(table, kellan, "vigilance until end of turn", ["vigilance"]);
 	pick(table, `attack:${claws[0]!.id}`);
@@ -83,6 +87,9 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	assert.ok(!nextDecision(table)!.options.some((one) => one.id.startsWith("unattack:")), "a finished declaration cannot be withdrawn");
 	assert.deepEqual([...claws, kellan].map((one) => table.things.get(one.id)!.tapped), [true, true, false]);
 	assert.equal(table.waiting.length, 2, "each Claw's watch triggers once for the whole attack");
+	const waitingFacts = dossier({ frame: workFrame(table, 1) });
+	assert.match(waitingFacts, /### Waiting triggers/);
+	for (const line of project(table, 1).table.filter((one) => one.startsWith("Waiting to go on the stack:"))) assert.ok(waitingFacts.includes(line), "the dossier preserves actual pending triggers from the seat projection");
 	assert.ok(matches({ world: tableWorld(table), controller: 1 }, table.things.get(kellan.id)!, { attacking: true }));
 	assert.equal(nextDecision(table)!.situation, "trigger-order");
 	reach(table, "declare-attackers", 4);
