@@ -81,12 +81,21 @@ const submittedOption = Type.Object({ ...PlanDefs.Option.properties, when: Write
 		Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false }),
 		Type.Object({ procedure: terms }, { additionalProperties: false })]),
 }, { additionalProperties: false });
-const { throughTurn: _expiry, ...writableFields } = planFields.properties;
-export const submissionFields = { ...writableFields,
-	steps: Type.Array(submittedOption), may: Type.Array(submittedOption),
-	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, when: Type.Optional(WriterWhen), if: terms }, { additionalProperties: false })),
-	phases: Type.Array(Type.Object({ ...planFields.properties.phases.items.properties, when: WriterWhen }, { additionalProperties: false })),
+// objective and guidance are audit rationale that Jev never reads; the writer's assessment fills them, so a decision cannot hide there.
+const Complete = Type.Union([Type.Literal("pass"), Type.Literal("ask")], { description: "pass: once this window's commitments finish, Jev may end it. ask: Jev asks for help instead." });
+const writtenPhase = Type.Object({ ...planFields.properties.phases.items.properties, when: WriterWhen, complete: Complete }, { additionalProperties: false, required: ["when", "guidance", "complete"] });
+/** The opponent's whole next turn, as one policy Jev reads at every decision in it. It becomes a phase with no step. */
+export const TheirTurn = Type.Object({
+	guidance: Type.String({ minLength: 1, description: "What Jev does at every decision of the opponent's next turn, from upkeep to end step: which spell or ability to answer, with which card, target and mana, and what to block. Say plainly when nothing in hand answers anything." }),
+	complete: Complete,
+}, { additionalProperties: false, description: "Required. Your standing policy for the whole of the opponent's next turn. Phases for single steps add detail on top of it." });
+export const submissionFields = {
+	steps: Type.Array(submittedOption),
 	holds: Type.Array(Type.Object({ ...planFields.properties.holds.items.properties, releaseWhen: Type.Optional(terms) }, { additionalProperties: false })),
+	theirTurn: TheirTurn,
+	phases: Type.Array(writtenPhase, { description: "Guidance for single windows. A phase replaces the inherited phase with the same window; other inherited phases stay." }),
+	may: Type.Array(submittedOption),
+	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, when: Type.Optional(WriterWhen), if: terms }, { additionalProperties: false })),
 	packages: Type.Array(terms),
 };
 
@@ -96,7 +105,6 @@ export const ResponseSchema = Type.Object({
 		waitFor: PlanDefs.Option.properties.waitFor,
 		action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!, Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false })]),
 	}, { additionalProperties: false }), { minItems: 1 }),
-	guidance: Type.Optional(Type.String()),
 	phases: Type.Optional(submissionFields.phases),
 	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }) }, { additionalProperties: false }))),
 }, { additionalProperties: false });
@@ -194,6 +202,14 @@ export function changedPlan(base: Plan, changes: unknown, available: ReturnType<
 	const wrong = problems(ChangesSchema, changes);
 	if (wrong.length) throw new Error(`changes does not match the schema: ${wrong.join("; ")}.`);
 	const plan = structuredClone({ ...base, ...changes as Partial<Plan> });
+	// A phase replaces the inherited phase for the same window; the rest stay, so a rewrite cannot silently drop the opponent's turn.
+	const phases = (changes as Partial<Plan>).phases;
+	if (phases && !phases.length && base.phases?.length) throw new Error("phases [] would remove every window policy, including the opponent's turn. Omit phases to keep them, or write the windows that change: a phase replaces the inherited phase with the same when.");
+	if (phases) {
+		const key = (one: { when: unknown }) => JSON.stringify(one.when, Object.keys(one.when as object).sort());
+		const written = new Map(phases.map((one) => [key(one), one]));
+		plan.phases = structuredClone([...(base.phases ?? []).map((one) => written.get(key(one)) ?? one), ...phases.filter((one) => !(base.phases ?? []).some((old) => key(old) === key(one)))]);
+	}
 	// Preparation's packages have not reached work yet. An amendment adding a
 	// new permanent must keep those pending packages as well as accepted ones.
 	const added = (changes as Partial<Plan>).packages;

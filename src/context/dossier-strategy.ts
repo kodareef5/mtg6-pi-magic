@@ -8,31 +8,52 @@ import type { Plan, PlanOption } from "../core/language.ts";
 import { currentPlan } from "../core/query.ts";
 import { say, type Brief } from "./brief.ts";
 import type { Playbook } from "./playbook.ts";
+import type { Lookup } from "./reason.ts";
 
 const quote = (text: string) => text.trim().split("\n").map((line) => `> ${line}`.trimEnd()).join("\n");
 const FAMILIES: [keyof Playbook, string][] = [["sequencing", "Sequencing"], ["resources", "Resources"], ["responses", "Responses"], ["combat", "Combat"], ["recovery", "Recovery"]];
 
-export function strategySections(frame: Frame, brief?: Brief, reader: "analyst" | "coordinator" = "coordinator"): string[] {
-	return [matchupPlan(brief), ...(reader === "coordinator" ? [notebook(frame), standingPlan(frame)] : [])];
+/** The seat's own sections, last, so the analysts' dossier stays a prefix of the coordinator's. */
+export function strategySections(frame: Frame, reader: "analyst" | "coordinator" = "coordinator"): string[] {
+	return reader === "coordinator" ? [notebook(frame), standingPlan(frame)] : [];
 }
 
-function matchupPlan(brief?: Brief): string {
+/**
+ * The pregame advice that applies to this session: the policies' when, priorities, reserve and reconsider,
+ * step notes for the windows still ahead, and notes for cards this seat can see. Worked examples describe
+ * invented positions and stay behind a lookup. A response reads only its response and combat policies.
+ */
+export function matchupPlan(frame: Frame, brief?: Brief, scope: "turn" | "preparation" | "response" = "turn"): string {
 	if (!brief) return "## Your matchup plan\nNo pregame brief was prepared for this seat.";
 	const field = (title: string, note: unknown) => say(note) ? [`### ${title}`, quote(say(note))] : [];
-	const policies = brief.policies ? FAMILIES.flatMap(([key, title]) => {
+	const families = scope === "response" ? FAMILIES.filter(([key]) => key === "responses" || key === "combat") : FAMILIES;
+	const policies = brief.policies ? families.flatMap(([key, title]) => {
 		const one = brief.policies![key];
 		return [`### Policy: ${title.toLowerCase()}`, quote([`When: ${one.when}`, "Priorities:", ...one.priorities.map((priority, at) => `${at + 1}. ${priority}`),
-			`Reserve: ${one.reserve}`, `Reconsider: ${one.reconsider}`, `Worked example. Position: ${one.example.position}`,
-			...one.example.line.map((step, at) => `${at + 1}. ${step}`), `Exception: ${one.example.exception}`].join("\n"))];
+			`Reserve: ${one.reserve}`, `Reconsider: ${one.reconsider}`].join("\n"))];
 	}) : [];
+	const at = frame.view.window, mine = at.kind === "turn" && at.active === frame.seat, remaining = new Set(frame.view.remainingSteps ?? []);
+	// Notes for the windows still ahead: the rest of this turn, and the other player's next turn.
+	const ahead = (step: string, side: "own" | "opponent") => at.kind !== "turn" || ((side === "own") === mine ? remaining.has(step as never) : scope !== "response");
 	const steps = Object.entries(brief.steps ?? {}).flatMap(([step, sides]) => (["own", "opponent"] as const).flatMap((side) =>
-		say(sides?.[side]) ? [`- ${step.replace(/-/g, " ")} on ${side === "own" ? "your" : "the opponent's"} turn: ${say(sides?.[side])}`] : []));
-	const cards = Object.entries(brief.cards ?? {}).map(([card, note]) => `- ${card}: ${say(note)}`);
-	return ["## Your matchup plan", "Written before the game by your pregame analysts from both registered lists. Advice, not facts; the board above wins any disagreement.",
+		say(sides?.[side]) && ahead(step, side) ? [`- ${step.replace(/-/g, " ")} on ${side === "own" ? "your" : "the opponent's"} turn: ${say(sides?.[side])}`] : []));
+	const seen = new Set((frame.view.objects ?? []).flatMap((one) => one.card && one.zone !== "library" && (one.zone !== "hand" || one.controller === frame.seat) ? [one.card] : []));
+	const cards = Object.entries(brief.cards ?? {}).filter(([card]) => seen.has(card)).map(([card, note]) => `- ${card}: ${say(note)}`);
+	return ["## Your matchup plan", "Written before the game by your pregame analysts from both registered lists. Advice, not facts; the board below wins any disagreement. A policy that names a card applies only when that card is in your hand or on the battlefield.",
 		...field("Objective", brief.objective), ...field("Role", brief.role), ...field("Route to a win", brief.route), ...field("Matchup", brief.matchup),
 		...field("Traps", brief.traps), ...field("Recovery", brief.recovery), ...policies,
-		...(steps.length ? ["### Step notes", quote(steps.join("\n"))] : []), ...(cards.length ? ["### Card notes", quote(cards.join("\n"))] : []),
+		...(steps.length ? ["### Step notes for the windows ahead", quote(steps.join("\n"))] : []), ...(cards.length ? ["### Notes for cards you can see", quote(cards.join("\n"))] : []),
 		...(brief.gaps.length ? ["### Gaps in the preparation", brief.gaps.map((gap) => `- ${gap}`).join("\n")] : [])].join("\n\n");
+}
+
+/** The policies' worked examples, on request. Each describes an invented position, not this game. */
+export function matchupExamples(brief?: Brief): Lookup {
+	return { name: "matchup_examples", description: "Read the worked examples from your matchup plan's policies. Each describes an invented position written before the game, not this one.",
+		parameters: { type: "object", properties: {}, additionalProperties: false },
+		answer: () => !brief?.policies ? "No worked examples were prepared." : FAMILIES.map(([key, title]) => {
+			const one = brief.policies![key];
+			return [`## ${title}`, `Invented position: ${one.example.position}`, ...one.example.line.map((step, at) => `${at + 1}. ${step}`), `Exception: ${one.example.exception}`].join("\n");
+		}).join("\n\n") };
 }
 
 function notebook(frame: Frame): string {

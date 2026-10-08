@@ -17,9 +17,9 @@ import { manaLines } from "./strategy-facts.ts";
 import { useSources } from "../core/readiness.ts";
 import type { Brief } from "./brief.ts";
 import type { Recap } from "./summary.ts";
-import { strategySections } from "./dossier-strategy.ts";
+import { matchupPlan, strategySections } from "./dossier-strategy.ts";
 
-export type DossierInput = { frame: Frame; forecast?: { from: Frame; assumptions: string }; brief?: Brief; cards?: Universe; recaps?: readonly Recap[] };
+export type DossierInput = { frame: Frame; forecast?: { from: Frame; assumptions: string }; brief?: Brief; cards?: Universe; recaps?: readonly Recap[]; scope?: "turn" | "preparation" | "response" };
 
 /** Table cells hold one line; a pipe would end the cell. */
 export const cell = (value: unknown) => String(value ?? "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ").trim() || "-";
@@ -38,13 +38,15 @@ export function dossier(input: DossierInput, reader: "analyst" | "coordinator" =
 	const me = name(frame.seat);
 	return [
 		`# Game dossier for ${me}`,
-		"Everything you know as this player. The board, mana, deck lists, odds and printed card text come from the table. Registered triggers are accepted interpretations and can be wrong. Sections marked as written by a model are advice and can be wrong. The request at the end of the conversation says what to do with this.",
+		"Everything you know as this player. The board, mana, deck lists, odds and printed card text come from the table. Registered triggers are accepted interpretations and can be wrong. Sections marked as written by a model, such as the matchup plan, are advice and can be wrong. The request at the end of the conversation says what to do with this.",
 		situation(input, name),
+		// Advice before the facts, so the board, mana and card text sit nearest the request.
+		matchupPlan(frame, input.brief, input.scope),
 		battlefield(frame, name), hand(frame), stack(frame, name), graveyards(frame, name),
 		"## Mana", manaLines(frame).map((line) => `- ${line}`).join("\n"),
 		triggers(frame, name), decks(frame, name), cardText(input),
 		recent(frame, name, input.recaps),
-		...strategySections(frame, input.brief, reader),
+		...strategySections(frame, reader),
 	].join("\n\n");
 }
 

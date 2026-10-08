@@ -28,6 +28,7 @@ import { bill, CEILING, tally, type Spend } from "../src/context/spend.ts";
 import { question } from "../src/context/seat.ts";
 import { recap, recent } from "../src/context/summary.ts";
 import { dossier } from "../src/context/dossier.ts";
+import { matchupExamples } from "../src/context/dossier-strategy.ts";
 import { load as loadCards } from "../src/core/cards.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { splits } from "../src/core/odds.ts";
@@ -160,9 +161,12 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	assert.ok(spent.every((one) => !one.pending), "settling an attempt clears pending without adding another call");
 	assert.match(bill(spent).join("\n"), /pregame/);
 	const frame = { seat: me!.id, version: built.cursor.clock, view: project(built, me!.id) };
-	const plan = dossier({ frame, brief: written }).split("## Your matchup plan")[1]!.split("\n## Your notebook")[0]!;
-	for (const family of ["sequencing", "resources", "responses", "combat", "recovery"]) assert.match(plan, new RegExp(`### Policy: ${family}`), "every strategy call reads all five policy families");
-	for (const [, policy] of Object.entries(written.policies!)) assert.ok(plan.includes(policy.example.exception), "worked examples keep their exceptions");
+	const plan = dossier({ frame, brief: written }).split("## Your matchup plan")[1]!.split("\n## ")[0]!;
+	for (const family of ["sequencing", "resources", "responses", "combat", "recovery"]) assert.match(plan, new RegExp(`### Policy: ${family}`), "an own-turn strategy call reads all five policy families");
+	const response = dossier({ frame, brief: written, scope: "response" }).split("## Your matchup plan")[1]!.split("\n## ")[0]!;
+	assert.deepEqual([...response.matchAll(/### Policy: (\w+)/g)].map((one) => one[1]), ["responses", "combat"], "a response reads its response and combat policies");
+	const examples = String(matchupExamples(written).answer({}));
+	for (const [, policy] of Object.entries(written.policies!)) assert.ok(!plan.includes(policy.example.position) && examples.includes(policy.example.exception), "worked examples describe invented positions and wait behind a lookup");
 	if (say(written.route)) assert.ok(plan.includes(say(written.route)), "the whole brief reaches the strategist, not a filtered slice");
 	assert.match(plan, /Written before the game by your pregame analysts/, "model-written strategy is marked as advice");
 

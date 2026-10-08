@@ -10,7 +10,9 @@ import { NoteEditsSchema, type NoteEdit, type WorkCommand } from "../core/work-l
 import type { Prepared } from "./seat.ts";
 import type { Objection } from "../core/player.ts";
 import { planProblems, prepareWork } from "../core/work-tools.ts";
-import { type Package, type Plan, type Registration } from "../core/language.ts";
+import { type Condition, type Package, type Plan, type Registration } from "../core/language.ts";
+import { holds, viewWorld } from "../core/selectors.ts";
+import { matches } from "../core/query.ts";
 import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
@@ -21,6 +23,7 @@ import { chancing, initialPlan, planningFrame, type Context } from "./strategy-f
 import { findingsSection, surveyPosition } from "./survey.ts";
 import { perspectiveReports, reportsSection } from "./perspectives.ts";
 import { dossier } from "./dossier.ts";
+import { matchupExamples } from "./dossier-strategy.ts";
 import { ASSESSMENT, RESPONSE_ROLLUP, ROLLUP, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
 import { combatLookup } from "./strategy-combat.ts";
 
@@ -51,7 +54,7 @@ export const exampleReference: Lookup = {
 // it as a tool schema caused the provider to count over 430,000 input tokens.
 const SUBMIT = {
 	name: "submit",
-	description: "Update the base plan with only changed fields. Omitted fields stay; lists replace whole lists and [] clears one, except packages join by card name. An answer with only assessment keeps the base. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
+	description: "Update the base plan with only changed fields. Omitted fields stay; lists replace whole lists and [] clears one, except phases, which replace by window, and packages, which join by card name. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
 	parameters: { type: "object", properties: {
 		...submissionFields,
 		notes: NoteEditsSchema,
@@ -102,16 +105,16 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const response = responding && !baseProblems.length;
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
 		parameters: { ...SUBMIT.parameters, properties: { assessment: response && context.survey ? RESPONSE_ROLLUP : context.survey ? ROLLUP : ASSESSMENT, ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
-			required: ["assessment", ...(response ? ["current"] : [])] } };
+			required: ["assessment", ...(response ? ["current"] : responding ? [] : ["theirTurn"])] } };
 	const decision = !options.nextTurn && frame.decision ? ` The decision in front of the pilot: ${frame.decision.question}` : "";
 	const request = responding ? `${frame.view.work?.request}\nRepair this response or combat decision and the rest of the opponent's turn. Your next turn is prepared separately, so do not write its line. Keep the phase policies this decision does not touch.${response ? "" : " The inherited plan is invalid. Use the full changed fields to remove or replace every invalid commitment, including steps outside this window; omitted fields stay."}${decision}`
 		: `${task}${decision}`;
 	const resources = paymentForecast(frame, base);
-	const scoped = options.nextTurn ? "preparation" : responding ? "response" : "turn";
+	const scoped: "preparation" | "response" | "turn" = options.nextTurn ? "preparation" : responding ? "response" : "turn";
 	// Analysts judge the position before the coordinator reconciles their findings with prior intent.
 	const planned = planningFrame(frame, scoped);
 	const input = { frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
-		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}) };
+		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}), scope: scoped };
 	const doc = dossier(input), facts = dossier(input, "analyst");
 	const findings = context.survey ? await surveyPosition(planned, facts, reasoner, options.signal, response ? ["opponent", "defense", "removal"] : undefined) : undefined;
 	const reported = findings && !response ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
@@ -124,13 +127,21 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.
-			const { notes, objection: raised, assessment: _assessment, ...changes } = args;
+			// objective and guidance are audit fields the schema no longer offers; the assessment fills whichever is not written.
+			const { notes, objection: raised, assessment, theirTurn, objective, guidance, ...changes } = args;
+			if (theirTurn !== undefined && (!theirTurn || typeof theirTurn !== "object" || Array.isArray(theirTurn))) return "theirTurn is {guidance, complete}.";
 			let plan: Plan;
-			try { plan = changedPlan(base, response ? responseChanges(frame, base, changes) : changes, available); } catch (error) { return String(error); }
+			try {
+				const edited = response ? responseChanges(frame, base, changes) : changes as Record<string, unknown>;
+				const turn = theirTurn as { guidance?: unknown; complete?: unknown } | undefined;
+				const whole = turn ? [{ when: { active: "opponent" }, guidance: turn.guidance, complete: turn.complete }] : [];
+				plan = changedPlan(base, { ...edited, ...audit(assessment), ...(typeof objective === "string" && objective ? { objective } : {}), ...(typeof guidance === "string" && guidance ? { guidance } : {}), ...(whole.length ? { phases: [...(Array.isArray(edited.phases) ? edited.phases : []), ...whole] } : {}) }, available);
+			} catch (error) { return String(error); }
 			plan.throughTurn = base.throughTurn;
 			const objection = raised as Objection | undefined;
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
-			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes, options.nextTurn), ...registrationProblems(plan.packages ?? [])];
+			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes, options.nextTurn), ...registrationProblems(plan.packages ?? []),
+				...stopProblems(planned, changes.askWhen)];
 			if (!plan.steps.length && (options.nextTurn || !frame.view.work?.plan && !options.prepared && !plan.may?.length))
 				wrong.push('This turn has no ordered actions. Write the known line, or explicitly choose passing with a step whose action is {"option":"pass"}. Conditional branches do not replace the known turn line.');
 			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");
@@ -144,7 +155,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			return null;
 		} },
 		// A fourth reply lets a winning line survive a refusal over a side problem.
-		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 4,
+		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), matchupExamples(context.brief), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 4,
 		// With the survey, ordinary replies take 10-45s; retry a stalled
 		// critical-path request without replacing its task, model, or plan.
 		...(options.nextTurn ? {} : { timeoutMs: 75_000 }),
@@ -152,6 +163,27 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");
 	return accepted;
+}
+
+/** The writer's assessment becomes the plan's audit rationale; Jev reads neither. */
+function audit(assessment: unknown): { objective?: string; guidance?: string } {
+	const working = assessment && typeof assessment === "object" ? assessment as Record<string, unknown> : {};
+	const rollup = working.rollup && typeof working.rollup === "object" ? working.rollup as Record<string, unknown> : working;
+	const first = Array.isArray(rollup.priorities) ? rollup.priorities.find((one) => typeof one === "string" && one.trim()) : undefined;
+	const why = [rollup.win, rollup.threat].find((one) => typeof one === "string" && one.trim());
+	return { ...(first ? { objective: first as string } : {}), ...(why ? { guidance: why as string } : {}) };
+}
+
+/** A stop that already holds where it is watched would fire at once. */
+function stopProblems(frame: Frame, written: unknown): string[] {
+	if (!Array.isArray(written)) return [];
+	const scope = { world: viewWorld(frame.view), controller: frame.seat };
+	return written.flatMap((one, at) => {
+		const stop = one as { label?: string; when?: Parameters<typeof matches>[0]; if?: Condition };
+		if (!stop?.if || stop.when && !matches(stop.when, frame)) return [];
+		try { return holds(scope, stop.if) ? [`askWhen[${at}] "${stop.label ?? ""}" is already true in the planned position, so it would stop the pilot at once. A stop names a visible fact that is false now and would make the line impossible.`] : []; }
+		catch { return []; }
+	});
 }
 
 /** Expand to ordinary atomic work edits. The journal stores full accepted terms, never reuse keys. */

@@ -21,7 +21,7 @@ export const RULES_OF_PLAY = [
 	"- If you control legendary permanents with the same name, you choose one to keep and put the rest in their owners' graveyards (704.5j).",
 	"- You may play one land on each of your own turns, plus any extra land plays a card grants, never on the opponent's turn. A land that a spell or ability puts onto the battlefield, such as a land found by a search, uses no land play. Every land that enters under your control, played or put there, triggers each of your landfall abilities once.",
 	"- A land you can still play this turn adds its mana once it is on the battlefield untapped. A land that enters tapped adds nothing until it untaps.",
-	"- Until-end-of-turn changes last through the turn, and counters added later add to the result. An effect that doubles power reads the creature's power as the effect resolves, after every earlier change.",
+	"- Until-end-of-turn changes last through the turn, and counters added later add to the result. An effect that doubles power reads the creature's power as the effect resolves, after every earlier change. A 4/4 whose power doubles to 8/4 until end of turn and then gets four more +1/+1 counters is 12/8; doubling it again makes 24/8.",
 	"- Only abilities listed on a card or in its battlefield row exist.",
 	"",
 	"Write every sum out, such as 3 + 2 = 5 damage against toughness 4, or {1}{R} + {R} = 3 mana from three red sources.",

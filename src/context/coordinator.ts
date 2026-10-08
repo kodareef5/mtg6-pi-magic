@@ -72,7 +72,7 @@ const ORDER = [
 
 export function coordinatorSystem(definitions: string): string {
 	return [
-		"You coordinate one Magic player's strategy. You write the plan that a fast pilot, Jev, carries out one decision at a time. Jev reads your steps, branches, purposes, holds and phase guidance. It does not read your assessment, objective or guidance.",
+		"You coordinate one Magic player's strategy. You write the plan that a fast pilot, Jev, carries out one decision at a time. Jev reads your steps with their purposes, branches, holds, theirTurn and phase guidance. It never reads your assessment.",
 		"", ORDER, "",
 		"## Deciding",
 		"- Fill assessment first. It is your own working, and it decides the line.",
@@ -89,7 +89,7 @@ export function coordinatorSystem(definitions: string): string {
 		"- The situation section says whether the position is observed now or a forecast of your next turn. In a forecast, plan that turn's line. A creature already in play needs no new cast.",
 		"- Steps left this turn bound what is still possible. A window that has passed cannot be used again this turn.",
 		"- Triggers list registered watches now. A permanent does not see events that finished before it entered; its own entry can trigger it.",
-		"- The plan you are editing is earlier intent. Recheck its combat and response commitments against the board, including steps whose labels name an old creature or response. Replace contradicted steps, guidance, phase scripts and holds together.",
+		"- The plan you are editing is earlier intent. Recheck its combat and response commitments against the board, including steps whose labels name an old creature or response. Replace contradicted steps, theirTurn, phase scripts and holds together.",
 		"",
 		"## How the plan works",
 		"- steps are ordered actions with label, when and action. A step is an action Jev takes. Keeping a card or mana is a hold, never a step. essential means the line fails without that step. When assessment finds a win, the steps carry that line exactly: casts before combat, an attack step for every attacker counted, then attack:done.",
@@ -102,16 +102,17 @@ export function coordinatorSystem(definitions: string): string {
 		"- may holds conditional responses and alternative lines. Cover draw classes that change the line, not one branch per card.",
 		"- holds keep sources for a purpose. A hold query reserves every object it matches, so use refs for one object. releaseWhen ends a hold on a visible fact. releaseAt ends it at a window, such as active self and step declare-attackers.",
 		"- askWhen stops the pilot on a visible fact that makes the line impossible. It must not cause routine replanning.",
-		"- phases give each window's guidance: responses, trigger targets, searches, optional choices and exceptions. complete is pass or ask once that window's commitments are done, and leaving it out grants no pass. reevaluate lists board changes this guidance does not handle; Jev asks for help when one happens.",
-		'- Combat is one creature at a time, then a finish. Finish attacks with {"label":"Finish attackers","when":{"active":"self","step":"declare-attackers"},"action":{"option":"attack:done"}} and blocks on their turn with {"label":"Finish blockers","when":{"active":"opponent","step":"declare-blockers"},"action":{"option":"block:done"}}. Your own turn never needs a block step.',
+		"- theirTurn is your policy for the whole of the opponent's next turn, read at every decision in it: what to answer, with which card, target and mana, what to block, and when to pass. It is required; say plainly when nothing in hand answers anything.",
+		"- phases add guidance for single windows: responses, trigger targets, searches, optional choices and exceptions. A phase replaces the inherited phase with the same when and the others stay, so write a window's when again to change it. complete is pass or ask once that window's commitments are done. reevaluate lists board changes this guidance does not handle; Jev asks for help when one happens.",
+		'- Combat is one creature at a time, then a finish. On your turn with a creature that can attack, write the attack: an attack step for each attacker, then attack:done, or a lone attack:done whose purpose names who stays home. Finish attacks with {"label":"Finish attackers","when":{"active":"self","step":"declare-attackers"},"action":{"option":"attack:done"}} and blocks on their turn with {"label":"Finish blockers","when":{"active":"opponent","step":"declare-blockers"},"action":{"option":"block:done"}}. Your own turn never needs a block step.',
 		"- Windows use active self or opponent and step names. active means whose turn it is, not whose choice. Leave absolute turn numbers out unless needed. Untap, the turn's draw and cleanup happen through the rules, not plan steps.",
 		'- Conditions count visible objects. {"amount":{"count":{"zones":["hand"],"controller":"you","types":["creature"]}},"atLeast":1} tests for a creature in your hand. Combine tests with all, any and not. top refers only to library objects. Object queries use controller self; conditions accept you or self. A step with a known source needs no presence condition.',
 		"- A normal permanent other than an Aura is cast for its printed cost with no targets; its abilities come from its package. Instants and sorceries use their prepared actions. Do not give a creature spell its trigger's targets.",
-		"- objective and guidance are your rationale for audits. Jev never reads them, so a decision written only there is lost: an attack you skip is a lone attack:done with a purpose, a reserve is a hold, and a response is phase guidance. notes optionally edit your notebook with a useful new conclusion, and an empty note retires a topic.",
+		"- Your assessment becomes the plan's audit record. Jev never reads it, so a decision written only there is lost: an attack you skip is a lone attack:done with a purpose, a reserve is a hold, and a response is theirTurn or phase guidance. notes optionally edit your notebook with a useful new conclusion, and an empty note retires a topic.",
 		"- packages hold accepted card terms. Change one only when its interpretation was wrong. A new line does not change a card's abilities.",
 		"",
 		"## Your answer",
-		"Call submit once with the fields that change. Omitted fields stay, a list replaces the whole list, and [] clears it. Do not restore completed steps. You may look up a fact first. If submit refuses the answer, fix every named problem together and keep the rest.",
+		"Call submit once with theirTurn and the fields that change. Omitted fields stay. steps, holds, may and askWhen replace the whole list, and [] clears one; phases replace by window. Do not restore completed steps. You may look up a fact first. If submit refuses the answer, fix every named problem together and keep the rest.",
 		"Object only to a listed opposing action that broke a rule or misread a card, with objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
 		"Acceptance checks syntax, ids and mana arithmetic. It does not certify card meaning or good play.",
 		"",
@@ -141,7 +142,7 @@ export function responseSystem(definitions: string): string {
 		"## Rules of play", RULES_OF_PLAY, "",
 		"## Your answer",
 		"current is an ordered list of {label, action, purpose?}. action is {reuse: exact key}, a listed {option: id}, or {prefix, objects}. Every current action binds to this turn and step. Use block:done only when the listed decision declares blockers, never at priority while triggers resolve. Cover later blocks in phases. Do not write when or a next-turn line. Steps outside this window stay.",
-		"purpose carries targets, payment and resolution choices. phases replaces execution policies; keep unaffected windows and fix contradicted ones. complete is pass or ask after the commitments finish. guidance is rationale Jev does not read. holds replaces the reserves, and [] releases them. notes and objection follow the schema.",
+		"purpose carries targets, payment and resolution choices. A phase replaces the inherited phase with the same when; other windows stay, so fix a contradicted one by writing its when again. complete is pass or ask after the commitments finish. holds replaces the reserves, and [] releases them. notes and objection follow the schema.",
 		"Acceptance checks syntax and resources, not card meaning or good play. Object only to a listed opposing action that broke a rule. If submit refuses the answer, fix every named problem without pretending an action was executed.",
 		"",
 		"## Response definitions", definitions,
@@ -171,22 +172,20 @@ export function workSections(work: Work): string {
 }
 
 const EXAMPLE = JSON.stringify({ steps: [
-	{ label: "Play the land", when: { active: "self", step: "precombat-main" }, action: { reuse: "land <card> from hand" } },
 	{ label: "Cast the creature", when: { active: "self", step: "precombat-main" }, action: { reuse: "printed:<card>" }, purpose: "Pay with <land> (<id>@<incarnation>) and <land> (<id>@<incarnation>)." },
+	{ label: "Play the land", when: { active: "self", step: "precombat-main" }, action: { reuse: "land <card> from hand" } },
 	{ label: "Attack with <creature>", when: { active: "self", step: "declare-attackers" }, action: { reuse: "attack <id>@<incarnation>" } },
 	{ label: "Finish attackers", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" }, purpose: "<other creature> stays home to block." },
 ], holds: [{ objects: { refs: [{ id: "<id>", incarnation: 1 }] }, purpose: "<land> stays untapped for <instant in hand> on their turn.", releaseAt: { active: "self", step: "upkeep" } }],
-phases: [
-	{ when: { active: "opponent" }, guidance: "Cast <instant in hand> on <creature> (<id>@<incarnation>) when it attacks or grows past toughness 2. Otherwise keep the mana.", complete: "pass" },
-	{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block <attacker> (<id>@<incarnation>) with <creature> (<id>@<incarnation>) only if its damage would be lethal.", complete: "pass" },
-] });
+theirTurn: { guidance: "Cast <instant in hand> on <creature> (<id>@<incarnation>) when it attacks or grows past toughness 2, paying with <land> (<id>@<incarnation>). Otherwise keep the mana and pass.", complete: "pass" },
+phases: [{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block <attacker> (<id>@<incarnation>) with <creature> (<id>@<incarnation>) only if its damage would be lethal.", complete: "pass" }] });
 
 /** The request that ends the conversation. */
 export function coordinatorAsk(request: string, kind: "turn" | "preparation" | "response", current = kind === "response"): string {
 	return ["## Your request", request, "",
-		kind === "response" ? current ? "Answer through submit: assessment first, then current and any changed holds, phases or guidance."
+		kind === "response" ? current ? "Answer through submit: assessment first, then current and any changed holds or phases."
 			: "Answer through submit: assessment first, then the full plan fields that change, including steps to repair invalid inherited commitments."
-			: "Plan the turn and the opponent's next turn: the line, the mana it commits, and the phase decisions. Check them together, then answer through submit with assessment first and the plan fields that change.",
+			: "Plan the turn and the opponent's next turn: the line, the mana it commits, theirTurn and the phase decisions. Check them together, then answer through submit with assessment first, theirTurn, and the plan fields that change.",
 		...(kind === "response" ? [] : ["", "The plan fields of an answer, for their shape only. Your assessment comes first, as the submit tool describes it.", EXAMPLE]),
 	].join("\n");
 }

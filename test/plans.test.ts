@@ -1866,7 +1866,7 @@ test("preparation starts on the opponent's turn, not before our line has played,
  await planWork(workFrame(table, 0), { cards: loadCards("cards/standard.tsv"), rules: loadRules("rules/cr.tsv") }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
  assert.match(seen[0]!.messages, /Repair this response or combat decision/);
  assert.match(seen[0]!.messages, /Your next turn is prepared separately, so do not write its line/);
- assert.deepEqual(seen[0]!.tools.sort(), ["card", "combat", "equipment", "example", "odds", "rule", "submit", "syntax"]);
+ assert.deepEqual(seen[0]!.tools.sort(), ["card", "combat", "equipment", "example", "matchup_examples", "odds", "rule", "submit", "syntax"]);
 });
 
 test("odds count from what the seat can name: our library exactly, the opponent's hand and library together", () => {
@@ -2025,7 +2025,7 @@ test("the dossier lays out what the seat knows in fixed sections, with recent tu
 	const written = dossier({ frame, brief: { ...emptyBrief(0), route: "Race | then hold.", policies: { sequencing: policy, resources: policy, responses: policy, combat: policy, recovery: policy } } });
 	assert.equal(dossier({ frame }), dossier({ frame }), "the same frame gives the same bytes, so a session shares one prefix");
 	const headings = [...written.matchAll(/^## (.+)$/gm)].map((match) => match[1]!.replace(/ \(\d+\)$/, ""));
-	assert.deepEqual(headings, ["Situation", "Battlefield", "Your hand", "Stack", "Graveyards and exile", "Mana", "Triggers on the battlefield", "Decks and odds", "Card text", "Recent turns", "Your matchup plan", "Your notebook", "Your standing plan"]);
+	assert.deepEqual(headings, ["Situation", "Your matchup plan", "Battlefield", "Your hand", "Stack", "Graveyards and exile", "Mana", "Triggers on the battlefield", "Decks and odds", "Card text", "Recent turns", "Your notebook", "Your standing plan"]);
 	const turns = [...written.matchAll(/^### Turn (\d+),/gm)].map((match) => Number(match[1]));
 	assert.ok(turns.length <= 5 && turns.every((turn) => turn > 9 - 5), "recent turns reach back five turns, never to the start of the game");
 	assert.match(written, /### Your library: \d+ cards/);
@@ -2034,4 +2034,29 @@ test("the dossier lays out what the seat knows in fixed sections, with recent tu
 	assert.match(written, /^> Race \| then hold\.$/m);
 	assert.ok(!written.includes("## Your request"), "the request is a separate final message");
 	assert.deepEqual(frame, before, "rendering moves nothing");
+});
+
+test("phases replace by window, an empty list cannot wipe inherited windows, theirTurn covers the opponent's whole turn, and a stop that already holds is refused", async () => {
+	const base: Plan = { objective: "o", guidance: "g", steps: [], phases: [
+		{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block with the Elf.", complete: "pass" },
+		{ when: { active: "self", step: "postcombat-main" }, guidance: "Cast Zhao.", complete: "pass" }] };
+	const merged = changedPlan(base, { phases: [{ when: { step: "declare-blockers", active: "opponent" }, guidance: "Do not block.", complete: "pass" }] }, {});
+	assert.deepEqual(merged.phases!.map((one) => one.guidance), ["Do not block.", "Cast Zhao."], "a written window replaces its inherited phase and keeps the rest");
+	assert.throws(() => changedPlan(base, { phases: [] }, {}), /would remove every window policy/);
+
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+	main(table, 1, 4);
+	const seen: string[] = [];
+	const line = { label: "Wait under the response policy", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } };
+	const replies: Record<string, unknown>[] = [
+		{ assessment: { corrections: "none", adopted: "none", win: "No win.", priorities: ["Develop."] }, steps: [line], theirTurn: { guidance: "Nothing in hand answers anything; pass.", complete: "pass" },
+			askWhen: [{ label: "No creature in hand", if: { amount: { count: { zones: ["hand"], controller: "you", types: ["planeswalker"] } }, atMost: 0 } }] },
+		{ assessment: { corrections: "none", adopted: "none", win: "No win.", priorities: ["Develop."] }, steps: [line], theirTurn: { guidance: "Nothing in hand answers anything; pass.", complete: "pass" } }];
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
+	const prepared = await prepareTurn(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.match(seen[1]!, /askWhen\[0\] \\"No creature in hand\\" is already true in the planned position/, "a stop that already holds would fire at once");
+	assert.deepEqual(prepared.plan.phases!.find((one) => one.when.active === "opponent" && !one.when.step && !one.when.phase), { when: { active: "opponent" }, guidance: "Nothing in hand answers anything; pass.", complete: "pass" });
+	assert.equal(prepared.plan.objective, "Develop.", "the assessment fills the audit objective the writer no longer writes");
 });
