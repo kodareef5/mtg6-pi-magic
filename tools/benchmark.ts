@@ -9,9 +9,8 @@ import { gunzipSync } from "node:zlib";
 import { execFileSync } from "node:child_process";
 import { parseArgs, isDeepStrictEqual } from "node:util";
 import { replay } from "../src/core/journal.ts";
+import { decisionFrame, position } from "./benchmark-positions.ts";
 import { workFrame, planProblems } from "../src/core/work-tools.ts";
-import { project, sinceDecision } from "../src/core/view.ts";
-import { annotate, planState } from "../src/core/planning.ts";
 import { PlanSchema, check, type Plan } from "../src/core/language.ts";
 import { checkPlan, type PlanCheck, type After } from "./benchmark-checks.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
@@ -25,10 +24,13 @@ import { reasoner } from "../src/context/reason.ts";
 import { tally, type Spend } from "../src/context/spend.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { usageReport, bill } from "../src/context/metrics.ts";
-import type { Brief } from "../src/context/brief.ts";
 import { rule } from "../src/context/ruling.ts";
 import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
+import { corpus } from "./benchmark-corpus.ts";
+
+// The pilot lab has its own arguments; see tools/benchmark-corpus.ts.
+if (process.argv.includes("--corpus")) { await corpus(process.argv.slice(2)); process.exit(0); }
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
 	pilotPolicy?: string; prepared?: { file: string; name: string }; after?: After[]; throughTurn?: number };
@@ -65,32 +67,25 @@ for (const one of selected) if (!journals.has(one.journal)) {
 const positions = selected.map((one) => {
 	const path = catalog.journals[one.journal];
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
-	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
-	const frame = workFrame(saved.table, one.seat);
+	const saved = position(journals.get(one.journal)!, one.version, one.seat);
+	let frame = workFrame(saved.table, one.seat);
 	if (one.after && Number(values.through ?? one.throughTurn ?? saved.table.cursor.turn) < saved.table.cursor.turn) throw new Error(`${one.id}: a physical property cannot be graded at a boundary before its prefix.`);
-	if (one.task === "pilot") frame.view = project(saved.table, one.seat, sinceDecision(saved.table, one.seat));
 	// Supplied coverage changes only plan content, preserving the prefix's progress and physical facts.
+	let supplied: Plan | undefined;
 	if (one.pilotPolicy) {
 		if (one.task !== "pilot" || !frame.view.work?.plan) throw new Error("Supplied pilot coverage requires a pilot case with a plan.");
 		const added = JSON.parse(readFileSync(one.pilotPolicy, "utf8")) as Partial<Pick<Plan, "steps" | "may" | "phases">>;
 		if (Object.keys(added).some((key) => !["steps", "may", "phases"].includes(key))) throw new Error("Pilot coverage only appends steps, branches and phases.");
-		const plan = structuredClone(frame.view.work.plan);
-		for (const key of ["steps", "may", "phases"] as const) if (added[key]) Object.assign(plan, { [key]: [...(plan[key] ?? []), ...added[key]!] });
-		check(PlanSchema, plan, "Supplied pilot coverage");
-		const problems = planProblems(frame, plan);
+		supplied = structuredClone(frame.view.work.plan);
+		for (const key of ["steps", "may", "phases"] as const) if (added[key]) Object.assign(supplied, { [key]: [...(supplied[key] ?? []), ...added[key]!] });
+		check(PlanSchema, supplied, "Supplied pilot coverage");
+		const problems = planProblems(frame, supplied);
 		if (problems.length) throw new Error(problems.join("; "));
-		frame.view.work.plan = plan;
 	}
-	if (one.refused) {
-		if (one.task !== "pilot") throw new Error("Saved transient refusals apply only to a pilot question.");
-		frame.refused = one.refused;
-	}
-	if (one.task === "pilot" && !frame.decision) throw new Error(`${one.id}: this seat has no decision at the recorded prefix.`);
-	// Match the physical loop: accepted procedures and plan/resource marks are
-	// part of the offered decision, not added by the player adapter.
-	const state = one.task === "pilot" && planState(frame);
-	if (state && frame.decision) frame.decision = { ...frame.decision, options: annotate(frame.decision.options, state) };
-	const brief = saved.prepared.find((entry) => entry.seat === one.seat)?.made as Brief | undefined;
+	if (one.refused && one.task !== "pilot") throw new Error("Saved transient refusals apply only to a pilot question.");
+	// The pilot gets the frame the game loop offers: its view since its last decision and the plan's marks on the options.
+	if (one.task === "pilot") frame = decisionFrame(saved.table, one.seat, { ...(one.refused ? { refused: one.refused } : {}), ...(supplied ? { plan: supplied } : {}) });
+	const brief = saved.brief;
 	const preparation = one.prepared && JSON.parse(readFileSync(one.prepared.file, "utf8"));
 	const prior = preparation?.results.find((row: { name: string }) => row.name === one.prepared!.name) as { version: number; seat: number; plan: Plan } | undefined;
 	if (one.task === "amend" && (!prior?.plan || prior.seat !== one.seat || preparation.source !== path || prior.version >= one.version)) throw new Error(`${one.id}: preparation does not match this position.`);

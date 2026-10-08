@@ -79,3 +79,25 @@ answer, including equipment edits recorded at the same decision version.
 
 Retired experiments remain in Git history. Local notes live under ignored
 `design-ref/experiments/`. See [gameplay status](../../docs/STATUS.md).
+
+## Pilot lab
+
+`--corpus` re-asks the pilot about real logged decisions under the code in this checkout.
+Jev is cheap and fast, so the lab runs hundreds of decisions with repeats in a few minutes.
+
+```sh
+node tools/benchmark.ts --corpus build GAME_DIR... --out .pi/jev-lab/corpus.jsonl
+node tools/benchmark.ts --corpus run --items .pi/jev-lab/corpus.jsonl --only IDS --repeat 5 --arm NAME --out DIR
+node tools/benchmark.ts --corpus report DIR... --items .pi/jev-lab/corpus.jsonl --gold GOLD
+```
+
+`build` reads a game's journal and calls log. Each decision is one item: one seat's requests at
+one clock until a choice ends it. An item is kept only if this checkout rebuilds its first
+request byte for byte, so the lab asks exactly what the game asked. Work the seat recorded later
+at the same decision, such as its own help request, is cut from the rebuilt position.
+
+`run` builds each item's frame as the game loop does and runs the whole decision through the
+seat's own loop with the live classifier, inspection stages and rule routes included. It records
+every stage's options, probabilities and model. `report` scores runs against a gold file of
+acceptable answers per item and lists steady control answers that changed. Gold labels state what
+carries out the plan; a pick is never a verdict on playing strength.

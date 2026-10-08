@@ -60,6 +60,8 @@ export type AiSeatOptions = {
 	dials?: number;
 	/** Recorded on the table when an answer comes back unusable. */
 	onGap(note: string): void;
+	/** The decision version at which this seat already asked for help, when a seat is rebuilt mid-decision. */
+	helpedAt?: number;
 	/** Called with the route id each time this seat follows one. For the report. */
 	onDial?(route: string): void;
 	/**
@@ -278,7 +280,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let closed = false;
 	// A preparation installed at upkeep without review, and the frame it was prepared from.
 	let unreviewed: { turn: number; from: Frame } | undefined;
-	let helped: number | undefined;
+	let helped: number | undefined = options.helpedAt;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
 	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;

@@ -385,8 +385,13 @@ export function replay(
 	start: (header: Header) => Table,
 	upTo?: number,
 	against?: { cards: { generated: string }; rules: { effective: string } },
+	/** Keep only the first `workAt` work entries recorded at `upTo`: the position as a seat saw it before its own later work there, such as a help request. */
+	options: { workAt?: number } = {},
 ): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
-	const { header, lines: all } = read(path);
+	const { header, lines: recorded } = read(path);
+	let kept = 0;
+	const all = options.workAt === undefined || upTo === undefined ? recorded
+		: recorded.filter((line) => !("work" in line) || line.v !== upTo || kept++ < options.workAt!);
 	const lines = atVersion(all, upTo);
 	if (against) {
 		const drift = [
