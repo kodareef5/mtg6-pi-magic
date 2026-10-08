@@ -189,8 +189,8 @@ export function installable(frame: Frame, plan: Plan): boolean {
 
 /**
  * What the pilot was looking at when it asked: the window, the stack, the due step
- * and the remaining steps with the windows they are scheduled for. With nothing due
- * and an empty stack the question is narrow: act in this window, or keep the line.
+ * and the remaining steps with their windows. This records observations;
+ * the strategy request and submit schema define the reply.
  */
 export function helpRequest(frame: Frame, packet: Packet): string {
 	const at = frame.view.window;
@@ -207,8 +207,7 @@ export function helpRequest(frame: Frame, packet: Packet): string {
 		...(blocked.length ? [`Unfinished in this window: ${blocked.join("; ")}.`] : []),
 		stack.length ? `On the stack: ${stack.join(", ")}.` : "The stack is empty.",
 		next.length ? `Later planned steps: ${next.join("; ")}.` : "No later step is planned this turn.",
-		!plan?.due && !stack.length && !blocked.length ? "Nothing is due in this window. Decide whether an action belongs here; if not, submit only the assessment to keep the line and the pilot continues it."
-			: "Review the conflict with the current position and repair the unfinished line."].join(" ");
+		...(!plan?.due ? ["No ordered action is due in this window."] : [])].join(" ");
 }
 
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
