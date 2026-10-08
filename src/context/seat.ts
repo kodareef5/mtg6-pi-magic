@@ -235,7 +235,7 @@ export function question(packet: Packet, help: boolean): Question {
 	const instructions = [packet.obligation,
 		"Choose one listed id using the supplied facts and this seat's preparation. Acceptance does not certify card meaning or rules legality.",
 		"options describes the choices; uses holds shared source, timing, effect, target-slot terms and notes; payments holds costs and paid mana ids; funding holds the referenced mana abilities, while pools names existing mana and its restrictions. Read these references together. Printed cards and current characteristics are separate.",
-		...(stage ? [stage === "use" ? "Choose the prepared use that applies now. An inspect choice asks about its alternatives and moves nothing."
+		...(stage ? [stage === "use" ? "Listed uses describe accepted card terms. Choose a listed use, pass or route under the phase policy and unfinished plan. Inspection reads alternatives and moves nothing."
 			: stage === "component" ? "Inspect the named component or inclusive range. inspection.path records earlier filters; these are not committed choices. A later question asks for a complete original action. Backtracking restores alternatives."
 			: stage === "choice" ? "Choose a complete original action. parameters names its components. Earlier inspection filters committed nothing; the selected action includes every listed component."
 			: stage === "binding" ? "Choose the targets and X for this prepared use. Inspection declares no targets and spends nothing."
