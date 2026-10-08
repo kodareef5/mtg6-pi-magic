@@ -175,7 +175,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 			for (const attack of state.attacks) for (const object of attack.objects) if (taps.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation))
 				marks.push(`This payment taps ${object.card ?? object.token?.name ?? object.id}, named by the remaining attack step "${attack.label}". It would need to untap before attacking.`);
 		}
-		return marks.length ? { ...option, notes: [...(option.notes ?? []), ...marks], shows: [option.shows, ...marks].filter(Boolean).join(" ") } : option;
+		return marks.length ? { ...option, notes: [...(option.notes ?? []), ...marks] } : option;
 	});
 }
 

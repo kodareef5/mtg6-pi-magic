@@ -20,7 +20,7 @@ import type { Frame } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import { dial, follow } from "./dial.ts";
 import { asState, chose, CHOICE_LIMIT, type DecisionApi, type Question } from "./model.ts";
-import { focus, type Chronicle, type Packet } from "./packet.ts";
+import { compact, focus, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
 import { planProblems } from "../core/work-tools.ts";
@@ -432,7 +432,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				asked += 1;
 				options.onAsk?.(packet);
 				const answers = await options.api.ask({
-					state: asState(packet),
+					state: asState(compact(packet as unknown as Record<string, unknown>)),
 					questions: { [KEY]: ask },
 				}, "pick");
 

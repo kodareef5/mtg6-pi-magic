@@ -187,8 +187,9 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		funding: Object.fromEntries(Object.entries(data.funding).filter(([id]) => taps.has(id))), pools: structuredClone(view.pools),
 		...(menu ? { inspection: { stage: menu.stage, ...(menu.selected ? { selected: menu.selected } : {}),
 			...(menu.field ? { field: menu.field, facts: menu.facts } : {}), ...(menu.path ? { path: menu.path } : {}) } } : {}),
+		// Lands are played only on the seat's own turn, so the land-play count is a fact only then.
 		resources: view.resolution ? [] : [...view.yours, ...(view.window.kind === "turn" ? [
-			`Land plays left: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. A resolving effect putting a land onto the battlefield does not use a land play.`,
+			...(view.window.active === seat ? [`Land plays left: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. A resolving effect putting a land onto the battlefield does not use a land play.`] : []),
 			`Mana sources usable now: ${available.join("; ") || "none"}.`] : [])],
 		known: [...(view.players ?? []).map((one) => `Seat ${one.id} (${[view.seats?.find((seat) => seat.id === one.id)?.name, one.id === seat ? "you" : "opponent"].filter(Boolean).join(", ")}): ${one.life} life, ${one.hand ?? "unknown"} cards in hand, ${one.library ?? "unknown"} in library.`), ...view.since,
 			...(decision.situation === "trigger-order" ? view.table : [])],
@@ -210,4 +211,13 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 export function offerConcede(packet: Packet): boolean {
 	void packet;
 	throw new Error("offerConcede is unwritten: settled sequence or inescapable loop only.");
+}
+
+/** Empty lists and records say nothing, so the request leaves them out: at the top, in the plan and in its script. Deeper values stay as they are; an empty target slot means something. */
+export function compact(state: Record<string, unknown>): Record<string, unknown> {
+	const empty = (value: unknown) => Array.isArray(value) ? !value.length : !!value && typeof value === "object" && !Object.keys(value).length;
+	const prune = (record: Record<string, unknown>) => Object.fromEntries(Object.entries(record).filter(([, value]) => !empty(value)));
+	const top = prune(state), plan = top.plan as Record<string, unknown> | undefined;
+	if (plan) top.plan = prune({ ...plan, ...(plan.script ? { script: prune(plan.script as Record<string, unknown>) } : {}) });
+	return top;
 }

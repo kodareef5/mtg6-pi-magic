@@ -290,7 +290,7 @@ test("the real seat loop delegates a unique effect continuation and asks for eac
 	assert.equal(loots.length, 2);
 	assert.deepEqual(loots.map((row) => [row.seat, row.execution]), [[0, { plan: run.table.work[0]!.planned, step: 0 }], [1, { plan: run.table.work[1]!.planned, branch: 0 }]], "a step and a branch, each recorded");
 	assert.deepEqual(loots.map((row) => row.by), ["model", "model"], "the pilot chooses both the due step and the response");
-	const response = run.exchange.find((frame) => frame.seat === 1 && frame.decision?.options.some((one) => /Plan branch/.test(one.shows ?? "")));
+	const response = run.exchange.find((frame) => frame.seat === 1 && frame.decision?.options.some((one) => /Plan branch/.test((one.notes ?? []).join(" "))));
 	assert.ok(response, "the opponent receives the response window with the plan's action");
 	assert.match(response.view.since.join("\n"), /Qiqirn Merchant/, "passive observations do not consume the opponent action before Jev reads it");
 	assert.deepEqual(run.paused.map((pause) => pause.seat), [1, 0]);

@@ -42,7 +42,7 @@ import { load as loadRules } from "../src/core/rules.ts";
 import { reasoner, type Stream } from "../src/context/reason.ts";
 import { seat as seatTable, run } from "../src/context/sit.ts";
 import { CEILING, tally } from "../src/context/spend.ts";
-import { focus } from "../src/context/packet.ts";
+import { compact, focus } from "../src/context/packet.ts";
 import { emptyBrief } from "../src/context/brief.ts";
 import { initialPlan, manaLines } from "../src/context/strategy-facts.ts";
 import { startingIntent } from "../src/context/plan.ts";
@@ -275,15 +275,15 @@ test("a branch and a held resource are marked on the options they touch, and not
 	const state = planState(frame)!;
 	assert.deepEqual(state.branches.map((one) => one.label), ["Veil a targeted creature"]);
 	const marked = annotate(frame.decision!.options, state);
-	assert.ok(marked.some((option) => option.id === "pass" && !option.shows?.includes("Plan")), "pass stays without a plan mark");
+	assert.ok(marked.some((option) => option.id === "pass" && !(option.notes ?? []).join(" ").includes("Plan")), "pass stays without a plan mark");
 	const veil = marked.filter((option) => option.id.startsWith(`plan:${frame.view.work!.planned}:b0:`));
-	assert.ok(veil.length > 0 && veil.every((option) => /Plan branch: Veil a targeted creature/.test(option.shows!)));
-	assert.ok(veil.some((option) => /Uses Forest, held: green for Veil/.test(option.shows!)), "spending the held Forest is marked, not refused");
+	assert.ok(veil.length > 0 && veil.every((option) => /Plan branch: Veil a targeted creature/.test((option.notes ?? []).join(" "))));
+	assert.ok(veil.some((option) => /Uses Forest, held: green for Veil/.test((option.notes ?? []).join(" "))), "spending the held Forest is marked, not refused");
 	assert.equal(marked.length, frame.decision!.options.length + state.procedures.length);
 	frame.view.work.plan!.holds!.push({ objects: { refs: [{ id: chocobo.id, incarnation: chocobo.incarnation }] }, purpose: "Keep the Chocobo" });
 	const protectedTarget = annotate(frame.decision!.options, planState(frame)!);
 	assert.ok(protectedTarget.some((option) => option.use?.targets.flat().some((ref) => "id" in ref && ref.id === chocobo.id)));
-	assert.ok(protectedTarget.every((option) => !option.shows?.includes("Uses Sazh's Chocobo, held:")), "protecting a held target does not spend it");
+	assert.ok(protectedTarget.every((option) => !(option.notes ?? []).join(" ").includes("Uses Sazh's Chocobo, held:")), "protecting a held target does not spend it");
 	const scratch = mkdtempSync(join(tmpdir(), "held-vigilance-"));
 	try {
 		const path = join(scratch, "game.jsonl");
@@ -293,7 +293,7 @@ test("a branch and a held resource are marked on the options they touch, and not
 		const due = planState(attack)!.due.find((one) => one.candidates.length)!;
 		assert.deepEqual(due.candidates.map((one) => one.id), ["attack:1-50"]);
 		const candidate = annotate(attack.decision!.options, planState(attack)!).find((one) => one.id === "attack:1-50")!;
-		assert.ok(!candidate.shows?.includes("held:"), "the saved vigilant attacker stays available to block");
+		assert.ok(!(candidate.notes ?? []).join(" ").includes("held:"), "the saved vigilant attacker stays available to block");
 		assert.deepEqual(saved, before, "resource annotations move nothing");
 		apply(saved, candidate.id, "model", "chosen");
 		apply(saved, "attack:done", "model", "chosen");
@@ -301,17 +301,17 @@ test("a branch and a held resource are marked on the options they touch, and not
 		assert.equal(saved.things.get("1-49")!.tapped, true, "the nonvigilant attacker does tap when the declaration finishes");
 		const earlier = workFrame(replay(path, (header) => matchTable(header.seed), 591).table, 1);
 		const attackMarks = annotate(earlier.decision!.options, planState(earlier)!);
-		assert.ok(attackMarks.filter((one) => one.id.startsWith("attack:") && one.id !== "attack:done").every((one) => !one.shows?.includes("out of order")), "one declaration does not order its attackers");
+		assert.ok(attackMarks.filter((one) => one.id.startsWith("attack:") && one.id !== "attack:done").every((one) => !(one.notes ?? []).join(" ").includes("out of order")), "one declaration does not order its attackers");
 		assert.ok(checklist(earlier).filter((one) => one.kind === "step" && one.options.some((id) => id.startsWith("attack:") && id !== "attack:done")).every((one) => one.status === "available"), "the checklist treats those attackers as available together");
 		earlier.view.work!.plan!.holds!.push({ objects: { card: "Smaug the Magnificent", zones: ["battlefield"] }, purpose: "Keep this blocker untapped" });
-		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.shows!, /Uses Smaug the Magnificent, held:/);
+		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.notes!.join(" "), /Uses Smaug the Magnificent, held:/);
 		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz")));
 		const tokens = workFrame(replay(path, (header) => matchTable(header.seed), 236).table, 1);
 		const treasure = tokens.view.objects!.find((one) => one.token?.name === "Treasure")!;
 		assert.ok(treasure);
 		tokens.view.work!.plan!.holds = [{ objects: { refs: [{ id: treasure.id, incarnation: treasure.incarnation }] }, purpose: "Keep Treasure for Smaug." }];
 		const markedTokens = annotate(tokens.decision!.options, planState(tokens)!);
-		assert.ok(markedTokens.some((one) => one.shows?.includes("Uses Treasure, held: Keep Treasure for Smaug.")), "token hold warnings use the payment's name");
+		assert.ok(markedTokens.some((one) => (one.notes ?? []).join(" ").includes("Uses Treasure, held: Keep Treasure for Smaug.")), "token hold warnings use the payment's name");
 		assert.match(focus(tokens, startingIntent(1)).plan!.held[0]!, /^Treasure \(token-/, "the hold retains both its name and exact identity");
 
 		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/ready-before-help.jsonl.gz")));
@@ -944,11 +944,11 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	const markedPayments = annotate(paymentFrame.decision!.options, paymentState);
 	assert.equal(markedPayments.length, paymentFrame.decision!.options.length + paymentState.procedures.length, "a payment conflict adds guidance without removing a move");
 	const usesElf = (one: (typeof markedPayments)[number]) => one.use?.funding?.some((tap) => tap.source.id === elf.id);
-	assert.ok(markedPayments.some((one) => usesElf(one) && one.shows?.includes('remaining attack step "Attack with the Elf"')));
-	assert.ok(markedPayments.some((one) => one.use && !usesElf(one) && !one.shows?.includes("This payment taps")), "the payment preserving the attacker stays unmarked");
+	assert.ok(markedPayments.some((one) => usesElf(one) && (one.notes ?? []).join(" ").includes('remaining attack step "Attack with the Elf"')));
+	assert.ok(markedPayments.some((one) => one.use && !usesElf(one) && !(one.notes ?? []).join(" ").includes("This payment taps")), "the payment preserving the attacker stays unmarked");
 	const conditionalFrame = structuredClone(paymentFrame);
 	conditionalFrame.view.work!.plan!.steps[1]!.if = { amount: { life: "opponent" }, atMost: 0 };
-	assert.ok(annotate(conditionalFrame.decision!.options, planState(conditionalFrame)!).every((one) => !one.shows?.includes("This payment taps")), "a false attack condition creates no commitment mark");
+	assert.ok(annotate(conditionalFrame.decision!.options, planState(conditionalFrame)!).every((one) => !(one.notes ?? []).join(" ").includes("This payment taps")), "a false attack condition creates no commitment mark");
 	const beforeWitness = structuredClone(attacking), witness = paymentForecast(workFrame(attacking, 0), commitment);
 	assert.deepEqual(witness.conflicts, []);
 	assert.deepEqual(witness.unchecked, []);
@@ -1139,8 +1139,8 @@ test("a held payment still carries out its matching step or branch and preserves
 		assert.equal(fit.candidates.length, 2, "both matching payments carry out the commitment");
 		assert.deepEqual(fit.candidates.map((one) => one.id), physical.map((one) => one.id), "holds preserve canonical payment order");
 		const marked = annotate(physical, state);
-		assert.ok(marked.every((one) => one.shows?.includes(branch ? "Plan branch:" : "Plan step 1") && one.shows.includes(step.purpose!)));
-		assert.equal(marked.filter((one) => one.shows?.includes("Uses Forest, held:")).length, 1);
+		assert.ok(marked.every((one) => (one.notes ?? []).join(" ").includes(branch ? "Plan branch:" : "Plan step 1") && one.notes!.join(" ").includes(step.purpose!)));
+		assert.equal(marked.filter((one) => (one.notes ?? []).join(" ").includes("Uses Forest, held:")).length, 1);
 		const packet = focus(frame, startingIntent(0));
 		assert.deepEqual(packet.options.filter((one) => one.use).map((one) => one.id), physical.map((one) => one.id));
 		assert.deepEqual(new Set(packet.options.map((one) => one.id)), new Set(frame.decision!.options.map((one) => one.id)), "every original option remains reachable");
@@ -1154,7 +1154,7 @@ test("a held payment still carries out its matching step or branch and preserves
 		frame.view.work!.plan!.holds![0]!.releaseWhen = { amount: { life: "you" }, atLeast: 0 };
 		const released = planState(frame)!;
 		assert.deepEqual((branch ? released.branches : released.due)[0]!.candidates, fit.candidates);
-		assert.ok(annotate(physical, released).every((one) => !one.shows?.includes("held:")), "release removes only the hold warning");
+		assert.ok(annotate(physical, released).every((one) => !(one.notes ?? []).join(" ").includes("held:")), "release removes only the hold warning");
 	}
 });
 
@@ -1388,7 +1388,7 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.ok(ordinaryWarp && ordinaryNormal);
 	assert.equal(execution(sameState, ordinaryNormal.id), undefined, "a different casting mode does not finish the planned mode");
 	assert.deepEqual(execution(sameState, ordinaryWarp.id), { plan: sameState.revision, step: 0 }, "an identical ordinary announcement carries out the step too");
-	assert.match(annotate(sameFrame.decision!.options, sameState).find((one) => one.id === ordinaryWarp.id)!.shows!, /Plan step 1/);
+	assert.match(annotate(sameFrame.decision!.options, sameState).find((one) => one.id === ordinaryWarp.id)!.notes!.join(" "), /Plan step 1/);
 	apply(equivalent, ordinaryWarp.id, "model", "chosen", execution(sameState, ordinaryWarp.id));
 	assert.deepEqual(workFrame(equivalent, 1).view.done, [0], "progress is journaled on the actual chosen row, without a second plan edit");
 	assert.deepEqual(planState(workFrame(equivalent, 1))!.due, [], "the executed cast is not reintroduced as a missing essential step");
@@ -1606,7 +1606,7 @@ test("an essential step waits while a spell resolves; an impossible line returns
 	assert.ok(waitingPacket.plan!.script!.steps.some((one) => one.startsWith("Waiting for the stack to empty: Crack")));
 	assert.equal(waitingPacket.plan!.script!.completion, undefined, "waiting grants no pass");
 	const marked = annotate(pending.decision!.options, pendingState);
-	assert.ok(marked.some((one) => one.shows?.includes("Plan step 2") && one.shows.includes("Waiting for the stack to empty") && one.shows.includes(fetch.purpose!)));
+	assert.ok(marked.some((one) => (one.notes ?? []).join(" ").includes("Plan step 2") && one.notes!.join(" ").includes("Waiting for the stack to empty") && one.notes!.join(" ").includes(fetch.purpose!)));
 	assert.ok(pending.decision!.options.every((one) => marked.some((listed) => listed.id === one.id)), "every physical option remains reachable");
 	const early = structuredClone(green), use = pendingState.procedures.find((one) => pendingState.due[0]!.candidates.some((pick) => pick.id === one.option.id))!;
 	activate(early, use.activation, { picked: use.option.id, offered: marked.map((one) => one.id), by: "model", why: "chosen", execution: execution(pendingState, use.option.id) });
@@ -2101,6 +2101,7 @@ test("a planned cast the table already lists is offered once, under the table's 
 	assert.equal(marked.length, frame.decision!.options.length, "no second id for the same physical action");
 	assert.ok(marked.filter((one) => listed.some((cast) => cast.id === one.id)).every((one) => one.notes?.some((note) => note.startsWith("Plan step 1: Cast the Chocobo"))));
 	assert.deepEqual(execution(state, listed[0]!.id), { plan: state.revision, step: 0 }, "the listed option carries out the step");
+});
 
 test("options and effects read as words: targets are named in the label, summaries never print syntax", () => {
 	const table = matchup("words");
@@ -2119,4 +2120,18 @@ test("options and effects read as words: targets are named in the label, summari
 	assert.equal(summary({ do: "damage", amount: { count: { subtypes: ["Treasure"], controller: "you" } }, to: "target:0" } as never), "Deal the number of Treasure you control damage to target 1.");
 	assert.equal(summary({ do: "untap", what: "bound:land", if: { amount: { count: { types: ["land"], controller: "you" } }, atLeast: 4 } } as never),
 		"untap the chosen land if the number of land you control is at least 4.");
+});
+
+test("the pilot's request leaves out empty fields and states a land play only on the seat's own turn", () => {
+	assert.deepEqual(compact({ a: [], b: {}, c: [[]], plan: { stops: [], due: "Cast", script: { goal: [], guidance: ["x"] } } }),
+		{ c: [[]], plan: { due: "Cast", script: { guidance: ["x"] } } }, "empty lists and records go; nested values stay as they are");
+	const table = position();
+	main(table, 1, 2);
+	apply(table, "pass", "engine", "forced");
+	while (!nextDecision(table)) advance(table);
+	assert.equal(nextDecision(table)!.seat, 0, "Green holds priority on Red's turn");
+	const theirs = focus(workFrame(table, 0), startingIntent(0));
+	assert.ok(!theirs.resources.some((line) => line.startsWith("Land plays left")), "no land play is offered as a fact on the opponent's turn");
+	main(table, 0, 3);
+	assert.ok(focus(workFrame(table, 0), startingIntent(0)).resources.some((line) => line.startsWith("Land plays left: 1")));
 });
