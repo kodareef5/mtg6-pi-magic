@@ -381,7 +381,9 @@ export function aiSeat(options: AiSeatOptions): Player {
 							}
 						} else made = undefined;
 					} else {
-						await cancel();
+						// A repair during the opponent's turn leaves the next turn's preparation running, as begin intends;
+						// the post-draw review reads what the repair changed. Anything else discards it.
+						if (!(preparation && at.kind === "turn" && at.active !== frame.seat && preparation.turn > at.turn)) await cancel();
 						// The post-draw review reads what changed since the line was prepared or last accepted.
 						const since = unreviewed?.turn === turnNow ? unreviewed.from : accepted?.view.began === frame.view.began ? accepted : undefined;
 						const draw = frame.view.drawnAt;

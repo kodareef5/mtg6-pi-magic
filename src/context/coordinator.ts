@@ -143,7 +143,7 @@ export function responseSystem(definitions: string): string {
 		"## Rules of play", RULES_OF_PLAY, "",
 		"## Your answer",
 		"current is an ordered list of {label, action, purpose?}. action is {reuse: exact key}, a listed {option: id}, or {prefix, objects}. Every current action binds to this turn and step. Use block:done only when the listed decision declares blockers, never at priority while triggers resolve. Cover later blocks in phases. Do not write when or a next-turn line. Steps outside this window stay.",
-		"purpose carries targets, payment and resolution choices. A phase replaces the inherited phase with the same when; other windows stay, so fix a contradicted one by writing its when again. complete is pass or ask after the commitments finish. holds replaces the reserves, and [] releases them. notes and objection follow the schema.",
+		"purpose carries targets, payment and resolution choices. A phase replaces the inherited phase with the same when; other windows stay, so fix a contradicted one by writing its when again. Jev follows the inherited guidance in every window you leave alone, so when your assessment decides a block, a response or keeping a creature, write that window's phase with the decision. complete is pass or ask after the commitments finish. holds replaces the reserves, and [] releases them. notes and objection follow the schema.",
 		"Acceptance checks syntax and resources, not card meaning or good play. Object only to a listed opposing action that broke a rule. If submit refuses the answer, fix every named problem without pretending an action was executed.",
 		"",
 		"## Response definitions", definitions,

@@ -2064,3 +2064,25 @@ test("phases replace by window, an empty list cannot wipe inherited windows, the
 	assert.deepEqual(prepared.plan.phases!.find((one) => one.when.active === "opponent" && !one.when.step && !one.when.phase), { when: { active: "opponent" }, guidance: "Nothing in hand answers anything; pass.", complete: "pass" });
 	assert.equal(prepared.plan.objective, "Develop.", "the assessment fills the audit objective the writer no longer writes");
 });
+
+test("a repair during the opponent's turn leaves the next turn's preparation running", async () => {
+	const table = position(); main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "old", guidance: "g", steps: [] } }], "planned");
+	main(table, 1, 4);
+	const signals: AbortSignal[] = [], finishes: ((value: Prepared) => void)[] = [];
+	let repairs = 0;
+	const seat = aiSeat({ name: "Green", api: {} as never, intent: startingIntent(0), onGap() {},
+		prepare: (_frame, signal) => { signals.push(signal); return new Promise((resolve) => { finishes.push(resolve); }); },
+		plan: async () => { repairs++; return { tools: [{ do: "plan.put", plan: line }] }; } });
+	seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
+	assert.equal(signals.length, 1, "the opponent's turn starts the next turn's preparation");
+	apply(table, "pass", "engine", "forced");
+	while (!nextDecision(table)) advance(table);
+	assert.equal(nextDecision(table)!.seat, 0, "Green now holds priority during Red's turn");
+	editWork(table, 0, [{ do: "plan.request", reason: "Repair this response." }], "help");
+	await seat.answer(workFrame(table, 0));
+	assert.equal(repairs, 1);
+	assert.equal(signals[0]!.aborted, false, "the repair does not discard the preparation for turn 5");
+	const closing = seat.close(); assert.equal(signals[0]!.aborted, true);
+	finishes[0]!({ plan: line }); await closing;
+});
