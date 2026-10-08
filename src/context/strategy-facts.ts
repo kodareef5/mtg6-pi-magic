@@ -6,7 +6,6 @@ import type { Universe } from "../core/cards.ts";
 import type { Rules } from "../core/rules.ts";
 import { say, type Brief } from "./brief.ts";
 import type { Plan } from "../core/language.ts";
-import type { Step } from "../core/steps.ts";
 import type { Recap } from "./summary.ts";
 import type { Lookup } from "./reason.ts";
 import { intrinsic } from "../core/characteristics.ts";
@@ -63,14 +62,14 @@ export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Univer
 	/** Ask the focused board questions before the writer; seated games and benchmarks set it. */
 	survey?: boolean };
 
-/** Pregame decisions are the initial phase defaults, not paragraphs to rewrite on turn one. */
+/**
+ * A fresh plan starts from the pregame objective with no phases. The pregame step notes reach the pilot
+ * as its guidance in any window the plan leaves uncovered; as inherited phases they would stand as
+ * scripts with no completion and outlive every window the writer replaces.
+ */
 export function initialPlan(brief: Brief): Plan {
 	return { objective: brief.objective ?? [say(brief.role), say(brief.route)].filter(Boolean).join(" "),
-		guidance: say(brief.matchup) || say(brief.route), steps: [],
-		phases: Object.entries(brief.steps ?? {}).flatMap(([step, sides]) => (["own", "opponent"] as const).flatMap((side) => {
-			const guidance = say(sides?.[side]);
-			return guidance ? [{ when: { active: side === "own" ? "self" as const : "opponent" as const, step: step as Step }, guidance }] : [];
-		})) };
+		guidance: say(brief.matchup) || say(brief.route), steps: [] };
 }
 
 /**

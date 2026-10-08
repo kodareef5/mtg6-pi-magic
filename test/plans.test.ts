@@ -547,7 +547,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
 	assert.deepEqual(changedPlan(pending, { packages: [] }, available).packages, pending.packages, "empty package edits remove neither pending nor accepted work");
 	const brief = { ...emptyBrief(0), role: "Develop.", route: "Grow the Chocobo.", matchup: "Keep Veil mana.", steps: { "precombat-main": { own: "Creature before land; keep protection." } } };
 	const defaults = initialPlan(brief);
-	assert.equal(defaults.phases![0]!.guidance, "Creature before land; keep protection.");
+	assert.equal(defaults.phases, undefined, "pregame step notes stay pilot guidance, not inherited phase scripts");
 	assert.equal(changedPlan(defaults, { steps: [line.steps[0]] }, {}).objective, "Develop. Grow the Chocobo.", "turn one builds on pregame instead of rewriting its decisions");
 	assert.equal(initialPlan({ ...brief, objective: "Grow the Chocobo, keep protection." }).objective, "Grow the Chocobo, keep protection.", "the pilot receives the pregame's short objective, not all its reasoning");
 });
