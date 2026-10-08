@@ -223,7 +223,8 @@ test("a brief snippet reaches the decision and a card note only when its card is
 	assert.deepEqual(openingPacket().pregameNotes, [BRIEF.opening.draw.keep], "the other seat receives the draw policy, without bottom instructions");
 	apply(opening, "keep", "model", "chosen");
 	advance(opening);
-	assert.deepEqual(openingPacket().opening, { starting: 0, mulligans: 1, bottom: 1, hand: openingPacket().opening!.hand });
+	assert.deepEqual(openingPacket().opening, { starting: 0, mulligans: 1, bottom: 1, play: "You are on the play: you skip your first draw.", landOdds: openingPacket().opening!.landOdds, hand: openingPacket().opening!.hand });
+	assert.match(openingPacket().opening!.landOdds!, /^\d+% chance of at least one land in your next 2 draws\.$/, "the keep decision sees who draws first and its land odds");
 	apply(opening, "keep", "model", "chosen");
 	advance(opening);
 	assert.deepEqual(openingPacket().pregameNotes, [BRIEF.opening.play.bottom], "after keeping, only the bottom policy is read");

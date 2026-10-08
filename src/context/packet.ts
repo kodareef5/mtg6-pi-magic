@@ -19,6 +19,7 @@ import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { sources } from "../core/funding.ts";
 import { openingHand } from "../core/pregame.ts";
+import { odds, within } from "../core/odds.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { choices, inspect, type Choice, type Inspection, type Menu, type Payment, type Use, type Funding } from "./choices.ts";
 import { decisionFacts } from "./decision-facts.ts";
@@ -40,7 +41,7 @@ export type Seen = {
 export type Packet = {
 	actor: SeatId; window: Window; version: number; obligation: string;
 	kind: string;
-	opening?: NonNullable<SeatView["opening"]> & { hand: ReturnType<typeof openingHand>; retained?: { option: string; hand: ReturnType<typeof openingHand> }[] };
+	opening?: NonNullable<SeatView["opening"]> & { play: string; landOdds?: string; hand: ReturnType<typeof openingHand>; retained?: { option: string; hand: ReturnType<typeof openingHand> }[] };
 	retained?: { option: string; hand: ReturnType<typeof openingHand> }[];
 	plan?: PlanSlice;
 	blockDeclaration?: SeatView["blockDeclaration"];
@@ -110,6 +111,16 @@ function happened(event: NonNullable<SeatView["history"]>[number], view: SeatVie
 		case "attacked": return `${who(event.by)} attacked with ${event.attackers.map((one) => thing(one.object)).join(", ")}.`;
 		case "life": return `${who(event.who)} ${event.amount < 0 ? "lost" : "gained"} ${Math.abs(event.amount)} life.`;
 	}
+}
+
+/** Facts a keep decision turns on: who draws first, and the chance a land arrives, from the registered list less what this seat can name. */
+function openingFacts(frame: Frame): { play: string; landOdds?: string } {
+	const { view, seat } = frame;
+	const play = view.opening?.starting === seat ? "You are on the play: you skip your first draw." : "You are on the draw.";
+	const found = odds(frame, seat), first = Object.values(found)[0];
+	if (!first) return { play };
+	const lands = Object.keys(found).filter((name) => view.printed?.[name]?.type.includes("Land"));
+	return { play, landOdds: `${Math.round(100 * within(found, lands, first.pool, 2))}% chance of at least one land in your next 2 draws.` };
 }
 
 export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; inspection?: Inspection; capacity?: number };
@@ -191,7 +202,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	return {
 		actor: seat, window: structuredClone(view.window), version, obligation: decision.question,
 		kind: view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
-		...(view.opening ? { opening: { ...view.opening, hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
+		...(view.opening ? { opening: { ...view.opening, ...openingFacts(frame), hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
 		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => {
 			if (item.kind !== "phase") return { ...structuredClone(item), status: STATUS[item.status], available: options.length };
 			// Core keeps options for private assessments. Phase prose binds none of them.
