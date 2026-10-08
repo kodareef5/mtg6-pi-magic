@@ -838,6 +838,23 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	const veil = (table: Table): Plan["may"] => [{ label: "Veil a targeted creature", when: { active: "opponent" as const, fromTurn: turn(table) + 1, throughTurn: turn(table) + 1 },
 		action: { procedure: { claim: "Cast Snakeskin Veil", basis: "Put a +1/+1 counter on target creature you control. It gains hexproof until end of turn.", source: { zones: ["hand"], controller: "self", card: "Snakeskin Veil" },
 			timing: "spell", targets: [{ object: { types: ["creature"], controller: "you" } }], instructions: [] } } }];
+	const reserved = matchup("scheduled-hold");
+	main(reserved, 1, 4);
+	place(reserved, 1, "battlefield", "Mountain");
+	place(reserved, 1, "hand", "Mountain", "Zhao, the Moon Slayer");
+	const afterCombat: Plan = { objective: "Cast Zhao after combat", guidance: "Save the existing Mountain", steps: [land(reserved, "Mountain"),
+		{ ...cast(reserved, "Zhao, the Moon Slayer"), when: { active: "self", step: "postcombat-main" } }],
+		holds: [{ objects: { zones: ["battlefield"], types: ["land"], controller: "self" }, purpose: "Pay for Zhao", releaseAt: { active: "self", step: "postcombat-main" } }] };
+	const heldFrame = workFrame(reserved, 1), heldBefore = structuredClone(heldFrame);
+	assert.deepEqual(paymentForecast(heldFrame, afterCombat).conflicts, [], "the scheduled release lets the later cast spend the held source");
+	for (const releaseAt of [{ active: "self" as const, step: "end" as const }, { active: "opponent" as const, step: "precombat-main" as const }])
+		assert.match(paymentForecast(heldFrame, { ...afterCombat, holds: [{ ...afterCombat.holds![0]!, releaseAt }] }).conflicts.join(" "), /plan holds Mountain/, "later and other-seat windows keep the resource reserved");
+	assert.match(paymentForecast(heldFrame, { ...afterCombat, steps: [afterCombat.steps[0]!, cast(reserved, "Zhao, the Moon Slayer")] }).conflicts.join(" "), /plan holds Mountain/, "an earlier cast cannot spend a later release");
+	assert.deepEqual(paymentForecast(heldFrame, { ...afterCombat, steps: [afterCombat.steps[0]!, { ...afterCombat.steps[1]!, when: { active: "self", phase: "postcombat-main" } }] }).conflicts, [], "phase timing also releases a reached window");
+	const preceding = structuredClone(heldFrame);
+	if (preceding.view.window.kind === "turn") Object.assign(preceding.view.window, { active: 0, turn: 3 });
+	assert.deepEqual(paymentForecast(preceding, afterCombat).conflicts, [], "next-turn forecasts test releases in the planned seat's turn");
+	assert.deepEqual(heldFrame, heldBefore, "forecasting release windows moves nothing");
 
 	// Three Forests: Hydra spends them all, so Veil cannot also be kept.
 	const tappedSource = matchup("activation-tap-cost");
@@ -1297,6 +1314,15 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	const concealed = structuredClone(future);
 	concealed.view.objects = concealed.view.objects!.filter((one) => one.card !== "Fabled Passage");
 	assert.equal(actionFacts(concealed, futureActions)[fetchKey], undefined, "registered equipment alone does not invent a visible future source");
+	const dead = structuredClone(future);
+	for (const one of dead.view.objects!.filter((one) => one.card === "Fabled Passage")) one.zone = "graveyard";
+	assert.equal(actionFacts(dead, futureActions)[fetchKey], undefined, "a graveyard copy without a return or play permission is not a future battlefield source");
+	const graveUse = { ...fetch, source: { ...fetch.source, zones: ["graveyard" as const] } };
+	assert.ok(actionFacts(dead, { grave: { label: "Accepted graveyard use", action: { procedure: graveUse } } }).grave, "uses accepted from the graveyard stay visible");
+	establish(futureTable, 0, "Icetill Explorer");
+	const permitted = workFrame(futureTable, 0);
+	for (const one of permitted.view.objects!.filter((one) => one.card === "Fabled Passage")) one.zone = "graveyard";
+	assert.ok(actionFacts(permitted, futureActions)[fetchKey], "a permitted graveyard land can supply a future battlefield activation");
 	assert.deepEqual(future, beforeFuture, "describing future sources preserves the projected frame");
 	const warped = frame.decision!.options.find((one) => one.use?.claim === warp.claim)!;
 	assert.ok(warped?.use);

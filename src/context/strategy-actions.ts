@@ -6,6 +6,7 @@ import type { SeenObject } from "../core/work.ts";
 import { matches, reached, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
+import { playable } from "../core/permits.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
 import type { actions } from "./plan-edit.ts";
 import { isDeepStrictEqual } from "node:util";
@@ -82,7 +83,10 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 		const { cost, instructions: _instructions, ...procedure } = use;
 		const bound = useSources(frame, procedure, turn);
 		const card = procedure.source.card;
-		const visible = (frame.view.objects ?? []).filter((one) => one.card === card && one.controller === frame.seat);
+		const visible = (frame.view.objects ?? []).filter((one) => one.card === card &&
+			(one.zone === "battlefield" || one.zone === "stack" ? one.controller : one.owner) === frame.seat &&
+			((procedure.source.zones ?? ["battlefield"]).includes(one.zone) || playable(viewWorld(frame.view), frame.seat, one,
+				turn ?? (frame.view.window.kind === "turn" ? frame.view.window.turn : 0), !!one.traits?.types.includes("land"))));
 		if (!bound.length && !prior && (procedure.timing !== "stack" || !visible.length)) return undefined;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),

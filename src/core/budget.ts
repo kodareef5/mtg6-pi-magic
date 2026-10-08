@@ -30,7 +30,7 @@ import { reached, select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
 import { intrinsic } from "./characteristics.ts";
 import { permanentSpell } from "./printed.ts";
-import { STEPS } from "./steps.ts";
+import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
@@ -98,11 +98,16 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	const initial = now ? frame : afterUntap(frame);
 	let hypothetical = initial;
 	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
-	// Use the same current release condition as execution. Future releases
-	// caused by resolving effects are outside this resource-only forecast.
+	// Release conditions use current facts; scheduled windows can advance without
+	// simulating an effect. Unspecified windows retain the forecast's starting step.
 	const scope = { world: viewWorld(hypothetical.view), controller: frame.seat };
-	const held = new Set((plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, hypothetical)))
-		.flatMap((hold) => select(hold.objects, hypothetical).map((object) => object.id)));
+	const heldAt = (when?: PlanOption["when"]) => {
+		const step = when?.step ?? (when?.phase ? TURN.find((one) => STEPS[one].phase === when.phase) : undefined) ?? (now ? at.step as Step : "untap");
+		const window = { ...at, turn, active: frame.seat, step, phase: STEPS[step].phase };
+		return new Set((plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) &&
+			(!hold.releaseAt || !reached(hold.releaseAt, { seat: frame.seat, view: { window } })))
+			.flatMap((hold) => select(hold.objects, initial).map((object) => object.id)));
+	};
 	let plays = allowance(viewWorld(hypothetical.view), frame.seat).lands - (now ? frame.view.landsPlayed ?? 0 : 0);
 	let honest = true;
 	// A step that resolves instructions may put cards in hand: after it, a missing card is not a mistake.
@@ -164,19 +169,19 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			...(source?.card && permanentSpell(frame.view.printed?.[source.card]) ? { enters: true } : {}) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
-	type Item = { at: string; expired: boolean } & ({ kind: "entry"; source: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true });
+	type Item = { at: string; expired: boolean; when: PlanOption["when"] } & ({ kind: "entry"; source: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true });
 	const items: Item[] = [];
 	const arrived = new Set<string>();
 	const entered = (position: Frame, source: SeenObject): Frame => ({ ...position, view: { ...position.view,
 		objects: (position.view.objects ?? []).map((one) => one.id === source.id ? source : one) } });
-	const entry = (source: SeenObject, where: string, spell: boolean) => {
+	const entry = (source: SeenObject, where: string, spell: boolean, when: PlanOption["when"]) => {
 		const registers = (source.card ? packages.get(source.card) : undefined) ?? (spell ? [] : undefined);
 		const state = entersTapped(hypothetical, source, registers);
 		if (state === "conditional" || state === "unknown") honest = false;
 		const object: SeenObject = { ...source, zone: "battlefield", incarnation: source.incarnation + (spell ? 2 : 1), controller: frame.seat,
 			entered: Number.MAX_SAFE_INTEGER, tapped: state === "tapped", counters: {}, damage: 0,
 			...(source.traits ? { traits: { ...source.traits, registrations: registers ?? [] }, summoningSick: source.traits.types.includes("creature") } : {}) };
-		items.push({ at: where, expired, kind: "entry", source: object });
+		items.push({ at: where, expired, when, kind: "entry", source: object });
 		hypothetical = entered(hypothetical, object);
 		arrived.add(source.id);
 	};
@@ -188,7 +193,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const refs = movement.option && frame.decision?.options.find((one) => one.id === movement.option)?.objects;
 			const selected = select(refs ? { refs } : movement.objects ?? {}, hypothetical);
 			if (selected.length === 1 && !arrived.has(selected[0]!.id) && selected[0]!.zone === "battlefield" && selected[0]!.traits?.types.includes("creature"))
-				items.push({ at: where, expired: true, kind: "attack", source: selected[0]! });
+				items.push({ at: where, expired: true, when: step.when, kind: "attack", source: selected[0]! });
 			else report.unchecked.push(`${where}: attack source depends on a future entry, transformation or selection.`);
 			continue;
 		}
@@ -209,18 +214,18 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		if (act.kind === "land") {
 			if (plays <= 0) { found.push(`${where}: no land play is left for it this turn`); continue; }
 			plays -= 1;
-			entry(act.source, where, false);
+			entry(act.source, where, false, step.when);
 			continue;
 		}
 		if (act.tap && arrived.has(act.source.id) && act.source.traits?.types.includes("creature")) {
 			honest = false; report.unchecked.push(`${where}: a newly cast creature's tap ability depends on its entry characteristics.`);
 		}
 		if (act.unknown) { honest = false; continue; }
-		items.push({ at: where, expired, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}),
+		items.push({ at: where, expired, when: step.when, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}),
 			...(act.spell ? { spell: true } : {}), ...(act.tap ? { tap: true } : {}), label: step.label });
 		// A permanent cast now permits more land plays from then on.
 		if (act.spell) for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
-		if (act.enters) entry(act.source, where, true);
+		if (act.enters) entry(act.source, where, true, step.when);
 	}
 	// Then the payments: each cast from what the earlier ones left, trying other payments when a later step or a branch cannot be paid.
 	// Responses on the opponent's turn must be paid from what the turn leaves; a branch on our own turn is an alternative, not an addition.
@@ -243,7 +248,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	if (!honest) { report.unchecked.push("The line depends on unpriced costs, missing sources, mana-producing instructions or uncertain land entry. No complete payment witness."); return report; }
 	let deepest: { depth: number; message: string } | undefined;
 	const fail = (depth: number, message: string) => { if (!deepest || depth > deepest.depth) deepest = { depth, message }; return false; };
-	const left = (position: Frame, spent: ReadonlySet<string>) => {
+	const left = (position: Frame, spent: ReadonlySet<string>, held: ReadonlySet<string>) => {
 		const all = sources(position);
 		const free = all.filter(({ object }) => !spent.has(object.id) && !held.has(object.id)), kept = all.filter(({ object }) => held.has(object.id) && !spent.has(object.id));
 		return `${free.length ? `the steps before it leave ${free.map(({ object, yields }) => `${object.card ?? object.token?.name} (${[...new Set(yields.map((one) => one.colors.join("")))].join("/")})`).join(", ")}` : "the steps before it leave no untapped source"}` +
@@ -262,6 +267,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		if (failed.has(key)) return false;
 		if (++visits > SEARCH) throw INCOMPLETE;
 		const item = items[index];
+		const held = heldAt(item?.when);
 		if (item?.expired) position = drained(position);
 		const ok = ((): boolean => {
 			if (!item) {
@@ -271,7 +277,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				for (const { at, act } of branches) {
 					if (act.tap && cannotTap(later, act.source!, spent)) { responses.push(`${at}: its source cannot pay the tap cost after this example line`); continue; }
 					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act)).length)
-						responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
+						responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent, held)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
 				}
 				if (preferResponses && responses.length) { unfunded = true; return false; }
 				report.responses = responses;
@@ -296,7 +302,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			}
 			const ways = fundings(paymentPosition, item.price, reserved, spending(item))
 				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
-			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
+			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent, held)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
 			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}${mana?.persists ? "+" : ""}${JSON.stringify(mana?.spendOnly ?? null)}`; };
 			const distinct = new Map(ways.map((way) => [`${way.funding.taps.map((tap) => tap.source.id).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}`, way]));
