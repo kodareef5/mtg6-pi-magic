@@ -32,7 +32,8 @@ function movementFacts(frame: Frame, action: PlanOption["action"]) {
 /** Visible land and combat selectors, ready to reuse without inventing button ids. */
 export function movementActions(frame: Frame, turn?: number): ReturnType<typeof actions> {
 	const entries: [string, ReturnType<typeof actions>[string]][] = [];
-	for (const source of useSources(frame, { source: { zones: ["hand", "graveyard", "exile"], controller: "any" }, timing: "land" }, turn)) {
+	const at = frame.view.window, theirs = turn === undefined && at.kind === "turn" && at.active !== frame.seat;
+	for (const source of theirs ? [] : useSources(frame, { source: { zones: ["hand", "graveyard", "exile"], controller: "any" }, timing: "land" }, turn)) {
 		if (!source.traits?.types.includes("land") || !source.card) continue;
 		const label = `Play ${source.card} from ${source.zone}`;
 		entries.push([`land ${source.card} from ${source.zone}`, { label, action: { prefix: "land:", objects: { zones: [source.zone], card: source.card } } }]);

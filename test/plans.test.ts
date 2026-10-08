@@ -444,7 +444,8 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 
 test("a short amendment retains phase guidance and packages, reuses accepted syntax and never repeats a completed step", async () => {
  const table = position(); main(table, 0, 3);
- editWork(table, 0, [{ do: "package.put", package: { card: "Shock", registers: [], procedures: [example("Cast Shock")] } }], "other-equipment");
+ editWork(table, 0, [{ do: "package.put", package: { card: "Snakeskin Veil", registers: [], procedures: [example("Cast Snakeskin Veil")] } },
+	{ do: "package.put", package: { card: "Shock", registers: [], procedures: [example("Cast Shock")] } }], "other-equipment");
  editWork(table, 0, [{ do: "plan.put", plan: line }], "line");
  const first = planState(workFrame(table, 0))!.due[0]!.candidates[0]!;
  apply(table, first.id, "engine", "delegated", { plan: table.work[0]!.planned!, step: 0 });
@@ -461,9 +462,10 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  assert.deepEqual(changedPlan(base, planFacts(base), actions(frame, base)), base, "the displayed plan uses exact reusable references instead of repeating executable bodies");
  const pastPick = { ...frame, view: { ...frame.view, worked: [{ label: "Old physical pick", action: { option: "cast:past-incarnation-and-payment" } }] } };
  assert.ok(!Object.keys(actions(pastPick)).some((key) => key.startsWith("worked:")), "past physical picks are history, not reusable equipment");
- const shockKey = Object.keys(available).find((key) => available[key]!.label === "Cast Shock")!;
- assert.ok(shockKey && !frame.view.objects!.some((one) => one.card === "Shock"));
- assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Shock" })).actions[shockKey], available[shockKey], "absent card equipment keeps its exact reusable key and accepted terms");
+ const veilKey = Object.keys(available).find((key) => available[key]!.label === "Cast Snakeskin Veil")!;
+ assert.ok(veilKey && !frame.view.objects!.some((one) => one.card === "Snakeskin Veil"));
+ assert.deepEqual(JSON.parse(equipment(frame, available).answer({ card: "Snakeskin Veil" })).actions[veilKey], available[veilKey], "absent card equipment keeps its exact reusable key and accepted terms");
+ assert.ok(!Object.values(available).some((one) => one.label === "Cast Shock"), "a card off this seat's list and out of its control offers no reusable action");
 	const described = actionFacts(frame, available);
 	const forest = frame.view.objects!.find((one) => one.zone === "battlefield" && one.card === "Forest")!;
 	const stale: Plan = { objective: "Keep the old attack.", guidance: "An old label is not a current type.", steps: [{
@@ -493,7 +495,7 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
  const stream: Stream = (_model, request) => {
   const [dossierText, work] = (request.messages as { content: string }[]).map((one) => one.content);
   const catalog = work!.split("## Actions you can reuse")[1]!.split("\n## ")[0]!;
-  assert.ok(!catalog.includes(`### ${shockKey}\n`), "an absent card's procedure is fetched when needed, not sent with every repair");
+  assert.ok(!catalog.includes(`### ${veilKey}\n`), "an absent card's procedure is fetched when needed, not sent with every repair");
   assert.ok(!catalog.includes('"instructions"'), "ordinary strategy reads accepted claims and costs; equipment retains executable instructions");
   assert.ok(dossierText!.includes(`Steps left this turn, in order: ${table.cursor.steps.map((one) => one.replace(/-/g, " ")).join(", ")}.`), "the writer sees the real remaining turn windows");
   seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((one) => one.name) });
@@ -835,7 +837,7 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	const seen: string[] = [];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: line }], stopReason: "toolUse" }) }; };
 	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
-	assert.match(seen[0]!, /Mana now: Forest \(0-\d+\) makes G; Forest \(0-\d+\) makes G/);
+	assert.match(seen[0]!, /Mana now: Forest \(0-\d+@\d+\) makes G; Forest \(0-\d+@\d+\) makes G/);
 	assert.match(seen[0]!, /Land plays left this turn: 1\. In hand: .*Forest: enters untapped, makes G/);
 	assert.match(seen[0]!, /Ba Sing Se: no package, so how it enters and what it makes are unknown/, "a land with no package is not guessed at");
 	const grave = cardsIn(table, "hand", 0).find((one) => one.card === "Forest")!;
@@ -854,7 +856,7 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	const elf = establish(table, 0, "Llanowar Elves");
 	commit(table, [{ do: "tap", what: elf.id }], "resolve");
 	main(table, 1, 4);
-	assert.match(manaLines(afterUntap(workFrame(table, 0))).join(" "), /Llanowar Elves \(0-\d+\) makes G/, "next-turn preparation sees mana after an ordinary untap and sickness ends, as a forecast");
+	assert.match(manaLines(afterUntap(workFrame(table, 0))).join(" "), /Llanowar Elves \(0-\d+@\d+\) makes G/, "next-turn preparation sees mana after an ordinary untap and sickness ends, as a forecast");
 });
 
 test("the plan's arithmetic: costs from what the steps before leave, holds kept, land plays counted with what the plan permits", () => {
@@ -1271,7 +1273,7 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	const yours = sent!.split("### Yours")[1]!.split("\n### ")[0]!;
 	assert.match(yours, new RegExp(`\\| ${forest.id}@\\d+ \\|[^\\n]*\\| untapped`), "the forecast untaps your permanents without touching the table");
 	assert.ok(!yours.includes("summoning-sick"), "the roster uses the labelled forecast, not the observed opponent-turn restriction");
-	assert.match(sent!.split("## Mana")[1]!, new RegExp(`\\(${forest.id}\\) makes`));
+	assert.match(sent!.split("## Mana")[1]!, new RegExp(`\\(${forest.id}@${forest.incarnation}\\) makes`));
 	assert.ok(!work!.includes("## Choices offered now"), "current opponent-turn choices do not masquerade as next-turn offers");
 	assert.ok(!/### Turn 5/.test(sent!), "events on this turn are observations, not events on the forecast turn");
 	assert.match(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [{ label: "Cast absent Explorer", when: { active: "self", step: "precombat-main" },
@@ -1368,7 +1370,7 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	const texts = cardTexts(sheet);
 	assert.equal(texts.get("Nova Hellkite"), frame.view.printed!["Nova Hellkite"]!.oracle);
 	assert.match(texts.get("Nova Hellkite")!, /Flying, haste/);
-	assert.equal(sheet.split("\n### Nova Hellkite\n").length, 2, "each card's text appears once");
+	assert.equal(sheet.split("\n#### Nova Hellkite\n").length, 2, "each card's text appears once");
 	for (const name of new Set(frame.view.objects!.flatMap((one) => one.card ? [one.card] : []))) assert.ok(texts.has(name), `every visible identity keeps its complete printed definition: ${name}`);
 	assert.match(sheet, new RegExp(`^- Life: you ${frame.view.players!.find((one) => one.id === frame.seat)!.life}, `, "m"));
 	const warpFacts = planningChoices(frame).uses.find((one: { claim: string }) => one.claim === warp.claim)!;
@@ -1948,7 +1950,7 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	await planWork(workFrame(table, 0), { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	const hand = new Set(cardsIn(table, "hand", 0).map((one) => one.card));
 	for (const card of hand) assert.ok(questions.some((one) => one.includes(`Your card ${card}.`)), `a focused question for ${card}`);
-	for (const kind of ["The opponent.", "Their next attack.", "Your whole attack this turn.", "Orders of operations", "Removal.", "Your other resources."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
+	for (const kind of ["The opponent.", "Their next attack.", "Your whole attack this turn,", "Orders of operations", "Removal.", "Your other resources."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
 	for (const outlook of ["expert defender", "aggressive punisher", "long-horizon planner", "sequencing specialist", "the opponent looking", "removal analyst"]) assert.ok(outlooks.some((one) => one.includes(outlook)), outlook);
 	const [doc, work] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
 	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn"), brief }, "analyst");

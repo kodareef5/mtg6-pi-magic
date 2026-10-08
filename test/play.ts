@@ -101,7 +101,7 @@ export function readDossier(text: string) {
 /** The quoted Oracle text under each card heading in a dossier's card text section. */
 export function cardTexts(text: string): Map<string, string> {
 	const section = text.split("\n## Card text\n")[1]?.split("\n## ")[0] ?? "";
-	return new Map(section.split("\n### ").slice(1).map((block) => {
+	return new Map(section.split("\n#### ").slice(1).map((block) => {
 		const [head, ...rest] = block.split("\n");
 		return [head!.trim(), rest.filter((line) => line.startsWith(">")).map((line) => line.replace(/^> ?/, "")).join("\n")];
 	}));

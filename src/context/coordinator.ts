@@ -9,7 +9,7 @@
 import { RULES_OF_PLAY } from "./survey.ts";
 
 const text = (description: string) => ({ type: "string", minLength: 1, description });
-const win = "All your attackers together, castable haste included: damage through the opponent's best legal blocks, including trample and double strike, plus burn you can pay for, against their life. Write the sum and the winning line in order, or why not.";
+const win = "The most damage you can deal this turn. First apply everything you can do before combat: land plays and land searches with the landfall triggers each entry causes, counters, power changes, pumps and removal of blockers. A spell that never attacks still counts when it raises an attacker's power. Then count all your attackers together, castable haste included, through the opponent's best legal blocks, including trample and double strike, plus burn you can pay for, against their life. Write each change in order, such as 4 -> 8 -> 16 power, then the sum and the winning line, or why there is none.";
 
 /** Without analysts the coordinator surveys the board itself, piece by piece, before any plan field. */
 export const ASSESSMENT = { type: "object", additionalProperties: false, required: ["hand", "zones", "opponents", "combat", "combinations", "rollup"],
@@ -48,9 +48,19 @@ export const ROLLUP = { type: "object", additionalProperties: false, required: [
 	description: "Write first. Weigh the findings and the six reports against the dossier. Your own working; Jev never reads it.",
 	properties: {
 		corrections: text("Findings or report claims that contradict the dossier or the card text, corrected, or none."),
-		adopted: text("Which reports or parts of them you adopt and why, and which you reject. Prefer a line whose arithmetic you checked; merge parts only when they fit the same mana and order."),
+		adopted: text("Which reports or parts of them you adopt and why, and which you reject. When a finding or report claims more damage than your line, recount its steps against the card text and mana. If a step fails, try another source, payment or order; reject the claim only by naming the step that still fails. Merge parts only when they fit the same mana and order."),
 		win: text(win),
 		priorities: { type: "array", items: { type: "string" }, description: "The opportunities ranked by impact, combinations and removal included. The plan carries out the first ones." },
+	} };
+
+/** A response weighs what the opponent is doing now, not this seat's own attack. */
+export const RESPONSE_ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "threat", "answers", "priorities"],
+	description: "Write first. Weigh the findings against the dossier. Your own working; Jev never reads it.",
+	properties: {
+		corrections: text("Findings that contradict the dossier or the card text, corrected, or none."),
+		threat: text("What the opponent is doing now and can still do this turn: attackers, spells and triggers on the stack, their open mana. The damage that gets through your best legal blocks, written as a sum against your life."),
+		answers: text("Each block or response you can pay for now or later this turn, with the sources it uses, what it saves and what it leaves for your next turn."),
+		priorities: { type: "array", items: { type: "string" }, description: "The answers ranked by what they save. The response carries out the first ones." },
 	} };
 
 const ORDER = [
@@ -66,11 +76,12 @@ export function coordinatorSystem(definitions: string): string {
 		"", ORDER, "",
 		"## Deciding",
 		"- Fill assessment first. It is your own working, and it decides the line.",
-		"- Look for a win before anything else. Count every attacker together, haste creatures you can cast before combat included. The opponent blocks to stop the most damage, one attacker per untapped creature. Losing a blocked attacker does not matter when the rest is lethal. Burn to the player counts at any window, upkeep included. When the count reaches their life, that line comes before development or a defensive reserve, and the holds it needs are released.",
+		"- Look for a win before anything else. Count every attacker together after everything you can do first: haste creatures you can cast before combat, land entries and the landfall triggers they cause, counters and power changes. The opponent blocks to stop the most damage, one attacker per untapped creature. Losing a blocked attacker does not matter when the rest is lethal. Burn to the player counts at any window, upkeep included. When the count reaches their life, that line comes before development, a defensive reserve, or any matchup policy or worked example that prefers another line, and the holds it needs are released.",
 		"- Without a win, keep pressure. Attack with every creature that no untapped opposing creature can block and kill while surviving. Damage not dealt is lost, and an empty or tapped board takes all of it. Do not attack into a blocker that kills the attacker and survives. Keep back only the blockers you need to survive their next attack.",
-		"- Play a land each turn you hold one. Spend burn when it removes a blocker that stops lethal or a key threat, or finishes the opponent. A reserve names an actual card in hand and the window it is for. An unknown draw is not a response.",
+		"- Play a land each turn you hold one, and choose which by what this turn needs. A land you play and then sacrifice to search for another land makes two land entries; a basic makes one entry and one mana. With a landfall payoff on the battlefield or castable first, count the result of each land you could play before you play any.",
+		"- Spend burn when it removes a blocker that stops lethal or a key threat, or finishes the opponent. A reserve names an actual card in hand and the window it is for. An unknown draw is not a response.",
 		"- Use the matchup plan's policies where they fit the board, and check their reconsider conditions. A policy is guidance, not proof that it fits. Check both clocks and the last window to answer before you commit resources.",
-		"- When outlook reports are present, weigh them. Adopt a line whose arithmetic you checked against the dossier. Merge parts only when they fit the same mana and order.",
+		"- When findings or reports are present, weigh them against the dossier. When one claims more damage than your line, recount its steps. If a step fails, try another source, payment or order before you reject it. Merge parts only when they fit the same mana and order.",
 		"",
 		"## Rules of play", RULES_OF_PLAY, "",
 		"## Reading the dossier",
@@ -91,12 +102,12 @@ export function coordinatorSystem(definitions: string): string {
 		"- may holds conditional responses and alternative lines. Cover draw classes that change the line, not one branch per card.",
 		"- holds keep sources for a purpose. A hold query reserves every object it matches, so use refs for one object. releaseWhen ends a hold on a visible fact. releaseAt ends it at a window, such as active self and step declare-attackers.",
 		"- askWhen stops the pilot on a visible fact that makes the line impossible. It must not cause routine replanning.",
-		"- phases give each window's guidance: responses, trigger targets, searches, optional choices and exceptions. complete is pass or ask once that window's commitments are done, and leaving it out grants no pass. reevaluate names changes the guidance does not cover.",
+		"- phases give each window's guidance: responses, trigger targets, searches, optional choices and exceptions. complete is pass or ask once that window's commitments are done, and leaving it out grants no pass. reevaluate lists board changes this guidance does not handle; Jev asks for help when one happens.",
 		'- Combat is one creature at a time, then a finish. Finish attacks with {"label":"Finish attackers","when":{"active":"self","step":"declare-attackers"},"action":{"option":"attack:done"}} and blocks on their turn with {"label":"Finish blockers","when":{"active":"opponent","step":"declare-blockers"},"action":{"option":"block:done"}}. Your own turn never needs a block step.',
 		"- Windows use active self or opponent and step names. active means whose turn it is, not whose choice. Leave absolute turn numbers out unless needed. Untap, the turn's draw and cleanup happen through the rules, not plan steps.",
 		'- Conditions count visible objects. {"amount":{"count":{"zones":["hand"],"controller":"you","types":["creature"]}},"atLeast":1} tests for a creature in your hand. Combine tests with all, any and not. top refers only to library objects. Object queries use controller self; conditions accept you or self. A step with a known source needs no presence condition.',
 		"- A normal permanent other than an Aura is cast for its printed cost with no targets; its abilities come from its package. Instants and sorceries use their prepared actions. Do not give a creature spell its trigger's targets.",
-		"- objective and guidance are your rationale for audits; Jev does not read them. notes optionally edit your notebook with a useful new conclusion, and an empty note retires a topic.",
+		"- objective and guidance are your rationale for audits. Jev never reads them, so a decision written only there is lost: an attack you skip is a lone attack:done with a purpose, a reserve is a hold, and a response is phase guidance. notes optionally edit your notebook with a useful new conclusion, and an empty note retires a topic.",
 		"- packages hold accepted card terms. Change one only when its interpretation was wrong. A new line does not change a card's abilities.",
 		"",
 		"## Your answer",
@@ -110,12 +121,19 @@ export function coordinatorSystem(definitions: string): string {
 	].join("\n");
 }
 
+const RESPONSE_ORDER = [
+	"The conversation gives you, in order:",
+	"1. A game dossier with everything this player knows. The board, mana, deck lists, odds and card text are projected facts. Registered triggers are accepted interpretations; they, the matchup plan, notebook and standing plan can be wrong.",
+	"2. The work for this decision: findings from focused questions about the opponent, your defense and removal, the plan you are editing, the actions you can reuse, and any problems or changes.",
+	"3. Your request, last.",
+].join("\n");
+
 export function responseSystem(definitions: string): string {
 	return [
-		"You repair one response or combat decision for a Magic player during the opponent's turn. Jev, a fast pilot, carries out your actions and every pass. Plan this decision and the rest of the opponent's turn, not your next turn.",
-		"", ORDER, "",
+		"You repair one response or combat decision for a Magic player during the opponent's turn. Jev, a fast pilot, chooses each action and pass under your plan. Plan this decision and the rest of the opponent's turn, not your next turn.",
+		"", RESPONSE_ORDER, "",
 		"## Deciding",
-		"- Fill assessment first: the attack you face, the damage that gets through your best blocks against your life, and any win you hold next turn.",
+		"- Fill assessment first: what you face and the damage that gets through your best blocks against your life, then each answer you can pay for and what it saves.",
 		"- Choose the line that wins now, otherwise prevents a concrete loss, otherwise keeps your engine and response resources.",
 		"- Chump-block when the attack would otherwise be lethal. For each block, name the creature kept or lost. A blocker dying does not mean it kills the attacker.",
 		"- Read the actual hand and sources before reserving a response. A card named in a policy is not necessarily in hand.",
@@ -154,10 +172,14 @@ export function workSections(work: Work): string {
 
 const EXAMPLE = JSON.stringify({ steps: [
 	{ label: "Play the land", when: { active: "self", step: "precombat-main" }, action: { reuse: "land <card> from hand" } },
-	{ label: "Cast the haste creature", when: { active: "self", step: "precombat-main" }, action: { reuse: "printed:<n> Cast <card>" } },
-	{ label: "Attack with it", when: { active: "self", step: "declare-attackers" }, action: { reuse: "attack <id>@<incarnation>" } },
-	{ label: "Finish attackers", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" } },
-], phases: [{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block their largest attacker only if the damage would be lethal.", complete: "pass" }] });
+	{ label: "Cast the creature", when: { active: "self", step: "precombat-main" }, action: { reuse: "printed:<card>" }, purpose: "Pay with <land> (<id>@<incarnation>) and <land> (<id>@<incarnation>)." },
+	{ label: "Attack with <creature>", when: { active: "self", step: "declare-attackers" }, action: { reuse: "attack <id>@<incarnation>" } },
+	{ label: "Finish attackers", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" }, purpose: "<other creature> stays home to block." },
+], holds: [{ objects: { refs: [{ id: "<id>", incarnation: 1 }] }, purpose: "<land> stays untapped for <instant in hand> on their turn.", releaseAt: { active: "self", step: "upkeep" } }],
+phases: [
+	{ when: { active: "opponent" }, guidance: "Cast <instant in hand> on <creature> (<id>@<incarnation>) when it attacks or grows past toughness 2. Otherwise keep the mana.", complete: "pass" },
+	{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block <attacker> (<id>@<incarnation>) with <creature> (<id>@<incarnation>) only if its damage would be lethal.", complete: "pass" },
+] });
 
 /** The request that ends the conversation. */
 export function coordinatorAsk(request: string, kind: "turn" | "preparation" | "response", current = kind === "response"): string {

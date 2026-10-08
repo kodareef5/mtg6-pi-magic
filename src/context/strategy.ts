@@ -21,7 +21,7 @@ import { chancing, initialPlan, planningFrame, type Context } from "./strategy-f
 import { findingsSection, surveyPosition } from "./survey.ts";
 import { perspectiveReports, reportsSection } from "./perspectives.ts";
 import { dossier } from "./dossier.ts";
-import { ASSESSMENT, ROLLUP, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
+import { ASSESSMENT, RESPONSE_ROLLUP, ROLLUP, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
 import { combatLookup } from "./strategy-combat.ts";
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
@@ -101,7 +101,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	// inherited work there; expose the existing full editor so the seat can.
 	const response = responding && !baseProblems.length;
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
-		parameters: { ...SUBMIT.parameters, properties: { assessment: context.survey ? ROLLUP : ASSESSMENT, ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
+		parameters: { ...SUBMIT.parameters, properties: { assessment: response && context.survey ? RESPONSE_ROLLUP : context.survey ? ROLLUP : ASSESSMENT, ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
 			required: ["assessment", ...(response ? ["current"] : [])] } };
 	const decision = !options.nextTurn && frame.decision ? ` The decision in front of the pilot: ${frame.decision.question}` : "";
 	const request = responding ? `${frame.view.work?.request}\nRepair this response or combat decision and the rest of the opponent's turn. Your next turn is prepared separately, so do not write its line. Keep the phase policies this decision does not touch.${response ? "" : " The inherited plan is invalid. Use the full changed fields to remove or replace every invalid commitment, including steps outside this window; omitted fields stay."}${decision}`

@@ -124,12 +124,18 @@ export function responseChanges(frame: Frame, base: Plan, changes: unknown) {
 /** The actions available to reuse, with readable labels and their complete accepted syntax. */
 export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<string, { label: string; action: PlanOption["action"] }> {
 	const plan = prepared ?? currentPlan(frame);
+	// Uses of cards this seat can hold: its registered list and anything it controls now. Numbering stays global so keys stay stable.
+	const list = frame.view.decks?.find((one) => one.seat === frame.seat);
+	const own = new Set([...Object.keys(list?.cards ?? {}), ...Object.keys(list?.sideboard ?? {}),
+		...(frame.view.objects ?? []).flatMap((one) => one.controller === frame.seat && one.card ? [one.card] : [])]);
+	const mine = (card: string) => !list || own.has(card);
 	return Object.fromEntries([
 		...Object.entries(movementActions(frame, turn)),
 		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
-		...(frame.view.work?.packages ?? []).flatMap((pack) => pack.procedures ?? []).map((procedure, at) => [`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),
-		...(frame.view.work?.packages ?? []).filter((pack) => pack.printedCast && frame.view.printed?.[pack.card]).map((pack) =>
+		...(frame.view.work?.packages ?? []).flatMap((pack) => (pack.procedures ?? []).map((procedure) => ({ card: pack.card, procedure })))
+			.flatMap(({ card, procedure }, at) => mine(card) ? [[`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]] : []),
+		...(frame.view.work?.packages ?? []).filter((pack) => pack.printedCast && frame.view.printed?.[pack.card] && mine(pack.card)).map((pack) =>
 			[`printed:${pack.card}`, { label: `Cast ${pack.card} for its printed cost`, action: { procedure: printedCast(pack.card, frame.view.printed![pack.card]!) } }]),
 	]);
 }

@@ -63,8 +63,7 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	assert.ok(!dossier({ frame }).split("\n").find((line) => line.startsWith(`| ${claws[0]!.id}@`))!.includes("summoning-sick"), "the dossier row shows the same readiness");
 	assert.ok(dossier({ frame }).split("\n").find((line) => line.startsWith(`| ${claws[0]!.id}@`))!.includes("no summoning sickness"), "absence of sickness is an explicit projected fact");
 	assert.match(dossier({ frame }), /Registered watches, not pending triggers/);
-	const selectorText = dossier({ frame }).split("\n").find((line) => line.includes("Current selector matches:"))!.split("Current selector matches:")[1]!;
-	for (const claw of claws) assert.ok(selectorText.includes(`Hired Claw (${claw.id}@${claw.incarnation})`), "selector matches name objects and incarnations, not occurrences");
+	assert.ok(!dossier({ frame }).includes("selector matches"), "a watch lists its basis, not the objects its selector happens to match");
 	assert.ok(!dossier({ frame }).includes("### Waiting triggers"), "a selector match alone creates no pending event");
 	assert.deepEqual(table, before, "projecting readiness and watch matches moves nothing and stores no derived value");
 	label(table, kellan, "vigilance until end of turn", ["vigilance"]);

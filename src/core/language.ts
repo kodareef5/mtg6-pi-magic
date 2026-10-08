@@ -326,7 +326,7 @@ export const PlanDefs = { ...Defs,
 	Option: object({
 		label: text, when: WhenSchema, if: Type.Optional(Type.Ref("Condition")), essential: Type.Optional(Type.Literal(true)),
 		waitFor: Type.Optional(Type.Literal("empty-stack", { description: "Wait until the whole stack is empty before this commitment. Absence adds no prerequisite. This does not choose a pass or remove physical options." })),
-		purpose: Type.Optional(Type.String({ minLength: 1, description: "Execution choices: targets, payment, search and optional instructions. Rationale belongs in the plan's audit guidance." })),
+		purpose: Type.Optional(Type.String({ minLength: 1, description: "What Jev does when it takes this step: targets, payment, searches, optional choices and what to leave unspent. A decision Jev must follow belongs here or in phase guidance; reasons belong in assessment." })),
 		/** A listed table option by id or prefix and objects, or a procedure to announce. */
 		action: Type.Union([
 			object({ option: Type.Optional(text), prefix: Type.Optional(text), objects: Type.Optional(QuerySchema) }),

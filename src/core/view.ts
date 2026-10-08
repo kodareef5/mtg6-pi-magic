@@ -195,11 +195,11 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
-		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table) } : {}) };
+		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table, viewer) } : {}) };
 }
 
 /** The last five turns by each receipt's recorded turn, read backwards from now and never to the start of the game. */
-function recent(table: Table): NonNullable<SeatView["recent"]> {
+function recent(table: Table, viewer: Viewer): NonNullable<SeatView["recent"]> {
 	const order = table.seats.map((one) => one.id), current = table.cursor.turn, now = order.indexOf(table.cursor.active);
 	const active = (turn: number) => order[(((now - (current - turn)) % order.length) + order.length) % order.length]!;
 	const turns = new Map<number, string[]>();
@@ -207,7 +207,7 @@ function recent(table: Table): NonNullable<SeatView["recent"]> {
 		const receipt = table.log[at]!;
 		if (receipt.turn === undefined || receipt.reason === "game-setup") continue;
 		if (receipt.turn <= current - 5) break;
-		const line = describe(table, receipt);
+		const line = describe(table, receipt, viewer);
 		if (line) turns.set(receipt.turn, [line, ...turns.get(receipt.turn) ?? []]);
 	}
 	return [...turns].sort(([a], [b]) => a - b).map(([turn, lines]) => ({ turn, active: active(turn), lines }));
@@ -248,7 +248,7 @@ function actions(table: Table, viewer: SeatId): NonNullable<SeatView["actions"]>
  * Public facts only. Which card moved between two hidden zones is not one, so a
  * move nobody could see says only that it happened.
  */
-export function describe(table: Table, receipt: Receipt): string {
+export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spectator"): string {
 	const parts: string[] = [];
 	for (const change of receipt.changes) {
 		switch (change.do) {
@@ -262,7 +262,9 @@ export function describe(table: Table, receipt: Receipt): string {
 				const moved = receipt.after[change.what] ?? was;
 				if (!moved) break;
 				const who = seat(table, moved.owner).name;
-				const name = visible(moved) ? moved.card : publicName(was);
+				// A seat knows the cards that reach its own hand, such as its draws.
+				const known = viewer !== "spectator" && change.to === "hand" && moved.owner === viewer && !moved.faceDown && !!moved.card;
+				const name = known ? moved.card : visible(moved) ? moved.card : publicName(was);
 				const terms = change.to === "battlefield" ? [change.tapped ? "tapped" : "", ...Object.entries(change.counters ?? {}).map(([kind, n]) => `${n} ${kind}`)].filter(Boolean) : [];
 				parts.push(`${who} put ${name} into ${change.to} (${change.reason})${terms.length ? `, ${terms.join(", ")}` : ""}`);
 				break;

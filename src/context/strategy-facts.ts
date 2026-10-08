@@ -14,7 +14,7 @@ import { sources } from "../core/funding.ts";
 import { afterUntap, entersTapped } from "../core/budget.ts";
 import { TURN } from "../core/steps.ts";
 import { allowance } from "../core/permits.ts";
-import { viewWorld } from "../core/selectors.ts";
+import { holds, viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
 import { useSources } from "../core/readiness.ts";
 
@@ -29,24 +29,31 @@ export function manaLines(frame: Frame): string[] {
 		`${one.colors.join("")}${one.spendOnly ? ` (${only(one.spendOnly)})` : ""}${one.sacrifice ? " (sacrificing it)" : ""}`))].join(" or ");
 	const now = sources(frame);
 	const floating = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? [];
-	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
+	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}@${object.incarnation}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
 		`${floating.length ? `; floating ${floating.map((one) => one.color).join("")}` : ""}.`];
 	lines.push(`Maximum mana from these sources and the pool now: ${floating.length + now.reduce((n, one) => n + Math.max(...one.yields.map((yielded) => yielded.colors.length)), 0)}; colors and spending restrictions still apply.`);
 	const tapped = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && one.controller === frame.seat && one.tapped);
-	if (tapped.length) lines.push(`Already tapped, so unavailable for tap costs: ${tapped.map((one) => `${one.card ?? one.token?.name ?? "unknown"} (${one.id})`).join(", ")}.`);
+	if (tapped.length) lines.push(`Already tapped, so unavailable for tap costs: ${tapped.map((one) => `${one.card ?? one.token?.name ?? "unknown"} (${one.id}@${one.incarnation})`).join(", ")}.`);
 	const left = Math.max(0, allowance(viewWorld(frame.view), frame.seat).lands - (frame.view.landsPlayed ?? 0));
 	const lands = useSources(frame, { source: { zones: ["hand", "graveyard", "exile"], controller: "any" }, timing: "land" })
 		.filter((object) => object.traits?.types.includes("land"));
 	const land = (object: SeenObject) => {
 		const card = object.card!, colors = intrinsic(object.traits);
-		const registers = frame.view.work?.packages?.find((pack) => pack.card === card)?.registers;
+		const pack = frame.view.work?.packages?.find((one) => one.card === card), registers = pack?.registers;
 		const entry = entersTapped(frame, object, registers);
 		if (entry === "unknown") return `${card}: no package, so how it enters and what it makes are unknown until you write one`;
 		const makes = [...colors, ...(registers ?? []).flatMap((one) => one.kind === "mana" ? [one.colors?.join("") ?? `any ${one.any ?? 1}`] : [])];
-		return `${card}: ${entry === "conditional" ? "enters tapped under a condition" : `enters ${entry}`}, ${makes.length ? `makes ${makes.join(" or ")}` : "makes no mana itself"}`;
+		// A condition is read against the board now; an earlier land this turn can change it.
+		const own = registers?.find((one): one is Extract<NonNullable<typeof registers>[number], { kind: "enters" }> => one.kind === "enters" && !one.affects && !!one.tapped && !!one.if);
+		const condition = entry === "conditional" && own?.if ? `would enter ${holds({ world: viewWorld(frame.view), controller: frame.seat }, own.if) ? "tapped" : "untapped"} on the board now ("${own.basis}")`
+			: entry === "conditional" ? "enters tapped under a condition" : `enters ${entry}`;
+		const uses = (pack?.procedures ?? []).filter((one) => one.source.zones?.includes("battlefield")).map((one) => `${one.claim} ("${one.basis}")`);
+		return `${card}: ${condition}, ${makes.length ? `makes ${makes.join(" or ")}` : "makes no mana itself"}${uses.length ? `; on the battlefield it can also: ${uses.join("; ")}` : ""}`;
 	};
 	const from = (zone: string) => [...new Map(lands.filter((one) => one.zone === zone).map((one) => [one.card, one])).values()].map(land).join("; ") || "no land";
-	lines.push(left ? `Land plays left this turn: ${left}. In hand: ${from("hand")}.${[...new Set(lands.filter((one) => one.zone !== "hand").map((one) => one.zone))].map((zone) => ` Permitted from ${zone}: ${from(zone)}.`).join("")}`
+	const at = frame.view.window;
+	lines.push(at.kind === "turn" && at.active !== frame.seat ? "No land play: lands are played only on your own turn."
+		: left ? `Land plays left this turn: ${left}. In hand: ${from("hand")}.${[...new Set(lands.filter((one) => one.zone !== "hand").map((one) => one.zone))].map((zone) => ` Permitted from ${zone}: ${from(zone)}.`).join("")}`
 		: "No land play left this turn.");
 	lines.push("Tap each source once: its yields are alternatives, not added together. Each step spends what earlier steps leave. A held source stays available for its response. A land that enters tapped makes nothing this turn.");
 	return lines;
