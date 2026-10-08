@@ -122,7 +122,7 @@ export function responseSystem(definitions: string): string {
 		"",
 		"## Rules of play", RULES_OF_PLAY, "",
 		"## Your answer",
-		"current is an ordered list of {label, action, purpose?}. action is {reuse: exact key}, a listed {option: id}, or {prefix, objects}. Include the pass or block:done you intend. Every current action binds to this turn and step, so do not write when or a next-turn line. Steps outside this window stay.",
+		"current is an ordered list of {label, action, purpose?}. action is {reuse: exact key}, a listed {option: id}, or {prefix, objects}. Every current action binds to this turn and step. Use block:done only when the listed decision declares blockers, never at priority while triggers resolve. Cover later blocks in phases. Do not write when or a next-turn line. Steps outside this window stay.",
 		"purpose carries targets, payment and resolution choices. phases replaces execution policies; keep unaffected windows and fix contradicted ones. complete is pass or ask after the commitments finish. guidance is rationale Jev does not read. holds replaces the reserves, and [] releases them. notes and objection follow the schema.",
 		"Acceptance checks syntax and resources, not card meaning or good play. Object only to a listed opposing action that broke a rule. If submit refuses the answer, fix every named problem without pretending an action was executed.",
 		"",

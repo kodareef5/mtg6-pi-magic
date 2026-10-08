@@ -87,10 +87,10 @@ export function questions(frame: Frame): [string, string][] {
 	];
 }
 
-export async function surveyPosition(frame: Frame, dossier: string, reasoner: Pick<Reasoner, "work">, signal?: AbortSignal): Promise<Survey> {
+export async function surveyPosition(frame: Frame, dossier: string, reasoner: Pick<Reasoner, "work">, signal?: AbortSignal, only?: readonly string[]): Promise<Survey> {
 	signal?.throwIfAborted();
 	const survey: Survey = { findings: [] };
-	await Promise.all(questions(frame).map(async ([source, question]) => {
+	await Promise.all(questions(frame).filter(([source]) => !only || only.includes(source)).map(async ([source, question]) => {
 		try {
 			const answer = await reasoner.work(`survey ${source}`, { system: ANALYST_SYSTEM, user: dossier, task: ask(question) }, { submit: FINDINGS, turns: 2, signal }, 900);
 			for (const one of answer.findings as Omit<Finding, "source">[]) survey.findings.push({ source, ...one });

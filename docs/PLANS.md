@@ -133,6 +133,11 @@ invalid, strategy instead exposes the existing full editor: validation of the
 whole plan cannot be repaired through fields that preserve the invalid part.
 The writer must explicitly remove or replace those commitments. Context never
 rebinds an old incarnation or drops a step on the player's behalf.
+For a valid inherited response, the opponent, defense and removal questions
+run in parallel before the coordinator, without the six outlooks. The full
+analysis remains for invalid inherited work, turn planning and preparation.
+The current editor uses the actual decision: priority and declaring blockers
+are different decisions even when both occur during declare-blockers.
 
 Strategy can read accepted activations for its visible cards before their
 sources enter a permitted zone. These entries name the current sources and

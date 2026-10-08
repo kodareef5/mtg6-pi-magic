@@ -113,14 +113,14 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const input = { frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
 		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}) };
 	const doc = dossier(input), facts = dossier(input, "analyst");
-	const findings = context.survey ? await surveyPosition(planned, facts, reasoner, options.signal) : undefined;
-	const reported = findings ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
+	const findings = context.survey ? await surveyPosition(planned, facts, reasoner, options.signal, response ? ["opponent", "defense", "removal"] : undefined) : undefined;
+	const reported = findings && !response ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
 	const work = workSections({ base: planFacts(base), problems: [...baseProblems, ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
 		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
 		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
-		...(findings && reported ? { analysts: [findingsSection(findings), reportsSection(reported)] } : {}) });
+		...(findings ? { analysts: [findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.

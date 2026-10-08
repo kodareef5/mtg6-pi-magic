@@ -1913,7 +1913,8 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 		if (submit && "line" in submit.properties) { outlooks.push(JSON.stringify(request.messages)); return reply({ line: ["Play Forest", "Cast Mossborn Hydra"], hold: "none", opponentTurn: "Block with Hydra", risks: "none", outcome: "20 to 20", confidence: 3 }); }
 		writer.push(JSON.stringify(request.messages)); coordinated.push(JSON.stringify(submit));
 		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
-			steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] });
+			...(submit && "current" in submit.properties ? { current: [{ label: "Pass now", action: { option: "pass" } }] }
+				: { steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] }) });
 	};
 	const brief = { ...emptyBrief(0), route: "Pregame growth expertise" };
 	await planWork(workFrame(table, 0), { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
@@ -1935,6 +1936,25 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	assert.equal(work!.split("## Reports from six outlooks")[1]!.split("\n## ")[0]!.match(/^### /gm)!.length, 6);
 	assert.match(coordinated[0]!, /adopted/, "the coordinator records which reports it adopts");
 	assert.deepEqual(table, before, "asking questions changes nothing on the table");
+	const response = structuredClone(workFrame(table, 0));
+	if (response.view.window.kind === "turn") Object.assign(response.view.window, { active: 1, turn: 4 });
+	response.view.work!.request = "Review this opponent response.";
+	for (const invalid of [false, true]) {
+		if (invalid) response.view.work!.plan!.steps = [{ label: "Stale attacker", when: { active: "self", step: "declare-attackers" },
+			action: { prefix: "attack:", objects: { refs: [{ id: "absent", incarnation: 1 }] } } }];
+		const unchanged = structuredClone(response);
+		questions.length = 0; outlooks.length = 0; coordinated.length = 0;
+		await planWork(response, { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+		if (invalid) {
+			assert.ok(questions.length > 3 && outlooks.length === 6, "invalid inherited work keeps full analysis for the broader repair");
+			assert.doesNotMatch(coordinated[0]!, /"current"/, "the full editor can remove invalid work outside this window");
+		} else {
+			assert.equal(questions.length, 3); assert.equal(outlooks.length, 0);
+			for (const kind of ["The opponent.", "Their next attack.", "Removal."]) assert.ok(questions.some((one) => one.includes(kind)));
+			assert.match(coordinated[0]!, /"current"/, "a valid response edits only the current decision and its policies");
+		}
+		assert.deepEqual(response, unchanged, "shorter analysis neither changes the projected frame nor repairs it for the player");
+	}
 });
 
 test("the dossier lays out what the seat knows in fixed sections, with recent turns only and no request inside it", () => {
