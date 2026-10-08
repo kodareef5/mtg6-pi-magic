@@ -51,6 +51,7 @@ import { actions, basePlan, changedPlan, conditionProblems, equipment, responseC
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts, planningChoices } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { dossier } from "../src/context/dossier.ts";
+import { perspectiveReports, reportsSection } from "../src/context/perspectives.ts";
 import { announce, cardTexts, establish, example, finish, main, matchup, pack, passBoth, place, quiet, readDossier } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
@@ -151,7 +152,8 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.equal(checkPlan({ ...line, holds: [{ objects: { card: "Forest" }, purpose: "Keep the cast payment." }] }, { requireHold: true }, workFrame(table, 0)).passed, true);
 	const response = { ...line, phases: [{ when: { active: "opponent" as const }, guidance: "Respond when the target appears." }] };
 	assert.equal(checkPlan(response, { requireOpponentResponse: true }, workFrame(table, 0)).passed, true);
-	for (const when of [{ active: "self" as const }, { active: "opponent" as const, step: "declare-blockers" as const }, { active: "opponent" as const, phase: "combat" as const }])
+	for (const when of [{ active: "self" as const }, { active: "opponent" as const, step: "declare-blockers" as const }, { active: "opponent" as const, phase: "combat" as const },
+		{ active: "opponent" as const, fromTurn: 7 }, { active: "opponent" as const, throughTurn: 0 }])
 		assert.equal(checkPlan({ ...response, phases: [{ ...response.phases[0]!, when }] }, { requireOpponentResponse: true }, workFrame(table, 0)).passed, false, "a restricted phase does not cover the opponent's whole turn");
 	const typed = { ...line, steps: [{ ...line.steps[2]!, action: { prefix: "attack:", objects: { zones: ["battlefield" as const], controller: "self" as const, types: ["creature" as const] } } }] };
 	assert.deepEqual(planProblems(workFrame(table, 0), typed), []);
@@ -1942,6 +1944,15 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	assert.equal(work!.split("## Reports from six outlooks")[1]!.split("\n## ")[0]!.match(/^### /gm)!.length, 6);
 	assert.match(coordinated[0]!, /adopted/, "the coordinator records which reports it adopts");
 	assert.deepEqual(table, before, "asking questions changes nothing on the table");
+	const missingFields: Stream = (_model, request) => {
+		assert.equal(request.tools?.[0]?.name, "submit");
+		return { result: async () => ({ content: [{ type: "toolCall", id: "missing", name: "submit", arguments: { line: ["Pass", "hold", "none"] } }], stopReason: "toolUse" }) };
+	};
+	const malformed = await perspectiveReports(facts, { findings: [] }, reasoner({ role: "strategy", stream: missingFields,
+		model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.equal(Object.keys(malformed.reports).length, 0, "a partial line list is not a complete outlook report");
+	assert.equal(malformed.failed?.length, 6, "every unanswered outlook reaches the coordinator as a failure");
+	assert.doesNotMatch(reportsSection(malformed), /Hold: undefined|Outcome: undefined/, "missing report fields never become invented advice");
 	const response = structuredClone(workFrame(table, 0));
 	if (response.view.window.kind === "turn") Object.assign(response.view.window, { active: 1, turn: 4 });
 	response.view.work!.request = "Review this opponent response.";

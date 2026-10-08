@@ -14,6 +14,8 @@ export function planText(plan: Plan): string {
 }
 
 export function checkPlan(plan: Plan, check: PlanCheck, frame: Frame) {
+	const at = frame.view.window;
+	const responseTurn = at.kind === "turn" ? at.turn + Number(at.active === frame.seat) : undefined;
 	const fits = (action: PlanOption["action"], property: Property) => "procedure" in action
 		? (!property.source || action.procedure.source.card === property.source) && (!property.zone || action.procedure.source.zones?.some((zone) => zone === property.zone)) && (!property.timing || action.procedure.timing === property.timing) && !property.prefix && !property.id
 		: (!property.source || action.objects?.card === property.source || !!action.objects && select(action.objects, frame).some((object) => object.card === property.source)) &&
@@ -25,7 +27,8 @@ export function checkPlan(plan: Plan, check: PlanCheck, frame: Frame) {
 		(check.require ?? []).every((property) => index(property) >= 0) &&
 		ordered.every((at, n) => at >= 0 && (!n || at > ordered[n - 1]!)) &&
 		(!check.requireHold || !!plan.holds?.length) &&
-		(!check.requireOpponentResponse || !!plan.phases?.some((phase) => phase.when.active === "opponent" && !phase.when.step && !phase.when.phase));
+		(!check.requireOpponentResponse || responseTurn !== undefined && !!plan.phases?.some(({ when }) => when.active === "opponent" && !when.step && !when.phase &&
+			(when.fromTurn === undefined || when.fromTurn <= responseTurn) && (when.throughTurn === undefined || when.throughTurn >= responseTurn)));
 	const prose = (check.forbidProse ?? []).flatMap((pattern) => {
 		const matches = [...planText(plan).matchAll(new RegExp(pattern, "gi"))].map((one) => one[0]);
 		return matches.length ? [{ pattern, matches }] : [];

@@ -38,7 +38,7 @@ export function dossier(input: DossierInput, reader: "analyst" | "coordinator" =
 	const me = name(frame.seat);
 	return [
 		`# Game dossier for ${me}`,
-		"Everything you know as this player. The board, mana, triggers, deck lists, odds and card text are facts from the table. Sections marked as written by a model are advice and can be wrong. The request at the end of the conversation says what to do with this.",
+		"Everything you know as this player. The board, mana, deck lists, odds and printed card text come from the table. Registered triggers are accepted interpretations and can be wrong. Sections marked as written by a model are advice and can be wrong. The request at the end of the conversation says what to do with this.",
 		situation(input, name),
 		battlefield(frame, name), hand(frame), stack(frame, name), graveyards(frame, name),
 		"## Mana", manaLines(frame).map((line) => `- ${line}`).join("\n"),

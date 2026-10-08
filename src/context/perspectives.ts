@@ -28,7 +28,12 @@ const REPORT = { name: "submit", description: "Submit your proposed line for thi
 		outcome: { type: "string", description: "Expected life totals and board after this turn and theirs, with the arithmetic." },
 		confidence: { type: "integer", minimum: 1, maximum: 5 },
 	} },
-	check: (args: Record<string, unknown>) => Array.isArray(args.line) && args.line.length ? null : "Submit at least one action in line." };
+	check: (args: Record<string, unknown>) => {
+		if (!Array.isArray(args.line) || !args.line.length || args.line.some((one) => typeof one !== "string")) return "line needs at least one action, each as text.";
+		const missing = ["hold", "opponentTurn", "risks", "outcome"].filter((field) => typeof args[field] !== "string");
+		if (missing.length) return `Submit these report fields as text: ${missing.join(", ")}. Keep them outside the line list.`;
+		return Number.isInteger(args.confidence) && Number(args.confidence) >= 1 && Number(args.confidence) <= 5 ? null : "confidence must be an integer from 1 to 5.";
+	} };
 
 const EXAMPLE = '{"line": ["Play your land.", "Cast the 2-mana removal on their 3/3 blocker: 3 damage against toughness 3.", "Attack with both creatures: 3 + 2 = 5 damage, taking them from 9 to 4."], "hold": "One red source for the 1-mana burn spell on their turn.", "opponentTurn": "Block their 2/2 with your 2/1 only if they attack with it alone.", "risks": "A pump spell saves their blocker; then keep the second attacker home.", "outcome": "They go to 4 with no blocker; you stay at 12.", "confidence": 4}';
 
