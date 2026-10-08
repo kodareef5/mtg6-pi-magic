@@ -244,7 +244,7 @@ test("a pilot executes with derived plan status, while private judgments neither
 	await opponent.close();
 	assert.deepEqual(response.cursor, pending.cursor, "the model answer still needs core to apply the pass");
 	assert.deepEqual(response.ledger, pending.ledger);
-	assert.match(nextDecision(response)!.options.find((one) => one.id === "pass")!.shows!, /top stack object begins resolving/);
+	assert.match(nextDecision(response)!.options.find((one) => one.id === "pass")!.shows!, /Shock begins resolving/);
 	apply(response, "pass", "model", "chosen"); finish(response);
 	const cleared = focus(workFrame(response, 1), startingIntent(1));
 	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.status, "available", "resolution restores the land use without a new plan");

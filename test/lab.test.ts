@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { test } from "node:test";
 import { decisionFrame, position } from "../tools/benchmark-positions.ts";
-import { aiSeat } from "../src/context/seat.ts";
+import { aiSeat, criterion } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import type { DecisionApi } from "../src/context/model.ts";
 
@@ -38,4 +38,12 @@ test("a seat rebuilt mid-decision does not offer help it already used", async ()
 	};
 	assert.ok("ask:help" in await criteria(), "a seat with a planner offers help");
 	assert.ok(!("ask:help" in await criteria(frame.version)), "help already used at this version is not offered again");
+});
+
+test("every criterion says what the option does, its facts, and what the plan says about it", () => {
+	const uses = { "use:0": { notes: ["Plan step 2: Cast Zhao. Choices: pay with both Mountains."] } } as never;
+	assert.equal(criterion({ id: "cast:1", label: "Cast Zhao (Zhao); mana payment: tap Mountain (1-25@2) for R", use: "use:0", notes: ["Uses Mountain, held: Shock on their turn."] } as never, { uses }),
+		"Cast Zhao (Zhao); mana payment: tap Mountain (1-25@2) for R. Plan step 2: Cast Zhao. Choices: pay with both Mountains. Uses Mountain, held: Shock on their turn.");
+	assert.equal(criterion({ id: "pass", label: "Pass", shows: "Take no response now. If every seat passes in succession, Shock begins resolving." } as never, { uses: {} }),
+		"Pass. Take no response now. If every seat passes in succession, Shock begins resolving.", "passing is described by what it does, nothing more");
 });

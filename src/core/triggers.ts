@@ -266,7 +266,12 @@ export function triggerWindow(table: Table): Pending | null {
 	const seat = apnap.find((one) => current.some((trigger) => trigger.controller === one.id));
 	if (!seat) return null;
 	const world = tableWorld(table);
-	const moves: Move[] = current.filter((trigger) => trigger.controller === seat.id).flatMap((trigger): Move[] => {
+	const mine = current.filter((trigger) => trigger.controller === seat.id);
+	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.card ?? source?.token?.name ?? trigger.source.id; };
+	// Putting one on now places it under every trigger put later, so it resolves after them.
+	const after = (trigger: (typeof mine)[number]) => { const others = mine.filter((other) => other !== trigger).map((other) => `${sourceName(other)}'s trigger`);
+		return others.length ? `Put on now, it resolves after ${[...new Set(others)].map((one) => { const n = others.filter((other) => other === one).length; return n > 1 ? `${one} (x${n})` : one; }).join(", ")}.` : "It is the last trigger to put on."; };
+	const moves: Move[] = mine.flatMap((trigger): Move[] => {
 		const source = world.lastKnown(trigger.source)?.object;
 		const name = source?.card ?? source?.token?.name ?? trigger.source.id;
 		const slots = trigger.effect.targets ?? [];
@@ -284,7 +289,7 @@ export function triggerWindow(table: Table): Pending | null {
 			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
 			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
 				label: [`Put on the stack: ${name}: ${trigger.basis}`, ...aimed].join(" "),
-				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...trigger.effect.instructions.map(summary)].join(" "),
+				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])] },
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
 		});

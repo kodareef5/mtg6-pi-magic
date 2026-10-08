@@ -2112,7 +2112,7 @@ test("options and effects read as words: targets are named in the label, summari
 	const shock: Procedure = { claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", source: { zones: ["hand"], controller: "self", card: "Shock" },
 		timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] };
 	const labels = procedureOptions(shock, workFrame(table, 1), "words").map((one) => one.option.label);
-	assert.ok(labels.some((label) => /^Cast Shock \(Shock\)\. Target 1: Sazh's Chocobo \(0-\d+@\d+\)\.$/.test(label)), "a creature target is named with its reference");
+	assert.ok(labels.some((label) => /^Cast Shock \(Shock\)\. Target 1: Sazh's Chocobo \(0-\d+@\d+, opponent's, 0\/1\)\.$/.test(label)), "a creature target is named with its reference, controller and body");
 	assert.ok(labels.some((label) => /Target 1: player Green \(seat 0, opponent\)\./.test(label)), "a player target names the player");
 	assert.equal(summary({ do: "modify", what: "target:0", until: "end-of-turn", change: { power: { power: "target:0" } } } as never), "target 1 gets +(the power of target 1)/+0 until end of turn.");
 	assert.equal(summary({ do: "choose", who: "you", count: 1, upTo: true, from: { zones: ["library"], owner: "you", supertypes: ["basic"], types: ["land"] }, as: "land" } as never),

@@ -127,7 +127,11 @@ export function aiming(targets: Chosen[][], world: World, controller: SeatId): s
 	const named = (chosen: Chosen) => { if ("player" in chosen) {
 		const role = chosen.player === controller ? "you" : "opponent", player = world.players.find((one) => one.id === chosen.player)?.name;
 		return player ? `player ${player} (seat ${chosen.player}, ${role})` : `player ${role} (seat ${chosen.player})`;
-	} const object = world.lastKnown(chosen)?.object; return `${object ? name(object) : chosen.id} (${chosen.id}@${chosen.incarnation})`; };
+	} const known = world.lastKnown(chosen), object = known?.object, traits = known?.traits ?? (object ? world.read(object) : undefined);
+		// Whose it is and its body now, so a target reads as what it is without a cross-reference.
+		const facts = [`${chosen.id}@${chosen.incarnation}`, ...(object ? [object.controller === controller ? "yours" : "opponent's"] : []),
+			...(traits?.types.includes("creature") && traits.power !== undefined ? [`${traits.power}/${traits.toughness}`] : [])];
+		return `${object ? name(object) : chosen.id} (${facts.join(", ")})`; };
 	const marks = targetConflicts(targets.flat(), world, controller).map((one) => one.reason);
 	return [...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map(named).join(", ") : "none"}.`), ...marks];
 }

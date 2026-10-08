@@ -212,6 +212,13 @@ export function helpRequest(frame: Frame, packet: Packet): string {
 		...(!plan?.due ? ["No ordered action is due in this window."] : [])].join(" ");
 }
 
+/** Sentences joined so each ends once. */
+const sentences = (parts: (string | undefined)[]) => parts.filter((one): one is string => !!one?.trim()).map((one) => one.trim().replace(/([^.!?])$/, "$1.")).join(" ");
+
+/** One template for every option: what it does, its facts, then what the plan says about it, including marks shared by all variants of its use. */
+export const criterion = (option: Packet["options"][number], packet: Pick<Packet, "uses">) =>
+	sentences([option.label, option.shows, ...(option.use ? packet.uses[option.use]?.notes ?? [] : []), ...(option.notes ?? [])]);
+
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
 const KEY = "pick";
 /** The pilot's way to say the plan no longer fits. */
@@ -262,9 +269,7 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.refused?.length ? ["refused explains the previous unusable answer. The physical decision is unchanged."] : []),
 	].join("\n");
 	return { type: "choice", instructions, criteria: Object.fromEntries([
-		...packet.options.map((option) => [option.id, ["pass", "attack:done", "block:done"].includes(option.id) && packet.checklist?.length
-			? `Confirm the plan's current completion or waiting conditions, then choose ${option.label}. This records the physical choice, not completion of any unperformed step.`
-			: `Select the option with this id: ${option.label}. Read its bindings, payment and notes in options.`]),
+		...packet.options.map((option) => [option.id, criterion(option, packet)]),
 		...(packet.objection ? [[packet.objection.id, `Ask the judge whether action ${packet.objection.row} declared legal blocks. The judge reconstructs declaration-time evidence and may let it stand or roll back. This choice takes no physical action and does not revise strategy.`]] : []),
 		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
 		...(help ? [[HELP, "Request a revision of the unfinished line. Moves nothing."]] : []),

@@ -17,7 +17,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 	const ends = !next || STEPS[current].phase !== STEPS[next].phase ? `${STEPS[current].phase} phase` : `${current} step`;
 	const moves: Move[] = [
 		{ option: { id: "pass", label: "Pass", shows: waiting.length
-			? "Take no response now. If every seat passes in succession, the top stack object begins resolving."
+			? `Take no response now. If every seat passes in succession, ${waiting[0]!.card ?? (waiting[0]!.ability ? `${waiting[0]!.ability.claim.split(": ")[0]}'s ability` : "the top stack object")} begins resolving.`
 			: current === "cleanup" ? "Take no further action now. If every seat passes in succession, another cleanup step begins."
 			: `Take no further action now. If every seat passes in succession, the ${ends} ends.` }, changes: [], reason: "game-setup" },
 	];
