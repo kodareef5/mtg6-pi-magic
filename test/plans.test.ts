@@ -52,6 +52,7 @@ import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts, 
 import { asState } from "../src/context/model.ts";
 import { dossier } from "../src/context/dossier.ts";
 import { perspectiveReports, reportsSection } from "../src/context/perspectives.ts";
+import { surveyPosition } from "../src/context/survey.ts";
 import { announce, cardTexts, establish, example, finish, main, matchup, pack, passBoth, place, quiet, readDossier } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
@@ -1966,6 +1967,25 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	assert.equal(Object.keys(malformed.reports).length, 0, "a partial line list is not a complete outlook report");
 	assert.equal(malformed.failed?.length, 6, "every unanswered outlook reaches the coordinator as a failure");
 	assert.doesNotMatch(reportsSection(malformed), /Hold: undefined|Outcome: undefined/, "missing report fields never become invented advice");
+	let findingAttempts = 0;
+	const invalidRank: Stream = (_model, request) => {
+		findingAttempts++;
+		if (findingAttempts === 2) assert.match(JSON.stringify(request.messages), /relevance/, "the repair names the malformed ranking field");
+		return { result: async () => ({ content: [{ type: "toolCall", id: `rank-${findingAttempts}`, name: "submit", arguments: {
+			findings: [{ kind: "opportunity", what: "No cast required.", relevance: findingAttempts === 1 ? ":4" : 4, when: "now" }],
+		} }], stopReason: "toolUse" }) };
+	};
+	const repairedFindings = await surveyPosition(workFrame(table, 0), facts, reasoner({ role: "strategy", stream: invalidRank,
+		model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }), undefined, ["attack"]);
+	assert.equal(findingAttempts, 2); assert.equal(repairedFindings.findings[0]!.relevance, 4);
+	const invalidFinding = await surveyPosition(workFrame(table, 0), facts, { work: async (_about, _prompt, tools) => {
+		const valid = { kind: "resource", what: "An untapped source.", relevance: 3, when: "now", ordering: "Before combat." };
+		assert.equal(tools.submit.check({ findings: [valid] }), null);
+		for (const invalid of [null, { ...valid, kind: "unknown" }, { ...valid, what: "" }, { ...valid, relevance: 6 },
+			{ ...valid, when: "yesterday" }, { ...valid, ordering: 7 }, { ...valid, extra: true }]) assert.ok(tools.submit.check({ findings: [invalid] }), "malformed fields cannot reach ranking");
+		throw new Error("No valid finding after repair.");
+	} }, undefined, ["attack"]);
+	assert.equal(invalidFinding.findings.length, 0); assert.equal(invalidFinding.failed?.length, 1, "an unrepaired question reaches later rounds as a failure");
 	const response = structuredClone(workFrame(table, 0));
 	if (response.view.window.kind === "turn") Object.assign(response.view.window, { active: 1, turn: 4 });
 	response.view.work!.request = "Review this opponent response.";

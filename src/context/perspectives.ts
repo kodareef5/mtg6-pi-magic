@@ -19,7 +19,7 @@ export const PERSPECTIVES: Record<string, string> = {
 export type Report = { line: string[]; hold: string; opponentTurn: string; risks: string; outcome: string; confidence: number };
 export type Reports = { reports: Record<string, Report>; failed?: string[] };
 
-const REPORT = { name: "submit", description: "Submit your proposed line for this turn and the opponent's next turn.",
+const REPORT = { name: "submit", description: "Submit your proposed line for this turn and the opponent's next turn. Acceptance checks its shape, not its rules or arithmetic.",
 	parameters: { type: "object", additionalProperties: false, required: ["line", "hold", "opponentTurn", "risks", "outcome", "confidence"], properties: {
 		line: { type: "array", minItems: 1, items: { type: "string" }, description: "Ordered actions for this turn in plain words: land, casts with targets, abilities, attackers, what stays home." },
 		hold: { type: "string", description: "Mana, cards or creatures kept for the opponent's turn and why, or none." },

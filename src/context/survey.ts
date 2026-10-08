@@ -6,6 +6,7 @@
  * told the findings can be wrong.
  */
 import type { Frame } from "../core/types.ts";
+import { problems } from "../core/language.ts";
 import type { Reasoner } from "./reason.ts";
 
 /** The reading every strategy call applies to the dossier. */
@@ -40,7 +41,7 @@ export const ANALYST_SYSTEM = [
 export type Finding = { source: string; kind: "threat" | "opportunity" | "risk" | "resource"; what: string; relevance: number; when: "now" | "their turn" | "later"; ordering?: string };
 export type Survey = { findings: Finding[]; failed?: string[] };
 
-const FINDINGS = { name: "submit", description: "Submit the findings for your question, most relevant first.",
+const FINDINGS = { name: "submit", description: "Submit the findings for your question, most relevant first. Acceptance checks their shape, not their rules or arithmetic.",
 	parameters: { type: "object", additionalProperties: false, required: ["findings"], properties: {
 		findings: { type: "array", minItems: 1, items: { type: "object", additionalProperties: false, required: ["kind", "what", "relevance", "when"], properties: {
 			kind: { type: "string", enum: ["threat", "opportunity", "risk", "resource"] },
@@ -50,7 +51,10 @@ const FINDINGS = { name: "submit", description: "Submit the findings for your qu
 			ordering: { type: "string", description: "The order of operations it depends on, or what to hold open." },
 		} } },
 	} },
-	check: (args: Record<string, unknown>) => Array.isArray(args.findings) && args.findings.length ? null : "Submit at least one finding." };
+	check: (args: Record<string, unknown>): string | null => {
+		const wrong = problems(FINDINGS.parameters, args);
+		return wrong.length ? wrong.join("; ") : null;
+	} };
 
 const EXAMPLE = '{"kind": "opportunity", "what": "Their only untapped creature has no flying or reach, so your 3/3 flyer attacks unblocked: 3 damage takes them from 7 to 4.", "relevance": 4, "when": "now", "ordering": "Attack before casting the sorcery, so its mana stays open if they flash in a blocker."}';
 
