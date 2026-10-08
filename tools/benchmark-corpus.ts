@@ -180,17 +180,18 @@ function score(rows: Row[], gold: Gold) {
 function report(dirs: string[], goldPath: string, items: Item[]) {
 	const gold = existsSync(goldPath) ? JSON.parse(readFileSync(goldPath, "utf8")) as Gold[] : [];
 	const runs = dirs.map((dir) => ({ dir, meta: JSON.parse(readFileSync(join(dir, "meta.json"), "utf8")) as { arm: string; revision: string },
-		rows: readFileSync(join(dir, "results.jsonl"), "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as Row) }));
+		// A call that failed (a provider error, not a pick) says nothing about the question; it is counted, not scored.
+		all: readFileSync(join(dir, "results.jsonl"), "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line) as Row) })).map((run) => ({ ...run, rows: run.all.filter((one) => !one.error) }));
 	const byItem = (rows: Row[]) => { const grouped = new Map<string, Row[]>(); for (const one of rows) grouped.set(one.item, [...grouped.get(one.item) ?? [], one]); return grouped; };
 	const lines = [`# Pilot lab report`, "", `Gold items: ${gold.length}. Runs: ${runs.map((one) => `${one.meta.arm} (${one.meta.revision.slice(0, 7)})`).join(", ")}.`, ""];
 	const categories = [...new Set(gold.map((one) => one.category))].sort();
-	lines.push(`| Category | n | ${runs.map((one) => `${one.meta.arm} rate / mass / modal`).join(" | ")} |`, `| --- | --- | ${runs.map(() => "---").join(" | ")} |`);
+	lines.push(`| Category | n | ${runs.map((one) => `${one.meta.arm} rate / mass / modal (scored)`).join(" | ")} |`, `| --- | --- | ${runs.map(() => "---").join(" | ")} |`);
 	for (const category of [...categories, "all"]) {
 		const golds = gold.filter((one) => category === "all" || one.category === category);
 		lines.push(`| ${category} | ${golds.length} | ${runs.map((run) => {
 			const grouped = byItem(run.rows), scored = golds.flatMap((one) => grouped.get(one.item)?.length ? [score(grouped.get(one.item)!, one)] : []);
 			const mean = (pick: (one: ReturnType<typeof score>) => number) => scored.length ? (scored.reduce((n, one) => n + pick(one), 0) / scored.length).toFixed(2) : "-";
-			return `${mean((one) => one.rate)} / ${mean((one) => one.mass)} / ${mean((one) => Number(one.modal))}`;
+			return `${mean((one) => one.rate)} / ${mean((one) => one.mass)} / ${mean((one) => Number(one.modal))} (${scored.length})`;
 		}).join(" | ")} |`);
 	}
 	const help = (run: (typeof runs)[number], warranted: boolean) => {
@@ -204,7 +205,7 @@ function report(dirs: string[], goldPath: string, items: Item[]) {
 	const calls = (run: (typeof runs)[number]) => (run.rows.reduce((n, one) => n + one.stages.length, 0) / Math.max(1, run.rows.length)).toFixed(2);
 	lines.push("", `| Requests | ${runs.map((one) => one.meta.arm).join(" | ")} |`, `| --- | ${runs.map(() => "---").join(" | ")} |`,
 		`| median / max bytes | ${runs.map(size).join(" | ")} |`, `| Jev calls per decision | ${runs.map(calls).join(" | ")} |`,
-		`| errors | ${runs.map((run) => run.rows.filter((one) => one.error).length).join(" | ")} |`);
+		`| failed decisions, not scored | ${runs.map((run) => run.all.length - run.rows.length).join(" | ")} |`);
 	if (runs.length > 1) {
 		const [control, ...variants] = runs, steady = byItem(control!.rows), labelled = new Set(gold.map((one) => one.item));
 		for (const variant of variants) {
