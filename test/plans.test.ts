@@ -1673,6 +1673,22 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
  assert.deepEqual(response.steps[0]!.when, { active: "opponent", step: "precombat-main", fromTurn: 6, throughTurn: 6 });
  assert.deepEqual(response.steps[1], preserved.steps[0], "unaffected windows stay in the unfinished line");
  assert.throws(() => responseChanges(responding, preserved, { current: [{ label: "Wrong window", when: { active: "self" }, action: { option: "pass" } }] }), /response does not match/, "a model cannot override the current window");
+	const invalid = structuredClone(responding), object = invalid.view.objects![0]!;
+	invalid.view.done = [];
+	invalid.view.work!.request = "Repair this response.";
+	invalid.view.work!.plan = { ...preserved, throughTurn: 6, steps: [{ label: "Old incarnation", when: { active: "self", step: "declare-attackers" },
+		action: { prefix: "attack:", objects: { refs: [{ id: object.id, incarnation: object.incarnation + 100 }] } } }] };
+	const beforeRepair = structuredClone(invalid);
+	const stream: Stream = (_model, request) => {
+		const submit = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
+		assert.ok("steps" in submit.properties && !("current" in submit.properties), "an invalid inherited step needs the full editor, even during an opponent response");
+		assert.match(JSON.stringify(request.messages), /outside this window/);
+		return { result: async () => ({ content: [{ type: "toolCall", id: "repair", name: "submit", arguments: { assessment: {},
+			steps: [{ label: "Pass now", when: { active: "opponent", step: "precombat-main", fromTurn: 6, throughTurn: 6 }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
+	};
+	const repaired = await planWork(invalid, {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally() }));
+	assert.doesNotThrow(() => prepareWork(invalid, repaired.tools), "the seat can explicitly remove stale work outside the current window");
+	assert.deepEqual(invalid, beforeRepair, "offering full edits never repairs or rebinds a source on the seat's behalf");
  seat.observe(workFrame(table, 0)); await new Promise((resolve) => setImmediate(resolve));
  const closing = seat.close(); assert.equal(signals[1]!.aborted, true);
  finishes[1]!({ plan: line }); await closing;

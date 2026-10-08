@@ -114,6 +114,19 @@ plan's step and phase policy, including triggers. General objective and guidance
 remain audit rationale. Completion is explicit per window; missing instructions
 grant no pass.
 
+Strategy analysts read the projected position without the matchup plan,
+notebook or standing plan. The coordinator receives both their proposals and
+that prior intent, and must reconcile them. No physical facts or card text are
+removed from analyst context. Reset, close and supersession cancel the survey,
+outlook and coordinator rounds through the same signal; canceled attempts stay
+in the bill and cannot publish later work.
+
+A response normally edits only its current window. If the inherited plan is
+invalid, strategy instead exposes the existing full editor: validation of the
+whole plan cannot be repaired through fields that preserve the invalid part.
+The writer must explicitly remove or replace those commitments. Context never
+rebinds an old incarnation or drops a step on the player's behalf.
+
 ## Objections
 
 The pilot can object to a just-finished opposing block before the next physical

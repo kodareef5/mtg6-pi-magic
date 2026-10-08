@@ -95,15 +95,19 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	let forecastTold = false;
 	let accepted: Prepared & { objection?: Objection } | undefined;
 	const carried = options.prepared?.edits ?? [];
-	const response = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request && !!frame.view.work.plan;
+	const baseProblems = planProblems(frame, base);
+	const responding = !options.nextTurn && at.kind === "turn" && at.active !== frame.seat && !!frame.view.work?.request && !!frame.view.work.plan;
+	// The current-window editor preserves other steps. It cannot repair invalid
+	// inherited work there; expose the existing full editor so the seat can.
+	const response = responding && !baseProblems.length;
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
 		parameters: { ...SUBMIT.parameters, properties: { assessment: context.survey ? ROLLUP : ASSESSMENT, ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
 			required: ["assessment", ...(response ? ["current"] : [])] } };
 	const decision = !options.nextTurn && frame.decision ? ` The decision in front of the pilot: ${frame.decision.question}` : "";
-	const request = response ? `${frame.view.work?.request}\nRepair this response or combat decision and the rest of the opponent's turn. Your next turn is prepared separately, so do not write its line. Keep the phase policies this decision does not touch.${decision}`
+	const request = responding ? `${frame.view.work?.request}\nRepair this response or combat decision and the rest of the opponent's turn. Your next turn is prepared separately, so do not write its line. Keep the phase policies this decision does not touch.${response ? "" : " The inherited plan is invalid. Use the full changed fields to remove or replace every invalid commitment, including steps outside this window; omitted fields stay."}${decision}`
 		: `${task}${decision}`;
 	const resources = paymentForecast(frame, base);
-	const scoped = options.nextTurn ? "preparation" : response ? "response" : "turn";
+	const scoped = options.nextTurn ? "preparation" : responding ? "response" : "turn";
 	// Analysts judge the position before the coordinator reconciles their findings with prior intent.
 	const planned = planningFrame(frame, scoped);
 	const input = { frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
@@ -111,7 +115,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const doc = dossier(input), facts = dossier(input, "analyst");
 	const findings = context.survey ? await surveyPosition(planned, facts, reasoner, options.signal) : undefined;
 	const reported = findings ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
-	const work = workSections({ base: planFacts(base), problems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
+	const work = workSections({ base: planFacts(base), problems: [...baseProblems, ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
 		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
