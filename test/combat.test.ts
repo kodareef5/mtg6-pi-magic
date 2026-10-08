@@ -80,6 +80,8 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	assert.equal(table.waiting.length, 0, "withdrawing triggers nothing");
 	assert.ok(option(table, `attack:${claws[0]!.id}`), "withdrawal does not forbid reselecting the creature");
 	pick(table, `attack:${claws[0]!.id}`);
+	const attackInProgress = dossier({ frame: workFrame(table, 1) });
+	assert.ok(attackInProgress.includes(`Declaration in progress, not finalized: attacker Hired Claw (${claws[0]!.id}@${claws[0]!.incarnation})`));
 	const retainedChoice = table.ledger.at(-1)!.seq;
 	pick(table, `attack:${claws[1]!.id}`);
 	pick(table, `attack:${kellan.id}`);
@@ -115,11 +117,16 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	assert.match(option(table, `block:${chocobo.id}:${nova.id}`)!.shows!, /Conflicts with flying/);
 	assert.match(option(table, `block:${chocobo.id}:${zhao.id}`)!.shows!, /Conflicts with menace unless another creature also blocks it/);
 	pick(table, `block:${chocobo.id}:${zhao.id}`);
+	const beforeReading = structuredClone(table), blockInProgress = dossier({ frame: workFrame(table, 0) });
+	assert.ok(blockInProgress.includes(`Declaration in progress, not finalized: Sazh's Chocobo (${chocobo.id}@${chocobo.incarnation}) blocks Zhao, the Moon Slayer (${zhao.id}@${zhao.incarnation})`));
+	assert.match(blockInProgress, /Committed combat: attacking .+; blocking nothing yet/);
+	assert.deepEqual(table, beforeReading, "reading the pending declaration moves nothing");
 	assert.match(option(table, "block:done")!.shows!, /Zhao, the Moon Slayer conflicts with menace/);
 	const revision = structuredClone(table);
 	nextDecision(table); assert.deepEqual(table, revision, "listing block withdrawals is pure");
 	pick(table, `unblock:${chocobo.id}:${zhao.id}`);
 	assert.deepEqual(table.combat!.choosing, []);
+	assert.ok(!dossier({ frame: workFrame(table, 0) }).includes("Declaration in progress"), "a withdrawn choice is no longer pending");
 	assert.equal(option(table, "block:done")!.shows, undefined);
 	assert.ok(option(table, `block:${chocobo.id}:${zhao.id}`), "the same block can be selected again");
 	assert.ok(option(table, `block:${chocobo.id}:${nova.id}`), "the withdrawn blocker can instead block another attacker");

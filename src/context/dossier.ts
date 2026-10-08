@@ -67,9 +67,12 @@ function situation({ frame, forecast }: DossierInput, name: (seat: SeatId) => st
 	if (frame.view.turnDraw?.length) lines.push(`- Drawn this turn: ${frame.view.turnDraw.map((one) => one.card ?? "an unknown card").join(", ")}.`);
 	const combat = frame.view.combat;
 	if (combat && (combat.attackers.length || combat.choosing.length)) {
-		const object = (one: { id: string }) => frame.view.objects?.find((candidate) => candidate.id === one.id);
-		lines.push(`- Combat now: attacking ${combat.attackers.map((one) => `${object(one) ? named(object(one)!) : one.id} (${ref(one)})`).join(", ") || "nothing yet"}; ` +
-			`blocking ${combat.blockers.map((one) => `${object(one) ? named(object(one)!) : one.id} blocks ${one.blocking.map((aim) => object(aim) ? named(object(aim)!) : aim.id).join(" and ")}`).join("; ") || "nothing yet"}.`);
+		const object = (one: { id: string; incarnation: number }) => frame.view.objects?.find((candidate) => candidate.id === one.id && candidate.incarnation === one.incarnation);
+		const described = (one: { id: string; incarnation: number }) => `${object(one) ? named(object(one)!) : one.id} (${ref(one)})`;
+		lines.push(`- Committed combat: attacking ${combat.attackers.map(described).join(", ") || "nothing yet"}; ` +
+			`blocking ${combat.blockers.map((one) => `${described(one)} blocks ${one.blocking.map(described).join(" and ")}`).join("; ") || "nothing yet"}.`);
+		if (combat.choosing.length) lines.push(`- Declaration in progress, not finalized: ${combat.choosing.map((one) => "blocker" in one
+			? `${described(one.blocker)} blocks ${described(one.attacker)}` : `attacker ${described(one.attacker)}`).join("; ")}.`);
 	}
 	return ["## Situation", ...lines].join("\n");
 }
