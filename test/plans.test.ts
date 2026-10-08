@@ -1889,17 +1889,18 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
 			steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] });
 	};
-	await planWork(workFrame(table, 0), { survey: true }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	const brief = { ...emptyBrief(0), route: "Pregame growth expertise" };
+	await planWork(workFrame(table, 0), { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	const hand = new Set(cardsIn(table, "hand", 0).map((one) => one.card));
 	for (const card of hand) assert.ok(questions.some((one) => one.includes(`Your card ${card}.`)), `a focused question for ${card}`);
 	for (const kind of ["The opponent.", "Their next attack.", "Your whole attack this turn.", "Orders of operations", "Removal.", "Your other resources."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
 	for (const outlook of ["expert defender", "aggressive punisher", "long-horizon planner", "sequencing specialist", "the opponent looking", "removal analyst"]) assert.ok(outlooks.some((one) => one.includes(outlook)), outlook);
 	const [doc, work] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
-	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn") }, "analyst");
+	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn"), brief }, "analyst");
 	for (const asked of [...questions, ...outlooks]) {
 		const seen = (JSON.parse(asked) as { content: string }[])[0]!.content;
 		assert.equal(seen, facts, "every analyst reads the same projected facts");
-		assert.ok(!seen.includes("## Your standing plan") && !seen.includes("## Your matchup plan") && !seen.includes("Prior tactical conclusion"), "analysts work without prior strategic conclusions");
+		assert.ok(seen.includes("Pregame growth expertise") && !seen.includes("## Your standing plan") && !seen.includes("Prior tactical conclusion"), "analysts receive matchup advice without earlier tactical conclusions");
 	}
 	assert.ok(doc!.startsWith(facts) && doc!.includes("Prior tactical conclusion"), "the coordinator keeps the same facts and the prior intent it must reconcile");
 	assert.ok(work!.indexOf("## Findings from focused questions") < work!.indexOf("## Reports from six outlooks") && work!.indexOf("## Reports from six outlooks") < work!.indexOf("## Your request"), "analysts' work comes before the request, which comes last");

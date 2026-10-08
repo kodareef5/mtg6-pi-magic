@@ -12,8 +12,8 @@ import type { Playbook } from "./playbook.ts";
 const quote = (text: string) => text.trim().split("\n").map((line) => `> ${line}`.trimEnd()).join("\n");
 const FAMILIES: [keyof Playbook, string][] = [["sequencing", "Sequencing"], ["resources", "Resources"], ["responses", "Responses"], ["combat", "Combat"], ["recovery", "Recovery"]];
 
-export function strategySections(frame: Frame, brief?: Brief): string[] {
-	return [matchupPlan(brief), notebook(frame), standingPlan(frame)];
+export function strategySections(frame: Frame, brief?: Brief, reader: "analyst" | "coordinator" = "coordinator"): string[] {
+	return [matchupPlan(brief), ...(reader === "coordinator" ? [notebook(frame), standingPlan(frame)] : [])];
 }
 
 function matchupPlan(brief?: Brief): string {

@@ -120,9 +120,10 @@ reference when known. A future source uses its card name without an invented
 incarnation. Naming only a side can leave the pilot choosing one of its creatures
 when the writer intended the player.
 
-Strategy analysts read the projected position without the matchup plan,
-notebook or standing plan. The coordinator receives both their proposals and
-that prior intent, and must reconcile them. No physical facts or card text are
+Strategy analysts read the projected position and pregame matchup advice without
+the notebook or standing plan. The coordinator receives their proposals and
+that prior tactical intent, and must reconcile them. Pregame advice is revisable,
+not a conclusion about the current position. No physical facts or card text are
 removed from analyst context. Reset, close and supersession cancel the survey,
 outlook and coordinator rounds through the same signal; canceled attempts stay
 in the bill and cannot publish later work.

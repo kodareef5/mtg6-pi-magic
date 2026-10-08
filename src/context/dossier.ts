@@ -1,8 +1,8 @@
 /**
  * The game dossier: projected facts shared by the strategy calls in a session.
  * Every call gets public zones, the seat's hand, mana, triggers, registered
- * lists and odds, card text and recent turns. Only the coordinator also reads
- * the matchup plan, notebook and standing plan. No physical facts are dropped
+ * lists and odds, card text, recent turns and the pregame matchup advice.
+ * Only the coordinator also reads the notebook and standing plan. No physical facts are dropped
  * and no code judges the position. Model-written text is
  * quoted under a heading that names its author, so loud content stays inside
  * its section. Past 150 lines to keep every section beside the layout rules.
@@ -44,7 +44,7 @@ export function dossier(input: DossierInput, reader: "analyst" | "coordinator" =
 		"## Mana", manaLines(frame).map((line) => `- ${line}`).join("\n"),
 		triggers(frame, name), decks(frame, name), cardText(input),
 		recent(frame, name, input.recaps),
-		...(reader === "coordinator" ? strategySections(frame, input.brief) : []),
+		...strategySections(frame, input.brief, reader),
 	].join("\n\n");
 }
 
