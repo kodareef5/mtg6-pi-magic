@@ -4,7 +4,8 @@ import type { Frame } from "../src/core/types.ts";
 import { select } from "../src/core/query.ts";
 
 export type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string; zone?: string };
-export type PlanCheck = { expect?: Property; require?: Property[]; forbid?: Property; order?: Property[]; forbidProse?: string[] };
+export type PlanCheck = { expect?: Property; require?: Property[]; forbid?: Property; order?: Property[]; forbidProse?: string[];
+	requireHold?: boolean; requireOpponentResponse?: boolean };
 
 export function planText(plan: Plan): string {
 	return [plan.objective, plan.guidance, ...(plan.phases ?? []).flatMap((one) => [one.goal, one.guidance, one.reevaluate]),
@@ -22,7 +23,9 @@ export function checkPlan(plan: Plan, check: PlanCheck, frame: Frame) {
 	const ordered = check.order?.map(index) ?? [];
 	const structure = (!check.expect || index(check.expect) >= 0) && (!check.forbid || index(check.forbid) < 0) &&
 		(check.require ?? []).every((property) => index(property) >= 0) &&
-		ordered.every((at, n) => at >= 0 && (!n || at > ordered[n - 1]!));
+		ordered.every((at, n) => at >= 0 && (!n || at > ordered[n - 1]!)) &&
+		(!check.requireHold || !!plan.holds?.length) &&
+		(!check.requireOpponentResponse || !!plan.phases?.some((phase) => phase.when.active === "opponent" && !phase.when.step && !phase.when.phase));
 	const prose = (check.forbidProse ?? []).flatMap((pattern) => {
 		const matches = [...planText(plan).matchAll(new RegExp(pattern, "gi"))].map((one) => one[0]);
 		return matches.length ? [{ pattern, matches }] : [];

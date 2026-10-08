@@ -53,5 +53,10 @@ policy obedience, legal play, help and repairs separately. Record external
 stops, refusals, canceled calls and missing usage explicitly. Repeated identical
 pilot packets measure score stability rather than independent success rates.
 
+The authoring cases require a structured hold. `response-authoring` also
+requires an opponent phase policy with no step or phase restriction. These
+checks establish presence and scope, not whether the payment or response works.
+Cases without property checks grade only acceptance and continuation health.
+
 Retired experiments remain in Git history. Local notes live under ignored
 `design-ref/experiments/`. See [gameplay status](../../docs/STATUS.md).

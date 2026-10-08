@@ -28,7 +28,9 @@
     "smaug-zero-target": "test/fixtures/benchmarks/smaug-zero-target.jsonl.gz",
     "green-harmonizer-lethal": "test/fixtures/benchmarks/green-harmonizer-lethal.jsonl.gz",
     "stale-response": "test/fixtures/benchmarks/stale-response.jsonl.gz",
-    "green-hydra-growth": "test/fixtures/benchmarks/green-hydra-growth.jsonl.gz"
+    "green-hydra-growth": "test/fixtures/benchmarks/green-hydra-growth.jsonl.gz",
+    "reserve-authoring": "test/fixtures/benchmarks/reserve-authoring.jsonl.gz",
+    "response-authoring": "test/fixtures/benchmarks/response-authoring.jsonl.gz"
   },
   "cases": [
     {
@@ -677,6 +679,25 @@
       "task": "plan",
       "winner": 0,
       "property": "Find and execute a turn-7 win through land entries, counter growth and temporary power growth. Use --play --through 7; accepted plans alone do not grade the outcome."
+    },
+    {
+      "id": "reserve-authoring",
+      "journal": "reserve-authoring",
+      "version": 77,
+      "seat": 1,
+      "task": "plan",
+      "property": "Carry the chosen development payment through combat without unrelated spending.",
+      "requireHold": true
+    },
+    {
+      "id": "response-authoring",
+      "journal": "response-authoring",
+      "version": 73,
+      "seat": 1,
+      "task": "plan",
+      "property": "Reserve usable red and cover growth responses throughout the opponent turn.",
+      "requireHold": true,
+      "requireOpponentResponse": true
     }
   ]
 }

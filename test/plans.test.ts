@@ -147,6 +147,12 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.equal(checkPlan(line, required, workFrame(table, 0)).passed, true);
 	assert.equal(checkPlan({ ...line, steps: [line.steps[0]!] }, required, workFrame(table, 0)).passed, false, "the first named action alone cannot satisfy the whole commitment");
 	assert.equal(checkPlan({ ...line, steps: [...line.steps].reverse() }, required, workFrame(table, 0)).passed, true, "required actions do not invent an ordering constraint");
+	assert.equal(checkPlan(line, { requireHold: true }, workFrame(table, 0)).passed, false, "payment prose does not establish a held resource");
+	assert.equal(checkPlan({ ...line, holds: [{ objects: { card: "Forest" }, purpose: "Keep the cast payment." }] }, { requireHold: true }, workFrame(table, 0)).passed, true);
+	const response = { ...line, phases: [{ when: { active: "opponent" as const }, guidance: "Respond when the target appears." }] };
+	assert.equal(checkPlan(response, { requireOpponentResponse: true }, workFrame(table, 0)).passed, true);
+	for (const when of [{ active: "self" as const }, { active: "opponent" as const, step: "declare-blockers" as const }, { active: "opponent" as const, phase: "combat" as const }])
+		assert.equal(checkPlan({ ...response, phases: [{ ...response.phases[0]!, when }] }, { requireOpponentResponse: true }, workFrame(table, 0)).passed, false, "a restricted phase does not cover the opponent's whole turn");
 	const typed = { ...line, steps: [{ ...line.steps[2]!, action: { prefix: "attack:", objects: { zones: ["battlefield" as const], controller: "self" as const, types: ["creature" as const] } } }] };
 	assert.deepEqual(planProblems(workFrame(table, 0), typed), []);
 	assert.deepEqual(select(typed.steps[0]!.action.objects, workFrame(table, 0)).map((one) => one.card), ["Sazh's Chocobo"]);

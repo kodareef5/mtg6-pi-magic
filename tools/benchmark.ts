@@ -171,7 +171,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
 						{ out: join(out, `${one.id}-${iteration}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
 					const game = continuation.result;
-					passed = (one.winner === undefined ? passed : game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+					passed = passed && (one.winner === undefined || game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
 				}
 			} else {
 				const api: DecisionApi = pilot !== "luna" ? decisionApi(inference.classify, classifiers.get(pilot)!, { tally: measured, seat: one.seat }) : {
