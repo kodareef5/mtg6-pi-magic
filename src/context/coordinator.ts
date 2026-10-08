@@ -45,8 +45,9 @@ export const ASSESSMENT = { type: "object", additionalProperties: false, require
 
 /** With analysts' work supplied, the coordinator's own working is the rollup. */
 export const ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "adopted", "win", "priorities"],
-	description: "Write first. Weigh the findings and the six reports against the dossier. Your own working; Jev never reads it.",
+	description: "Write first. Weigh the branches or reports and the findings against the dossier. Your own working; Jev never reads it.",
 	properties: {
+		branches: text("When branches are present: for the two that claim the most damage, check each ledger row against the dossier, its costs, sources, triggers and power. Name the first row that fails and whether another source, payment or order repairs it, or confirm the total."),
 		corrections: text("Findings or report claims that contradict the dossier or the card text, corrected, or none."),
 		adopted: text("Which reports or parts of them you adopt and why, and which you reject. When a finding or report claims more damage than your line, recount its steps against the card text and mana. If a step fails, try another source, payment or order; reject the claim only by naming the step that still fails. Merge parts only when they fit the same mana and order."),
 		win: text(win),
@@ -66,7 +67,7 @@ export const RESPONSE_ROLLUP = { type: "object", additionalProperties: false, re
 const ORDER = [
 	"The conversation gives you, in order:",
 	"1. A game dossier with everything this player knows. The board, mana, deck lists, odds and card text are projected facts. Registered triggers are accepted interpretations; they, the matchup plan, notebook and standing plan can be wrong.",
-	"2. The work for this decision: findings from focused questions and reports from six outlooks when they ran, the plan you are editing, the actions you can reuse, and any problems or changes.",
+	"2. The work for this decision: branches that each follow one first action, or reports from six outlooks, and findings from focused questions, when they ran; then the plan you are editing, the actions you can reuse, and any problems or changes.",
 	"3. Your request, last.",
 ].join("\n");
 
@@ -81,7 +82,7 @@ export function coordinatorSystem(definitions: string): string {
 		"- Play a land each turn you hold one, and choose which by what this turn needs. A land you play and then sacrifice to search for another land makes two land entries; a basic makes one entry and one mana. With a landfall payoff on the battlefield or castable first, count the result of each land you could play before you play any.",
 		"- Spend burn when it removes a blocker that stops lethal or a key threat, or finishes the opponent. A reserve names an actual card in hand and the window it is for. An unknown draw is not a response.",
 		"- Use the matchup plan's policies where they fit the board, and check their reconsider conditions. A policy is guidance, not proof that it fits. Check both clocks and the last window to answer before you commit resources.",
-		"- When findings or reports are present, weigh them against the dossier. When one claims more damage than your line, recount its steps. If a step fails, try another source, payment or order before you reject it. Merge parts only when they fit the same mana and order.",
+		"- When branches, reports or findings are present, weigh them against the dossier. Read the branches first: each follows one first action, so together they compare your land plays and casts. When one claims more damage than your line, recount its steps. If a step fails, try another source, payment or order before you reject it. Merge parts only when they fit the same mana and order.",
 		"",
 		"## Rules of play", RULES_OF_PLAY, "",
 		"## Reading the dossier",
@@ -100,7 +101,7 @@ export function coordinatorSystem(definitions: string): string {
 		"- Name target kinds and identities in purpose and phase guidance. For a player target, say player <name> (seat <id>); the side's name alone can also mean its creatures. For a creature target, name the creature and its current ref when known. A future source needs a card name, not an invented incarnation.",
 		"- waitFor: empty-stack makes a step wait for the whole stack to resolve, such as a landfall payoff before a fetch. Otherwise steps keep announcement order.",
 		"- may holds conditional responses and alternative lines. Cover draw classes that change the line, not one branch per card.",
-		"- holds keep sources for a purpose. A hold query reserves every object it matches, so use refs for one object. releaseWhen ends a hold on a visible fact. releaseAt ends it at a window, such as active self and step declare-attackers.",
+		"- holds keep sources for a purpose. A hold query reserves every object it matches, so use refs for one object. releaseWhen ends a hold on a visible fact. releaseAt ends it at a window, such as active self and step declare-attackers. A later step does not reserve its own mana: when an earlier window offers another use of the same sources, such as an upgrade or a response before a postcombat cast, hold those sources with releaseAt at the step that spends them.",
 		"- askWhen stops the pilot on a visible fact that makes the line impossible. It must not cause routine replanning.",
 		"- theirTurn is your policy for the whole of the opponent's next turn, read at every decision in it: what to answer, with which card, target and mana, what to block, and when to pass. It is required; say plainly when nothing in hand answers anything.",
 		"- phases add guidance for single windows: responses, trigger targets, searches, optional choices and exceptions. A phase replaces the inherited phase with the same when and the others stay, so write a window's when again to change it. complete is pass or ask once that window's commitments are done. reevaluate lists board changes this guidance does not handle; Jev asks for help when one happens.",

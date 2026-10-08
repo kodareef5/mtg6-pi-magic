@@ -20,7 +20,8 @@ import { budget, paymentForecast } from "../core/budget.ts";
 import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts, planningChoices } from "./strategy-actions.ts";
 import { chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
-import { findingsSection, surveyPosition } from "./survey.ts";
+import { findingsSection, questions, surveyPosition } from "./survey.ts";
+import { branchReports, branchesSection } from "./branches.ts";
 import { perspectiveReports, reportsSection } from "./perspectives.ts";
 import { dossier } from "./dossier.ts";
 import { matchupExamples } from "./dossier-strategy.ts";
@@ -116,14 +117,19 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const input = { frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
 		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}), scope: scoped };
 	const doc = dossier(input), facts = dossier(input, "analyst");
-	const findings = context.survey ? await surveyPosition(planned, facts, reasoner, options.signal, response ? ["opponent", "defense", "removal"] : undefined) : undefined;
-	const reported = findings && !response ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
+	// Own turns and preparations branch on each first action beside the focused questions; branches cover the attack and its order.
+	// An invalid inherited response keeps the outlooks; a valid one asks three questions.
+	const branching = !!context.survey && !responding;
+	const only = response ? ["opponent", "defense", "removal"] : branching ? questions(planned).map(([source]) => source).filter((source) => !["attack", "ordering", "zones"].includes(source)) : undefined;
+	const [findings, branched] = await Promise.all([context.survey ? surveyPosition(planned, facts, reasoner, options.signal, only) : undefined,
+		branching ? branchReports(planned, facts, available, reasoner, options.signal) : undefined]);
+	const reported = findings && !response && !branching ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
 	const work = workSections({ base: planFacts(base), problems: [...baseProblems, ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
 		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
 		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
-		...(findings ? { analysts: [findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
+		...(findings ? { analysts: [...(branched ? [branchesSection(branched)] : []), findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.

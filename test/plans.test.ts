@@ -1769,15 +1769,15 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
  assert.equal(signals.length, 2, "closed seats start nothing more");
 
 	// Exercise the real preparation pipeline with a provider that never finishes.
-	// Cancellation must stop either analyst round before the coordinator starts.
-	for (const stage of ["survey", "perspective"] as const) {
+	// Cancellation must stop the focused questions or the branches before the coordinator starts.
+	for (const stage of ["survey", "branch"] as const) {
 		const pending: AbortSignal[] = [], calls = tally();
 		let coordinated = 0;
 		const stream: Stream = (_model, request, options) => {
 			const schema = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
 			const survey = "findings" in schema.properties;
-			if (stage === "perspective" && survey) return { result: async () => ({ content: [{ type: "toolCall", id: "finding", name: "submit", arguments: { findings: [] } }], stopReason: "toolUse" }) };
-			if (!survey && !("line" in schema.properties)) coordinated++;
+			if (stage === "branch" && survey) return { result: async () => ({ content: [{ type: "toolCall", id: "finding", name: "submit", arguments: { findings: [] } }], stopReason: "toolUse" }) };
+			if (!survey && !("line" in schema.properties) && !("ledger" in schema.properties)) coordinated++;
 			pending.push(options!.signal!);
 			return { result: () => new Promise(() => {}) };
 		};
@@ -1786,7 +1786,7 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
 			prepare: (frame, signal) => prepareTurn(frame, { survey: true }, planner, signal) });
 		pilot.observe(workFrame(table, 0));
 		await new Promise((resolve) => setImmediate(resolve));
-		assert.ok(pending.length > 1, `${stage} calls began together`);
+		assert.ok(pending.length > (stage === "survey" ? 1 : 0), `${stage} calls began`);
 		await pilot.close();
 		assert.ok(pending.every((signal) => signal.aborted), `closing cancels every ${stage} request`);
 		assert.equal(coordinated, 0, "a canceled round cannot launch the coordinator");
@@ -1927,7 +1927,7 @@ test("a hold can end at a window, and object queries accept the writer's you", (
 	assert.equal(reached({ active: "self", phase: "combat" }, at(0, "begin-combat")), true, "a phase begins at its first step");
 });
 
-test("focused questions rate findings, outlooks propose lines in parallel, and the coordinator weighs them", async () => {
+test("focused questions rate findings, branches follow each first action in parallel, and the coordinator weighs them", async () => {
 	const table = matchup("survey");
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest");
@@ -1935,12 +1935,13 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Prior tactical conclusion", guidance: "Prior payment assumption", steps: [] } },
 		{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const before = structuredClone(table);
-	const questions: string[] = [], outlooks: string[] = [], writer: string[] = [], coordinated: string[] = [];
+	const questions: string[] = [], outlooks: string[] = [], branches: string[] = [], writer: string[] = [], coordinated: string[] = [];
 	const stream: Stream = (_model, request) => {
 		const submit = request.tools?.find((one) => one.name === "submit")?.parameters as { properties: Record<string, unknown> } | undefined;
 		const reply = (args: Record<string, unknown>) => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: args }], stopReason: "toolUse" }) });
 		if (submit && "findings" in submit.properties) { questions.push(JSON.stringify(request.messages)); return reply({ findings: [{ kind: "opportunity", what: "Hydra: 2 + 1 = 3 sources pay {2}{G}.", relevance: questions.length % 5 + 1, when: "now" }] }); }
 		if (submit && "line" in submit.properties) { outlooks.push(JSON.stringify(request.messages)); return reply({ line: ["Play Forest", "Cast Mossborn Hydra"], hold: "none", opponentTurn: "Block with Hydra", risks: "none", outcome: "20 to 20", confidence: 3 }); }
+		if (submit && "ledger" in submit.properties) { branches.push(JSON.stringify(request.messages)); return reply({ ledger: ["Play Forest: one land entry."], attackers: "None.", damage: branches.length, theirLife: 20 - branches.length }); }
 		writer.push(JSON.stringify(request.messages)); coordinated.push(JSON.stringify(submit));
 		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
 			...(submit && "current" in submit.properties ? { current: [{ label: "Pass now", action: { option: "pass" } }] }
@@ -1950,20 +1951,23 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	await planWork(workFrame(table, 0), { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	const hand = new Set(cardsIn(table, "hand", 0).map((one) => one.card));
 	for (const card of hand) assert.ok(questions.some((one) => one.includes(`Your card ${card}.`)), `a focused question for ${card}`);
-	for (const kind of ["The opponent.", "Their next attack.", "Your whole attack this turn,", "Orders of operations", "Removal.", "Your other resources."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
-	for (const outlook of ["expert defender", "aggressive punisher", "long-horizon planner", "sequencing specialist", "the opponent looking", "removal analyst"]) assert.ok(outlooks.some((one) => one.includes(outlook)), outlook);
+	for (const kind of ["The opponent.", "Their next attack.", "Removal."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
+	for (const kind of ["Your whole attack this turn,", "Orders of operations", "Your other resources."]) assert.ok(!questions.some((one) => one.includes(kind)), `branches replace ${kind}`);
+	assert.equal(outlooks.length, 0, "an own turn branches on first actions instead of asking six outlooks");
+	assert.ok(branches.some((one) => one.includes("Commit to this first action this turn: Play Forest from hand.")), "each land play is a first action");
 	const [doc, work] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
 	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn"), brief }, "analyst");
-	for (const asked of [...questions, ...outlooks]) {
+	for (const asked of [...questions, ...branches]) {
 		const seen = (JSON.parse(asked) as { content: string }[])[0]!.content;
 		assert.equal(seen, facts, "every analyst reads the same projected facts");
 		assert.ok(seen.includes("Pregame growth expertise") && !seen.includes("## Your standing plan") && !seen.includes("Prior tactical conclusion"), "analysts receive matchup advice without earlier tactical conclusions");
 	}
 	assert.ok(doc!.startsWith(facts) && doc!.includes("Prior tactical conclusion"), "the coordinator keeps the same facts and the prior intent it must reconcile");
-	assert.ok(work!.indexOf("## Findings from focused questions") < work!.indexOf("## Reports from six outlooks") && work!.indexOf("## Reports from six outlooks") < work!.indexOf("## Your request"), "analysts' work comes before the request, which comes last");
+	assert.ok(work!.indexOf("## Branches from each first action") < work!.indexOf("## Findings from focused questions") && work!.indexOf("## Findings from focused questions") < work!.indexOf("## Your request"), "analysts' work comes before the request, which comes last");
+	const claimed = [...work!.matchAll(/Claims (\d+) damage/g)].map((match) => Number(match[1]));
+	assert.deepEqual(claimed, [...claimed].sort((a, b) => b - a), "branches arrive ordered by the damage they claim");
 	const ranks = [...work!.matchAll(/^\d+\. Relevance (\d)/gm)].map((match) => Number(match[1]));
 	assert.deepEqual(ranks, [...ranks].sort((a, b) => b - a), "findings arrive ranked by relevance");
-	assert.equal(work!.split("## Reports from six outlooks")[1]!.split("\n## ")[0]!.match(/^### /gm)!.length, 6);
 	assert.match(coordinated[0]!, /adopted/, "the coordinator records which reports it adopts");
 	assert.deepEqual(table, before, "asking questions changes nothing on the table");
 	const missingFields: Stream = (_model, request) => {

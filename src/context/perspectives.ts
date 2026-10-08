@@ -5,7 +5,7 @@
  * report is a model's proposal, never a move or a certified line.
  */
 import type { Reasoner } from "./reason.ts";
-import { ANALYST_SYSTEM, findingsSection, type Survey } from "./survey.ts";
+import { ANALYST_SYSTEM, ANALYST_TIMEOUT, findingsSection, type Survey } from "./survey.ts";
 
 export const PERSPECTIVES: Record<string, string> = {
 	defender: "an expert defender. Survive and stabilize first: protect your life total and key permanents, and value blocks and instant-speed answers held for the opponent's turn",
@@ -62,7 +62,7 @@ export async function perspectiveReports(dossier: string, survey: Survey, reason
 	const findings = findingsSection(survey);
 	await Promise.all(Object.entries(PERSPECTIVES).map(async ([name, outlook]) => {
 		try {
-			result.reports[name] = await reasoner.work(`perspective ${name}`, { system: ANALYST_SYSTEM, user: dossier, task: `${findings}\n\n${ask(outlook)}` }, { submit: REPORT, turns: 2, signal }, 1200) as Report;
+			result.reports[name] = await reasoner.work(`perspective ${name}`, { system: ANALYST_SYSTEM, user: dossier, task: `${findings}\n\n${ask(outlook)}` }, { submit: REPORT, turns: 2, signal, timeoutMs: ANALYST_TIMEOUT }, 1200) as Report;
 		} catch (error) {
 			signal?.throwIfAborted();
 			(result.failed ??= []).push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
