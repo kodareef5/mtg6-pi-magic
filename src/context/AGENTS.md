@@ -80,13 +80,12 @@ it. The ledger records truncation only when the provider reports a length stop.
 - **Pick** returns one id from the prepared list. It never plans, never widens
   the list and never writes a move.
 
-The action question includes the phase instructions and core's derived checklist.
-It distinguishes available actions, later steps, false conditions, stack
-prerequisites and unavailable uses. Jev chooses directly under that policy;
-passing confirms the current completion or waiting conditions. Phase rows carry
-no action availability count or option-derived card list. A phase with no
-matching explicit step or branch is labelled `policy`. Its prose can still
-require an action; completion applies as authored. Jev does not
+The action question opens with a short orientation. Every criterion follows one
+template: what the option does, its facts, and the plan's marks on it, including
+marks shared by all variants of a use. The checklist states in plain words
+whether an option here takes each planned action. The pass option says what
+passing does now; nothing in the question grants or withholds a pass. A phase
+that asks for help is stated on the help option. Jev does not
 receive a separate response review or one strategic question per unmentioned
 card. Private review notes remain available as seat work, without completing
 steps. Resolution receives the accepted effect and its remaining instructions,

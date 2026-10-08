@@ -82,7 +82,7 @@ const submittedOption = Type.Object({ ...PlanDefs.Option.properties, when: Write
 		Type.Object({ procedure: terms }, { additionalProperties: false })]),
 }, { additionalProperties: false });
 // objective and guidance are audit rationale that Jev never reads; the writer's assessment fills them, so a decision cannot hide there.
-const Complete = Type.Union([Type.Literal("pass"), Type.Literal("ask")], { description: "pass: once this window's commitments finish, Jev may end it. ask: Jev asks for help instead." });
+const Complete = Type.Union([Type.Literal("pass"), Type.Literal("ask")], { description: "ask: the pilot is told, on its help option, that the plan asks for help once this window's planned actions are done. pass: adds nothing; the pilot passes when nothing planned remains." });
 const writtenPhase = Type.Object({ ...planFields.properties.phases.items.properties, when: WriterWhen, complete: Complete }, { additionalProperties: false, required: ["when", "guidance", "complete"] });
 /** The opponent's whole next turn, as one policy Jev reads at every decision in it. It becomes a phase with no step. */
 export const TheirTurn = Type.Object({

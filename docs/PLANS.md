@@ -71,7 +71,8 @@ A commitment can explicitly require `waitFor: "empty-stack"`. While any object
 remains on the stack, its checklist, script and marks show waiting and keep
 later steps later. Every physical option stays available and a chosen action
 still records execution. An omitted prerequisite preserves announcement order,
-so a second response can go above the first. Waiting grants no pass.
+so a second response can go above the first. Waiting changes no option; the
+seat still chooses its pass.
 
 Finishing an attacker declaration names the available ordered attack steps it
 would leave unfinished. Their choices remain offered, including finishing;
@@ -111,8 +112,9 @@ and preserves progress.
 Context renders each step's execution choices before
 announcement and throughout inspection. Resolution recovers the announcing
 plan's step and phase policy, including triggers. General objective and guidance
-remain audit rationale. Completion is explicit per window; missing instructions
-grant no pass.
+remain audit rationale. A phase may end with `complete: "ask"`, which the pilot
+reads on its help option. Nothing in the plan grants or withholds a pass, and no
+code passes for the seat; the pass option says what passing does now.
 
 Execution policies name the target's kind and identity. A player target names
 the player and seat number; a creature target names the creature and its current

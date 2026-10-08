@@ -307,8 +307,9 @@ A **plan** is what jev flies.
   A nonvigilant attack commits its tap when the declaration finishes.
 - `packages`: corrections to the seat's prepared registrations and procedures.
 - `phases`: window policies for responses, triggers, searches and exceptions.
-  Optional `complete: "pass" | "ask"` states what to choose after the window's
-  commitments finish. Absence and empty lists grant no pass. Waiting for a stack
+  Optional `complete: "ask"` tells the pilot, on its help option, to ask for a
+  new plan once the window's commitments finish; `"pass"` adds nothing, since the
+  pass option already says what passing does. Waiting for a stack
   object uses the response policy separately. Trigger and ordinary resolution
   read the phase policy in force at announcement, even after an amendment.
 

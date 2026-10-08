@@ -308,8 +308,8 @@ those from the pinned card file rather than trusting a claim.
 
 A compulsory rules operation with one option is forced. A priority pass or
 combat declaration belongs to the seat even when only one option is listed.
-Jev selects every voluntary action and pass, including a unique planned action;
-silence in a plan grants no permission to pass. A resolving card instruction
+Jev selects every voluntary action and pass, including a unique planned action.
+No code passes for a seat; the pass option states what passing does now. A resolving card instruction
 can be delegated with that seat's explicit authorization. Strategy calls and
 escalations add no physical decision. Read reasons beside total calls, tokens,
 cost and elapsed time; the forced ratio is not a gameplay target.
