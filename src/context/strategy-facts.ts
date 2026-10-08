@@ -1,5 +1,4 @@
-/** The strategist's projected position, resources and reference tools. No hidden order is read.
- * Past 150 lines to keep the observed and forecast positions on the same complete readers. */
+/** The strategist's projected position, resources and reference tools. No hidden order is read. */
 import type { Frame } from "../core/types.ts";
 import type { SeenObject } from "../core/work.ts";
 import type { Selector } from "../core/language.ts";

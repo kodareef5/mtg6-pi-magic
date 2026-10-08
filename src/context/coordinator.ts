@@ -9,6 +9,7 @@
 import { RULES_OF_PLAY } from "./survey.ts";
 
 const text = (description: string) => ({ type: "string", minLength: 1, description });
+const win = "All your attackers together, castable haste included: damage through the opponent's best legal blocks, including trample and double strike, plus burn you can pay for, against their life. Write the sum and the winning line in order, or why not.";
 
 /** Without analysts the coordinator surveys the board itself, piece by piece, before any plan field. */
 export const ASSESSMENT = { type: "object", additionalProperties: false, required: ["hand", "zones", "opponents", "combat", "combinations", "rollup"],
@@ -37,7 +38,7 @@ export const ASSESSMENT = { type: "object", additionalProperties: false, require
 			cards: text("The cards and their total cost against your mana."), effect: text("What they achieve together, or why it is not worth it."),
 		} } },
 		rollup: { type: "object", additionalProperties: false, required: ["win", "priorities"], properties: {
-			win: text("All your attackers together, castable haste included: total damage, minus the largest attacker each untapped opposing creature can block, plus burn, against their life. The winning line in order, or why not."),
+			win: text(win),
 			priorities: { type: "array", items: { type: "string" }, description: "The opportunities above ranked by impact. The plan carries out the first ones." },
 		} },
 	} };
@@ -48,7 +49,7 @@ export const ROLLUP = { type: "object", additionalProperties: false, required: [
 	properties: {
 		corrections: text("Findings or report claims that contradict the dossier or the card text, corrected, or none."),
 		adopted: text("Which reports or parts of them you adopt and why, and which you reject. Prefer a line whose arithmetic you checked; merge parts only when they fit the same mana and order."),
-		win: text("All your attackers together, castable haste included: total damage, minus the largest attacker each untapped opposing creature can block, plus burn, against their life. Write the sum. The winning line in order, or why not."),
+		win: text(win),
 		priorities: { type: "array", items: { type: "string" }, description: "The opportunities ranked by impact, combinations and removal included. The plan carries out the first ones." },
 	} };
 
@@ -158,9 +159,10 @@ const EXAMPLE = JSON.stringify({ steps: [
 ], phases: [{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block their largest attacker only if the damage would be lethal.", complete: "pass" }] });
 
 /** The request that ends the conversation. */
-export function coordinatorAsk(request: string, kind: "turn" | "preparation" | "response"): string {
+export function coordinatorAsk(request: string, kind: "turn" | "preparation" | "response", current = kind === "response"): string {
 	return ["## Your request", request, "",
-		kind === "response" ? "Answer through submit: assessment first, then current and any changed holds, phases or guidance."
+		kind === "response" ? current ? "Answer through submit: assessment first, then current and any changed holds, phases or guidance."
+			: "Answer through submit: assessment first, then the full plan fields that change, including steps to repair invalid inherited commitments."
 			: "Plan the turn and the opponent's next turn: the line, the mana it commits, and the phase decisions. Check them together, then answer through submit with assessment first and the plan fields that change.",
 		...(kind === "response" ? [] : ["", "The plan fields of an answer, for their shape only. Your assessment comes first, as the submit tool describes it.", EXAMPLE]),
 	].join("\n");

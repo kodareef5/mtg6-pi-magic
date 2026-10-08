@@ -81,13 +81,14 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 		const use = one.action.procedure;
 		const { cost, instructions: _instructions, ...procedure } = use;
 		const bound = useSources(frame, procedure, turn);
-		if (!bound.length && !prior) return undefined;
 		const card = procedure.source.card;
+		const visible = (frame.view.objects ?? []).filter((one) => one.card === card && one.controller === frame.seat);
+		if (!bound.length && !prior && (procedure.timing !== "stack" || !visible.length)) return undefined;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
 			manaBudgets: bound.map((source) => ({ source: { id: source.id, incarnation: source.incarnation }, ...manaBudget(resources, use, source) })),
 			...(turn === undefined ? {} : { permissionTurn: turn }),
-			...(!bound.length ? { availability: "Prior intent has no permitted source now. An earlier step or a future draw must supply it; it is not an available use." } : {}),
+			...(!bound.length ? { visibleSources: visible.map(sourceFact), availability: "No permitted source now. Earlier actions must satisfy the source's zone, permission and conditions before this use becomes available. This is accepted equipment, not an offered action or a forecast that it will work." } : {}),
 			cost: { ...cost, mana: mana ?? (procedure.timing === "spell" ? "Read the bound source's printed cost" : "{0}") },
 			costBasis: cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost" }] as const;
 	}).filter((one) => one !== undefined);

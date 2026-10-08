@@ -1,7 +1,7 @@
 /**
  * One planner builds on the pregame brief and the seat's last plan. The same
  * short answer is used ahead of the turn, after its draw, and on an escalation.
- * Past 150 lines to keep its prompt, reference tools and validation together.
+ * Past 150 lines to keep reference tools, session orchestration and validation together.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -121,7 +121,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
 		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
 		...(findings && reported ? { analysts: [findingsSection(findings), reportsSection(reported)] } : {}) });
-	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped)}` }, {
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.
 			const { notes, objection: raised, assessment: _assessment, ...changes } = args;

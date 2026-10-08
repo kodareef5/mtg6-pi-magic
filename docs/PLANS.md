@@ -127,6 +127,12 @@ whole plan cannot be repaired through fields that preserve the invalid part.
 The writer must explicitly remove or replace those commitments. Context never
 rebinds an old incarnation or drops a step on the player's behalf.
 
+Strategy can read accepted activations for its visible cards before their
+sources enter a permitted zone. These entries name the current sources and
+state that the use is unavailable. Reading equipment adds no move, predicts
+no entry and grants no permission. The writer can reuse the exact terms after
+an earlier action supplies the required source.
+
 ## Objections
 
 The pilot can object to a just-finished opposing block before the next physical

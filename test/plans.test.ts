@@ -1283,6 +1283,21 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	const warpKey = Object.keys(available).find((key) => available[key]!.label === warp.claim)!;
 	assert.equal((descriptions[normalKey] as { cost: { mana: string } }).cost.mana, "{3}{R}{R}");
 	assert.equal((descriptions[warpKey] as { cost: { mana: string } }).cost.mana, "{2}{R}");
+	const fetch = example("Crack Fabled Passage for a basic land"), futureTable = matchup("future-fetch");
+	main(futureTable, 0, 3); place(futureTable, 0, "hand", "Fabled Passage");
+	editWork(futureTable, 0, [{ do: "package.put", package: { card: "Fabled Passage", registers: [], procedures: [fetch] } }], "fetch-use");
+	const future = workFrame(futureTable, 0), beforeFuture = structuredClone(future), futureActions = actions(future);
+	const fetchKey = Object.keys(futureActions).find((key) => futureActions[key]!.label === fetch.claim)!;
+	const futureUse = actionFacts(future, futureActions)[fetchKey] as { sourcesNow: unknown[]; visibleSources: { zone: string }[]; availability: string; cost: unknown };
+	assert.deepEqual(futureUse.sourcesNow, [], "accepted uses of a hand card are not offered battlefield activations");
+	assert.ok(futureUse.visibleSources.every((one) => one.zone === "hand"));
+	assert.match(futureUse.availability, /No permitted source now/);
+	assert.deepEqual(futureUse.cost, { ...fetch.cost, mana: "{0}" });
+	assert.ok(!future.decision!.options.some((one) => one.use?.claim === fetch.claim), "describing future equipment creates no move");
+	const concealed = structuredClone(future);
+	concealed.view.objects = concealed.view.objects!.filter((one) => one.card !== "Fabled Passage");
+	assert.equal(actionFacts(concealed, futureActions)[fetchKey], undefined, "registered equipment alone does not invent a visible future source");
+	assert.deepEqual(future, beforeFuture, "describing future sources preserves the projected frame");
 	const warped = frame.decision!.options.find((one) => one.use?.claim === warp.claim)!;
 	assert.ok(warped?.use);
 	const planningOffers = planningChoices(frame).uses as { claim: string; notes: string[] }[];
@@ -1683,6 +1698,8 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
 		const submit = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
 		assert.ok("steps" in submit.properties && !("current" in submit.properties), "an invalid inherited step needs the full editor, even during an opponent response");
 		assert.match(JSON.stringify(request.messages), /outside this window/);
+		assert.match(JSON.stringify(request.messages), /assessment first, then the full plan fields/);
+		assert.doesNotMatch(JSON.stringify(request.messages), /assessment first, then current/);
 		return { result: async () => ({ content: [{ type: "toolCall", id: "repair", name: "submit", arguments: { assessment: {},
 			steps: [{ label: "Pass now", when: { active: "opponent", step: "precombat-main", fromTurn: 6, throughTurn: 6 }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
 	};
