@@ -61,6 +61,7 @@ test("attackers are declared one at a time, nothing moves until done, vigilance 
 	const pilot = focus(frame, startingIntent(1)).objects.find((one) => one.id === claws[0]!.id)!;
 	assert.equal(pilot.summoningSick, false); assert.ok(pilot.subtypes!.includes("Lizard"));
 	assert.ok(!dossier({ frame }).split("\n").find((line) => line.startsWith(`| ${claws[0]!.id}@`))!.includes("summoning-sick"), "the dossier row shows the same readiness");
+	assert.ok(dossier({ frame }).split("\n").find((line) => line.startsWith(`| ${claws[0]!.id}@`))!.includes("no summoning sickness"), "absence of sickness is an explicit projected fact");
 	assert.match(dossier({ frame }), /Registered watches, not pending triggers/);
 	const selectorText = dossier({ frame }).split("\n").find((line) => line.includes("Current selector matches:"))!.split("Current selector matches:")[1]!;
 	for (const claw of claws) assert.ok(selectorText.includes(`Hired Claw (${claw.id}@${claw.incarnation})`), "selector matches name objects and incarnations, not occurrences");

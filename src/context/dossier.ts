@@ -81,7 +81,7 @@ function state(frame: Frame, object: SeenObject, name: (seat: SeatId) => string)
 	const labels = (frame.view.notes ?? []).filter((note) => note.kind === "label" && note.on.id === object.id && note.on.incarnation === object.incarnation).map((note) => note.kind === "label" ? note.text : "");
 	const attached = object.attached && frame.view.objects?.find((one) => one.id === object.attached!.id);
 	return [object.tapped ? "tapped" : "untapped", object.faceDown ? "face down" : "",
-		object.traits?.types.includes("creature") && object.summoningSick ? "summoning-sick" : "",
+		object.traits?.types.includes("creature") ? object.summoningSick === true ? "summoning-sick" : object.summoningSick === false ? "no summoning sickness" : "summoning sickness unknown" : "",
 		object.damage ? `${object.damage} damage marked` : "", attached ? `attached to ${named(attached)}` : "",
 		object.controller !== object.owner ? `owned by ${name(object.owner)}` : "", ...labels.map((text) => `label: ${text}`)].filter(Boolean).join(", ");
 }
