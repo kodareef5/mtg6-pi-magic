@@ -294,5 +294,5 @@ export function triggerWindow(table: Table): Pending | null {
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
 		});
 	});
-	return { situation: "trigger-order", seat: seat.id, question: `Put your triggered abilities on the stack, one at a time; the last one put on resolves first (603.3b).`, moves };
+	return { situation: "trigger-order", seat: seat.id, question: "Choose which of your waiting triggers resolves last. It goes on the stack now, under every trigger you put on after it (603.3b).", moves };
 }

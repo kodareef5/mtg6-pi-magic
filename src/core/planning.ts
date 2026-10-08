@@ -167,7 +167,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
-			if (used.length) marks.push(`Uses ${used.map((object) => object.card ?? object.token?.name ?? object.id).join(", ")}, held: ${hold.purpose}.`);
+			if (used.length) marks.push(`Spends ${used.map((object) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}, which the plan holds for: ${hold.purpose.replace(/\.$/, "")}.`);
 		}
 		if (option.use) {
 			const { cost, source, funding } = option.use;

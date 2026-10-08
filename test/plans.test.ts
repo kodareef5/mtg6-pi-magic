@@ -278,7 +278,7 @@ test("a branch and a held resource are marked on the options they touch, and not
 	assert.ok(marked.some((option) => option.id === "pass" && !(option.notes ?? []).join(" ").includes("Plan")), "pass stays without a plan mark");
 	const veil = marked.filter((option) => option.id.startsWith(`plan:${frame.view.work!.planned}:b0:`));
 	assert.ok(veil.length > 0 && veil.every((option) => /Plan branch: Veil a targeted creature/.test((option.notes ?? []).join(" "))));
-	assert.ok(veil.some((option) => /Uses Forest, held: green for Veil/.test((option.notes ?? []).join(" "))), "spending the held Forest is marked, not refused");
+	assert.ok(veil.some((option) => /Spends Forest \(0-\d+@\d+\), which the plan holds for: green for Veil\./.test((option.notes ?? []).join(" "))), "spending the held Forest is marked, not refused");
 	assert.equal(marked.length, frame.decision!.options.length + state.procedures.length);
 	frame.view.work.plan!.holds!.push({ objects: { refs: [{ id: chocobo.id, incarnation: chocobo.incarnation }] }, purpose: "Keep the Chocobo" });
 	const protectedTarget = annotate(frame.decision!.options, planState(frame)!);
@@ -304,14 +304,14 @@ test("a branch and a held resource are marked on the options they touch, and not
 		assert.ok(attackMarks.filter((one) => one.id.startsWith("attack:") && one.id !== "attack:done").every((one) => !(one.notes ?? []).join(" ").includes("out of order")), "one declaration does not order its attackers");
 		assert.ok(checklist(earlier).filter((one) => one.kind === "step" && one.options.some((id) => id.startsWith("attack:") && id !== "attack:done")).every((one) => one.status === "available"), "the checklist treats those attackers as available together");
 		earlier.view.work!.plan!.holds!.push({ objects: { card: "Smaug the Magnificent", zones: ["battlefield"] }, purpose: "Keep this blocker untapped" });
-		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.notes!.join(" "), /Uses Smaug the Magnificent, held:/);
+		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.notes!.join(" "), /Spends Smaug the Magnificent \(1-49@\d+\), which the plan holds for:/);
 		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz")));
 		const tokens = workFrame(replay(path, (header) => matchTable(header.seed), 236).table, 1);
 		const treasure = tokens.view.objects!.find((one) => one.token?.name === "Treasure")!;
 		assert.ok(treasure);
 		tokens.view.work!.plan!.holds = [{ objects: { refs: [{ id: treasure.id, incarnation: treasure.incarnation }] }, purpose: "Keep Treasure for Smaug." }];
 		const markedTokens = annotate(tokens.decision!.options, planState(tokens)!);
-		assert.ok(markedTokens.some((one) => (one.notes ?? []).join(" ").includes("Uses Treasure, held: Keep Treasure for Smaug.")), "token hold warnings use the payment's name");
+		assert.ok(markedTokens.some((one) => (one.notes ?? []).join(" ").includes("which the plan holds for: Keep Treasure for Smaug.") && (one.notes ?? []).join(" ").includes("Spends Treasure")), "token hold warnings use the payment's name");
 		assert.match(focus(tokens, startingIntent(1)).plan!.held[0]!, /^Treasure \(token-/, "the hold retains both its name and exact identity");
 
 		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/ready-before-help.jsonl.gz")));
@@ -1140,7 +1140,7 @@ test("a held payment still carries out its matching step or branch and preserves
 		assert.deepEqual(fit.candidates.map((one) => one.id), physical.map((one) => one.id), "holds preserve canonical payment order");
 		const marked = annotate(physical, state);
 		assert.ok(marked.every((one) => (one.notes ?? []).join(" ").includes(branch ? "Plan branch:" : "Plan step 1") && one.notes!.join(" ").includes(step.purpose!)));
-		assert.equal(marked.filter((one) => (one.notes ?? []).join(" ").includes("Uses Forest, held:")).length, 1);
+		assert.equal(marked.filter((one) => (one.notes ?? []).join(" ").includes("which the plan holds for")).length, 1);
 		const packet = focus(frame, startingIntent(0));
 		assert.deepEqual(packet.options.filter((one) => one.use).map((one) => one.id), physical.map((one) => one.id));
 		assert.deepEqual(new Set(packet.options.map((one) => one.id)), new Set(frame.decision!.options.map((one) => one.id)), "every original option remains reachable");
