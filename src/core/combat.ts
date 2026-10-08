@@ -132,7 +132,7 @@ export function declareBlockers(table: Table): Pending {
 	}
 	const lone = attackers.filter((attacker) => has(traitsOf(table, attacker), "menace") && blocking(attacker) === 1);
 	moves.push({ option: { id: "block:done", label: declared.size ? `Finish: ${[...declared.values()].map((entry) => `${name(entry.blocker)} blocks ${entry.blocking.map((one) => name(table.things.get(one.id)!)).join(", ")}`).join("; ")}` : "Block nothing",
-		...(lone.length ? { shows: lone.map((attacker) => `${name(attacker)} conflicts with menace: one creature blocks it.`).join(" ") } : {}) },
+		...(lone.length ? { shows: lone.map((attacker) => `${name(attacker)} has menace and only one creature blocks it, so finishing now declares an illegal block (702.111b). Withdraw that blocker or add a second one.`).join(" ") } : {}) },
 		changes: [{ do: "block", blockers: [...declared.values()].map((entry) => ({ ...ref(entry.blocker), blocking: entry.blocking })) }], reason: "combat" });
 	moves.push(...withdrawals(table));
 	return { situation: "turn-based", seat: defending, question: blocks.length ? `Declare blockers: ${blocks.length} chosen so far. Add another, withdraw a pending choice, or finish.` : "Declare blockers, one at a time, then finish.", moves };

@@ -121,7 +121,7 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	assert.ok(blockInProgress.includes(`Declaration in progress, not finalized: Sazh's Chocobo (${chocobo.id}@${chocobo.incarnation}) blocks Zhao, the Moon Slayer (${zhao.id}@${zhao.incarnation})`));
 	assert.match(blockInProgress, /Committed combat: attacking .+; blocking nothing yet/);
 	assert.deepEqual(table, beforeReading, "reading the pending declaration moves nothing");
-	assert.match(option(table, "block:done")!.shows!, /Zhao, the Moon Slayer conflicts with menace/);
+	assert.match(option(table, "block:done")!.shows!, /Zhao, the Moon Slayer has menace and only one creature blocks it, so finishing now declares an illegal block/);
 	const revision = structuredClone(table);
 	nextDecision(table); assert.deepEqual(table, revision, "listing block withdrawals is pure");
 	pick(table, `unblock:${chocobo.id}:${zhao.id}`);
@@ -139,7 +139,7 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	assert.equal(option(table, "block:done")!.shows, undefined);
 	pick(table, `unblock:${chocobo.id}:${zhao.id}`);
 	assert.equal(table.combat!.choosing.length, 1, "withdrawing one pick preserves the others");
-	assert.match(option(table, "block:done")!.shows!, /conflicts with menace/);
+	assert.match(option(table, "block:done")!.shows!, /has menace and only one creature blocks it/);
 	pick(table, `block:${chocobo.id}:${zhao.id}`);
 	pick(table, "block:done");
 	assert.deepEqual(table.combat!.blocked.map((one) => one.id), [zhao.id]);
