@@ -186,7 +186,9 @@ function stopProblems(frame: Frame, written: unknown): string[] {
 	const scope = { world: viewWorld(frame.view), controller: frame.seat };
 	return written.flatMap((one, at) => {
 		const stop = one as { label?: string; when?: Parameters<typeof matches>[0]; if?: Condition };
-		if (!stop?.if || stop.when && !matches(stop.when, frame)) return [];
+		// Nothing happens between the planned upkeep and the draw but the draw, so a stop watched there is judged now too.
+		const early = stop?.when?.active === "self" && (stop.when.step === "upkeep" || stop.when.step === "draw");
+		if (!stop?.if || stop.when && !matches(stop.when, frame) && !early) return [];
 		try { return holds(scope, stop.if) ? [`askWhen[${at}] "${stop.label ?? ""}" is already true in the planned position, so it would stop the pilot at once. A stop names a visible fact that is false now and would make the line impossible.`] : []; }
 		catch { return []; }
 	});

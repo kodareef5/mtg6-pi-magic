@@ -2145,3 +2145,29 @@ test("watches and this turn's events reach the pilot as plain lines, and basic l
 	assert.equal(packet.cards.Forest, undefined, "a basic land's text adds nothing the mana sources do not say");
 	assert.ok((packet.history ?? []).every((line) => typeof line === "string"));
 });
+
+test("a stop watched at the coming draw is judged when written, and an essential attack is never missing at a priority", async () => {
+	const table = position();
+	main(table, 0, 3);
+	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
+	main(table, 1, 4);
+	const seen: string[] = [];
+	const line = { label: "Wait", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } };
+	const drawStop = { label: "A draw changes the plan", when: { active: "self", step: "draw" }, if: { amount: { count: { zones: ["hand"], controller: "you", types: ["planeswalker"] } }, atMost: 0 } };
+	const replies: Record<string, unknown>[] = [
+		{ assessment: { corrections: "none", adopted: "none", win: "No win.", priorities: ["Develop."] }, steps: [line], theirTurn: { guidance: "Pass.", complete: "pass" }, askWhen: [drawStop] },
+		{ assessment: { corrections: "none", adopted: "none", win: "No win.", priorities: ["Develop."] }, steps: [line], theirTurn: { guidance: "Pass.", complete: "pass" } }];
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
+	await prepareTurn(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.match(seen[1]!, /A draw changes the plan\\" is already true/, "nothing but the draw happens before it, so a stop true now would fire at once");
+
+	const attacking = position();
+	main(attacking, 0, 3);
+	const chocobo = cardsIn(attacking, "battlefield", 0).find((one) => one.card === "Sazh's Chocobo")!;
+	editWork(attacking, 0, [{ do: "plan.put", plan: { objective: "o", guidance: "g", steps: [{ label: "Attack with the Chocobo", essential: true, when: { active: "self", step: "declare-attackers" },
+		action: { prefix: "attack:", objects: { refs: [{ id: chocobo.id, incarnation: chocobo.incarnation }] } } }] } }], "attack");
+	main(attacking, 0, 3, "declare-attackers");
+	assert.equal(nextDecision(attacking)!.situation, "priority", "the declaration is over and priority follows in the same step");
+	assert.equal(planState(workFrame(attacking, 0))!.unmet, undefined, "an attack is declared in its own decision; the priority after it never finds it missing");
+});
+

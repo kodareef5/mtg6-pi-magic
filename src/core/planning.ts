@@ -104,7 +104,9 @@ export function planState(frame: Frame): PlanState | null {
 	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase.
 	// Only with an empty stack: while a spell waits to resolve, passing so it can is the procedure, not a failed line.
 	const at = frame.view.window;
-	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" && !(frame.view.objects ?? []).some((object) => object.zone === "stack") &&
+	// Attacks and blocks are taken only in their declaration, never at a priority, so a priority cannot find one missing.
+	const declares = (step: PlanOption) => !("procedure" in step.action) && /^(attack|block):/.test(step.action.prefix ?? step.action.option ?? "");
+	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" && !(frame.view.objects ?? []).some((object) => object.zone === "stack") && !declares(step) &&
 		(step.when.step ? step.when.step === at.step : at.step === "precombat-main" || at.step === "postcombat-main");
 	// Only the first essential step with nothing listed, and only before any step that can still be taken: a land step first may yet pay for it.
 	const next = due.find((one) => one.candidates.length);
