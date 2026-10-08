@@ -1,0 +1,12 @@
+{
+  "phases": [
+    {
+      "when": {
+        "active": "self",
+        "step": "declare-attackers"
+      },
+      "guidance": "For Smaug's pending attack trigger, target the opposing player Green (seat 0). Select the player target, not one of Green's creatures. The damage is 0 because you control no Treasures; targeting a creature gives Green a Surrak draw.",
+      "complete": "pass"
+    }
+  ]
+}

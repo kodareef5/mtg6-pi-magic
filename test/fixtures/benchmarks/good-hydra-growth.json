@@ -1,0 +1,218 @@
+{
+  "results": [
+    {
+      "id": "green-hydra-growth",
+      "iteration": 0,
+      "answer": {
+        "plan": {
+          "objective": "Win this turn through two land entries and ordered power growth.",
+          "guidance": "Put Harmonizer's landfall trigger on the stack first and Hydra's counter trigger last, so Hydra resolves first. Every Harmonizer trigger targets Mossborn Hydra (0-49@3). After Tunnel enters: counters 2 to 4, then power 4 to 8. After its fetched Forest enters: counters 4 to 8, power 8+4=12, then power 12 to 24. The earlier temporary power increase remains. Let each stack finish before the next land entry.",
+          "throughTurn": 8,
+          "steps": [
+            {
+              "label": "Pass draw",
+              "when": {
+                "active": "self",
+                "step": "draw"
+              },
+              "action": {
+                "option": "pass"
+              }
+            },
+            {
+              "label": "Warp Mightform Harmonizer",
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "action": {
+                "procedure": {
+                  "source": {
+                    "zones": [
+                      "hand"
+                    ],
+                    "controller": "self",
+                    "card": "Mightform Harmonizer"
+                  },
+                  "claim": "Cast Mightform Harmonizer for its warp cost",
+                  "basis": "Warp {2}{G} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+                  "timing": "spell",
+                  "cost": {
+                    "mana": "{2}{G}"
+                  },
+                  "instructions": [
+                    {
+                      "do": "delay",
+                      "event": {
+                        "on": "step",
+                        "step": "end",
+                        "whose": "any"
+                      },
+                      "effect": {
+                        "instructions": [
+                          {
+                            "do": "move",
+                            "what": "this",
+                            "to": "exile",
+                            "reason": "exile",
+                            "as": "warped"
+                          },
+                          {
+                            "do": "permit",
+                            "what": "bound:warped",
+                            "who": "you",
+                            "from": "next-turn",
+                            "until": "indefinite"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "purpose": "Pay {2}{G} with the three existing green sources. It resolves before playing Tunnel; it has no haste and does not attack."
+            },
+            {
+              "label": "Play Escape Tunnel",
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "waitFor": "empty-stack",
+              "action": {
+                "prefix": "land:",
+                "objects": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "card": "Escape Tunnel"
+                }
+              },
+              "purpose": "Put Harmonizer's landfall trigger on the stack first and Hydra's counter trigger last, so Hydra resolves first. Every Harmonizer trigger targets Mossborn Hydra (0-49@3). After Tunnel enters: counters 2 to 4, then power 4 to 8. After its fetched Forest enters: counters 4 to 8, power 8+4=12, then power 12 to 24. The earlier temporary power increase remains. Let each stack finish before the next land entry."
+            },
+            {
+              "label": "Search with Escape Tunnel",
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "waitFor": "empty-stack",
+              "action": {
+                "procedure": {
+                  "source": {
+                    "zones": [
+                      "battlefield"
+                    ],
+                    "controller": "self",
+                    "card": "Escape Tunnel"
+                  },
+                  "claim": "Sacrifice Escape Tunnel to search for a basic land",
+                  "basis": "{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+                  "timing": "stack",
+                  "cost": {
+                    "tap": true,
+                    "sacrifice": "this"
+                  },
+                  "targets": [],
+                  "instructions": [
+                    {
+                      "do": "choose",
+                      "who": "you",
+                      "from": {
+                        "zones": [
+                          "library"
+                        ],
+                        "supertypes": [
+                          "basic"
+                        ],
+                        "types": [
+                          "land"
+                        ]
+                      },
+                      "count": 1,
+                      "as": "basic"
+                    },
+                    {
+                      "do": "move",
+                      "what": "bound:basic",
+                      "to": "battlefield",
+                      "tapped": true,
+                      "reason": "resolve"
+                    },
+                    {
+                      "do": "shuffle",
+                      "who": "you"
+                    }
+                  ]
+                }
+              },
+              "purpose": "Tap and sacrifice Tunnel to search for a basic Forest. Find the Forest; its tapped entry triggers both permanents again. Put Harmonizer's landfall trigger on the stack first and Hydra's counter trigger last, so Hydra resolves first. Every Harmonizer trigger targets Mossborn Hydra (0-49@3). After Tunnel enters: counters 2 to 4, then power 4 to 8. After its fetched Forest enters: counters 4 to 8, power 8+4=12, then power 12 to 24. The earlier temporary power increase remains. Let each stack finish before the next land entry."
+            },
+            {
+              "label": "Attack with Mossborn Hydra",
+              "when": {
+                "active": "self",
+                "step": "declare-attackers"
+              },
+              "waitFor": "empty-stack",
+              "action": {
+                "prefix": "attack:",
+                "objects": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "self",
+                  "card": "Mossborn Hydra"
+                }
+              },
+              "purpose": "Attack with Hydra after both sets of triggers resolved. It should have 24 power against Red at 20 with no creatures to block."
+            },
+            {
+              "label": "Finish attackers",
+              "when": {
+                "active": "self",
+                "step": "declare-attackers"
+              },
+              "action": {
+                "option": "attack:done"
+              }
+            }
+          ],
+          "phases": [
+            {
+              "when": {
+                "active": "self",
+                "step": "draw"
+              },
+              "guidance": "Pass to precombat main.",
+              "complete": "pass"
+            },
+            {
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "guidance": "Put Harmonizer's landfall trigger on the stack first and Hydra's counter trigger last, so Hydra resolves first. Every Harmonizer trigger targets Mossborn Hydra (0-49@3). After Tunnel enters: counters 2 to 4, then power 4 to 8. After its fetched Forest enters: counters 4 to 8, power 8+4=12, then power 12 to 24. The earlier temporary power increase remains. Let each stack finish before the next land entry. Do not cast Glimpse or a second Harmonizer. After paying for warp, the Tunnel search needs no mana.",
+              "complete": "pass"
+            },
+            {
+              "when": {
+                "active": "self",
+                "step": "declare-attackers"
+              },
+              "guidance": "Attack with Hydra only after growth resolves, then finish attackers. Harmonizer has no haste.",
+              "complete": "pass"
+            },
+            {
+              "when": {
+                "active": "opponent"
+              },
+              "guidance": "No instant response is in hand. If the game continues, reassess actual attacks and legal blocks; Hydra cannot block a flyer.",
+              "complete": "ask"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

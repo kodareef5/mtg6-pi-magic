@@ -127,3 +127,42 @@ remove or replace the stale commitment without rebinding the land automatically.
 Use `--live --case stale-response --play --through 14` to check the repair and
 the remainder of the turn. The original failed run stays in the October 8
 evidence directory.
+
+## Target and growth review
+
+`smaug-player-policy.json` supplies the existing Smaug position with an explicit
+player target: Green (seat 0). It appends phase coverage through `pilotPolicy`;
+the original options and physical facts stay. In three repeats the original
+policy picked Explorer each time, while this supplied wording picked the player
+each time. The `smaug-explicit-player` case tests execution, not plan generation.
+
+`hydra-postcombat-response` reuses the earlier decision 119 of the Smaug journal.
+Green has a fetch on the stack in postcombat main and a 1/1 Hydra; Red holds
+Shock and Burst with an unrestricted red source. The original plan has no
+policy for that window. Its failed removal expectation diagnoses missing
+coverage, not disobedience of an instruction to remove Hydra. Earlier precombat
+work explicitly told Jev to pass and wait for growth; these are different cases.
+
+`green-hydra-growth.jsonl.gz` freezes decision 180 of
+`claude-20261007-i-1791416748215`, including the neutral review request used by
+the October 8 comparison. Green has a 2/2 Hydra with two counters, three usable
+green sources, Harmonizer and Tunnel in hand. Red is at 20 with no creature
+blocker. `good-hydra-growth.json` supplies an executed turn-7 win:
+
+1. Warp Harmonizer for {2}{G} using the three existing sources.
+2. Play Tunnel. Put Harmonizer's trigger on the stack first and Hydra's last,
+   so Hydra's counters become four before Harmonizer doubles its power to eight.
+3. Sacrifice Tunnel for a tapped Forest. Use the same trigger order. Hydra now
+   has eight counters plus the earlier four-power increase, for 12 power.
+   Harmonizer doubles that to 24.
+4. Attack with Hydra after both sets of triggers resolve.
+
+Ordinary Jev seats executed this witness in 43 further decisions, won on turn 7
+and produced matching replay and clone checks with no gaps or fallback.
+It verifies one observed line, not discovery or every opposing response.
+Without `--answers`, the case asks the writer to find its own line:
+
+```sh
+npm run benchmark -- --live --case green-hydra-growth --play --through 7
+npm run benchmark -- --live --case green-hydra-growth --play --through 7 --answers test/fixtures/benchmarks/good-hydra-growth.json
+```

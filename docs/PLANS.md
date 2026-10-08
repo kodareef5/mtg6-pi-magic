@@ -114,6 +114,12 @@ plan's step and phase policy, including triggers. General objective and guidance
 remain audit rationale. Completion is explicit per window; missing instructions
 grant no pass.
 
+Execution policies name the target's kind and identity. A player target names
+the player and seat number; a creature target names the creature and its current
+reference when known. A future source uses its card name without an invented
+incarnation. Naming only a side can leave the pilot choosing one of its creatures
+when the writer intended the player.
+
 Strategy analysts read the projected position without the matchup plan,
 notebook or standing plan. The coordinator receives both their proposals and
 that prior intent, and must reconcile them. No physical facts or card text are
