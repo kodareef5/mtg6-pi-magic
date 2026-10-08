@@ -14,7 +14,7 @@
  */
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, globSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import { read, rowsOf } from "../src/core/journal.ts";
@@ -76,7 +76,8 @@ function decisions(calls: string): Logged[][] {
 async function build(games: string[], out: string, rules: Rules) {
 	const items: Item[] = [], dropped: string[] = [], seen = new Set<string>();
 	for (const dir of games) {
-		const journal = globSync(join(dir, "*.jsonl")).find((one) => !one.endsWith(".calls.jsonl"))!, calls = globSync(join(dir, "*.calls.jsonl"))[0]!;
+		// Absolute, so a variant checkout elsewhere replays the same journal.
+		const journal = resolve(globSync(join(dir, "*.jsonl")).find((one) => !one.endsWith(".calls.jsonl"))!), calls = globSync(join(dir, "*.calls.jsonl"))[0]!;
 		const { lines } = read(journal), rows = rowsOf(lines), game = basename(dir);
 		const helped = new Map<string, number>();
 		for (const group of decisions(calls)) {
