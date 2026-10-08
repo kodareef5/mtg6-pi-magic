@@ -33,7 +33,8 @@ import { planningFrame } from "../src/context/strategy-facts.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
-import { lifted, type Plan, type PlanOption } from "../src/core/language.ts";
+import { lifted, type Plan, type PlanOption, type Procedure } from "../src/core/language.ts";
+import { summary } from "../src/core/announce.ts";
 import { NOTEBOOK_LIMIT } from "../src/core/work-language.ts";
 import type { Frame } from "../src/core/types.ts";
 import { load as loadCards } from "../src/core/cards.ts";
@@ -2100,4 +2101,22 @@ test("a planned cast the table already lists is offered once, under the table's 
 	assert.equal(marked.length, frame.decision!.options.length, "no second id for the same physical action");
 	assert.ok(marked.filter((one) => listed.some((cast) => cast.id === one.id)).every((one) => one.notes?.some((note) => note.startsWith("Plan step 1: Cast the Chocobo"))));
 	assert.deepEqual(execution(state, listed[0]!.id), { plan: state.revision, step: 0 }, "the listed option carries out the step");
+
+test("options and effects read as words: targets are named in the label, summaries never print syntax", () => {
+	const table = matchup("words");
+	main(table, 1, 2);
+	place(table, 1, "battlefield", "Mountain");
+	place(table, 1, "hand", "Shock");
+	place(table, 0, "battlefield", "Sazh's Chocobo");
+	const shock: Procedure = { claim: "Cast Shock", basis: "Shock deals 2 damage to any target.", source: { zones: ["hand"], controller: "self", card: "Shock" },
+		timing: "spell", targets: [{ object: { types: ["creature"] }, player: "any" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] };
+	const labels = procedureOptions(shock, workFrame(table, 1), "words").map((one) => one.option.label);
+	assert.ok(labels.some((label) => /^Cast Shock \(Shock\)\. Target 1: Sazh's Chocobo \(0-\d+@\d+\)\.$/.test(label)), "a creature target is named with its reference");
+	assert.ok(labels.some((label) => /Target 1: player Green \(seat 0, opponent\)\./.test(label)), "a player target names the player");
+	assert.equal(summary({ do: "modify", what: "target:0", until: "end-of-turn", change: { power: { power: "target:0" } } } as never), "target 1 gets +(the power of target 1)/+0 until end of turn.");
+	assert.equal(summary({ do: "choose", who: "you", count: 1, upTo: true, from: { zones: ["library"], owner: "you", supertypes: ["basic"], types: ["land"] }, as: "land" } as never),
+		"you choose up to 1 basic land (your library) as land.");
+	assert.equal(summary({ do: "damage", amount: { count: { subtypes: ["Treasure"], controller: "you" } }, to: "target:0" } as never), "Deal the number of Treasure you control damage to target 1.");
+	assert.equal(summary({ do: "untap", what: "bound:land", if: { amount: { count: { types: ["land"], controller: "you" } }, atLeast: 4 } } as never),
+		"untap the chosen land if the number of land you control is at least 4.");
 });

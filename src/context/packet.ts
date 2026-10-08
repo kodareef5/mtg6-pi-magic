@@ -158,7 +158,13 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 				const tap = data.funding[id]!, object = view.objects?.find((object) => object.id === tap.source.id && object.incarnation === tap.source.incarnation);
 				return `${tap.sacrifice ? "sacrifice" : "tap"} ${object?.card ?? object?.token?.name ?? tap.source.id} (${tap.source.id}@${tap.source.incarnation}) for ${tap.colors.join("")}`;
 			})];
-		return { ...one, label: `${one.label}; mana payment: ${mana.join("; ") || "none"}` };
+		// Costs other than mana belong beside it: tapping or sacrificing the source, life, cards.
+		const named = (ref: { id: string; incarnation: number }) => { const object = view.objects?.find((candidate) => candidate.id === ref.id && candidate.incarnation === ref.incarnation); return `${object?.card ?? object?.token?.name ?? ref.id} (${ref.id}@${ref.incarnation})`; };
+		const cost = payment.cost, source = one.use ? data.uses[one.use]?.source : undefined;
+		const other = [...(cost.tap && source ? [`tap ${named(source)}`] : []), ...(cost.tapped ?? []).map((ref) => `tap ${named(ref)}`), ...(cost.sacrificed ?? []).map((ref) => `sacrifice ${named(ref)}`),
+			...(cost.exiled ?? []).map((ref) => `exile ${named(ref)}`), ...(cost.discarded ?? []).map((ref) => `discard ${named(ref)}`), ...(cost.life ? [`pay ${cost.life} life`] : []),
+			...(cost.counters ? [`remove ${cost.counters.count} ${cost.counters.kind} counters`] : [])];
+		return { ...one, label: `${one.label}; mana payment: ${mana.join("; ") || "none"}${other.length ? `; other costs: ${other.join("; ")}` : ""}` };
 	});
 	const used = new Set(listed.flatMap((one) => one.use ? [one.use] : []));
 	const paid = new Set(listed.flatMap((one) => one.payment ? [one.payment] : []));

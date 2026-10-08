@@ -69,7 +69,7 @@ function stages(facts: ReturnType<typeof choices>, selected: Inspection): Menu {
 		options: [...bindings.map((key, at) => {
 			const one = variants.find((variant) => bindingKey(variant) === key)!;
 			const id = `inspect:binding:${at}`; enter[id] = { use: selected.use, binding: key };
-			return { id, label: `${facts.uses[one.use!]!.claim}: targets ${JSON.stringify(one.targets)}${one.x === undefined ? "" : `, X=${one.x}`}`,
+			return { id, label: `${one.label}${one.x === undefined ? "" : `, X=${one.x}`}`,
 				use: one.use, targets: one.targets, ...(one.x === undefined ? {} : { x: one.x }), notes: notes(variants.filter((one) => bindingKey(one) === key)),
 				shows: "Inspect the payments for these exact target bindings. No target is declared." };
 		}), ...terminals, back],

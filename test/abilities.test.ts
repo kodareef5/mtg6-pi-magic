@@ -132,8 +132,8 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 		const use = Object.values(packet.uses)[0]!;
 		assert.match(use.notes!.join(" "), /Plan step 1: Loot with a Merchant/);
 		assert.equal(use.timing, "stack");
-		assert.match(use.effects.join(" "), /you draws 1\./);
-		assert.match(use.effects.join(" "), /you chooses 1 of \{"zones":\["hand"\],"owner":"you"\} as discard\. Put bound:discard into graveyard \(discard\)\./);
+		assert.match(use.effects.join(" "), /you draw 1\./);
+		assert.match(use.effects.join(" "), /you choose 1 card \(your hand\) as discard\. Put the chosen discard into graveyard \(discard\)\./);
 		assert.deepEqual(packet.pools, frame.view.pools, "payment ids retain color, restrictions and persistence");
 		let chosen: string;
 		if (packet.inspection?.stage === "use") chosen = packet.options.find((one) => one.id.startsWith("inspect:use:"))!.id;

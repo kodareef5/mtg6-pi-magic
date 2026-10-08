@@ -37,21 +37,68 @@ export function symbols(text: string): { generic: number; colors: Color[]; x: nu
 	return { generic, colors, x };
 }
 
+/** A reference, selector, amount or condition in plain words. Shapes this does not know read as their kind, never as JSON. */
+function words(value: unknown, as: "thing" | "amount" | "condition" = "thing"): string {
+	if (typeof value === "number") return String(value);
+	if (typeof value === "string") {
+		const target = /^target:(\d+)$/.exec(value);
+		return target ? `target ${Number(target[1]) + 1}` : value.startsWith("bound:") ? `the chosen ${value.slice(6)}` : value === "event:object" ? "that object" : value;
+	}
+	if (!value || typeof value !== "object") return as === "amount" ? "an amount" : as === "condition" ? "a condition" : "something";
+	const one = value as Record<string, unknown>;
+	if (as === "condition") {
+		if ("amount" in one) return `${words(one.amount, "amount")} is ${one.atLeast !== undefined ? `at least ${one.atLeast}` : `at most ${one.atMost}`}`;
+		if ("bound" in one) return `a ${one.bound} was chosen`;
+		if ("not" in one) return `not (${words(one.not, "condition")})`;
+		return "a condition holds";
+	}
+	if (as === "amount") {
+		if ("count" in one) return `the number of ${words(one.count)}`;
+		if ("power" in one) return `the power of ${words(one.power)}`;
+		if ("toughness" in one) return `the toughness of ${words(one.toughness)}`;
+		if ("counters" in one) return `the number of ${one.counters} counters on ${words(one.on)}`;
+		return "an amount";
+	}
+	// A selector: its type words, then whose zones it looks in.
+	const list = (key: string) => Array.isArray(one[key]) ? (one[key] as string[]) : [];
+	const zones = list("zones"), mine = one.controller === "you" || one.owner === "you";
+	const kind = [...list("supertypes"), ...list("subtypes"), ...list("types")].join(" ") || (typeof one.card === "string" ? one.card : zones.length && !zones.includes("battlefield") ? "card" : "permanent");
+	return zones.length ? `${kind} (${mine ? "your " : ""}${zones.join(" or ")})` : `${kind}${mine ? " you control" : ""}`;
+}
+
+/** A characteristic change in plain words. */
+function changed(change: unknown): string {
+	if (!change || typeof change !== "object") return "changes";
+	const one = change as Record<string, unknown>, parts: string[] = [];
+	const delta = (value: unknown) => typeof value === "number" ? `${value < 0 ? "" : "+"}${value}` : `+(${words(value, "amount")})`;
+	if (one.power !== undefined || one.toughness !== undefined) parts.push(`${delta(one.power ?? 0)}/${delta(one.toughness ?? 0)}`);
+	const base = one.base as { power?: number; toughness?: number } | undefined;
+	if (base) parts.push(`base ${base.power ?? "?"}/${base.toughness ?? "?"}`);
+	const types = one.types as { add?: string[] } | undefined;
+	if (types?.add?.length) parts.push(`also a ${types.add.join(" ")}`);
+	const subtypes = one.subtypes as { set?: string[] } | undefined;
+	if (subtypes?.set?.length) parts.push(`becomes a ${subtypes.set.join(" ")}`);
+	if (Array.isArray(one.words) && one.words.length) parts.push(`gains ${(one.words as string[]).join(", ")}`);
+	if (Array.isArray(one.registers) && one.registers.length) parts.push("gains an ability");
+	return parts.join(", ") || "changes";
+}
+
 /** One instruction in a few words, so every option says what it does at the same level of detail. */
 export function summary(instruction: Instruction): string {
-	const of = (value: unknown) => typeof value === "string" || typeof value === "number" ? String(value) : JSON.stringify(value);
+	const of = (value: unknown) => words(value);
+	const who = (value: unknown, verb: string) => value === "you" ? `you ${verb}` : `${of(value)} ${verb}s`;
 	const what = "what" in instruction && instruction.what ? of(instruction.what) : "every" in instruction && instruction.every ? `each ${of(instruction.every)}` : "";
-	const gate = `${instruction.if ? ` if ${of(instruction.if)}` : ""}${instruction.may ? " (optional)" : ""}${instruction.as ? ` as ${instruction.as}` : ""}`;
+	const gate = `${instruction.if ? ` if ${words(instruction.if, "condition")}` : ""}${instruction.may ? " (optional)" : ""}${instruction.as ? ` as ${instruction.as}` : ""}`;
 	switch (instruction.do) {
-		case "damage": return `Deal ${of(instruction.amount)} damage to ${instruction.to ? of(instruction.to) : what}${gate}.`;
-		case "choose": return `${of(instruction.who)} chooses ${of(instruction.count)}${instruction.upTo ? " or fewer" : ""} of ${of(instruction.from)}${instruction.reveal ? ", revealed" : ""}${gate}.`;
+		case "damage": return `Deal ${words(instruction.amount, "amount")} damage to ${instruction.to ? of(instruction.to) : what}${gate}.`;
+		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${of(instruction.count)} ${of(instruction.from)}${instruction.reveal ? ", revealed" : ""}${gate}.`;
 		case "move": return `Put ${what} into ${instruction.to} (${instruction.reason})${instruction.tapped ? " tapped" : ""}${gate}.`;
-		case "draw": case "mill": case "shuffle": return `${of(instruction.who)} ${instruction.do}s${"count" in instruction ? ` ${of(instruction.count)}` : ""}${gate}.`;
-		case "life": return `${of(instruction.who)} changes life by ${of(instruction.amount)}${gate}.`;
-		case "counters": return `Put ${of(instruction.amount)} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
-		case "mana": return `${of(instruction.who)} adds ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${gate}.`;
-		case "modify": return `${what} gets ${of(instruction.change)} until ${instruction.until}${gate}.`;
-		default: return `${instruction.do} ${what}${gate}.`;
+		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${of(instruction.count)}` : ""}${gate}.`;
+		case "life": return `${of(instruction.who)} changes life by ${words(instruction.amount, "amount")}${gate}.`;
+		case "counters": return `Put ${words(instruction.amount, "amount")} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
+		case "mana": return `${who(instruction.who, "add")} ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${gate}.`;
+		case "modify": return `${what} gets ${changed(instruction.change)} ${instruction.until === "indefinite" ? "indefinitely" : `until ${instruction.until.replace(/-/g, " ")}`}${gate}.`;
+		default: return `${instruction.do}${what ? ` ${what}` : ""}${gate}.`;
 	}
 }
 
@@ -185,7 +232,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 						offered.push({
 							option: {
 								id: `${prefix}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => tap.source.id), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
-								label: `${procedure.claim} (${name(source)})`,
+								// The label names its targets, so an option says what it hits without a cross-reference.
+								label: `${procedure.claim} (${name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
 								notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
 								shows: [
 									`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
