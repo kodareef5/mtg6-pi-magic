@@ -198,7 +198,7 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const offered = nextDecision(table)!.options.filter((one) => one.objects?.[0]?.id === nova!.id);
 	assert.equal(offered.length, 2, "normal and warp casts come from preparation, with no bare duplicate");
 	const frame = workFrame(table, 1), available = actions(frame);
-	assert.equal(focus(frame, startingIntent(1)).watches.some((one) => one.source.name === pack.card), false, "a prepared card still in hand supplies no active watch");
+	assert.equal(focus(frame, startingIntent(1)).watches.some((one) => one.startsWith(`${pack.card} (`)), false, "a prepared card still in hand supplies no active watch");
 	assert.ok(!dossier({ frame }).split("## Triggers on the battlefield")[1]!.split("\n## ")[0]!.includes(pack.card), "the writer reads the same battlefield facts");
 	const preparedKey = `prepared:0 ${pack.procedures![0]!.claim}`;
 	assert.deepEqual(available[preparedKey]!.action, { procedure: pack.procedures![0] });
@@ -209,7 +209,7 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	apply(table, offered.find((one) => one.label.startsWith("Cast Nova"))!.id, "model", "chosen");
 	passBoth(table); finish(table);
 	assert.deepEqual(characteristics(table, nova!)!.words.sort(), ["flying", "haste"]);
-	assert.ok(focus(workFrame(table, 1), startingIntent(1)).watches.some((one) => one.source.name === pack.card && one.event.on === "enters"), "entry activates the accepted watch without a strategy edit");
+	assert.ok(focus(workFrame(table, 1), startingIntent(1)).watches.some((one) => one.startsWith(`${pack.card} (`) && one.includes("When this creature enters")), "entry activates the accepted watch without a strategy edit");
 	assert.equal(sick(workFrame(table, 1), project(table, 1).objects!.find((one) => one.id === nova!.id)!), false, "prepared haste permits attacking on entry");
 	for (const viewer of [0, 1] as const) assert.equal(project(table, viewer).objects!.find((one) => one.id === nova!.id)!.summoningSick, false, "both seats see the current effect of haste");
 	assert.equal(nextDecision(table)!.situation, "trigger-order", "the enters ability did not depend on a turn-plan edit");

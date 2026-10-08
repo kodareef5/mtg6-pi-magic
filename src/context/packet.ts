@@ -48,9 +48,9 @@ export type Packet = {
 	objection?: { id: string; row: number; claim: string };
 	options: Choice[]; uses: Record<string, Use>; payments: Record<string, Payment>; funding: Record<string, Funding>; pools: SeatView["pools"];
 	resources: string[]; known: string[]; objects: Seen[];
-	watches: ReturnType<typeof activeWatches>; cards: Record<string, Printed>;
-	guidance: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
-	history?: SeatView["history"]; resolution?: SeatView["resolution"]; combat?: SeatView["combat"];
+	watches: string[]; cards: Record<string, Printed>;
+	pregameNotes: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
+	history?: string[]; resolution?: SeatView["resolution"]; combat?: SeatView["combat"];
 	checklist?: (Omit<ReviewItem, "options" | "cards" | "status"> & { status: string; cards?: string[]; available?: number })[];
 	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
 	inspection?: Pick<Menu, "stage" | "selected" | "field" | "path" | "facts">;
@@ -97,6 +97,20 @@ export const STATUS: Record<ReviewItem["status"] | "policy", string> = {
 	available: "an option here takes it now", later: "after an earlier step", waiting: "waits for the stack to empty", "condition-false": "its condition is false now",
 	unavailable: "no option here takes it", open: "guidance for this window", recorded: "guidance for this window; its steps are done", policy: "guidance for this window",
 };
+
+/** One event this turn in plain words. */
+function happened(event: NonNullable<SeatView["history"]>[number], view: SeatView, seat: SeatId): string {
+	const who = (id: SeatId) => id === seat ? "You" : view.seats?.find((one) => one.id === id)?.name ?? `Seat ${id}`;
+	const thing = (object: { id: string; incarnation: number; card?: string; token?: { name: string } }) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`;
+	switch (event.kind) {
+		case "cast": return `${who(event.by)} cast ${thing(event.spell)}.`;
+		// A sacrificed source has moved on; its card is still known by id.
+		case "activated": { const source = view.objects?.find((one) => one.id === event.source.id && one.incarnation === event.source.incarnation) ?? view.objects?.find((one) => one.id === event.source.id);
+			return `${who(event.by)} activated ${source?.card ?? source?.token?.name ?? "an ability"} (${event.source.id}@${event.source.incarnation}): ${event.basis}`; }
+		case "attacked": return `${who(event.by)} attacked with ${event.attackers.map((one) => thing(one.object)).join(", ")}.`;
+		case "life": return `${who(event.who)} ${event.amount < 0 ? "lost" : "gained"} ${Math.abs(event.amount)} life.`;
+	}
+}
 
 export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; inspection?: Inspection; capacity?: number };
 /** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
@@ -197,16 +211,20 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		known: [...(view.players ?? []).map((one) => `Seat ${one.id} (${[view.seats?.find((seat) => seat.id === one.id)?.name, one.id === seat ? "you" : "opponent"].filter(Boolean).join(", ")}): ${one.life} life, ${one.hand ?? "unknown"} cards in hand, ${one.library ?? "unknown"} in library.`), ...view.since,
 			...(decision.situation === "trigger-order" ? view.table : [])],
 		objects: scoped.objects.map(seen).sort((a, b) => a.zone === "stack" && b.zone === "stack" ? (a.position ?? 0) - (b.position ?? 0) : 0),
-		watches: view.resolution ? watches.filter((one) => names.has(one.source.name)) : watches,
-		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name]) => names.has(name)).map(([name, card]) => [name, structuredClone(card)])),
-		...(view.window.kind === "turn" ? { history: structuredClone(view.history ?? []) } : {}),
+		// One line per watch and per event: who, what and its text, without selector syntax.
+		watches: (view.resolution ? watches.filter((one) => names.has(one.source.name)) : watches)
+			.map((one) => `${one.source.name} (${one.source.id}@${one.source.incarnation}, ${one.source.controller === seat ? "yours" : "opponent's"}): ${one.basis}`),
+		// During a turn a basic land's printed text is its mana ability, already stated with the sources, unless an option offers that card.
+		cards: Object.fromEntries(Object.entries(view.printed ?? {}).filter(([name, card]) => names.has(name) && (view.window.kind !== "turn" || !card.type.startsWith("Basic Land") || offered.some((one) => one.cards?.includes(name))))
+			.map(([name, card]) => [name, structuredClone(card)])),
+		...(view.window.kind === "turn" ? { history: (view.history ?? []).map((event) => happened(event, view, seat)) } : {}),
 		...(view.declarationReview ? { declarationReview: structuredClone(view.declarationReview) } : {}),
 		...(view.blockDeclaration ? { blockDeclaration: structuredClone(view.blockDeclaration) } : {}),
 		...(view.combat ? { combat: structuredClone(view.combat) } : {}),
 		...(view.resolution ? { resolution: structuredClone(view.resolution) } : {}),
 		...(ability ? { resolving: { claim: ability.claim, basis: ability.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),
 			...(purpose?.use ? { purpose: purpose.use } : {}), guidance: purpose?.guidance || guidance.join("\n") } } : {}),
-		guidance: scripts.length || ability ? [] : guidance, lately: [], routes: dial(decision, context.rules),
+		pregameNotes: scripts.length || ability ? [] : guidance, lately: [], routes: dial(decision, context.rules),
 		...(context.learned?.length ? { learned: [...context.learned] } : {}), ...(refused?.length ? { refused: [...refused] } : {}),
 	};
 }

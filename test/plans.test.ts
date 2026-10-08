@@ -1169,7 +1169,7 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	assert.deepEqual(packet.plan!.script, { goal: ["Grow the Chocobo twice."], guidance: ["Land first, then the Passage."],
 		steps: ["Now: Play a Forest", "Then: Crack Fabled Passage"], reevaluate: ["Red flashes in a blocker"] }, "this window's script, its steps in order");
 	assert.equal(packet.plan!.guidance, undefined, "the whole plan's guidance is not repeated");
-	assert.deepEqual([packet.guidance, packet.lately], [[], []], "nor the brief's notes or the recaps");
+	assert.deepEqual([packet.pregameNotes, packet.lately], [[], []], "nor the brief's notes or the recaps");
 	const asked = question(packet, true).instructions;
 	assert.equal(asked.includes("Land first, then the Passage."), false, "the script is carried once in state, not repeated in instructions");
 	assert.deepEqual(packet.plan!.script!.reevaluate, ["Red flashes in a blocker"]);
@@ -1179,7 +1179,7 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	const plain = focus(workFrame(table, 0), startingIntent(0), { brief });
 	assert.deepEqual(plain.plan!.script!.steps, ["Now: Play a Forest", "Then: Crack Fabled Passage"], "steps supply order without authored narrative");
 	assert.equal(plain.plan!.script!.askWhenDone, undefined, "only a phase that asks for help changes what help says");
-	assert.deepEqual(plain.guidance, ["Develop before combat."]);
+	assert.deepEqual(plain.pregameNotes, ["Develop before combat."]);
 	const scoped = { ...line, throughTurn: 4, objective: "Yesterday's objective", guidance: "Yesterday's tactical story",
 		phases: [{ when: { active: "any" as const }, guidance: "Yesterday's phase policy", complete: "pass" as const }],
 		holds: [{ objects: { card: "Forest" }, purpose: "Yesterday's reserve" }] };
@@ -1199,7 +1199,7 @@ test("in a scripted window the pilot reads the script and nothing else of the pl
 	const expired = workFrame(table, 0), upkeep = focus(expired, startingIntent(0), { brief: { ...brief, steps: { upkeep: { own: "Apply the standing upkeep response policy." } } } });
 	assert.equal(planState(expired), null, "expiry covers holds, stops, steps and unbounded phase policies before draw replanning");
 	assert.equal(upkeep.plan, undefined);
-	assert.deepEqual(upkeep.guidance, ["Apply the standing upkeep response policy."]);
+	assert.deepEqual(upkeep.pregameNotes, ["Apply the standing upkeep response policy."]);
 	assert.doesNotMatch(JSON.stringify(upkeep), /Yesterday/);
 	assert.doesNotMatch(JSON.stringify(basePlan(expired)), /Yesterday/);
 	assert.ok(expired.view.work!.packages!.some((one) => one.card === "Sazh's Chocobo"), "package corrections outlive their tactical plan");
@@ -2134,4 +2134,14 @@ test("the pilot's request leaves out empty fields and states a land play only on
 	assert.ok(!theirs.resources.some((line) => line.startsWith("Land plays left")), "no land play is offered as a fact on the opponent's turn");
 	main(table, 0, 3);
 	assert.ok(focus(workFrame(table, 0), startingIntent(0)).resources.some((line) => line.startsWith("Land plays left: 1")));
+});
+
+test("watches and this turn's events reach the pilot as plain lines, and basic land text only when a choice offers it", () => {
+	const table = position();
+	main(table, 0, 3);
+	const packet = focus(workFrame(table, 0), startingIntent(0));
+	assert.ok(packet.watches.some((line) => /^Sazh's Chocobo \(0-\d+@\d+, yours\): Landfall/.test(line)), "a watch names its source, whose it is and its text");
+	assert.ok(packet.watches.every((line) => !line.includes("{\"")), "no selector syntax");
+	assert.equal(packet.cards.Forest, undefined, "a basic land's text adds nothing the mana sources do not say");
+	assert.ok((packet.history ?? []).every((line) => typeof line === "string"));
 });

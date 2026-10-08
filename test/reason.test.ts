@@ -218,20 +218,20 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		const decision = nextDecision(opening)!;
 		return focus({ seat: decision.seat, version: opening.cursor.clock, view: project(opening, decision.seat), decision }, startingIntent(decision.seat), { brief: policy });
 	};
-	assert.deepEqual(openingPacket().guidance, [BRIEF.opening.play.keep], "only the starting seat's keep policy reaches its declaration");
+	assert.deepEqual(openingPacket().pregameNotes, [BRIEF.opening.play.keep], "only the starting seat's keep policy reaches its declaration");
 	apply(opening, "mulligan", "model", "chosen");
-	assert.deepEqual(openingPacket().guidance, [BRIEF.opening.draw.keep], "the other seat receives the draw policy, without bottom instructions");
+	assert.deepEqual(openingPacket().pregameNotes, [BRIEF.opening.draw.keep], "the other seat receives the draw policy, without bottom instructions");
 	apply(opening, "keep", "model", "chosen");
 	advance(opening);
 	assert.deepEqual(openingPacket().opening, { starting: 0, mulligans: 1, bottom: 1, hand: openingPacket().opening!.hand });
 	apply(opening, "keep", "model", "chosen");
 	advance(opening);
-	assert.deepEqual(openingPacket().guidance, [BRIEF.opening.play.bottom], "after keeping, only the bottom policy is read");
+	assert.deepEqual(openingPacket().pregameNotes, [BRIEF.opening.play.bottom], "after keeping, only the bottom policy is read");
 	assert.deepEqual(openingPacket().options.map((one) => one.id), nextDecision(opening)!.options.map((one) => one.id), "the policy narrows context, never choices");
 	const bottom = nextDecision(opening)!;
 	const legacy = focus({ seat: bottom.seat, version: opening.cursor.clock, view: project(opening, bottom.seat), decision: bottom }, startingIntent(bottom.seat),
 		{ brief: { ...policy, opening: { old: "The original policy remains whole." } } });
-	assert.deepEqual(legacy.guidance, ["old: The original policy remains whole."], "a carried free-form note is preserved, not guessed into a new shape");
+	assert.deepEqual(legacy.pregameNotes, ["old: The original policy remains whole."], "a carried free-form note is preserved, not guessed into a new shape");
 
 	const built = table();
 	advance(built);
@@ -261,10 +261,10 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		{ brief: written, recaps },
 	);
 
-	assert.ok(packet.guidance.includes("Play a land. There is nothing else."), "this window's note, for whose turn it is");
-	assert.equal(packet.guidance.includes("Nothing to do on their main phase."), false);
-	assert.ok(packet.guidance.some((line) => line.startsWith("Forest:")), "the note for a card an option names is in");
-	assert.equal(packet.guidance.some((line) => line.startsWith("Cavern")), false, "an absent card costs nothing");
+	assert.ok(packet.pregameNotes.includes("Play a land. There is nothing else."), "this window's note, for whose turn it is");
+	assert.equal(packet.pregameNotes.includes("Nothing to do on their main phase."), false);
+	assert.ok(packet.pregameNotes.some((line) => line.startsWith("Forest:")), "the note for a card an option names is in");
+	assert.equal(packet.pregameNotes.some((line) => line.startsWith("Cavern")), false, "an absent card costs nothing");
 	assert.equal(JSON.stringify(packet).includes("Green Stompy curves out"), false, "the deck reading is strategy's, not the pilot's");
 	assert.equal(JSON.stringify(packet).includes("behind on everything"), false, "so is the matchup");
 	assert.deepEqual(packet.lately, [], "the pilot reads current turn events and prepared guidance, not an arbitrary tail of recaps");
@@ -283,7 +283,7 @@ test("a brief snippet reaches the decision and a card note only when its card is
 		{ seat: decision.seat, version: built.cursor.clock, view: project(built, decision.seat), decision },
 		startingIntent(decision.seat),
 	);
-	assert.deepEqual(bare.guidance, []);
+	assert.deepEqual(bare.pregameNotes, []);
 	assert.deepEqual(bare.lately, []);
 });
 

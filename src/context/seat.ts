@@ -244,7 +244,7 @@ export function question(packet: Packet, help: boolean): Question {
 	const instructions = [packet.obligation,
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an unrelated option taken now can spend what they need." : ""}`] : []),
-		...(packet.guidance.length ? [packet.plan ? "state.guidance is advice written before the game; your plan outranks it." : "state.guidance is advice written before the game."] : []),
+		...(packet.pregameNotes.length && packet.plan ? ["Your plan outranks pregameNotes, which were written before the game."] : []),
 		"state.objects is the board now; state.cards is printed card text.",
 		...(packet.window.kind === "turn" && !packet.resolving && packet.kind !== "trigger-order" ? [stacked
 			? "The stack is not empty, so lands and sorcery-speed actions wait until it is; their absence now is no reason to ask for help. An object on the stack has not resolved yet; using its card again starts another use."
@@ -252,7 +252,7 @@ export function question(packet: Packet, help: boolean): Question {
 		...(options.some((one) => one.id.startsWith("inspect:use") || one.id.startsWith("inspect:binding")) ? ["An inspect option opens one use's targets and payments; it takes no action."] : []),
 		...(stage === "binding" ? ["Choose the targets; the payment comes next."] : stage === "payment" ? ["Choose how to pay. inspect:back returns to all uses."] : stage === "component" ? ["Choose a range to narrow the options; this takes no action."] : []),
 		...(options.some((one) => one.parameters) ? ["An option with parameters takes all of its parts at once."] : []),
-		...(packet.opening ? ["state.opening shows your hand. Follow the opening advice in state.guidance."] : []),
+		...(packet.opening ? ["state.opening shows your hand. Follow the opening advice in pregameNotes."] : []),
 		...(packet.retained ? ["retained shows the hand left after each choice."] : []),
 		...(packet.combat ? ["Choosing a creature adds it to the declaration; only the finish option ends it. state.combat shows the declaration so far."] : []),
 		...(packet.resolving ? ["You are resolving an effect whose costs are paid. Follow resolving.purpose."] : []),
