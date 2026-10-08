@@ -7,6 +7,17 @@ export type Property = { id?: string; source?: string; timing?: string; target?:
 export type PlanCheck = { expect?: Property; require?: Property[]; forbid?: Property; order?: Property[]; anyOrder?: Property[][]; forbidProse?: string[];
 	requireHold?: boolean; requireOpponentResponse?: boolean };
 
+/** Physical fixture goals, graded only after the requested continuation finishes. */
+export type After = { id: string; zone: string; incarnation?: number };
+export function checkPosition(objects: Iterable<{ id: string; zone: string; incarnation: number }>, expected: After[], completed: boolean) {
+	const observed = new Map([...objects].map((one) => [one.id, one]));
+	const checks = expected.map((want) => { const actual = observed.get(want.id);
+		return { expected: want, actual: actual && { id: actual.id, zone: actual.zone, incarnation: actual.incarnation },
+			passed: !!actual && actual.zone === want.zone && (want.incarnation === undefined || actual.incarnation === want.incarnation) };
+	});
+	return { completed, checks, passed: completed && checks.every((one) => one.passed) };
+}
+
 export function planText(plan: Plan): string {
 	return [plan.objective, plan.guidance, ...(plan.phases ?? []).flatMap((one) => [one.goal, one.guidance, one.reevaluate]),
 		...plan.steps.flatMap((one) => [one.label, one.purpose]), ...(plan.may ?? []).flatMap((one) => [one.label, one.purpose]),

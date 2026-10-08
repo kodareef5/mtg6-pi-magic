@@ -27,7 +27,7 @@ import { activate, printedCast, procedureOptions } from "../src/core/procedures.
 import { select, reached } from "../src/core/query.ts";
 import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
-import { checkPlan } from "../tools/benchmark-checks.ts";
+import { checkPlan, checkPosition } from "../tools/benchmark-checks.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
 import { planningFrame } from "../src/context/strategy-facts.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
@@ -141,6 +141,12 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	}
 	assert.deepEqual(planProblems(workFrame(table, 0), { ...line, steps: [{ ...line.steps[0]!, if: { is: { top: 1, of: "you" }, matches: { zones: ["library"], name: "Forest" } } }] }), [], "a library test remains a library test, subject to projected knowledge");
 	const prose = { ...line, guidance: "Keep one Forest for Veil." };
+	const observedThing = [...table.things.values()][0]!, after = [{ id: observedThing.id, zone: observedThing.zone, incarnation: observedThing.incarnation }];
+	assert.equal(checkPosition(table.things.values(), after, true).passed, true);
+	assert.equal(checkPosition(table.things.values(), after, false).passed, false, "an observation stop before the requested boundary cannot establish survival");
+	assert.equal(checkPosition(table.things.values(), [{ ...after[0]!, zone: "another zone" }], true).passed, false, "plan acceptance cannot establish the object's final zone");
+	assert.equal(checkPosition(table.things.values(), [{ ...after[0]!, incarnation: observedThing.incarnation + 1 }], true).passed, false, "retention must preserve the specified incarnation");
+	assert.equal(checkPosition(table.things.values(), [{ id: "absent", zone: "battlefield" }], true).passed, false);
 	const checked = checkPlan(prose, { forbidProse: ["keep[^.]*Veil"] }, workFrame(table, 0));
 	assert.ok(checked.structure && !checked.passed, "a valid action line can fail the fixture's prose property");
 	assert.deepEqual(checked.prose[0]!.matches, ["Keep one Forest for Veil"]);

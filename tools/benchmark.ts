@@ -13,7 +13,7 @@ import { workFrame, planProblems } from "../src/core/work-tools.ts";
 import { project, sinceDecision } from "../src/core/view.ts";
 import { annotate, planState } from "../src/core/planning.ts";
 import { PlanSchema, check, type Plan } from "../src/core/language.ts";
-import { checkPlan, type PlanCheck } from "./benchmark-checks.ts";
+import { checkPlan, type PlanCheck, type After } from "./benchmark-checks.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { aiSeat, changes } from "../src/context/seat.ts";
@@ -31,7 +31,7 @@ import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
 
 type Case = PlanCheck & { id: string; journal: string; version: number; seat: number; task: "pilot" | "prepare" | "amend" | "repair" | "plan" | "continue" | "judge"; judgeRow?: number; legal?: boolean; objectionRow?: number; avoidObjection?: boolean; property: string; winner?: number; picks?: string[]; refused?: string[];
-	pilotPolicy?: string; prepared?: { file: string; name: string } };
+	pilotPolicy?: string; prepared?: { file: string; name: string }; after?: After[]; throughTurn?: number };
 const { values } = parseArgs({ options: { positions: { type: "string" }, live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", multiple: true, default: ["jev"] }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
@@ -45,7 +45,9 @@ const repeat = Number(values.repeat), pilots = [...new Set(values.pilot!.flatMap
 if (!Number.isInteger(repeat) || repeat < 1 || pilots.some((one) => !one.trim())) throw new Error("Use a positive --repeat and a nonempty --pilot model pattern.");
 const selected = catalog.cases.filter((one) => (!values.task || one.task === values.task) && (!values.case || values.case.includes(one.id)));
 if (!selected.length || values.case?.some((id) => !selected.some((one) => one.id === id))) throw new Error("The requested benchmark cases were not found.");
+if (selected.some((one) => one.throughTurn !== undefined && (!Number.isInteger(one.throughTurn) || one.throughTurn < 0))) throw new Error("A case's throughTurn must be a nonnegative integer.");
 if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))) throw new Error("--play continues plans; select preparation, amendment or repair cases.");
+if ((values.live && !values.play || values.review) && selected.some((one) => one.after)) throw new Error("Physical position properties require --live --play; a plan alone cannot establish them.");
 if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers)) throw new Error("Continuation cases require --play, without --answers: they resume the prefix's existing work.");
 const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
@@ -65,6 +67,7 @@ const positions = selected.map((one) => {
 	if (!path) throw new Error(`Unknown journal ${one.journal}.`);
 	const saved = replay(journals.get(one.journal)!, (header) => matchTable(header.seed), one.version, { cards: matchup.cards, rules: matchup.rules });
 	const frame = workFrame(saved.table, one.seat);
+	if (one.after && Number(values.through ?? one.throughTurn ?? saved.table.cursor.turn) < saved.table.cursor.turn) throw new Error(`${one.id}: a physical property cannot be graded at a boundary before its prefix.`);
 	if (one.task === "pilot") frame.view = project(saved.table, one.seat, sinceDecision(saved.table, one.seat));
 	// Supplied coverage changes only plan content, preserving the prefix's progress and physical facts.
 	if (one.pilotPolicy) {
@@ -168,10 +171,10 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 				passed = checks.passed;
 				decisionMs = Date.now() - began;
 				if (values.play) {
-					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }) },
-						{ out: join(out, `${one.id}-${iteration}`), inference, roster: parts, ...(values.through ? { throughTurn: Number(values.through) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
+					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }), ...(one.after ? { after: one.after } : {}) },
+						{ out: join(out, `${one.id}-${iteration}`), inference, roster: parts, ...(values.through !== undefined || one.throughTurn !== undefined ? { throughTurn: Number(values.through ?? one.throughTurn) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
 					const game = continuation.result;
-					passed = passed && (one.winner === undefined || game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+					passed = passed && (!one.after || !!continuation.afterChecks?.passed) && (one.winner === undefined || game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
 				}
 			} else {
 				const api: DecisionApi = pilot !== "luna" ? decisionApi(inference.classify, classifiers.get(pilot)!, { tally: measured, seat: one.seat }) : {

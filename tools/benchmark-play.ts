@@ -13,8 +13,9 @@ import { traceInference } from "../src/context/trace.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { gameResult, saveReport } from "./game-report.ts";
 import { matchTable, matchup, universe } from "./matchup-fixture.ts";
+import { checkPosition, type After } from "./benchmark-checks.ts";
 
-export async function playProposal(input: { journal: string; version: number; seat: number; plan?: Plan },
+export async function playProposal(input: { journal: string; version: number; seat: number; plan?: Plan; after?: After[] },
 	options: { out: string; inference: Inference; roster: Cast[]; throughTurn?: number; decisions?: number; judgeAttempts?: number }) {
 	mkdirSync(options.out, { recursive: true });
 	const path = join(options.out, "game.jsonl"), trace = join(options.out, "calls.jsonl");
@@ -70,7 +71,7 @@ export async function playProposal(input: { journal: string; version: number; se
 	const result = gameResult(table, seated, { replayMatches: isDeepStrictEqual(same(compared), same(rebuilt)), journal: path, trace,
 		...(failure ? { error: String(failure) } : {}) });
 	const paths = saveReport(join(options.out, "game.result.json"), result);
-	return { result, paths, cloneMatches: true, throughTurn: through, ...(stoppedBy ? { stoppedBy } : {}),
+	return { result, paths, cloneMatches: true, throughTurn: through, ...(input.after ? { afterChecks: checkPosition(table.things.values(), input.after, !!table.outcome || stoppedBy === "turn") } : {}), ...(stoppedBy ? { stoppedBy } : {}),
 		...(options.decisions === undefined ? {} : { decisionLimit: options.decisions }), decisions: table.ledger.length - beganAt, judgeAttempts: seated.judged.cases,
 		...(options.judgeAttempts === undefined ? {} : { judgeAttemptLimit: options.judgeAttempts }) };
 }

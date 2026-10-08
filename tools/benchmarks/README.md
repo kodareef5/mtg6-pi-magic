@@ -64,5 +64,18 @@ the listed source, cost and window choices; it does not check targets, payment
 instructions or power arithmetic. Review those separately. With `--play`, the
 plan property, winner and continuation health must all pass.
 
+Physical `after` checks name object ids, final zones and optional incarnations.
+They require `--live --play` and a completed turn boundary or actual outcome.
+A decision or judge limit reached earlier cannot pass them. `throughTurn` in
+the case sets its boundary; `--through` overrides it. A boundary before the
+prefix is refused. These checks establish the final state, not the payment,
+timing or tactical value of the actions that produced it.
+
+`k-preserve-elf-response` retains the Elf through turn 4,
+`l-hydra-response` puts Hydra in the graveyard through turn 9, and
+`kellan-reserve-continuation` puts the planned Zhao on the battlefield through
+turn 4. The two repair prefixes end at `plan.request`, before the writer's
+answer, including equipment edits recorded at the same decision version.
+
 Retired experiments remain in Git history. Local notes live under ignored
 `design-ref/experiments/`. See [gameplay status](../../docs/STATUS.md).

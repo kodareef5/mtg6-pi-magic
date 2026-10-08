@@ -30,7 +30,9 @@
     "stale-response": "test/fixtures/benchmarks/stale-response.jsonl.gz",
     "green-hydra-growth": "test/fixtures/benchmarks/green-hydra-growth.jsonl.gz",
     "reserve-authoring": "test/fixtures/benchmarks/reserve-authoring.jsonl.gz",
-    "response-authoring": "test/fixtures/benchmarks/response-authoring.jsonl.gz"
+    "response-authoring": "test/fixtures/benchmarks/response-authoring.jsonl.gz",
+    "k-preserve-elf-response": "test/fixtures/benchmarks/k-preserve-elf-response.jsonl.gz",
+    "l-hydra-response": "test/fixtures/benchmarks/l-hydra-response.jsonl.gz"
   },
   "cases": [
     {
@@ -793,6 +795,53 @@
       "property": "Reserve usable red and cover growth responses throughout the opponent turn.",
       "requireHold": true,
       "requireOpponentResponse": true
+    },
+    {
+      "id": "k-preserve-elf-response",
+      "journal": "k-preserve-elf-response",
+      "version": 87,
+      "seat": 0,
+      "task": "repair",
+      "throughTurn": 4,
+      "after": [
+        {
+          "id": "0-40",
+          "zone": "battlefield",
+          "incarnation": 3
+        }
+      ],
+      "property": "Repair the response before blockers. Preserve the existing Elf through turn4, using executable policy rather than unread rationale. Actual survival, boundary completion and health must pass."
+    },
+    {
+      "id": "l-hydra-response",
+      "journal": "l-hydra-response",
+      "version": 276,
+      "seat": 1,
+      "task": "repair",
+      "throughTurn": 9,
+      "after": [
+        {
+          "id": "0-50",
+          "zone": "graveyard"
+        }
+      ],
+      "property": "Remove the present Hydra before postcombat landfall grows it out of Burst range. Grade its final zone after turn9 and review payment and timing separately."
+    },
+    {
+      "id": "kellan-reserve-continuation",
+      "journal": "kellan-reserve",
+      "version": 82,
+      "seat": 1,
+      "task": "continue",
+      "throughTurn": 4,
+      "after": [
+        {
+          "id": "1-57",
+          "zone": "battlefield",
+          "incarnation": 3
+        }
+      ],
+      "property": "Execute the accepted attack and postcombat Zhao cast through turn4. Grade actual Zhao entry separately from plan acceptance; preserve the two Mountain payment against an unplanned Kellan upgrade."
     }
   ]
 }
