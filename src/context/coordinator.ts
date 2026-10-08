@@ -55,7 +55,7 @@ export const ROLLUP = { type: "object", additionalProperties: false, required: [
 
 const ORDER = [
 	"The conversation gives you, in order:",
-	"1. A game dossier with everything this player knows. The board, mana, triggers, deck lists, odds and card text are facts. The matchup plan, notebook and standing plan were written by models and can be wrong.",
+	"1. A game dossier with everything this player knows. The board, mana, deck lists, odds and card text are projected facts. Registered triggers are accepted interpretations; they, the matchup plan, notebook and standing plan can be wrong.",
 	"2. The work for this decision: findings from focused questions and reports from six outlooks when they ran, the plan you are editing, the actions you can reuse, and any problems or changes.",
 	"3. Your request, last.",
 ].join("\n");

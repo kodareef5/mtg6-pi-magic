@@ -158,6 +158,9 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	const warp = { source: "Mightform Harmonizer", timing: "spell", mana: "{2}{G}", step: "precombat-main" };
 	assert.equal(checkPlan(growth, { expect: warp }, workFrame(table, 0)).passed, true, "the saved witness establishes the affordable precombat warp choice");
 	assert.equal(checkPlan(growth, { expect: { ...warp, mana: "{3}{G}" } }, workFrame(table, 0)).passed, false, "a different spell payment cannot satisfy that choice");
+	const laterGrowth = structuredClone(growth);
+	for (const step of laterGrowth.steps) step.when.fromTurn = 99;
+	assert.equal(checkPlan(laterGrowth, { expect: warp }, workFrame(table, 0)).passed, false, "a later-turn proposal cannot establish this turn's resource choice");
 	assert.equal(checkPlan(line, { requireHold: true }, workFrame(table, 0)).passed, false, "payment prose does not establish a held resource");
 	assert.equal(checkPlan({ ...line, holds: [{ objects: { card: "Forest" }, purpose: "Keep the cast payment." }] }, { requireHold: true }, workFrame(table, 0)).passed, true);
 	const response = { ...line, phases: [{ when: { active: "opponent" as const }, guidance: "Respond when the target appears." }] };

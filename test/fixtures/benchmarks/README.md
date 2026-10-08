@@ -114,7 +114,10 @@ Run the strategist with `npm run benchmark -- --live --case
 green-harmonizer-lethal --play --through 7`. Add `--answers
 test/fixtures/benchmarks/good-harmonizer-lethal.json` to test execution of the
 supplied line instead. Both spend on live inference. Without `--play`, an
-accepted plan does not establish the outcome property.
+accepted plan does not establish the outcome property. The case also checks
+the initial accepted sequence before any pilot moves or repairs: Harmonizer
+before two land entries and the Surrak attack. A matching sequence does not
+certify its targets, payment instructions or arithmetic.
 
 `stale-response.jsonl.gz` ends at decision 438 of
 `engine-feedback-20261008-l-1791451374149`, immediately after Green's
@@ -160,7 +163,10 @@ blocker. `good-hydra-growth.json` supplies an executed turn-7 win:
 Ordinary Jev seats executed this witness in 43 further decisions, won on turn 7
 and produced matching replay and clone checks with no gaps or fallback.
 It verifies one observed line, not discovery or every opposing response.
-Without `--answers`, the case asks the writer to find its own line:
+The case checks the initial accepted choice: warp Harmonizer before Tunnel
+enters, fetch with Tunnel, then attack with Hydra. A later repair cannot satisfy
+that initial-plan check. Trigger targets, payment and power arithmetic still
+need review. Without `--answers`, the case asks the writer to find its own line:
 
 ```sh
 npm run benchmark -- --live --case green-hydra-growth --play --through 7
