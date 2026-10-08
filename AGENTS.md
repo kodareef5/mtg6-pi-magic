@@ -211,8 +211,8 @@ same bill, counted when a request is made rather than when one comes back, so a
 run that was rate limited does not report as free. The output ceiling is there too
 and not in the prompts, because it is a price rather than a style: some routes
 price a request against the maximum output asked for rather than the output
-returned, so every role names a deliberate ceiling and a reply that hits it is
-recorded as truncated.
+returned, so every role names a requested ceiling. A route may ignore it.
+Truncation records the provider's length stop, not an inferred token threshold.
 
 ## Build order
 

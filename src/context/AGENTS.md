@@ -67,7 +67,8 @@ reaches a decision is a short plan plus the facts.
 
 Every call goes through `spend.ts` and carries an output ceiling. The ceiling is
 a price and not a style, because some routes charge against the maximum asked
-for rather than the reply returned.
+for rather than the reply returned. It is a requested limit; a route may ignore
+it. The ledger records truncation only when the provider reports a length stop.
 
 ## Preparation, projection, and selection
 

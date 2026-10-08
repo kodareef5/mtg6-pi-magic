@@ -15,8 +15,8 @@
  * a style. Some routes, OpenRouter among them, price a request against the
  * maximum output asked for rather than the output returned, so asking for
  * 128,000 tokens to receive 80 costs more than asking for 200. Every role
- * therefore names a deliberate ceiling, and a reply that hits it is recorded as
- * truncated rather than quietly accepted.
+ * therefore names a requested ceiling. A route may ignore it. Truncation is
+ * recorded when the provider reports a length stop, not inferred from the count.
  */
 
 import type { Usage } from "@earendil-works/pi-ai";
@@ -30,8 +30,8 @@ import type { Role } from "./roles.ts";
  * How much output each role may ask for.
  *
  * Read these together with the prompt that uses them. A summary is two or three
- * sentences, so 200 tokens is loose rather than tight, and a ceiling a reply
- * never reaches costs nothing in quality and saves money on every call.
+ * sentences, so it requests 200 tokens. The route decides whether to enforce
+ * that request; the ledger keeps actual usage and the reported stop reason.
  */
 export const CEILING: Record<Role, number> = {
 	/** A classifier returns a choice and a distribution. We do not size its output. */
@@ -70,10 +70,10 @@ export type Spend = {
 	ms: number;
 	/** A hash of the system prompt and tools: two calls with the same one share a cacheable prefix and a prompt version. */
 	prompt?: string;
-	/** The output ceiling asked for. Some routes price against this, not the reply. */
+	/** Requested output limit. Some routes price against it; others ignore it. */
 	ceiling: number;
 	usage?: Usage;
-	/** The reply stopped because it ran out of room. The prompt or the ceiling is wrong. */
+	/** The provider reported a length stop. */
 	truncated?: boolean;
 	/** Set when the call failed. The caller decides what that means. */
 	failed?: string;
