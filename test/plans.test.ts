@@ -29,6 +29,7 @@ import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan } from "../tools/benchmark-checks.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
+import { planningFrame } from "../src/context/strategy-facts.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -1842,7 +1843,8 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest");
 	place(table, 0, "hand", "Mossborn Hydra", "Forest");
-	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
+	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Prior tactical conclusion", guidance: "Prior payment assumption", steps: [] } },
+		{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const before = structuredClone(table);
 	const questions: string[] = [], outlooks: string[] = [], writer: string[] = [], coordinated: string[] = [];
 	const stream: Stream = (_model, request) => {
@@ -1860,7 +1862,13 @@ test("focused questions rate findings, outlooks propose lines in parallel, and t
 	for (const kind of ["The opponent.", "Their next attack.", "Your whole attack this turn.", "Orders of operations", "Removal.", "Your other resources."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
 	for (const outlook of ["expert defender", "aggressive punisher", "long-horizon planner", "sequencing specialist", "the opponent looking", "removal analyst"]) assert.ok(outlooks.some((one) => one.includes(outlook)), outlook);
 	const [doc, work] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
-	for (const asked of [...questions, ...outlooks]) assert.equal((JSON.parse(asked) as { content: string }[])[0]!.content, doc, "every analyst and the coordinator read one identical dossier");
+	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn") }, "analyst");
+	for (const asked of [...questions, ...outlooks]) {
+		const seen = (JSON.parse(asked) as { content: string }[])[0]!.content;
+		assert.equal(seen, facts, "every analyst reads the same projected facts");
+		assert.ok(!seen.includes("## Your standing plan") && !seen.includes("## Your matchup plan") && !seen.includes("Prior tactical conclusion"), "analysts work without prior strategic conclusions");
+	}
+	assert.ok(doc!.startsWith(facts) && doc!.includes("Prior tactical conclusion"), "the coordinator keeps the same facts and the prior intent it must reconcile");
 	assert.ok(work!.indexOf("## Findings from focused questions") < work!.indexOf("## Reports from six outlooks") && work!.indexOf("## Reports from six outlooks") < work!.indexOf("## Your request"), "analysts' work comes before the request, which comes last");
 	const ranks = [...work!.matchAll(/^\d+\. Relevance (\d)/gm)].map((match) => Number(match[1]));
 	assert.deepEqual(ranks, [...ranks].sort((a, b) => b - a), "findings arrive ranked by relevance");

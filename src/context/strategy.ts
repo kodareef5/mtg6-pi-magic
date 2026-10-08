@@ -104,12 +104,13 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		: `${task}${decision}`;
 	const resources = paymentForecast(frame, base);
 	const scoped = options.nextTurn ? "preparation" : response ? "response" : "turn";
-	// One dossier for every call in the session, then two concurrent rounds of analysts before the coordinator.
+	// Analysts judge the position before the coordinator reconciles their findings with prior intent.
 	const planned = planningFrame(frame, scoped);
-	const doc = dossier({ frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
-		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}) });
-	const findings = context.survey ? await surveyPosition(planned, doc, reasoner, options.signal) : undefined;
-	const reported = findings ? await perspectiveReports(doc, findings, reasoner, options.signal) : undefined;
+	const input = { frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
+		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}) };
+	const doc = dossier(input), facts = dossier(input, "analyst");
+	const findings = context.survey ? await surveyPosition(planned, facts, reasoner, options.signal) : undefined;
+	const reported = findings ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
 	const work = workSections({ base: planFacts(base), problems: [...planProblems(frame, base), ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
 		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),

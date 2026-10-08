@@ -1,9 +1,9 @@
 /**
- * The game dossier: one markdown document of everything this seat knows,
- * read by every strategy call in a session. The board in every public zone and
- * the seat's own hand, mana, triggers, both registered lists with odds from the
- * seat's own knowledge, card text, the last turns, and the seat's strategy.
- * Nothing is trimmed and no code judges the position. Model-written text is
+ * The game dossier: projected facts shared by the strategy calls in a session.
+ * Every call gets public zones, the seat's hand, mana, triggers, registered
+ * lists and odds, card text and recent turns. Only the coordinator also reads
+ * the matchup plan, notebook and standing plan. No physical facts are dropped
+ * and no code judges the position. Model-written text is
  * quoted under a heading that names its author, so loud content stays inside
  * its section. Past 150 lines to keep every section beside the layout rules.
  */
@@ -31,7 +31,7 @@ const words = (step: string) => step.replace(/-/g, " ");
 export const named = (object: SeenObject) => object.card ?? object.token?.name ?? object.ability?.claim ?? (object.faceDown ? "a face-down card" : "an unknown object");
 export const ref = (object: { id: string; incarnation: number }) => `${object.id}@${object.incarnation}`;
 
-export function dossier(input: DossierInput): string {
+export function dossier(input: DossierInput, reader: "analyst" | "coordinator" = "coordinator"): string {
 	const { frame } = input;
 	const seats = frame.view.seats ?? frame.view.players?.map((one) => ({ id: one.id, name: `Seat ${one.id}` })) ?? [];
 	const name = (seat: SeatId) => seats.find((one) => one.id === seat)?.name ?? `Seat ${seat}`;
@@ -44,7 +44,7 @@ export function dossier(input: DossierInput): string {
 		"## Mana", manaLines(frame).map((line) => `- ${line}`).join("\n"),
 		triggers(frame, name), decks(frame, name), cardText(input),
 		recent(frame, name, input.recaps),
-		...strategySections(frame, input.brief),
+		...(reader === "coordinator" ? strategySections(frame, input.brief) : []),
 	].join("\n\n");
 }
 
