@@ -90,7 +90,7 @@ export function report(result: GameResult): string[] {
 		...(reasons ? [`decisions ${Object.entries(reasons).map(([why, n]) => `${why} ${n}`).join("  ")}`] : []),
 		`jev       ${byRole("decide")} calls  ${purpose("pick")} picks  ${purpose("review")} reviews  ${byRole("decide") - purpose("pick") - purpose("review")} other`,
 		`strategy  ${byRole("strategy")} calls  ${planned.length} sessions${plans ? `  ${plans.accepted} plans  ${plans.steps} steps  ${plans.branches} branches` : ""}${stops ? `; help ${stops.help}  stops ${stops.stops}  essential ${stops.essential}` : ""}`,
-		`planning  ready ${preparations.filter((one) => one.ready).length}/${preparations.length}  unfinished wait ${preparations.some((one) => one.preparation) ? duration(preparationWait) : "?"}  timeouts ${result.calls.filter((one) => one.role === "strategy" && /timed out/.test(one.failed ?? "")).length}`,
+		`planning  ready ${preparations.filter((one) => one.ready).length}/${preparations.length}  unfinished wait ${preparations.some((one) => one.preparation) ? duration(preparationWait) : "?"}  timeouts ${(["pregame", "strategy", "judge", "summary", "decide"] as const).map((role) => `${role} ${result.calls.filter((one) => one.role === role && /timed out/.test(one.failed ?? "")).length}`).join(" ")}`,
 		`judge     ${byRole("judge")} calls  ${result.judged?.cases ?? "?"} cases this run (${result.judged?.failed ?? "?"} failed); ${stops?.rulings ?? "?"} game rulings  ${stops?.unruled ?? 0} unruled cases  ${stops?.upheld ?? "?"} rollbacks`,
 		`summary   ${byRole("summary")} calls  ${result.recaps ?? "?"} recaps; rule lookups ${result.dials ? Object.values(result.dials).reduce((sum, n) => sum + n, 0) : "?"}`,
 		...bill(result.calls, now),

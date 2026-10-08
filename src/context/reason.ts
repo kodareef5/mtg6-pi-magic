@@ -102,8 +102,12 @@ const textOf = (content: unknown[]): string =>
 		.trim();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-/** How long one request may take before it is abandoned and tried again. Generous: thinking takes time. */
-const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 240_000, strategy: 150_000, judge: 150_000, summary: 60_000 };
+/**
+ * How long one request may take before it is abandoned and tried again. Generous: thinking takes time.
+ * Pregame analysts on a high-effort model ran a median of two to three minutes, and at 240 seconds
+ * about one in six timed out, so the brief that every later turn reads gets fifteen minutes.
+ */
+const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 900_000, strategy: 150_000, judge: 150_000, summary: 60_000 };
 
 export function reasoner(options: {
 	role: Role;
