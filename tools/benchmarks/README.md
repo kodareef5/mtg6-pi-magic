@@ -58,5 +58,11 @@ requires an opponent phase policy with no step or phase restriction. These
 checks establish presence and scope, not whether the payment or response works.
 Cases without property checks grade only acceptance and continuation health.
 
+The growth cases check the initial accepted plan, before pilot actions or
+repairs. `anyOrder` lists alternative ordered sequences. A match establishes
+the listed source, cost and window choices; it does not check targets, payment
+instructions or power arithmetic. Review those separately. With `--play`, the
+plan property, winner and continuation health must all pass.
+
 Retired experiments remain in Git history. Local notes live under ignored
 `design-ref/experiments/`. See [gameplay status](../../docs/STATUS.md).

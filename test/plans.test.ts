@@ -148,6 +148,16 @@ test("a plan is accepted whole and atomically, and every problem with it is name
 	assert.equal(checkPlan(line, required, workFrame(table, 0)).passed, true);
 	assert.equal(checkPlan({ ...line, steps: [line.steps[0]!] }, required, workFrame(table, 0)).passed, false, "the first named action alone cannot satisfy the whole commitment");
 	assert.equal(checkPlan({ ...line, steps: [...line.steps].reverse() }, required, workFrame(table, 0)).passed, true, "required actions do not invent an ordering constraint");
+	const alternatives = { anyOrder: [required.require, [{ id: "missing" }]] };
+	assert.equal(checkPlan(line, alternatives, workFrame(table, 0)).passed, true, "one complete ordered alternative suffices");
+	assert.equal(checkPlan({ ...line, steps: [...line.steps].reverse() }, alternatives, workFrame(table, 0)).passed, false, "unordered pieces do not establish a sequence");
+	assert.equal(checkPlan({ ...line, steps: [line.steps[0]!] }, alternatives, workFrame(table, 0)).passed, false, "partial alternatives do not establish the initial line");
+	assert.equal(checkPlan(line, { expect: { ...required.require[0], step: "postcombat-main" } }, workFrame(table, 0)).passed, false, "a postcombat step cannot satisfy a precombat growth check");
+	assert.equal(checkPlan(line, { expect: { ...required.require[0], mana: "{2}{G}" } }, workFrame(table, 0)).passed, false, "movement does not establish a priced cast");
+	const growth = JSON.parse(readFileSync("test/fixtures/benchmarks/good-hydra-growth.json", "utf8")).results[0].answer.plan as Plan;
+	const warp = { source: "Mightform Harmonizer", timing: "spell", mana: "{2}{G}", step: "precombat-main" };
+	assert.equal(checkPlan(growth, { expect: warp }, workFrame(table, 0)).passed, true, "the saved witness establishes the affordable precombat warp choice");
+	assert.equal(checkPlan(growth, { expect: { ...warp, mana: "{3}{G}" } }, workFrame(table, 0)).passed, false, "a different spell payment cannot satisfy that choice");
 	assert.equal(checkPlan(line, { requireHold: true }, workFrame(table, 0)).passed, false, "payment prose does not establish a held resource");
 	assert.equal(checkPlan({ ...line, holds: [{ objects: { card: "Forest" }, purpose: "Keep the cast payment." }] }, { requireHold: true }, workFrame(table, 0)).passed, true);
 	const response = { ...line, phases: [{ when: { active: "opponent" as const }, guidance: "Respond when the target appears." }] };

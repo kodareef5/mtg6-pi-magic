@@ -637,7 +637,77 @@
       "seat": 0,
       "task": "plan",
       "winner": 0,
-      "property": "Find and execute a turn-7 win using precombat power growth. Use --play --through 7 to grade the outcome; an accepted proposal alone is not a win."
+      "property": "Author a precombat Harmonizer sequence with two land entries, then attack with Surrak. Accepted steps must match one listed sequence; this does not certify payment, targets or arithmetic. With --play --through 7, a turn-7 win and continuation health must also pass.",
+      "anyOrder": [
+        [
+          {
+            "source": "Mightform Harmonizer",
+            "timing": "spell",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Escape Tunnel",
+            "prefix": "land:",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Escape Tunnel",
+            "timing": "stack",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Surrak, Elusive Hunter",
+            "prefix": "attack:",
+            "step": "declare-attackers"
+          }
+        ],
+        [
+          {
+            "source": "Mightform Harmonizer",
+            "timing": "spell",
+            "step": "precombat-main",
+            "mana": "{2}{G}"
+          },
+          {
+            "source": "Ba Sing Se",
+            "prefix": "land:",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Promising Vein",
+            "timing": "stack",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Surrak, Elusive Hunter",
+            "prefix": "attack:",
+            "step": "declare-attackers"
+          }
+        ],
+        [
+          {
+            "source": "Mightform Harmonizer",
+            "timing": "spell",
+            "step": "precombat-main",
+            "mana": "{2}{G}"
+          },
+          {
+            "source": "Forest",
+            "prefix": "land:",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Promising Vein",
+            "timing": "stack",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Surrak, Elusive Hunter",
+            "prefix": "attack:",
+            "step": "declare-attackers"
+          }
+        ]
+      ]
     },
     {
       "id": "stale-response",
@@ -678,7 +748,32 @@
       "seat": 0,
       "task": "plan",
       "winner": 0,
-      "property": "Find and execute a turn-7 win through land entries, counter growth and temporary power growth. Use --play --through 7; accepted plans alone do not grade the outcome."
+      "property": "Author precombat Harmonizer warp before playing and fetching with Tunnel, then attack with Hydra. This checks the initial resource choice and order, not trigger targets or power arithmetic. With --play --through 7, a turn-7 win and continuation health must also pass.",
+      "anyOrder": [
+        [
+          {
+            "source": "Mightform Harmonizer",
+            "timing": "spell",
+            "step": "precombat-main",
+            "mana": "{2}{G}"
+          },
+          {
+            "source": "Escape Tunnel",
+            "prefix": "land:",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Escape Tunnel",
+            "timing": "stack",
+            "step": "precombat-main"
+          },
+          {
+            "source": "Mossborn Hydra",
+            "prefix": "attack:",
+            "step": "declare-attackers"
+          }
+        ]
+      ]
     },
     {
       "id": "reserve-authoring",

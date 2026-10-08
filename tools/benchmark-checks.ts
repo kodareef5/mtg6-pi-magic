@@ -3,8 +3,8 @@ import type { Plan, PlanOption } from "../src/core/language.ts";
 import type { Frame } from "../src/core/types.ts";
 import { select } from "../src/core/query.ts";
 
-export type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string; zone?: string };
-export type PlanCheck = { expect?: Property; require?: Property[]; forbid?: Property; order?: Property[]; forbidProse?: string[];
+export type Property = { id?: string; source?: string; timing?: string; target?: string; prefix?: string; zone?: string; step?: string; mana?: string };
+export type PlanCheck = { expect?: Property; require?: Property[]; forbid?: Property; order?: Property[]; anyOrder?: Property[][]; forbidProse?: string[];
 	requireHold?: boolean; requireOpponentResponse?: boolean };
 
 export function planText(plan: Plan): string {
@@ -17,15 +17,15 @@ export function checkPlan(plan: Plan, check: PlanCheck, frame: Frame) {
 	const at = frame.view.window;
 	const responseTurn = at.kind === "turn" ? at.turn + Number(at.active === frame.seat) : undefined;
 	const fits = (action: PlanOption["action"], property: Property) => "procedure" in action
-		? (!property.source || action.procedure.source.card === property.source) && (!property.zone || action.procedure.source.zones?.some((zone) => zone === property.zone)) && (!property.timing || action.procedure.timing === property.timing) && !property.prefix && !property.id
+		? (!property.source || action.procedure.source.card === property.source) && (!property.zone || action.procedure.source.zones?.some((zone) => zone === property.zone)) && (!property.timing || action.procedure.timing === property.timing) && (!property.mana || action.procedure.cost?.mana === property.mana) && !property.prefix && !property.id
 		: (!property.source || action.objects?.card === property.source || !!action.objects && select(action.objects, frame).some((object) => object.card === property.source)) &&
 			(!property.zone || !!action.objects && select(action.objects, frame).some((object) => object.zone === property.zone && (!property.source || object.card === property.source))) &&
-			(!property.prefix || action.prefix === property.prefix) && (!property.id || action.option === property.id) && !property.timing;
-	const index = (property: Property) => plan.steps.findIndex((step) => fits(step.action, property));
-	const ordered = check.order?.map(index) ?? [];
+			(!property.prefix || action.prefix === property.prefix) && (!property.id || action.option === property.id) && !property.timing && !property.mana;
+	const index = (property: Property) => plan.steps.findIndex((step) => (!property.step || step.when.active === "self" && step.when.step === property.step) && fits(step.action, property));
+	const ordered = (properties: Property[]) => properties.map(index).every((at, n, all) => at >= 0 && (!n || at > all[n - 1]!));
 	const structure = (!check.expect || index(check.expect) >= 0) && (!check.forbid || index(check.forbid) < 0) &&
 		(check.require ?? []).every((property) => index(property) >= 0) &&
-		ordered.every((at, n) => at >= 0 && (!n || at > ordered[n - 1]!)) &&
+		(!check.order || ordered(check.order)) && (!check.anyOrder || check.anyOrder.some(ordered)) &&
 		(!check.requireHold || !!plan.holds?.length) &&
 		(!check.requireOpponentResponse || responseTurn !== undefined && !!plan.phases?.some(({ when }) => when.active === "opponent" && !when.step && !when.phase &&
 			(when.fromTurn === undefined || when.fromTurn <= responseTurn) && (when.throughTurn === undefined || when.throughTurn >= responseTurn)));
