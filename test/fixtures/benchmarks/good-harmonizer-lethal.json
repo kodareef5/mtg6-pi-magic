@@ -1,0 +1,166 @@
+{
+  "results": [
+    {
+      "id": "green-harmonizer-lethal",
+      "iteration": 0,
+      "answer": {
+        "plan": {
+          "objective": "Win this combat by doubling Surrak for each of two land entries.",
+          "guidance": "Cast Harmonizer with the four existing sources. Play and sacrifice Escape Tunnel for two entries; both Harmonizer triggers target Surrak, in order, 4 to 8 to 16. Red has no untapped blocker and is at 16.",
+          "throughTurn": 8,
+          "steps": [
+            {
+              "label": "Pass draw",
+              "when": {
+                "active": "self",
+                "step": "draw"
+              },
+              "action": {
+                "option": "pass"
+              }
+            },
+            {
+              "label": "Cast Mightform Harmonizer",
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "action": {
+                "procedure": {
+                  "source": {
+                    "zones": [
+                      "hand",
+                      "graveyard",
+                      "exile"
+                    ],
+                    "controller": "any",
+                    "card": "Mightform Harmonizer"
+                  },
+                  "claim": "Cast Mightform Harmonizer normally",
+                  "basis": "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+                  "timing": "spell",
+                  "instructions": []
+                }
+              },
+              "purpose": "Pay with both Forests, Llanowar Elves and Promising Vein. Elf taps for mana and will not attack."
+            },
+            {
+              "label": "Play Escape Tunnel",
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "waitFor": "empty-stack",
+              "action": {
+                "prefix": "land:",
+                "objects": {
+                  "zones": [
+                    "hand"
+                  ],
+                  "card": "Escape Tunnel"
+                }
+              },
+              "purpose": "Landfall targets Surrak and doubles its power from 4 to 8."
+            },
+            {
+              "label": "Sacrifice Escape Tunnel",
+              "when": {
+                "active": "self",
+                "step": "precombat-main"
+              },
+              "waitFor": "empty-stack",
+              "action": {
+                "procedure": {
+                  "source": {
+                    "zones": [
+                      "battlefield"
+                    ],
+                    "controller": "self",
+                    "card": "Escape Tunnel"
+                  },
+                  "claim": "Search for a basic land",
+                  "basis": "{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+                  "timing": "stack",
+                  "cost": {
+                    "tap": true,
+                    "sacrifice": "this"
+                  },
+                  "instructions": [
+                    {
+                      "do": "choose",
+                      "who": "you",
+                      "from": {
+                        "zones": [
+                          "library"
+                        ],
+                        "owner": "you",
+                        "supertypes": [
+                          "basic"
+                        ],
+                        "types": [
+                          "land"
+                        ]
+                      },
+                      "count": 1,
+                      "upTo": true,
+                      "as": "land"
+                    },
+                    {
+                      "do": "move",
+                      "what": "bound:land",
+                      "to": "battlefield",
+                      "tapped": true,
+                      "reason": "resolve"
+                    },
+                    {
+                      "do": "shuffle",
+                      "who": "you"
+                    }
+                  ]
+                }
+              },
+              "purpose": "Search for a basic Forest and put it onto the battlefield tapped. The second landfall trigger targets Surrak, doubling 8 to 16."
+            },
+            {
+              "label": "Attack with Surrak",
+              "when": {
+                "active": "self",
+                "step": "declare-attackers"
+              },
+              "action": {
+                "prefix": "attack:",
+                "objects": {
+                  "zones": [
+                    "battlefield"
+                  ],
+                  "controller": "self",
+                  "card": "Surrak, Elusive Hunter"
+                }
+              }
+            },
+            {
+              "label": "Finish attackers",
+              "when": {
+                "active": "self",
+                "step": "declare-attackers"
+              },
+              "action": {
+                "option": "attack:done"
+              }
+            }
+          ],
+          "phases": [
+            {
+              "when": {
+                "active": "self"
+              },
+              "guidance": "Execute the ordered line. Every Mightform Harmonizer landfall trigger targets Surrak, Elusive Hunter. Let each trigger resolve before the next land entry. Search Escape Tunnel for a basic Forest. Attack only with Surrak after its power reaches 16; Elf paid for Harmonizer and is tapped. Pass priority when the stack needs to resolve or the current window has no remaining action.",
+              "complete": "pass"
+            }
+          ],
+          "holds": []
+        }
+      }
+    }
+  ]
+}

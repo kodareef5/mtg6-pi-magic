@@ -85,3 +85,45 @@ matching test, not a claim about the instruction accepted after that declaration
 `block-kellan-zhao.jsonl.gz` and `block-zhao-only.jsonl.gz` descend from the first
 prefix through recorded passes and supplied T12 attacks. No physical fact was
 edited. The pair-catalog experiment was not adopted.
+
+## Dossier review positions
+
+- `kellan-reserve.jsonl.gz` is decision 82 of
+  `claude-20261007-i-1791416748215`: Red is at begin combat with a postcombat
+  Zhao cast in its plan. The original plan lacks a hold covering that payment.
+  The pass expectation tests preservation of the line; it does not establish
+  that the original policy gave Jev sufficient instructions.
+- `smaug-zero-target.jsonl.gz` is decision 244 of
+  `claude-20261007-j-1791416748242`: Red chooses Smaug's attack-trigger target
+  with zero Treasures. Its accepted phase policy names Green. Targeting a
+  creature instead gives Green a Surrak draw without dealing damage.
+- `green-harmonizer-lethal.jsonl.gz` is decision 182 of the same j game, with
+  a journaled request to review the unfinished line. The physical position is
+  unchanged: turn 7 draw, Red at 16, Surrak and Llanowar Elves untapped, four
+  usable sources, Harmonizer and Escape Tunnel in Green's hand.
+
+`good-harmonizer-lethal.json` is a manually prepared witness, not a strategist
+answer. Cast Harmonizer with the four existing sources, play Tunnel, resolve
+its landfall on Surrak, sacrifice Tunnel for a basic Forest, resolve the second
+landfall on Surrak, then attack with Surrak. The Elf pays for Harmonizer and
+cannot also attack. Ordinary Jev seats executed this line and won on turn 7,
+with matching replay and clone checks, no gaps and no fallback. This proves
+one observed continuation, not a win against every response.
+
+Run the strategist with `npm run benchmark -- --live --case
+green-harmonizer-lethal --play --through 7`. Add `--answers
+test/fixtures/benchmarks/good-harmonizer-lethal.json` to test execution of the
+supplied line instead. Both spend on live inference. Without `--play`, an
+accepted plan does not establish the outcome property.
+
+`stale-response.jsonl.gz` ends at decision 438 of
+`engine-feedback-20261008-l-1791451374149`, immediately after Green's
+declare-blockers help request and before the failed repair is kept. Ba Sing Se
+left and returned, but an unfinished own-turn attack still names `0-1@2`.
+The current-window editor could not remove that inherited step, while full-plan
+validation refused every response containing it. This is an interface failure,
+independent of the choice of blocks. The repair must let the writer explicitly
+remove or replace the stale commitment without rebinding the land automatically.
+Use `--live --case stale-response --play --through 14` to check the repair and
+the remainder of the turn. The original failed run stays in the October 8
+evidence directory.

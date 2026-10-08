@@ -23,7 +23,11 @@
     "block-zhao-only": "test/fixtures/benchmarks/block-zhao-only.jsonl.gz",
     "red-post-development": "test/fixtures/benchmarks/red-post-development.jsonl.gz",
     "red-begin-combat": "test/fixtures/benchmarks/red-begin-combat.jsonl.gz",
-    "red-prose-block": "test/fixtures/benchmarks/red-prose-block.jsonl.gz"
+    "red-prose-block": "test/fixtures/benchmarks/red-prose-block.jsonl.gz",
+    "kellan-reserve": "test/fixtures/benchmarks/kellan-reserve.jsonl.gz",
+    "smaug-zero-target": "test/fixtures/benchmarks/smaug-zero-target.jsonl.gz",
+    "green-harmonizer-lethal": "test/fixtures/benchmarks/green-harmonizer-lethal.jsonl.gz",
+    "stale-response": "test/fixtures/benchmarks/stale-response.jsonl.gz"
   },
   "cases": [
     {
@@ -600,6 +604,45 @@
       "task": "continue",
       "winner": 1,
       "property": "Continue the unchanged winning plan before first begin-combat help; classify repair, declarations, obedience and outcomes separately from runner health."
+    },
+    {
+      "id": "kellan-reserve",
+      "journal": "kellan-reserve",
+      "version": 82,
+      "seat": 1,
+      "task": "pilot",
+      "property": "Preserve the planned Zhao payment.",
+      "expect": {
+        "id": "pass"
+      }
+    },
+    {
+      "id": "smaug-zero-target",
+      "journal": "smaug-zero-target",
+      "version": 244,
+      "seat": 1,
+      "task": "pilot",
+      "property": "Choose the opposing player for the zero-damage trigger.",
+      "expect": {
+        "id": "trigger:trigger-463-0:t0=seat-0"
+      }
+    },
+    {
+      "id": "green-harmonizer-lethal",
+      "journal": "green-harmonizer-lethal",
+      "version": 182,
+      "seat": 0,
+      "task": "plan",
+      "winner": 0,
+      "property": "Find and execute a turn-7 win using precombat power growth. Use --play --through 7 to grade the outcome; an accepted proposal alone is not a win."
+    },
+    {
+      "id": "stale-response",
+      "journal": "stale-response",
+      "version": 438,
+      "seat": 0,
+      "task": "repair",
+      "property": "Repair the current block while explicitly removing or replacing invalid inherited commitments in other windows. Use --play --through 14 to verify continuation without a strategy gap; no particular block is required."
     }
   ]
 }
