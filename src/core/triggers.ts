@@ -283,7 +283,7 @@ export function triggerWindow(table: Table): Pending | null {
 					...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
 			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
-				label: `Put on the stack: ${name}: ${trigger.basis}`,
+				label: [`Put on the stack: ${name}: ${trigger.basis}`, ...aimed].join(" "),
 				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...trigger.effect.instructions.map(summary)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])] },
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };

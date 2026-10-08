@@ -184,7 +184,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		resources: view.resolution ? [] : [...view.yours, ...(view.window.kind === "turn" ? [
 			`Land plays left: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. A resolving effect putting a land onto the battlefield does not use a land play.`,
 			`Mana sources usable now: ${available.join("; ") || "none"}.`] : [])],
-		known: [...(view.players ?? []).map((one) => `Seat ${one.id}: ${one.life} life, ${one.hand ?? "unknown"} cards in hand, ${one.library ?? "unknown"} in library.`), ...view.since,
+		known: [...(view.players ?? []).map((one) => `Seat ${one.id} (${[view.seats?.find((seat) => seat.id === one.id)?.name, one.id === seat ? "you" : "opponent"].filter(Boolean).join(", ")}): ${one.life} life, ${one.hand ?? "unknown"} cards in hand, ${one.library ?? "unknown"} in library.`), ...view.since,
 			...(decision.situation === "trigger-order" ? view.table : [])],
 		objects: scoped.objects.map(seen).sort((a, b) => a.zone === "stack" && b.zone === "stack" ? (a.position ?? 0) - (b.position ?? 0) : 0),
 		watches: view.resolution ? watches.filter((one) => names.has(one.source.name)) : watches,

@@ -20,7 +20,7 @@ import type { Frame } from "../src/core/types.ts";
 import { abilityExercise } from "../tools/ability-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { choices, inspect, type Inspection } from "../src/context/choices.ts";
-import { aiSeat } from "../src/context/seat.ts";
+import { aiSeat, question } from "../src/context/seat.ts";
 import { establish, example, main, matchup, offered, place } from "./play.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { annotate, planState } from "../src/core/planning.ts";
@@ -140,6 +140,27 @@ test("context preserves the seat's options, shows the plan the seat flies, and c
 		await pilot.close();
 	}
 	assert.deepEqual(choiceFrame, originalChoices, "factoring and every inspection leave the original offers intact");
+
+	// Target alternatives must differ in the classifier's descriptions, not only
+	// in opaque ids or a separate detail field. No preference is added to a label.
+	const triggered = matchup("focused-trigger-targets");
+	main(triggered, 1, 2);
+	const smaug = establish(triggered, 1, "Smaug the Magnificent");
+	place(triggered, 0, "battlefield", "Icetill Explorer");
+	commit(triggered, [{ do: "attack", attackers: [{ id: smaug.id, incarnation: smaug.incarnation, defending: 0 }] }], "combat");
+	const triggerFrame = workFrame(triggered, 1), unchanged = structuredClone(triggerFrame);
+	assert.equal(triggerFrame.decision!.situation, "trigger-order");
+	const triggerPacket = focus(triggerFrame, startingIntent(1));
+	const targetQuestion = question(triggerPacket, false);
+	assert.equal(targetQuestion.type, "choice");
+	if (targetQuestion.type !== "choice") assert.fail();
+	const descriptions = triggerPacket.options.map((option) => targetQuestion.criteria[option.id]);
+	assert.equal(new Set(descriptions).size, descriptions.length, "each target has a distinct readable choice");
+	assert.ok(descriptions.some((text) => text!.includes("Target 1: opponent (seat 0)")));
+	assert.ok(descriptions.some((text) => text!.includes("Target 1: Icetill Explorer")));
+	assert.ok(triggerPacket.known.some((text) => text.includes("Green, opponent")), "the policy's player name is tied to its seat id");
+	assert.deepEqual(triggerPacket.options.map((option) => option.id), triggerFrame.decision!.options.map((option) => option.id));
+	assert.deepEqual(triggerFrame, unchanged);
 	const entered = inspect(facts, inspect(facts, {}).enter["inspect:use:0"]!);
 	assert.deepEqual(inspect(facts, entered.enter["inspect:back"]!).options, inspect(facts, {}).options, "backtracking restores all choices");
 
