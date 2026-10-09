@@ -40,8 +40,9 @@ function writerChanges(value: unknown): unknown {
 	const holdsFixed = (list: unknown) => Array.isArray(list) ? list.map((hold) => hold?.objects ? { ...hold, objects: query(hold.objects) } : hold).map((one) => one?.releaseWhen && typeof one.releaseWhen === "object" && !Array.isArray(one.releaseWhen) &&
 		Object.keys(one.releaseWhen).length && Object.keys(one.releaseWhen).every((key) => windowKeys.includes(key))
 		? (({ releaseWhen, ...rest }) => ({ ...rest, releaseAt: releaseWhen }))(one) : one) : list;
+	const triggersFixed = (list: unknown) => Array.isArray(list) ? list.map((one) => Array.isArray(one?.resolve) ? { ...one, resolve: one.resolve.map(query) } : one) : list;
 	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key, key === "holds" ? holdsFixed(list) :
-		["steps", "may", "phases", "askWhen"].includes(key) && Array.isArray(list) ? list.map((one) => {
+		["steps", "may", "phases", "askWhen", "triggers"].includes(key) && Array.isArray(list) ? (key === "triggers" ? triggersFixed(list) as unknown[] : list).map((one) => {
 			if (one?.action?.objects) one = { ...one, action: { ...one.action, objects: query(one.action.objects) } };
 			// purpose belongs to the step; written inside the action it means the same.
 			if (one?.action && typeof one.action === "object" && "purpose" in one.action && one.purpose === undefined) {
@@ -97,6 +98,8 @@ export const submissionFields = {
 	may: Type.Array(submittedOption),
 	askWhen: Type.Array(Type.Object({ ...planFields.properties.askWhen.items.properties, when: Type.Optional(WriterWhen), if: terms }, { additionalProperties: false })),
 	packages: Type.Array(terms),
+	triggers: Type.Array(Type.Object({ ...planFields.properties.triggers.items.properties, when: Type.Optional(WriterWhen) }, { additionalProperties: false }),
+		{ description: "Standing orders for your own triggers that wait together, such as the landfall triggers of each land entry. Jev puts them on the stack in reverse and the trigger that goes on now is marked." }),
 };
 
 /** A current response has a known window. The model chooses actions, not that metadata. */
@@ -107,6 +110,7 @@ export const ResponseSchema = Type.Object({
 	}, { additionalProperties: false }), { minItems: 1 }),
 	phases: Type.Optional(submissionFields.phases),
 	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }) }, { additionalProperties: false }))),
+	triggers: Type.Optional(submissionFields.triggers),
 }, { additionalProperties: false });
 
 /** Advertise exact equipment keys while retaining declarations and selectors. Local validation remains authoritative. */

@@ -35,6 +35,8 @@ export type PlanState = {
 	/** Unarmed stops that are false now, and so arm. */
 	arming: string[];
 	held: { purpose: string; objects: SeenObject[] }[];
+	/** Trigger orders whose window is open, with each listed source resolved to the objects it names now. */
+	triggers: { sources: SeenObject[][]; purpose?: string }[];
 	/** Current sources named by unfinished attacks in this turn's remaining combat. */
 	attacks: { label: string; objects: SeenObject[] }[];
 	/** The announcements due steps and branches offer, beside the table's own options. */
@@ -87,6 +89,8 @@ export function planState(frame: Frame): PlanState | null {
 	const procedures: ProcedureOption[] = [];
 	const held = (plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, frame)))
 		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
+	const triggers = (plan.triggers ?? []).filter((one) => !one.when || matches(one.when, frame))
+		.map((one) => ({ sources: one.resolve.map((query) => select(query, frame)), ...(one.purpose ? { purpose: one.purpose } : {}) }));
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
 		procedures.push(...found.procedures);
@@ -123,8 +127,24 @@ export function planState(frame: Frame): PlanState | null {
 		revision, plan, due, waiting, branches, procedures, ...(unmet ? { unmet: unmet.at } : {}),
 		stops: [...(plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label), ...blocked],
 		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && ((stop.when && !matches(stop.when, frame)) || !condition(scope, stop.if))).map((stop) => stop.label),
-		held, attacks,
+		held, triggers, attacks,
 	};
+}
+
+/**
+ * The plan's order for the waiting triggers these options put on: the triggers that go on the stack now and the
+ * order they all go on in, last to resolve first. The first open policy that orders two or more of them applies.
+ */
+export function triggerOrder(state: PlanState, options: readonly Option[]): { now: string[]; placement: string[]; purpose?: string } | undefined {
+	const waiting = [...new Map(options.flatMap((one) => one.trigger && one.objects?.[0] ? [[one.trigger.id, { ...one.trigger, source: one.objects[0] }] as const] : [])).values()];
+	for (const policy of state.triggers) {
+		const ranked = waiting.map((one) => ({ one, rank: policy.sources.findIndex((objects) => objects.some((object) => object.id === one.source.id && object.incarnation === one.source.incarnation)) }))
+			.filter((one) => one.rank >= 0);
+		if (new Set(ranked.map((one) => one.rank)).size < 2) continue;
+		const last = Math.max(...ranked.map((one) => one.rank));
+		return { now: ranked.filter((one) => one.rank === last).map((one) => one.one.id), placement: [...ranked].sort((a, b) => b.rank - a.rank).map((one) => one.one.name),
+			...(policy.purpose ? { purpose: policy.purpose } : {}) };
+	}
 }
 
 /** The first due step an option carries out, or else a branch it carries out. Neither means it is off the plan. */
@@ -154,8 +174,12 @@ export function laterStep(state: PlanState, at: number): boolean {
  * guides; nothing is removed.
  */
 export function annotate(options: Option[], state: PlanState): Option[] {
+	const order = triggerOrder(state, options);
 	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
+		// Stated in placement order: the trigger named first is the one that goes on now.
+		if (order && option.trigger && order.now.includes(option.trigger.id))
+			marks.push(`Your plan's trigger order puts this trigger on the stack now: ${order.placement.map((name, at) => at ? name : `${name} now`).join(", then ")}.${order.purpose ? ` Choices: ${order.purpose}` : ""}`);
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
 		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
 		if (option.id === "attack:done") {

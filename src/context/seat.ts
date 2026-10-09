@@ -22,7 +22,7 @@ import { dial, follow } from "./dial.ts";
 import { asState, chose, CHOICE_LIMIT, RequestTooLarge, type DecisionApi, type Question } from "./model.ts";
 import { compact, focus, STATUS, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
-import { planReason } from "../core/planning.ts";
+import { planReason, planState, triggerOrder } from "../core/planning.ts";
 import { planProblems } from "../core/work-tools.ts";
 import type { Package, Plan, PlanOption } from "../core/language.ts";
 import type { SeenObject } from "../core/work.ts";
@@ -237,7 +237,7 @@ export const HELP = "ask:help";
  * what is good: advice here would make every seat play the same way and would
  * hide the alternatives the packet just spent its space listing.
  */
-export function question(packet: Packet, help: boolean, stated?: readonly string[]): Question {
+export function question(packet: Packet, help: boolean, order?: { by: "plan" | "pilot"; placement: readonly string[] }): Question {
 	const stage = packet.inspection?.stage;
 	const instruction = packet.resolution?.program[0]?.instruction;
 	const search = instruction?.do === "choose" && instruction.from.zones?.length === 1 && instruction.from.zones[0] === "library" &&
@@ -245,7 +245,7 @@ export function question(packet: Packet, help: boolean, stated?: readonly string
 	const options = packet.options, stacked = packet.objects.some((one) => one.zone === "stack");
 	const instructions = [packet.obligation,
 		// Stated in placement order: the trigger named first is the one that goes on now.
-		...(stated && stated.length > 1 ? [`Your stated order puts your waiting triggers on the stack in this order: ${[...stated].reverse().map((name, at) => at ? name : `${name} now`).join(", then ")}. The option that keeps it says so.`] : []),
+		...(order && order.placement.length > 1 ? [`${order.by === "plan" ? "Your plan's trigger order" : "Your stated order"} puts your waiting triggers on the stack in this order: ${order.placement.map((name, at) => at ? name : `${name} now`).join(", then ")}. The option that keeps it says so.`] : []),
 		...(packet.kind === "trigger-order" && packet.plan ? ["Choose targets as your plan gives them."] : []),
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...orientation(packet),
@@ -322,8 +322,6 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let began: string | undefined;
 	// `fit` is the option capacity this decision's requests fit into, once the classifier has refused a larger one.
 	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection; fit?: number } | undefined;
-	// The resolution order this seat stated for its waiting triggers, under the plan revision it read.
-	let stated: { revision: number; order: string[] } | undefined;
 	const cancel = () => {
 		const old = preparation;
 		preparation = undefined;
@@ -450,23 +448,28 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const movable = frame.decision.options.some((one) => !["pass", "attack:done", "block:done"].includes(one.id));
 			const help = !!options.plan && !!frame.view.work && movable && helped !== frame.version && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
-			// Before two or more of its triggers go on the stack, the seat states the order they resolve in, one pair
-			// at a time. The pairs do not depend on each other, so they are asked at once. The answers move nothing;
-			// each put after them is its own decision.
+			// Before two or more of its triggers go on the stack, the seat asks which of each pair should resolve first.
+			// The pairs do not depend on each other, so they are asked at once, and again at each put about what still
+			// waits. The answers move nothing; each put after them is its own decision.
 			const waiting = waitingTriggers(frame.decision.options);
-			if (waiting.length > 1 && !(stated?.revision === revision && waiting.every((one) => stated!.order.includes(one.id)))) {
+			// The plan's own trigger order, when it has one for these triggers, is already marked on the options by the table.
+			const state = planState(frame), planned = state ? triggerOrder(state, frame.decision.options) : undefined;
+			let order: Waiting[] = [];
+			if (waiting.length > 1 && !planned) {
 				const base = focus(frame, options.intent, { ...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}), ...(seated ? { recaps: seated.recaps } : {}), inspection: {}, capacity: CHOICE_LIMIT });
 				const pairs = waiting.flatMap((first, at) => waiting.slice(at + 1).map((second) => [first, second] as const));
 				const answered = await Promise.all(pairs.map((pair) => {
 					const { packet, question: ask } = orderQuestion(base, pair, help);
 					asked += 1;
 					options.onAsk?.(packet);
-					return options.api.ask({ state: asState(compact(packet as unknown as Record<string, unknown>)), questions: { [KEY]: ask } }, "pick").then((answers) => chose(answers, KEY));
+					return options.api.ask({ state: asState(compact(packet as unknown as Record<string, unknown>)), questions: { [KEY]: ask } }, "pick")
+						.then((answers) => chose(answers, KEY), (error) => { if (error instanceof RequestTooLarge) return error; throw error; });
 				}));
-				// A trigger resolves earlier the more of its pairs it wins; ties keep option order.
 				const wins = new Map(waiting.map((one) => [one, 0]));
+				let refused = false;
 				for (const [at, pair] of pairs.entries()) {
 					const answer = answered[at]!;
+					if (answer instanceof RequestTooLarge) { refused = true; continue; }
 					if (typeof answer !== "string" && answer.choice === HELP && help) {
 						helped = frame.version;
 						return { kind: "work", tools: [{ do: "plan.request", reason: helpRequest(frame, base) }],
@@ -479,10 +482,11 @@ export function aiSeat(options: AiSeatOptions): Player {
 					}
 					wins.set(won, wins.get(won)! + 1);
 				}
-				stated = { revision, order: [...waiting].sort((a, b) => wins.get(b)! - wins.get(a)!).map((one) => one.id) };
+				// Consistent answers give every trigger a different number of wins. A contradiction (A before B, B before
+				// C, C before A) ties, and then no order is stated: the put is asked without one rather than with an invented one.
+				if (!refused && new Set(wins.values()).size === waiting.length) order = [...waiting].sort((a, b) => wins.get(b)! - wins.get(a)!);
 			}
 			// The put that keeps the stated order says so; every option stays offered.
-			const order = waiting.length > 1 ? stated!.order.flatMap((id) => waiting.filter((one) => one.id === id)) : [];
 			const shown: Frame = order.length ? { ...frame, decision: { ...frame.decision, options: frame.decision.options.map((one) => one.trigger?.id === order.at(-1)!.id
 				? { ...one, notes: [...one.notes ?? [], "Your stated order puts this trigger on the stack now."] } : one) } } : frame;
 
@@ -504,7 +508,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, ...(objection ? { objection } : {}), routes: whole.routes.filter((route) => !walked.includes(route.id)) };
-				const ask = question(packet, help, order.map((one) => one.name));
+				const ask = question(packet, help, planned ? { by: "plan", placement: planned.placement } : order.length ? { by: "pilot", placement: [...order].reverse().map((one) => one.name) } : undefined);
 				asked += 1;
 				options.onAsk?.(packet);
 				let answers;
@@ -551,7 +555,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 			if (preparation && frame.version < preparation.from.version) cancel();
 			begin(frame);
 		},
-		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; unreviewed = undefined; helped = undefined; stated = undefined; },
+		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; unreviewed = undefined; helped = undefined; },
 		close() { closed = true; return cancel()?.then(() => {}); },
 	};
 }

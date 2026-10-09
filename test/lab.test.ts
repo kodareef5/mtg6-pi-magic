@@ -12,6 +12,7 @@ import { test } from "node:test";
 import { decisionFrame, position } from "../tools/benchmark-positions.ts";
 import { aiSeat, criterion } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
+import { changedPlan } from "../src/context/plan-edit.ts";
 import { RequestTooLarge, type DecisionApi } from "../src/context/model.ts";
 import { summary } from "../src/core/announce.ts";
 import { check, InstructionSchema, type Instruction } from "../src/core/language.ts";
@@ -96,14 +97,31 @@ test("a seat states its trigger order one pair at a time, then puts each trigger
 	assert.deepEqual(marked, ["trigger:trigger-509-1:t0=0-15@2", "trigger:trigger-509-1:t0=0-44@3", "trigger:trigger-509-1:t0=0-48@3"], "every target choice of the last trigger to resolve keeps the order");
 	assert.deepEqual(first, { kind: "pick", option: "trigger:trigger-509-2", actionId: "Lab-4" }, "the put is the pilot's own pick, even one that breaks its stated order");
 
-	// The logged game put Hydra on at 263. The stated order still covers what waits, so nothing is asked again.
+	// The logged game put Hydra on at 263. The next put asks again about what still waits, so it is read from its own position.
 	asked.length = 0;
 	put = "trigger:trigger-509-1:t0=0-48@3";
 	const second = await seat.answer(decisionFrame(position(journal, 264, 0).table, 0));
-	assert.equal(asked.length, 1, "the next put is one question");
-	assert.ok(asked[0]!.criteria["trigger:trigger-509-1:t0=0-48@3"]!.includes("Your stated order puts this trigger on the stack now"));
-	assert.ok(!asked[0]!.criteria["trigger:trigger-509-0"]!.includes("Your stated order"));
+	assert.deepEqual(asked.map((one) => one.ids), [["order:trigger-509-0", "order:trigger-509-1", "ask:help"], asked[1]!.ids], "one remaining pair, then the put");
+	assert.ok(asked[1]!.criteria["trigger:trigger-509-1:t0=0-48@3"]!.includes("Your stated order puts this trigger on the stack now"));
+	assert.ok(!asked[1]!.criteria["trigger:trigger-509-0"]!.includes("Your stated order"));
 	assert.equal(second.kind === "pick" && second.option, "trigger:trigger-509-1:t0=0-48@3");
+});
+
+test("contradictory pair answers state no order", async () => {
+	const { table, brief } = position(expand("trigger-hydra-order"), 263, 0);
+	// Ascension before Harmonizer, Harmonizer before Hydra, Hydra before Ascension.
+	const beats: Record<string, string> = { "order:trigger-509-0|order:trigger-509-1": "order:trigger-509-0", "order:trigger-509-1|order:trigger-509-2": "order:trigger-509-1",
+		"order:trigger-509-0|order:trigger-509-2": "order:trigger-509-2" };
+	let put: { instructions: string; criteria: Record<string, string> } | undefined;
+	const api: DecisionApi = { named: "cyclic", ask: async (request) => {
+		const question = request.questions.pick as { criteria: Record<string, string>; instructions: string };
+		const pair = Object.keys(question.criteria).filter((id) => id.startsWith("order:"));
+		const choice = pair.length ? beats[pair.join("|")]! : (put = question, "trigger:trigger-509-0");
+		return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
+	} };
+	await aiSeat({ name: "Lab", api, intent: startingIntent(0), chronicle: { briefs: brief ? { 0: brief } : {}, recaps: [] }, onGap() {},
+		plan: async () => { throw new Error("no planning here"); } }).answer(decisionFrame(table, 0));
+	assert.ok(put && !put.instructions.includes("stated order") && Object.values(put.criteria).every((text) => !text.includes("stated order")), "a cycle is not presented as intent");
 });
 
 test("a decision too long for the pilot is asked again in smaller inspection steps, with nothing cut", async () => {
@@ -126,4 +144,35 @@ test("a decision too long for the pilot is asked again in smaller inspection ste
 	assert.ok(sent.slice(1, -1).every((ids) => ids.some((id) => id.startsWith("inspect:component"))), "the narrowing steps choose ranges and act on nothing");
 	assert.deepEqual(answer, { kind: "pick", option: "assign:0-15:2-210", actionId: `Lab-${sent.length}` });
 	assert.deepEqual(gaps, []);
+});
+
+test("a plan's trigger order marks the trigger that goes on now, and the pilot is asked no order questions", async () => {
+	const journal = expand("trigger-hydra-order");
+	const { table, brief } = position(journal, 263, 0);
+	const plan = { ...structuredClone(table.work[0]!.plan!), triggers: [{ resolve: [{ card: "Mossborn Hydra" }, { card: "Earthbender Ascension" }, { card: "Mightform Harmonizer" }],
+		purpose: "Harmonizer targets Mossborn Hydra (0-48@3)." }] };
+	const marked = (frame: ReturnType<typeof decisionFrame>) => frame.decision!.options.filter((one) => one.notes?.some((note) => note.startsWith("Your plan's trigger order puts this trigger on the stack now"))).map((one) => one.id);
+	const frame = decisionFrame(table, 0, { plan });
+	assert.deepEqual(marked(frame), ["trigger:trigger-509-1:t0=0-15@2", "trigger:trigger-509-1:t0=0-44@3", "trigger:trigger-509-1:t0=0-48@3"], "the last to resolve goes on first, with every target choice");
+	assert.match(frame.decision!.options.find((one) => one.id === "trigger:trigger-509-1:t0=0-48@3")!.notes!.at(-1)!, /Mightform Harmonizer \(0-44@3\) now, then Earthbender Ascension \(0-5@5\), then Mossborn Hydra \(0-48@3\)\. Choices: Harmonizer targets Mossborn Hydra/);
+	// With Hydra already on the stack, Harmonizer still goes on before Ascension.
+	assert.deepEqual(marked(decisionFrame(position(journal, 264, 0).table, 0, { plan })), ["trigger:trigger-509-1:t0=0-15@2", "trigger:trigger-509-1:t0=0-44@3", "trigger:trigger-509-1:t0=0-48@3"]);
+	const asked: { ids: string[]; instructions: string }[] = [];
+	const api: DecisionApi = { named: "scripted", ask: async (request) => {
+		const question = request.questions.pick as { criteria: Record<string, string>; instructions: string };
+		asked.push({ ids: Object.keys(question.criteria), instructions: question.instructions });
+		return { pick: { type: "choice", choice: "trigger:trigger-509-1:t0=0-48@3", probabilities: { "trigger:trigger-509-1:t0=0-48@3": 1 }, confidence: 1 } };
+	} };
+	const answer = await aiSeat({ name: "Lab", api, intent: startingIntent(0), chronicle: { briefs: brief ? { 0: brief } : {}, recaps: [] }, onGap() {},
+		plan: async () => { throw new Error("no planning here"); } }).answer(frame);
+	assert.equal(asked.length, 1, "the plan gives the order, so only the put is asked");
+	assert.match(asked[0]!.instructions, /Your plan's trigger order puts your waiting triggers on the stack in this order: Mightform Harmonizer \(0-44@3\) now/);
+	assert.equal(answer.kind === "pick" && answer.option, "trigger:trigger-509-1:t0=0-48@3");
+});
+
+test("the writer's trigger order is accepted, read in its own words, and replaces the old one", () => {
+	const base = { objective: "Grow Hydra.", guidance: "Landfall.", steps: [], triggers: [{ resolve: [{ card: "Earthbender Ascension" }, { card: "Mossborn Hydra" }] }] };
+	const plan = changedPlan(base, { triggers: [{ when: { active: "self", step: "any" }, resolve: [{ card: "Mossborn Hydra", controller: "you" }, { card: "Mightform Harmonizer" }], purpose: "Harmonizer targets Hydra." }] }, {});
+	assert.deepEqual(plan.triggers, [{ when: { active: "self" }, resolve: [{ card: "Mossborn Hydra", controller: "self" }, { card: "Mightform Harmonizer" }], purpose: "Harmonizer targets Hydra." }]);
+	assert.throws(() => changedPlan(base, { triggers: [{ resolve: [{ card: "Mossborn Hydra" }] }] }, {}), /schema/, "an order names at least two sources");
 });

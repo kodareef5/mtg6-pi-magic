@@ -46,8 +46,9 @@ function seat(item: Pick<Item, "seat" | "helpedAt">, api: DecisionApi, brief: Br
 /** The first request this checkout's seat sends for an item, without calling a model. */
 export async function firstRequest(item: Item, rules: Rules): Promise<string> {
 	const { table, brief } = position(item.journal, item.version, item.seat, item.workAt);
+	// Order questions go out together; the first is the one the game logged first.
 	let captured = "";
-	const api: DecisionApi = { named: "capture", ask: async (request) => { captured = JSON.stringify(request); throw STOP; } };
+	const api: DecisionApi = { named: "capture", ask: async (request) => { captured ||= JSON.stringify(request); throw STOP; } };
 	await seat(item, api, brief, rules).answer(decisionFrame(table, item.seat, { ...(item.refused ? { refused: item.refused } : {}) })).catch((error) => { if (error !== STOP) throw error; });
 	return captured;
 }
