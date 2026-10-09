@@ -61,7 +61,9 @@ failures from the projected request and physical continuation separately.
 
 `--findings FILE` reuses that results file's analyst tasks for a live writer
 comparison. Case, repetition, projected position and analyst task coverage must
-match. Failed analysts stay failed. Reused work is marked and costs no new call;
+match, and successful reports must still satisfy their submission contract.
+A missing or incompatible report stops before the writer spends; recorded
+analyst failures stay failed. Reused work is marked and costs no new call;
 the writer is asked normally. This isolates writing changes from new analyst
 samples. It cannot combine with saved plan answers or pilot, judge and
 continuation-only cases.

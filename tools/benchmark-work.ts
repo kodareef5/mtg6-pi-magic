@@ -12,12 +12,31 @@ const analysis = (about: string) => /^(survey |branch |perspective |growth$)/.te
  * A different projected position or missing task is refused, not regenerated. */
 export function recordWork(writer: Reasoner, frame: Frame, output: WorkResult[], saved?: { position: string; work: WorkResult[] }): Reasoner {
 	if (saved && saved.position !== positionKey(frame)) throw new Error("Frozen analysis belongs to a different projected position.");
+	const incompatible: string[] = [];
 	return { ...writer, async work(about, ...args) {
 		const began = Date.now(), stage = analysis(about) ? "analysis" : "writing";
+		const refuse = (error: string) => {
+			output.push({ about, stage, ms: 0, error });
+			throw new Error(error);
+		};
+		// Optional analyst callers catch failures. An incompatible fixture must
+		// still stop the writer, rather than becoming a new missing analyst.
+		if (stage === "writing" && incompatible.length) return refuse(incompatible.join("\n"));
 		if (saved && stage === "analysis") {
 			const found = saved.work.filter((one) => one.about === about && one.stage === stage);
-			if (found.length !== 1 || !found[0]!.answer && !found[0]!.error) throw new Error(`Frozen analysis needs exactly one completed task for ${about}.`);
+			if (found.length !== 1 || !found[0]!.answer && !found[0]!.error) {
+				const error = `Frozen analysis needs exactly one completed task for ${about}.`;
+				incompatible.push(error); return refuse(error);
+			}
 			const row = structuredClone(found[0]!);
+			if (!row.error) {
+				let wrong: string | null;
+				try { wrong = args[1].submit.check(structuredClone(row.answer!)); } catch (error) { wrong = String(error); }
+				if (wrong) {
+					const error = `Frozen analysis for ${about} no longer satisfies its report contract: ${wrong}`;
+					incompatible.push(error); return refuse(error);
+				}
+			}
 			output.push({ ...row, ms: 0, reused: true });
 			if (row.error) throw new Error(row.error);
 			return structuredClone(row.answer!);

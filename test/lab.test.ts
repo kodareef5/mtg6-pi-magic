@@ -63,6 +63,17 @@ test("a writer comparison reuses complete analyst evidence only for its projecte
 	await frozen.work("turn plan", args[1], args[2]);
 	assert.equal(calls, 3, "the writer still answers");
 	await assert.rejects(frozen.work("branch missing", args[1], args[2]), /exactly one completed task/);
+	await assert.rejects(frozen.work("turn plan", args[1], args[2]), /exactly one completed task/);
+	assert.equal(calls, 3, "a caught fixture mismatch cannot spend on a writer with missing evidence");
+	const incompatible: WorkResult[] = [];
+	const changed = recordWork(writer, frame, incompatible, { position: positionKey(frame), work: recorded });
+	await assert.rejects(changed.work(args[0], args[1], { submit: { ...args[2].submit, check: (answer) => {
+		(answer.line as string[]).push("checked on a copy"); return "defense is required";
+	} } }), /report contract: defense is required/);
+	await assert.rejects(changed.work("turn plan", args[1], args[2]), /report contract: defense is required/);
+	assert.equal(calls, 3, "a changed report contract stops the comparison before new inference");
+	assert.equal(incompatible.length, 2); assert.ok(incompatible.every((row) => row.error && !row.answer));
+	assert.deepEqual(recorded[0]!.answer, { line: ["growth"] }, "a report checker cannot mutate frozen evidence");
 	assert.throws(() => recordWork(writer, { ...frame, version: frame.version + 1 }, [], { position: positionKey(frame), work: recorded }), /different projected position/);
 });
 
