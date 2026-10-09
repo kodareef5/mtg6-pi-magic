@@ -157,12 +157,17 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 function triggers(frame: Frame, name: (seat: SeatId) => string): string {
 	const watched = activeWatches(frame);
 	// Your watches on the same event trigger together: each time it happens their triggers wait together, in an order you choose.
-	const groups = new Map<string, typeof watched>();
-	for (const one of watched) if (one.source.controller === frame.seat) groups.set(JSON.stringify(one.event), [...groups.get(JSON.stringify(one.event)) ?? [], one]);
+	// Your watches on the battlefield and those your hand cards bring once cast, grouped by event.
+	const packages = new Map((frame.view.work?.packages ?? []).map((pack) => [pack.card, pack.registers]));
+	const hand = [...new Set((frame.view.objects ?? []).filter((one) => one.zone === "hand" && one.controller === frame.seat && one.card).map((one) => one.card!))];
+	const groups = new Map<string, string[]>();
+	const add = (event: unknown, label: string) => groups.set(JSON.stringify(event), [...groups.get(JSON.stringify(event)) ?? [], label]);
+	for (const one of watched) if (one.source.controller === frame.seat) add(one.event, `${one.source.name} (${ref(one.source)})`);
+	for (const card of hand) for (const registration of packages.get(card) ?? []) if (registration.kind === "watch") add(registration.event, `${card} (in your hand, once cast)`);
 	const together = [...groups.values()].filter((group) => group.length > 1);
 	return ["## Triggers on the battlefield", "Registered watches, not pending triggers. Each triggers when its event happens from now on; pending triggers are under the stack.",
 		watched.length ? watched.map((one) => `- ${one.source.name} (${ref(one.source)}, ${one.source.controller === frame.seat ? "yours" : name(one.source.controller)}): "${one.basis}"`).join("\n") : "None.",
-		...together.map((group) => `${group.map((one) => `${one.source.name} (${ref(one.source)})`).join(", ")} trigger on the same event. Each time it happens their triggers wait together and you choose the order they resolve in; state it in triggers when the order changes the result.`)].join("\n");
+		...together.map((group) => `${group.join(", ")} trigger on the same event. Each time it happens their triggers wait together and you choose the order they resolve in; state it in triggers when the order changes the result.`)].join("\n");
 }
 
 /** Accepted terms other than triggers and mana that are in force now, and those your hand cards bring once on the battlefield. */
