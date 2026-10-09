@@ -5,6 +5,91 @@ writes strategy and judges. The roster stayed fixed. Playing strength remains
 unproven. No coded lethal search, move filtering or automatic voluntary choice
 was added.
 
+## October 9 growth discovery: a growth analyst
+
+Strategy missed lethal lines built from landfall growth. The last round's
+attempts showed the causes: no analyst found the second land entry, and
+coordinators kept the old plan. The fix is a prompt, not code: a new analyst
+whose only job is finding this turn's ways to grow the attack and ranking them.
+Control is `f3dacf5`. Raw runs, reviews and notes are under ignored
+`.pi/round6/`.
+
+**Measurement first** (`f3dacf5`, kept):
+- `k-missed-lethal` had been cut before the draw that brings Harmonizer, so it
+  held no lethal line. It is re-cut at the plan decision after that draw.
+- The dossier offered every graveyard card as a land play under a
+  land-from-graveyard permission. Only land cards get that line now.
+
+**The growth analyst** (`63a68fa`..`66354be`, kept):
+- It runs beside the focused questions and the branches on own turns and
+  preparations: one attempt, optional, 35s.
+- It lists the land entries land by land, including a land played then
+  sacrificed to search, and a search paid with the played land's mana. It
+  writes candidate lines with power written as base (printed power plus
+  counters) + bonus until end of turn, and ranks them by claimed damage. When
+  no land entry grows a creature, it gives no lines.
+- The coordinator reads its section first and recounts any line that claims
+  lethal the same way before rejecting it.
+
+Growth set, 5 repeats. The per-case columns count structural passes. The last
+column counts real wins, found by reading each plan. Surrak is
+`green-harmonizer-lethal`, Hydra is `green-hydra-growth`, and
+`m-explorer-first` is held out.
+
+| Arm | Surrak | Hydra | k | m | Structural | Real wins, 3 tuning cases |
+| --- | --- | --- | --- | --- | --- | --- |
+| Control | 0 | 2 | 0 | 1 | 3/20 | 1/15 |
+| Analyst | 1 | 1 | 4 | 3 | 9/20 | 6/15 |
+| Plus stale-plan wording (dropped) | 0 | 1 | 4 | 2 | 7/20 | 4/15 |
+| Entries land by land, bonus carried | 2 | 4 | 4 | 2 | 12/20 | 8/15 |
+| Unambiguous base + bonus example | 1 | 3 | 4 | 3 | 11/19 | 7/15 |
+| No lines when nothing grows (kept) | 2 | 3 | 3 | 1 | 9/20 | 7/15 |
+| Plus "lethal ends the game" (dropped) | 1 | 2 | 3 | 1 | 7/20 | 5-6/15 |
+
+- **Two analysts.** Two analysts answering apart, with their lines pooled,
+  found Surrak's second entry more often. Real wins were 16/30 against 15/30
+  for one analyst, so the extra call was dropped.
+- **Reading mattered.** Several structural passes were not wins: a 3-entry
+  line for 16 damage against 20 life, and the unblockable mode for 8 damage.
+- **Hydra arithmetic is fixed.** The rules text already gave this exact
+  example, yet analysts and coordinators dropped the earlier +4 at the second
+  doubling and wrote 16 or 32 for 24. With the base + bonus trail, most Hydra
+  plans now write 8 + 4 = 12, doubled 24.
+- **Red's turns.** The Red pair (`red-blocked-lethal`, `-fresh`, 5 repeats)
+  scored 5/10 on control, 4/10 with the analyst, and 8/10 once the analyst gives
+  no lines on a turn where nothing grows.
+- **Full suite, 3 repeats:** control 64/85, analyst 65/86 (before the
+  no-lines change). Most of the 9 errors were WebSocket drops.
+
+Matched games from identical version-zero preparations, control beside the
+kept arm. Replay matched in all eight.
+
+| Seed | Control | Kept |
+| --- | --- | --- |
+| n | Green turn 11, 8m12s | Green turn 13, 12m52s, 4 help requests |
+| m | Green turn 11, 8m46s | Green turn 9, 6m48s |
+| k | Red turn 10, 7m38s | Stopped turn 10, 1 gap |
+| l | Green turn 11, 9m30s | Green turn 9, 6m50s |
+
+- **Strategy wait:** 27m15s over 80 sessions for control, and 26m26s over 82
+  for the kept arm. Per session there was no rise.
+- **The k gap:** Red's card preparation refused Nova Hellkite's warp cast twice.
+  That code is untouched this round, and control prepared and cast the same
+  card.
+- **The n delay:** on turn 13 the pilot asked for help because a planned
+  Promising Vein sacrifice could not be taken. Vein had entered tapped under
+  Zhao, the open item below.
+
+**Open.**
+- Surrak stays at 1-2/5. Analysts find the second entry about half the time.
+  Plans still tap Promising Vein for mana and then for its {T} search, even
+  with a sentence against it.
+- Coordinators sometimes compute Explorer at 32 and still hold it back to block
+  Claw. A sentence saying a lethal line ends the game did not change this and
+  was dropped.
+- Writers still plan an activation the standing effects forbid (Vein or
+  Passage under Zhao).
+
 ## October 9 measured round: strategy facts, stalls and pilot schedule marks
 
 Three reviews of the latest games, the benchmark set and strategy timing, and a
