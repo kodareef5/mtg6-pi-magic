@@ -50,7 +50,7 @@ export type Packet = {
 	options: Choice[]; uses: Record<string, Use>; payments: Record<string, Payment>; funding: Record<string, Funding>; pools: SeatView["pools"];
 	resources: string[]; known: string[]; objects: Seen[];
 	watches: string[]; cards: Record<string, Printed>;
-	pregameNotes: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[];
+	pregameNotes: string[]; lately: string[]; routes: Route[]; learned?: string[]; refused?: string[]; repeated?: number;
 	history?: string[]; resolution?: SeatView["resolution"]; combat?: SeatView["combat"];
 	checklist?: (Omit<ReviewItem, "options" | "cards" | "status"> & { status: string; cards?: string[]; available?: number })[];
 	resolving?: { claim: string; basis: string; remaining: string[]; objective?: string; purpose?: string; guidance?: string };
@@ -126,7 +126,7 @@ function openingFacts(frame: Frame): { play: string; landOdds?: string } {
 export type Focus = { brief?: Brief; recaps?: readonly Recap[]; rules?: Rules; learned?: readonly string[]; inspection?: Inspection; capacity?: number };
 /** Select the question before its dependencies. Unrelated card text never enters a packet to be clipped later. */
 export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet {
-	const { decision, seat, view, version, refused } = frame;
+	const { decision, seat, view, version, refused, repeated } = frame;
 	if (!decision || decision.seat !== seat || intent.seat !== seat || intent.deck.seat !== seat) throw new Error("A packet needs a decision and intent for its own seat");
 	if (view.window.kind === "finished") throw new Error("A finished game has no decision packet");
 	const state = planState(frame);
@@ -236,7 +236,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		...(ability ? { resolving: { claim: ability.claim, basis: ability.basis, remaining: view.resolution!.program.map((one) => summary(one.instruction)),
 			...(purpose?.use ? { purpose: purpose.use } : {}), guidance: purpose?.guidance || guidance.join("\n") } } : {}),
 		pregameNotes: scripts.length || ability ? [] : guidance, lately: [], routes: dial(decision, context.rules),
-		...(context.learned?.length ? { learned: [...context.learned] } : {}), ...(refused?.length ? { refused: [...refused] } : {}),
+		...(context.learned?.length ? { learned: [...context.learned] } : {}), ...(refused?.length ? { refused: [...refused] } : {}), ...(repeated ? { repeated } : {}),
 	};
 }
 

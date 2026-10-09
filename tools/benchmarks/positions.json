@@ -38,7 +38,8 @@
     "required-help-payment": "test/fixtures/benchmarks/required-help-payment.jsonl.gz",
     "trigger-hydra-order": "test/fixtures/benchmarks/trigger-hydra-order.jsonl.gz",
     "p-future-step": "test/fixtures/benchmarks/p-future-step.jsonl.gz",
-    "n-trample-assignment": "test/fixtures/benchmarks/n-trample-assignment.jsonl.gz"
+    "n-trample-assignment": "test/fixtures/benchmarks/n-trample-assignment.jsonl.gz",
+    "n-block-loop": "test/fixtures/benchmarks/n-block-loop.jsonl.gz"
   },
   "cases": [
     {
@@ -1137,6 +1138,14 @@
         "assign:0-15:209-3",
         "assign:0-15:210-2"
       ]
+    },
+    {
+      "id": "block-loop-recovery",
+      "journal": "n-block-loop",
+      "version": 489,
+      "seat": 0,
+      "task": "continue",
+      "property": "One Mightform Harmonizer remains and the accepted policy double-blocks menace Zhao with two. The October 9 game added and withdrew the same lone block about 9,000 times. Play must stay bounded: a legal declaration, a help request, or the table noticing the repeated position and asking strategy; a stopped loop is a gap, never a runaway."
     }
   ]
 }

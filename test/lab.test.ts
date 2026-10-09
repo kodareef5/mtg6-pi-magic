@@ -12,6 +12,9 @@ import { test } from "node:test";
 import { decisionFrame, position } from "../tools/benchmark-positions.ts";
 import { aiSeat, criterion } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
+import { play } from "../src/core/loop.ts";
+import { planReason } from "../src/core/planning.ts";
+import type { Player } from "../src/core/player.ts";
 import { changedPlan } from "../src/context/plan-edit.ts";
 import { RequestTooLarge, type DecisionApi } from "../src/context/model.ts";
 import { summary } from "../src/core/announce.ts";
@@ -235,4 +238,24 @@ test("a target rule leaves a trigger that chooses no target in the order", () =>
 	assert.match(marks["trigger:trigger-509-1:t0=0-48@3"]!, /Mightform Harmonizer \(0-44@3\) aiming at Mossborn Hydra \(0-48@3\) now, then Earthbender Ascension \(0-5@5\)\./);
 	const flipped = { ...plan, triggers: [{ ...plan.triggers[0]!, resolve: [{ card: "Mightform Harmonizer" }, { card: "Earthbender Ascension" }] }] };
 	assert.deepEqual(decisionFrame(table, 0, { plan: flipped }).decision!.options.filter((one) => one.notes?.some((note) => note.startsWith("Your plan's trigger order"))).map((one) => one.id), ["trigger:trigger-509-0"]);
+});
+
+test("a seat that keeps returning to the same position is told, then strategy is asked, then play stops", async () => {
+	// The October 9 n game: one Harmonizer left, the plan double-blocks menace Zhao, and the pilot added and withdrew the same block 9,000 times.
+	const { table } = position(expand("n-block-loop"), 489, 0);
+	const repeats: number[] = [];
+	let requests = 0, picks = 0;
+	const toggling: Player = { name: "toggling", observe() {}, close: async () => {}, async answer(frame) {
+		if (planReason(frame)) { requests += 1; return { kind: "work", tools: [{ do: "plan.keep", reason: "scripted" }], revision: frame.view.work?.revision ?? 0, actionId: `keep-${frame.version}` }; }
+		picks += 1;
+		if (frame.repeated) repeats.push(frame.repeated);
+		const option = frame.decision!.options.some((one) => one.id === "unblock:0-44:1-58") ? "unblock:0-44:1-58" : "block:0-44:1-58";
+		return { kind: "pick", option, actionId: `toggle-${frame.version}` };
+	} };
+	const idle: Player = { name: "idle", observe() {}, close: async () => {}, async answer() { throw new Error("the other seat is not asked during this declaration"); } };
+	assert.equal(await play(table, { 0: toggling, 1: idle }, { 0: startingIntent(0), 1: startingIntent(1) }), null, "play stops instead of running on");
+	assert.ok(repeats.includes(2), "the seat is told it is back at the same position");
+	assert.equal(requests, 2, "strategy is asked, up to the turn's requests");
+	assert.ok(picks < 20, `bounded: ${picks} picks`);
+	assert.match(table.gaps.at(-1)!, /^Seat 0: Loop: this seat has met the same decision in the same position \d+ times this step \(Declare blockers/);
 });

@@ -11,6 +11,7 @@
  * Past 150 lines to keep answer dispatch and recovery in the same serial loop.
  */
 
+import { createHash } from "node:crypto";
 import { concede } from "./concede.ts";
 import { declare } from "./declare.ts";
 import { advance, apply, nextDecision } from "./decisions.ts";
@@ -90,6 +91,8 @@ export async function play(
 	let began = table.log.length;
 	let walk: { version: number; edits: number } | undefined;
 	let observedTurn: string | undefined;
+	// Positions each seat has met in the current step, to notice a seat that keeps returning to the same one.
+	let positions: { step: string; seen: Map<string, number> } | undefined;
 
 	while (table.outcome === null) {
 		checkpoint?.();
@@ -152,11 +155,32 @@ export async function play(
 		const player = players[decision.seat];
 		if (!player) throw new Error(`Seat ${decision.seat} has nobody to answer it`);
 
+		// A seat back at the same decision in the same position, under the same plan, is going round in circles:
+		// declaring and withdrawing a block, say. It is told; at the third visit strategy is asked, as a stop would;
+		// past the turn's requests the game stops with a gap instead of running on. Nothing is chosen for the seat.
+		const step = `${table.cursor.turn}:${table.cursor.active}:${table.cursor.steps[0] ?? ""}`;
+		if (positions?.step !== step) positions = { step, seen: new Map() };
+		const key = createHash("sha256").update(JSON.stringify([decision.seat, decision.situation, decision.question, decision.options.map((one) => one.id).sort(),
+			[...table.things], table.combat ?? null, table.waiting.map((one) => one.id), table.resolution ?? null, table.work[decision.seat]?.revision ?? 0])).digest("hex");
+		const repeated = (positions.seen.get(key) ?? 0) + 1;
+		positions.seen.set(key, repeated);
+		if (repeated >= LOOP) {
+			const reason = `Loop: this seat has met the same decision in the same position ${repeated} times this step (${decision.question}). Its answers lead back to it without progress.`;
+			if (escalations(table, decision.seat) < ESCALATIONS && table.work[decision.seat] && !attention) {
+				editWork(table, decision.seat, [{ do: "plan.request", reason }], `loop-${decision.seat}-${version}`);
+				told = report(table, told, watch);
+				continue;
+			}
+			table.gaps.push(`Seat ${decision.seat}: ${reason} This turn's requests for a new plan are spent, so play stops here; no action was chosen.`);
+			report(table, told, watch);
+			return null;
+		}
+
 		// Retry the same decision, and say what was wrong with the last answer.
 		// Asking the identical question twice is one question, not two. A plan's
 		// announcements join the listed options, each marked with what the plan says.
 		const offered: Decision = state ? { ...decision, options: annotate(decision.options, state) } : decision;
-		const asked = { ...frame(decision.seat), decision: offered };
+		const asked = { ...frame(decision.seat), decision: offered, ...(repeated > 1 ? { repeated } : {}) };
 		let answer: Answer | undefined;
 		const failures: string[] = [];
 		for (let attempt = 0; attempt < 2; attempt++) {
@@ -289,6 +313,8 @@ async function object(table: Table, open: Case, judge?: Judge): Promise<boolean>
 	return true;
 }
 
+/** Visits to the same decision in the same position, within a step and under one plan, that mean a seat is going round in circles. */
+const LOOP = 3;
 /** Requests for a new plan a seat may make in one turn, by stops or by asking for help. Past it, the pilot decides. */
 const ESCALATIONS = 2;
 const escalations = (table: Table, seat: SeatId) => table.workLog.filter((entry) => entry.seat === seat &&

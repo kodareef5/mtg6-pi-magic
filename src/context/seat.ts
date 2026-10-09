@@ -219,6 +219,8 @@ const sentences = (parts: (string | undefined)[]) => parts.filter((one): one is 
 export const criterion = (option: Packet["options"][number], packet: Pick<Packet, "uses">) =>
 	sentences([option.label, option.shows, ...(option.use ? packet.uses[option.use]?.notes ?? [] : []), ...(option.notes ?? [])]);
 
+/** Questions one decision may take, inspections, routes and narrowing included, before the seat stops walking and asks for a new plan. */
+const WALK_LIMIT = 24;
 /** The fewest options a refused request is narrowed to before the refusal stands. */
 const FIT_FLOOR = 8;
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
@@ -266,6 +268,7 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 		...(packet.routes.length ? ["A rules: option shows a rule and returns to this decision."] : []),
 		...(packet.learned?.length ? ["learned holds the rules you looked up."] : []),
 		...(packet.refused?.length ? ["refused says why your last answer could not be used."] : []),
+		...(packet.repeated ? [`You have met this same decision in this same position ${packet.repeated} times in this step: your earlier answers led back to it.`] : []),
 	].join("\n");
 	return { type: "choice", instructions, criteria: Object.fromEntries([
 		...packet.options.map((option) => [option.id, criterion(option, packet)]),
@@ -494,7 +497,15 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const shown: Frame = order.length ? { ...frame, decision: { ...frame.decision, options: frame.decision.options.map((one) => one.trigger?.id === order.at(-1)!.id
 				? { ...one, notes: [...one.notes ?? [], "Your stated order puts this trigger on the stack now."] } : one) } } : frame;
 
+			// Inspection and narrowing move nothing, so a walk that never settles is bounded: past it the seat asks for a new plan.
+			let walking = 0;
 			for (;;) {
+				if (++walking > WALK_LIMIT) {
+					const why = `The pilot inspected this decision ${WALK_LIMIT} times without choosing an option.`;
+					if (help) { helped = frame.version; return { kind: "work", tools: [{ do: "plan.request", reason: why }], revision, actionId: `${options.name}-${frame.version}-${revision}-walk-${asked}` }; }
+					options.onGap(`${options.name}: ${why}`);
+					return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
+				}
 				const rules = options.rules && walked.length < budget ? options.rules : undefined;
 				const declaration = frame.view.blockDeclaration;
 				const objection = options.judge && declaration && declaration.seat !== frame.seat && declaration.blockers.length && !declaration.heard

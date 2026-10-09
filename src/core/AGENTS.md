@@ -217,6 +217,14 @@ Accepted equipment edits have a per-version budget too. Exhaustion leaves the
 decision pending with an explicit budget gap. It never turns a request into a
 pass. Accepted edits survive resume and count toward the same budget.
 
+A seat can also go round in circles through legal answers: declaring a block,
+withdrawing it, declaring it again. The loop fingerprints each decision with the
+position (objects, combat, waiting triggers, resolution) and the seat's plan
+revision, and counts visits within a step. From the second visit the seat is
+told how often it has been here. At the third, the table asks strategy for a new
+plan, as a stop would, within the turn's requests. Past them play stops with a
+loop gap. Nothing is chosen for the seat, and a game cannot run unbounded.
+
 Three things that look like helpfulness and are not. Completing an invalid
 selection from whatever is left. Treating a failed operation as the seat's
 decision. A configured cap that stops a seat early and then reads as though the

@@ -171,6 +171,8 @@ export type Frame = {
 	 * something new, it is saying what came back and why.
 	 */
 	refused?: string[];
+	/** How many times this seat has met this same decision at this same position in this step, when more than once. */
+	repeated?: number;
 };
 
 export type Pick = {
