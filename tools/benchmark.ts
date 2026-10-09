@@ -28,6 +28,7 @@ import { rule } from "../src/context/ruling.ts";
 import { paymentForecast } from "../src/core/budget.ts";
 import { playProposal } from "./benchmark-play.ts";
 import { corpus } from "./benchmark-corpus.ts";
+import { recordWork, positionKey, type WorkResult } from "./benchmark-work.ts";
 
 // The pilot lab has its own arguments; see tools/benchmark-corpus.ts.
 if (process.argv.includes("--corpus")) { await corpus(process.argv.slice(2)); process.exit(0); }
@@ -36,7 +37,7 @@ type Case = PlanCheck & { id: string; journal: string; version: number; seat: nu
 	pilotPolicy?: string; prepared?: { file: string; name: string }; after?: After[]; throughTurn?: number };
 const { values } = parseArgs({ options: { positions: { type: "string" }, live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", multiple: true, default: ["jev"] }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
-	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
+	answers: { type: "string" }, findings: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
 const manifest = values.positions ?? join(import.meta.dirname, "benchmarks/positions.json");
 const catalog = JSON.parse(readFileSync(manifest, "utf8")) as { journals: Record<string, string>; cases: Case[] };
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
@@ -52,6 +53,8 @@ if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))
 if ((values.live && !values.play || values.review) && selected.some((one) => one.after)) throw new Error("Physical position properties require --live --play; a plan alone cannot establish them.");
 if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers)) throw new Error("Continuation cases require --play, without --answers: they resume the prefix's existing work.");
 const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
+if (values.findings && (!values.live || values.answers || selected.some((one) => ["pilot", "judge", "continue"].includes(one.task)))) throw new Error("--findings requires live strategy authoring, without --answers.");
+const savedFindings = values.findings ? JSON.parse(readFileSync(values.findings, "utf8")) as { results: { id: string; iteration: number; position: string; work: WorkResult[] }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
 // the selected inputs and remove temporary copies even when a probe fails.
 const scratch = mkdtempSync(join(tmpdir(), "magic-bench-"));
@@ -135,9 +138,12 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
+		const work: WorkResult[] = [];
 		try {
-			const writer = reasoner({ role: one.task === "judge" ? "judge" : one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
-				model: (one.task === "judge" ? judging : luna).model as never, thinking: (one.task === "judge" ? judging : luna).thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 });
+			const supplied = savedFindings?.results.filter((row) => row.id === one.id && row.iteration === iteration);
+			if (supplied && (supplied.length !== 1 || !Array.isArray(supplied[0]?.work))) throw new Error("Frozen analysis must identify exactly one recorded case and repetition.");
+			const writer = recordWork(reasoner({ role: one.task === "judge" ? "judge" : one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
+				model: (one.task === "judge" ? judging : luna).model as never, thinking: (one.task === "judge" ? judging : luna).thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 }), frame, work, supplied?.[0]);
 			if (one.task === "judge") {
 				if (one.judgeRow === undefined || one.legal === undefined) throw new Error("Judge cases need judgeRow and legal.");
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
@@ -161,6 +167,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 				}
 				const plan = (answer as { plan?: Plan }).plan;
 				if (!plan) throw new Error("Planning returned no accepted plan.");
+				const tasks = (rows: WorkResult[]) => rows.filter((row) => row.stage === "analysis").map((row) => row.about).sort();
+				if (supplied && !isDeepStrictEqual(tasks(work), tasks(supplied[0]!.work))) throw new Error("Frozen analysis does not cover the same analyst tasks.");
 				checks = checkPlan(plan, one, frame);
 				resources = paymentForecast(frame, plan);
 				passed = checks.passed;
@@ -202,6 +210,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 		const calls = [...measured.spent().slice(startCall), ...(continuation?.result.calls ?? [])];
 		spent.push(...calls);
 		const entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
+			position: positionKey(frame), work, ...(values.findings ? { findings: values.findings } : {}),
 			ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
 			...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
 		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);

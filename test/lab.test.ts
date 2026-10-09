@@ -25,6 +25,8 @@ import { choiceProblems } from "../src/context/strategy-actions.ts";
 import { RequestTooLarge, type DecisionApi } from "../src/context/model.ts";
 import { summary } from "../src/core/announce.ts";
 import { check, InstructionSchema, type Instruction } from "../src/core/language.ts";
+import { recordWork, positionKey, type WorkResult } from "../tools/benchmark-work.ts";
+import type { Reasoner } from "../src/context/reason.ts";
 
 const expand = (name: string) => {
 	const to = join(mkdtempSync(join(tmpdir(), "magic-lab-")), `${name}.jsonl`);
@@ -36,6 +38,32 @@ test("a position can be rebuilt before the seat's own later work at that decisio
 	const journal = expand("k-preserve-elf-response");
 	assert.ok(position(journal, 87, 0).table.work[0]!.request, "the prefix ends with the seat's request for a new plan");
 	assert.equal(position(journal, 87, 0, 0).table.work[0]?.request, undefined, "keeping no work entries at the decision leaves the request out");
+});
+
+test("a writer comparison reuses complete analyst evidence only for its projected position", async () => {
+	const frame = workFrame(position(expand("k-missed-lethal"), 239, 0).table, 0);
+	const recorded: WorkResult[] = [], reused: WorkResult[] = [];
+	let calls = 0;
+	const writer: Reasoner = { named: "offline", broken: () => null, think: async () => "", work: async (about) => {
+		calls++; if (about === "survey opponent") throw new Error("analyst failed");
+		return { line: [about] };
+	} };
+	const args: Parameters<Reasoner["work"]> = ["growth", { system: "", user: "" }, { submit: { name: "submit", description: "", parameters: {}, check: () => null } }];
+	const capture = recordWork(writer, frame, recorded);
+	await capture.work(...args);
+	await assert.rejects(capture.work("survey opponent", args[1], args[2]), /analyst failed/);
+	const frozen = recordWork(writer, frame, reused, { position: positionKey(frame), work: recorded });
+	const answer = await frozen.work(...args);
+	(answer.line as string[]).push("changed by caller");
+	assert.deepEqual(recorded[0]!.answer, { line: ["growth"] }, "reusing evidence cannot mutate its source");
+	assert.deepEqual(reused[0]!.answer, recorded[0]!.answer, "the copied evidence stays as it was supplied");
+	await assert.rejects(frozen.work("survey opponent", args[1], args[2]), /analyst failed/);
+	assert.equal(calls, 2, "successful and failed analysts are both reused without inference");
+	assert.ok(reused.every((row) => row.reused && row.ms === 0));
+	await frozen.work("turn plan", args[1], args[2]);
+	assert.equal(calls, 3, "the writer still answers");
+	await assert.rejects(frozen.work("branch missing", args[1], args[2]), /exactly one completed task/);
+	assert.throws(() => recordWork(writer, { ...frame, version: frame.version + 1 }, [], { position: positionKey(frame), work: recorded }), /different projected position/);
 });
 
 test("a seat rebuilt mid-decision does not offer help it already used", async () => {

@@ -48,6 +48,19 @@ The paused table remains at the stop, including an unfinished declaration.
 also save their journal, report and timeline, checking the initial clone and
 final replay. Keep initial planning costs separate from continuation costs.
 
+Each result also records `work`: the accepted analyst reports and writer
+submission, or each task's failure. Use these to distinguish missing candidates,
+selection errors and commitments lost while writing. They are evidence for a
+review, not automatic strategic scores. Attribute fact, pilot and execution
+failures from the projected request and physical continuation separately.
+
+`--findings FILE` reuses that results file's analyst tasks for a live writer
+comparison. Case, repetition, projected position and analyst task coverage must
+match. Failed analysts stay failed. Reused work is marked and costs no new call;
+the writer is asked normally. This isolates writing changes from new analyst
+samples. It cannot combine with saved plan answers or pilot, judge and
+continuation-only cases.
+
 A runner PASS establishes only its listed property. Review strategic choices,
 policy obedience, legal play, help and repairs separately. Record external
 stops, refusals, canceled calls and missing usage explicitly. Repeated identical
