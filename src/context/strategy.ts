@@ -169,9 +169,9 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		} },
 		// A fourth reply lets a winning line survive a refusal over a side problem.
 		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), matchupExamples(context.brief), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 4,
-		// Retry a stalled request without replacing its task, model, or plan. Over 477 coordinator calls the
-		// p99 was 24.8s and the maximum 40.4s, so a call still waiting at 40s is treated as stalled.
-		timeoutMs: 40_000,
+		// Retry a stalled request without replacing its task, model, or plan. Over about 830 coordinator calls the
+		// p99 was 23-28s and the slowest success 40.4s, so a call still waiting at 45s is treated as stalled.
+		timeoutMs: 45_000,
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");
