@@ -5,6 +5,95 @@ writes strategy and judges. The roster stayed fixed. Playing strength remains
 unproven. No coded lethal search, move filtering or automatic voluntary choice
 was added.
 
+## October 9 measured round: strategy facts, stalls and pilot schedule marks
+
+Three reviews of the latest games, the benchmark set and strategy timing, and a
+critical design review, set this round. Control is `0c99f92`. Raw runs,
+scorers and the dropped arm's patch are under ignored `.pi/round5/`.
+
+**Measurement first.**
+- New committed fixtures:
+  - four October 9 strategy misses (`k-missed-lethal`, `m-explorer-first`,
+    `n-attacker-tapped`, `m-red-blockers`);
+  - Codex's five October 8 misses, moved into the committed fixtures;
+  - `pilot-passage-above-harmonizer`.
+- Strategy suite baselines: the full plan/prepare/amend/repair suite on
+  control, run twice with 3 repeats. A/A noise is large: 67/88 against 57/84,
+  with per-case swings of 1-2 out of 3. Only target gains beyond that count.
+- Review yield: 67 of 84 post-draw reviews change actions or steps, 15 only
+  purposes, and 2 keep the plan. Reviews do real work, so no review-skipping
+  lifecycle change was built.
+
+**Pilot** (`7893572`, kept):
+- An option that carries out a plan step scheduled for a later window says so.
+- A spell or ability cast while objects wait on the stack says what it
+  resolves before.
+- The objection option quotes the declaration's blocking conflicts.
+
+| Pilot set, 5 repeats | Control | Kept |
+| --- | --- | --- |
+| `pilot-future-step` | 1/5 | 5/5 |
+| `menace-objection-pilot` | 0/5 | 5/5 |
+| Labelled corpus, 153 decisions | 0.94 | 0.94, no steady answer changed |
+
+- The neutral hold wording did not fix its target cases and was dropped.
+- `pilot-passage-above-harmonizer` stays 0/5. The plan's step lacks
+  `waitFor`, and the due-step mark outweighs the stack fact.
+
+**Strategy** (`a8cca22`..`628f759`, kept together):
+- What reviews read:
+  - the seat's own upkeep install no longer reads as a plan replaced by a
+    stop;
+  - tapped opposing creatures say they cannot block this turn;
+  - opposing lands that only tapped become one count.
+- New dossier sections:
+  - standing effects (what enters tapped, permissions, replacements, and hand
+    cards' terms once on the battlefield);
+  - which of the seat's creatures could block each opposing creature, with
+    the rule that summoning sickness does not stop blocking.
+- An attack step naming a creature that an earlier step casts this turn is told
+  once with the forecast.
+- A rejected branch claim must quote the dossier line it rests on.
+- The same-event trigger line includes hand cards, and trigger orders get no
+  step.
+- Stall bounds and refusals:
+  - analysts get 25s and one attempt, and their failures no longer count
+    toward a reasoner giving up;
+  - a coordinator call is stalled at 45s, down from 75s or 150s;
+  - stray assessment fields, label-prefixed steps and single-source trigger
+    targets are absorbed, and a card not in hand is named.
+
+| Check | Control | Kept |
+| --- | --- | --- |
+| Targets, 7 cases × 5 | 9/34 | 15/33 |
+| `red-blocked-lethal-fresh` | 1/5 | 5/5 |
+| `red-funding-land` | 2/5 | 4/5 |
+| Full suite, 3 repeats | 67/88 and 57/84 (A/A) | 64/86 |
+
+Matched games from identical version-zero preparations (n, m, k, l): results
+on par, with replay matched and no gaps or stalls in all eight.
+
+| Seed | Control | Kept |
+| --- | --- | --- |
+| n | Green turn 11, 7m45s | Green turn 11, 8m37s |
+| m | Green turn 9, 6m16s | Green turn 11, 9m49s |
+| k | Red turn 12, 8m46s | Red turn 10, 6m49s |
+| l | Green turn 7, 4m18s | Green turn 7, 4m19s |
+
+- Strategy wait across the four games: 19m49s for control, 21m41s for the
+  candidate. That is about 5% per session for the larger dossier, plus three
+  warranted help requests (a Passage that entered tapped under Zhao, a stop
+  and a search). No game stalled, so the timeout bounds saved nothing here;
+  they cap the worst case.
+
+**Open.**
+- Growth discovery is unchanged. `k-missed-lethal` is 0/5 in every arm: the
+  writer stays home or casts Harmonizer after the land entries.
+  `green-harmonizer-lethal` and `green-hydra-growth` stay at about 0/3, and
+  `reserve-authoring` at 0/3.
+- Writers still plan an activation the standing effects forbid (Passage under
+  Zhao).
+
 ## October 9 strategy-owned trigger order and the loop guard
 
 A review of the pair questions found three problems: groups played with options
