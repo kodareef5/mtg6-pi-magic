@@ -43,7 +43,8 @@ export const ANALYST_SYSTEM = [
 ].join("\n");
 
 /** An analyst answer usually takes 10 to 20 seconds; a stalled one is retried rather than holding the session. */
-export const ANALYST_TIMEOUT = 45_000;
+/** An analyst's answer is optional: past this it is dropped, once. Observed p99 is 12.7s over 4,834 calls. */
+export const ANALYST_TIMEOUT = 25_000;
 
 export type Finding = { source: string; kind: "threat" | "opportunity" | "risk" | "resource"; what: string; relevance: number; when: "now" | "their turn" | "later"; ordering?: string };
 export type Survey = { findings: Finding[]; failed?: string[] };
@@ -103,7 +104,7 @@ export async function surveyPosition(frame: Frame, dossier: string, reasoner: Pi
 	const survey: Survey = { findings: [] };
 	await Promise.all(questions(frame).filter(([source]) => !only || only.includes(source)).map(async ([source, question]) => {
 		try {
-			const answer = await reasoner.work(`survey ${source}`, { system: ANALYST_SYSTEM, user: dossier, task: ask(question) }, { submit: FINDINGS, turns: 2, signal, timeoutMs: ANALYST_TIMEOUT }, 900);
+			const answer = await reasoner.work(`survey ${source}`, { system: ANALYST_SYSTEM, user: dossier, task: ask(question) }, { submit: FINDINGS, turns: 2, signal, timeoutMs: ANALYST_TIMEOUT, attempts: 1, optional: true }, 900);
 			for (const one of answer.findings as Omit<Finding, "source">[]) survey.findings.push({ source, ...one });
 		} catch (error) {
 			signal?.throwIfAborted();

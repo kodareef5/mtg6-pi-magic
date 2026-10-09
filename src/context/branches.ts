@@ -82,7 +82,7 @@ export async function branchReports(frame: Frame, dossier: string, available: Re
 			signal?.throwIfAborted();
 			const first = candidates[next++]!;
 			try {
-				const answer = await reasoner.work(`branch ${first.key}`, { system: ANALYST_SYSTEM, user: dossier, task: ask(first) }, { submit: REPORT, turns: 2, signal, timeoutMs: ANALYST_TIMEOUT }, 1200);
+				const answer = await reasoner.work(`branch ${first.key}`, { system: ANALYST_SYSTEM, user: dossier, task: ask(first) }, { submit: REPORT, turns: 2, signal, timeoutMs: ANALYST_TIMEOUT, attempts: 1, optional: true }, 1200);
 				result.branches.push({ key: first.key, first: first.label, ...answer } as Branch);
 			} catch (error) {
 				signal?.throwIfAborted();

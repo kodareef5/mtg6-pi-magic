@@ -755,6 +755,21 @@ test("work takes its answer only through submit, and tells the model what was wr
 	assert.match(timed.spent()[0]!.failed!, /timed out/);
 	assert.equal(timed.spent()[1]!.failed, undefined);
 	assert.equal(retry.broken(), null);
+
+	// Optional questions, such as one analyst among many, are asked once and dropped when they stall; however many
+	// stall, the reasoner keeps answering the questions that matter.
+	let asked = 0;
+	const analysts = reasoner({ role: "strategy", model: sol, tally: tally(), backoffMs: 0,
+		stream: (_model, context) => { asked += 1;
+			return JSON.stringify(context).includes("analyst") ? { result: () => new Promise(() => {}) }
+				: { result: async () => ({ content: [{ type: "toolCall", id: "plan", name: "submit", arguments: { commands: ["plan"] } }], stopReason: "toolUse" }) }; } });
+	const held = setInterval(() => {}, 100);
+	try {
+		for (let one = 0; one < 4; one++) await assert.rejects(analysts.work(`analyst ${one}`, { system: "S", user: "analyst question" }, { submit, timeoutMs: 10, attempts: 1, optional: true }), /timed out/);
+		assert.equal(asked, 4, "each optional question is asked once");
+		assert.equal(analysts.broken(), null, "dropped optional answers do not stop the reasoner");
+		assert.deepEqual(await analysts.work("turn", { system: "S", user: "coordinate" }, { submit }), { commands: ["plan"] });
+	} finally { clearInterval(held); }
 });
 
 test("opening-hand splits are exact: they match counting every hand", () => {

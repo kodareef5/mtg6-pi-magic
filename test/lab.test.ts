@@ -19,7 +19,8 @@ import { play } from "../src/core/loop.ts";
 import { workFrame } from "../src/core/work-tools.ts";
 import { planReason } from "../src/core/planning.ts";
 import type { Player } from "../src/core/player.ts";
-import { changedPlan } from "../src/context/plan-edit.ts";
+import { changedPlan, labelled } from "../src/context/plan-edit.ts";
+import { choiceProblems } from "../src/context/strategy-actions.ts";
 import { RequestTooLarge, type DecisionApi } from "../src/context/model.ts";
 import { summary } from "../src/core/announce.ts";
 import { check, InstructionSchema, type Instruction } from "../src/core/language.ts";
@@ -198,7 +199,19 @@ test("the writer's trigger order is accepted, read in its own words, and replace
 	const base = { objective: "Grow Hydra.", guidance: "Landfall.", steps: [], triggers: [{ resolve: [{ card: "Earthbender Ascension" }, { card: "Mossborn Hydra" }] }] };
 	const plan = changedPlan(base, { triggers: [{ when: { active: "self", step: "any" }, resolve: [{ card: "Mossborn Hydra", controller: "you" }, { card: "Mightform Harmonizer" }], purpose: "Harmonizer targets Hydra." }] }, {});
 	assert.deepEqual(plan.triggers, [{ when: { active: "self" }, resolve: [{ card: "Mossborn Hydra", controller: "self" }, { card: "Mightform Harmonizer" }], purpose: "Harmonizer targets Hydra." }]);
-	assert.throws(() => changedPlan(base, { triggers: [{ resolve: [{ card: "Mossborn Hydra" }] }] }, {}), /schema/, "an order names at least two sources");
+	assert.deepEqual(changedPlan(base, { triggers: [{ resolve: [{ card: "Mightform Harmonizer" }], targets: [{ source: { card: "Mightform Harmonizer" }, target: "opponent" }] }] }, {}).triggers![0]!.resolve,
+		[{ card: "Mightform Harmonizer" }], "one source names a lone trigger's target");
+});
+
+test("a step written with an action's label as its prefix means that action, and a card not in hand is named", () => {
+	const available = { "prepared:0 Cast Snakeskin Veil": { label: "Cast Snakeskin Veil", action: { prefix: "cast:" } }, "land:1 Play Forest": { label: "Play Forest", action: { prefix: "land:" } } } as never;
+	assert.deepEqual(labelled({ may: [{ label: "Veil", when: {}, action: { prefix: "Cast Snakeskin Veil" } }] }, available),
+		{ may: [{ label: "Veil", when: {}, action: { reuse: "prepared:0 Cast Snakeskin Veil" } }] });
+	assert.deepEqual(labelled({ steps: [{ label: "Land", when: {}, action: { prefix: "land:", objects: { card: "Forest" } } }] }, available).steps,
+		[{ label: "Land", when: {}, action: { prefix: "land:", objects: { card: "Forest" } } }], "a real move family is left alone");
+	const { table } = position(expand("k-missed-lethal"), 236, 0);
+	const refusals = choiceProblems(workFrame(table, 0), { steps: [{ label: "Cast Nova", when: {}, action: { option: "Nova Hellkite" } }] });
+	assert.match(refusals[0]!, /"Nova Hellkite" is not a listed option id\. Nova Hellkite is not in your hand or on your battlefield now\./);
 });
 
 test("a trigger order's named target narrows the mark to the option aiming at it", async () => {

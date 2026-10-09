@@ -53,13 +53,19 @@ export function movementActions(frame: Frame, turn?: number): ReturnType<typeof 
 export function choiceProblems(frame: Frame, changes: Record<string, unknown>, nextTurn = false): string[] {
 	const listed = new Set(["pass", "attack:done", "block:done", ...(!nextTurn ? frame.decision?.options.map((one) => one.id) ?? [] : [])]);
 	const families = ["land:", "cast:", "play:", "use:", "plan:", "attack:", "block:", "assign:", "trigger:", "resolve:", "pass"];
+	// An id that is a card name says plainly when no such card is in hand or on the battlefield.
+	const absent = (id: string) => {
+		const card = id.replace(/^printed:/, "");
+		if (card.includes(":")) return "";
+		return (frame.view.objects ?? []).some((one) => one.card === card && one.controller === frame.seat && (one.zone === "hand" || one.zone === "battlefield")) ? "" : ` ${card} is not in your hand or on your battlefield now.`;
+	};
 	return ["steps", "may", "current"].flatMap((field) => {
 		const entries = changes[field];
 		return !Array.isArray(entries) ? [] : entries.flatMap((one, at) => {
 			const id = one?.action?.option;
 			const prefix = one?.action?.prefix;
 			return [
-				...(typeof id !== "string" || listed.has(id) ? [] : [`${field}[${at}]: ${JSON.stringify(id)} is not a listed option id. Reuse an action under actions, or use prefix with objects for a future land or combat action. Card names are not button ids.`]),
+				...(typeof id !== "string" || listed.has(id) ? [] : [`${field}[${at}]: ${JSON.stringify(id)} is not a listed option id.${absent(id)} Reuse an action under actions, or use prefix with objects for a future land or combat action. Card names are not button ids.`]),
 				...(typeof prefix !== "string" || families.some((family) => prefix.startsWith(family) || family.startsWith(prefix)) ||
 					[...listed].some((id) => id.startsWith(prefix)) ? [] : [`${field}[${at}]: prefix ${JSON.stringify(prefix)} names no table move family. Use an accepted action.reuse for an activation, or an actual move prefix (${families.join(", ")}). Reading equipment supplies accepted uses for a future source.`]),
 			];

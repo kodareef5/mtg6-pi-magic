@@ -203,6 +203,20 @@ export function conditionProblems(plan: Plan): string[] {
 }
 
 /** Merge changed fields and expand reused actions. This never writes private or physical state. */
+/** Table move families a step's prefix may name. */
+const MOVES = ["land:", "cast:", "play:", "use:", "plan:", "attack:", "block:", "assign:", "trigger:", "resolve:", "pass"];
+
+/** A step whose prefix is no move family but exactly one available action's label means that action. */
+export function labelled(changes: Record<string, unknown>, available: ReturnType<typeof actions>): Record<string, unknown> {
+	const fix = (list: unknown) => !Array.isArray(list) ? list : list.map((one) => {
+		const prefix = one?.action?.prefix;
+		if (typeof prefix !== "string" || one.action.objects || MOVES.some((family) => prefix.startsWith(family) || family.startsWith(prefix))) return one;
+		const keys = Object.entries(available).filter(([, found]) => found.label.trim().toLowerCase() === prefix.trim().toLowerCase()).map(([key]) => key);
+		return keys.length === 1 ? { ...one, action: { reuse: keys[0] } } : one;
+	});
+	return { ...changes, ...("steps" in changes ? { steps: fix(changes.steps) } : {}), ...("may" in changes ? { may: fix(changes.may) } : {}), ...("current" in changes ? { current: fix(changes.current) } : {}) };
+}
+
 export function changedPlan(base: Plan, changes: unknown, available: ReturnType<typeof actions>): Plan {
 	changes = writerChanges(changes);
 	const wrong = problems(ChangesSchema, changes);

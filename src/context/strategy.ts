@@ -17,7 +17,7 @@ import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
 import { budget, castAttackers, paymentForecast } from "../core/budget.ts";
-import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
+import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, labelled, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts, planningChoices } from "./strategy-actions.ts";
 import { chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
 import { findingsSection, questions, surveyPosition } from "./survey.ts";
@@ -53,6 +53,9 @@ export const exampleReference: Lookup = {
 
 // Recursive JSON Schema belongs in local validation and prompt text. Advertising
 // it as a tool schema caused the provider to count over 430,000 input tokens.
+/** Field names of the writer's assessment and rollups; none is a plan field. */
+const ASSESSMENT_FIELDS = new Set(["hand", "zones", "opponents", "combat", "combinations", "rollup", "corrections", "adopted", "win", "priorities", "threat", "answers"]);
+
 const SUBMIT = {
 	name: "submit",
 	description: "Update the base plan with only changed fields. Omitted fields stay; lists replace whole lists and [] clears one, except phases, which replace by window, and packages, which join by card name. Reuse an action with {reuse: its key under actions}. Optional notes edit topics in the same answer. Acceptance proves neither card meaning nor playing strength.",
@@ -134,7 +137,11 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.
 			// objective and guidance are audit fields the schema no longer offers; the assessment fills whichever is not written.
-			const { notes, objection: raised, assessment, theirTurn, objective, guidance, ...changes } = args;
+			// Assessment fields written beside the plan fields are still the writer's working, not plan content.
+			const stray = Object.fromEntries(Object.entries(args).filter(([key]) => ASSESSMENT_FIELDS.has(key)));
+			const { notes, objection: raised, assessment: written, theirTurn, objective, guidance, ...rest } = args;
+			const changes = labelled(Object.fromEntries(Object.entries(rest).filter(([key]) => !ASSESSMENT_FIELDS.has(key))), available);
+			const assessment = Object.keys(stray).length ? { ...(written && typeof written === "object" ? written : {}), ...stray } : written;
 			if (theirTurn !== undefined && (!theirTurn || typeof theirTurn !== "object" || Array.isArray(theirTurn))) return "theirTurn is {guidance, complete}.";
 			let plan: Plan;
 			try {
@@ -162,9 +169,9 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		} },
 		// A fourth reply lets a winning line survive a refusal over a side problem.
 		lookups: [syntaxLookup, equipment(frame, available), combatLookup(frame), exampleReference, chancing(frame), matchupExamples(context.brief), ...(context.cards ? lookups(context.cards, context.rules) : [])], turns: 4,
-		// With the survey, ordinary replies take 10-45s; retry a stalled
-		// critical-path request without replacing its task, model, or plan.
-		...(options.nextTurn ? {} : { timeoutMs: 75_000 }),
+		// Retry a stalled request without replacing its task, model, or plan. Over 477 coordinator calls the
+		// p99 was 24.8s and the maximum 40.4s, so a call still waiting at 40s is treated as stalled.
+		timeoutMs: 40_000,
 		...(options.signal ? { signal: options.signal } : {}),
 	});
 	if (!accepted) throw new Error("Strategy returned without a checked plan.");
