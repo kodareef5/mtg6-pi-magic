@@ -201,3 +201,23 @@ power and trample, blocked by Hired Claw, with Red at 2 life. The table lists al
 211 splits. That request overran Jev's window (`max_tokens_exceeded`) and the
 game stopped. `pilot-trample-assignment` passes when the seat narrows the
 decision by inspection and picks a split that deals Red at least 2.
+
+## Strategy misses from October 9 games
+
+Each prefix ends just before the writer's own `plan.put` at that position, so a
+case asks the writer again from the same facts. Properties are written from
+review of the board, not computed.
+
+- `k-missed-lethal`: game k turn 9 upkeep (v236). Hired Claw and Smaug are tapped
+  through Green's turn; Harmonizer from exile before the land entries makes
+  Explorer lethal. The writer said "Smaug can block it".
+- `m-explorer-first`: game m turn 9 draw (v299). Explorer from hand opens the two
+  graveyard Passages; the writer said they could not be played yet.
+- `n-attacker-tapped`: game n turn 11 after a help request (v412). The writer paid
+  for the exiled Harmonizer with the Forest it attacked with.
+- `m-red-blockers`: game m Red turn 6 draw (v178). The writer said creatures cast
+  this turn cannot block on the opponent's turn.
+
+Codex's five October 8 misses (`l-generic-payment`, `l-sick-claw-repair`,
+`q-sick-zhao-repair`, `l-source-reuse-repair`, `k-veil-before-blocks`) moved here
+from ignored `.pi/round4-20261008/new-misses/` unchanged.
