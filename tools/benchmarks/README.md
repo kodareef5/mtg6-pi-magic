@@ -47,6 +47,11 @@ The paused table remains at the stop, including an unfinished declaration.
 `calls.jsonl` contains complete requests and replies. Physical continuations
 also save their journal, report and timeline, checking the initial clone and
 final replay. Keep initial planning costs separate from continuation costs.
+`continuationPassed` reports the physical property and health separately from
+the plan-pattern check. An alternative winning line can fail the expected
+pattern and pass its continuation. `replacementPlans` names later accepted
+plans for the tested seat, including ones later rolled back. Inspect those
+changes before crediting the initial plan with the eventual result.
 
 Each result also records `work`: the accepted analyst reports and writer
 submission, or each task's failure. Use these to distinguish missing candidates,

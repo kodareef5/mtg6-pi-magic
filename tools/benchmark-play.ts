@@ -2,7 +2,7 @@
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { fork, replay, reopen, save } from "../src/core/journal.ts";
+import { fork, read, replay, reopen, save } from "../src/core/journal.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { play } from "../src/core/loop.ts";
@@ -31,6 +31,7 @@ export async function playProposal(input: { journal: string; version: number; se
 		editWork(table, input.seat, [{ do: "plan.put", plan: input.plan }], proposalId);
 	}
 	save(journal, table);
+	const beganLines = read(path).lines.length;
 	writeFileSync(trace, "", { flag: "wx", mode: 0o600 });
 	const observed = traceInference(options.inference, (event) => {
 		if (event.event === "request") save(journal, table);
@@ -71,7 +72,11 @@ export async function playProposal(input: { journal: string; version: number; se
 	const result = gameResult(table, seated, { replayMatches: isDeepStrictEqual(same(compared), same(rebuilt)), journal: path, trace,
 		...(failure ? { error: String(failure) } : {}) });
 	const paths = saveReport(join(options.out, "game.result.json"), result);
-	return { result, paths, cloneMatches: true, throughTurn: through, ...(input.after ? { afterChecks: checkPosition(table.things.values(), input.after, !!table.outcome || stoppedBy === "turn") } : {}), ...(stoppedBy ? { stoppedBy } : {}),
+	// Read the journal so a replacement later rolled back still counts as work
+	// done after the initial plan. A later win may have required that repair.
+	const replacementPlans = read(path).lines.slice(beganLines).flatMap((line) => "work" in line && line.work.seat === input.seat && line.work.tools?.some((tool) => tool.do === "plan.put")
+		? [{ version: line.v, clock: line.work.clock }] : []);
+	return { result, paths, cloneMatches: true, replacementPlans, throughTurn: through, ...(input.after ? { afterChecks: checkPosition(table.things.values(), input.after, !!table.outcome || stoppedBy === "turn") } : {}), ...(stoppedBy ? { stoppedBy } : {}),
 		...(options.decisions === undefined ? {} : { decisionLimit: options.decisions }), decisions: table.ledger.length - beganAt, judgeAttempts: seated.judged.cases,
 		...(options.judgeAttempts === undefined ? {} : { judgeAttemptLimit: options.judgeAttempts }) };
 }

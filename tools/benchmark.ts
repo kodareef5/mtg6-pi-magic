@@ -138,6 +138,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 		const began = Date.now(), startCall = measured.spent().length, before = structuredClone(frame);
 		let answer: unknown, passed = false, error: string | undefined, checks: ReturnType<typeof checkPlan> | undefined;
 		let resources: ReturnType<typeof paymentForecast> | undefined, continuation: Awaited<ReturnType<typeof playProposal>> | undefined, decisionMs: number | undefined;
+		let continuationPassed: boolean | undefined;
 		const work: WorkResult[] = [];
 		try {
 			const supplied = savedFindings?.results.filter((row) => row.id === one.id && row.iteration === iteration);
@@ -177,7 +178,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 					continuation = await playProposal({ journal: journals.get(one.journal)!, version: one.version, seat: one.seat, ...(one.task === "continue" ? {} : { plan }), ...(one.after ? { after: one.after } : {}) },
 						{ out: join(out, `${one.id}-${iteration}`), inference, roster: parts, ...(values.through !== undefined || one.throughTurn !== undefined ? { throughTurn: Number(values.through ?? one.throughTurn) } : {}), ...(values.decisions ? { decisions: Number(values.decisions) } : {}), ...(values["judge-attempts"] ? { judgeAttempts: Number(values["judge-attempts"]) } : {}) });
 					const game = continuation.result;
-					passed = passed && (!one.after || !!continuation.afterChecks?.passed) && (one.winner === undefined || game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+					continuationPassed = (!one.after || !!continuation.afterChecks?.passed) && (one.winner === undefined || game.outcome?.results[one.winner] === "win") && !!game.replayMatches && !game.gaps.length && !game.reasons?.fallback && !game.error;
+					passed = passed && continuationPassed;
 				}
 			} else {
 				const api: DecisionApi = pilot !== "luna" ? decisionApi(inference.classify, classifiers.get(pilot)!, { tally: measured, seat: one.seat }) : {
@@ -212,8 +214,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 		const entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
 			position: positionKey(frame), work, ...(values.findings ? { findings: values.findings } : {}),
 			ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
-			...(continuation ? { continuation } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
-		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${error ? ` ${error}` : ""}`);
+			...(continuation ? { continuation, continuationPassed } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
+		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${continuation ? `; plan check ${checks?.passed ? "PASS" : "FAIL"}, continuation ${continuationPassed ? "PASS" : "FAIL"}, replacement plans ${continuation.replacementPlans.length}` : ""}${error ? ` ${error}` : ""}`);
 		writeFileSync(join(out, "results.json"), JSON.stringify({ manifest, source, results, calls: spent }, null, 2) + "\n");
 	}
 }
