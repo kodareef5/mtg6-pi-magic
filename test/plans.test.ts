@@ -1027,6 +1027,15 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 	editWork(two, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "forest");
 	assert.match(problems(two, { steps: [cast(two, "Mossborn Hydra"), land(two, "Forest")] }), /Cast Mossborn Hydra\): costs \{2\}\{G\}/);
 	assert.equal(problems(two, { steps: [land(two, "Forest"), cast(two, "Mossborn Hydra")] }), "");
+	const variable: PlanOption = { label: "Variable cast", when: now(two), action: { procedure: {
+		...printedCast("Mossborn Hydra", two.printed["Mossborn Hydra"]!), cost: { mana: "{X}{G}" } } } };
+	const partial = (steps: PlanOption[]) => paymentForecast(workFrame(two, 0), { objective: "Check the known prefix", guidance: "The variable cost remains unchecked", steps });
+	const tooSoon = partial([cast(two, "Mossborn Hydra"), variable]);
+	assert.match(tooSoon.conflicts.join(" "), /Cast Mossborn Hydra\): costs \{2\}\{G\}/, "a later unknown cannot erase an earlier payment conflict");
+	const afterUnknown = partial([variable, cast(two, "Mossborn Hydra")]);
+	assert.deepEqual(afterUnknown.conflicts, [], "an unknown first cost prevents claims about what later spending leaves");
+	assert.equal(afterUnknown.payments.length, 0);
+	assert.match(afterUnknown.unchecked.join(" "), /steps\[0\].*Variable cast.*known payment prefix/);
 	// A source played earlier in the line exists for its later activation.
 	const passage = matchup("land-then-activate");
 	main(passage, 0, 3);
@@ -1036,7 +1045,15 @@ test("the plan's arithmetic: costs from what the steps before leave, holds kept,
 		{ label: "Activate Fabled Passage", when: now(passage), action: { procedure: example("Crack Fabled Passage for a basic land") } }] };
 	const passageBefore = structuredClone(passage), fetchForecast = paymentForecast(workFrame(passage, 0), fetch);
 	assert.deepEqual(fetchForecast.conflicts, [], "the earlier land play supplies the activation source");
-	assert.ok(fetchForecast.unchecked.length, "the sacrifice and resolved search remain outside the mana-only witness");
+	assert.equal(fetchForecast.payments.length, 0, "checking necessary mana/tap costs does not witness an unpriced sacrifice");
+	assert.match(fetchForecast.unchecked.join(" "), /steps\[1\].*Activate Fabled Passage/, "the exact resource boundary is named");
+	const tappedPassage = structuredClone(passage);
+	establish(tappedPassage, 1, "Zhao, the Moon Slayer");
+	assert.match(paymentForecast(workFrame(tappedPassage, 0), fetch).conflicts.join(" "), /Activate Fabled Passage.*cannot pay the tap cost/,
+		"an unpriced sacrifice cannot hide a known tapped-entry conflict");
+	const laterCast = paymentForecast(workFrame(passage, 0), { ...fetch, steps: [...fetch.steps, cast(passage, "Mossborn Hydra")] });
+	assert.deepEqual(laterCast.conflicts, [], "the forecast does not reject a later source or payment after unresolved search instructions");
+	assert.equal(laterCast.payments.length, 0, "neither the partial cost nor the unknown continuation has a complete payment witness");
 	assert.deepEqual(passage, passageBefore, "forecasting the entry changes no physical or private state");
 	apply(passage, nextDecision(passage)!.options.find((one) => one.id.startsWith("land:") && one.objects?.some((ref) => passage.things.get(ref.id)?.card === "Fabled Passage"))!.id, "model", "chosen");
 	assert.ok(procedureOptions(example("Crack Fabled Passage for a basic land"), workFrame(passage, 0), "check").length, "the forecasted fetch source really becomes available after the land play");

@@ -15,9 +15,10 @@
  * one, so every different payment is tried before a conflict is named.
  *
  * Nothing is tapped and nothing is promised: every spell is assumed to resolve.
- * Where the arithmetic cannot be done honestly, an X cost, a reduction, mana a
- * procedure makes, a land whose entry is conditional, a search too large to
- * finish, the walk names no conflict rather than guess. It is a forecast: the
+ * Where the arithmetic cannot continue honestly, the walk checks the known
+ * prefix and names the unpriced remainder. Known mana and source tap costs at
+ * that boundary can still conflict; their other costs and effects stay unchecked.
+ * A search too large to finish names no conflict rather than guessing. It is a forecast: the
  * writer is told once, and the table's payment at the time is what decides.
  * Past 150 lines to keep the single-use preview and ordered payment search
  * beside their shared entry forecast and funding reader.
@@ -110,7 +111,7 @@ export type PaymentForecast = { conflicts: string[]; payments: Payment[]; respon
 /** One payment witness for the stated sequence, never a choice or a simulated resolution. */
 export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	const report: PaymentForecast = { conflicts: [], payments: [], responses: [], unchecked: [],
-		scope: "Resource forecast under normal untap and successful resolution. Ordinary land and permanent entries supply later sources, using accepted tapped-entry terms. Current attackers keep their current traits. No hidden cards, resolved instructions, triggers, counters, untaps or transformations are simulated. Payments show ordered actions; priced response branches are checked separately, not listed. Remaining sources are mana sources, not every untapped permanent. Payments are examples, not locked choices; timing, targets, future attackers and combat outcomes remain separate." };
+		scope: "Resource forecast under normal untap and successful resolution. Ordinary land and permanent entries supply later sources, using accepted tapped-entry terms. Current attackers keep their current traits. No hidden cards, resolved instructions, triggers, counters, untaps or transformations are simulated. An unchecked resource boundary ends the payment prefix; later actions and responses are not priced. Known mana and source tap costs at that boundary can be checked without pricing its other costs or effects. Remaining sources are mana sources, not every untapped permanent. Payments are examples, not locked choices; timing, targets, future attackers and combat outcomes remain separate." };
 	const at = frame.view.window;
 	if (at.kind !== "turn") { report.unchecked.push("No turn window."); return report; }
 	const now = at.active === frame.seat;
@@ -138,6 +139,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	};
 	let plays = allowance(viewWorld(hypothetical.view), frame.seat).lands - (now ? frame.view.landsPlayed ?? 0 : 0);
 	let honest = true;
+	let boundary = "";
 	// A step that resolves instructions may put cards in hand: after it, a missing card is not a mistake.
 	let drawing = false;
 	let expired = false;
@@ -165,8 +167,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
 			const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? source?.card ? frame.view.printed?.[source.card]?.mana : undefined : "{0}");
 			const mana = stated ? symbols(stated) : undefined;
-			const unknown = !mana || mana.x > 0 || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof procedure.cost?.tap === "object";
-			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !unknown ? { price: { generic: mana.generic, colors: mana.colors } } : {}),
+			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
+			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key));
+			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: { generic: mana.generic, colors: mana.colors } } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && source?.card && permanentSpell(frame.view.printed?.[source.card]) && !procedure.instructions.length ? { enters: true } : {}) };
 		}
@@ -186,8 +189,10 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const { generic, colors, ...extra } = offered.use.cost;
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
-			if (Object.keys(extra).some((key) => key !== "tap") || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
+			const additional = Object.keys(extra).some((key) => key !== "tap");
+			if (additional || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
 			return { kind, ...(source ? { source } : {}), price: { generic, colors },
+				...(additional ? { unknown: true as const } : {}),
 				...(timing === "spell" ? { spell: true } : {}), ...(extra.tap ? { tap: true } : {}),
 				...(timing === "spell" && source?.card && permanentSpell(frame.view.printed?.[source.card]) && !offered.use.instructions.length ? { enters: true } : {}),
 				fixed: { paid: offered.use.paid, taps: offered.use.funding ?? [] } };
@@ -197,7 +202,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			...(source?.card && permanentSpell(frame.view.printed?.[source.card]) ? { enters: true } : {}) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
-	type Item = { at: string; expired: boolean; when: PlanOption["when"] } & ({ kind: "entry"; source: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true });
+	type Item = { at: string; expired: boolean; when: PlanOption["when"] } & ({ kind: "entry"; source: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true; unknown?: true });
 	const items: Item[] = [];
 	const arrived = new Set<string>();
 	const entered = (position: Frame, source: SeenObject): Frame => ({ ...position, view: { ...position.view,
@@ -216,6 +221,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	for (const [at, step] of plan.steps.entries()) {
 		if (!ours(step)) { if (step.if) report.unchecked.push(`steps[${at}]: conditional action not priced.`); continue; }
 		const where = `steps[${at}] (${step.label})`;
+		boundary = where;
 		const movement = !("procedure" in step.action) && step.action;
 		if (movement && (movement.prefix === "attack:" || movement.option?.startsWith("attack:") && movement.option !== "attack:done")) {
 			const refs = movement.option && frame.decision?.options.find((one) => one.id === movement.option)?.objects;
@@ -226,14 +232,14 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			continue;
 		}
 		const act = read(step);
-		if (!act) continue;
+		if (!act) { if (!honest) break; continue; }
 		const drew = drawing;
 		if ("procedure" in step.action && step.action.procedure.instructions.length) drawing = true;
 		if (!act.source) {
 			if (!drew && taken) found.push(`${where}: every card it names is already taken by an earlier step`);
 			else if (act.named && !drew) found.push(`${where}: you hold no ${act.named} now in the stated source zone; cast or play only what you have, and put a card you might draw in a branch`);
 			honest = false;
-			continue;
+			break;
 		}
 		used.add(act.source.id);
 		// Floating mana empties at the end of each step: once a step is in a later window than now, it is gone.
@@ -243,21 +249,26 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			if (plays <= 0) { found.push(`${where}: no land play is left for it this turn`); continue; }
 			plays -= 1;
 			entry(act.source, where, false, step.when);
+			if (!honest) break;
 			continue;
 		}
 		if (act.tap && arrived.has(act.source.id) && act.source.traits?.types.includes("creature")) {
 			honest = false; report.unchecked.push(`${where}: a newly cast creature's tap ability depends on its entry characteristics.`);
+			break;
 		}
-		if (act.unknown) { honest = false; continue; }
+		if (act.unknown) honest = false;
+		if (!act.price) break;
 		items.push({ at: where, expired, when: step.when, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}),
-			...(act.spell ? { spell: true } : {}), ...(act.tap ? { tap: true } : {}), label: step.label });
+			...(act.spell ? { spell: true } : {}), ...(act.tap ? { tap: true } : {}), ...(act.unknown ? { unknown: true as const } : {}), label: step.label });
+		if (!honest) break;
 		// A permanent cast now permits more land plays from then on.
 		if (act.spell) for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
 		if (act.enters) entry(act.source, where, true, step.when);
+		if (!honest) break;
 	}
 	// Then the payments: each cast from what the earlier ones left, trying other payments when a later step or a branch cannot be paid.
 	// Responses on the opponent's turn must be paid from what the turn leaves; a branch on our own turn is an alternative, not an addition.
-	const branches = (plan.may ?? []).flatMap((branch, index) => {
+	const branches = (honest ? plan.may ?? [] : []).flatMap((branch, index) => {
 		const at = `may[${index}] (${branch.label})`;
 		const lineHonest = honest;
 		honest = true;
@@ -273,7 +284,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		if (act) report.unchecked.push(`${at}: response payment needs a known source and priced cost.`);
 		return [];
 	});
-	if (!honest) { report.unchecked.push("The line depends on unpriced costs, missing sources, mana-producing instructions or uncertain land entry. No complete payment witness."); return report; }
+	if (!honest) report.unchecked.push(`Resource checking stopped at ${boundary}: an unpriced cost, missing source, mana-producing instruction or uncertain entry. Only the known payment prefix is checked; later steps and responses have no payment witness.`);
 	let deepest: { depth: number; message: string } | undefined;
 	const fail = (depth: number, message: string) => { if (!deepest || depth > deepest.depth) deepest = { depth, message }; return false; };
 	const left = (position: Frame, spent: ReadonlySet<string>, held: ReadonlySet<string>) => {
@@ -339,7 +350,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				const after = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => !paid.has(mana.id)) })) } };
 				const used = new Set([...spent, ...funding.taps.map((tap) => tap.source.id), ...(item.tap ? [item.source.id] : [])]);
 				if (!go(index + 1, after, used)) return false;
-				report.payments.unshift({ step: item.at, source: ref(item.source), funding, tapSource: !!item.tap,
+				// Necessary mana/tap checks can refute an unpriced cost, but cannot
+				// witness that entire cost or the resources its other parts leave.
+				if (!item.unknown) report.payments.unshift({ step: item.at, source: ref(item.source), funding, tapSource: !!item.tap,
 					untappedManaSourcesAfter: sources(after).filter(({ object }) => !used.has(object.id)).map(({ object }) => ref(object)) });
 				return true;
 			});
