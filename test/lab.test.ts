@@ -210,7 +210,7 @@ test("a trigger order's named target narrows the mark to the option aiming at it
 		asked.push((request.questions.pick as { instructions: string }).instructions);
 		return { pick: { type: "choice", choice: "ask:help", probabilities: { "ask:help": 1 }, confidence: 1 } };
 	} }, intent: startingIntent(0), chronicle: { briefs: {}, recaps: [] }, onGap() {}, plan: async () => { throw new Error("no planning here"); } }).answer(decisionFrame(table, 0, { plan: toPlayer }));
-	assert.match(asked[0]!, /No listed option puts Mightform Harmonizer \(0-43@3\) on with the target your plan names\./);
+	assert.match(asked[0]!, /in this order: Mightform Harmonizer \(0-43@3\) aiming at the opponent now, then Sazh's Chocobo \(0-53@3\), then Sazh's Chocobo \(0-56@3\)\. No listed option puts Mightform Harmonizer \(0-43@3\) on aiming at the opponent\./);
 });
 
 test("a named trigger target marks the aiming option when that trigger waits alone", () => {
@@ -222,4 +222,17 @@ test("a named trigger target marks the aiming option when that trigger waits alo
 	const notes = Object.fromEntries(decisionFrame(table, 0, { plan }).decision!.options.map((one) => [one.id, one.notes ?? []]));
 	assert.deepEqual(Object.entries(notes).filter(([, list]) => list.some((note) => note.startsWith("Aims where your plan"))).map(([id]) => id), ["trigger:trigger-509-1:t0=0-48@3"]);
 	assert.ok(!Object.values(notes).flat().some((note) => note.startsWith("Your plan's trigger order")), "one listed source waiting is no order");
+});
+
+test("a target rule leaves a trigger that chooses no target in the order", () => {
+	// Ascension's landfall trigger targets nothing; its payoff targets later. Naming the payoff's target must not unmark it.
+	const journal = expand("trigger-hydra-order");
+	const { table } = position(journal, 264, 0);
+	const plan = { ...structuredClone(table.work[0]!.plan!), triggers: [{ resolve: [{ card: "Earthbender Ascension" }, { card: "Mightform Harmonizer" }],
+		targets: [{ source: { card: "Earthbender Ascension" }, target: { card: "Mossborn Hydra" } }, { source: { card: "Mightform Harmonizer" }, target: { card: "Mossborn Hydra" } }] }] };
+	const marks = Object.fromEntries(decisionFrame(table, 0, { plan }).decision!.options.map((one) => [one.id, (one.notes ?? []).find((note) => note.startsWith("Your plan's trigger order"))]));
+	assert.deepEqual(Object.keys(marks).filter((id) => marks[id]), ["trigger:trigger-509-1:t0=0-48@3"]);
+	assert.match(marks["trigger:trigger-509-1:t0=0-48@3"]!, /Mightform Harmonizer \(0-44@3\) aiming at Mossborn Hydra \(0-48@3\) now, then Earthbender Ascension \(0-5@5\)\./);
+	const flipped = { ...plan, triggers: [{ ...plan.triggers[0]!, resolve: [{ card: "Mightform Harmonizer" }, { card: "Earthbender Ascension" }] }] };
+	assert.deepEqual(decisionFrame(table, 0, { plan: flipped }).decision!.options.filter((one) => one.notes?.some((note) => note.startsWith("Your plan's trigger order"))).map((one) => one.id), ["trigger:trigger-509-0"]);
 });
