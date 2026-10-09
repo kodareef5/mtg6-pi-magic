@@ -341,3 +341,11 @@ test("a review reads which opposing creatures cannot block, the opponent's lands
 	assert.ok(!lines.some((line) => line.startsWith("your standing plan was replaced")), "the seat's own install is not a replacement");
 	assert.ok(changes(from, now).lines.some((line) => line.startsWith("your standing plan was replaced")), "a replacement it did not make still shows");
 });
+
+test("a land permission marks only land cards in the graveyard as playable lands", () => {
+	// Game n turn 11: Explorer permits lands from the graveyard, beside Hydras, Surrak and Snakeskin Veil there.
+	const text = dossier({ frame: workFrame(position(expand("n-attacker-tapped"), 412, 0).table, 0), cards: universe }, "coordinator");
+	const graveyard = text.split("- Your graveyard: ")[1]!.split("\n")[0]!;
+	assert.match(graveyard, /Fabled Passage \(0-11@1\), you may play it as your land/);
+	assert.ok(!/Snakeskin Veil \([^)]*\), you may play it as your land/.test(graveyard) && !/Hydra \([^)]*\), you may play it as your land/.test(graveyard), graveyard);
+});

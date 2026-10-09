@@ -1160,11 +1160,11 @@
     {
       "id": "k-missed-lethal",
       "journal": "k-missed-lethal",
-      "version": 236,
+      "version": 239,
       "seat": 0,
       "task": "plan",
       "winner": 0,
-      "property": "Green at upkeep of turn 9, Red at 20 with Hired Claw and Smaug tapped through this turn, so nothing can block. Casting Harmonizer from exile before the land entries doubles Explorer on each landfall: Tunnel and the Passages, played and searched with Explorer extra and graveyard land plays, reach 28 or more. The October 9 writer said \"Smaug can block it\" and planned 8. This checks Harmonizer before the first land play and an Explorer attack, not the arithmetic.",
+      "property": "Green in the draw step of turn 9 with Mightform Harmonizer just drawn, Red at 20 with Hired Claw and Smaug tapped through this turn, so nothing can block. Harmonizer cast first with the four Forests, then both land plays (Icetill Explorer allows a second) on fetch lands from hand or graveyard, each sacrificed for a basic: four land entries double Explorer 2 to 32. This checks Harmonizer before the first land play and an Explorer attack, not the arithmetic.",
       "order": [
         {
           "source": "Mightform Harmonizer",

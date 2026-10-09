@@ -142,7 +142,9 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 	const seats = (frame.view.players ?? []).map((one) => one.id).sort((a, b) => Number(a !== frame.seat) - Number(b !== frame.seat));
 	const permits = (frame.view.notes ?? []).filter((note) => note.kind === "permit");
 	// Lands this seat may play from where they lie, by a standing permission such as playing lands from a graveyard.
-	const lands = new Set(useSources(frame, { source: { zones: ["graveyard", "exile"], controller: "any" }, timing: "land" }).map((one) => ref(one)));
+	// A land permission covers land cards only; a spell beside them in the graveyard is not playable as a land.
+	const lands = new Set(useSources(frame, { source: { zones: ["graveyard", "exile"], controller: "any" }, timing: "land" })
+		.filter((one) => one.traits?.types.includes("land")).map((one) => ref(one)));
 	const list = (zone: "graveyard" | "exile", seat: SeatId) => {
 		const here = (frame.view.objects ?? []).filter((one) => one.zone === zone && one.owner === seat);
 		return here.length ? here.map((one) => {

@@ -208,9 +208,11 @@ Each prefix ends just before the writer's own `plan.put` at that position, so a
 case asks the writer again from the same facts. Properties are written from
 review of the board, not computed.
 
-- `k-missed-lethal`: game k turn 9 upkeep (v236). Hired Claw and Smaug are tapped
-  through Green's turn; Harmonizer from exile before the land entries makes
-  Explorer lethal. The writer said "Smaug can block it".
+- `k-missed-lethal`: game k turn 9 draw step (v239), with Harmonizer just drawn.
+  Hired Claw and Smaug are tapped through Green's turn. Harmonizer first, then two
+  fetch-land plays each sacrificed for a basic, doubles Explorer four times. The
+  writer said "Smaug can block it". (An earlier cut at v236 was before the draw,
+  where no lethal existed.)
 - `m-explorer-first`: game m turn 9 draw (v299). Explorer from hand opens the two
   graveyard Passages; the writer said they could not be played yet.
 - `n-attacker-tapped`: game n turn 11 after a help request (v412). The writer paid
