@@ -85,25 +85,27 @@ test("a seat states its trigger order one pair at a time, then puts each trigger
 
 	put = "trigger:trigger-509-2";
 	const first = await seat.answer(decisionFrame(table, 0));
-	assert.deepEqual(asked.slice(0, 3).map((one) => one.ids), [
-		["order:trigger-509-0", "order:trigger-509-1", "ask:help"],
-		["order:trigger-509-0", "order:trigger-509-2", "ask:help"],
-		["order:trigger-509-1", "order:trigger-509-2", "ask:help"]], "each pair of waiting triggers is one question, with help, before the put");
+	assert.deepEqual(asked.slice(0, 6).map((one) => one.ids), [
+		["order:trigger-509-0", "order:trigger-509-1", "ask:help"], ["order:trigger-509-1", "order:trigger-509-0", "ask:help"],
+		["order:trigger-509-0", "order:trigger-509-2", "ask:help"], ["order:trigger-509-2", "order:trigger-509-0", "ask:help"],
+		["order:trigger-509-1", "order:trigger-509-2", "ask:help"], ["order:trigger-509-2", "order:trigger-509-1", "ask:help"]],
+		"each pair of waiting triggers is asked in both orientations, with help, before the put");
 	assert.ok((asked[0]!.state.options as { id: string }[]).every((one) => one.id.startsWith("order:")), "an order question shows only the pair it orders");
 	assert.equal(asked[0]!.criteria["order:trigger-509-0"]!.split(". Its trigger")[0],
 		"Earthbender Ascension (0-5@5) resolves before Mightform Harmonizer (0-44@3), so Mightform Harmonizer (0-44@3) goes on the stack first", "a claim reads the same against resolution or placement wording");
-	assert.match(asked[3]!.instructions, /Your stated order puts your waiting triggers on the stack in this order: Mightform Harmonizer \(0-44@3\) now, then Earthbender Ascension \(0-5@5\), then Mossborn Hydra \(0-48@3\)\./);
-	const marked = asked[3]!.ids.filter((id) => asked[3]!.criteria[id]!.includes("Your stated order puts this trigger on the stack now"));
+	assert.match(asked[6]!.instructions, /Your stated order puts your waiting triggers on the stack in this order: Mightform Harmonizer \(0-44@3\) now, then Earthbender Ascension \(0-5@5\), then Mossborn Hydra \(0-48@3\)\./);
+	const marked = asked[6]!.ids.filter((id) => asked[6]!.criteria[id]!.includes("Your stated order puts this trigger on the stack now"));
 	assert.deepEqual(marked, ["trigger:trigger-509-1:t0=0-15@2", "trigger:trigger-509-1:t0=0-44@3", "trigger:trigger-509-1:t0=0-48@3"], "every target choice of the last trigger to resolve keeps the order");
-	assert.deepEqual(first, { kind: "pick", option: "trigger:trigger-509-2", actionId: "Lab-4" }, "the put is the pilot's own pick, even one that breaks its stated order");
+	assert.deepEqual(first, { kind: "pick", option: "trigger:trigger-509-2", actionId: "Lab-7" }, "the put is the pilot's own pick, even one that breaks its stated order");
 
 	// The logged game put Hydra on at 263. The next put asks again about what still waits, so it is read from its own position.
 	asked.length = 0;
 	put = "trigger:trigger-509-1:t0=0-48@3";
 	const second = await seat.answer(decisionFrame(position(journal, 264, 0).table, 0));
-	assert.deepEqual(asked.map((one) => one.ids), [["order:trigger-509-0", "order:trigger-509-1", "ask:help"], asked[1]!.ids], "one remaining pair, then the put");
-	assert.ok(asked[1]!.criteria["trigger:trigger-509-1:t0=0-48@3"]!.includes("Your stated order puts this trigger on the stack now"));
-	assert.ok(!asked[1]!.criteria["trigger:trigger-509-0"]!.includes("Your stated order"));
+	assert.deepEqual(asked.map((one) => one.ids), [["order:trigger-509-0", "order:trigger-509-1", "ask:help"], ["order:trigger-509-1", "order:trigger-509-0", "ask:help"], asked[2]!.ids],
+		"one remaining pair both ways, then the put");
+	assert.ok(asked[2]!.criteria["trigger:trigger-509-1:t0=0-48@3"]!.includes("Your stated order puts this trigger on the stack now"));
+	assert.ok(!asked[2]!.criteria["trigger:trigger-509-0"]!.includes("Your stated order"));
 	assert.equal(second.kind === "pick" && second.option, "trigger:trigger-509-1:t0=0-48@3");
 });
 
@@ -116,12 +118,27 @@ test("contradictory pair answers state no order", async () => {
 	const api: DecisionApi = { named: "cyclic", ask: async (request) => {
 		const question = request.questions.pick as { criteria: Record<string, string>; instructions: string };
 		const pair = Object.keys(question.criteria).filter((id) => id.startsWith("order:"));
-		const choice = pair.length ? beats[pair.join("|")]! : (put = question, "trigger:trigger-509-0");
+		const choice = pair.length ? beats[[...pair].sort().join("|")]! : (put = question, "trigger:trigger-509-0");
 		return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
 	} };
 	await aiSeat({ name: "Lab", api, intent: startingIntent(0), chronicle: { briefs: brief ? { 0: brief } : {}, recaps: [] }, onGap() {},
 		plan: async () => { throw new Error("no planning here"); } }).answer(decisionFrame(table, 0));
 	assert.ok(put && !put.instructions.includes("stated order") && Object.values(put.criteria).every((text) => !text.includes("stated order")), "a cycle is not presented as intent");
+});
+
+test("pair answers that follow the listed position state no order", async () => {
+	const { table, brief } = position(expand("trigger-hydra-order"), 263, 0);
+	let put: { instructions: string } | undefined;
+	// A pilot that always takes the first trigger listed answers each pair differently in its two orientations.
+	const api: DecisionApi = { named: "positional", ask: async (request) => {
+		const question = request.questions.pick as { criteria: Record<string, string>; instructions: string };
+		const pair = Object.keys(question.criteria).filter((id) => id.startsWith("order:"));
+		const choice = pair.length ? pair[0]! : (put = question, "trigger:trigger-509-0");
+		return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
+	} };
+	await aiSeat({ name: "Lab", api, intent: startingIntent(0), chronicle: { briefs: brief ? { 0: brief } : {}, recaps: [] }, onGap() {},
+		plan: async () => { throw new Error("no planning here"); } }).answer(decisionFrame(table, 0));
+	assert.ok(put && !put.instructions.includes("stated order"));
 });
 
 test("a decision too long for the pilot is asked again in smaller inspection steps, with nothing cut", async () => {

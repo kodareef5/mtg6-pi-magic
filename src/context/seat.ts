@@ -448,9 +448,10 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const movable = frame.decision.options.some((one) => !["pass", "attack:done", "block:done"].includes(one.id));
 			const help = !!options.plan && !!frame.view.work && movable && helped !== frame.version && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
-			// Before two or more of its triggers go on the stack, the seat asks which of each pair should resolve first.
-			// The pairs do not depend on each other, so they are asked at once, and again at each put about what still
-			// waits. The answers move nothing; each put after them is its own decision.
+			// Before two or more of its triggers go on the stack, with no plan order for them, the seat asks which of each
+			// pair should resolve first, in both orientations so a preference for a listed position cannot decide it. The
+			// questions go out together, and again at each put about what still waits. The answers move nothing; each put
+			// after them is its own decision.
 			const waiting = waitingTriggers(frame.decision.options);
 			// The plan's own trigger order, when it has one for these triggers, is already marked on the options by the table.
 			const state = planState(frame), planned = state ? triggerOrder(state, frame.decision.options) : undefined;
@@ -458,33 +459,36 @@ export function aiSeat(options: AiSeatOptions): Player {
 			if (waiting.length > 1 && !planned) {
 				const base = focus(frame, options.intent, { ...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}), ...(seated ? { recaps: seated.recaps } : {}), inspection: {}, capacity: CHOICE_LIMIT });
 				const pairs = waiting.flatMap((first, at) => waiting.slice(at + 1).map((second) => [first, second] as const));
-				const answered = await Promise.all(pairs.map((pair) => {
-					const { packet, question: ask } = orderQuestion(base, pair, help);
+				const answered = await Promise.all(pairs.flatMap((pair) => [pair, [pair[1], pair[0]] as const]).map((shown) => {
+					const { packet, question: ask } = orderQuestion(base, shown, help);
 					asked += 1;
 					options.onAsk?.(packet);
 					return options.api.ask({ state: asState(compact(packet as unknown as Record<string, unknown>)), questions: { [KEY]: ask } }, "pick")
 						.then((answers) => chose(answers, KEY), (error) => { if (error instanceof RequestTooLarge) return error; throw error; });
 				}));
 				const wins = new Map(waiting.map((one) => [one, 0]));
-				let refused = false;
+				let settled = true;
 				for (const [at, pair] of pairs.entries()) {
-					const answer = answered[at]!;
-					if (answer instanceof RequestTooLarge) { refused = true; continue; }
-					if (typeof answer !== "string" && answer.choice === HELP && help) {
+					const both = answered.slice(2 * at, 2 * at + 2);
+					if (both.some((answer) => answer instanceof RequestTooLarge)) { settled = false; continue; }
+					const choices = both.map((answer) => typeof answer === "string" ? answer : (answer as { choice: string }).choice);
+					// Help is asked for when both orientations of a pair ask for it.
+					if (help && choices.every((choice) => choice === HELP)) {
 						helped = frame.version;
 						return { kind: "work", tools: [{ do: "plan.request", reason: helpRequest(frame, base) }],
 							revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
 					}
-					const won = typeof answer === "string" ? undefined : pair.find((one) => `order:${one.id}` === answer.choice);
-					if (!won) {
-						options.onGap(`${options.name} via ${options.api.named}: ${typeof answer === "string" ? answer : `${answer.choice} is not a waiting trigger`}`);
+					const unusable = both.find((answer) => typeof answer === "string" || (answer as { choice: string }).choice !== HELP && !pair.some((one) => `order:${one.id}` === (answer as { choice: string }).choice));
+					if (unusable !== undefined) {
+						options.onGap(`${options.name} via ${options.api.named}: ${typeof unusable === "string" ? unusable : `${(unusable as { choice: string }).choice} is not a waiting trigger`}`);
 						return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
 					}
-					wins.set(won, wins.get(won)! + 1);
+					const won = choices[0] === choices[1] ? pair.find((one) => `order:${one.id}` === choices[0]) : undefined;
+					if (won) wins.set(won, wins.get(won)! + 1); else settled = false;
 				}
-				// Consistent answers give every trigger a different number of wins. A contradiction (A before B, B before
-				// C, C before A) ties, and then no order is stated: the put is asked without one rather than with an invented one.
-				if (!refused && new Set(wins.values()).size === waiting.length) order = [...waiting].sort((a, b) => wins.get(b)! - wins.get(a)!);
+				// An order is stated only when both orientations of every pair agree and the pairs are consistent: every trigger
+				// then has a different number of wins. Otherwise the put is asked without one rather than with an invented one.
+				if (settled && new Set(wins.values()).size === waiting.length) order = [...waiting].sort((a, b) => wins.get(b)! - wins.get(a)!);
 			}
 			// The put that keeps the stated order says so; every option stays offered.
 			const shown: Frame = order.length ? { ...frame, decision: { ...frame.decision, options: frame.decision.options.map((one) => one.trigger?.id === order.at(-1)!.id
