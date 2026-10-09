@@ -177,7 +177,8 @@ const EXAMPLE = JSON.stringify({ steps: [
 	{ label: "Play the land", when: { active: "self", step: "precombat-main" }, action: { reuse: "land <card> from hand" } },
 	{ label: "Attack with <creature>", when: { active: "self", step: "declare-attackers" }, action: { reuse: "attack <id>@<incarnation>" } },
 	{ label: "Finish attackers", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" }, purpose: "<other creature> stays home to block." },
-], holds: [{ objects: { refs: [{ id: "<id>", incarnation: 1 }] }, purpose: "<land> stays untapped for <instant in hand> on their turn.", releaseAt: { active: "self", step: "upkeep" } }],
+	{ label: "Cast the reserved spell", when: { active: "self", step: "postcombat-main" }, action: { reuse: "printed:<reserved card>" }, purpose: "Pay with <reserved land> (<reserve id>@1) and the other named sources. Keep these sources out of earlier payments and activations." },
+], holds: [{ objects: { refs: [{ id: "<reserve id>", incarnation: 1 }] }, purpose: "Keep this land untapped for <reserved card> after combat.", releaseAt: { active: "self", step: "postcombat-main" } }],
 theirTurn: { guidance: "Cast <instant in hand> on <creature> (<id>@<incarnation>) when it attacks or grows past toughness 2, paying with <land> (<id>@<incarnation>). Otherwise keep the mana and pass.", complete: "pass" },
 phases: [{ when: { active: "opponent", step: "declare-blockers" }, guidance: "Block <attacker> (<id>@<incarnation>) with <creature> (<id>@<incarnation>) only if its damage would be lethal.", complete: "pass" }] });
 

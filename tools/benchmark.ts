@@ -188,7 +188,8 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 					chronicle: { briefs: brief ? { [one.seat]: brief } : {}, recaps: [] },
 					plan: async () => { throw new Error("This position requests strategy before it can be piloted."); } });
 				try { answer = await seat.answer(frame); } finally { await seat.close(); }
-				const pick = (answer as { kind: string; option?: string }).option, expected = one.expect!;
+				const reply = answer as { kind: string; option?: string; tools?: { do: string }[] };
+				const pick = reply.kind === "work" && reply.tools?.some((tool) => tool.do === "plan.request") ? "ask:help" : reply.option, expected = one.expect!;
 				const use = frame.decision!.options.find((option) => option.id === pick)?.use;
 				const name = (ref: { id: string; incarnation: number }) => frame.view.objects?.find((o) => o.id === ref.id && o.incarnation === ref.incarnation)?.card;
 				passed = one.avoidObjection ? (answer as { kind: string }).kind !== "object" : one.objectionRow !== undefined ? (answer as { kind: string; row?: number }).kind === "object" && (answer as { row?: number }).row === one.objectionRow : one.picks ? !!pick && one.picks.includes(pick) : expected.id ? pick === expected.id : !!use && name(use.source) === expected.source && (!expected.timing || use.timing === expected.timing) &&

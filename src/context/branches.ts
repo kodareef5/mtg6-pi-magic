@@ -42,7 +42,7 @@ const ask = (first: string) => [
 	"- each triggered ability it causes, in the order you resolve it, with its target",
 	"- after they resolve: each changed creature's power and toughness, and the untapped sources left",
 	"",
-	"A source that pays a cost stays tapped for the rest of the turn. Every land that enters under your control, played or put there, triggers each of your landfall abilities. End with the attackers, the damage through their best legal blocks, and their life after. If the first action cannot be taken, say why in fails.",
+	"A tapped source stays tapped until an effect untaps it. Every land that enters under your control, played or put there, triggers each of your landfall abilities. End with the attackers, the damage through their best legal blocks, and their life after. If the first action cannot be taken, say why in fails.",
 	"",
 	"Answer through submit. Do not write plan syntax.",
 ].join("\n");

@@ -37,63 +37,71 @@ export function symbols(text: string): { generic: number; colors: Color[]; x: nu
 	return { generic, colors, x };
 }
 
-/** A reference, selector, amount or condition in plain words. Shapes this does not know read as their kind, never as JSON. */
+/** Plain words for simple accepted terms, exact terms for shapes the prose does not cover. */
 function words(value: unknown, as: "thing" | "amount" | "condition" = "thing"): string {
 	if (typeof value === "number") return String(value);
 	if (typeof value === "string") {
 		const target = /^target:(\d+)$/.exec(value);
 		return target ? `target ${Number(target[1]) + 1}` : value.startsWith("bound:") ? `the chosen ${value.slice(6)}` : value === "event:object" ? "that object" : value;
 	}
-	if (!value || typeof value !== "object") return as === "amount" ? "an amount" : as === "condition" ? "a condition" : "something";
+	if (!value || typeof value !== "object") return JSON.stringify(value);
 	const one = value as Record<string, unknown>;
 	if (as === "condition") {
-		if ("amount" in one) return `${words(one.amount, "amount")} is ${one.atLeast !== undefined ? `at least ${one.atLeast}` : `at most ${one.atMost}`}`;
+		if ("amount" in one) return `${words(one.amount, "amount")} is ${[one.atLeast !== undefined ? `at least ${one.atLeast}` : "", one.atMost !== undefined ? `at most ${one.atMost}` : ""].filter(Boolean).join(" and ") || "unbounded"}`;
 		if ("bound" in one) return `a ${one.bound} was chosen`;
 		if ("not" in one) return `not (${words(one.not, "condition")})`;
-		return "a condition holds";
+		return JSON.stringify(one);
 	}
 	if (as === "amount") {
 		if ("count" in one) return `the number of ${words(one.count)}`;
 		if ("power" in one) return `the power of ${words(one.power)}`;
 		if ("toughness" in one) return `the toughness of ${words(one.toughness)}`;
 		if ("counters" in one) return `the number of ${one.counters} counters on ${words(one.on)}`;
-		return "an amount";
+		if ("life" in one) return one.life === "you" || one.life === "self" ? "your life" : `${words(one.life)}'s life`;
+		return JSON.stringify(one);
 	}
-	// A selector: its type words, then whose zones it looks in.
+	// Prose covers these selector fields completely. Others retain their exact restrictions.
+	if (Object.keys(one).some((key) => !["name", "zones", "controller", "owner", "types", "subtypes", "supertypes"].includes(key))) return JSON.stringify(one);
 	const list = (key: string) => Array.isArray(one[key]) ? (one[key] as string[]) : [];
-	const zones = list("zones"), mine = one.controller === "you" || one.owner === "you";
-	const kind = [...list("supertypes"), ...list("subtypes"), ...list("types")].join(" ") || (typeof one.card === "string" ? one.card : zones.length && !zones.includes("battlefield") ? "card" : "permanent");
-	return zones.length ? `${kind} (${mine ? "your " : ""}${zones.join(" or ")})` : `${kind}${mine ? " you control" : ""}`;
+	const zones = list("zones");
+	const kind = ["supertypes", "subtypes", "types"].map((key) => list(key).join(" or ")).filter(Boolean).join(" ") || (zones.length && !zones.includes("battlefield") ? "card" : "permanent");
+	if (!one.name && !(one.owner && one.controller) && !(one.owner && (!zones.length || zones.includes("battlefield") || zones.includes("stack")))) {
+		const side = one.controller ?? one.owner, possessive = side === "you" || side === "self" ? "your " : side === "opponent" ? "opponent's " : "";
+		if (side === undefined || possessive) return zones.length ? `${kind} (${possessive}${zones.join(" or ")})` : `${kind}${possessive ? side === "opponent" ? " an opponent controls" : " you control" : ""}`;
+	}
+	const scope = [zones.length ? zones.join(" or ") : "battlefield", one.controller ? `controlled by ${words(one.controller)}` : "", one.owner ? `owned by ${words(one.owner)}` : "", one.name ? `named ${one.name}` : ""].filter(Boolean);
+	return `${kind} (${scope.join("; ")})`;
 }
 
 /** A characteristic change in plain words. */
 function changed(change: unknown): string {
 	if (!change || typeof change !== "object") return "changes";
 	const one = change as Record<string, unknown>, parts: string[] = [];
+	if (Object.keys(one).some((key) => !["power", "toughness", "base", "words"].includes(key))) return JSON.stringify(one);
 	const delta = (value: unknown) => typeof value === "number" ? `${value < 0 ? "" : "+"}${value}` : `+(${words(value, "amount")})`;
 	if (one.power !== undefined || one.toughness !== undefined) parts.push(`${delta(one.power ?? 0)}/${delta(one.toughness ?? 0)}`);
-	const base = one.base as { power?: number; toughness?: number } | undefined;
-	if (base) parts.push(`base ${base.power ?? "?"}/${base.toughness ?? "?"}`);
-	const types = one.types as { add?: string[] } | undefined;
-	if (types?.add?.length) parts.push(`also a ${types.add.join(" ")}`);
-	const subtypes = one.subtypes as { set?: string[] } | undefined;
-	if (subtypes?.set?.length) parts.push(`becomes a ${subtypes.set.join(" ")}`);
+	const base = one.base as { power: unknown; toughness: unknown } | undefined;
+	if (base) parts.push(`base ${words(base.power, "amount")}/${words(base.toughness, "amount")}`);
 	if (Array.isArray(one.words) && one.words.length) parts.push(`gains ${(one.words as string[]).join(", ")}`);
-	if (Array.isArray(one.registers) && one.registers.length) parts.push("gains an ability");
-	return parts.join(", ") || "changes";
+	return parts.join(", ") || JSON.stringify(one);
 }
 
 /** One instruction in a few words, so every option says what it does at the same level of detail. */
 export function summary(instruction: Instruction): string {
+	const rendered: Record<string, string[]> = { damage: ["to", "every", "amount"], choose: ["who", "from", "count", "upTo", "reveal"],
+		move: ["what", "every", "to", "reason", "tapped"], draw: ["who", "count"], mill: ["who", "count"], shuffle: ["who"],
+		life: ["who", "amount"], counters: ["on", "every", "kind", "amount"], mana: ["who", "colors", "any"],
+		modify: ["what", "every", "change", "until"], tap: ["what", "every"], untap: ["what", "every"], destroy: ["what", "every"] };
+	if (!rendered[instruction.do] || instruction.do === "mana" && instruction.colors && instruction.any || Object.keys(instruction).some((key) => !["do", "if", "may", "as", ...rendered[instruction.do]!].includes(key))) return `Accepted instruction: ${JSON.stringify(instruction)}`;
 	const of = (value: unknown) => words(value);
 	const who = (value: unknown, verb: string) => value === "you" ? `you ${verb}` : `${of(value)} ${verb}s`;
 	const what = "what" in instruction && instruction.what ? of(instruction.what) : "every" in instruction && instruction.every ? `each ${of(instruction.every)}` : "";
 	const gate = `${instruction.if ? ` if ${words(instruction.if, "condition")}` : ""}${instruction.may ? " (optional)" : ""}${instruction.as ? ` as ${instruction.as}` : ""}`;
 	switch (instruction.do) {
 		case "damage": return `Deal ${words(instruction.amount, "amount")} damage to ${instruction.to ? of(instruction.to) : what}${gate}.`;
-		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${of(instruction.count)} ${of(instruction.from)}${instruction.reveal ? ", revealed" : ""}${gate}.`;
+		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${words(instruction.count, "amount")} ${of(instruction.from)}${instruction.reveal ? ", revealed" : ""}${gate}.`;
 		case "move": return `Put ${what} into ${instruction.to} (${instruction.reason})${instruction.tapped ? " tapped" : ""}${gate}.`;
-		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${of(instruction.count)}` : ""}${gate}.`;
+		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${words(instruction.count, "amount")}` : ""}${gate}.`;
 		case "life": return `${of(instruction.who)} changes life by ${words(instruction.amount, "amount")}${gate}.`;
 		case "counters": return `Put ${words(instruction.amount, "amount")} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
 		case "mana": return `${who(instruction.who, "add")} ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${gate}.`;

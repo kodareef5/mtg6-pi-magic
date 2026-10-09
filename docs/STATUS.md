@@ -110,7 +110,7 @@ establish playing strength.
 
 ## Retained changes
 
-Analysts now read projected facts followed by revisable pregame matchup advice.
+Analysts receive projected facts and revisable pregame matchup advice.
 Notebook entries and standing intent reach only the coordinator. Restoring the
 advice repairs an information loss from the previous split. It showed no
 improvement in the sampled growth continuations: six per arm found zero wins.
@@ -118,8 +118,9 @@ Initial reported cost rose from $0.103 to $0.144. The previous 47% input and 29%
 reductions measured efficiency without measuring gameplay quality.
 
 Valid inherited opponent responses ask opponent, defense and removal in
-parallel, then the coordinator. Own-turn work, preparation and invalid-plan
-repair retain the full survey and six outlooks. The current editor binds
+parallel, then the coordinator. Own-turn work and preparation now ask first-action
+branches beside focused questions; invalid-plan response repair retains the full
+survey and six outlooks. The current editor binds
 actions to the actual decision and distinguishes priority from declaring
 blockers. Discarded preparation still cancels every round; invalid inherited
 plans still unlock the full editor.

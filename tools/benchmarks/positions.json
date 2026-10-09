@@ -33,7 +33,10 @@
     "response-authoring": "test/fixtures/benchmarks/response-authoring.jsonl.gz",
     "k-preserve-elf-response": "test/fixtures/benchmarks/k-preserve-elf-response.jsonl.gz",
     "l-hydra-response": "test/fixtures/benchmarks/l-hydra-response.jsonl.gz",
-    "final-k-smaug-player": "test/fixtures/benchmarks/final-k-smaug-player.jsonl.gz"
+    "final-k-smaug-player": "test/fixtures/benchmarks/final-k-smaug-player.jsonl.gz",
+    "trigger-m-0-402-0": "test/fixtures/benchmarks/trigger-m-0-402-0.jsonl.gz",
+    "required-help-payment": "test/fixtures/benchmarks/required-help-payment.jsonl.gz",
+    "trigger-hydra-order": "test/fixtures/benchmarks/trigger-hydra-order.jsonl.gz"
   },
   "cases": [
     {
@@ -854,6 +857,54 @@
       "expect": {
         "id": "trigger:trigger-434-1:t0=seat-0"
       }
+    },
+    {
+      "id": "trigger-m-0-402-0",
+      "journal": "trigger-m-0-402-0",
+      "version": 209,
+      "seat": 0,
+      "task": "pilot",
+      "property": "The precombat-main phase says resolve both Chocobo counter triggers before Harmonizer's trigger, targeting 0-53@3, so Harmonizer's trigger goes on the stack first to resolve last.",
+      "picks": [
+        "trigger:trigger-402-0:t0=0-53@3"
+      ]
+    },
+    {
+      "id": "trigger-n-0-511-0",
+      "journal": "trigger-hydra-order",
+      "version": 263,
+      "seat": 0,
+      "task": "pilot",
+      "property": "Step 1's purpose orders the new entry's triggers Hydra, then Ascension, then Harmonizer, so Harmonizer (to resolve last) goes on first; no target is specified and Hydra cannot attack, so any Harmonizer target is acceptable. (adjudicated)",
+      "picks": [
+        "trigger:trigger-509-1:t0=0-15@2",
+        "trigger:trigger-509-1:t0=0-44@3",
+        "trigger:trigger-509-1:t0=0-48@3"
+      ]
+    },
+    {
+      "id": "trigger-n-0-512-0",
+      "journal": "trigger-hydra-order",
+      "version": 264,
+      "seat": 0,
+      "task": "pilot",
+      "property": "Step 1's purpose orders Ascension's quest before Harmonizer's power doubling; among the waiting triggers, Harmonizer should resolve last, so it goes on now; any target is acceptable since no attack is planned.",
+      "picks": [
+        "trigger:trigger-509-1:t0=0-15@2",
+        "trigger:trigger-509-1:t0=0-44@3",
+        "trigger:trigger-509-1:t0=0-48@3"
+      ]
+    },
+    {
+      "id": "required-help-payment",
+      "journal": "required-help-payment",
+      "version": 117,
+      "seat": 0,
+      "task": "pilot",
+      "property": "Step 3 casts Explorer with four sources relying on the searched Forest untapping, but it stayed tapped (only three lands) so 3 mana cannot pay {2}{G}{G}; no listed option carries out the step and the phase forbids proactive Veil.",
+      "picks": [
+        "ask:help"
+      ]
     }
   ]
 }
