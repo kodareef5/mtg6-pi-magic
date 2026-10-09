@@ -242,7 +242,7 @@ export function question(packet: Packet, help: boolean): Question {
 		!instruction.from.is && !instruction.from.linked && packet.resolution?.program.some((one) => one.instruction.do === "shuffle" && one.instruction.who === instruction.who);
 	const options = packet.options, stacked = packet.objects.some((one) => one.zone === "stack");
 	const instructions = [packet.obligation,
-		...(packet.kind === "trigger-order" && packet.plan ? ["Follow plan.script's placement order and target choices. Reverse a stated resolution order when placing triggers."] : []),
+		...(packet.kind === "trigger-order" && packet.plan ? ["Choose targets as your plan gives them."] : []),
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an unrelated option taken now can spend what they need." : ""}`] : []),
 		...(packet.pregameNotes.length && packet.plan ? ["Your plan outranks pregameNotes, which were written before the game."] : []),
