@@ -27,8 +27,8 @@ const LINE = { type: "object", additionalProperties: false, required: ["sequence
 const GROWTH = { name: "submit", description: "Submit the growth lines you found, sorted by damage. Acceptance checks the shape, not the rules or the arithmetic.",
 	parameters: { type: "object", additionalProperties: false, required: ["entries", "lines"], properties: {
 		entries: { type: "string", description: "The land entries you can make this turn and how." },
-		lines: { type: "array", items: LINE, description: "Your lines, the most damage first. Empty when nothing grows this turn." },
-		none: { type: "string", description: "Only when nothing grows this turn: why, in one line." },
+		lines: { type: "array", items: LINE, description: "Your lines, the most damage first. Empty when no land entry this turn grows a creature." },
+		none: { type: "string", description: "Only when no land entry this turn grows a creature: why, in one line." },
 	} },
 	check: (args: Record<string, unknown>) => {
 		if (typeof args.entries !== "string") return "entries is text.";
@@ -50,7 +50,7 @@ export const GROWTH_QUESTION = [
 	"3. Your candidate lines: which payoff to cast first and how to pay for it without tapping your attacker or a land whose {T} ability the line uses later, which entries in which order, the order and targets of the triggers each time, and which creature grows.",
 	"4. For each line: the grown attacker's power after each entry, as its base (printed power plus counters) + its bonus until end of turn. A doubling adds the whole power to the bonus, and the bonus lasts the turn. For a 3-power creature: 3 + 0 = 3, doubled 6 (bonus 3); after a counter, 4 + 3 = 7, doubled 14 (bonus 10); with no new counter, 4 + 10 = 14, doubled 28 (bonus 24). Then the attackers: the creatures the board lists without summoning sickness, and any with haste; a creature you cast this turn has summoning sickness. Then their best blocks, the rough damage against their life, and what the line costs or gives up.",
 	"",
-	"Sort the lines by damage, the most first. Rough arithmetic is fine; say what you are unsure of. If nothing grows this turn, say so in none.",
+	"Sort the lines by damage, the most first. Rough arithmetic is fine; say what you are unsure of. A line grows a creature through land entries; when no land entry this turn grows one, leave lines empty and say why in none.",
 	"",
 	"Answer through submit. Do not write plan syntax.",
 ].join("\n");
