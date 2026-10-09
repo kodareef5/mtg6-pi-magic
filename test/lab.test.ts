@@ -12,7 +12,7 @@ import { test } from "node:test";
 import { decisionFrame, position } from "../tools/benchmark-positions.ts";
 import { aiSeat, criterion } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
-import type { DecisionApi } from "../src/context/model.ts";
+import { RequestTooLarge, type DecisionApi } from "../src/context/model.ts";
 import { summary } from "../src/core/announce.ts";
 import { check, InstructionSchema, type Instruction } from "../src/core/language.ts";
 
@@ -104,4 +104,26 @@ test("a seat states its trigger order one pair at a time, then puts each trigger
 	assert.ok(asked[0]!.criteria["trigger:trigger-509-1:t0=0-48@3"]!.includes("Your stated order puts this trigger on the stack now"));
 	assert.ok(!asked[0]!.criteria["trigger:trigger-509-0"]!.includes("Your stated order"));
 	assert.equal(second.kind === "pick" && second.option, "trigger:trigger-509-1:t0=0-48@3");
+});
+
+test("a decision too long for the pilot is asked again in smaller inspection steps, with nothing cut", async () => {
+	// The stopped game: a 212-power trampler, one blocker, Red at 2 life. Its 211 splits overran the classifier's window.
+	const journal = expand("n-trample-assignment");
+	const { table, brief } = position(journal, 480, 0);
+	const sent: string[][] = [];
+	const api: DecisionApi = { named: "windowed", ask: async (request) => {
+		const ids = Object.keys((request.questions.pick as { criteria: Record<string, string> }).criteria);
+		sent.push(ids);
+		if (ids.length > 100) throw new RequestTooLarge("windowed classifier: HTTP 400: max_tokens_exceeded");
+		const choice = ids.find((id) => id.startsWith("inspect:component")) ?? (ids.includes("assign:0-15:2-210") ? "assign:0-15:2-210" : ids[0]!);
+		return { pick: { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 } };
+	} };
+	const gaps: string[] = [];
+	const answer = await aiSeat({ name: "Lab", api, intent: startingIntent(0), chronicle: { briefs: brief ? { 0: brief } : {}, recaps: [] }, onGap(gap) { gaps.push(gap); },
+		plan: async () => { throw new Error("no planning here"); } }).answer(decisionFrame(table, 0));
+	assert.ok(sent[0]!.length > 200, "the whole list is asked first");
+	assert.ok(sent.slice(1).every((ids) => ids.length <= 100), "after the refusal every question fits");
+	assert.ok(sent.slice(1, -1).every((ids) => ids.some((id) => id.startsWith("inspect:component"))), "the narrowing steps choose ranges and act on nothing");
+	assert.deepEqual(answer, { kind: "pick", option: "assign:0-15:2-210", actionId: `Lab-${sent.length}` });
+	assert.deepEqual(gaps, []);
 });

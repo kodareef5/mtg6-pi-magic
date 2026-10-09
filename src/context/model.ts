@@ -75,6 +75,9 @@ export type Classify = (
  * an attempted call report as no call at all, so a run that was rate limited for
  * a minute looked free.
  */
+/** The classifier refused a request longer than its window. The same decision fits when asked in smaller inspection steps. */
+export class RequestTooLarge extends PlayerUnavailable {}
+
 export function decisionApi(
 	classify: Classify,
 	model: ClassifierModel<ClassifierApi>,
@@ -107,7 +110,7 @@ export function decisionApi(
 				...(result.usage ? { usage: result.usage } : {}),
 				...(wrong ? { failed: wrong } : {}),
 			});
-			if (wrong) throw new PlayerUnavailable(wrong);
+			if (wrong) throw /max_tokens_exceeded/.test(wrong) ? new RequestTooLarge(wrong) : new PlayerUnavailable(wrong);
 			return result.answers;
 		},
 	};

@@ -19,7 +19,7 @@ import type { Rules } from "../core/rules.ts";
 import type { Frame, Option } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import { dial, follow } from "./dial.ts";
-import { asState, chose, CHOICE_LIMIT, type DecisionApi, type Question } from "./model.ts";
+import { asState, chose, CHOICE_LIMIT, RequestTooLarge, type DecisionApi, type Question } from "./model.ts";
 import { compact, focus, STATUS, type Chronicle, type Packet } from "./packet.ts";
 import type { NoteEdit, WorkCommand } from "../core/work-language.ts";
 import { planReason } from "../core/planning.ts";
@@ -219,6 +219,8 @@ const sentences = (parts: (string | undefined)[]) => parts.filter((one): one is 
 export const criterion = (option: Packet["options"][number], packet: Pick<Packet, "uses">) =>
 	sentences([option.label, option.shows, ...(option.use ? packet.uses[option.use]?.notes ?? [] : []), ...(option.notes ?? [])]);
 
+/** The fewest options a refused request is narrowed to before the refusal stands. */
+const FIT_FLOOR = 8;
 /** One question per decision, so the key is fixed and the answer is unambiguous. */
 const KEY = "pick";
 /** The pilot's way to say the plan no longer fits. */
@@ -318,7 +320,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let helped: number | undefined = options.helpedAt;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
-	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;
+	// `fit` is the option capacity this decision's requests fit into, once the classifier has refused a larger one.
+	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection; fit?: number } | undefined;
 	// The resolution order this seat stated for its waiting triggers, under the plan revision it read.
 	let stated: { revision: number; order: string[] } | undefined;
 	const cancel = () => {
@@ -488,7 +491,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				const declaration = frame.view.blockDeclaration;
 				const objection = options.judge && declaration && declaration.seat !== frame.seat && declaration.blockers.length && !declaration.heard
 					? { id: `object:block:${declaration.row}`, row: declaration.row, claim: `Check whether the complete blocking assignment at action ${declaration.row} satisfies declaration-time blocking restrictions.` } : undefined;
-				const capacity = CHOICE_LIMIT - (objection ? 1 : 0) - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
+				const capacity = (navigation.fit ?? CHOICE_LIMIT) - (objection ? 1 : 0) - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
 				const menu = inspect(decisionChoices(shown), navigation.selected, capacity);
 				const whole = focus(shown, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
@@ -504,10 +507,18 @@ export function aiSeat(options: AiSeatOptions): Player {
 				const ask = question(packet, help, order.map((one) => one.name));
 				asked += 1;
 				options.onAsk?.(packet);
-				const answers = await options.api.ask({
-					state: asState(compact(packet as unknown as Record<string, unknown>)),
-					questions: { [KEY]: ask },
-				}, "pick");
+				let answers;
+				try {
+					answers = await options.api.ask({
+						state: asState(compact(packet as unknown as Record<string, unknown>)),
+						questions: { [KEY]: ask },
+					}, "pick");
+				} catch (error) {
+					// Too long for the classifier: ask the same decision in smaller inspection steps. Nothing is cut.
+					if (!(error instanceof RequestTooLarge) || menu.options.length <= FIT_FLOOR) throw error;
+					navigation.fit = Math.max(FIT_FLOOR, Math.floor(menu.options.length / 2));
+					continue;
+				}
 
 				const answer = chose(answers, KEY);
 				if (typeof answer === "string") {

@@ -192,3 +192,12 @@ three held-out repeats under both arms. `pilot-future-step` expects a pass
 to the scheduled window. It measures obedience to that plan, not whether
 casting the instant earlier is legal or strategically worse. The prefix
 and carried brief match the original position before later work.
+
+## Oversized damage assignment
+
+`n-trample-assignment.jsonl.gz` freezes `claude-20261008-n-1791540958433`, played
+on October 9, at its last pending decision (480): an earthbent Forest with 212
+power and trample, blocked by Hired Claw, with Red at 2 life. The table lists all
+211 splits. That request overran Jev's window (`max_tokens_exceeded`) and the
+game stopped. `pilot-trample-assignment` passes when the seat narrows the
+decision by inspection and picks a split that deals Red at least 2.
