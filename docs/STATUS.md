@@ -5,6 +5,63 @@ writes strategy and judges. The roster stayed fixed. Playing strength remains
 unproven. No coded lethal search, move filtering or automatic voluntary choice
 was added.
 
+## October 9 strategy-owned trigger order and the loop guard
+
+A review of the pair questions found three problems: groups played with options
+reversed lost the plan's order more often than control (15/24 against 20/24),
+contradictory pair answers became an invented "stated order", and the lab
+dropped trigger frames (concurrent requests overwrote the captured first
+request, and later puts read an order cached only in the live seat).
+
+Strategy now owns trigger order. A plan's `triggers` lists trigger sources in
+resolution order, with optional named targets (a query, `"opponent"` or
+`"self"`). The table marks the put that goes on now, in placement order and
+aiming at any named target; a named target also marks a lone trigger. The
+pilot still picks each put, and each put remains an objectable ledger row. The
+writer's dossier names its watches that fire on the same event and says their
+order is the writer's to state.
+
+Without a plan order the pilot is asked each pair in both orientations; an
+order is stated only when every pair agrees both ways and the pairs are
+consistent, otherwise the put is asked plainly. Pairs are asked again at each
+put, a size refusal skips them, and the lab keeps the first concurrent request.
+
+| Check | Main | Pairs, one orientation | Pairs, agree or abstain | Strategy order |
+| --- | --- | --- | --- | --- |
+| Played groups keep the order, all 48 (original and supplied, both option orders) | 36/48 | 39/48 | 41/48 | |
+| Played groups, options reversed, supplied policies | 11/12 | 6/12 | 10/12 | |
+| Played groups with a structured order, both option orders | | | | 24/24 |
+| First put follows the plan (10 labelled items) | 0.62 | 1.00 | 0.96 | |
+| Codex's supplied-policy cases | 80/80 | 80/80 | 80/80 | |
+
+The structured order's 24/24 includes target, final size, replay and no gaps.
+Two bugs it exposed are fixed: a named target unmarked a trigger that chooses no
+target (Ascension's landfall, whose payoff targets later), and equal-rank
+triggers were listed in option order, so the mark and the question disagreed
+when options were reversed. Writer uptake in games went from 0 Green plans with
+an order (n) and 2 marked puts (m) to about half of Green's plans with an order
+once the dossier named the triggers that fire together: 6 and 13 marked puts.
+
+Seed n then exposed an unbounded loop: one Harmonizer remained, the plan
+double-blocked menace Zhao with two, and the pilot added and withdrew the same
+lone block about 9,000 times. The core loop now fingerprints each decision with
+the position and the seat's plan revision. From the second visit in a step the
+seat is told; at the third the table asks strategy for a new plan within the
+turn's requests; past them play stops with a loop gap. The seat also bounds one
+decision's inspection walk. Live on the frozen position (`block-loop-recovery`),
+all three runs began the same toggle, the table raised the loop at the third
+visit, strategy repaired, and the pilot finished a legal declaration.
+
+Health games on the merged code, from the carried version-zero preparations:
+
+| Seed | Result | Wall time | Green plans with an order | Puts under a plan order | Help |
+| --- | --- | --- | --- | --- | --- |
+| n | Green turn 11 | 8m29s | 9 of 28 | 7 | 2 |
+| m | Green turn 7 | 6m25s | 8 of 14 | 5 | 0 |
+
+Both have matching replays, no gaps and no loop requests. One game per seed
+does not show playing strength.
+
 ## October 9 trigger order questions
 
 Plans state trigger order as resolution order ("resolve Hydra, then Ascension,
