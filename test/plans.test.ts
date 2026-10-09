@@ -2056,7 +2056,7 @@ test("the dossier lays out what the seat knows in fixed sections, with recent tu
 	const written = dossier({ frame, brief: { ...emptyBrief(0), route: "Race | then hold.", policies: { sequencing: policy, resources: policy, responses: policy, combat: policy, recovery: policy } } });
 	assert.equal(dossier({ frame }), dossier({ frame }), "the same frame gives the same bytes, so a session shares one prefix");
 	const headings = [...written.matchAll(/^## (.+)$/gm)].map((match) => match[1]!.replace(/ \(\d+\)$/, ""));
-	assert.deepEqual(headings, ["Situation", "Your matchup plan", "Battlefield", "Your hand", "Stack", "Graveyards and exile", "Mana", "Triggers on the battlefield", "Decks and odds", "Card text", "Recent turns", "Your notebook", "Your standing plan"]);
+	assert.deepEqual(headings, ["Situation", "Your matchup plan", "Battlefield", "Your hand", "Stack", "Graveyards and exile", "Mana", "Triggers on the battlefield", "Standing effects", "Blocking on the opponent's next turn", "Decks and odds", "Card text", "Recent turns", "Your notebook", "Your standing plan"]);
 	const turns = [...written.matchAll(/^### Turn (\d+),/gm)].map((match) => Number(match[1]));
 	assert.ok(turns.length <= 5 && turns.every((turn) => turn > 9 - 5), "recent turns reach back five turns, never to the start of the game");
 	assert.match(written, /### Your library: \d+ cards/);

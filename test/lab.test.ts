@@ -13,6 +13,8 @@ import { decisionFrame, position } from "../tools/benchmark-positions.ts";
 import { aiSeat, criterion } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { castAttackers } from "../src/core/budget.ts";
+import { dossier } from "../src/context/dossier.ts";
+import { universe } from "../tools/matchup-fixture.ts";
 import { play } from "../src/core/loop.ts";
 import { workFrame } from "../src/core/work-tools.ts";
 import { planReason } from "../src/core/planning.ts";
@@ -294,4 +296,16 @@ test("the writer is told when an attack step names a creature an earlier step ca
 		{ label: "Attack with Explorer", when: { active: "self", step: "declare-attackers" }, action: { prefix: "attack:", objects: { card: "Icetill Explorer" } } },
 	] } as never;
 	assert.deepEqual(castAttackers(frame, plan), ["steps[1] (Attack with Harmonizer) attacks with Mightform Harmonizer, which steps[0] casts this turn. A creature cast this turn can attack only with haste."]);
+});
+
+test("the writer's dossier names standing effects, hand cards' effects once cast, and who can block each opposing creature", () => {
+	const at = (name: string, version: number, seat: 0 | 1) => dossier({ frame: workFrame(position(expand(name), version, seat).table, seat), cards: universe }, "coordinator");
+	const m = at("m-explorer-first", 299, 0);
+	assert.match(m, /Icetill Explorer, in your hand, once on the battlefield: "You may play lands from your graveyard\."/);
+	const n = at("n-attacker-tapped", 412, 0);
+	assert.match(n, /Zhao, the Moon Slayer \(1-58@3, Red\): "Nonbasic lands enter tapped\."/);
+	assert.match(n, /- Zhao, the Moon Slayer \(1-58@3, 2\/2, menace\): .*can block it; menace needs two of them together\./);
+	const red = at("m-red-blockers", 178, 1);
+	assert.match(red, /Summoning sickness does not stop a creature blocking, so a creature you cast this turn can block on their turn\./);
+	assert.match(red, /no creature of yours on the battlefield now can block it/);
 });

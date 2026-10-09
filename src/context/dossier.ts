@@ -9,9 +9,11 @@
  */
 import type { Frame, SeatId } from "../core/types.ts";
 import type { SeenObject } from "../core/work.ts";
+import type { Registration } from "../core/language.ts";
 import type { Universe } from "../core/cards.ts";
 import { odds } from "../core/odds.ts";
 import { activeWatches } from "../core/triggers.ts";
+import { blockConflicts } from "../core/combat-facts.ts";
 import { cardDefinition } from "./strategy-position.ts";
 import { manaLines } from "./strategy-facts.ts";
 import { useSources } from "../core/readiness.ts";
@@ -44,7 +46,7 @@ export function dossier(input: DossierInput, reader: "analyst" | "coordinator" =
 		matchupPlan(frame, input.brief, input.scope),
 		battlefield(frame, name), hand(frame), stack(frame, name), graveyards(frame, name),
 		"## Mana", manaLines(frame).map((line) => `- ${line}`).join("\n"),
-		triggers(frame, name), decks(frame, name), cardText(input),
+		triggers(frame, name), effects(frame, name), blocking(frame, name), decks(frame, name), cardText(input),
 		recent(frame, name, input.recaps),
 		...strategySections(frame, reader),
 	].join("\n\n");
@@ -161,6 +163,33 @@ function triggers(frame: Frame, name: (seat: SeatId) => string): string {
 	return ["## Triggers on the battlefield", "Registered watches, not pending triggers. Each triggers when its event happens from now on; pending triggers are under the stack.",
 		watched.length ? watched.map((one) => `- ${one.source.name} (${ref(one.source)}, ${one.source.controller === frame.seat ? "yours" : name(one.source.controller)}): "${one.basis}"`).join("\n") : "None.",
 		...together.map((group) => `${group.map((one) => `${one.source.name} (${ref(one.source)})`).join(", ")} trigger on the same event. Each time it happens their triggers wait together and you choose the order they resolve in; state it in triggers when the order changes the result.`)].join("\n");
+}
+
+/** Accepted terms other than triggers and mana that are in force now, and those your hand cards bring once on the battlefield. */
+function effects(frame: Frame, name: (seat: SeatId) => string): string {
+	const standing = (registration: Registration) => ["continuous", "replace", "permit", "suppress"].includes(registration.kind) || registration.kind === "enters" && !!registration.affects;
+	const now = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield").flatMap((one) => (one.registrations ?? []).filter(standing)
+		.map((registration) => `- ${one.card ?? one.token?.name ?? one.id} (${ref(one)}, ${one.controller === frame.seat ? "yours" : name(one.controller)}): "${registration.basis}"`));
+	const packages = new Map((frame.view.work?.packages ?? []).map((pack) => [pack.card, pack.registers]));
+	const hand = [...new Set((frame.view.objects ?? []).filter((one) => one.zone === "hand" && one.controller === frame.seat && one.card).map((one) => one.card!))];
+	const later = hand.flatMap((card) => (packages.get(card) ?? []).filter(standing).map((registration) => `- ${card}, in your hand, once on the battlefield: "${registration.basis}"`));
+	return ["## Standing effects", "Accepted terms in force that are not triggers or mana: what enters tapped, permissions, replacements and continuous changes.",
+		now.length ? now.join("\n") : "None on the battlefield.", ...(later.length ? [later.join("\n")] : [])].join("\n");
+}
+
+/** For each opposing creature, which of your creatures could block it on their next turn, by keyword conflicts only. */
+function blocking(frame: Frame, name: (seat: SeatId) => string): string {
+	const creatures = (mine: boolean) => (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && (one.controller === frame.seat) === mine && one.traits?.types.includes("creature"));
+	const body = (one: SeenObject) => `${one.card ?? one.token?.name ?? one.id} (${ref(one)}, ${one.traits?.power ?? "?"}/${one.traits?.toughness ?? "?"}${one.traits?.words.length ? `, ${one.traits.words.join(", ")}` : ""})`;
+	const ours = creatures(true), theirs = creatures(false);
+	const opponent = theirs[0] ? name(theirs[0].controller) : "the opponent";
+	const lines = theirs.map((attacker) => {
+		const able = ours.filter((blocker) => blockConflicts(attacker, blocker, 1).length === 0);
+		const menace = attacker.traits?.words.includes("menace");
+		return `- ${body(attacker)}: ${able.length ? `${able.map(body).join(", ")} can block it${menace ? "; menace needs two of them together" : ""}` : "no creature of yours on the battlefield now can block it"}.`;
+	});
+	return [`## Blocking on ${opponent}'s next turn`, "Keyword conflicts only, by what is on the battlefield now. Summoning sickness does not stop a creature blocking, so a creature you cast this turn can block on their turn. Yours that stay tapped cannot block.",
+		lines.length ? lines.join("\n") : "They have no creatures on the battlefield."].join("\n");
 }
 
 function decks(frame: Frame, name: (seat: SeatId) => string): string {
