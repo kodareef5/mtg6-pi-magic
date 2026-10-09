@@ -154,8 +154,13 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 
 function triggers(frame: Frame, name: (seat: SeatId) => string): string {
 	const watched = activeWatches(frame);
+	// Your watches on the same event trigger together: each time it happens their triggers wait together, in an order you choose.
+	const groups = new Map<string, typeof watched>();
+	for (const one of watched) if (one.source.controller === frame.seat) groups.set(JSON.stringify(one.event), [...groups.get(JSON.stringify(one.event)) ?? [], one]);
+	const together = [...groups.values()].filter((group) => group.length > 1);
 	return ["## Triggers on the battlefield", "Registered watches, not pending triggers. Each triggers when its event happens from now on; pending triggers are under the stack.",
-		watched.length ? watched.map((one) => `- ${one.source.name} (${ref(one.source)}, ${one.source.controller === frame.seat ? "yours" : name(one.source.controller)}): "${one.basis}"`).join("\n") : "None."].join("\n");
+		watched.length ? watched.map((one) => `- ${one.source.name} (${ref(one.source)}, ${one.source.controller === frame.seat ? "yours" : name(one.source.controller)}): "${one.basis}"`).join("\n") : "None.",
+		...together.map((group) => `${group.map((one) => `${one.source.name} (${ref(one.source)})`).join(", ")} trigger on the same event. Each time it happens their triggers wait together and you choose the order they resolve in; state it in triggers when the order changes the result.`)].join("\n");
 }
 
 function decks(frame: Frame, name: (seat: SeatId) => string): string {
