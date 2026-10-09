@@ -54,6 +54,7 @@ import { asState } from "../src/context/model.ts";
 import { dossier } from "../src/context/dossier.ts";
 import { perspectiveReports, reportsSection } from "../src/context/perspectives.ts";
 import { surveyPosition } from "../src/context/survey.ts";
+import { branchReports, branchesSection, firstActions } from "../src/context/branches.ts";
 import { announce, cardTexts, establish, example, finish, main, matchup, pack, passBoth, place, quiet, readDossier } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
@@ -1971,6 +1972,31 @@ test("focused questions rate findings, branches follow each first action in para
 	assert.deepEqual(ranks, [...ranks].sort((a, b) => b - a), "findings arrive ranked by relevance");
 	assert.match(coordinated[0]!, /adopted/, "the coordinator records which reports it adopts");
 	assert.deepEqual(table, before, "asking questions changes nothing on the table");
+	const branchFrame = workFrame(table, 0), castHydra = printedCast("Mossborn Hydra", branchFrame.view.printed!["Mossborn Hydra"]!);
+	const branchActions = Object.fromEntries(Array.from({ length: 9 }, (_, n) => [`cast:${n}`, { label: "Same label", action: {
+		procedure: { ...castHydra, cost: { mana: `{${n}}{G}` } },
+	} }]));
+	branchActions.alias = { ...branchActions["cast:0"]!, label: "Prior plan's alias" };
+	const distinct = firstActions(branchFrame, branchActions);
+	assert.equal(distinct.length, 9, "different accepted costs survive identical labels and the former eight-action limit");
+	assert.deepEqual(distinct[0]!.aliases, ["alias"], "only identical accepted actions share a branch");
+	let active = 0, peak = 0, asked = 0;
+	const coverage = await branchReports(branchFrame, facts, branchActions, { work: async (about, prompt) => {
+		assert.equal(prompt.user, facts); asked++; active++; peak = Math.max(peak, active);
+		const key = about.slice("branch ".length);
+		assert.ok(prompt.task?.includes(JSON.stringify(branchActions[key]!.action)), "identical labels cannot hide different accepted terms from the analyst");
+		await new Promise((resolve) => setImmediate(resolve)); active--;
+		if (about.includes("cast:8")) throw new Error("Recorded analyst failure");
+		return { ledger: ["No inferred execution."], attackers: "None", damage: 0, theirLife: 20 };
+	} });
+	assert.equal(asked, 9); assert.equal(peak, 8, "the concurrency bound never drops a candidate");
+	assert.equal(coverage.branches.length, 8); assert.equal(coverage.failed?.length, 1);
+	assert.match(branchesSection(coverage), /9 distinct accepted-action candidates, 1 aliases, 8 reports, 1 failed calls/);
+	const cancelled = new AbortController(); asked = 0;
+	await assert.rejects(branchReports(branchFrame, facts, branchActions, { work: async () => {
+		asked++; cancelled.abort(); throw new Error("Cancelled");
+	} }, cancelled.signal), /abort/i);
+	assert.equal(asked, 1, "discarding work prevents queued branches from starting");
 	const missingFields: Stream = (_model, request) => {
 		assert.equal(request.tools?.[0]?.name, "submit");
 		return { result: async () => ({ content: [{ type: "toolCall", id: "missing", name: "submit", arguments: { line: ["Pass", "hold", "none"] } }], stopReason: "toolUse" }) };
@@ -2170,4 +2196,3 @@ test("a stop watched at the coming draw is judged when written, and an essential
 	assert.equal(nextDecision(attacking)!.situation, "priority", "the declaration is over and priority follows in the same step");
 	assert.equal(planState(workFrame(attacking, 0))!.unmet, undefined, "an attack is declared in its own decision; the priority after it never finds it missing");
 });
-

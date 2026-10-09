@@ -69,6 +69,10 @@ for review. Unresolved discoveries remain named in the status notes.
 - [x] Facts, examples and four reusable positions. The supplied postcombat
   reserve executes with no help, gaps or replay mismatch. All 191 invariants,
   types and new prefix checks pass.
-- [ ] Trigger execution and policy authoring.
-- [ ] Branch coverage and growth calculations.
+- [x] Trigger execution tested separately from authoring. The retained question
+  improves execution of supplied policies; the authoring add-on is rejected.
+- [x] Branch coverage repaired and two adjacent-context growth arms screened.
+  Neither produces a correct complete winning calculation. Attack-before-
+  spending comparisons and further coordinator trials remain follow-up work;
+  adding calls before branch arithmetic works would not resolve these misses.
 - [ ] Matched games, final review and retained results.
