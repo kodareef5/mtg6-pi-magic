@@ -25,8 +25,8 @@ export type PlanState = {
 	plan: Plan;
 	/** Steps whose window and condition hold, in order. An explicit stack wait keeps later steps later even when no option fits yet. */
 	due: Fit[];
-	/** Steps not yet taken and not due now, in plan order. */
-	waiting: { at: number; label: string }[];
+	/** Steps not yet taken and not due now, in plan order, with the listed options that would carry them out if taken now. */
+	waiting: { at: number; label: string; candidates: Option[] }[];
 	branches: Fit[];
 	/** `askWhen` labels that hold now, and an essential step that should be taken here and cannot. */
 	stops: string[];
@@ -109,7 +109,7 @@ export function planState(frame: Frame): PlanState | null {
 	plan.steps.forEach((step, at) => {
 		if (done.has(at)) return;
 		if (open(step)) due.push(fit(step, at, "s"));
-		else waiting.push({ at, label: step.label });
+		else waiting.push({ at, label: step.label, candidates: candidates(step, frame, `plan:${revision}:w${at}`).options });
 	});
 	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length || one.waiting);
 	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase.
@@ -137,6 +137,10 @@ export function planState(frame: Frame): PlanState | null {
 		held, triggers, attacks,
 	};
 }
+
+/** A step's window in words: whose turn and which step. */
+const scheduledFor = (when: PlanOption["when"]) => [when.active === "self" ? "your" : when.active === "opponent" ? "the opponent's" : "any",
+	(when.step ?? when.phase ?? "turn").replace(/-/g, " ")].join(" ") + (when.fromTurn !== undefined ? ` from turn ${when.fromTurn}` : "");
 
 /** An order in placement order, the trigger that goes on now first, with its named target. */
 export const placed = (placement: readonly string[], aim?: string) => placement.map((name, at) => at ? name : `${name}${aim ? ` aiming at ${aim}` : ""} now`).join(", then ");
@@ -214,6 +218,9 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 			marks.push("Aims where your plan's trigger targets name this trigger's target.");
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
 		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
+		// An option that would carry out a step whose window has not come says so, so taking it now is not mistaken for the step.
+		const later = step ? undefined : state.waiting.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
+		if (later) marks.push(`Carries out plan step ${later.at + 1}, ${later.label}, which is scheduled for ${scheduledFor(state.plan.steps[later.at]!.when)}; it is not due now.`);
 		if (option.id === "attack:done") {
 			const unfinished = state.due.flatMap((one) => {
 				if (one.candidates.some((candidate) => candidate.id === option.id)) return [];

@@ -259,3 +259,25 @@ test("a seat that keeps returning to the same position is told, then strategy is
 	assert.ok(picks < 20, `bounded: ${picks} picks`);
 	assert.match(table.gaps.at(-1)!, /^Seat 0: Loop: this seat has met the same decision in the same position \d+ times this step \(Declare blockers/);
 });
+
+test("an option for a step whose window has not come says so, and an action says what it resolves before", () => {
+	// Burst is scheduled for precombat main; the decision is in the draw step.
+	const future = decisionFrame(position(expand("p-future-step"), 359, 1).table, 1);
+	const burst = future.decision!.options.filter((one) => one.id.startsWith("cast:38:0:"));
+	assert.ok(burst.length && burst.every((one) => one.notes?.some((note) => /^Carries out plan step 1, Burst Lightning for lethal, which is scheduled for your precombat main; it is not due now\.$/.test(note))));
+	// A second Harmonizer is on the stack; Passage's activation would resolve first.
+	const stacked = decisionFrame(position(expand("n-passage-above-harmonizer"), 361, 0).table, 0);
+	assert.match(stacked.decision!.options.find((one) => one.id.startsWith("use:2:"))!.shows!, /It goes on the stack above your Mightform Harmonizer and resolves before it\./);
+	assert.ok(!stacked.decision!.options.find((one) => one.id === "pass")!.shows!.includes("It goes on the stack"), "passing puts nothing on the stack");
+});
+
+test("the objection option quotes the declaration's blocking conflicts", async () => {
+	const { table, brief } = position(expand("menace-objection"), 286, 1);
+	let criteria: Record<string, string> = {};
+	await aiSeat({ name: "Lab", judge: true, api: { named: "capture", ask: async (request) => { criteria = (request.questions.pick as { criteria: Record<string, string> }).criteria; throw new Error("captured"); } },
+		intent: startingIntent(1), chronicle: { briefs: brief ? { 1: brief } : {}, recaps: [] }, onGap() {}, plan: async () => { throw new Error("no planning here"); } })
+		.answer(decisionFrame(table, 1)).catch(() => undefined);
+	const objection = Object.entries(criteria).find(([id]) => id.startsWith("object:"));
+	assert.ok(objection, "an objection is offered");
+	assert.match(objection![1], /The declaration shows: .*menace/);
+});

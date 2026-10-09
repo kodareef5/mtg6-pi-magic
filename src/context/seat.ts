@@ -272,7 +272,7 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 	].join("\n");
 	return { type: "choice", instructions, criteria: Object.fromEntries([
 		...packet.options.map((option) => [option.id, criterion(option, packet)]),
-		...(packet.objection ? [[packet.objection.id, `Ask the judge whether action ${packet.objection.row} declared legal blocks. The judge reconstructs declaration-time evidence and may let it stand or roll back. This choice takes no physical action and does not revise strategy.`]] : []),
+		...(packet.objection ? [[packet.objection.id, `Ask the judge whether action ${packet.objection.row} declared legal blocks. ${packet.blockDeclaration?.conflicts.length ? `The declaration shows: ${packet.blockDeclaration.conflicts.join("; ")}.` : "The declaration shows no blocking restriction conflict."} The judge reconstructs declaration-time evidence and may let it stand or roll back. This choice takes no physical action and does not revise strategy.`]] : []),
 		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
 		...(help ? [[HELP, helpCriterion(packet)]] : []),
 	]) };
@@ -280,7 +280,7 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 
 /** Where the plan and the board are in the state, worded the same for every question. */
 const orientation = (packet: Packet) => [
-	...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an unrelated option taken now can spend what they need." : ""}`] : []),
+	...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an option taken now can spend what they need." : ""}`] : []),
 	...(packet.pregameNotes.length && packet.plan ? ["Your plan outranks pregameNotes, which were written before the game."] : []),
 	"state.objects is the board now; state.cards is printed card text."];
 const HELP_LINE = "ask:help asks your strategist for a new plan and takes no action. Use it when your plan's step for this window has no option here, or the board contradicts something the plan relies on.";

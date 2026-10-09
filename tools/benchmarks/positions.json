@@ -48,7 +48,8 @@
     "k-missed-lethal": "test/fixtures/benchmarks/k-missed-lethal.jsonl.gz",
     "m-explorer-first": "test/fixtures/benchmarks/m-explorer-first.jsonl.gz",
     "n-attacker-tapped": "test/fixtures/benchmarks/n-attacker-tapped.jsonl.gz",
-    "m-red-blockers": "test/fixtures/benchmarks/m-red-blockers.jsonl.gz"
+    "m-red-blockers": "test/fixtures/benchmarks/m-red-blockers.jsonl.gz",
+    "n-passage-above-harmonizer": "test/fixtures/benchmarks/n-passage-above-harmonizer.jsonl.gz"
   },
   "cases": [
     {
@@ -1275,6 +1276,17 @@
         "cast:26:0:0-58@1:0-18:t0=0-40@3"
       ],
       "journal": "k-veil-before-blocks"
+    },
+    {
+      "id": "pilot-passage-above-harmonizer",
+      "journal": "n-passage-above-harmonizer",
+      "version": 361,
+      "seat": 0,
+      "task": "pilot",
+      "picks": [
+        "pass"
+      ],
+      "property": "Green cast a second Mightform Harmonizer and it is still on the stack. The due step activates Fabled Passage, and its purpose relies on both Harmonizer triggers. Activating now resolves the land entry before Harmonizer is on the battlefield and loses a doubling; the October 9 pilot did so at 0.80. Passing lets Harmonizer resolve first."
     }
   ]
 }

@@ -42,7 +42,7 @@ test("a pilot executes with derived plan status, while private judgments neither
 		assert.deepEqual(draw.plan!.next.map((one) => one.scheduled), [0, 1].map(() => ({ turn: 1, active: 0, step: "precombat-main", phase: "precombat-main" })));
 		assert.doesNotMatch(moveQuestion(draw, true).instructions!, /window is closed/);
 		assert.match(moveQuestion(draw, true).instructions!, /plan.next lists later steps with their windows/);
-		assert.match(moveQuestion(draw, true).instructions!, /an unrelated option taken now can spend what they need/);
+		assert.match(moveQuestion(draw, true).instructions!, /plan.next lists later steps with their windows; they are not taken now, and an option taken now can spend what they need/);
 		assert.deepEqual(drawFrame.view.work!.plan!.steps, table.work[0]!.plan!.steps, "slicing pending windows changes no intent");
 	}
 	const later = focus(drawFrame, startingIntent(0));

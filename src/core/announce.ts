@@ -233,6 +233,9 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
 		const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce - mana.colors.length) + 1 }, (_, at) => at) : [0];
 		const aims = targetings(procedure.targets ?? [], scope);
+		// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
+		const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+			.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
 		// Mana pays for the spell as it will be on the stack, or for the ability.
 		const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const } : source;
 		for (const x of xs) {
@@ -252,6 +255,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
 										`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduce ? ` (reduced by ${reduce})` : ""}. ${extra.shows}${paying}`,
 									procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
+									(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
 									...aiming(targets, world, frame.seat), ...procedure.instructions.map(summary), `Claimed basis: ${procedure.basis}`,
 								].filter(Boolean).join(" "),
 								objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...extra.uses.filter((id) => id !== source.id).flatMap((id) => {
