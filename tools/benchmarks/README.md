@@ -97,7 +97,7 @@ request byte for byte, so the lab asks exactly what the game asked. Work the sea
 at the same decision, such as its own help request, is cut from the rebuilt position.
 
 `run` builds each item's frame as the game loop does and runs the whole decision through the
-seat's own loop with the live classifier, inspection stages and rule routes included. It records
+seat's own loop with the live classifier, inspection stages, trigger order questions and rule routes included. It records
 every stage's options, probabilities and model. `report` scores runs against a gold file of
 acceptable answers per item and lists steady control answers that changed. Gold labels state what
 carries out the plan; a pick is never a verdict on playing strength.

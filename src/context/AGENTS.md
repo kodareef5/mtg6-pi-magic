@@ -154,6 +154,18 @@ decision. It does not pass, refund a paid cost, change a locked choice, or
 reveal anything the seat has not earned.
 
 The packet offers exact rule routes from disk, and `ask:help` when the seat has a planner.
+
+Before two or more of its triggers go on the stack, the pilot states the order
+they resolve in, one pair at a time: which of these two resolves first. Each
+answer states both directions ("A resolves before B, so B goes on the stack
+first"), so it reads the same against a plan worded either way. The answers move
+nothing. Each put is still its own decision and its own ledger row, which the
+opponent can object to. The put question gives the stated order as placement
+order, the trigger that goes on now first, and the option that keeps it says
+so; every option stays offered. Measured alternatives did worse: one list
+question ("which resolves first?") drew the first-listed trigger, and a
+resolution order given at the put drew the first-named trigger onto the stack,
+which inverts the plan.
 Ordinary option widening, raw declarations, and free-form delegation remain unwritten. Do not
 advertise an executable route whose handler does not exist.
 

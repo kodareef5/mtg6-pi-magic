@@ -34,7 +34,7 @@ type Gold = { item: string; category: string; accept: string[]; reason: string }
 const sha = (text: string) => createHash("sha256").update(text).digest("hex").slice(0, 16);
 const STOP = new Error("captured");
 /** Routes and inspection continue a decision; any other choice ends it. */
-const continues = (choice: string) => choice.startsWith("inspect:") || choice.startsWith("rules:");
+const continues = (choice: string) => choice.startsWith("inspect:") || choice.startsWith("rules:") || choice.startsWith("order:");
 
 /** One seat built as seating builds it, asking through `api`. Help is offered because a planner exists; this seat never plans. */
 function seat(item: Pick<Item, "seat" | "helpedAt">, api: DecisionApi, brief: Brief | undefined, rules: Rules) {

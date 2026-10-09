@@ -16,7 +16,7 @@ import { isDeepStrictEqual } from "node:util";
 import { basePlan, conditionProblems } from "./plan-edit.ts";
 import { PlayerUnavailable, type Answer, type Objection, type Player } from "../core/player.ts";
 import type { Rules } from "../core/rules.ts";
-import type { Frame } from "../core/types.ts";
+import type { Frame, Option } from "../core/types.ts";
 import type { Intent } from "../core/intent.ts";
 import { dial, follow } from "./dial.ts";
 import { asState, chose, CHOICE_LIMIT, type DecisionApi, type Question } from "./model.ts";
@@ -235,18 +235,18 @@ export const HELP = "ask:help";
  * what is good: advice here would make every seat play the same way and would
  * hide the alternatives the packet just spent its space listing.
  */
-export function question(packet: Packet, help: boolean): Question {
+export function question(packet: Packet, help: boolean, stated?: readonly string[]): Question {
 	const stage = packet.inspection?.stage;
 	const instruction = packet.resolution?.program[0]?.instruction;
 	const search = instruction?.do === "choose" && instruction.from.zones?.length === 1 && instruction.from.zones[0] === "library" &&
 		!instruction.from.is && !instruction.from.linked && packet.resolution?.program.some((one) => one.instruction.do === "shuffle" && one.instruction.who === instruction.who);
 	const options = packet.options, stacked = packet.objects.some((one) => one.zone === "stack");
 	const instructions = [packet.obligation,
+		// Stated in placement order: the trigger named first is the one that goes on now.
+		...(stated && stated.length > 1 ? [`Your stated order puts your waiting triggers on the stack in this order: ${[...stated].reverse().map((name, at) => at ? name : `${name} now`).join(", then ")}. The option that keeps it says so.`] : []),
 		...(packet.kind === "trigger-order" && packet.plan ? ["Choose targets as your plan gives them."] : []),
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
-		...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an unrelated option taken now can spend what they need." : ""}`] : []),
-		...(packet.pregameNotes.length && packet.plan ? ["Your plan outranks pregameNotes, which were written before the game."] : []),
-		"state.objects is the board now; state.cards is printed card text.",
+		...orientation(packet),
 		...(packet.window.kind === "turn" && !packet.resolving && packet.kind !== "trigger-order" ? [stacked
 			? "The stack is not empty, so lands and sorcery-speed actions wait until it is; their absence now is no reason to ask for help. An object on the stack has not resolved yet; using its card again starts another use."
 			: "The stack is empty."] : []),
@@ -259,7 +259,7 @@ export function question(packet: Packet, help: boolean): Question {
 		...(packet.resolving ? ["You are resolving an effect whose costs are paid. Follow resolving.purpose."] : []),
 		...(search ? ["Choose the card the search's purpose names. Declining finds nothing; it is not a pass."] : []),
 		...(packet.checklist?.length ? ["checklist shows each planned action for this window and whether an option here takes it."] : []),
-		...(help ? ["ask:help asks your strategist for a new plan and takes no action. Use it when your plan's step for this window has no option here, or the board contradicts something the plan relies on."] : []),
+		...(help ? [HELP_LINE] : []),
 		...(packet.blockDeclaration ? ["blockDeclaration shows the block assignment just made."] : []),
 		...(packet.routes.length ? ["A rules: option shows a rule and returns to this decision."] : []),
 		...(packet.learned?.length ? ["learned holds the rules you looked up."] : []),
@@ -269,8 +269,41 @@ export function question(packet: Packet, help: boolean): Question {
 		...packet.options.map((option) => [option.id, criterion(option, packet)]),
 		...(packet.objection ? [[packet.objection.id, `Ask the judge whether action ${packet.objection.row} declared legal blocks. The judge reconstructs declaration-time evidence and may let it stand or roll back. This choice takes no physical action and does not revise strategy.`]] : []),
 		...packet.routes.map((route) => [route.id, `Ask to see ${route.does}. Acts on nothing.`]),
-		...(help ? [[HELP, sentences(["Ask your strategist for a new plan. This takes no action", packet.plan?.script?.askWhenDone ? "Your plan asks for help once this window's planned actions are done" : undefined])]] : []),
+		...(help ? [[HELP, helpCriterion(packet)]] : []),
 	]) };
+}
+
+/** Where the plan and the board are in the state, worded the same for every question. */
+const orientation = (packet: Packet) => [
+	...(packet.plan ? [`state.plan is your plan: plan.due is the step to take now, with its Choices; plan.script holds the guidance for this window; plan.held lists what the plan keeps for later.${packet.plan.next.length ? " plan.next lists later steps with their windows; they are not taken now, and an unrelated option taken now can spend what they need." : ""}`] : []),
+	...(packet.pregameNotes.length && packet.plan ? ["Your plan outranks pregameNotes, which were written before the game."] : []),
+	"state.objects is the board now; state.cards is printed card text."];
+const HELP_LINE = "ask:help asks your strategist for a new plan and takes no action. Use it when your plan's step for this window has no option here, or the board contradicts something the plan relies on.";
+const helpCriterion = (packet: Packet) => sentences(["Ask your strategist for a new plan. This takes no action", packet.plan?.script?.askWhenDone ? "Your plan asks for help once this window's planned actions are done" : undefined]);
+
+/** One waiting trigger of this seat's, shared by each of its target choices. A trigger with no legal target is removed, never resolved, so it has no place in the order. */
+export type Waiting = NonNullable<Option["trigger"]>;
+export function waitingTriggers(options: readonly Option[]): Waiting[] {
+	return [...new Map(options.flatMap((one) => one.trigger ? [[one.trigger.id, one.trigger] as const] : [])).values()];
+}
+
+/**
+ * One question of the order sequence: which of two waiting triggers resolves
+ * first. Plans state resolution order, so the seat asks in that direction, one
+ * pair at a time; answering moves nothing. The puts that follow are ordinary
+ * decisions, one at a time.
+ */
+export function orderQuestion(packet: Packet, pair: readonly [Waiting, Waiting], help: boolean): { packet: Packet; question: Question } {
+	const asked = `Which of these two waiting triggers should resolve first: ${pair[0].name} or ${pair[1].name}?`;
+	// Each claim says both directions, so it reads the same against a plan that states resolution or placement order.
+	const options = pair.map((one, at) => ({ id: `order:${one.id}`, label: `${one.name} resolves before ${pair[1 - at]!.name}, so ${pair[1 - at]!.name} goes on the stack first. Its trigger: ${one.text}` }));
+	const shown: Packet = { ...packet, obligation: asked, options, uses: {}, payments: {}, funding: {}, routes: [] };
+	return { packet: shown, question: { type: "choice", instructions: [asked,
+		"This answer moves nothing. After these questions you put the triggers on the stack one at a time and choose their targets; triggers put on later resolve first.",
+		"Choose one id from the criteria. Each criterion states one order for these two triggers, both as they resolve and as they go on the stack, and quotes its trigger.",
+		...orientation(packet),
+		...(help ? ["ask:help asks your strategist for a new plan and takes no action. Use it when the board contradicts something the plan relies on."] : [])].join("\n"),
+	criteria: Object.fromEntries([...options.map((one) => [one.id, sentences([one.label])]), ...(help ? [[HELP, helpCriterion(packet)]] : [])]) } };
 }
 
 export function aiSeat(options: AiSeatOptions): Player {
@@ -286,6 +319,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
 	let navigation: { version: number; revision: number; learned: string[]; walked: string[]; selected: Inspection } | undefined;
+	// The resolution order this seat stated for its waiting triggers, under the plan revision it read.
+	let stated: { revision: number; order: string[] } | undefined;
 	const cancel = () => {
 		const old = preparation;
 		preparation = undefined;
@@ -412,14 +447,50 @@ export function aiSeat(options: AiSeatOptions): Player {
 			const movable = frame.decision.options.some((one) => !["pass", "attack:done", "block:done"].includes(one.id));
 			const help = !!options.plan && !!frame.view.work && movable && helped !== frame.version && !frame.refused?.some((why) => why.includes("requests for a new plan are spent"));
 
+			// Before two or more of its triggers go on the stack, the seat states the order they resolve in, one pair
+			// at a time. The pairs do not depend on each other, so they are asked at once. The answers move nothing;
+			// each put after them is its own decision.
+			const waiting = waitingTriggers(frame.decision.options);
+			if (waiting.length > 1 && !(stated?.revision === revision && waiting.every((one) => stated!.order.includes(one.id)))) {
+				const base = focus(frame, options.intent, { ...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}), ...(seated ? { recaps: seated.recaps } : {}), inspection: {}, capacity: CHOICE_LIMIT });
+				const pairs = waiting.flatMap((first, at) => waiting.slice(at + 1).map((second) => [first, second] as const));
+				const answered = await Promise.all(pairs.map((pair) => {
+					const { packet, question: ask } = orderQuestion(base, pair, help);
+					asked += 1;
+					options.onAsk?.(packet);
+					return options.api.ask({ state: asState(compact(packet as unknown as Record<string, unknown>)), questions: { [KEY]: ask } }, "pick").then((answers) => chose(answers, KEY));
+				}));
+				// A trigger resolves earlier the more of its pairs it wins; ties keep option order.
+				const wins = new Map(waiting.map((one) => [one, 0]));
+				for (const [at, pair] of pairs.entries()) {
+					const answer = answered[at]!;
+					if (typeof answer !== "string" && answer.choice === HELP && help) {
+						helped = frame.version;
+						return { kind: "work", tools: [{ do: "plan.request", reason: helpRequest(frame, base) }],
+							revision, actionId: `${options.name}-${frame.version}-${revision}-help-${asked}` };
+					}
+					const won = typeof answer === "string" ? undefined : pair.find((one) => `order:${one.id}` === answer.choice);
+					if (!won) {
+						options.onGap(`${options.name} via ${options.api.named}: ${typeof answer === "string" ? answer : `${answer.choice} is not a waiting trigger`}`);
+						return { kind: "pick", option: "", actionId: `${options.name}-${asked}` };
+					}
+					wins.set(won, wins.get(won)! + 1);
+				}
+				stated = { revision, order: [...waiting].sort((a, b) => wins.get(b)! - wins.get(a)!).map((one) => one.id) };
+			}
+			// The put that keeps the stated order says so; every option stays offered.
+			const order = waiting.length > 1 ? stated!.order.flatMap((id) => waiting.filter((one) => one.id === id)) : [];
+			const shown: Frame = order.length ? { ...frame, decision: { ...frame.decision, options: frame.decision.options.map((one) => one.trigger?.id === order.at(-1)!.id
+				? { ...one, notes: [...one.notes ?? [], "Your stated order puts this trigger on the stack now."] } : one) } } : frame;
+
 			for (;;) {
 				const rules = options.rules && walked.length < budget ? options.rules : undefined;
 				const declaration = frame.view.blockDeclaration;
 				const objection = options.judge && declaration && declaration.seat !== frame.seat && declaration.blockers.length && !declaration.heard
 					? { id: `object:block:${declaration.row}`, row: declaration.row, claim: `Check whether the complete blocking assignment at action ${declaration.row} satisfies declaration-time blocking restrictions.` } : undefined;
 				const capacity = CHOICE_LIMIT - (objection ? 1 : 0) - (help ? 1 : 0) - dial(frame.decision, rules).filter((route) => !walked.includes(route.id)).length;
-				const menu = inspect(decisionChoices(frame), navigation.selected, capacity);
-				const whole = focus(frame, options.intent, {
+				const menu = inspect(decisionChoices(shown), navigation.selected, capacity);
+				const whole = focus(shown, options.intent, {
 					...(seated?.briefs[frame.seat] ? { brief: seated.briefs[frame.seat] } : {}),
 					...(seated ? { recaps: seated.recaps } : {}),
 					...(rules ? { rules } : {}),
@@ -430,7 +501,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, ...(objection ? { objection } : {}), routes: whole.routes.filter((route) => !walked.includes(route.id)) };
-				const ask = question(packet, help);
+				const ask = question(packet, help, order.map((one) => one.name));
 				asked += 1;
 				options.onAsk?.(packet);
 				const answers = await options.api.ask({
@@ -469,7 +540,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 			if (preparation && frame.version < preparation.from.version) cancel();
 			begin(frame);
 		},
-		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; unreviewed = undefined; helped = undefined; },
+		reset() { cancel(); accepted = undefined; began = undefined; navigation = undefined; unreviewed = undefined; helped = undefined; stated = undefined; },
 		close() { closed = true; return cancel()?.then(() => {}); },
 	};
 }
