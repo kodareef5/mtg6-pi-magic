@@ -47,6 +47,28 @@ ambiguously ("arrange Hydra, Ascension, then Harmonizer") or contradict
 themselves remain authoring problems no question can recover. Raw runs, labels
 and harnesses are under ignored `.pi/jev-lab/`.
 
+Health games on the retained code, resumed from the carried version-zero
+preparations, two at a time:
+
+| Seed | Result | Wall time | Help | Notes |
+| --- | --- | --- | --- | --- |
+| m | Green turn 7 | 3m23s | 0 | Harmonizer put on under both Chocobo counters, as planned |
+| n | stopped turn 11 | 9m27s | 3 | a 212-power earthbent Forest's damage split overran Jev |
+| n (after the fix below) | Green turn 11 | 9m52s | 4 | |
+| k | Red turn 10 | 7m03s | 0 | |
+
+All four have matching replays; the finished three have no gaps. In n the
+pilot resolved Ascension's counter before Harmonizer's power doubling on each
+entry, and the Forest reached 212 power with trample. The table listed all
+211 damage splits, Jev refused the request (`max_tokens_exceeded`) and the
+game stopped. Option count is not the limit (670-option requests have
+succeeded); digit-heavy text is. The adapter now raises `RequestTooLarge` for
+that refusal, and the seat asks the same decision again with half as many
+options per question, so inspection splits it into ranges; nothing is cut.
+The stopped position is `pilot-trample-assignment`: 3/3 live, each one refused
+call and two narrowed questions. One game per seed does not show playing
+strength.
+
 ## October 8 review and cleanup round
 
 The [round plan](IMPROVEMENTS.md) pins control `f5ad823`. Retained code is
