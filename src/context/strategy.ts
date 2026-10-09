@@ -21,6 +21,7 @@ import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditio
 import { actionFacts, bindingFacts, choiceProblems, planFacts, planningChoices } from "./strategy-actions.ts";
 import { chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
 import { findingsSection, questions, surveyPosition } from "./survey.ts";
+import { growthReport, growthSection } from "./growth.ts";
 import { branchReports, branchesSection } from "./branches.ts";
 import { perspectiveReports, reportsSection } from "./perspectives.ts";
 import { dossier } from "./dossier.ts";
@@ -124,15 +125,16 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	// An invalid inherited response keeps the outlooks; a valid one asks three questions.
 	const branching = !!context.survey && !responding;
 	const only = response ? ["opponent", "defense", "removal"] : branching ? questions(planned).map(([source]) => source).filter((source) => !["attack", "ordering", "zones"].includes(source)) : undefined;
-	const [findings, branched] = await Promise.all([context.survey ? surveyPosition(planned, facts, reasoner, options.signal, only) : undefined,
-		branching ? branchReports(planned, facts, available, reasoner, options.signal) : undefined]);
+	const [findings, branched, growth] = await Promise.all([context.survey ? surveyPosition(planned, facts, reasoner, options.signal, only) : undefined,
+		branching ? branchReports(planned, facts, available, reasoner, options.signal) : undefined,
+		branching ? growthReport(facts, reasoner, options.signal) : undefined]);
 	const reported = findings && !response && !branching ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
 	const work = workSections({ base: planFacts(base), problems: [...baseProblems, ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
 		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
 		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
-		...(findings ? { analysts: [...(branched ? [branchesSection(branched)] : []), findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
+		...(findings ? { analysts: [...(growth ? [growthSection(growth)] : []), ...(branched ? [branchesSection(branched)] : []), findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.

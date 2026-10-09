@@ -16,6 +16,7 @@ import { dossier } from "../src/context/dossier.ts";
 import { universe } from "../tools/matchup-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { castAttackers } from "../src/core/budget.ts";
+import { growthReport, growthSection } from "../src/context/growth.ts";
 import { play } from "../src/core/loop.ts";
 import { planReason } from "../src/core/planning.ts";
 import type { Player } from "../src/core/player.ts";
@@ -348,4 +349,14 @@ test("a land permission marks only land cards in the graveyard as playable lands
 	const graveyard = text.split("- Your graveyard: ")[1]!.split("\n")[0]!;
 	assert.match(graveyard, /Fabled Passage \(0-11@1\), you may play it as your land/);
 	assert.ok(!/Snakeskin Veil \([^)]*\), you may play it as your land/.test(graveyard) && !/Hydra \([^)]*\), you may play it as your land/.test(graveyard), graveyard);
+});
+
+test("a growth analyst that does not answer is reported as such, and its lines are ranked by claimed damage", async () => {
+	const failed = await growthReport("facts", { work: async () => { throw new Error("timed out after 35s"); } });
+	assert.match(growthSection(failed), /The growth analyst did not answer: timed out after 35s\./);
+	const ranked = await growthReport("facts", { work: async () => ({ entries: "Two plays.", lines: [
+		{ sequence: ["Play Forest."], attacker: "Explorer", power: "2 -> 4", damage: 4, theirLife: 16 },
+		{ sequence: ["Cast Harmonizer.", "Play Passage.", "Sacrifice Passage."], attacker: "Explorer", power: "2 -> 4 -> 8", damage: 8, theirLife: 12 }] }) });
+	assert.deepEqual(ranked.lines.map((one) => one.damage), [8, 4]);
+	assert.match(growthSection(ranked), /### Line 1\. Claims 8 damage, their life 12/);
 });

@@ -1779,7 +1779,7 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
 			const schema = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
 			const survey = "findings" in schema.properties;
 			if (stage === "branch" && survey) return { result: async () => ({ content: [{ type: "toolCall", id: "finding", name: "submit", arguments: { findings: [] } }], stopReason: "toolUse" }) };
-			if (!survey && !("line" in schema.properties) && !("ledger" in schema.properties)) coordinated++;
+			if (!survey && !("line" in schema.properties) && !("ledger" in schema.properties) && !("lines" in schema.properties)) coordinated++;
 			pending.push(options!.signal!);
 			return { result: () => new Promise(() => {}) };
 		};
@@ -1937,12 +1937,14 @@ test("focused questions rate findings, branches follow each first action in para
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Prior tactical conclusion", guidance: "Prior payment assumption", steps: [] } },
 		{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const before = structuredClone(table);
-	const questions: string[] = [], outlooks: string[] = [], branches: string[] = [], writer: string[] = [], coordinated: string[] = [];
+	const questions: string[] = [], outlooks: string[] = [], branches: string[] = [], grown: string[] = [], writer: string[] = [], coordinated: string[] = [];
 	const stream: Stream = (_model, request) => {
 		const submit = request.tools?.find((one) => one.name === "submit")?.parameters as { properties: Record<string, unknown> } | undefined;
 		const reply = (args: Record<string, unknown>) => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: args }], stopReason: "toolUse" }) });
 		if (submit && "findings" in submit.properties) { questions.push(JSON.stringify(request.messages)); return reply({ findings: [{ kind: "opportunity", what: "Hydra: 2 + 1 = 3 sources pay {2}{G}.", relevance: questions.length % 5 + 1, when: "now" }] }); }
 		if (submit && "line" in submit.properties) { outlooks.push(JSON.stringify(request.messages)); return reply({ line: ["Play Forest", "Cast Mossborn Hydra"], hold: "none", opponentTurn: "Block with Hydra", risks: "none", outcome: "20 to 20", confidence: 3 }); }
+		if (submit && "lines" in submit.properties) { grown.push(JSON.stringify(request.messages)); return reply({ entries: "One Forest play: one entry.",
+			lines: [{ sequence: ["Play Forest."], attacker: "None.", power: "0", damage: 1, theirLife: 19 }, { sequence: ["Cast Hydra.", "Play Forest."], attacker: "Hydra next turn.", power: "0 + 1", damage: 3, theirLife: 17 }] }); }
 		if (submit && "ledger" in submit.properties) { branches.push(JSON.stringify(request.messages)); return reply({ ledger: ["Play Forest: one land entry."], attackers: "None.", damage: branches.length, theirLife: 20 - branches.length }); }
 		writer.push(JSON.stringify(request.messages)); coordinated.push(JSON.stringify(submit));
 		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
@@ -1959,14 +1961,19 @@ test("focused questions rate findings, branches follow each first action in para
 	assert.ok(branches.some((one) => one.includes("Commit to this first action this turn: Play Forest from hand.")), "each land play is a first action");
 	const [doc, work] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
 	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn"), brief }, "analyst");
-	for (const asked of [...questions, ...branches]) {
+	assert.equal(grown.length, 1, "one growth analyst runs beside the branches");
+	assert.ok(JSON.parse(grown[0]!).at(-1).content.startsWith("## Your request\nGrowth question."));
+	for (const asked of [...questions, ...branches, ...grown]) {
 		const seen = (JSON.parse(asked) as { content: string }[])[0]!.content;
 		assert.equal(seen, facts, "every analyst reads the same projected facts");
 		assert.ok(seen.includes("Pregame growth expertise") && !seen.includes("## Your standing plan") && !seen.includes("Prior tactical conclusion"), "analysts receive matchup advice without earlier tactical conclusions");
 	}
 	assert.ok(doc!.startsWith(facts) && doc!.includes("Prior tactical conclusion"), "the coordinator keeps the same facts and the prior intent it must reconcile");
 	assert.ok(work!.indexOf("## Branches from each first action") < work!.indexOf("## Findings from focused questions") && work!.indexOf("## Findings from focused questions") < work!.indexOf("## Your request"), "analysts' work comes before the request, which comes last");
-	const claimed = [...work!.matchAll(/Claims (\d+) damage/g)].map((match) => Number(match[1]));
+	assert.ok(work!.indexOf("## Growth opportunities") < work!.indexOf("## Branches from each first action"), "growth opportunities come first");
+	const growthPart = work!.split("## Branches from each first action")[0]!, branchPart = work!.split("## Branches from each first action")[1]!;
+	assert.deepEqual([...growthPart.matchAll(/Claims (\d+) damage/g)].map((match) => Number(match[1])), [3, 1], "growth lines arrive ordered by the damage they claim");
+	const claimed = [...branchPart.matchAll(/Claims (\d+) damage/g)].map((match) => Number(match[1]));
 	assert.deepEqual(claimed, [...claimed].sort((a, b) => b - a), "branches arrive ordered by the damage they claim");
 	const ranks = [...work!.matchAll(/^\d+\. Relevance (\d)/gm)].map((match) => Number(match[1]));
 	assert.deepEqual(ranks, [...ranks].sort((a, b) => b - a), "findings arrive ranked by relevance");
