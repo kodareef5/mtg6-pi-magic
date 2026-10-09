@@ -5,6 +5,48 @@ writes strategy and judges. The roster stayed fixed. Playing strength remains
 unproven. No coded lethal search, move filtering or automatic voluntary choice
 was added.
 
+## October 9 trigger order questions
+
+Plans state trigger order as resolution order ("resolve Hydra, then Ascension,
+then Harmonizer"), and the pilot put the first-named trigger on first, which
+inverts it. Code does not stack triggers for the pilot. Before two or more of its
+triggers go on the stack, the seat asks Jev, one pair at a time, which should
+resolve first. Each answer states both directions ("A resolves before B, so B
+goes on the stack first"), so it reads the same against either wording. The
+answers move nothing. Each put stays its own decision and ledger row, which the
+opponent can object to. The put question gives the stated order as placement
+order and marks the option that keeps it. Separately, the trigger question's
+reversal rule became "Choose targets as your plan gives them". Requests outside
+trigger decisions are byte-identical.
+
+Two blind labellers added six agreed trigger items to the gold set, giving 21
+trigger decisions (10 order, 10 target, 1 due step). Control is `16309d0`.
+
+| Check | Control | Retained |
+| --- | --- | --- |
+| First put follows the plan's order (10 items, 5 repeats) | 0.62 | 1.00 |
+| First put has the plan's target (10 items) | 0.84 | 0.92 |
+| Whole stated order keeps the plan (10 items) | - | 49/50 |
+| Played-out groups keep the plan's order, options as listed | 16/24 | 24/24 |
+| Played-out groups keep the plan's order, options reversed | 20/24 | 15/24 |
+| Codex's supplied-policy cases | 80/80 | 80/80 |
+| Saved pilot cases (3 repeats) | 76/93 | 82/93 |
+
+The target line alone moved the first put from 0.62 to 0.82. Measured
+alternatives for the order questions did worse: one list question ("which
+resolves first?") drew the first-listed trigger, 19/50 whole orders; a
+resolution order given at the put drew the first-named trigger onto the stack;
+claim-shaped list options reached 25/50; asking each pair in both orientations
+(by votes or summed probabilities) reached 41/50. In the counterbalanced runs a
+pair's two orientations agreed 88% of the time on items whose plan states an
+order, so the answers carry the plan's order rather than position alone. The
+reversed-option result remains a real weakness: some pairs still lean on
+position, so a game whose triggers were created in the opposite order can see a
+wrong stated order, which the pilot then follows. Plans that state order
+ambiguously ("arrange Hydra, Ascension, then Harmonizer") or contradict
+themselves remain authoring problems no question can recover. Raw runs, labels
+and harnesses are under ignored `.pi/jev-lab/`.
+
 ## October 8 review and cleanup round
 
 The [round plan](IMPROVEMENTS.md) pins control `f5ad823`. Retained code is
