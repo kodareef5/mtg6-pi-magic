@@ -101,3 +101,8 @@ seat's own loop with the live classifier, inspection stages and rule routes incl
 every stage's options, probabilities and model. `report` scores runs against a gold file of
 acceptable answers per item and lists steady control answers that changed. Gold labels state what
 carries out the plan; a pick is never a verdict on playing strength.
+
+`pilot-future-step` preserves a known schedule departure through the full
+inspection sequence. Its expected pass measures the supplied plan's timing,
+not the legality or strategic value of an earlier instant cast. Offline
+prefix validation does not establish that this live property passes.

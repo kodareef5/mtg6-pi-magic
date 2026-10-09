@@ -36,7 +36,8 @@
     "final-k-smaug-player": "test/fixtures/benchmarks/final-k-smaug-player.jsonl.gz",
     "trigger-m-0-402-0": "test/fixtures/benchmarks/trigger-m-0-402-0.jsonl.gz",
     "required-help-payment": "test/fixtures/benchmarks/required-help-payment.jsonl.gz",
-    "trigger-hydra-order": "test/fixtures/benchmarks/trigger-hydra-order.jsonl.gz"
+    "trigger-hydra-order": "test/fixtures/benchmarks/trigger-hydra-order.jsonl.gz",
+    "p-future-step": "test/fixtures/benchmarks/p-future-step.jsonl.gz"
   },
   "cases": [
     {
@@ -904,6 +905,17 @@
       "property": "Step 3 casts Explorer with four sources relying on the searched Forest untapping, but it stayed tapped (only three lands) so 3 mana cannot pay {2}{G}{G}; no listed option carries out the step and the phase forbids proactive Veil.",
       "picks": [
         "ask:help"
+      ]
+    },
+    {
+      "id": "pilot-future-step",
+      "journal": "p-future-step",
+      "version": 359,
+      "seat": 1,
+      "task": "pilot",
+      "property": "The current window is draw and Burst is scheduled for precombat main. Pass to that window. This measures obedience to the accepted plan, not the strategic value or legality of casting an instant earlier.",
+      "picks": [
+        "pass"
       ]
     }
   ]

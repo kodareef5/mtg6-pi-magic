@@ -180,3 +180,15 @@ need review. Without `--answers`, the case asks the writer to find its own line:
 npm run benchmark -- --live --case green-hydra-growth --play --through 7
 npm run benchmark -- --live --case green-hydra-growth --play --through 7 --answers test/fixtures/benchmarks/good-hydra-growth.json
 ```
+
+## Pilot schedule review
+
+`p-future-step.jsonl.gz` freezes decision 359, physical clock 729, of
+`claude-20261008-p-1791503205155`, before later work at that decision.
+The window is draw; the accepted Burst Lightning step is scheduled for
+precombat main. The schedule and "not taken now" instruction survive the
+use, target and payment inspections, but Jev casts Burst during draw in all
+three held-out repeats under both arms. `pilot-future-step` expects a pass
+to the scheduled window. It measures obedience to that plan, not whether
+casting the instant earlier is legal or strategically worse. The prefix
+and carried brief match the original position before later work.

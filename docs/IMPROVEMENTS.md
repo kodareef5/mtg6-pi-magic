@@ -71,8 +71,17 @@ for review. Unresolved discoveries remain named in the status notes.
   types and new prefix checks pass.
 - [x] Trigger execution tested separately from authoring. The retained question
   improves execution of supplied policies; the authoring add-on is rejected.
-- [x] Branch coverage repaired and two adjacent-context growth arms screened.
-  Neither produces a correct complete winning calculation. Attack-before-
-  spending comparisons and further coordinator trials remain follow-up work;
-  adding calls before branch arithmetic works would not resolve these misses.
-- [ ] Matched games, final review and retained results.
+- [x] Branch coverage repaired; adjacent context, mode headings, advice removal,
+  a resource report and alternative-ledger structures screened. Schema field
+  order changed the replies' output order, but its mixed three-generation
+  screen does not establish reliable growth discovery. No growth prompt arm
+  is retained. Attack-before-spending and coordinator selection remain follow-up
+  work, scored separately from payment and growth arithmetic.
+- [x] Two matched seed pairs and fresh q completed with zero gaps or fallback,
+  matching replay and full-state clones. Candidate k improved observed time
+  and cost; l took the same time, cost slightly more and needed more sessions.
+  The fixed roster and identical version-zero preparations are recorded.
+- [x] A critical reviewer checked prompt and reply pairs. The blind pilot set
+  stayed 45/51 in both arms; a known future-step departure is preserved as a
+  reusable fixture. Retained results and unresolved work are in
+  [gameplay status](STATUS.md).

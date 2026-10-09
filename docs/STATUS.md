@@ -5,6 +5,128 @@ writes strategy and judges. The roster stayed fixed. Playing strength remains
 unproven. No coded lethal search, move filtering or automatic voluntary choice
 was added.
 
+## October 8 review and cleanup round
+
+The [round plan](IMPROVEMENTS.md) pins control `f5ad823`. Retained code is
+`eacc878` and `b5dec02`; the roster stayed fixed. Raw requests, replies, supplied
+policies, failed harnesses and rejected prompt experiments remain under ignored
+`.pi/round4-20261008/`.
+
+Instruction summaries now preserve accepted selector restrictions, both
+condition bounds and characteristic changes, using exact terms when prose
+cannot carry them. The coordinator's reserve example releases held sources at
+postcombat main. A supplied reserve actually casts Zhao after combat with zero
+help or gaps and matching replay and clone checks. This proves execution of
+that reserve, not that the writer will author one.
+
+Branch coverage now distinguishes actions by their accepted meaning instead
+of their labels, checks projected source zones and permissions, and queues
+every distinct candidate with at most eight calls at once. The coordinator
+receives candidate, alias, report and failure counts, plus the exact first
+action's terms. Equal labels no longer merge different costs or modes. The
+matched and fresh candidate games include nine- and ten-candidate requests
+with every report returned. Extra candidates can still add time and cost;
+coverage does not certify affordability, timing or arithmetic.
+
+Trigger questions explicitly ask for targets and distinguish placing triggers
+from their resolution order. With supplied placement and target policies,
+ten fresh repetitions improved from 50/70 to 69/70 correct first choices.
+Required help remained 10/10. All 24 physical continuations passed, including
+reversed option order and partial queues, with full replay and clone parity.
+These are four witnesses from two related trigger families. One supplied
+order gives Hydra 14/5 where another order can give 16/6; this measures policy
+obedience, not optimal trigger order. An authoring add-on still produced
+contradictory orders and was rejected.
+
+A reviewer labelled 22 fresh pilot frames before reading repeated answers:
+17 scored and five excluded. Control and candidate both scored 45/51, with
+the same six misses. One block policy asks for a tapped Sanctuary as a third
+blocker while also asking to minimize damage; its help requests are ambiguous.
+The clear schedule departure is now `pilot-future-step`: Burst is scheduled
+for precombat main, but Jev casts it during draw in all three repeats in both
+arms. Its timing survives every inspection request. Earlier casting is legal
+and can win; the failure is obedience to the accepted schedule.
+
+### Growth experiments
+
+All arms used Luna low, the two growth witnesses and a real held-out position,
+with three generations per fixture and arm. These were branch-call screens,
+not full-game strength comparisons. Adjacent action text, headings separating
+accepted modes, removing matchup advice, a separate resource-mode report and
+separate alternative ledgers did not yield reliable complete winning
+calculations. None is retained. Fetch modes still get mixed, tapped sources
+are counted attacking, triggers disappear, and the held-out Zhao entry
+restriction gets ignored.
+
+An alternatives table exposed correct Surrak lines that the selected ledger
+then discarded. One Hydra answer correctly reached 24. That is a lead, not a
+reliable discovery improvement. The experimental schema also contradicted
+its prose: it asked for alternatives before the ledger but put that field last.
+Every reply followed the schema's field order. Moving the field first, with
+identical prose and facts in both arms, scored:
+
+| Correct complete selected lethal ledger | Field last | Field first |
+| --- | --- | --- |
+| Surrak witness | 0/3 | 1/3 |
+| Hydra witness | 0/3 | 0/3 |
+| Held-out position | 1/3 | 0/3 |
+
+This mixed screen does not justify retention or a broad confirmation queue.
+Growth discovery remains unresolved. The next experiment should carry an
+alternative's payment, events and characteristics into its selected ledger
+without rewriting them, then check coordinator selection separately. Keep
+attack-before-spending coverage and the pilot's schedule miss as distinct
+follow-up properties. More prose alone has not solved these failures.
+
+### Matched games and fresh play
+
+Both arms resumed identical version-zero preparations with summaries off.
+Control is `f5ad823`; candidate is `b5dec02`. At most two games ran together;
+some isolated probes overlapped. Timing observations do not isolate a cause.
+
+| Seed | Arm | Result | Wall time | Strategy wait | Reported cost | Help |
+| --- | --- | --- | --- | --- | --- | --- |
+| k | Control | Red turn 12 | 8m58s | 6m09s | $0.549 | 1 |
+| k | Candidate | Red turn 10 | 7m54s | 5m50s | $0.457 | 2 |
+| l | Control | Green turn 13 | 12m26s | 9m31s | $0.711 | 1 |
+| l | Candidate | Red turn 14 | 12m26s | 9m39s | $0.725 | 2 |
+| q | Fresh candidate | Red turn 12 | 10m30s | 7m36s | $0.627 | 1 |
+
+All five have zero gaps or fallback, matching replay and complete final-state
+clones. The matched version-zero tables and preparations also match. Candidate
+l needed 30 planning sessions against control's 25; k needed 20 against 23.
+One k control branch timed out after 45 seconds and lacked usage. Candidate l
+canceled one final preparation without usage; the other three games have
+complete usage. There were no judge rulings. Replay parity does not certify
+rules legality or playing strength.
+
+Fresh q's preparation is billed separately: 11m22s, 149 Sol high calls and
+$1.451. Preparation plus play took 21m52s and reported $2.078. The matched
+comparisons reuse preparation and exclude that cost.
+
+Review found specific writer failures with the needed facts present. Candidate
+l rejects casting Harmonizer from exile because four green mana supposedly
+cannot pay its "colorless generic requirement". The exile permission is
+active, and those sources can pay {2}{G}{G}. This disproves the stated rule;
+it does not prove casting Harmonizer is better than the chosen Ascension.
+In l and fresh q, the writer schedules a newly cast Claw or Zhao to attack
+while its own guidance correctly says it is summoning sick. Jev then asks
+for help. In l, another plan spends Ba Sing Se on Hydra and then needs to tap
+it again for earthbend. These are warranted own-turn repairs. Their exact
+prefixes and pending help frames are frozen under `.pi/round4-20261008/new-misses/`.
+
+Candidate k also delivers an explicit Veil-before-blocking policy with legal
+payment, but Jev passes and loses the Elf. Its v87 prefix is frozen. Control
+loses the Elf under a different policy, so this does not establish a retained
+code regression. The next pilot experiment should compare that prose policy
+with the existing conditional action representation, checking the actual cast,
+payment and combat outcome without another analysis round.
+
+All 191 offline tests, types and saved-prefix checks pass. The new schedule
+fixture preserves a known live failure; validating its prefix is not a live
+pass. The retained changes are ready for review, with growth discovery,
+trigger authoring and broader schedule adherence still open.
+
 ## October 8 pilot overhaul
 
 A lab now re-asks the pilot about real logged decisions under candidate code
