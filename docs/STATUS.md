@@ -5,6 +5,43 @@ writes strategy and judges. The roster stayed fixed. Playing strength remains
 unproven. No coded lethal search, move filtering or automatic voluntary choice
 was added.
 
+## October 8 pilot overhaul
+
+A lab now re-asks the pilot about real logged decisions under candidate code
+(`--corpus` in [the benchmark runner](../tools/benchmarks/README.md)). It rebuilt
+all 2,019 decisions from six games byte for byte. A gold set of 147 decisions was
+labelled twice, blind to the pilot's answers and later events; each arm ran the
+gold items and 400 others five times, with a control in every round.
+
+| Arm, cumulative | Gold accuracy | Due step | Nothing planned | Unneeded help | Median request |
+| --- | --- | --- | --- | --- | --- |
+| Before | 0.83 | 0.90 | 0.70 | 0.07 | 11.0 KB |
+| One id per physical action | 0.86 | 0.96 | 0.73 | 0.06 | 11.0 KB |
+| Criteria from each option's facts and plan marks | 0.89 | 0.96 | 0.87 | 0.02 | 10.8 KB |
+| Short orientation, pass rules removed | 0.92 | 0.98 | 0.93 | 0.00 | 9.3 KB |
+| Plain watches and events, opening facts | 0.91 | 0.98 | 0.95 | 0.00 | 7.2 KB |
+
+The planned cast is now offered once; each criterion states what its option does,
+its facts and the plan's marks; target labels name the target, its controller and
+body; effects read as words; the pass option says what passing does, and nothing
+grants or withholds a pass; a phase that asks for help says so on the help option;
+the opening states play or draw and land odds. A lone block on menace is now
+stated as illegal at the finish. Strategy no longer accepts a draw-step stop that
+already holds, and a declared attack is never reported missing at a priority.
+
+The 26 saved pilot cases went from 58/78 to 66/78 with no case worse; the menace
+finish wording then fixed the partial-block case (5/5). Trigger order remains
+weak (about half of seven gold items): plans state resolution order and the pilot
+tends to put the first-named trigger on first.
+
+Games from version zero on `d68a146` and `219bab6`, one per seed, all with zero
+gaps or fallback and matching replay: m Red turn 12 (8m44s, $0.55, help 1),
+k Green turn 11 (8m37s, $0.50, help 2), l Green turn 7 (3m48s, $0.25, help 0),
+n Green turn 11 (7m24s, $0.47, help 2), p Red turn 14 (8m56s, $0.64, help 0).
+Seed k had not been won by Green before. One game per seed does not establish
+playing strength. Three games at once exceeded the strategy provider's rate limit;
+two at a time did not.
+
 ## October 8 strategy overhaul
 
 A review of the strategy requests found the prompts teaching the wrong game.
@@ -195,7 +232,7 @@ Missing usage affected five control-k calls, one candidate-k call and three
 candidate-l calls; control l had none.
 Replay and clone parity establish consistency, not rules legality.
 
-All 183 offline tests, type checks and saved-prefix checks pass. New physical
+All 191 offline tests, type checks and saved-prefix checks pass. New physical
 fixture checks require a completed continuation boundary or actual outcome;
 an earlier decision limit cannot pass them. They check Elf preservation, Hydra
 removal and Zhao's entry rather than treating acceptance as success.
