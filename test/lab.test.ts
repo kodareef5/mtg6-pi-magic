@@ -12,7 +12,9 @@ import { test } from "node:test";
 import { decisionFrame, position } from "../tools/benchmark-positions.ts";
 import { aiSeat, criterion } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
+import { castAttackers } from "../src/core/budget.ts";
 import { play } from "../src/core/loop.ts";
+import { workFrame } from "../src/core/work-tools.ts";
 import { planReason } from "../src/core/planning.ts";
 import type { Player } from "../src/core/player.ts";
 import { changedPlan } from "../src/context/plan-edit.ts";
@@ -280,4 +282,16 @@ test("the objection option quotes the declaration's blocking conflicts", async (
 	const objection = Object.entries(criteria).find(([id]) => id.startsWith("object:"));
 	assert.ok(objection, "an objection is offered");
 	assert.match(objection![1], /The declaration shows: .*menace/);
+});
+
+test("the writer is told when an attack step names a creature an earlier step casts this turn", () => {
+	// Game k turn 9: the October 9 plan cast Harmonizer from exile and attacked with it.
+	const frame = workFrame(position(expand("k-missed-lethal"), 236, 0).table, 0);
+	const harmonizer = { source: { card: "Mightform Harmonizer", zones: ["exile"] }, claim: "Cast Mightform Harmonizer", basis: "Warp", timing: "spell", instructions: [] };
+	const plan = { objective: "", guidance: "", steps: [
+		{ label: "Cast Harmonizer", when: { active: "self", step: "precombat-main" }, action: { procedure: harmonizer } },
+		{ label: "Attack with Harmonizer", when: { active: "self", step: "declare-attackers" }, action: { prefix: "attack:", objects: { card: "Mightform Harmonizer" } } },
+		{ label: "Attack with Explorer", when: { active: "self", step: "declare-attackers" }, action: { prefix: "attack:", objects: { card: "Icetill Explorer" } } },
+	] } as never;
+	assert.deepEqual(castAttackers(frame, plan), ["steps[1] (Attack with Harmonizer) attacks with Mightform Harmonizer, which steps[0] casts this turn. A creature cast this turn can attack only with haste."]);
 });

@@ -16,7 +16,7 @@ import { matches } from "../core/query.ts";
 import { lookups } from "./brief.ts";
 import type { Lookup, Reasoner } from "./reason.ts";
 import { planReason } from "../core/planning.ts";
-import { budget, paymentForecast } from "../core/budget.ts";
+import { budget, castAttackers, paymentForecast } from "../core/budget.ts";
 import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts, planningChoices } from "./strategy-actions.ts";
 import { chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
@@ -155,7 +155,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			if (options.nextTurn && objection) wrong.push("Preparation cannot object to an action; raise it from the current decision.");
 			// Core validates the same complete answer, including notebook capacity.
 			try { prepareWork(frame, putting({ plan, ...(edits.length ? { edits } : {}) })); } catch (error) { wrong.push(String(error)); }
-			if (!wrong.length && !forecastTold) { const conflicts = budget(frame, plan); if (conflicts.length) { forecastTold = true; wrong.push(...conflicts); } }
+			if (!wrong.length && !forecastTold) { const conflicts = [...budget(frame, plan), ...castAttackers(frame, plan)]; if (conflicts.length) { forecastTold = true; wrong.push(...conflicts); } }
 			if (wrong.length) return `${wrong.length} problems: ${[...new Set(wrong)].join("; ")}. These describe your proposed plan. No action was executed; the position and resources in the request are unchanged.`;
 			accepted = { plan, ...(edits.length ? { edits } : {}), ...(objection ? { objection } : {}) };
 			return null;

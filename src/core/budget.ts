@@ -76,6 +76,34 @@ export function budget(frame: Frame, plan: Plan): string[] {
 	return paymentForecast(frame, plan).conflicts;
 }
 
+/**
+ * Attack steps naming a creature that an earlier step of the same turn casts. The forecast gives a new creature
+ * no traits, so it states the plan relation and the rule rather than a conclusion: haste can come from an effect.
+ * A card whose accepted terms grant haste is left out.
+ */
+export function castAttackers(frame: Frame, plan: Plan): string[] {
+	const at = frame.view.window;
+	if (at.kind !== "turn") return [];
+	// view.done numbers the standing plan's steps; a written plan's steps are its own intent.
+	const turn = at.active === frame.seat ? at.turn : at.turn + 1;
+	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
+	const cast = new Map<string, number>(), found: string[] = [];
+	plan.steps.forEach((step, index) => {
+		if (step.if || step.when.active === "opponent" || (step.when.fromTurn ?? 0) > turn || turn > (step.when.throughTurn ?? Infinity)) return;
+		const action = step.action;
+		if ("procedure" in action) {
+			const card = action.procedure.source.card;
+			if (action.procedure.timing === "spell" && card && frame.view.printed?.[card]?.type.includes("Creature")) cast.set(card, index);
+			return;
+		}
+		if (action.prefix !== "attack:" || !action.objects) return;
+		const named = action.objects.card ?? select(action.objects, frame).find((one) => one.card)?.card;
+		if (named && cast.has(named) && !JSON.stringify(packages.get(named) ?? []).includes('"haste"'))
+			found.push(`steps[${index}] (${step.label}) attacks with ${named}, which steps[${cast.get(named)}] casts this turn. A creature cast this turn can attack only with haste.`);
+	});
+	return found;
+}
+
 type Payment = { step: string; source: ObjectRef; funding: Funding; tapSource: boolean; untappedManaSourcesAfter: ObjectRef[] };
 export type PaymentForecast = { conflicts: string[]; payments: Payment[]; responses: string[]; unchecked: string[]; scope: string };
 
