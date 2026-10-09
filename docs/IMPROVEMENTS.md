@@ -18,7 +18,9 @@ alone do not solve those failures.
 The existing benchmark runner now records each analyst answer or failure and
 the writer's submission. `--findings FILE` reuses the exact analyst reports for
 an isolated writer comparison. Case, repetition, projected frame and analyst
-tasks must match. Failed reports remain failures; only new calls are billed.
+tasks must match. Successful reports must satisfy the current report contract;
+an incompatible fixture stops before writer inference. Recorded analyst failures
+remain failures; only new calls are billed.
 
 Saved-plan continuations now report the physical property separately from the
 expected move pattern. They also identify later accepted replacement plans,
@@ -48,44 +50,31 @@ These matches establish narrow structural properties, not good play. The
 three-question arm missed a known winning line twice, despite matching the
 control's aggregate pattern count.
 
-The choose/write split reused A's analyst findings. It needed 44 new calls
-against A's 21 writer calls, used 38% more writer input, and produced two
-infrastructure failures in 16 attempts. It chose unpayable lines and sometimes
-dropped commitments while writing. Its 20.0 s median excludes analyst work.
-Reject this implementation. Adding a sequential call did not fix selection.
+The choose/write split reused A's findings: 44 new calls versus 21 writer calls,
+38% more input, two infrastructure failures, unpayable lines and dropped
+commitments. Its 20.0 s median excludes analysts. Reject this implementation.
 
-Three concurrent attack, survival and development questions reduced peak
-requests per session from 19 to 3. They also lost candidate coverage: both
-Hydra generations missed the win, while three of four controls found it. Reject
-this implementation too. Do not replace the existing wave for call savings alone.
+Three attack, survival and development questions reduced peak requests from
+19 to 3 but missed both Hydra wins; three of four controls found them. Reject
+this implementation. Call savings alone do not justify losing coverage.
 
 ## Rejected context trim
 
-The prototype gave strategy a brief's structured policies with their complete
-applicable priorities, reserves and reversing conditions, plus the objective,
-role, visible card notes and preparation gaps. Supporting route, matchup,
-traps, recovery and pilot step essays stayed available through a lookup.
-Legacy briefs kept their prose; carried preparation and pilot packets were
-unchanged. Current physical facts, restrictions and visible card text stayed
-complete.
+The prototype supplied complete applicable policies, objective, role, visible
+card notes and preparation gaps, with supporting essays behind a lookup.
+Legacy briefs, pilot packets, physical facts and visible card text stayed intact.
 
 Across 77 saved positions it removed 24.8% of dossier bytes with all physical
 facts byte-identical. The live development screen used about 18% fewer input
 tokens. It established no latency or price gain: cache usage differed, and the
 cleanup cost more in that batch.
 
-Four saved first plans per arm were then played through their own turns. The
-cleanup won both tactical positions that control A missed, without replacement
-plans. One win used a valid alternative rejected by the expected move pattern.
-But both cleanup generations also proposed a losing Kellan attack, compared
-with one of four controls. Its analyst got the exchange wrong; the writer
-corrected the arithmetic while retaining the attack. Holding A's correct
-reports fixed made both cleanup writer generations keep Kellan safe. That
-localizes the observed failure without proving the cleanup harmless.
-
-All eight development continuations matched their initial clone and final
-replay, with no gaps or fallback choices. Turn boundaries canceled background
-preparation; missing usage makes their reported costs incomplete.
+Four first plans per arm were played through their own turns. The cleanup won
+both tactical positions that control A missed, without replacement plans; one
+used an alternative rejected by the expected pattern. But both cleanup answers
+proposed a losing Kellan attack versus one of four controls. The writer corrected
+its analyst's arithmetic while retaining the attack. With A's reports fixed,
+both cleanup writer generations kept Kellan safe. This localizes that failure.
 
 Four unused positions from one other source game then tested development,
 tapped entry, casting from exile and survival. In the tapped-entry position,
@@ -93,32 +82,47 @@ the trim reused a land already spent on casting, then misread menace. Its
 continuation needed a replacement plan and dealt no damage; the control dealt
 10 without replanning. Both arms failed to retain enough blockers in the
 survival position. All eight clones and replays matched with no gaps or
-fallbacks. The health checks alone would have hidden those strategic failures.
-Reject the broad trim and restore the original context. Token savings did not
-satisfy the dependency and execution requirement.
+fallbacks, as did the eight development continuations. Missing usage from
+canceled background preparation makes their reported costs incomplete.
+Reject the broad trim. Token savings did not preserve coherent execution.
 
-## Next experiment: verify candidate assumptions before selection
+## Resource checks and the next process experiment
 
-Use the existing projected combat arithmetic and payment facts as evidence
-beside candidates. A model should compare lines without recalculating a known
-single-block exchange from prose. Start with the existing combat helper and
-lookup; test surfacing its scoped result to analysts. Do not build another
-rules interpreter, infer card meaning, or silently decide for Jev. Multi-blocks,
-responses, triggers and future characteristics remain outside that helper.
+The payment forecast now preserves checks before an unknown continuation. Known
+mana and tap costs can refute a step without claiming its other costs were checked.
+Across 86 plans this recovered 20 complete payment witnesses and one conflict.
+Retain the truthful forecast; its live comparison established no strength gain.
 
-Freeze two comparisons: candidate discovery with identical facts and preparation,
-and selection/writing with identical reviewed reports. Cover profitable and
-losing exchanges, first strike, trample, resource conflicts, tapped entry,
-summoning sickness, growth dependencies and visible next-turn losses. Preserve
-every accepted use and move id. Retain the change only if it improves feasible
-choices across positions, rather than teaching one named card interaction.
+A separate pilot annotation for sources needed by later tap costs did not
+improve four paired continuations. Leave it out. Automatically attaching combat
+exchange facts was already tested and removed in October 6 and 7 experiments;
+correct arithmetic did not repair candidate selection. Keep the existing lookup.
 
-Only then reconsider a choose/write split or fewer analyst questions. The
-writer should either preserve a selected commitment or report why it cannot
-bind it. Reducing overlapping jobs must preserve the combinations found by the
-removed work. Bound concurrency across both seats only after measuring active
-response latency against background preparation; peak request count alone is
-not a performance result.
+A branch-objective prototype kept the existing parallel coverage, asked for
+win, survival and development continuations, added a defense report, and removed
+ranking by claimed damage. Nine development positions, two generations per arm:
+both used 322 calls, with medians 29.7 seconds for candidate and 31.0 for control.
+Candidate output increased; the screen established no efficiency gain.
+
+All 24 saved-plan continuations had matching clones and replays, no gaps and no
+fallbacks. The candidate kept the needed blockers in both survival runs versus
+one of two controls, with one later replacement plan overall versus four. But
+it won four of eight immediate-win continuations versus five for control.
+Leave this prototype out. These repeated positions show a tradeoff, not stronger
+play. Continuation costs exclude 270 canceled calls with missing usage.
+
+Next, make the handoff preserve action and resource commitments. A coordinator
+can calculate a winning attack and omit it from the plan, or name an attacker
+while telling Jev to tap it for mana. Prototype candidates built from accepted
+action keys, with selected order and payment commitments carried into the plan
+without another prose translation. Use existing plan checks and the scoped
+resource forecast; expose commitments that cannot be bound. This still cannot
+certify card meaning or predict responses. Keep every physical choice with Jev.
+
+Compare candidate feasibility, preservation into accepted plans and execution
+with fixed evidence before another prompt split or reduction in analysts.
+Preserve candidate coverage. Bound concurrency only after measuring active
+response latency against background preparation; peak count alone proves little.
 
 Keep opponent-turn preparation, scoped upkeep acceptance and post-draw review.
 Do not narrow amendments yet: earlier narrow reviews retained stale advice,
@@ -135,15 +139,12 @@ work recorded at the same revision. Run an unchanged control twice; change one
 process decision at a time. Keep errors and incomplete usage in the report.
 Do not turn inspected development cases into fresh confirmation.
 
-Before claiming stronger play, run fresh paired seeds with deck assignments
-and starting player balanced. An initial eight pairs is a screen. Review missed
-wins, avoidable losses, legal play, repairs and obedience alongside outcomes,
+Before claiming stronger play, run fresh paired seeds with balanced decks and
+starting players. Eight pairs is a screen. Review missed wins, avoidable losses,
+legal play, repairs and obedience alongside outcomes,
 then report calls, input, output, cost and median/tail strategy waits. Remove
 superseded paths when retaining a replacement. Both `npm test` and
 `npm run check` must pass before committing.
 
-The measurement changes are retained; the three planner prototypes remain out
-of normal gameplay. Detailed experiments, patches and calls are in ignored
-`.pi/process-improvements-20261009/`; the initial review is in
-`design-ref/process-review-20261009.md`. These local artifacts are evidence for
-this round, not prerequisites for ordinary play.
+Retained changes are measurement and truthful prefix checks. Local evidence is in
+`.pi/process-improvements-20261009/` and `design-ref/process-review-20261009.md`.
