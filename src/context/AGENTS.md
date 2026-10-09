@@ -157,17 +157,19 @@ reveal anything the seat has not earned.
 
 The packet offers exact rule routes from disk, and `ask:help` when the seat has a planner.
 
-Before two or more of its triggers go on the stack, the pilot states the order
-they resolve in, one pair at a time: which of these two resolves first. Each
-answer states both directions ("A resolves before B, so B goes on the stack
-first"), so it reads the same against a plan worded either way. The answers move
+Strategy owns trigger order. A plan's `triggers` lists the sources of the seat's
+triggers in resolution order, with named targets; the table marks the put that
+goes on now, in placement order, and the pilot is asked nothing more. When two or
+more triggers wait and no plan order covers them, the pilot is asked which of
+each pair resolves first. Each answer states both directions ("A resolves before
+B, so B goes on the stack first"), the questions go out together and are asked
+again at each put, and contradictory answers state no order. The answers move
 nothing. Each put is still its own decision and its own ledger row, which the
-opponent can object to. The put question gives the stated order as placement
-order, the trigger that goes on now first, and the option that keeps it says
-so; every option stays offered. Measured alternatives did worse: one list
-question ("which resolves first?") drew the first-listed trigger, and a
-resolution order given at the put drew the first-named trigger onto the stack,
-which inverts the plan.
+opponent can object to; the put question gives any order as placement order,
+the trigger that goes on now first, and every option stays offered. Measured
+alternatives did worse: one list question ("which resolves first?") drew the
+first-listed trigger, and a resolution order given at the put drew the
+first-named trigger onto the stack, which inverts the plan.
 Ordinary option widening, raw declarations, and free-form delegation remain unwritten. Do not
 advertise an executable route whose handler does not exist.
 

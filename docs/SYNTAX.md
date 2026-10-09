@@ -306,6 +306,16 @@ A **plan** is what jev flies.
   targeting a held creature or attacking with vigilance does not spend it.
   A nonvigilant attack commits its tap when the declaration finishes.
 - `packages`: corrections to the seat's prepared registrations and procedures.
+- `triggers`: standing orders for the seat's own triggers that wait together,
+  such as the landfall triggers of each land entry. `resolve` lists their
+  sources by query in the order the triggers resolve, first first; an optional
+  `when` limits the window and `targets` names, per source, the object it
+  targets (a query) or `"opponent"` or `"self"`. Whenever two or more listed
+  triggers wait, the options that put the last to resolve on now, aiming at any
+  named target, are marked in placement order; a named target also marks a lone
+  trigger. Marks never choose: the pilot still picks each put, and each put is a
+  ledger row the opponent can object to. Without a plan order the pilot is asked,
+  pair by pair, which trigger resolves first.
 - `phases`: window policies for responses, triggers, searches and exceptions.
   Optional `complete: "ask"` tells the pilot, on its help option, to ask for a
   new plan once the window's commitments finish; `"pass"` adds nothing, since the
