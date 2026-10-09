@@ -1,147 +1,149 @@
-# Strategy process improvement plan
+# Strategy process improvements
 
-Proposed next round, October 9, from `0a51987`. Improve the rate at which a
-sound strategic line becomes coherent play across different positions. Keep
-Jev, Sol 6.1 high for pregame, and Luna low for strategy, judge and summary.
-The current contract remains in [Plans](PLANS.md); the completed October 8
-round and subsequent measurements remain in [Gameplay status](STATUS.md).
+October 9. Improve how often a sound line becomes coherent play across different
+positions. Keep Jev, Sol 6.1 high for pregame, and Luna low for strategy, judge
+and summary. [Plans](PLANS.md) remains the gameplay contract; this document
+records the process experiments and the next work.
 
-The review found substantial concurrency already: 30 to 35 simultaneous
-strategy requests at peak in the latest candidate games. Median initial
-analyst requests carried 33 KB of pregame advice; median coordinator requests
-were 137 KB. Strategy waits occupied about 78% of the four games' elapsed time,
-including one stopped game. Analysts sometimes found a winning line that the
-coordinator weakened or declined while writing the plan. These observations
-support changing the questions and their handoffs before adding specialists.
+The review found ample concurrency already: 30 to 35 simultaneous strategy
+requests at peak in recent games. Initial analysts read a median 33 KB of
+pregame advice; coordinator requests reached a median 137 KB. Strategy waits
+occupied about 78% of elapsed play in the four reviewed games, including one
+stopped game. The problem is repeated reading, unreliable candidate analysis,
+and decisions lost between analysis and execution. More parallel specialists
+alone do not solve those failures.
 
-Detailed evidence and reproduction live in ignored
-`design-ref/process-review-20261009.md` and `.pi/process-review-20261009/`.
+## Implemented measurement
 
-## 1. Measure the stages that lose the line
+The existing benchmark runner now records each analyst answer or failure and
+the writer's submission. `--findings FILE` reuses the exact analyst reports for
+an isolated writer comparison. Case, repetition, projected frame and analyst
+tasks must match. Failed reports remain failures; only new calls are billed.
 
-Use the existing benchmark runner, traces and journal continuations. Before
-changing prompts, distinguish six failures: missing facts, missed candidate,
-wrong selection, lost commitment during writing, pilot departure, and execution
-or card-meaning error. Record the earliest failure and any later independent
-failure. A structural match, a legal action and a strong choice are separate.
+Saved-plan continuations now report the physical property separately from the
+expected move pattern. They also identify later accepted replacement plans,
+including plans later rolled back. An alternative winning line can fail the
+pattern, and a win after repair cannot establish that the initial plan worked.
+The runner checks clone and replay parity. See [benchmark usage](../tools/benchmarks/README.md).
 
-Build a small balanced development set from both pinned decks: immediate wins,
-survival and responses, resource conflicts, multi-effect sequencing, development
-without a win, and changed-position repairs. Include negative cases where an
-apparent win fails. Define acceptable alternatives and observable outcomes
-before reading candidate replies. Keep entire source games together when
-splitting development from confirmation cases. Repeated generations estimate
-stability; they do not increase the number of independent positions.
+Review the earliest failure in six stages: facts, candidate discovery, selection,
+writing, pilot execution, and card meaning or engine execution. Record later
+independent failures too. Acceptance, legality and playing strength need separate
+evidence; unknowns stay unknown. No new evaluation service is needed.
 
-For selection tests, supply the same candidate reports to both arms. For writing
-tests, supply a reviewed chosen line. For pilot tests, supply a complete accepted
-plan. For end-to-end tests, let every stage answer and execute the initial plan,
-reporting whether a later repair rescued it. Validate each fixture's hand,
-window, resources and claimed opportunity before scoring it.
+## First comparison
 
-Done when each failure can be attributed without inferring strategy quality
-from a PASS or a winner. Reuse current reporting; no new evaluation service.
+Eight development positions, two generations each, with unchanged controls run
+twice. All arms used the same carried preparation, model settings and disabled
+summaries. Repetitions do not create independent positions.
 
-## 2. Remove repeated reading
+| Arm | Calls | Input tokens | Median session | Plan-pattern matches |
+| --- | ---: | ---: | ---: | ---: |
+| Original A | 291 | 4,452,943 | 38.8 s | 8/16 |
+| Original B | 290 | 4,397,095 | 29.5 s | 9/16 |
+| Policy context | 294 | 3,620,164 | 38.8 s | 9/16 |
+| Three questions | 75 | 1,529,688 | 28.3 s | 9/16 |
 
-In `dossier-strategy.ts`, render one authoritative representation of pregame
-advice. Structured policies currently arrive beside route, matchup, traps,
-recovery and future step prose. Keep carried briefs unchanged; change what each
-question reads. Compare this cleanup alone before changing orchestration.
+These matches establish narrow structural properties, not good play. The
+three-question arm missed a known winning line twice, despite matching the
+control's aggregate pattern count.
 
-Give each question its complete applicable policy families, current projected
-facts and dependencies. Keep restrictions and relevant full card text beside
-sources they affect. Other advice and equipment remain accessible by lookup.
-An attack question must see spending restrictions and opposing responses; a
-resource question must see reserved attackers. Never use first-N retrieval,
-string clipping, or a card's current unavailability to erase a future dependency.
+The choose/write split reused A's analyst findings. It needed 44 new calls
+against A's 21 writer calls, used 38% more writer input, and produced two
+infrastructure failures in 16 attempts. It chose unpayable lines and sometimes
+dropped commitments while writing. Its 20.0 s median excludes analyst work.
+Reject this implementation. Adding a sequential call did not fix selection.
 
-Trim submission instructions to the fields that call writes. Measure dossier,
-reports, schema, input tokens, repairs and waits separately. Cached input still
-counts as reading. Retain the cleanup only if dependency coverage and executed
-decisions hold across the development and confirmation cases.
+Three concurrent attack, survival and development questions reduced peak
+requests per session from 19 to 3. They also lost candidate coverage: both
+Hydra generations missed the win, while three of four controls found it. Reject
+this implementation too. Do not replace the existing wave for call savings alone.
 
-## 3. Separate choosing from writing
+## Rejected context trim
 
-First keep candidate generation fixed and compare the current coordinator with
-two short calls through the same strategy role:
+The prototype gave strategy a brief's structured policies with their complete
+applicable priorities, reserves and reversing conditions, plus the objective,
+role, visible card notes and preparation gaps. Supporting route, matchup,
+traps, recovery and pilot step essays stayed available through a lookup.
+Legacy briefs kept their prose; carried preparation and pilot packets were
+unchanged. Current physical facts, restrictions and visible card text stayed
+complete.
 
-| Call | Question | Output |
-| --- | --- | --- |
-| Choose | Which feasible line best serves this position, considering the opponent's response? | One chosen line, its ordered actions, resource commitments, expected result, dependencies and conditions that change it |
-| Write | How does Jev carry out this chosen line? | Existing plan fields: steps, purposes, waits, holds, triggers, phases and conditions |
+Across 77 saved positions it removed 24.8% of dossier bytes with all physical
+facts byte-identical. The live development screen used about 18% fewer input
+tokens. It established no latency or price gain: cache usage differed, and the
+cleanup cost more in that batch.
 
-The selector gets candidates, current facts and their resource conflicts,
-without the full plan-writing reference. It may repair a candidate or choose
-another line; claimed damage is not proof. The writer gets the chosen line,
-its source facts, relevant accepted actions and the unfinished plan, without
-the competing essays. It must preserve the selected decisions or name the
-specific binding problem. It must not silently choose a different strategy.
+Four saved first plans per arm were then played through their own turns. The
+cleanup won both tactical positions that control A missed, without replacement
+plans. One win used a valid alternative rejected by the expected move pattern.
+But both cleanup generations also proposed a losing Kellan attack, compared
+with one of four controls. Its analyst got the exchange wrong; the writer
+corrected the arithmetic while retaining the attack. Holding A's correct
+reports fixed made both cleanup writer generations keep Kellan safe. That
+localizes the observed failure without proving the cleanup harmless.
 
-Reuse existing action keys and plan fields for the handoff. Keep intermediate
-work in the call trace; only the complete accepted plan reaches core. Do not
-create another durable plan language or another model role. Use existing
-payment forecasts with their unchecked cases visible. This checks consistency
-within stated assumptions, not Oracle meaning or optimal play.
+All eight development continuations matched their initial clone and final
+replay, with no gaps or fallback choices. Turn boundaries canceled background
+preparation; missing usage makes their reported costs incomplete.
 
-Compare the selected line with the written commitments before blaming Jev:
-missing casts or activations, changed targets, tapped attackers, discarded
-reserves and missing resolution waits each need a named failure. Model-authored
-dependencies such as `waitFor` remain explicit; code must not infer them from
-card prose. Keep all physical choices offered.
+Four unused positions from one other source game then tested development,
+tapped entry, casting from exile and survival. In the tapped-entry position,
+the trim reused a land already spent on casting, then misread menace. Its
+continuation needed a replacement plan and dealt no damage; the control dealt
+10 without replanning. Both arms failed to retain enough blockers in the
+survival position. All eight clones and replays matched with no gaps or
+fallbacks. The health checks alone would have hidden those strategic failures.
+Reject the broad trim and restore the original context. Token savings did not
+satisfy the dependency and execution requirement.
 
-Keep the split only if it preserves good lines and improves executed results
-beyond the control's observed variation. Measure its extra sequential latency.
-If it repeatedly fails confirmation, remove it and revise the hypothesis instead
-of appending another warning. Simple response repairs can remain one short call.
+## Next experiment: verify candidate assumptions before selection
 
-## 4. Replace overlapping analysis, then narrow amendments
+Use the existing projected combat arithmetic and payment facts as evidence
+beside candidates. A model should compare lines without recalculating a known
+single-block exchange from prose. Start with the existing combat helper and
+lookup; test surfacing its scoped result to analysts. Do not build another
+rules interpreter, infer card meaning, or silently decide for Jev. Multi-blocks,
+responses, triggers and future characteristics remain outside that helper.
 
-After the handoff works, compare the current analyst wave with three concurrent
-questions: the best immediate attack or win line, the opponent's threats and
-required response resources, and a development line that competes with spending
-now. Include attacking before spending and holding resources as real alternatives.
-Each proposal states its ordered actions, resource use, assumptions and result.
-The selector reconciles them; separate phase writers must not spend the same mana.
+Freeze two comparisons: candidate discovery with identical facts and preparation,
+and selection/writing with identical reviewed reports. Cover profitable and
+losing exchanges, first strike, trample, resource conflicts, tapped entry,
+summoning sickness, growth dependencies and visible next-turn losses. Preserve
+every accepted use and move id. Retain the change only if it improves feasible
+choices across positions, rather than teaching one named card interaction.
 
-This replaces per-card surveys, per-first-action branches and the unconditional
-growth analyst on the tested path. Specialist detail becomes a question about
-a concrete unresolved dependency. Preserve inspection of every accepted use;
-reducing model jobs must not reduce the seat's move list. Bound concurrency
-across both seats and give an active response precedence over queued preparation.
-All canceled, failed and delayed work remains accounted for.
+Only then reconsider a choose/write split or fewer analyst questions. The
+writer should either preserve a selected commitment or report why it cannot
+bind it. Reducing overlapping jobs must preserve the combinations found by the
+removed work. Bound concurrency across both seats only after measuring active
+response latency against background preparation; peak request count alone is
+not a performance result.
 
-Keep preparation during the opponent's turn, required upkeep acceptance and
-post-draw review. Reuse findings only with their frame, assumptions and source
-dependencies. A changed blocker, missing source or new draw starts a comparison
-of the affected line and alternatives. Unknown dependency coverage requires
-review. A model still decides strategic relevance; syntax and mana checks do
-not authorize keeping stale advice. Responses repair the current window and
-its affected commitments, without rebuilding the next own turn.
+Keep opponent-turn preparation, scoped upkeep acceptance and post-draw review.
+Do not narrow amendments yet: earlier narrow reviews retained stale advice,
+and 67 of 84 inspected draw reviews changed actions or steps. Changed blockers,
+response mana, source availability, relevant draws and resume without cached
+work must be covered before reusing findings. Reset, rollback and close cancel
+stale jobs; late answers cannot install plans.
 
-Test removed prerequisites, changed response mana, tapped entry, a new relevant
-draw, a harmless change and a resume with no cached work. The October 6 narrow
-review experiment retained stale advice, and 67 of 84 later draw reviews changed
-actions or steps. Narrow the work only after these cases are covered. Reset,
-rollback and close must cancel stale jobs; late answers cannot install plans.
+## Retention rule
 
-## Retain changes by gameplay evidence
+State the properties, acceptable alternatives, source-game split and live-call
+budget before a run. Verify the prefix ends before the planning answer, including
+work recorded at the same revision. Run an unchanged control twice; change one
+process decision at a time. Keep errors and incomplete usage in the report.
+Do not turn inspected development cases into fresh confirmation.
 
-Freeze the scoring rules, confirmation positions and live-call budget before
-each comparison. Measure an unchanged control twice. Compare one process change
-at a time, using identical preparation, model settings and summaries. Do not
-reuse repeatedly inspected cases as fresh confirmation. Keep failed attempts
-in the denominator and report infrastructure failures separately.
+Before claiming stronger play, run fresh paired seeds with deck assignments
+and starting player balanced. An initial eight pairs is a screen. Review missed
+wins, avoidable losses, legal play, repairs and obedience alongside outcomes,
+then report calls, input, output, cost and median/tail strategy waits. Remove
+superseded paths when retaining a replacement. Both `npm test` and
+`npm run check` must pass before committing.
 
-Then play fresh seeds with candidate against control, swapping their deck
-assignments and balancing who starts. An initial eight seed pairs is a screen,
-not a playing-strength claim. Review missed wins, avoidable losses, resource
-conflicts, plan obedience and legal play alongside outcomes. Report median and
-tail strategy waits, preparation reuse, repairs, calls, tokens and cost. Require
-replay/clone parity and keep gaps and fallback visible.
-
-Land each successful step as a replacement and delete its superseded prompts
-and paths. Keep experiments and long reviews outside published docs. Both
-`npm test` and `npm run check` must pass before a commit. The first implementation
-should be stage scoring and duplicate-context removal; broader concurrency and
-amendment changes follow evidence from the choose/write experiment.
+The measurement changes are retained; the three planner prototypes remain out
+of normal gameplay. Detailed experiments, patches and calls are in ignored
+`.pi/process-improvements-20261009/`; the initial review is in
+`design-ref/process-review-20261009.md`. These local artifacts are evidence for
+this round, not prerequisites for ordinary play.
