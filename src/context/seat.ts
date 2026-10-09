@@ -92,7 +92,7 @@ export type Planned = { seat: number; turn: number; how: "prepared" | "amended" 
  * between. Untapping our own permanents and the opponent's own untap are expected
  * and not changes. `quiet` is nothing changed but the draw.
  */
-export function changes(from: Frame, now: Frame): { lines: string[]; drawn: SeenObject[]; quiet: boolean } {
+export function changes(from: Frame, now: Frame, installed?: number): { lines: string[]; drawn: SeenObject[]; quiet: boolean } {
 	const at = (frame: Frame, zone: string, mine: boolean) => (frame.view.objects ?? []).filter((object) => object.zone === zone && (object.controller === frame.seat) === mine);
 	const same = (object: SeenObject, other: SeenObject) => other.id === object.id && other.incarnation === object.incarnation;
 	const kept = (object: SeenObject, among: SeenObject[]) => among.some((other) => same(object, other));
@@ -106,19 +106,26 @@ export function changes(from: Frame, now: Frame): { lines: string[]; drawn: Seen
 		const earlier = at(from, "battlefield", mine).find((other) => same(object, other));
 		return earlier && state(earlier, true, mine) !== state(object, false, mine);
 	});
+	// The opponent's lands that only tapped since are counted together; their creatures that tapped stay tapped through your turn.
+	const land = (object: SeenObject) => !!object.traits?.types.includes("land") && !object.traits.types.includes("creature");
+	const onlyTapped = (object: SeenObject) => { const earlier = at(from, "battlefield", false).find((other) => same(object, other))!;
+		return land(object) && state(earlier, true, true) === state(object, false, true); };
+	const lands = at(now, "battlefield", false).filter(land);
 	const life = (frame: Frame, mine: boolean) => frame.view.players?.find((one) => (one.id === frame.seat) === mine)?.life;
 	const drawn = added("hand", true);
 	const lines = [
 		...gone("battlefield", true).map((object) => `your ${name(object)} left the battlefield`), ...added("battlefield", true).map((object) => `you now have ${name(object)}`),
 		...altered(true).map((object) => `your ${name(object)} changed`),
 		...gone("battlefield", false).map((object) => `the opponent's ${name(object)} left the battlefield`), ...added("battlefield", false).map((object) => `the opponent now has ${name(object)}`),
-		...altered(false).map((object) => `the opponent's ${name(object)} changed${object.tapped ? " and is tapped" : ""}`),
+		...altered(false).filter((object) => !onlyTapped(object)).map((object) => `the opponent's ${name(object)} changed${object.tapped ? land(object) ? " and is tapped" : " and is tapped, so it cannot block this turn" : ""}`),
+		...(altered(false).some(onlyTapped) ? [`the opponent has ${lands.filter((one) => !one.tapped).length} of ${lands.length} lands untapped`] : []),
 		...gone("hand", true).map((object) => `${name(object)} left your hand`),
 		...[true, false].flatMap((mine) => life(from, mine) !== life(now, mine) ? [`${mine ? "your" : "the opponent's"} life went from ${life(from, mine)} to ${life(now, mine)}`] : []),
 		...(JSON.stringify(from.view.notes ?? []) !== JSON.stringify(now.view.notes ?? []) ? ["the table's notes changed"] : []),
 		...(JSON.stringify(from.view.pools ?? []) !== JSON.stringify(now.view.pools ?? []) ? ["the mana pools changed"] : []),
 		...(now.view.actions?.some((one) => !one.turnDraw && one.what.some((line) => !["no attackers", "no blockers"].includes(line)) && !from.view.actions?.some((earlier) => earlier.row === one.row)) ? ["the opponent took new actions; inspect view.actions"] : []),
-		...(from.view.work?.planned !== now.view.work?.planned ? ["your standing plan was replaced since you prepared, by a stop, a request for help or a judge's ruling"] : []),
+		// The seat's own upkeep install of this preparation is not a replacement.
+		...(from.view.work?.planned !== now.view.work?.planned && now.view.work?.planned !== installed ? ["your standing plan was replaced since you prepared, by a stop, a request for help or a judge's ruling"] : []),
 	];
 	return { lines: [...lines, ...drawn.map((object) => `you drew ${name(object)}`)], drawn, quiet: !lines.length };
 }
@@ -319,7 +326,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 	};
 	let closed = false;
 	// A preparation installed at upkeep without review, and the frame it was prepared from.
-	let unreviewed: { turn: number; from: Frame } | undefined;
+	let unreviewed: { turn: number; from: Frame; installed: number } | undefined;
 	let helped: number | undefined = options.helpedAt;
 	let preparation: { turn: number; from: Frame; controller: AbortController; plan: Promise<Prepared | undefined>; ready?: true; timing: PreparationTiming } | undefined;
 	let began: string | undefined;
@@ -414,7 +421,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 								const delta = changes(job.from, frame);
 								const install = !settled(frame, made.plan, delta) && installable(frame, made.plan);
 								if (install || settled(frame, made.plan, delta)) {
-									if (install) unreviewed = { turn: turnNow, from: job.from };
+									if (install) unreviewed = { turn: turnNow, from: job.from, installed: revision + 1 };
 									how = "prepared";
 									failed = false;
 									return { kind: "work", tools: putting(made), revision, actionId: `${options.name}-${frame.version}-${revision}-plan-${++asked}` };
@@ -431,7 +438,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 						const since = unreviewed?.turn === turnNow ? unreviewed.from : accepted?.view.began === frame.view.began ? accepted : undefined;
 						const draw = frame.view.drawnAt;
 						if (since && !frame.view.work?.request && at.kind === "turn" && at.active === frame.seat && draw !== undefined &&
-							(frame.view.work?.accepted ?? -1) < draw) changed = changes(since, frame).lines;
+							(frame.view.work?.accepted ?? -1) < draw) changed = changes(since, frame, unreviewed?.turn === turnNow ? unreviewed.installed : undefined).lines;
 						unreviewed = undefined;
 					}
 					if (!options.plan) throw new Error(`Strategy requested, but no planner is available: ${reason}`);

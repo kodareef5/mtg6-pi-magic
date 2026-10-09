@@ -94,7 +94,7 @@ function state(frame: Frame, object: SeenObject, name: (seat: SeatId) => string)
 function sickness(frame: Frame, object: SeenObject, name: (seat: SeatId) => string): string {
 	const at = frame.view.window;
 	if (object.summoningSick === undefined) return "summoning sickness unknown";
-	if (at.kind !== "turn" || at.active !== object.controller) return `${object.tapped ? "" : "can block, "}can attack on ${object.controller === frame.seat ? "your" : `${name(object.controller)}'s`} next turn`;
+	if (at.kind !== "turn" || at.active !== object.controller) return `${object.tapped ? "tapped, so it cannot block this turn; " : "can block, "}can attack on ${object.controller === frame.seat ? "your" : `${name(object.controller)}'s`} next turn`;
 	return object.summoningSick ? "summoning-sick: cannot attack or pay {T} costs this turn, can still block" : "no summoning sickness";
 }
 

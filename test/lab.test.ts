@@ -10,13 +10,13 @@ import { join } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { test } from "node:test";
 import { decisionFrame, position } from "../tools/benchmark-positions.ts";
-import { aiSeat, criterion } from "../src/context/seat.ts";
-import { startingIntent } from "../src/context/plan.ts";
-import { castAttackers } from "../src/core/budget.ts";
+import { aiSeat, changes, criterion } from "../src/context/seat.ts";
+import { workFrame } from "../src/core/work-tools.ts";
 import { dossier } from "../src/context/dossier.ts";
 import { universe } from "../tools/matchup-fixture.ts";
+import { startingIntent } from "../src/context/plan.ts";
+import { castAttackers } from "../src/core/budget.ts";
 import { play } from "../src/core/loop.ts";
-import { workFrame } from "../src/core/work-tools.ts";
 import { planReason } from "../src/core/planning.ts";
 import type { Player } from "../src/core/player.ts";
 import { changedPlan, labelled } from "../src/context/plan-edit.ts";
@@ -321,4 +321,23 @@ test("the writer's dossier names standing effects, hand cards' effects once cast
 	const red = at("m-red-blockers", 178, 1);
 	assert.match(red, /Summoning sickness does not stop a creature blocking, so a creature you cast this turn can block on their turn\./);
 	assert.match(red, /no creature of yours on the battlefield now can block it/);
+});
+
+test("a review reads which opposing creatures cannot block, the opponent's lands as one count, and no replacement it made itself", () => {
+	// Game k, Green's turn 9 upkeep: Red's Hired Claw and Smaug attacked last turn and stay tapped through Green's turn.
+	const { table } = position(expand("k-missed-lethal"), 236, 0);
+	const now = workFrame(table, 0);
+	const text = dossier({ frame: now, cards: universe }, "coordinator");
+	assert.match(text, /Smaug the Magnificent[^\n]*tapped, so it cannot block this turn/);
+	assert.match(text, /Hired Claw[^\n]*tapped, so it cannot block this turn/);
+	// The frame the preparation was written from had everything untapped and the plan before the install.
+	const from = structuredClone(now);
+	for (const one of from.view.objects ?? []) one.tapped = false;
+	from.view.work = { ...from.view.work!, planned: (now.view.work?.planned ?? 1) - 1 };
+	const lines = changes(from, now, now.view.work?.planned).lines;
+	assert.ok(lines.some((line) => /^the opponent's Smaug the Magnificent changed and is tapped, so it cannot block this turn$/.test(line)), lines.join("\n"));
+	assert.ok(lines.some((line) => /^the opponent has \d+ of \d+ lands untapped$/.test(line)));
+	assert.ok(!lines.some((line) => /Mountain changed/.test(line)), "lands that only tapped are counted, not listed");
+	assert.ok(!lines.some((line) => line.startsWith("your standing plan was replaced")), "the seat's own install is not a replacement");
+	assert.ok(changes(from, now).lines.some((line) => line.startsWith("your standing plan was replaced")), "a replacement it did not make still shows");
 });
