@@ -12,7 +12,7 @@ import { holds as condition, viewWorld, type Scope } from "./selectors.ts";
 import { currentPlan, matches, reached, select } from "./query.ts";
 import { procedureOptions, type ProcedureOption } from "./procedures.ts";
 import type { Plan, PlanOption, Procedure } from "./language.ts";
-import type { Frame, Option } from "./types.ts";
+import type { Frame, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import type { LedgerRow } from "./table.ts";
 import { isDeepStrictEqual } from "node:util";
@@ -35,8 +35,8 @@ export type PlanState = {
 	/** Unarmed stops that are false now, and so arm. */
 	arming: string[];
 	held: { purpose: string; objects: SeenObject[] }[];
-	/** Trigger orders whose window is open, with each listed source resolved to the objects it names now. */
-	triggers: { sources: SeenObject[][]; purpose?: string }[];
+	/** Trigger orders whose window is open, with each listed source and target resolved to what it names now. */
+	triggers: { sources: SeenObject[][]; targets: { source: SeenObject[]; target: SeenObject[] | { player: SeatId } }[]; purpose?: string }[];
 	/** Current sources named by unfinished attacks in this turn's remaining combat. */
 	attacks: { label: string; objects: SeenObject[] }[];
 	/** The announcements due steps and branches offer, beside the table's own options. */
@@ -89,8 +89,13 @@ export function planState(frame: Frame): PlanState | null {
 	const procedures: ProcedureOption[] = [];
 	const held = (plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, frame)))
 		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
+	const opponent = frame.view.players?.find((one) => one.id !== frame.seat)?.id;
 	const triggers = (plan.triggers ?? []).filter((one) => !one.when || matches(one.when, frame))
-		.map((one) => ({ sources: one.resolve.map((query) => select(query, frame)), ...(one.purpose ? { purpose: one.purpose } : {}) }));
+		.map((one) => ({ sources: one.resolve.map((query) => select(query, frame)),
+			targets: (one.targets ?? []).flatMap((aim): PlanState["triggers"][number]["targets"] => aim.target === "self" ? [{ source: select(aim.source, frame), target: { player: frame.seat } }]
+				: aim.target === "opponent" ? opponent === undefined ? [] : [{ source: select(aim.source, frame), target: { player: opponent } }]
+				: [{ source: select(aim.source, frame), target: select(aim.target, frame) }]),
+			...(one.purpose ? { purpose: one.purpose } : {}) }));
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
 		procedures.push(...found.procedures);
@@ -131,19 +136,32 @@ export function planState(frame: Frame): PlanState | null {
 	};
 }
 
+const same = (a: { id: string; incarnation: number }, b: { id: string; incarnation: number }) => a.id === b.id && a.incarnation === b.incarnation;
+/** Whether a trigger option aims where the policy names its source's target, or undefined when the policy names none. */
+function aims(policy: PlanState["triggers"][number], option: Option): boolean | undefined {
+	const source = option.objects?.[0], rules = policy.targets.filter((aim) => source && aim.source.some((object) => same(object, source)));
+	if (!option.trigger || !rules.length) return undefined;
+	return rules.some((aim) => option.trigger!.targets.some((chosen) => "player" in aim.target
+		? "player" in chosen && chosen.player === (aim.target as { player: SeatId }).player
+		: !("player" in chosen) && (aim.target as SeenObject[]).some((object) => same(object, chosen))));
+}
+
 /**
  * The plan's order for the waiting triggers these options put on: the triggers that go on the stack now and the
  * order they all go on in, last to resolve first. The first open policy that orders two or more of them applies.
  */
-export function triggerOrder(state: PlanState, options: readonly Option[]): { now: string[]; placement: string[]; purpose?: string } | undefined {
+export function triggerOrder(state: PlanState, options: readonly Option[]): { now: string[]; placement: string[]; purpose?: string; aimed: (option: Option) => boolean; kept: boolean } | undefined {
 	const waiting = [...new Map(options.flatMap((one) => one.trigger && one.objects?.[0] ? [[one.trigger.id, { ...one.trigger, source: one.objects[0] }] as const] : [])).values()];
 	for (const policy of state.triggers) {
 		const ranked = waiting.map((one) => ({ one, rank: policy.sources.findIndex((objects) => objects.some((object) => object.id === one.source.id && object.incarnation === one.source.incarnation)) }))
 			.filter((one) => one.rank >= 0);
 		if (new Set(ranked.map((one) => one.rank)).size < 2) continue;
 		const last = Math.max(...ranked.map((one) => one.rank));
-		return { now: ranked.filter((one) => one.rank === last).map((one) => one.one.id), placement: [...ranked].sort((a, b) => b.rank - a.rank).map((one) => one.one.name),
-			...(policy.purpose ? { purpose: policy.purpose } : {}) };
+		// A named target narrows the options that keep the order to those aiming at it; a trigger with none named keeps it with any target.
+		const aimed = (option: Option) => aims(policy, option) !== false;
+		const now = ranked.filter((one) => one.rank === last).map((one) => one.one.id);
+		return { now, placement: [...ranked].sort((a, b) => b.rank - a.rank).map((one) => one.one.name),
+			...(policy.purpose ? { purpose: policy.purpose } : {}), aimed, kept: options.some((option) => option.trigger && now.includes(option.trigger.id) && aimed(option)) };
 	}
 }
 
@@ -178,8 +196,11 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
 		// Stated in placement order: the trigger named first is the one that goes on now.
-		if (order && option.trigger && order.now.includes(option.trigger.id))
+		if (order && option.trigger && order.now.includes(option.trigger.id) && order.aimed(option))
 			marks.push(`Your plan's trigger order puts this trigger on the stack now: ${order.placement.map((name, at) => at ? name : `${name} now`).join(", then ")}.${order.purpose ? ` Choices: ${order.purpose}` : ""}`);
+		// A named target counts whenever its trigger waits, alone included, unless the order puts that trigger on later.
+		else if (option.trigger && (!order || order.now.includes(option.trigger.id)) && state.triggers.some((policy) => aims(policy, option)))
+			marks.push("Aims where your plan's trigger targets name this trigger's target.");
 		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
 		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
 		if (option.id === "attack:done") {

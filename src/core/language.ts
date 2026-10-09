@@ -358,7 +358,9 @@ export const PlanDefs = { ...Defs,
 		/** Standing trigger orders, used each time the listed triggers wait together, such as on every land entry. */
 		triggers: Type.Optional(Type.Array(object({ when: Type.Optional(WhenSchema),
 			resolve: Type.Array(QuerySchema, { minItems: 2, description: "The sources of your triggers in the order the triggers resolve: the first listed resolves first. A trigger whose source is not listed may go anywhere." }),
-			purpose: Type.Optional(Type.String({ minLength: 1, description: "Targets and choices for these triggers, as a step's purpose." })) }))),
+			targets: Type.Optional(Type.Array(object({ source: QuerySchema,
+				target: Type.Union([QuerySchema, Type.Literal("opponent"), Type.Literal("self")], { description: "The object this source's trigger targets, by query, or a player." }) }))),
+			purpose: Type.Optional(Type.String({ minLength: 1, description: "Other choices for these triggers, as a step's purpose." })) }))),
 	}),
 };
 export const PlanSchema = Type.Cyclic(PlanDefs, "Plan");

@@ -78,7 +78,7 @@ function standingPlan(frame: Frame): string {
 		"### Steps", plan.steps.length ? plan.steps.map((one, at) => line(one, at, "step")).join("\n") : "None.",
 		"### Branches", plan.may?.length ? plan.may.map((one, at) => line(one, at, "branch")).join("\n") : "None.",
 		"### Holds", plan.holds?.length ? plan.holds.map((one) => `- ${one.purpose}: ${JSON.stringify(one.objects)}${one.releaseAt ? `, released at ${window({ when: one.releaseAt })}` : ""}${one.releaseWhen ? `, released when ${JSON.stringify(one.releaseWhen)}` : ""}`).join("\n") : "None.",
-		"### Trigger orders", plan.triggers?.length ? plan.triggers.map((one) => `- ${one.when ? `${window({ when: one.when })}: ` : ""}resolve ${one.resolve.map((query) => JSON.stringify(query)).join(", then ")}${one.purpose ? `. Purpose: ${one.purpose}` : ""}`).join("\n") : "None.",
+		"### Trigger orders", plan.triggers?.length ? plan.triggers.map((one) => `- ${one.when ? `${window({ when: one.when })}: ` : ""}resolve ${one.resolve.map((query) => JSON.stringify(query)).join(", then ")}${one.targets?.length ? `; targets ${one.targets.map((aim) => `${JSON.stringify(aim.source)} at ${JSON.stringify(aim.target)}`).join(", ")}` : ""}${one.purpose ? `. Purpose: ${one.purpose}` : ""}`).join("\n") : "None.",
 		"### Phase guidance", plan.phases?.length ? quote(plan.phases.map((one) => `${window(one)}: ${one.guidance ?? ""}${one.complete ? ` Then ${one.complete}.` : ""}`).join("\n")) : "None.",
 	].join("\n\n");
 }

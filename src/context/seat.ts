@@ -237,7 +237,7 @@ export const HELP = "ask:help";
  * what is good: advice here would make every seat play the same way and would
  * hide the alternatives the packet just spent its space listing.
  */
-export function question(packet: Packet, help: boolean, order?: { by: "plan" | "pilot"; placement: readonly string[] }): Question {
+export function question(packet: Packet, help: boolean, order?: { by: "plan" | "pilot"; placement: readonly string[]; kept?: boolean }): Question {
 	const stage = packet.inspection?.stage;
 	const instruction = packet.resolution?.program[0]?.instruction;
 	const search = instruction?.do === "choose" && instruction.from.zones?.length === 1 && instruction.from.zones[0] === "library" &&
@@ -245,7 +245,7 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 	const options = packet.options, stacked = packet.objects.some((one) => one.zone === "stack");
 	const instructions = [packet.obligation,
 		// Stated in placement order: the trigger named first is the one that goes on now.
-		...(order && order.placement.length > 1 ? [`${order.by === "plan" ? "Your plan's trigger order" : "Your stated order"} puts your waiting triggers on the stack in this order: ${order.placement.map((name, at) => at ? name : `${name} now`).join(", then ")}. The option that keeps it says so.`] : []),
+		...(order && order.placement.length > 1 ? [`${order.by === "plan" ? "Your plan's trigger order" : "Your stated order"} puts your waiting triggers on the stack in this order: ${order.placement.map((name, at) => at ? name : `${name} now`).join(", then ")}. ${order.kept === false ? `No listed option puts ${order.placement[0]} on with the target your plan names.` : "The option that keeps it says so."}`] : []),
 		...(packet.kind === "trigger-order" && packet.plan ? ["Choose targets as your plan gives them."] : []),
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...orientation(packet),
@@ -508,7 +508,7 @@ export function aiSeat(options: AiSeatOptions): Player {
 				// already in front of the seat, and offering it twice spends the
 				// budget on something the seat has read.
 				const packet = { ...whole, ...(objection ? { objection } : {}), routes: whole.routes.filter((route) => !walked.includes(route.id)) };
-				const ask = question(packet, help, planned ? { by: "plan", placement: planned.placement } : order.length ? { by: "pilot", placement: [...order].reverse().map((one) => one.name) } : undefined);
+				const ask = question(packet, help, planned ? { by: "plan", placement: planned.placement, kept: planned.kept } : order.length ? { by: "pilot", placement: [...order].reverse().map((one) => one.name) } : undefined);
 				asked += 1;
 				options.onAsk?.(packet);
 				let answers;

@@ -176,3 +176,33 @@ test("the writer's trigger order is accepted, read in its own words, and replace
 	assert.deepEqual(plan.triggers, [{ when: { active: "self" }, resolve: [{ card: "Mossborn Hydra", controller: "self" }, { card: "Mightform Harmonizer" }], purpose: "Harmonizer targets Hydra." }]);
 	assert.throws(() => changedPlan(base, { triggers: [{ resolve: [{ card: "Mossborn Hydra" }] }] }, {}), /schema/, "an order names at least two sources");
 });
+
+test("a trigger order's named target narrows the mark to the option aiming at it", async () => {
+	// Two Sazh's Chocobos; the plan's Harmonizer doubles the one it names.
+	const journal = expand("trigger-m-0-402-0");
+	const { table } = position(journal, 209, 0);
+	const plan = { ...structuredClone(table.work[0]!.plan!), triggers: [{ resolve: [{ card: "Sazh's Chocobo" }, { card: "Mightform Harmonizer" }],
+		targets: [{ source: { card: "Mightform Harmonizer" }, target: { refs: [{ id: "0-53", incarnation: 3 }] } }] }] };
+	const marked = decisionFrame(table, 0, { plan }).decision!.options.filter((one) => one.notes?.some((note) => note.startsWith("Your plan's trigger order"))).map((one) => one.id);
+	assert.deepEqual(marked, ["trigger:trigger-402-0:t0=0-53@3"]);
+	const toPlayer = { ...plan, triggers: [{ ...plan.triggers[0]!, targets: [{ source: { card: "Mightform Harmonizer" }, target: "opponent" as const }] }] };
+	assert.deepEqual(decisionFrame(table, 0, { plan: toPlayer }).decision!.options.filter((one) => one.notes?.some((note) => note.startsWith("Your plan's trigger order"))), [],
+		"a target no option can take marks nothing rather than a wrong option");
+	const asked: string[] = [];
+	await aiSeat({ name: "Lab", api: { named: "scripted", ask: async (request) => {
+		asked.push((request.questions.pick as { instructions: string }).instructions);
+		return { pick: { type: "choice", choice: "ask:help", probabilities: { "ask:help": 1 }, confidence: 1 } };
+	} }, intent: startingIntent(0), chronicle: { briefs: {}, recaps: [] }, onGap() {}, plan: async () => { throw new Error("no planning here"); } }).answer(decisionFrame(table, 0, { plan: toPlayer }));
+	assert.match(asked[0]!, /No listed option puts Mightform Harmonizer \(0-43@3\) on with the target your plan names\./);
+});
+
+test("a named trigger target marks the aiming option when that trigger waits alone", () => {
+	// Hydra is already on the stack at 264; the plan aims Harmonizer at Hydra but gives no order for Ascension and Harmonizer.
+	const journal = expand("trigger-hydra-order");
+	const { table } = position(journal, 264, 0);
+	const plan = { ...structuredClone(table.work[0]!.plan!), triggers: [{ resolve: [{ card: "Mossborn Hydra" }, { card: "Mightform Harmonizer" }],
+		targets: [{ source: { card: "Mightform Harmonizer" }, target: { card: "Mossborn Hydra" } }] }] };
+	const notes = Object.fromEntries(decisionFrame(table, 0, { plan }).decision!.options.map((one) => [one.id, one.notes ?? []]));
+	assert.deepEqual(Object.entries(notes).filter(([, list]) => list.some((note) => note.startsWith("Aims where your plan"))).map(([id]) => id), ["trigger:trigger-509-1:t0=0-48@3"]);
+	assert.ok(!Object.values(notes).flat().some((note) => note.startsWith("Your plan's trigger order")), "one listed source waiting is no order");
+});

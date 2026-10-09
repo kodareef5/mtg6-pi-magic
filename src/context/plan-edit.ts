@@ -40,7 +40,9 @@ function writerChanges(value: unknown): unknown {
 	const holdsFixed = (list: unknown) => Array.isArray(list) ? list.map((hold) => hold?.objects ? { ...hold, objects: query(hold.objects) } : hold).map((one) => one?.releaseWhen && typeof one.releaseWhen === "object" && !Array.isArray(one.releaseWhen) &&
 		Object.keys(one.releaseWhen).length && Object.keys(one.releaseWhen).every((key) => windowKeys.includes(key))
 		? (({ releaseWhen, ...rest }) => ({ ...rest, releaseAt: releaseWhen }))(one) : one) : list;
-	const triggersFixed = (list: unknown) => Array.isArray(list) ? list.map((one) => Array.isArray(one?.resolve) ? { ...one, resolve: one.resolve.map(query) } : one) : list;
+	const triggersFixed = (list: unknown) => Array.isArray(list) ? list.map((one) => !one || typeof one !== "object" ? one : { ...one,
+		...(Array.isArray(one.resolve) ? { resolve: one.resolve.map(query) } : {}),
+		...(Array.isArray(one.targets) ? { targets: one.targets.map((aim: { source?: unknown; target?: unknown }) => aim && typeof aim === "object" ? { ...aim, source: query(aim.source), target: typeof aim.target === "string" ? aim.target : query(aim.target) } : aim) } : {}) }) : list;
 	return Object.fromEntries(Object.entries(changed).map(([key, list]) => [key, key === "holds" ? holdsFixed(list) :
 		["steps", "may", "phases", "askWhen", "triggers"].includes(key) && Array.isArray(list) ? (key === "triggers" ? triggersFixed(list) as unknown[] : list).map((one) => {
 			if (one?.action?.objects) one = { ...one, action: { ...one.action, objects: query(one.action.objects) } };

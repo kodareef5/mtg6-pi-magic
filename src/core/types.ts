@@ -65,8 +65,8 @@ export type Option = {
 	notes?: string[];
 	/** Public components of a compound choice. Inspecting one does not commit it. */
 	parameters?: Record<string, string | number>;
-	/** The waiting trigger this option puts on the stack, the same for each of its target choices. */
-	trigger?: { id: string; name: string; text: string };
+	/** The waiting trigger this option puts on the stack, and the targets this option chooses for it. */
+	trigger?: { id: string; name: string; text: string; targets: ({ id: string; incarnation: number } | { player: SeatId })[] };
 };
 
 /** Options are canonically ordered, so a seed plus the picks replays the game. */

@@ -291,7 +291,7 @@ export function triggerWindow(table: Table): Pending | null {
 				label: [`Put on the stack: ${name}: ${trigger.basis}`, ...aimed].join(" "),
 				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
-				trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: trigger.basis } },
+				trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: trigger.basis, targets: structuredClone(targets.flat()) } },
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
 		});
 	});
