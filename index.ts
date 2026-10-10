@@ -37,7 +37,7 @@ import {
 import { degraded, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { gameResult, report, preparationFailure, saveReport } from "./tools/game-report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
-import { deck } from "./src/core/decks.ts";
+import { collection, deck } from "./src/core/decks.ts";
 import { start } from "./src/core/commit.ts";
 import { nextDecision } from "./src/core/decisions.ts";
 import { standard } from "./src/core/format.ts";
@@ -134,7 +134,7 @@ export default function (pi: ExtensionAPI) {
 	 */
 	async function open(
 		ctx: ExtensionContext,
-		from: { seed: string } | { resume: string },
+		from: { seed: string; decks?: [string, string] } | { resume: string },
 	): Promise<Table> {
 		const cards = universe(standard.name);
 		const rules = loadRules(RULES);
@@ -166,7 +166,7 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(`Resumed past a torn last line. Dropped: ${journal.repaired.slice(0, 80)}`, "warning");
 			}
 		} else {
-			opened = start(standard, PLAY.map((name) => ({ deck: deck(name) })), from.seed, cards);
+			opened = start(standard, (from.decks ?? PLAY).map((name) => ({ deck: deck(name) })), from.seed, cards);
 			header = {
 				id: from.seed,
 				format: standard.name,
@@ -300,7 +300,21 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (verb === "play" || verb === "resume") {
-				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed });
+				// play [seed] | play random [seed] | play <deck A> vs <deck B> [seed]: any two collection decks, or two at random from the web-sourced ones.
+				const rest = args.trim().slice(verb.length).trim();
+				let decks: [string, string] | undefined, playSeed = seed;
+				if (verb === "play" && /^random\b/.test(rest)) {
+					const pool = [...collection().values()].filter((one) => /^https?:/.test(one.source)).map((one) => one.name);
+					if (pool.length < 2) throw new Error("Random play needs at least two web-sourced decks in decks/collection.");
+					const first = pool[Math.floor(Math.random() * pool.length)]!; let second = first;
+					while (second === first) second = pool[Math.floor(Math.random() * pool.length)]!;
+					decks = [first, second]; playSeed = rest.replace(/^random\s*/, "") || `random-${Date.now()}`;
+				} else if (verb === "play" && / vs /.test(rest)) {
+					const [left, right] = rest.split(/ vs /).map((one) => one.trim());
+					const tail = right!.split(/\s+/); const named = tail.length > 1 && !collection().has(right!) ? tail.slice(0, -1).join(" ") : right!;
+					decks = [left!, named]; playSeed = named === right ? `${left}-vs-${right}`.replace(/[^A-Za-z0-9-]+/g, "-") : tail.at(-1)!;
+				}
+				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed: playSeed, ...(decks ? { decks } : {}) });
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
 				running = true;
 				let outcome, failure: unknown;
@@ -313,10 +327,10 @@ export default function (pi: ExtensionAPI) {
 					games.get(opened),
 				); } catch (error) { failure = error; } finally { running = false; }
 				const result = gameResult(opened, seated!, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
-				const resultPath = join(GAMES, `${seed}-${seated!.timing.startedAt}.result.json`);
+				const resultPath = join(GAMES, `${playSeed}-${seated!.timing.startedAt}.result.json`);
 				const paths = saveReport(resultPath, result);
 				ctx.ui.notify(
-					`${verb === "resume" ? "Resumed" : "Seed"} ${seed}.\n` +
+					`${verb === "resume" ? "Resumed" : "Seed"} ${playSeed}.\n` +
 						[...report(result), ...paths].join("\n"),
 					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
@@ -429,7 +443,7 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			ctx.ui.notify(
-				"Usage: /magic play [seed] | /magic resume <game> | " +
+				"Usage: /magic play [seed] | /magic play random [seed] | /magic play <deck A> vs <deck B> [seed] | /magic resume <game> | " +
 					"/magic clone <game> <version> <new-id> | " +
 					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic work [seat] | /magic log | " +
 					"/magic export <game> [public|full|<seat>] | " +

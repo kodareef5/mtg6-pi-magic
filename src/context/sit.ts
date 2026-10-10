@@ -26,6 +26,7 @@ import type { Player } from "../core/player.ts";
 import type { Seat, Table } from "../core/table.ts";
 import type { Outcome, SeatId } from "../core/types.ts";
 import { brief, current, emptyBrief, type Brief } from "./brief.ts";
+import { guideFor } from "./guides.ts";
 import { decisionApi, type Classify } from "./model.ts";
 import type { Chronicle } from "./packet.ts";
 import { startingIntent } from "./plan.ts";
@@ -250,7 +251,7 @@ export async function seat(
 				model: role.model as Model<Api>,
 				...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
 				tally: counted,
-			}), { format: options.format, ...(options.rules ? { rules: options.rules } : {}) });
+			}), { format: options.format, guides: guideFor, ...(options.rules ? { rules: options.rules } : {}) });
 			take(at.id, written, "written");
 		}),
 	);

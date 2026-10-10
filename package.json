@@ -44,7 +44,8 @@
     "benchmark": "node tools/benchmark.ts",
     "timeline": "node tools/timeline.ts",
     "sim": "node tools/sim.ts",
-    "decks": "node tools/decks.ts"
+    "decks": "node tools/decks.ts",
+    "guide": "node tools/guide.ts"
   },
   "dependencies": {
     "typebox": "^1.3.27"

@@ -204,13 +204,15 @@ const submission = <T>(schema: Parameters<typeof problems>[0], description: stri
 /** JSON Schema as a provider reads it: a cyclic schema's bare refs become pointers into its `$defs`. */
 const pointers = (schema: object): object => JSON.parse(JSON.stringify(schema).replace(/"\$ref":"([A-Za-z]+)"/g, '"$ref":"#/$defs/$1"'));
 
-/** The facts every analyst reads: both lists in full, the computed numbers, the table. */
-function facts(seat: Seat, others: Seat[], universe: Universe, format: string): string {
+/** The facts every analyst reads: both lists in full, the computed numbers, the table, and any deck guide written for either list. */
+function facts(seat: Seat, others: Seat[], universe: Universe, format: string, guides?: (deck: string) => string | undefined): string {
 	const mine = listed(seat.deck.main);
+	const guide = (deck: string, whose: string) => { const text = guides?.(deck); return text ? ["", `${whose} deck guide, written before the game about how ${deck} is designed to be played. Advice, not facts; the lists above and the card text win any disagreement.`, text] : []; };
 	return [
 		`You are seat ${seat.id} in a ${others.length + 1}-seat game of ${format}. Who plays first is not yet known.`,
 		"", `Your registered deck:`, ...deckLines(mine, universe), "", numbers(mine, universe),
 		...others.flatMap((other) => ["", `Seat ${other.id}'s public registered deck:`, ...deckLines(listed(other.deck.main), universe), "", numbers(listed(other.deck.main), universe)]),
+		...guide(seat.deck.name, "Your"), ...others.flatMap((other) => guide(other.deck.name, `Seat ${other.id}'s`)),
 	].join("\n");
 }
 
@@ -224,9 +226,9 @@ export async function brief(
 	others: Seat[],
 	universe: Universe,
 	reasoners: () => Pick<Reasoner, "work">,
-	options: { format: string; rules?: Rules },
+	options: { format: string; rules?: Rules; guides?: (deck: string) => string | undefined },
 ): Promise<Brief> {
-	const user = facts(seat, others, universe, options.format);
+	const user = facts(seat, others, universe, options.format, options.guides);
 	const tools = lookups(universe, options.rules);
 	const results = await Promise.all(Object.entries(QUESTIONS).map(async ([key, question]) => {
 		try {
