@@ -1,6 +1,8 @@
 {
 	"card": "Consult the Star Charts",
 	"generated": "2026-10-10",
+	"source": "20091acc909af546c60de2faaca1baf8db3f99d1f9213e55f64973c1eb9c4f78",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Consult the Star Charts",

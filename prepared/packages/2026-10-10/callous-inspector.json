@@ -1,6 +1,8 @@
 {
 	"card": "Callous Inspector",
 	"generated": "2026-10-10",
+	"source": "58fa6a5275d88132b515dae969d9f3e792deb9fbe75e2f840f7a3bf85371342f",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Callous Inspector",

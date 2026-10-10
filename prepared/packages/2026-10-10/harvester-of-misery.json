@@ -1,6 +1,8 @@
 {
 	"card": "Harvester of Misery",
 	"generated": "2026-10-10",
+	"source": "7a3a078f1b838deaedde33abd9872c52a9c4d06f2e707b7989cedfd17e0741a7",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Harvester of Misery",

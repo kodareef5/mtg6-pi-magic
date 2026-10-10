@@ -1,6 +1,8 @@
 {
 	"card": "Godless Shrine",
 	"generated": "2026-10-10",
+	"source": "b72b1ae687e6d617c32697836a4e33fc75cdec142ab75a56409442a74cb32070",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Godless Shrine",

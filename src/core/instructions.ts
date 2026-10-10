@@ -214,7 +214,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			if (!unless) return one(`Counter ${stacked.map(name).join(", ") || "nothing"}`, counter);
 			const payer = players(scope, unless.who)[0] ?? controller;
 			const life = unless.pays.life ?? 0, mana = unless.pays.mana ? symbols(unless.pays.mana) : undefined;
-			const ways = mana ? fundings({ seat: payer, version: table.cursor.clock, view: project(table, payer) }, { generic: mana.generic, colors: mana.colors }) : [{ funding: { paid: [], taps: [] }, shows: "" }];
+			const ways = mana ? fundings({ seat: payer, version: table.cursor.clock, view: project(table, payer) }, { generic: mana.generic, colors: mana.colors, life }) : [{ funding: { paid: [], taps: [] }, shows: "" }];
 			const pay = seat(table, payer).life >= life ? ways.map(({ funding, shows }, at): Choice => {
 				const changes = paying(funding, payer, table.cursor.clock, 0);
 				if (life) changes.push({ do: "change-life", who: payer, amount: -life, reason: "cost-payment" });

@@ -1,6 +1,8 @@
 {
 	"card": "Gloomlake Verge",
 	"generated": "2026-10-10",
+	"source": "858d88c77fb9934e5a8a860ee2cca17b537c7e3b4111d14bd412160db3d1f695",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Gloomlake Verge",

@@ -1,6 +1,8 @@
 {
 	"card": "Deadly Precision",
 	"generated": "2026-10-10",
+	"source": "4b6abd4c4ba800d0407fe7800f2717962ff31dbed144d345b5078611c60ec083",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Deadly Precision",

@@ -1,6 +1,8 @@
 {
 	"card": "Gev, Scaled Scorch",
 	"generated": "2026-10-10",
+	"source": "99fd1571f907fddb062cde9b3e904fe438b37afb424982534da06c645ad31f21",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Gev, Scaled Scorch",

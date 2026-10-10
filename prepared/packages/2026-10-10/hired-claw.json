@@ -1,6 +1,8 @@
 {
 	"card": "Hired Claw",
 	"generated": "2026-10-10",
+	"source": "05c2cb60a30cf6f45bfd652d5bd175642541f679328b57d17835b774b5756505",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Hired Claw",

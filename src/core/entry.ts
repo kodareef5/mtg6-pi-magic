@@ -42,7 +42,7 @@ export function entering(table: Table, seat: SeatId, card: string): string {
  * permanents entering together never shape each other's entry, whatever order
  * the changes are written in.
  */
-export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set(), paid?: true): { tapped?: true; counters: Record<string, number> } {
+export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set(), paid?: boolean): { tapped?: true; counters: Record<string, number> } {
 	const live = tableWorld(table);
 	const objects = live.objects.flatMap((one) => one.id === object.id ? [one] : born.has(one.id) ? [] : [before[one.id] ?? one]);
 	for (const [id, was] of Object.entries(before)) if (id !== object.id && !table.things.has(id)) objects.push(was);

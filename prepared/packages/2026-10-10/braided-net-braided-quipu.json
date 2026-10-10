@@ -1,6 +1,8 @@
 {
 	"card": "Braided Net // Braided Quipu",
 	"generated": "2026-10-10",
+	"source": "5b29a08eb0272e4caef0650eb7a99b4d97ac9be561836c28048e13c9710b828b",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Braided Net // Braided Quipu",

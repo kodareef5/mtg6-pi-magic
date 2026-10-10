@@ -1,6 +1,8 @@
 {
 	"card": "Concealed Courtyard",
 	"generated": "2026-10-10",
+	"source": "78774ef6ba941418d01ecc14a56fb9cf4af0144240293bd8c43e58efe8f14291",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Concealed Courtyard",

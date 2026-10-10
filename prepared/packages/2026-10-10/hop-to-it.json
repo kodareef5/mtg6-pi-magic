@@ -1,6 +1,8 @@
 {
 	"card": "Hop to It",
 	"generated": "2026-10-10",
+	"source": "f550adfc905e0f01b366b41f946e8fdc0394f8fa5eb93e955f84650302c9cc33",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Hop to It",

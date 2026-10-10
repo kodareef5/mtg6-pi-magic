@@ -1,6 +1,8 @@
 {
 	"card": "Sleight of Hand",
 	"generated": "2026-10-10",
+	"source": "9c35559e00ada3841b095ae8877ce8a00361bbae48acd586d7e81850273f23f6",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sleight of Hand",

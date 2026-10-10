@@ -1,6 +1,8 @@
 {
 	"card": "Soulstone Sanctuary",
 	"generated": "2026-10-10",
+	"source": "a79ed827bfe3c48ae7d7a49c3c5600e04cf7ed94d77ba62946eb0310794d11ee",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Soulstone Sanctuary",

@@ -1,6 +1,8 @@
 {
 	"card": "Warleader's Call",
 	"generated": "2026-10-10",
+	"source": "bb15bc5e49a895b15e2821c4d541577d4cf67026e4385baf957c954ce230269d",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Warleader's Call",

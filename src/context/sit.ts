@@ -27,6 +27,7 @@ import type { Seat, Table } from "../core/table.ts";
 import type { Outcome, SeatId } from "../core/types.ts";
 import { brief, current, emptyBrief, type Brief } from "./brief.ts";
 import { guideFor } from "./guides.ts";
+import { loadStored, saveAssessed } from "../core/packages.ts";
 import { decisionApi, type Classify } from "./model.ts";
 import type { Chronicle } from "./packet.ts";
 import { startingIntent } from "./plan.ts";
@@ -84,6 +85,8 @@ export async function seat(
 	universe: Universe,
 	options: {
 		format: string;
+		/** Reuse and save source-checked packages for a new game only. */
+		reusePackages?: boolean;
 		/**
 		 * The rules, so a seat can look one up mid decision. Absent is a table
 		 * with no dialer, which still plays.
@@ -177,6 +180,11 @@ export async function seat(
 	// Card meaning precedes play. Every seat needs the registered universe,
 	// including cards it may gain control of. Accepted work survives a retry or
 	// a version-zero clone; a resumed position must already carry its assessment.
+	const reuse = options.reusePackages && !table.ledger.length && !options.prepared?.length;
+	if (reuse) loadStored(table, universe, (seat) => {
+		const strategy = pick(parts.get(seat)!, "strategy");
+		return !strategy?.model || !!strategy.off || strategy.model.type === "classifier";
+	});
 	const jobs = table.seats.flatMap((at) => Object.entries(table.printed).filter(([card, printed]) => printed.text &&
 		!table.work[at.id]?.packages?.some((pack) => pack.card === card && pack.assessed)).map(([card, printed]) => ({ seat: at.id, card, printed })));
 	const refuse = async (message: string): Promise<never> => {
@@ -204,6 +212,7 @@ export async function seat(
 			} catch (error) { failed.push(`Seat ${job.seat}: ${String(error)}`); }
 		}
 	}));
+	if (reuse) saveAssessed(table, universe, (seat) => pick(parts.get(seat)!, "pregame")?.pattern);
 	if (failed.length) return refuse(`Card assessment is incomplete; play has not started. ${failed.join("\n")}`);
 	for (const at of table.seats) {
 		const strategy = pick(parts.get(at.id)!, "strategy");

@@ -302,7 +302,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	let visits = 0, preferResponses = branches.length > 0, unfunded = false;
 	const ref = (object: SeenObject): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 	const go = (index: number, position: Frame, spent: ReadonlySet<string>): boolean => {
-		const key = `${index}|${[...spent].sort().join(",")}|${pool(position).map((mana) => mana.id).sort().join(",")}`;
+		const key = `${index}|${position.view.players?.find((one) => one.id === frame.seat)?.life}|${[...spent].sort().join(",")}|${pool(position).map((mana) => mana.id).sort().join(",")}`;
 		if (failed.has(key)) return false;
 		if (++visits > SEARCH) throw INCOMPLETE;
 		const item = items[index];
@@ -344,10 +344,10 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent, held)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
 			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}${mana?.persists ? "+" : ""}${JSON.stringify(mana?.spendOnly ?? null)}`; };
-			const distinct = new Map(ways.map((way) => [`${way.funding.taps.map((tap) => tap.source.id).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}`, way]));
+			const distinct = new Map(ways.map((way) => [`${way.funding.taps.map((tap) => `${tap.source.id}:${tap.life ?? 0}`).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}`, way]));
 			return [...distinct.values()].some(({ funding }) => {
 				const paid = new Set(funding.paid);
-				const after = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => !paid.has(mana.id)) })) } };
+				const after = { ...position, view: { ...position.view, players: position.view.players?.map((one) => one.id === frame.seat ? { ...one, life: one.life - funding.taps.reduce((sum, tap) => sum + (tap.life ?? 0), 0) } : one), pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => !paid.has(mana.id)) })) } };
 				const used = new Set([...spent, ...funding.taps.map((tap) => tap.source.id), ...(item.tap ? [item.source.id] : [])]);
 				if (!go(index + 1, after, used)) return false;
 				// Necessary mana/tap checks can refute an unpriced cost, but cannot
@@ -399,4 +399,4 @@ const INCOMPLETE = new Error("The payment search is too large to finish.");
 
 const stated = (price: Price) => `${price.generic ? `{${price.generic}}` : ""}${price.colors.map((color) => `{${color}}`).join("")}` || "{0}";
 const paymentKey = (funding: Funding) => JSON.stringify({ paid: [...funding.paid].sort(),
-	taps: funding.taps.map((tap) => `${tap.source.id}@${tap.source.incarnation}:${tap.colors.join("")}:${!!tap.sacrifice}`).sort() });
+	taps: funding.taps.map((tap) => `${tap.source.id}@${tap.source.incarnation}:${tap.colors.join("")}:${!!tap.sacrifice}:${tap.life ?? 0}`).sort() });

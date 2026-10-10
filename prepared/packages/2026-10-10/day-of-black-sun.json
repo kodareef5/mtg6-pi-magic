@@ -1,6 +1,8 @@
 {
 	"card": "Day of Black Sun",
 	"generated": "2026-10-10",
+	"source": "01fc2572a36bfd552918b16cf5aeb7b69d88f029ff76da619eb2cfc50dc009f5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Day of Black Sun",

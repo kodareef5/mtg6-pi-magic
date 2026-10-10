@@ -1,6 +1,8 @@
 {
 	"card": "Desolation Prowler",
 	"generated": "2026-10-10",
+	"source": "56e45fb488fef28c623971fe9c5451a78e97af3df2760c686fd55f9cd4fa5001",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Desolation Prowler",

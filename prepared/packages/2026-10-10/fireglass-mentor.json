@@ -1,6 +1,8 @@
 {
 	"card": "Fireglass Mentor",
 	"generated": "2026-10-10",
+	"source": "4a8bcb0430599690e76dd2ec353c3224a7d3923e8e6ff68a2d691056a4b8228a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Fireglass Mentor",

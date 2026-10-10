@@ -1,6 +1,8 @@
 {
 	"card": "Floodfarm Verge",
 	"generated": "2026-10-10",
+	"source": "74934ff8d047bac4945832348e999dca60001ba01f51ec0a607e3d37804e6dcb",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Floodfarm Verge",

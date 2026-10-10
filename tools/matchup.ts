@@ -11,7 +11,6 @@ import { dealtTable, matchTable, matchup, universe } from "./matchup-fixture.ts"
 import { start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { loadStored, saveAssessed } from "./packages.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { open, save, replay, fork, reopen } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
@@ -47,9 +46,6 @@ if (chosen && (chosen.length !== 2 || chosen[0] === chosen[1] || from)) throw ne
 const label = (name: string, at: number) => { const short = name.replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-|-$/g, "").slice(0, 20); return short || `Seat${at}`; };
 const table = carried ? carried.table : chosen ? start(standard, chosen.map((name, at) => ({ name: label(name, at), deck: deck(name) })), values.seed!, universe) : matchTable(values.seed!);
 if (chosen && table.seats[0]!.name === table.seats[1]!.name) throw new Error("The two deck names shorten to the same seat label; rename one deck.");
-// Interpretations the store already holds, so seating assesses only cards no game has seen.
-const stored = carried ? 0 : loadStored(table, universe.generated);
-if (stored) console.log(`Loaded ${stored} stored card interpretations.`);
 // A list's own strategy pattern, when --green or --red names one, resolved for whichever seat plays that list.
 const byList: Record<string, string | undefined> = { Green: values.green, Red: values.red };
 const partsFor = (seat: number) => {
@@ -71,15 +67,12 @@ const observed = traceInference(inference as never, (event) => {
 // The clock starts before seating, so the elapsed time includes the pregame.
 const began = Date.now();
 console.log(`${values.prepare ? "Preparing" : "Playing"} ${id}; journal ${path}`);
-const seated = await seatTable(table, async (seat) => partsFor(seat), observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
-	// Cards that did assess are kept even when others did not: the next pairing pays only for the rest.
-	if (!carried) { const saved = saveAssessed(table, universe.generated, parts.find((part) => part.role === "pregame")?.pattern); if (saved) console.log(`Stored ${saved} card interpretations before stopping.`); }
+const seated = await seatTable(table, async (seat) => partsFor(seat), observed, universe, { format: "standard", reusePackages: !carried, journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
 	const result = preparationFailure(table, error, began, { journal: path, trace: calls });
 	const paths = saveReport(join(values.out!, `${id}.result.json`), result);
 	console.error([...report(result), ...paths].join("\n"));
 	process.exit(1);
 });
-if (!carried) { const saved = saveAssessed(table, universe.generated, parts.find((part) => part.role === "pregame")?.pattern); if (saved) console.log(`Stored ${saved} new card interpretations.`); }
 const stop = new Error("Monitor stop");
 const limit = Number(values.turns);
 if (!values.prepare) seated.timing.playStartedAt = Date.now();

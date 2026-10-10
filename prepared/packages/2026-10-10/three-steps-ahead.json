@@ -1,6 +1,8 @@
 {
 	"card": "Three Steps Ahead",
 	"generated": "2026-10-10",
+	"source": "50cb13c2954bbb174718a1e6e53686e6176845731e963b02cc67ce21cb5a37cc",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Three Steps Ahead",

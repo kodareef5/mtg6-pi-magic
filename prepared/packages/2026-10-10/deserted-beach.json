@@ -1,6 +1,8 @@
 {
 	"card": "Deserted Beach",
 	"generated": "2026-10-10",
+	"source": "e41260d9b12cf1411d145d32ca11a7a5e8a1bd8e09c801cfb9d03737bb2a844a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Deserted Beach",

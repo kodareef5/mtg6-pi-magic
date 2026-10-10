@@ -1,6 +1,8 @@
 {
 	"card": "Sundown Pass",
 	"generated": "2026-10-10",
+	"source": "43a33651583501eebcbc4397287c78e01418f6f62d2ddd22b7997d75c4b92894",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sundown Pass",

@@ -1,6 +1,8 @@
 {
 	"card": "Temple Garden",
 	"generated": "2026-10-10",
+	"source": "e90311e3b836135a02874b6da4fc9f89766ef54377cc6d70bb85bec34e448184",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Temple Garden",

@@ -1,6 +1,8 @@
 {
 	"card": "Song of Totentanz",
 	"generated": "2026-10-10",
+	"source": "2c5373051b19bf13c361d39049e539ea58834e2a2ddb70bef5affcba2a204aa9",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Song of Totentanz",

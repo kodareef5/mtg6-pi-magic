@@ -1,6 +1,8 @@
 {
 	"card": "Nova Hellkite",
 	"generated": "2026-10-10",
+	"source": "0105b5a621d57bc961fccf2be969fe8c3d894994aa1510663b2e972d55e0ea20",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Nova Hellkite",

@@ -1,6 +1,8 @@
 {
 	"card": "Traumatic Critique",
 	"generated": "2026-10-10",
+	"source": "2585c177f1fa006612eeb9994fa32cdb0db5a975fdd16dc684e2099554b7a385",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Traumatic Critique",

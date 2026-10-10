@@ -1,6 +1,8 @@
 {
 	"card": "Bitter Triumph",
 	"generated": "2026-10-10",
+	"source": "15579f99a28a825778138ab3b1c4425ae9fbfd7e0c4896aa3ad2ede9865d06b6",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Bitter Triumph",

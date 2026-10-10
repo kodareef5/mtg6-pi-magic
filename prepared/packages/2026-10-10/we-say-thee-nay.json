@@ -1,6 +1,8 @@
 {
 	"card": "We Say Thee Nay!",
 	"generated": "2026-10-10",
+	"source": "c970808a984994b4d62cba5d85013112d6a8e110cf22c1afbdf6766cceb991a1",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "We Say Thee Nay!",

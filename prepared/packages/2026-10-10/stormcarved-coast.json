@@ -1,6 +1,8 @@
 {
 	"card": "Stormcarved Coast",
 	"generated": "2026-10-10",
+	"source": "876af139db204fb2d235e2e83546086c15f55d3c8dea090ad05a7465d0ba4ce7",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Stormcarved Coast",

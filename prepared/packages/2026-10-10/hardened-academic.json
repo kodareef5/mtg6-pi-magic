@@ -1,6 +1,8 @@
 {
 	"card": "Hardened Academic",
 	"generated": "2026-10-10",
+	"source": "ea69698eb6876c39a9c90068b68de9dd43d19e364dae3778d7d9d16e46b92821",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Hardened Academic",

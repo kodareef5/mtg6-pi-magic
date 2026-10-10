@@ -1,6 +1,8 @@
 {
 	"card": "Abandoned Air Temple",
 	"generated": "2026-10-10",
+	"source": "6682ae72fb8cfa94a2f76343e09ee48681324ea24aa859bab6b5bad1ba98d98e",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Abandoned Air Temple",

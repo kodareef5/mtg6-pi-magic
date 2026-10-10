@@ -1,6 +1,8 @@
 {
 	"card": "Requiting Hex",
 	"generated": "2026-10-10",
+	"source": "f7f4deb54c09aafb5a2578cba9bd73499c46342f8e0e5fa5aaba01732f0af215",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Requiting Hex",

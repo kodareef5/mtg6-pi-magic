@@ -1,6 +1,8 @@
 {
 	"card": "Countersculpt",
 	"generated": "2026-10-10",
+	"source": "44f0d61c8c7cfcebb5d57b0deac6f10503efcaaa20e476e0226c27da19024c3e",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Countersculpt",

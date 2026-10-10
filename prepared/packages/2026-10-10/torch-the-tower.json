@@ -1,6 +1,8 @@
 {
 	"card": "Torch the Tower",
 	"generated": "2026-10-10",
+	"source": "c5562220ba6167ca61f6296aa819d986340c528916cd008974e1db879b4c4edb",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Torch the Tower",

@@ -1,6 +1,8 @@
 {
 	"card": "Bloodghast",
 	"generated": "2026-10-10",
+	"source": "c46becfdfcae3121978dd638d1cbb260dc88a022a0d8d89663901052a10b7297",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Bloodghast",

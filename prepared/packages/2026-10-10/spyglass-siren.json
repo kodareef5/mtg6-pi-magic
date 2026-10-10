@@ -1,6 +1,8 @@
 {
 	"card": "Spyglass Siren",
 	"generated": "2026-10-10",
+	"source": "93903659b8e0dd5bb657b94839054f1ae9f2529c320fdf2449ae5797f972569a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Spyglass Siren",

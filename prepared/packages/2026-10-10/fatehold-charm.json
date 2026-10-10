@@ -1,6 +1,8 @@
 {
 	"card": "Fatehold Charm",
 	"generated": "2026-10-10",
+	"source": "0e1da63a83479ce669ad751436062e123e975876c8669fa82577cf580a175166",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Fatehold Charm",

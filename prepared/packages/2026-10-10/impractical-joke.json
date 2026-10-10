@@ -1,6 +1,8 @@
 {
 	"card": "Impractical Joke",
 	"generated": "2026-10-10",
+	"source": "f4716b46aa39b1c885c1bb6182877964a755906fbe68da7e4e018dda641e6798",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Impractical Joke",

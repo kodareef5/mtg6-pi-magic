@@ -1,6 +1,8 @@
 {
 	"card": "Stomping Ground",
 	"generated": "2026-10-10",
+	"source": "456b3a68806a11f51d7e835a2e591c6b0903e7d9bfc23598a350a746315e2d18",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Stomping Ground",

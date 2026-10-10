@@ -1,6 +1,8 @@
 {
 	"card": "Lively Dirge",
 	"generated": "2026-10-10",
+	"source": "d2284c309aacb5f561d3f634dbed392e318badde05d41495636e12054b5eb912",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Lively Dirge",

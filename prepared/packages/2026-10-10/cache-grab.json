@@ -1,6 +1,8 @@
 {
 	"card": "Cache Grab",
 	"generated": "2026-10-10",
+	"source": "6b4299d78d2eb5b88845c452a4b10ad036d3322b67fff6a13a969eca3552d38c",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Cache Grab",

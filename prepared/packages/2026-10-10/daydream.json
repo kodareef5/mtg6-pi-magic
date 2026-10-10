@@ -1,6 +1,8 @@
 {
 	"card": "Daydream",
 	"generated": "2026-10-10",
+	"source": "650fca4f563fae785b44c69f0677f0a1bc52f54c47eacfb5eced7f304f404a43",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Daydream",

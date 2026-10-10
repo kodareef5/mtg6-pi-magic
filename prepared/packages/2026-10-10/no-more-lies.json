@@ -1,6 +1,8 @@
 {
 	"card": "No More Lies",
 	"generated": "2026-10-10",
+	"source": "2a0eeb6c49fe2bf68d03f488dc7d3c6b0ab2dab070f10b45e51a17b4da4df4c5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "No More Lies",

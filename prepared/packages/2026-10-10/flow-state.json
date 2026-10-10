@@ -1,6 +1,8 @@
 {
 	"card": "Flow State",
 	"generated": "2026-10-10",
+	"source": "1e494167ad95274c42f39208b1632de82492ded440457de18476bdb4e11af6a5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Flow State",

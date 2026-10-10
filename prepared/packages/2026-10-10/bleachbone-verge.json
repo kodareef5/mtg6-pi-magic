@@ -1,6 +1,8 @@
 {
 	"card": "Bleachbone Verge",
 	"generated": "2026-10-10",
+	"source": "c323df845089dae4e0817d767cb3585169430f88e955319f1a3c08c8474f608e",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Bleachbone Verge",

@@ -1,6 +1,8 @@
 {
 	"card": "Zack Fair",
 	"generated": "2026-10-10",
+	"source": "677de9c7379cd2cb435f68246c3e8a08621ac71794c64269b50e30eff48b89ec",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Zack Fair",

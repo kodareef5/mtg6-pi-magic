@@ -1,6 +1,8 @@
 {
 	"card": "Overgrown Tomb",
 	"generated": "2026-10-10",
+	"source": "ffbdac8e38223d9bf0211fed8d928cca21cac2c4d615af4a9a5ffb464c353150",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Overgrown Tomb",

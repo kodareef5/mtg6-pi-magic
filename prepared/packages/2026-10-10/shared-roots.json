@@ -1,6 +1,8 @@
 {
 	"card": "Shared Roots",
 	"generated": "2026-10-10",
+	"source": "399a0286372b8572d34f1fdf83a3fa299ceae9744f9016b87dbdbd18b51dcf54",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Shared Roots",

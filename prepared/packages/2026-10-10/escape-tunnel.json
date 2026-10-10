@@ -1,6 +1,8 @@
 {
 	"card": "Escape Tunnel",
 	"generated": "2026-10-10",
+	"source": "ea9bac2a24cd2f1dbff327303c707fc1d6f178833fb021a96ebacd9d8c466fdd",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Escape Tunnel",

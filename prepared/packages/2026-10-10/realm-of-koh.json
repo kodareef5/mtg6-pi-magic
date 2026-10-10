@@ -1,6 +1,8 @@
 {
 	"card": "Realm of Koh",
 	"generated": "2026-10-10",
+	"source": "3cacc3c9a067099c9e6615298c943281fd0deefd3bd0d6724981309ba33714d9",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Realm of Koh",

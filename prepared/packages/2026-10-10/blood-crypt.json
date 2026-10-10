@@ -1,6 +1,8 @@
 {
 	"card": "Blood Crypt",
 	"generated": "2026-10-10",
+	"source": "c08b782b13930e52fd1e7922660f78cd82ce0486920c271a97942d5a7c148022",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Blood Crypt",

@@ -1,6 +1,8 @@
 {
 	"card": "United Battlefront",
 	"generated": "2026-10-10",
+	"source": "2077985c7e0dcf8f00c65e95925f93aeade7e4ebc83bfebe1e88f8e0fbcbf806",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "United Battlefront",

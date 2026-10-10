@@ -1,6 +1,8 @@
 {
 	"card": "Nighthowl Pursuer",
 	"generated": "2026-10-10",
+	"source": "993c3d578c3d0c134c788a266e79007767d11733aab87858c54a2008a07b9bfc",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Nighthowl Pursuer",

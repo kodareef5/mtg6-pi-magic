@@ -241,12 +241,12 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		for (const x of xs) {
 			const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
 			for (const extra of extras(procedure, scope, source, frame)) {
-				for (const { funding, shows: paying } of fundings(frame, price, new Set(extra.uses), spending)) {
+				for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
 					for (const targets of aims) {
 						const aimed = targets.flat();
 						offered.push({
 							option: {
-								id: `${prefix}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => tap.source.id), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
+								id: `${prefix}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}`), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
 								// The label names its targets, so an option says what it hits without a cross-reference.
 								label: `${procedure.claim} (${name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
 								notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),

@@ -1,6 +1,8 @@
 {
 	"card": "Get Out",
 	"generated": "2026-10-10",
+	"source": "54b93aceaf4d9591aee2c7705fd0ef7633a15d20905ae0e7b6c78f8dd5a84d96",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Get Out",

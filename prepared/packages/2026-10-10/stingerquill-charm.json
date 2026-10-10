@@ -1,6 +1,8 @@
 {
 	"card": "Stingerquill Charm",
 	"generated": "2026-10-10",
+	"source": "a93d340ce3af68d47023e87c96c3cdf6acf404c248a3ba41123fb75bdf3e2f41",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Stingerquill Charm",

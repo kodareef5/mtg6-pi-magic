@@ -1,6 +1,8 @@
 {
 	"card": "Slick Sequence",
 	"generated": "2026-10-10",
+	"source": "7cb9c514a41f1807c6779d2efd0dad2d4a23cb6c24d4b292077f02b52fb6e4cc",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Slick Sequence",

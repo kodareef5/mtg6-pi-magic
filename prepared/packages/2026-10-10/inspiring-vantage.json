@@ -1,6 +1,8 @@
 {
 	"card": "Inspiring Vantage",
 	"generated": "2026-10-10",
+	"source": "7f1adf07e18460a340216ed4be90ffd4c0e8ca13ce5d867c81ebc82ea7142708",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Inspiring Vantage",

@@ -1,6 +1,8 @@
 {
 	"card": "Great Hall of the Biblioplex",
 	"generated": "2026-10-10",
+	"source": "53dbc5d85878942d4dee107a9b80615057f956593defd403fa2203aa866fe502",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Great Hall of the Biblioplex",

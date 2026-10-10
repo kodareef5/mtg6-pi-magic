@@ -1,6 +1,8 @@
 {
 	"card": "Wastewood Verge",
 	"generated": "2026-10-10",
+	"source": "a9fdb869053943eae9f000f1daf7e9f4e4fd92e369d8e7f8841c6b7e06fdceaa",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Wastewood Verge",

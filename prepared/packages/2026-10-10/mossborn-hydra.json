@@ -1,6 +1,8 @@
 {
 	"card": "Mossborn Hydra",
 	"generated": "2026-10-10",
+	"source": "56be938c20c0670aa8d2726f627f33c5d5a63476d2118e7bfa1a325cc716efe0",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Mossborn Hydra",

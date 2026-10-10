@@ -1,6 +1,8 @@
 {
 	"card": "Earthbender Ascension",
 	"generated": "2026-10-10",
+	"source": "a434f06054e18fcfbd375e448db82aaf8ccb3bbf0baabfcdfe6563c1a6bfd97e",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Earthbender Ascension",

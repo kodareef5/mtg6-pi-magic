@@ -1,6 +1,8 @@
 {
 	"card": "Dalkovan Encampment",
 	"generated": "2026-10-10",
+	"source": "e1bd969ae222bcf2c2413b62d10b48c94879912492b92fab7f54f495f2d78d86",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dalkovan Encampment",

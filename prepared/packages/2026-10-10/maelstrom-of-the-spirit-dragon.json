@@ -1,6 +1,8 @@
 {
 	"card": "Maelstrom of the Spirit Dragon",
 	"generated": "2026-10-10",
+	"source": "39990d4ddbd31bb7d5b2bdde1760706c760c59695eabfb4514d0f479113ba3c4",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Maelstrom of the Spirit Dragon",

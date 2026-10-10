@@ -1,6 +1,8 @@
 {
 	"card": "Terror of the Peaks",
 	"generated": "2026-10-10",
+	"source": "dac02a3ab65ddc82bbdc01dc38e25429f09af67dd434c25ccd821fd65ede1c0e",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Terror of the Peaks",

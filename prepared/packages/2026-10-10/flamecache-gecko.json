@@ -1,6 +1,8 @@
 {
 	"card": "Flamecache Gecko",
 	"generated": "2026-10-10",
+	"source": "7655f01ff0bd94433564ec27bbd8228d302f4702e4a85b59abd369676645ea8e",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Flamecache Gecko",

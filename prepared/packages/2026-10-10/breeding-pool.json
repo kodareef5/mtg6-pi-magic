@@ -1,6 +1,8 @@
 {
 	"card": "Breeding Pool",
 	"generated": "2026-10-10",
+	"source": "f3ef73f47aabadd1444f0eb9ac2754f2fa26d358b5ba07a9fb6d3285aff863ba",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Breeding Pool",

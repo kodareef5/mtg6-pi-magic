@@ -1,6 +1,8 @@
 {
 	"card": "Suki, Courageous Rescuer",
 	"generated": "2026-10-10",
+	"source": "dfdbcc4194d886cbefbf0e1c575df0c8059eb792ccbe776c2ba9167ea9800dc5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Suki, Courageous Rescuer",

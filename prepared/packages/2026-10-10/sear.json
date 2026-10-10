@@ -1,6 +1,8 @@
 {
 	"card": "Sear",
 	"generated": "2026-10-10",
+	"source": "f3c6e406d53cd4d763c6b53e1b9f2cc1671dd39747ab20e71fc7a1bd888908a1",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sear",

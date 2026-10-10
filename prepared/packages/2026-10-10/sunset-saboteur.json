@@ -1,6 +1,8 @@
 {
 	"card": "Sunset Saboteur",
 	"generated": "2026-10-10",
+	"source": "5c428e8775f8617ccdf6e0be64490048000af08fba58dff9c0979ead30f5f6bb",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sunset Saboteur",

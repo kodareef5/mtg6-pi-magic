@@ -1,6 +1,8 @@
 {
 	"card": "Stock Up",
 	"generated": "2026-10-10",
+	"source": "90515f288bb7584924b36478d740898cf2ae894f1d0d9a472114da7ce7d4c2c7",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Stock Up",

@@ -1,6 +1,8 @@
 {
 	"card": "Magmatic Hellkite",
 	"generated": "2026-10-10",
+	"source": "e21a469da9d6e59530aa7abf8a28bea72e92ed2a59bffd24cf4f8b6a8d832988",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Magmatic Hellkite",

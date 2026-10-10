@@ -1,6 +1,8 @@
 {
 	"card": "Umbral Collar Zealot",
 	"generated": "2026-10-10",
+	"source": "694c89084a8726f63e1b3d8bfb00ee0892621dd68f0415d6bd359e1c187dae24",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Umbral Collar Zealot",

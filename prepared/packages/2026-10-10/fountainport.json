@@ -1,6 +1,8 @@
 {
 	"card": "Fountainport",
 	"generated": "2026-10-10",
+	"source": "019f797d712ab86db14eb38670d0d4cbc100846d959e20cd241d3ff1c58a1a81",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Fountainport",

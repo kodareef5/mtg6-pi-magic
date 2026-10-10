@@ -1,6 +1,8 @@
 {
 	"card": "Tablet of Discovery",
 	"generated": "2026-10-10",
+	"source": "e1572419f4b7a344550c8a01f3b70d6f8a1f0d9a1468c47a7458831ea1f7603f",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Tablet of Discovery",

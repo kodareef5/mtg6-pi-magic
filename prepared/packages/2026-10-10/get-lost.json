@@ -1,6 +1,8 @@
 {
 	"card": "Get Lost",
 	"generated": "2026-10-10",
+	"source": "5d8309f6cc1dedaa831948bdaab5a7f2ed100275d4b058a65e2df1d2f2822767",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Get Lost",

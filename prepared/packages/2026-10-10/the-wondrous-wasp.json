@@ -1,6 +1,8 @@
 {
 	"card": "The Wondrous Wasp",
 	"generated": "2026-10-10",
+	"source": "700e7cb0eb7b689e576154c2935f07f635245b60278b8dd28bc0ed3a49191da1",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "The Wondrous Wasp",

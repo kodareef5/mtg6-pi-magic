@@ -1,6 +1,8 @@
 {
 	"card": "Winternight Stories",
 	"generated": "2026-10-10",
+	"source": "25d22be34f27ea3bc81ca5c879f0c3948687872fd63db8edf5165d2870c19bfb",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Winternight Stories",

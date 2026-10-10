@@ -3,6 +3,7 @@
  * including its own labels and reserves. Payment is exact: a source that would
  * leave mana floating is not used. Keeping floating mana and tapping instead is
  * a different payment and is offered too.
+ * Past 150 lines to keep enumeration and exact payment checks together.
  */
 import { currentPlan, select } from "./query.ts";
 import { intrinsic } from "./characteristics.ts";
@@ -14,13 +15,13 @@ import { amount, holds, matches, viewWorld } from "./selectors.ts";
 import type { SeenObject } from "./work.ts";
 
 /** The mana part of a locked cost. */
-export type Price = { generic: number; colors: Mana["color"][] };
+export type Price = { generic: number; colors: Mana["color"][]; life?: number };
 type Color = Mana["color"];
 /** One mana ability activated while paying, with the claim it was accepted under. `sacrifice` is part of its cost, as a Treasure's is. */
-export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; sacrifice?: true };
+export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; sacrifice?: true; life?: number };
 export type Funding = { paid: string[]; taps: Tap[] };
 /** One way a source can produce mana, what it claims, and what that mana may pay for. */
-type Yield = { colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; sacrifice?: true };
+type Yield = { colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; sacrifice?: true; life?: number };
 type Unit = { key: string; id: string; label: string; yields: Yield[]; pool?: Mana; source?: SeenObject };
 
 const COLORS: Color[] = ["W", "U", "B", "R", "G"];
@@ -39,12 +40,12 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
  * What a registered mana ability produces when its cost is tapping, or tapping
  * and sacrificing the source. `count` works out "for each Elf you control".
  */
-export function produces(registration: Registration, count: (amount: Amount) => number, holding: (condition: Condition) => boolean = () => true): Yield[] {
+export function produces(registration: Registration, count: (amount: Amount) => number, holding: (condition: Condition) => boolean = () => false): Yield[] {
 	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
 	if (registration.if && !holding(registration.if)) return [];
-	const { tap: _, sacrifice, ...other } = registration.cost;
+	const { tap: _, sacrifice, life, ...other } = registration.cost;
 	if (Object.keys(other).length || (sacrifice !== undefined && sacrifice !== "this")) return [];
-	const terms = { claim: registration.basis, ...(registration.spendOnly ? { spendOnly: registration.spendOnly } : {}), ...(sacrifice ? { sacrifice: true as const } : {}) };
+	const terms = { claim: registration.basis, ...(registration.spendOnly ? { spendOnly: registration.spendOnly } : {}), ...(sacrifice ? { sacrifice: true as const } : {}), ...(life ? { life } : {}) };
 	const times = count(registration.times ?? 1);
 	const repeat = (colors: Color[]) => Array.from({ length: times }, () => colors).flat();
 	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), ...terms }];
@@ -59,6 +60,7 @@ export function paying(funding: Funding, who: SeatId, clock: number, offset: num
 	const changes: Change[] = [], made: string[] = [];
 	for (const tap of funding.taps) {
 		changes.push({ do: "tap", what: tap.source.id });
+		if (tap.life) changes.push({ do: "change-life", who, amount: -tap.life, reason: "cost-payment" });
 		if (tap.sacrifice) changes.push({ do: "move", what: tap.source.id, to: "graveyard", reason: "sacrifice" });
 		tap.colors.forEach((_, unit) => made.push(`mana-${clock + 1}-${offset + changes.length}-${unit}`));
 		changes.push({ do: "add-mana", who, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}) });
@@ -73,14 +75,16 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
 		if (except.has(object.id) || sick(frame, object)) continue;
 		const scope = { world: viewWorld(frame.view), controller: frame.seat, source: object };
+		const life = frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0;
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
 			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, (value) => amount(scope, value), (condition) => holds(scope, condition))),
-		];
-		// A source whose abilities make different amounts is one unit per amount; the walk uses an object once.
-		for (const size of [...new Set(yields.map((one) => one.colors.length))]) {
-			const sized = yields.filter((one) => one.colors.length === size);
-			units.push({ key: `${sameness(frame, object)}|${JSON.stringify(sized.map((one) => one.colors))}`, id: object.id, source: object, yields: sized,
+		].filter((one) => (one.life ?? 0) <= life);
+		// Different payment costs remain choices. The walk uses an object once.
+		const costKey = (one: Yield) => JSON.stringify([one.colors.length, one.life ?? 0, !!one.sacrifice]);
+		for (const size of [...new Set(yields.map(costKey))]) {
+			const sized = yields.filter((one) => costKey(one) === size);
+			units.push({ key: `${sameness(frame, object)}|${JSON.stringify(sized)}`, id: object.id, source: object, yields: sized,
 				label: `tap ${object.card} (${object.id})` });
 		}
 	}
@@ -98,14 +102,16 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 		.map((mana): Unit => ({ key: `pool|${mana.color}|${!!mana.persists}|${JSON.stringify(mana.spendOnly ?? null)}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
 			label: `{${mana.color}} (${mana.id}, ${mana.persists ? "persists" : "expires at step end"}${mana.spendOnly ? ", restricted" : ""})` }));
 	const sources = manaSources(frame, except).map((unit) => ({ ...unit, yields: unit.yields.filter((one) => allowed(one.spendOnly)) })).filter((unit) => unit.yields.length);
-	return exact([...pool, ...sources], cost).map((units) => {
+	const life = (frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0) - (cost.life ?? 0);
+	return exact([...pool, ...sources], cost).filter((units) => units.reduce((sum, unit) => sum + (unit.yields[0]!.life ?? 0), 0) <= life).map((units) => {
 		const made = cover(units, cost)!;
 		return {
 			funding: { paid: units.flatMap((unit) => unit.pool ? [unit.id] : []),
 				taps: units.flatMap((unit) => unit.source ? [{ source: { id: unit.source.id, incarnation: unit.source.incarnation }, colors: made.get(unit.id)!.colors,
 					claim: made.get(unit.id)!.claim, ...(made.get(unit.id)!.intrinsic ? { intrinsic: true as const } : {}), ...(made.get(unit.id)!.sacrifice ? { sacrifice: true as const } : {}),
+					...(made.get(unit.id)!.life ? { life: made.get(unit.id)!.life! } : {}),
 					...(made.get(unit.id)!.spendOnly ? { spendOnly: made.get(unit.id)!.spendOnly! } : {}) }] : []) },
-			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label}${made.get(unit.id)!.sacrifice ? " and sacrifice it" : ""} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
+			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label}${made.get(unit.id)!.sacrifice ? " and sacrifice it" : ""}${made.get(unit.id)!.life ? ` and pay ${made.get(unit.id)!.life} life` : ""} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
 		};
 	});
 }
@@ -113,14 +119,14 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 /**
  * Each untapped source this seat could tap now and the ways it makes mana: the
  * same reading a payment uses, for a planner to count with. A mana ability with
- * a cost beyond tapping and sacrificing the source is not read here, as it is
+ * a cost beyond tapping, life and sacrificing the source is not read here, as it is
  * not read when paying.
  */
 export function sources(frame: Frame): { object: SeenObject; yields: Omit<Yield, "claim" | "intrinsic">[] }[] {
 	const found = new Map<string, { object: SeenObject; yields: Omit<Yield, "claim" | "intrinsic">[] }>();
 	for (const unit of manaSources(frame, new Set())) {
 		const entry = found.get(unit.id) ?? { object: unit.source!, yields: [] };
-		entry.yields.push(...unit.yields.map(({ colors, spendOnly, sacrifice }) => ({ colors, ...(spendOnly ? { spendOnly } : {}), ...(sacrifice ? { sacrifice } : {}) })));
+		entry.yields.push(...unit.yields.map(({ colors, spendOnly, sacrifice, life }) => ({ colors, ...(life ? { life } : {}), ...(spendOnly ? { spendOnly } : {}), ...(sacrifice ? { sacrifice } : {}) })));
 		found.set(unit.id, entry);
 	}
 	return [...found.values()];

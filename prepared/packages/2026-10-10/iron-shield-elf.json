@@ -1,6 +1,8 @@
 {
 	"card": "Iron-Shield Elf",
 	"generated": "2026-10-10",
+	"source": "3fdc1228e4d8738ab94b76ae0360c4e7670b4fe7e897daf0e223932230043bc5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Iron-Shield Elf",

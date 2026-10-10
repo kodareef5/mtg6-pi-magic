@@ -1,6 +1,8 @@
 {
 	"card": "The Last Ronin's Technique",
 	"generated": "2026-10-10",
+	"source": "01bf6fb3e6d750330f08e00ea57881b905d73b24172471ee26040545ace08411",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "The Last Ronin's Technique",

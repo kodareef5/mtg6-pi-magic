@@ -1,6 +1,8 @@
 {
 	"card": "Nurturing Pixie",
 	"generated": "2026-10-10",
+	"source": "bea740e65b0ca3d3aa09d4e716384530f8c71cfd27b4d0780c579886f1106146",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Nurturing Pixie",

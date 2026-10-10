@@ -1,6 +1,8 @@
 {
 	"card": "Ingris Stingerquill",
 	"generated": "2026-10-10",
+	"source": "b0e7cedfcb0fb34c71d7aecc1cac423d737feb5d7b495057b6dc47b55bd0b01a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Ingris Stingerquill",

@@ -1,6 +1,8 @@
 {
 	"card": "Rapid Rescue",
 	"generated": "2026-10-10",
+	"source": "16c2f22fc304c494c8b178db29824c8aff814ae31ad0fe20684dae5e81b91c6f",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Rapid Rescue",

@@ -1,6 +1,8 @@
 {
 	"card": "Repurposing Bay",
 	"generated": "2026-10-10",
+	"source": "1f0c289eac62ac502284554e3b998d3ea80f80e9b2fb8cc4334c6602a0f36629",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Repurposing Bay",

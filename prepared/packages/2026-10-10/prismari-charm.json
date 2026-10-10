@@ -1,6 +1,8 @@
 {
 	"card": "Prismari Charm",
 	"generated": "2026-10-10",
+	"source": "39cb626a564f3f59ca504ecd61bc6c63ae5aec259af0ad8a35fb61f3ea6a5d42",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Prismari Charm",

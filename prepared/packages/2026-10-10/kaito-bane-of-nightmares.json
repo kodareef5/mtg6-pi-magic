@@ -1,6 +1,8 @@
 {
 	"card": "Kaito, Bane of Nightmares",
 	"generated": "2026-10-10",
+	"source": "d2c665f5a9529329002c7bdbb02d172805047b6bed28538642e4eb207685bc65",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Kaito, Bane of Nightmares",

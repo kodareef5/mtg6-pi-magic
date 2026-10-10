@@ -1,6 +1,8 @@
 {
 	"card": "Guiding Hydra",
 	"generated": "2026-10-10",
+	"source": "68231be89c39b6b00d5a939fefcd4d8f22c71d94f143a54ec4a6e0ef7df0b5f9",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Guiding Hydra",

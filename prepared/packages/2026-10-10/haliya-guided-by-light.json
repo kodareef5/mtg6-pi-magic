@@ -1,6 +1,8 @@
 {
 	"card": "Haliya, Guided by Light",
 	"generated": "2026-10-10",
+	"source": "f8ea0b8b2b768ae59fa7f8b3f2fcc900f963fb1fe516da292fb52b6c3cd27fb4",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Haliya, Guided by Light",

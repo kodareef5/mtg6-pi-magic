@@ -1,6 +1,8 @@
 {
 	"card": "Spirebluff Canal",
 	"generated": "2026-10-10",
+	"source": "33c168cce9d6b254438196c991a824433981b6be2748d70e6f6a2179c00a8815",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Spirebluff Canal",

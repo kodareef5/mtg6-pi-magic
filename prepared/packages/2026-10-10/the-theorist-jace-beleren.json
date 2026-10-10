@@ -1,6 +1,8 @@
 {
 	"card": "The Theorist, Jace Beleren",
 	"generated": "2026-10-10",
+	"source": "dc387769f01de5dc00a9f3bf232f44007f74f27c6ac716bff88bb604f7cb2dd2",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "The Theorist, Jace Beleren",

@@ -1,6 +1,8 @@
 {
 	"card": "Flashback",
 	"generated": "2026-10-10",
+	"source": "b658db00f95b5ffbf8e5c75c42d6b4b8fa24a1eee0cb70bed360b3c18c7cfa11",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Flashback",

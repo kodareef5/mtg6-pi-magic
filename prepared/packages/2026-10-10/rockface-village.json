@@ -1,6 +1,8 @@
 {
 	"card": "Rockface Village",
 	"generated": "2026-10-10",
+	"source": "f75805fae774e60af9bdd6f82c27eaf4ab969e01dcc79ef8300d11b06a4c7a11",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Rockface Village",

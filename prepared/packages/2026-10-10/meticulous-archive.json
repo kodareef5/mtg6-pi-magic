@@ -1,6 +1,8 @@
 {
 	"card": "Meticulous Archive",
 	"generated": "2026-10-10",
+	"source": "2bbd16ecd6d358b52738d07868731a4a6191a79b5f2db5b9bb139b295cc88a69",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Meticulous Archive",

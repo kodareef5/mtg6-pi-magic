@@ -1,6 +1,8 @@
 {
 	"card": "Starting Town",
 	"generated": "2026-10-10",
+	"source": "994df18d21c03b12a1f568e4959f0abb649e53d7006023aa4c8b5c57c3a8784c",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Starting Town",

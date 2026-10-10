@@ -1,6 +1,8 @@
 {
 	"card": "Floodpits Drowner",
 	"generated": "2026-10-10",
+	"source": "ea202ed2680748f65661df40fe368ebdc793b72b3dcbafab63521c3d4e0cb184",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Floodpits Drowner",

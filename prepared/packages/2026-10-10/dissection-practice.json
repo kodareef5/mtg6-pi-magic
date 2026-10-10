@@ -1,6 +1,8 @@
 {
 	"card": "Dissection Practice",
 	"generated": "2026-10-10",
+	"source": "0418a4ad4711dacab41d9a5d68227adc19fd96f2518407d7ce143e4faee7a56c",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dissection Practice",

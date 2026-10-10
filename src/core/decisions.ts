@@ -21,6 +21,7 @@ import { cardsIn, playing, type Table, type LedgerRow, type Thing } from "./tabl
 import type { Decision } from "./types.ts";
 import { begin as beginResolving, resolving } from "./resolution.ts";
 import { attach } from "./entry.ts";
+import { beforeEntry, entryPayment } from "./entry-payments.ts";
 import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
 import { characteristics, has } from "./characteristics.ts";
@@ -41,6 +42,7 @@ import { project } from "./view.ts";
  */
 function pending(table: Table): Pending | null {
 	if (table.outcome) return null;
+	if (table.entry) return entryPayment(table);
 
 	// 2. Pregame: mulligan, then the opening actions a card permits. Situation 7.
 	//    Null before the hands are dealt and between rounds: advance deals and
@@ -143,7 +145,7 @@ function take(
 		return;
 	}
 	const changes = [...move.changes, ...bookkeeping(table, p, move)];
-	const entered = attach(table, changes, registered);
+	const entered = table.entry ? Object.fromEntries(changes.flatMap((change) => change.do === "move" && change.to === "battlefield" && change.registers ? [[change.what, structuredClone(change.registers)]] : [])) : attach(table, changes, registered);
 	// The row goes in first, so every group this decision commits is stamped with
 	// a version that includes the decision that caused it. Nothing in `commit`
 	// reads the ledger, so the order costs nothing else.
@@ -159,7 +161,7 @@ function take(
 		why,
 		...(Object.keys(entered).length ? { registered: entered } : {}),
 	});
-	commit(table, changes, move.reason);
+	commit(table, table.entry ? changes : beforeEntry(table, changes, move.reason), move.reason);
 }
 
 /** A listed action and its bookkeeping are one committed event. */

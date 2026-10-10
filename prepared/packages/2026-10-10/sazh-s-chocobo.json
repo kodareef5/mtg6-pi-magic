@@ -1,6 +1,8 @@
 {
 	"card": "Sazh's Chocobo",
 	"generated": "2026-10-10",
+	"source": "d889833e6656ef45d327f0df89e8135db725a8934f12c7033ae8b23f2b680764",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sazh's Chocobo",

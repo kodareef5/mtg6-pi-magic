@@ -1,6 +1,8 @@
 {
 	"card": "Hinterland Sanctifier",
 	"generated": "2026-10-10",
+	"source": "d30b5ffbab57294b6cbe748b5945347aa0a1bcc5cfe50ce9043e460495e1a863",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Hinterland Sanctifier",

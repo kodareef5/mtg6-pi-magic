@@ -1,6 +1,8 @@
 {
 	"card": "Spell Snare",
 	"generated": "2026-10-10",
+	"source": "4e48c9448dabfa3b606a55254d5ae9a681fdd22a0d58c42f426cafbdc2c274f1",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Spell Snare",

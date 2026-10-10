@@ -1,6 +1,8 @@
 {
 	"card": "Spell Pierce",
 	"generated": "2026-10-10",
+	"source": "345e8940cc4bb6d5433cea03f2c00296fa5e6c1aa9ec95045f0d5abdaa9f574f",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Spell Pierce",

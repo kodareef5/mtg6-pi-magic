@@ -1,6 +1,8 @@
 {
 	"card": "Clarion Conqueror",
 	"generated": "2026-10-10",
+	"source": "cc2b7db8399606ee3cd2353d25703b99fb20a4dbca81abdfe369ec47b44f5edc",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Clarion Conqueror",

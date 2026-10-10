@@ -1,6 +1,8 @@
 {
 	"card": "Case of the Uneaten Feast",
 	"generated": "2026-10-10",
+	"source": "82f89da36c78277353d4a72f611b458b5b5c75b285048b72b5dda6fa82575bc5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Case of the Uneaten Feast",

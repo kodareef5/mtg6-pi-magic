@@ -1,6 +1,8 @@
 {
 	"card": "Jace's Machinations",
 	"generated": "2026-10-10",
+	"source": "bcebe4a26dd5bc6779504845b4c6fd4d15e1fae24d5681d5cfe63f38feb03ace",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Jace's Machinations",

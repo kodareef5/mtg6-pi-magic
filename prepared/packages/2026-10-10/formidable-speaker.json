@@ -1,6 +1,8 @@
 {
 	"card": "Formidable Speaker",
 	"generated": "2026-10-10",
+	"source": "36defb12b7f4cd69eb6150518f65a947b5c45a49cd8532cf45dd40aba6d1fce6",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Formidable Speaker",

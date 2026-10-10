@@ -1,6 +1,8 @@
 {
 	"card": "Blooming Marsh",
 	"generated": "2026-10-10",
+	"source": "6e9b53fd95c90a674ee9c1c9aedefa2ee439caac3db3834505572eac051ed7a3",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Blooming Marsh",

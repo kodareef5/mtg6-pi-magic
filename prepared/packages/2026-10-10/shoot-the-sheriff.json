@@ -1,6 +1,8 @@
 {
 	"card": "Shoot the Sheriff",
 	"generated": "2026-10-10",
+	"source": "1760ca4cb310cf3210d67a7aaf7c0130c0e71da2db041f540ac28268a200cce1",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Shoot the Sheriff",

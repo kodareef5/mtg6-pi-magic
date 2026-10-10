@@ -1,6 +1,8 @@
 {
 	"card": "Icetill Explorer",
 	"generated": "2026-10-10",
+	"source": "7095212f42654f0dd7da19eb468167a7714e7bb3adb57b72b95f383fc8fbc977",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Icetill Explorer",

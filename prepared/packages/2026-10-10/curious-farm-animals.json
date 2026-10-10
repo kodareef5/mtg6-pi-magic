@@ -1,6 +1,8 @@
 {
 	"card": "Curious Farm Animals",
 	"generated": "2026-10-10",
+	"source": "df6188d41a68c88d351781789daa4ba1e6ce05db6779902d49875a22798dd94f",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Curious Farm Animals",

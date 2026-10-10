@@ -1,6 +1,8 @@
 {
 	"card": "Riverpyre Verge",
 	"generated": "2026-10-10",
+	"source": "fed8e46b31cd1477760eff262ebe97e9b4e59ba2d9dd8885bb4046ae49adea1a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Riverpyre Verge",

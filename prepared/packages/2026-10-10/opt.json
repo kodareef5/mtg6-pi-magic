@@ -1,6 +1,8 @@
 {
 	"card": "Opt",
 	"generated": "2026-10-10",
+	"source": "ac8e0b86509efb7834e8127c5de5741a75aeb9fc7e24f63125b9f872f23752bf",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Opt",

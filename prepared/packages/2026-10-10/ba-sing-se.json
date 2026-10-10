@@ -1,6 +1,8 @@
 {
 	"card": "Ba Sing Se",
 	"generated": "2026-10-10",
+	"source": "9a83fef93ab36de82fdaf038fa422caf604bf6fe76bbcc13b93bd514fd45c835",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Ba Sing Se",

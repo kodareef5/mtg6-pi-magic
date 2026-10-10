@@ -1,6 +1,8 @@
 {
 	"card": "Torpor Orb",
 	"generated": "2026-10-10",
+	"source": "42e9a00e538ec4388d520d43d09f410ead83126d2427d77066b2d5df689395cd",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Torpor Orb",

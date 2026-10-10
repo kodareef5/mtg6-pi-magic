@@ -1,6 +1,8 @@
 {
 	"card": "Practiced Offense",
 	"generated": "2026-10-10",
+	"source": "83ca7bab7702337df38b4b027f16786dfe0c98e6113a13770bb41ac7f7977347",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Practiced Offense",

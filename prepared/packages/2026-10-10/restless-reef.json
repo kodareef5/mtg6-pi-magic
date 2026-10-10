@@ -1,6 +1,8 @@
 {
 	"card": "Restless Reef",
 	"generated": "2026-10-10",
+	"source": "a1ad1261ddf32de071288111cd6f017f81754357343564ce0885b619d9ac82a3",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Restless Reef",

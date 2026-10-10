@@ -1,6 +1,8 @@
 {
 	"card": "Watery Grave",
 	"generated": "2026-10-10",
+	"source": "14cf528ccea2a97bbf5df69067282848617a4c152a2efe3b45c7238bc2d400db",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Watery Grave",

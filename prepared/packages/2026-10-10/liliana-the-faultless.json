@@ -1,6 +1,8 @@
 {
 	"card": "Liliana the Faultless",
 	"generated": "2026-10-10",
+	"source": "7ab38a68455c968f424f3fb61b157de995804c4807ae51fa29f95baac1e021c4",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Liliana the Faultless",

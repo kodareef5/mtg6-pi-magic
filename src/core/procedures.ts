@@ -9,9 +9,10 @@ import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, 
 import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
+import { beforeEntry } from "./entry-payments.ts";
 import { covers, paying, produces } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
-import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
+import { amount, holds, matches, players, tableWorld, type Scope } from "./selectors.ts";
 import { allowance, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
@@ -126,7 +127,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	// Tapping a creature for mana and then sacrificing it to the cost is fine (601.2g): only a mana ability's own sacrifice uses it up.
 	const consumed = [...(cost.sacrificed ?? []), ...(cost.exiled ?? []), ...(cost.discarded ?? []), ...funding.filter((tap) => tap.sacrifice).map((tap) => tap.source)].map((ref) => ref.id);
 	if (new Set(consumed).size !== consumed.length || (cost.tapped ?? []).some((ref) => consumed.includes(ref.id))) throw new Error("One object cannot pay two parts of a cost.");
-	if (cost.life !== undefined && seat(table, controller).life < cost.life) throw new Error("Not enough life to pay.");
+	if (seat(table, controller).life < (cost.life ?? 0) + funding.reduce((sum, tap) => sum + (tap.life ?? 0), 0)) throw new Error("Not enough life to pay.");
 	if (cost.counters && (object.counters[cost.counters.kind] ?? 0) < cost.counters.count) throw new Error("Not enough counters to remove.");
 
 	const pool = seat(table, controller).pool;
@@ -141,8 +142,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		const made = characteristics(table, mana);
 		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
 		const count = (value: Amount) => amount({ world, controller, source: mana }, value);
-		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, count)).some((one) => one.colors.join() === tap.colors.join() &&
-			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && !!one.sacrifice === !!tap.sacrifice))
+		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, count, (condition) => holds({ world, controller, source: mana }, condition))).some((one) => one.colors.join() === tap.colors.join() &&
+			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
 			throw new Error("The source has no registered mana ability that makes that mana.");
 		if (!allowed(tap.spendOnly)) throw new Error("That mana may not be spent on this.");
 	}
@@ -182,7 +183,8 @@ export function activate(table: Table, activation: Activation, choice: Pick<Ledg
 	const entered = attach(table, changes, registered);
 	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: activation.controller,
 		...structuredClone(choice), activation: structuredClone(activation), ...(Object.keys(entered).length ? { registered: entered } : {}) });
-	commit(table, changes, activation.timing === "spell" ? "cast" : activation.timing === "land" ? "play-land" : "activate");
+	const reason = activation.timing === "spell" ? "cast" : activation.timing === "land" ? "play-land" : "activate";
+	commit(table, beforeEntry(table, changes, reason), reason);
 }
 
 export { offers };

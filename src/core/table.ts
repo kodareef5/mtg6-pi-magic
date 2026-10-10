@@ -329,6 +329,8 @@ export type Seat = {
 };
 
 export type Table = {
+	/** A proposed group awaiting optional entry payments. */
+	entry?: import("./entry-payments.ts").Entry;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

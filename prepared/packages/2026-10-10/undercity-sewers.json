@@ -1,6 +1,8 @@
 {
 	"card": "Undercity Sewers",
 	"generated": "2026-10-10",
+	"source": "2585685f86b12363c167d00ca2fc1500154c4cb959b1c9a06aa3ff343d53ce20",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Undercity Sewers",

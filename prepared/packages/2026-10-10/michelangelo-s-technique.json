@@ -1,6 +1,8 @@
 {
 	"card": "Michelangelo's Technique",
 	"generated": "2026-10-10",
+	"source": "d1475fd947cf3cf3fbc381d00122f3d3f4d62771a04b28ac3d628a54612ef3cd",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Michelangelo's Technique",

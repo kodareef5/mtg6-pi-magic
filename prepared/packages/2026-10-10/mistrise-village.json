@@ -1,6 +1,8 @@
 {
 	"card": "Mistrise Village",
 	"generated": "2026-10-10",
+	"source": "2b56aa6d3091a401cc7c70c413f8404c0e97541923ffbfa4967f3c0be43d4aae",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Mistrise Village",

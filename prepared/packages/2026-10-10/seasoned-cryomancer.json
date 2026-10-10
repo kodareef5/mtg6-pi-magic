@@ -1,6 +1,8 @@
 {
 	"card": "Seasoned Cryomancer",
 	"generated": "2026-10-10",
+	"source": "dcc6f0aa75f4f642456a65e842fb9a1e6315e199edcbd49d0c469963a99ccb2a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Seasoned Cryomancer",

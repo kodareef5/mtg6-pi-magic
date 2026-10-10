@@ -1,6 +1,8 @@
 {
 	"card": "Smaug the Magnificent",
 	"generated": "2026-10-10",
+	"source": "546762cb465b8d72007acefd8d0c91119ceff9ba6f6a625c8ca6ee2517dcc58d",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Smaug the Magnificent",

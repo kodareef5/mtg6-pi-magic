@@ -1,6 +1,8 @@
 {
 	"card": "Firdoch Core",
 	"generated": "2026-10-10",
+	"source": "7d2788e67bd91a9bafc0077e9bc0d2292b2ad98e400982929e026db634aa363b",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Firdoch Core",

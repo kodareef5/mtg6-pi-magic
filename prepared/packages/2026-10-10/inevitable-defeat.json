@@ -1,6 +1,8 @@
 {
 	"card": "Inevitable Defeat",
 	"generated": "2026-10-10",
+	"source": "320f6dd6f1e0b4ab37d775f605ac518e51126b79bc980b8cc012026ac0a8b02d",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Inevitable Defeat",

@@ -39,7 +39,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 			const toll = (pack(table, holder, card.card!) ?? []).find((one): one is Extract<Registration, { kind: "enters" }> => one.kind === "enters" && !one.affects && !!one.unlessPay)?.unlessPay;
 			const from = card.zone === "hand" ? "" : ` from ${card.zone}`;
 			if (toll && seat(table, holder).life >= toll.life) moves.push({
-				option: { id: `land:${card.id}:pay`, label: `Play ${card.card}${from}, paying ${toll.life} life so it enters untapped`, objects: [{ id: card.id, incarnation: card.incarnation }],
+				option: { id: `land:${card.id}:pay`, label: `Play ${card.card}${from}, paying ${toll.life} life for its entry term`, objects: [{ id: card.id, incarnation: card.incarnation }],
 					spends: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
 				changes: [{ do: "change-life", who: holder, amount: -toll.life, reason: "cost-payment" }, { do: "move", what: card.id, to: "battlefield", reason: "play-land", controller: holder, paid: true }],
 				reason: "play-land",
@@ -47,7 +47,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 			moves.push({
 				option: { id: `land:${card.id}`, label: `Play ${card.card}${from}${toll ? ", letting it enter tapped" : ""}`, objects: [{ id: card.id, incarnation: card.incarnation }],
 					spends: [{ id: card.id, incarnation: card.incarnation }], ...(note ? { shows: note } : {}) },
-				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land", controller: holder }],
+				changes: [{ do: "move", what: card.id, to: "battlefield", reason: "play-land", controller: holder, ...(toll ? { paid: false } : {}) }],
 				reason: "play-land",
 			});
 		}

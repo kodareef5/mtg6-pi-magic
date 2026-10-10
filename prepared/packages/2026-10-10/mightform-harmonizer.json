@@ -1,6 +1,8 @@
 {
 	"card": "Mightform Harmonizer",
 	"generated": "2026-10-10",
+	"source": "d04c2595a39a23621101bf2f70086890b56dccc2fe0fc76ebcbcfca0815996dd",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Mightform Harmonizer",

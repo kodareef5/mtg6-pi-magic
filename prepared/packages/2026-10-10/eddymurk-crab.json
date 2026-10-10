@@ -1,6 +1,8 @@
 {
 	"card": "Eddymurk Crab",
 	"generated": "2026-10-10",
+	"source": "78f4639d87fcad7dce34e27b95e9dacd01df409dbc89a2761ca0a48c0b2bd83a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Eddymurk Crab",

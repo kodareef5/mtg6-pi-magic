@@ -1,6 +1,8 @@
 {
 	"card": "Deadly Cover-Up",
 	"generated": "2026-10-10",
+	"source": "aa33ec8443c590830c4708e48ed5538bebdd5bcbe74c244c760e47f97c93a6ab",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Deadly Cover-Up",

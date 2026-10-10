@@ -1,6 +1,8 @@
 {
 	"card": "Cryogen Relic",
 	"generated": "2026-10-10",
+	"source": "185850fc2da97a0dca5ec34fd3dea6c2c37046cdfa5cab40d20597a307d88cae",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Cryogen Relic",

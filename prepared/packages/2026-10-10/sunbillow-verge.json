@@ -1,6 +1,8 @@
 {
 	"card": "Sunbillow Verge",
 	"generated": "2026-10-10",
+	"source": "0f3953858369421699ebfb1ef3e6a819b3140b809aefb92250df1ce7317ec722",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sunbillow Verge",

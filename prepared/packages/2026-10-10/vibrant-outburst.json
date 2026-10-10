@@ -1,6 +1,8 @@
 {
 	"card": "Vibrant Outburst",
 	"generated": "2026-10-10",
+	"source": "8cf58422cd985c1599684abb9fccdee578572e20a1d933395cf3760fff22d234",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Vibrant Outburst",

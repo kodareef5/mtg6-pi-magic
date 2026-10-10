@@ -1,6 +1,8 @@
 {
 	"card": "Archenemy's Charm",
 	"generated": "2026-10-10",
+	"source": "ad6419407a5aa905d5ad803c7f9e913c0f098c7e2c629294eed9af1a1b371420",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Archenemy's Charm",

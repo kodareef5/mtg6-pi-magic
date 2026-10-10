@@ -1,6 +1,8 @@
 {
 	"card": "Sacred Foundry",
 	"generated": "2026-10-10",
+	"source": "d49f5c86962310c340168bd27ae1824b74c1493856599ea830862fe06933e129",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sacred Foundry",

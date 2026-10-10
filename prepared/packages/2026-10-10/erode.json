@@ -1,6 +1,8 @@
 {
 	"card": "Erode",
 	"generated": "2026-10-10",
+	"source": "266c9bdc75525013011634faa3e353ae236d45a5f3689b0983678fc296412453",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Erode",

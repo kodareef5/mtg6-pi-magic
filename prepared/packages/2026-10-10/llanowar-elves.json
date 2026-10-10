@@ -1,6 +1,8 @@
 {
 	"card": "Llanowar Elves",
 	"generated": "2026-10-10",
+	"source": "35ecbffbb7c70e5bdeecd8f3514d3f72a032da32a78d13609fe5e846eb7f351a",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Llanowar Elves",

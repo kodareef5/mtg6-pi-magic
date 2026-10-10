@@ -1,6 +1,8 @@
 {
 	"card": "Dispelling Exhale",
 	"generated": "2026-10-10",
+	"source": "2642709c65db007ae9e97e7eb1c855a9014c7af5605e69b5d82991e8721f7342",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dispelling Exhale",

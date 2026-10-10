@@ -1,6 +1,8 @@
 {
 	"card": "Channeled Dragonfire",
 	"generated": "2026-10-10",
+	"source": "abaf6ff4362af1b90370209052b150e1fe1599aefa8182338e05d0430ce705f1",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Channeled Dragonfire",

@@ -1,6 +1,8 @@
 {
 	"card": "Together as One",
 	"generated": "2026-10-10",
+	"source": "ba9d858b95ba877e0062a0816ad212ed349aaf6ced17cf28c7df000623685e06",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Together as One",

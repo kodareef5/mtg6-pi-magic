@@ -1,6 +1,8 @@
 {
 	"card": "Day of Judgment",
 	"generated": "2026-10-10",
+	"source": "a281a7d96e5485c82276804a0dad2b5e1836adc57869242a57534d54c404d371",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Day of Judgment",

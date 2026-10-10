@@ -1,6 +1,8 @@
 {
 	"card": "Frontline Rush",
 	"generated": "2026-10-10",
+	"source": "b1f53bb25720032291625d87bf18bc116f9ab89a0c1df3afea1179a45a7c260d",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Frontline Rush",

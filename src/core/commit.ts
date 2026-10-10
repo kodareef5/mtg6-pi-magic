@@ -259,6 +259,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "resolution":
 				resolutionTransition(table, change);
 				break;
+			case "entry":
+				if (change.entry) table.entry = structuredClone(change.entry);
+				else delete table.entry;
+				break;
 			case "shuffle": {
 				// The shuffle is the only randomness in the game. Positions are
 				// swapped so the library stays a list the engine fully knows.
@@ -402,7 +406,7 @@ function stack(table: Table, id: string, ability: Activation): void {
 }
 
 /** Entering terms apply as part of the motion, and the recorded change says so. */
-function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number>; paid?: true }, before: Receipt["before"], born: ReadonlySet<string>): void {
+function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number>; paid?: boolean }, before: Receipt["before"], born: ReadonlySet<string>): void {
 	forget(table);
 	const entering = terms(table, object, before, born, change.paid);
 	if (entering.tapped) object.tapped = change.tapped = true;

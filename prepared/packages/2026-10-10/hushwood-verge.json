@@ -1,6 +1,8 @@
 {
 	"card": "Hushwood Verge",
 	"generated": "2026-10-10",
+	"source": "541c23f4d1f39ddc52b21c7f37e734fe0381baaa2273c12425306c329b5e136b",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Hushwood Verge",

@@ -1,6 +1,8 @@
 {
 	"card": "Fabled Passage",
 	"generated": "2026-10-10",
+	"source": "fe9f9a5518db1183cc5315701dc31916897f2fdb7c062509784826da1ad0054b",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Fabled Passage",

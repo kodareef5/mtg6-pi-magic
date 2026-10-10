@@ -1,6 +1,8 @@
 {
 	"card": "Castle Doom",
 	"generated": "2026-10-10",
+	"source": "e12f1da63badfbdfc8daceb994ccd1475b897272ff209174061d2efba024d4f6",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Castle Doom",

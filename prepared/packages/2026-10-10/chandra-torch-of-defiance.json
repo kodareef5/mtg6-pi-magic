@@ -1,6 +1,8 @@
 {
 	"card": "Chandra, Torch of Defiance",
 	"generated": "2026-10-10",
+	"source": "facdb3da25656dacda0ee08f4aa60f494b6dca9099d32708c15b78af0a568824",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Chandra, Torch of Defiance",

@@ -1,6 +1,8 @@
 {
 	"card": "Burst Lightning",
 	"generated": "2026-10-10",
+	"source": "7d0f56fef494342c287f97040e3069c063a8ac160a8f0d20c46248526b93a7bc",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Burst Lightning",

@@ -1,6 +1,8 @@
 {
 	"card": "Steam Vents",
 	"generated": "2026-10-10",
+	"source": "f05dd590ac4d0f04012bdbd431c42e9c5ee5859968f63af3178c68b014556cc6",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Steam Vents",

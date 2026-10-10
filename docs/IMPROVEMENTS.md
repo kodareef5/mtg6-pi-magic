@@ -15,6 +15,38 @@ Each finished batch yields a ledger of broken concepts: cards refused as
 unsupported, interpretations that failed, gaps, help requests and rulings.
 Those drive engine and syntax work, ordered by how many decks they block.
 
+## Takeover sequence, October 10
+
+The checkpoint at `2f1dd88` passes 213 offline tests and the type check. The
+156 stored assessments establish source coverage, not executable completeness.
+Every imported deck still has setup blockers. Keep the current roster.
+
+1. Repair the package store and use it through the shared seating path for Pi
+   and the runners. Check source identity and interpreter compatibility, exclude
+   the refusal ledger, write atomically, and preserve carried preparation.
+   Distinguish registration, standing assessment, deferred interpretation and
+   played evidence in the pool report.
+2. Finish the land mechanics already accepted: life payments during mana
+   funding, live conditional-mana checks, and optional entry payments through
+   every battlefield-entry route. Extend the conservation and replay tests.
+3. Expose structured faces from pinned card data. Keep one physical card and
+   its registered full name; derive characteristics from the selected face and
+   zone. Scope source quotations, standing terms and deferred uses by face.
+4. Add alternate casting, Adventure exile permissions and Omen shuffling, then
+   Room door designations and unlocking. Failed resolution must not receive the
+   successful spell's continuation. Unlocking is a special action.
+5. Add transformation without a zone change, entry transformed, craft costs and
+   return, Saga lore and chapter lifecycle, and Prepare's castable copy in exile.
+   Use shared operations and the current collection's cards as regression
+   positions. Other abilities on those cards remain explicit blockers until
+   their own shared operations work.
+6. Reassess affected cards, record the remaining blockers, and play newly ready
+   lists from ordinary setup. Save journals and verify replay and clone parity.
+   Do not rewrite historical decisions or claim a fixture proves a whole deck.
+
+Each stage requires `npm test` and `npm run check`. No inference runs in those
+checks. Live assessment and games retain calls, failures, cost and timing.
+
 ## Steps, in order
 
 1. **Decks as a formal list of names.** A deck file is counts by card name,
@@ -33,13 +65,13 @@ Those drive engine and syntax work, ordered by how many decks they block.
    or opponent. A store under `prepared/packages/` keyed by card name and
    card-file date is loaded before seating, so a new pairing assesses only
    cards no game has seen, and saves what it assesses. Setup then costs the
-   two briefs, not sixty card readings. Built in `tools/packages.ts`; the
+   two briefs, not sixty card readings. Built in `src/core/packages.ts`; the
    store fills as pairings are prepared.
 4. **Any two decks.** `tools/matchup.ts --decks "A,B"` seats two collection
    decks by name with short labels; `tools/sim.ts --random N` draws seeded
    random pairings, alternates who plays first, and runs two games at a time.
    `/magic play random` does the same inside Pi. The two tools are done; the
-   Pi verb is not.
+   Pi verb is done.
 5. **Deck guides.** One write-up per deck under `decks/guides/`, written once by
    the pregame model from the list and card text: how the deck is designed to
    be played, its engine, sequencing, mulligans, what beats it. The brief

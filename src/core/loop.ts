@@ -74,7 +74,7 @@ export type PlayOptions = {
 function automatic(decision: Decision, intent?: Intent): "forced" | "delegated" | null {
 	if (decision.situation === "priority" || decision.options.some((one) => one.id === "attack:done" || one.id === "block:done")) return null;
 	if (decision.options.length !== 1) return null;
-	if (["turn-based", "state-based", "pregame", "trigger-order"].includes(decision.situation)) return "forced";
+	if (["turn-based", "state-based", "pregame", "trigger-order", "replacement-order"].includes(decision.situation)) return "forced";
 	if (intent?.deck.delegates?.includes(decision.situation)) return "delegated";
 	return null;
 }

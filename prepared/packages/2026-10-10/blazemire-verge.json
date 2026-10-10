@@ -1,6 +1,8 @@
 {
 	"card": "Blazemire Verge",
 	"generated": "2026-10-10",
+	"source": "3e4c1a6a7591915a452949f395ac35c32bcad73040888555d61989d924740205",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Blazemire Verge",

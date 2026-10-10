@@ -1,6 +1,8 @@
 {
 	"card": "Moonshadow",
 	"generated": "2026-10-10",
+	"source": "a45cc9042fb33f2e612b785da13fdd96aeccc27c8f7a09c4231dd07fd1538ed5",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Moonshadow",

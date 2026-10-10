@@ -1,6 +1,8 @@
 {
 	"card": "Heroes' Hangout",
 	"generated": "2026-10-10",
+	"source": "d9ae3c4c87c62e9bdb3f5ae8653fadf666deecd8d2f0b3bd83dfff6192b49db6",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Heroes' Hangout",

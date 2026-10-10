@@ -1,6 +1,8 @@
 {
 	"card": "Hallowed Fountain",
 	"generated": "2026-10-10",
+	"source": "e28d00fab510ca21d8c4b3ec750b2ccbe750c6172ef4bf36e3f4ca6b99c45f30",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Hallowed Fountain",

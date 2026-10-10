@@ -1,6 +1,8 @@
 {
 	"card": "Jeskai Revelation",
 	"generated": "2026-10-10",
+	"source": "c763a48f0e63ed33b5e67cd8fa12736ab24084a1d399a84b7c0e731048374509",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Jeskai Revelation",

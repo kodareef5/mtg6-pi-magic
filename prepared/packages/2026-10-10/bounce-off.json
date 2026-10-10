@@ -1,6 +1,8 @@
 {
 	"card": "Bounce Off",
 	"generated": "2026-10-10",
+	"source": "fdbdc8cf3a288366e70b8cb922ad9486eb7b0b71eae737c95d46ba49753de228",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Bounce Off",

@@ -1,6 +1,8 @@
 {
 	"card": "Shattered Sanctum",
 	"generated": "2026-10-10",
+	"source": "fc56b0fd7c05c6707f035b247fc64976ebc1aea2b9a7883267790760159e088f",
+	"contract": 1,
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Shattered Sanctum",
