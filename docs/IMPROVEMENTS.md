@@ -37,16 +37,10 @@ the wrong boundary (`b0233e9`).
 
 ## Next
 
-Done the same day: the analyst wave is removed (the coordinator writes alone),
-the roster is Haiku 5.5 medium for strategy and judge, and the
-`process/explored-lines` branch is deleted. Twenty games at the new roster
-finished clean: no gaps, exact replay, median 7.8 minutes and $0.25.
-
-Strength is now measured directly: `--green` and `--red` seat one roster
-against another. The first arm, Green on Haiku 5.5 medium against Red on Luna
-low, is in [Status](STATUS.md). Next: the swapped arm, Green on Luna against
-Red on Haiku, so wins count by roster and not by list; then the same pair with
-Haiku high, to learn whether more thinking still wins more at the table.
+The measuring phase is closed. Haiku 5.5 medium is the model; no further
+roster or prompt comparisons are planned. The next phase widens the card pool
+and collects complete games rather than tuning: its plan is written
+separately before work starts.
 
 ## Retained from October 9
 
