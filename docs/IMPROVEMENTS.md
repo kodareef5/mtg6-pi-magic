@@ -42,10 +42,11 @@ the roster is Haiku 5.5 medium for strategy and judge, and the
 `process/explored-lines` branch is deleted. Twenty games at the new roster
 finished clean: no gaps, exact replay, median 7.8 minutes and $0.25.
 
-Next: measure strength directly. Seat one roster against another on the same
-twenty seeds, each list on the play half the time, and count wins by roster
-rather than by deck. The runner and `tools/matchup.ts` need a per-seat
-strategy option for that; `rosterFor` already takes per-seat rosters.
+Strength is now measured directly: `--green` and `--red` seat one roster
+against another. The first arm, Green on Haiku 5.5 medium against Red on Luna
+low, is in [Status](STATUS.md). Next: the swapped arm, Green on Luna against
+Red on Haiku, so wins count by roster and not by list; then the same pair with
+Haiku high, to learn whether more thinking still wins more at the table.
 
 ## Retained from October 9
 

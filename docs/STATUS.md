@@ -63,6 +63,23 @@ games separate nothing on wins between the Luna arms; they do separate cost,
 speed and gaps. Sol high won all four of its games as Green, two on the play and
 two on the draw, on seeds where the Luna baseline went Red, Red, Green, Red.
 
+Head to head, the first direct strength reading: Green on Haiku 5.5 medium
+against Red on Luna low, twenty seeds, each list on the play half the time,
+on the new code (`9197896`).
+
+| Measure | Green on Haiku, Red on Luna |
+| --- | --- |
+| Games finished / started | 16 / 20 so far |
+| Green (Haiku) wins / Red (Luna) wins | 13 / 3 |
+| Median turns | 9 |
+| Median wall | 5.8 min |
+| Median cost | $0.15 |
+| Gaps, replay mismatches | 0, 0 |
+
+With both seats on one roster Green won 9, 13 and 11 of twenty. The swapped
+arm, Green on Luna against Red on Haiku, has not run; until it does this
+separates deck from roster only by comparison with those same-roster arms.
+
 Growth and lethal fixtures, five positions, three repeats, same prompts. A
 real win means the plan carries the payoff spell before the first land entry,
 enough entries and the lethal attackers, read by `.pi/sim-20261010/real-wins.py`.
