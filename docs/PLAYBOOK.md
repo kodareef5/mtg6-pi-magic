@@ -1,6 +1,6 @@
 # Pregame policies and turn organization
 
-The pregame prepares decisions that recur. Luna binds them to the visible
+The pregame prepares decisions that recur. The strategy model binds them to the visible
 position and checks the exceptions. Jev executes that line and asks for help
 when the prepared decisions no longer cover the position. A policy is advice;
 it neither certifies a card's meaning nor guarantees the best move.
@@ -229,7 +229,7 @@ triggers, apply damage replacements, or calculate life gain.
 The interpreter still owns missing executable uses. Source checks, plan shape
 checks and payment forecasts are separate from strategic quality. Compare
 accepted plans, corrections, strategy wait and actual decisions in the saved
-calls before claiming the playbook made Luna stronger or faster.
+calls before claiming the playbook made the strategy model stronger or faster.
 
 ## Checking a proposed payment sequence
 

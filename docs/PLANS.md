@@ -12,16 +12,17 @@ Complete executable programs for every registered card are no longer a setup
 requirement. Existing procedures and registrations remain useful; replacing them
 with another representation needs a concrete simplification.
 
-Pregame prepares the matchup's policies and worked lines. Luna low chooses and
-binds the applicable policies to the position, orders the actions, reserves
+Pregame prepares the matchup's policies and worked lines. The strategy model
+chooses and binds the applicable policies to the position, orders the actions, reserves
 resources and names exceptions. Jev navigates the interface under that direction,
 including voluntary actions, responses and priority passes. Many Jev calls are
 acceptable. Redundant questions and strategic work handed to Jev are defects.
 
 ## Boundaries
 
-- Keep Jev for decide, Sol 6.1 high for pregame, and Luna low for strategy,
-  judge and summary. Preserve a run's summary setting when comparing it.
+- Keep Jev for decide, Sol 6.1 high for pregame, and Haiku 5.5 medium for
+  strategy and judge, summary off. Preserve a run's summary setting when
+  comparing it.
 - Core never infers Oracle meaning from strings. Model-authored claims name the
   relevant source text; acceptance checks syntax and provenance, not correctness.
 - Card understanding and executable completeness are separate. An unprepared
@@ -122,18 +123,13 @@ reference when known. A future source uses its card name without an invented
 incarnation. Naming only a side can leave the pilot choosing one of its creatures
 when the writer intended the player.
 
-Strategy analysts read the projected position and pregame matchup advice without
-the notebook or standing plan. For a turn or a preparation, one analyst per first
-action (each land play and each accepted cast or activation with a visible
-source) writes the line after it as an ordered ledger, beside the focused
-questions; context lists the actions and ranks nothing. The coordinator receives
-their proposals and that prior tactical intent, and must reconcile them. Pregame
-advice is revisable, not a conclusion about the current position; worked
-examples stay behind a lookup. No physical facts or card text are removed from
-analyst context. Reset, close and supersession cancel every analyst round and the
-coordinator through the same signal; canceled attempts stay in the bill and
-cannot publish later work. A repair during the opponent's turn leaves the next
-turn's preparation running.
+The coordinator reads the projected position, the pregame matchup advice, the
+notebook and the standing plan, and writes the plan alone; context lists the
+actions it can reuse and ranks nothing. Pregame advice is revisable, not a
+conclusion about the current position; worked examples stay behind a lookup.
+Reset, close and supersession cancel the coordinator through one signal;
+canceled attempts stay in the bill and cannot publish later work. A repair
+during the opponent's turn leaves the next turn's preparation running.
 
 Own-turn planning and preparation explicitly replace or keep both the unfinished
 steps and the whole-opponent-turn policy. In the writer's answer, `steps` is an
@@ -150,9 +146,6 @@ invalid, strategy instead exposes the existing full editor: validation of the
 whole plan cannot be repaired through fields that preserve the invalid part.
 The writer must explicitly remove or replace those commitments. Context never
 rebinds an old incarnation or drops a step on the player's behalf.
-For a valid inherited response, the opponent, defense and removal questions
-run in parallel before the coordinator. Invalid inherited work keeps the
-full survey and six outlooks.
 The current editor uses the actual decision: priority and declaring blockers
 are different decisions even when both occur during declare-blockers.
 

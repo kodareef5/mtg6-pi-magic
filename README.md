@@ -15,9 +15,9 @@ state.
 AI playing in real time is slow and expensive. A 1v1 Standard game can take
 hours and cost tens to hundreds of dollars of frontier inference.
 
-Luna low writes the strategy, and a Jev-style pilot carries it out. Testing uses
-Luna low for strategy, judging and summaries, and Sol 6.1 high for pregame
-planning. Playing strength is still being measured. The goal is five-minute
+Haiku 5.5 at medium thinking writes the strategy, and a Jev-style pilot carries
+it out. Testing uses Haiku 5.5 medium for strategy and judging, summaries off,
+and Sol 6.1 high for pregame planning. Playing strength is still being measured. The goal is five-minute
 games for under a dollar.
 
 Pi configures your inference providers, and pi-magic uses those connections

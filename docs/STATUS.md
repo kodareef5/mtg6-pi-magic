@@ -1,7 +1,8 @@
 # Gameplay status
 
-Jev pilots, Sol 6.1 high prepared the carried matchup briefs, and Luna low
-writes strategy and judges. Playing strength is unproven. No coded lethal
+Jev pilots, Sol 6.1 high prepared the carried matchup briefs, and Haiku 5.5
+medium writes strategy and judges since October 10; every measurement below
+with Luna low predates that. Playing strength is unproven. No coded lethal
 search, move filtering or automatic voluntary choice exists. The round history
 behind this page, October 5 to 9, is in ignored
 `design-ref/experiments/` and in Git history.

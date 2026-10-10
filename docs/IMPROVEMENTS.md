@@ -37,14 +37,14 @@ the wrong boundary (`b0233e9`).
 
 ## Next
 
-Remove the analyst wave: survey, branch, growth and perspective analysts and
-the dossier they share. The coordinator alone is the strategy session. One
-comparison on the runner against the no-survey arm confirms nothing regressed.
+Done the same day: the analyst wave is removed (the coordinator writes alone),
+the roster is Haiku 5.5 medium for strategy and judge, and the
+`process/explored-lines` branch is deleted. Next: twenty games on the runner
+at the new roster against the October 10 Haiku arm, then fix whatever stops a
+game or loses one, reading the saved journals first.
 
 ## Retained from October 9
 
-- `--findings FILE` reuses recorded analyst reports for an isolated writer
-  comparison.
 - The payment forecast keeps its checks before an unknown continuation.
 - An own-turn answer must keep or replace `steps` and `theirTurn` explicitly.
 

@@ -89,10 +89,12 @@ other four roles and what reaches a decision is a short plan plus the facts.
 Handing the classifier everything known about the game is the failure the split
 exists to prevent: it is smart, and it is not going to work out a line.
 
-The testing roster is Jev for `decide`, `gpt-6.1-sol:high` for `pregame`, and
-`gpt-6-luna:low` for `strategy`, `judge` and `summary`. Keep that baseline while
-improving gameplay. A stronger model or higher effort is a different experiment,
-not a substitute for fixing its context; change it only when explicitly asked.
+The roster is Jev for `decide`, `gpt-6.1-sol:high` for `pregame`, and
+`anthropic/claude-haiku-5.5:medium` for `strategy` and `judge`, with `summary`
+off in testing. Haiku replaced Luna low on October 10, when the growth fixtures
+showed thinking effort, not prompting, was what found lethal lines. Keep that
+roster while improving gameplay; a different model or effort is a different
+experiment, and changes only when explicitly asked.
 
 `src/context/roles.ts` holds the roles, the suggested patterns, the resolution
 and why each default is what it is. `/magic models` reads the roster and says
@@ -150,13 +152,11 @@ game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
 into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
-**`strategy` advances the pregame setup.** One session writes each plan. By
-default an analyst wave reads the same dossier first (a survey question per hand
-card and own creature plus six fixed questions, one branch analyst per first
-action, and a growth analyst), then one coordinator reconciles their reports
-and writes the plan; `--no-survey` in `tools/matchup.ts` and `tools/sim.ts`
-runs the coordinator alone, which is the arm that tests whether the wave earns
-its three hundred calls a game. The session prepares during the opponent's
+**`strategy` advances the pregame setup.** One session writes each plan: the
+coordinator reads the dossier and writes the plan alone. An analyst wave that
+ran before it (a question per card, a branch per first action, a growth
+analyst) was removed on October 10 after twenty games showed the coordinator
+alone matched it at a tenth of the calls. The session prepares during the opponent's
 turn. After prior scoped tactical work, it accepts or amends before
 upkeep choices, then reviews the unfinished line after its draw. Opening and
 unscoped legacy work retain the post-draw deadline. Jev flies the phase
@@ -496,7 +496,6 @@ src/context/           questions for a decision model. Its own AGENTS.md
   dial.ts              the routes a seat can ask for, answered from the rules
   packet.ts, seat.ts   one decision's context, and the seat that answers it
   sit.ts               seating a whole table, so one command cannot differ
-  survey.ts, branches.ts, growth.ts, perspectives.ts  the analyst wave: focused questions, one branch per first action, growth lines, six outlooks
   coordinator.ts       the coordinator's system prompts and task sections
   dossier.ts, dossier-strategy.ts  the projected position rendered for the writer, and the model-written sections
   choices.ts, choice-space.ts, decision-facts.ts  inspection of option variants and the facts a decision carries
