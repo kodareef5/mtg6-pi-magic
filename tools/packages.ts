@@ -37,6 +37,16 @@ export function loadStored(table: Table, generated: string): number {
 	return loaded;
 }
 
+/** Save one assessed package. */
+export function storePackage(generated: string, pack: Package, model?: string): void {
+	const dir = join(STORE, generated);
+	mkdirSync(dir, { recursive: true });
+	writeFileSync(join(dir, `${slug(pack.card)}.json`), JSON.stringify({ card: pack.card, generated, ...(model ? { model } : {}), package: pack } satisfies Stored, null, "\t") + "\n");
+}
+
+/** Where the audit of cards that would not assess is kept, beside the store for the same card file. */
+export const ledgerPath = (generated: string) => join(STORE, generated, "ledger.json");
+
 /** Save every assessed package the table holds that the store lacks. A package bound to a game object never crosses games. */
 export function saveAssessed(table: Table, generated: string, model?: string): number {
 	const kept = storedPackages(generated), dir = join(STORE, generated);

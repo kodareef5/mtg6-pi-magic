@@ -72,6 +72,8 @@ const observed = traceInference(inference as never, (event) => {
 const began = Date.now();
 console.log(`${values.prepare ? "Preparing" : "Playing"} ${id}; journal ${path}`);
 const seated = await seatTable(table, async (seat) => partsFor(seat), observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
+	// Cards that did assess are kept even when others did not: the next pairing pays only for the rest.
+	if (!carried) { const saved = saveAssessed(table, universe.generated, parts.find((part) => part.role === "pregame")?.pattern); if (saved) console.log(`Stored ${saved} card interpretations before stopping.`); }
 	const result = preparationFailure(table, error, began, { journal: path, trace: calls });
 	const paths = saveReport(join(values.out!, `${id}.result.json`), result);
 	console.error([...report(result), ...paths].join("\n"));
