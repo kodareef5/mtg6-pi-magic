@@ -58,9 +58,7 @@ export function manaLines(frame: Frame): string[] {
 	return lines;
 }
 
-export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules;
-	/** Ask the focused board questions before the writer; seated games and benchmarks set it. */
-	survey?: boolean };
+export type Context = { brief?: Brief; recaps?: readonly Recap[]; cards?: Universe; rules?: Rules };
 
 /**
  * A fresh plan starts from the pregame objective with no phases. The pregame step notes reach the pilot

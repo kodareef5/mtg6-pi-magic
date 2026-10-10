@@ -13,9 +13,9 @@ import type { Lookup } from "./reason.ts";
 const quote = (text: string) => text.trim().split("\n").map((line) => `> ${line}`.trimEnd()).join("\n");
 const FAMILIES: [keyof Playbook, string][] = [["sequencing", "Sequencing"], ["resources", "Resources"], ["responses", "Responses"], ["combat", "Combat"], ["recovery", "Recovery"]];
 
-/** The seat's own sections, last, so the analysts' dossier stays a prefix of the coordinator's. */
-export function strategySections(frame: Frame, reader: "analyst" | "coordinator" = "coordinator"): string[] {
-	return reader === "coordinator" ? [notebook(frame), standingPlan(frame)] : [];
+/** The seat's own sections, last: its notebook and its standing plan. */
+export function strategySections(frame: Frame): string[] {
+	return [notebook(frame), standingPlan(frame)];
 }
 
 /**

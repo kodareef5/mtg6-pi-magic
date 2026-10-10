@@ -33,7 +33,7 @@ const words = (step: string) => step.replace(/-/g, " ");
 export const named = (object: SeenObject) => object.card ?? object.token?.name ?? object.ability?.claim ?? (object.faceDown ? "a face-down card" : "an unknown object");
 export const ref = (object: { id: string; incarnation: number }) => `${object.id}@${object.incarnation}`;
 
-export function dossier(input: DossierInput, reader: "analyst" | "coordinator" = "coordinator"): string {
+export function dossier(input: DossierInput): string {
 	const { frame } = input;
 	const seats = frame.view.seats ?? frame.view.players?.map((one) => ({ id: one.id, name: `Seat ${one.id}` })) ?? [];
 	const name = (seat: SeatId) => seats.find((one) => one.id === seat)?.name ?? `Seat ${seat}`;
@@ -48,7 +48,7 @@ export function dossier(input: DossierInput, reader: "analyst" | "coordinator" =
 		"## Mana", manaLines(frame).map((line) => `- ${line}`).join("\n"),
 		triggers(frame, name), effects(frame, name), blocking(frame, name), decks(frame, name), cardText(input),
 		recent(frame, name, input.recaps),
-		...strategySections(frame, reader),
+		...strategySections(frame),
 	].join("\n\n");
 }
 

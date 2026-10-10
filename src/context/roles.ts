@@ -75,33 +75,35 @@ export const ROLES: Record<
 		does: "advance the pregame strategy and, in separate calls, interpret identified card uses",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6-luna:low",
+		suggested: "anthropic/claude-haiku-5.5:medium",
 		why:
 			"Prepares before the turn and submits short updates. The seat waits after its draw " +
-			"when that work is unfinished. Luna low is the chosen testing baseline. Improve " +
-			"the context and turn guidance against its failures; changing reasoning effort " +
-			"changes the experiment and requires an explicit roster choice.",
+			"when that work is unfinished. Chosen October 10 on the growth fixtures: Haiku 5.5 " +
+			"medium found every recorded lethal line (15 of 15) where Luna low found 6 of 15 at " +
+			"any timeout, for about eight cents a session, and played whole games at twenty " +
+			"cents. Thinking effort was the lever, not the prompts. Changing it again is a " +
+			"roster choice, not a prompt fix.",
 	},
 	judge: {
 		does: "rule on an objection, citing the rules on disk",
 		kind: "chat",
 		whose: "table",
-		suggested: "gpt-6-luna:low",
+		suggested: "anthropic/claude-haiku-5.5:medium",
 		why:
-			"Rare: only an objection reaches it. Luna while the game is being built; a wrong " +
-			"ruling changes a game, so it is the first role to move to a stronger model. It " +
-			"looks up the rules it needs on disk rather than reading three thousand.",
+			"Rare: only an objection reaches it. The same model as strategy, so one provider " +
+			"and one price; a wrong ruling changes a game, so it is the first role to move to a " +
+			"stronger model. It looks up the rules it needs on disk rather than reading three thousand.",
 	},
 	summary: {
 		does: "say what happened this turn in two sentences, as the commentator",
 		kind: "chat",
 		whose: "seat",
-		suggested: "gpt-6-luna:low",
+		suggested: "anthropic/claude-haiku-5.5:low",
 		why:
 			"Called every turn and read by every seat, so it is the one place to be strict " +
 			"about cost. The job is small and bounded: summarise public events in two or three " +
-			"sentences. A cheaper model on low thinking does it, and the output ceiling in " +
-			"spend.ts keeps the bill where the prompt says it should be.",
+			"sentences. The strategy model on low thinking does it, and the output ceiling in " +
+			"spend.ts keeps the bill where the prompt says it should be. Off in testing.",
 	},
 };
 

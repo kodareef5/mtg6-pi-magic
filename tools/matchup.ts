@@ -20,9 +20,7 @@ import { load as loadRules } from "../src/core/rules.ts";
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
 	turns: { type: "string", default: "40" }, prepare: { type: "boolean", default: false }, resume: { type: "string" }, version: { type: "string" },
 	/** Model patterns for a role this run only, such as gpt-6.1-sol:high. */
-	pregame: { type: "string" }, strategy: { type: "string" },
-	/** Skip the analyst wave: the coordinator writes each plan alone. */
-	"no-survey": { type: "boolean", default: false } } });
+	pregame: { type: "string" }, strategy: { type: "string" } } });
 if (values.version && (!values.resume || !/^\d+$/.test(values.version))) throw new Error("--version needs a journal supplied by --resume and a nonnegative decision count.");
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
@@ -48,7 +46,7 @@ const observed = traceInference(inference as never, (event) => {
 // The clock starts before seating, so the elapsed time includes the pregame.
 const began = Date.now();
 console.log(`${values.prepare ? "Preparing" : "Playing"} ${id}; journal ${path}`);
-const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), survey: !values["no-survey"], ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
+const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
 	const result = preparationFailure(table, error, began, { journal: path, trace: calls });
 	const paths = saveReport(join(values.out!, `${id}.result.json`), result);
 	console.error([...report(result), ...paths].join("\n"));

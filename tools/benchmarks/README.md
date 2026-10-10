@@ -53,22 +53,12 @@ pattern and pass its continuation. `replacementPlans` names later accepted
 plans for the tested seat, including ones later rolled back. Inspect those
 changes before crediting the initial plan with the eventual result.
 
-Each result also records `work`: the accepted analyst reports and writer
-submission, or each task's failure. Use these to distinguish missing candidates,
-selection errors and commitments lost while writing. They are evidence for a
-review, not automatic strategic scores. Attribute fact, pilot and execution
-failures from the projected request and physical continuation separately. For turn
-writers, count explicit `steps: "keep"` and `theirTurn: "keep"` in these saved
-submissions; an accepted plan alone cannot distinguish retention from replacement.
-
-`--findings FILE` reuses that results file's analyst tasks for a live writer
-comparison. Case, repetition, projected position and analyst task coverage must
-match, and successful reports must still satisfy their submission contract.
-A missing or incompatible report stops before the writer spends; recorded
-analyst failures stay failed. Reused work is marked and costs no new call;
-the writer is asked normally. This isolates writing changes from new analyst
-samples. It cannot combine with saved plan answers or pilot, judge and
-continuation-only cases.
+Each result also records `work`: the writer's accepted submission, or its
+failure, per call. Use these to distinguish missing candidates, selection
+errors and commitments lost while writing. They are evidence for a review, not
+automatic strategic scores. For turn writers, count explicit `steps: "keep"` and
+`theirTurn: "keep"` in these saved submissions; an accepted plan alone cannot
+distinguish retention from replacement.
 
 A runner PASS establishes only its listed property. Review strategic choices,
 policy obedience, legal play, help and repairs separately. Record external

@@ -21,13 +21,9 @@ import { budget, castAttackers, paymentForecast } from "../core/budget.ts";
 import { ChangesSchema, ResponseSchema, actions, basePlan, changedPlan, conditionProblems, equipment, labelled, responseChanges, submissionFields, selectionFields } from "./plan-edit.ts";
 import { actionFacts, bindingFacts, choiceProblems, planFacts, planningChoices } from "./strategy-actions.ts";
 import { chancing, initialPlan, planningFrame, type Context } from "./strategy-facts.ts";
-import { findingsSection, questions, surveyPosition } from "./survey.ts";
-import { growthReport, growthSection } from "./growth.ts";
-import { branchReports, branchesSection } from "./branches.ts";
-import { perspectiveReports, reportsSection } from "./perspectives.ts";
 import { dossier } from "./dossier.ts";
 import { matchupExamples } from "./dossier-strategy.ts";
-import { ASSESSMENT, RESPONSE_ROLLUP, ROLLUP, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
+import { ASSESSMENT, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
 import { combatLookup } from "./strategy-combat.ts";
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
@@ -115,7 +111,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	const wholeOpponent = (plan: Plan) => plan.phases?.filter((one) => one.when.active === "opponent" && !one.when.step && !one.when.phase) ?? [];
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
 		...(!responding ? { description: `${SUBMIT.description} steps and theirTurn are required: replace each or explicitly write \"keep\".` } : {}),
-		parameters: { ...SUBMIT.parameters, properties: { assessment: response && context.survey ? RESPONSE_ROLLUP : context.survey ? ROLLUP : ASSESSMENT, ...fields,
+		parameters: { ...SUBMIT.parameters, properties: { assessment: ASSESSMENT, ...fields,
 			...(!responding ? { steps: { anyOf: [fields.steps, keep] }, theirTurn: { anyOf: [submissionFields.theirTurn, keep] } } : {}), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
 			required: ["assessment", ...(response ? ["current"] : responding ? [] : ["steps", "theirTurn"])] } };
 	const decision = !options.nextTurn && frame.decision ? ` The decision in front of the pilot: ${frame.decision.question}` : "";
@@ -123,25 +119,16 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		: `${task}${decision}`;
 	const resources = paymentForecast(frame, base);
 	const scoped: "preparation" | "response" | "turn" = options.nextTurn ? "preparation" : responding ? "response" : "turn";
-	// Analysts judge the position before the coordinator reconciles their findings with prior intent.
+	// The writer reads the position projected for the scope it plans, beside the prior intent it must reconcile.
 	const planned = planningFrame(frame, scoped);
 	const input = { frame: planned, ...(options.nextTurn ? { forecast: { from: frame, assumptions: FORECAST } } : {}),
 		...(context.brief ? { brief: context.brief } : {}), ...(context.cards ? { cards: context.cards } : {}), ...(context.recaps ? { recaps: context.recaps } : {}), scope: scoped };
-	const doc = dossier(input), facts = dossier(input, "analyst");
-	// Own turns and preparations branch on each first action beside the focused questions; branches cover the attack and its order.
-	// An invalid inherited response keeps the outlooks; a valid one asks three questions.
-	const branching = !!context.survey && !responding;
-	const only = response ? ["opponent", "defense", "removal"] : branching ? questions(planned).map(([source]) => source).filter((source) => !["attack", "ordering", "zones"].includes(source)) : undefined;
-	const [findings, branched, growth] = await Promise.all([context.survey ? surveyPosition(planned, facts, reasoner, options.signal, only) : undefined,
-		branching ? branchReports(planned, facts, available, reasoner, options.signal) : undefined,
-		branching ? growthReport(facts, reasoner, options.signal) : undefined]);
-	const reported = findings && !response && !branching ? await perspectiveReports(facts, findings, reasoner, options.signal) : undefined;
+	const doc = dossier(input);
 	const work = workSections({ base: planFacts(base), problems: [...baseProblems, ...conditionProblems(base), ...resources.conflicts],
 		...(resources.responses.length ? { funding: resources.responses } : {}), bindings: bindingFacts(frame, base, options.nextTurn),
 		actions: actionFacts(frame, available, options.nextTurn && at.kind === "turn" ? at.turn + 1 : undefined),
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
-		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
-		...(findings ? { analysts: [...(growth ? [growthSection(growth)] : []), ...(branched ? [branchesSection(branched)] : []), findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
+		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}) });
 	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : responding ? REPAIR_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
 			if (!responding) {

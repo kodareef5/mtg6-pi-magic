@@ -16,7 +16,6 @@ import { dossier } from "../src/context/dossier.ts";
 import { universe } from "../tools/matchup-fixture.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { castAttackers } from "../src/core/budget.ts";
-import { growthReport, growthSection } from "../src/context/growth.ts";
 import { play } from "../src/core/loop.ts";
 import { planReason } from "../src/core/planning.ts";
 import type { Player } from "../src/core/player.ts";
@@ -25,8 +24,6 @@ import { choiceProblems } from "../src/context/strategy-actions.ts";
 import { RequestTooLarge, type DecisionApi } from "../src/context/model.ts";
 import { summary } from "../src/core/announce.ts";
 import { check, InstructionSchema, type Instruction } from "../src/core/language.ts";
-import { recordWork, positionKey, type WorkResult } from "../tools/benchmark-work.ts";
-import type { Reasoner } from "../src/context/reason.ts";
 
 const expand = (name: string) => {
 	const to = join(mkdtempSync(join(tmpdir(), "magic-lab-")), `${name}.jsonl`);
@@ -38,43 +35,6 @@ test("a position can be rebuilt before the seat's own later work at that decisio
 	const journal = expand("k-preserve-elf-response");
 	assert.ok(position(journal, 87, 0).table.work[0]!.request, "the prefix ends with the seat's request for a new plan");
 	assert.equal(position(journal, 87, 0, 0).table.work[0]?.request, undefined, "keeping no work entries at the decision leaves the request out");
-});
-
-test("a writer comparison reuses complete analyst evidence only for its projected position", async () => {
-	const frame = workFrame(position(expand("k-missed-lethal"), 239, 0).table, 0);
-	const recorded: WorkResult[] = [], reused: WorkResult[] = [];
-	let calls = 0;
-	const writer: Reasoner = { named: "offline", broken: () => null, think: async () => "", work: async (about) => {
-		calls++; if (about === "survey opponent") throw new Error("analyst failed");
-		return { line: [about] };
-	} };
-	const args: Parameters<Reasoner["work"]> = ["growth", { system: "", user: "" }, { submit: { name: "submit", description: "", parameters: {}, check: () => null } }];
-	const capture = recordWork(writer, frame, recorded);
-	await capture.work(...args);
-	await assert.rejects(capture.work("survey opponent", args[1], args[2]), /analyst failed/);
-	const frozen = recordWork(writer, frame, reused, { position: positionKey(frame), work: recorded });
-	const answer = await frozen.work(...args);
-	(answer.line as string[]).push("changed by caller");
-	assert.deepEqual(recorded[0]!.answer, { line: ["growth"] }, "reusing evidence cannot mutate its source");
-	assert.deepEqual(reused[0]!.answer, recorded[0]!.answer, "the copied evidence stays as it was supplied");
-	await assert.rejects(frozen.work("survey opponent", args[1], args[2]), /analyst failed/);
-	assert.equal(calls, 2, "successful and failed analysts are both reused without inference");
-	assert.ok(reused.every((row) => row.reused && row.ms === 0));
-	await frozen.work("turn plan", args[1], args[2]);
-	assert.equal(calls, 3, "the writer still answers");
-	await assert.rejects(frozen.work("branch missing", args[1], args[2]), /exactly one completed task/);
-	await assert.rejects(frozen.work("turn plan", args[1], args[2]), /exactly one completed task/);
-	assert.equal(calls, 3, "a caught fixture mismatch cannot spend on a writer with missing evidence");
-	const incompatible: WorkResult[] = [];
-	const changed = recordWork(writer, frame, incompatible, { position: positionKey(frame), work: recorded });
-	await assert.rejects(changed.work(args[0], args[1], { submit: { ...args[2].submit, check: (answer) => {
-		(answer.line as string[]).push("checked on a copy"); return "defense is required";
-	} } }), /report contract: defense is required/);
-	await assert.rejects(changed.work("turn plan", args[1], args[2]), /report contract: defense is required/);
-	assert.equal(calls, 3, "a changed report contract stops the comparison before new inference");
-	assert.equal(incompatible.length, 2); assert.ok(incompatible.every((row) => row.error && !row.answer));
-	assert.deepEqual(recorded[0]!.answer, { line: ["growth"] }, "a report checker cannot mutate frozen evidence");
-	assert.throws(() => recordWork(writer, { ...frame, version: frame.version + 1 }, [], { position: positionKey(frame), work: recorded }), /different projected position/);
 });
 
 test("a seat rebuilt mid-decision does not offer help it already used", async () => {
@@ -352,7 +312,7 @@ test("the writer is told when an attack step names a creature an earlier step ca
 });
 
 test("the writer's dossier names standing effects, hand cards' effects once cast, and who can block each opposing creature", () => {
-	const at = (name: string, version: number, seat: 0 | 1) => dossier({ frame: workFrame(position(expand(name), version, seat).table, seat), cards: universe }, "coordinator");
+	const at = (name: string, version: number, seat: 0 | 1) => dossier({ frame: workFrame(position(expand(name), version, seat).table, seat), cards: universe });
 	const m = at("m-explorer-first", 299, 0);
 	assert.match(m, /Icetill Explorer, in your hand, once on the battlefield: "You may play lands from your graveyard\."/);
 	const n = at("n-attacker-tapped", 412, 0);
@@ -367,7 +327,7 @@ test("a review reads which opposing creatures cannot block, the opponent's lands
 	// Game k, Green's turn 9 upkeep: Red's Hired Claw and Smaug attacked last turn and stay tapped through Green's turn.
 	const { table } = position(expand("k-missed-lethal"), 236, 0);
 	const now = workFrame(table, 0);
-	const text = dossier({ frame: now, cards: universe }, "coordinator");
+	const text = dossier({ frame: now, cards: universe });
 	assert.match(text, /Smaug the Magnificent[^\n]*tapped, so it cannot block this turn/);
 	assert.match(text, /Hired Claw[^\n]*tapped, so it cannot block this turn/);
 	// The frame the preparation was written from had everything untapped and the plan before the install.
@@ -384,18 +344,8 @@ test("a review reads which opposing creatures cannot block, the opponent's lands
 
 test("a land permission marks only land cards in the graveyard as playable lands", () => {
 	// Game n turn 11: Explorer permits lands from the graveyard, beside Hydras, Surrak and Snakeskin Veil there.
-	const text = dossier({ frame: workFrame(position(expand("n-attacker-tapped"), 412, 0).table, 0), cards: universe }, "coordinator");
+	const text = dossier({ frame: workFrame(position(expand("n-attacker-tapped"), 412, 0).table, 0), cards: universe });
 	const graveyard = text.split("- Your graveyard: ")[1]!.split("\n")[0]!;
 	assert.match(graveyard, /Fabled Passage \(0-11@1\), you may play it as your land/);
 	assert.ok(!/Snakeskin Veil \([^)]*\), you may play it as your land/.test(graveyard) && !/Hydra \([^)]*\), you may play it as your land/.test(graveyard), graveyard);
-});
-
-test("a growth analyst that does not answer is reported as such, and its lines are ranked by claimed damage", async () => {
-	const failed = await growthReport("facts", { work: async () => { throw new Error("timed out after 35s"); } });
-	assert.match(growthSection(failed), /The growth analyst did not answer: timed out after 35s\./);
-	const ranked = await growthReport("facts", { work: async () => ({ entries: "Two plays.", lines: [
-		{ sequence: ["Play Forest."], attacker: "Explorer", power: "2 -> 4", damage: 4, theirLife: 16 },
-		{ sequence: ["Cast Harmonizer.", "Play Passage.", "Sacrifice Passage."], attacker: "Explorer", power: "2 -> 4 -> 8", damage: 8, theirLife: 12 }] }) });
-	assert.deepEqual(ranked.lines.map((one) => one.damage), [8, 4]);
-	assert.match(growthSection(ranked), /### Line 1\. Claims 8 damage, their life 12/);
 });

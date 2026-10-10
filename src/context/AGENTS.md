@@ -50,8 +50,7 @@ reaches a decision is a short plan plus the facts.
   The implementation still uses four analysts and a synthesis; measure its wall
   time and repairs before claiming that a larger brief improves gameplay.
 - **strategy** advances the pregame reasoning with one plan per seat per turn.
-  By default an analyst wave (survey, branches, growth) reads the dossier and
-  one coordinator writes the plan; `--no-survey` runs the coordinator alone. It
+  The coordinator reads the dossier and writes the plan alone. It
   prepares during the opponent's turn, accepts scoped work before upkeep choices,
   then reviews the unfinished line after draw. Without prior scoped work, opening
   planning waits for draw. It also answers stops or requests for help. It submits changed fields and reuses

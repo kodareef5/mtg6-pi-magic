@@ -40,7 +40,7 @@ const jev: ClassifierModel<ClassifierApi> = {
 };
 
 const catalogue = {
-	chat: [chat("openai", "gpt-6.1-sol"), chat("openai", "gpt-6-luna"), chat("openrouter", "openai/gpt-6-luna"), chat("openai", "gpt-5.6-luna"), chat("openrouter", "openai/gpt-5.6-luna")],
+	chat: [chat("openai", "gpt-6.1-sol"), chat("openrouter", "anthropic/claude-haiku-5.5"), chat("openai", "gpt-6-luna"), chat("openrouter", "openai/gpt-6-luna"), chat("openai", "gpt-5.6-luna"), chat("openrouter", "openai/gpt-5.6-luna")],
 	classifiers: [jev],
 };
 
@@ -52,11 +52,12 @@ test("a roster resolves patterns the way a reader would type them", () => {
 	assert.equal(of("decide").model?.id, "jev-latest");
 	assert.equal(of("pregame").model?.id, "gpt-6.1-sol");
 	assert.equal(of("pregame").thinkingLevel, "high");
-	assert.equal(of("strategy").model?.id, "gpt-6-luna");
-	assert.equal(of("strategy").thinkingLevel, "low");
-	assert.equal(of("judge").model?.id, "gpt-6-luna");
-	assert.equal(of("judge").thinkingLevel, "low");
-	assert.equal(of("summary").model?.id, "gpt-6-luna");
+	assert.equal(of("strategy").model?.id, "anthropic/claude-haiku-5.5");
+	assert.equal(of("strategy").model?.provider, "openrouter");
+	assert.equal(of("strategy").thinkingLevel, "medium");
+	assert.equal(of("judge").model?.id, "anthropic/claude-haiku-5.5");
+	assert.equal(of("judge").thinkingLevel, "medium");
+	assert.equal(of("summary").model?.id, "anthropic/claude-haiku-5.5");
 	assert.equal(of("summary").thinkingLevel, "low");
 	for (const part of parts) assert.equal(part.problem, undefined, `${part.role}: ${part.problem}`);
 

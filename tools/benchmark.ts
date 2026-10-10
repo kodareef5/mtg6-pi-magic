@@ -37,11 +37,9 @@ type Case = PlanCheck & { id: string; journal: string; version: number; seat: nu
 	pilotPolicy?: string; prepared?: { file: string; name: string }; after?: After[]; throughTurn?: number };
 const { values } = parseArgs({ options: { positions: { type: "string" }, live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", multiple: true, default: ["jev"] }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
-	answers: { type: "string" }, findings: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" },
-	/** The strategy model for this run, as a Pi pattern. The default is the prescribed baseline. */
-	strategy: { type: "string", default: "gpt-6-luna:low" },
-	/** Skip the analyst wave: the coordinator writes each plan alone. */
-	"no-survey": { type: "boolean", default: false } } });
+	answers: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" },
+	/** The strategy model for this run, as a Pi pattern. Absent, the roster's suggestion. */
+	strategy: { type: "string" } } });
 const manifest = values.positions ?? join(import.meta.dirname, "benchmarks/positions.json");
 const catalog = JSON.parse(readFileSync(manifest, "utf8")) as { journals: Record<string, string>; cases: Case[] };
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
@@ -57,8 +55,6 @@ if (values.play && selected.some((one) => ["pilot", "judge"].includes(one.task))
 if ((values.live && !values.play || values.review) && selected.some((one) => one.after)) throw new Error("Physical position properties require --live --play; a plan alone cannot establish them.");
 if (values.live && selected.some((one) => one.task === "continue") && (!values.play || values.answers)) throw new Error("Continuation cases require --play, without --answers: they resume the prefix's existing work.");
 const savedAnswers = values.answers ? JSON.parse(readFileSync(values.answers, "utf8")) as { results: { id: string; iteration: number; plan?: Plan; answer?: { plan?: Plan } }[] } : undefined;
-if (values.findings && (!values.live || values.answers || selected.some((one) => ["pilot", "judge", "continue"].includes(one.task)))) throw new Error("--findings requires live strategy authoring, without --answers.");
-const savedFindings = values.findings ? JSON.parse(readFileSync(values.findings, "utf8")) as { results: { id: string; iteration: number; position: string; work: WorkResult[] }[] } : undefined;
 // Committed compressed journals stay outside the published package. Expand only
 // the selected inputs and remove temporary copies even when a probe fails.
 const scratch = mkdtempSync(join(tmpdir(), "magic-bench-"));
@@ -119,7 +115,7 @@ if (!values.live) process.exit(0);
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
 const available = { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") };
-const parts = cast(rosterFor({ every: { strategy: values.strategy!, summary: "off" } }), available);
+const parts = cast(rosterFor({ every: { ...(values.strategy ? { strategy: values.strategy } : {}), summary: "off" } }), available);
 const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!, judging = parts.find((one) => one.role === "judge")!;
 const classifiers = new Map(pilots.filter((pilot) => pilot !== "luna").map((pilot) => {
 	const chosen = pilot === "jev" ? jev : cast({ decide: pilot }, available).find((one) => one.role === "decide")!;
@@ -145,16 +141,14 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 		let continuationPassed: boolean | undefined;
 		const work: WorkResult[] = [];
 		try {
-			const supplied = savedFindings?.results.filter((row) => row.id === one.id && row.iteration === iteration);
-			if (supplied && (supplied.length !== 1 || !Array.isArray(supplied[0]?.work))) throw new Error("Frozen analysis must identify exactly one recorded case and repetition.");
 			const writer = recordWork(reasoner({ role: one.task === "judge" ? "judge" : one.task !== "pilot" ? "strategy" : "decide", seat: one.seat,
-				model: (one.task === "judge" ? judging : luna).model as never, thinking: (one.task === "judge" ? judging : luna).thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 }), frame, work, supplied?.[0]);
+				model: (one.task === "judge" ? judging : luna).model as never, thinking: (one.task === "judge" ? judging : luna).thinkingLevel, stream: inference.stream, tally: measured, attempts: 1 }), work);
 			if (one.task === "judge") {
 				if (one.judgeRow === undefined || one.legal === undefined) throw new Error("Judge cases need judgeRow and legal.");
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
 				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
 			} else if (one.task !== "pilot") {
-				const context = { brief, cards: universe, rules, survey: !values["no-survey"] };
+				const context = { brief, cards: universe, rules };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
 					answer = { plan: frame.view.work.plan, fromPrefix: true };
@@ -172,8 +166,6 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 				}
 				const plan = (answer as { plan?: Plan }).plan;
 				if (!plan) throw new Error("Planning returned no accepted plan.");
-				const tasks = (rows: WorkResult[]) => rows.filter((row) => row.stage === "analysis").map((row) => row.about).sort();
-				if (supplied && !isDeepStrictEqual(tasks(work), tasks(supplied[0]!.work))) throw new Error("Frozen analysis does not cover the same analyst tasks.");
 				checks = checkPlan(plan, one, frame);
 				resources = paymentForecast(frame, plan);
 				passed = checks.passed;
@@ -216,7 +208,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 		const calls = [...measured.spent().slice(startCall), ...(continuation?.result.calls ?? [])];
 		spent.push(...calls);
 		const entry = { id: one.id, iteration, pilot, case: one, journal: catalog.journals[one.journal], property: one.property, passed: passed && !error,
-			position: positionKey(frame), work, ...(values.findings ? { findings: values.findings } : {}),
+			position: positionKey(frame), work,
 			ms: decisionMs ?? Date.now() - began, totalMs: Date.now() - began, calls: calls.length, answer, ...(checks ? { checks } : {}), ...(resources ? { resources } : {}),
 			...(continuation ? { continuation, continuationPassed } : {}), ...(error ? { error } : {}), usage: usageReport(calls) };
 		results.push(entry); console.log(`${one.id} ${pilot} ${entry.passed ? "PASS" : "FAIL"} ${entry.totalMs}ms ${calls.length} calls${continuation ? `; plan check ${checks?.passed ? "PASS" : "FAIL"}, continuation ${continuationPassed ? "PASS" : "FAIL"}, replacement plans ${continuation.replacementPlans.length}` : ""}${error ? ` ${error}` : ""}`);

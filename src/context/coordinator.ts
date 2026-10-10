@@ -1,17 +1,32 @@
 /**
  * What the coordinator reads: its system prompts, the work laid out for one
  * decision, and the request that ends the conversation. The coordinator writes
- * the plan the pilot flies; analysts' findings and reports are advice it weighs
- * against the dossier. Nothing here certifies a card's meaning or a line's
- * strength. Past 150 lines because the plan language and its examples belong
- * beside the prompts that teach them.
+ * the plan the pilot flies from the dossier alone. Nothing here certifies a
+ * card's meaning or a line's strength. Past 150 lines because the plan language
+ * and its examples belong beside the prompts that teach them.
  */
-import { RULES_OF_PLAY } from "./survey.ts";
 
 const text = (description: string) => ({ type: "string", minLength: 1, description });
 const win = "The most damage you can deal this turn. First apply everything you can do before combat: land plays and land searches with the landfall triggers each entry causes, counters, power changes, pumps and removal of blockers. A spell that never attacks still counts when it raises an attacker's power. Then count all your attackers together, castable haste included, through the opponent's best legal blocks, including trample and double strike, plus burn you can pay for, against their life. Write each change in order, such as 4 -> 8 -> 16 power, then the sum and the winning line, or why there is none.";
 
-/** Without analysts the coordinator surveys the board itself, piece by piece, before any plan field. */
+const RULES_OF_PLAY = [
+	"- Summoning sickness never stops blocking. An untapped creature can block on any opponent's turn, including the turn it entered.",
+	"- Summoning sickness applies only to creatures. A creature its controller has not controlled continuously since that player's most recent turn began cannot attack or pay a cost that includes {T} or {Q}, unless it has haste (302.6, 702.10). Lands and other noncreature permanents can tap the turn they enter, and every permanent's triggered and static abilities work at once.",
+	"- Tapped creatures cannot attack or block. A creature tapped for mana or for a cost before attackers are declared is not an attacker, and an attacker without vigilance becomes tapped, so it cannot pay a {T} cost afterwards. Count each creature once, as mana or as an attacker.",
+	"- A permanent taps once. Its mana ability and its other {T} abilities are alternatives: a land tapped for mana cannot also pay its own {T} cost, and an activated ability's mana cost comes from other sources.",
+	"- A creature normally blocks one attacker. Menace needs at least two blockers; flying needs flying or reach. Card abilities can change these restrictions.",
+	"- A blocked attacker divides its power among its blockers, not full power to each (510.1c). Trample can assign excess to the player after assigning lethal damage to every blocker, accounting for marked damage and deathtouch (702.19). Without trample, a blocked attacker deals no damage to the player.",
+	"- Marked damage adds up within the turn. Lethal damage destroys a creature unless indestructible or another effect prevents it; deathtouch can make 1 damage lethal (704.5g-h, 702.12).",
+	"- If you control legendary permanents with the same name, you choose one to keep and put the rest in their owners' graveyards (704.5j).",
+	"- You may play one land on each of your own turns, plus any extra land plays a card grants, never on the opponent's turn. A land that a spell or ability puts onto the battlefield, such as a land found by a search, uses no land play. Every land that enters under your control, played or put there, triggers each of your landfall abilities once.",
+	"- A land you can still play this turn adds its mana once it is on the battlefield untapped. A land that enters tapped adds nothing until it untaps.",
+	"- Until-end-of-turn changes last through the turn, and counters added later add to the result. An effect that doubles power reads the creature's power as the effect resolves, after every earlier change. A 4/4 whose power doubles to 8/4 until end of turn and then gets four more +1/+1 counters is 12/8; doubling it again makes 24/8.",
+	"- Only abilities listed on a card or in its battlefield row exist.",
+	"",
+	"Write every sum out, such as 3 + 2 = 5 damage against toughness 4, or {1}{R} + {R} = 3 mana from three red sources.",
+].join("\n");
+
+/** The coordinator surveys the board itself, piece by piece, before any plan field. */
 export const ASSESSMENT = { type: "object", additionalProperties: false, required: ["hand", "zones", "opponents", "combat", "combinations", "rollup"],
 	description: "Write first. Survey the position piece by piece before any plan field. Your own working; Jev never reads it.",
 	properties: {
@@ -43,31 +58,10 @@ export const ASSESSMENT = { type: "object", additionalProperties: false, require
 		} },
 	} };
 
-/** With analysts' work supplied, the coordinator's own working is the rollup. */
-export const ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "adopted", "win", "priorities"],
-	description: "Write first. Weigh the branches or reports and the findings against the dossier. Your own working; Jev never reads it.",
-	properties: {
-		branches: text("When branches are present: for the two that claim the most damage, check each ledger row against the dossier, its costs, sources, triggers and power. Name the first row that fails and whether another source, payment or order repairs it, or confirm the total."),
-		corrections: text("Findings or report claims that contradict the dossier or the card text, corrected, or none."),
-		adopted: text("Which reports or parts of them you adopt and why, and which you reject. When a finding or report claims more damage than your line, recount its steps against the card text and mana. If a step fails, try another source, payment or order; reject the claim only by naming the step that still fails and quoting the dossier line it rests on, such as a creature's tapped state, who can block, or a card's text. Merge parts only when they fit the same mana and order."),
-		win: text(win),
-		priorities: { type: "array", items: { type: "string" }, description: "The opportunities ranked by impact, combinations and removal included. The plan carries out the first ones." },
-	} };
-
-/** A response weighs what the opponent is doing now, not this seat's own attack. */
-export const RESPONSE_ROLLUP = { type: "object", additionalProperties: false, required: ["corrections", "threat", "answers", "priorities"],
-	description: "Write first. Weigh the findings against the dossier. Your own working; Jev never reads it.",
-	properties: {
-		corrections: text("Findings that contradict the dossier or the card text, corrected, or none."),
-		threat: text("What the opponent is doing now and can still do this turn: attackers, spells and triggers on the stack, their open mana. The damage that gets through your best legal blocks, written as a sum against your life."),
-		answers: text("Each block or response you can pay for now or later this turn, with the sources it uses, what it saves and what it leaves for your next turn."),
-		priorities: { type: "array", items: { type: "string" }, description: "The answers ranked by what they save. The response carries out the first ones." },
-	} };
-
 const ORDER = [
 	"The conversation gives you, in order:",
 	"1. A game dossier with everything this player knows. The board, mana, deck lists, odds and card text are projected facts. Registered triggers are accepted interpretations; they, the matchup plan, notebook and standing plan can be wrong.",
-	"2. The work for this decision: branches that each follow one first action, or reports from six outlooks, and findings from focused questions, when they ran; then the plan you are editing, the actions you can reuse, and any problems or changes.",
+	"2. The work for this decision: the plan you are editing, the actions you can reuse, and any problems or changes.",
 	"3. Your request, last.",
 ].join("\n");
 
@@ -82,7 +76,6 @@ export function coordinatorSystem(definitions: string, turn = true): string {
 		"- Play a land each turn you hold one, and choose which by what this turn needs. A land you play and then sacrifice to search for another land makes two land entries; a basic makes one entry and one mana. With a landfall payoff on the battlefield or castable first, count the result of each land you could play before you play any.",
 		"- Spend burn when it removes a blocker that stops lethal or a key threat, or finishes the opponent. A reserve names an actual card in hand and the window it is for. An unknown draw is not a response.",
 		"- Use the matchup plan's policies where they fit the board, and check their reconsider conditions. A policy is guidance, not proof that it fits. Check both clocks and the last window to answer before you commit resources.",
-		"- When growth opportunities, branches, reports or findings are present, weigh them against the dossier. Read the growth opportunities first: one analyst ranked this turn's ways to grow your attack. Then the branches: each follows one first action, so together they compare your land plays and casts. When a line claims their life or more, or more damage than your line, recount it row by row against the dossier, writing power after each entry as its base (printed power plus counters) + its bonus until end of turn, which keeps every earlier doubling. If a row fails, try another source, payment, order or target before you reject it; if it still fails, name the row and quote the dossier line it contradicts. Merge parts only when they fit the same mana and order.",
 		"",
 		"## Rules of play", RULES_OF_PLAY, "",
 		"## Reading the dossier",
@@ -128,7 +121,7 @@ export function coordinatorSystem(definitions: string, turn = true): string {
 const RESPONSE_ORDER = [
 	"The conversation gives you, in order:",
 	"1. A game dossier with everything this player knows. The board, mana, deck lists, odds and card text are projected facts. Registered triggers are accepted interpretations; they, the matchup plan, notebook and standing plan can be wrong.",
-	"2. The work for this decision: findings from focused questions about the opponent, your defense and removal, the plan you are editing, the actions you can reuse, and any problems or changes.",
+	"2. The work for this decision: the plan you are editing, the actions you can reuse, and any problems or changes.",
 	"3. Your request, last.",
 ].join("\n");
 
@@ -153,14 +146,13 @@ export function responseSystem(definitions: string): string {
 }
 
 export type Work = { base: unknown; problems: string[]; funding?: unknown; bindings: unknown; actions: Record<string, unknown>; changed?: string[];
-	pendingNotes?: unknown[]; choices?: unknown; refused?: readonly string[]; analysts?: string[] };
+	pendingNotes?: unknown[]; choices?: unknown; refused?: readonly string[] };
 
 const json = (value: unknown) => ["```json", JSON.stringify(value), "```"].join("\n");
 
 /** The work for one decision, laid out in sections between the dossier and the request. */
 export function workSections(work: Work): string {
 	return [
-		...(work.analysts ?? []),
 		"## The plan you are editing", "Earlier intent, with the reuse keys of its steps and branches. Change only the fields that need it.", json(work.base),
 		"## Known problems with that plan", work.problems.length ? work.problems.map((one) => `- ${one}`).join("\n") : "None found by the checks.",
 		...(work.changed?.length ? ["## What changed since it was prepared or accepted", work.changed.map((one) => `- ${one}`).join("\n")] : []),

@@ -1,52 +1,20 @@
-/** Record accepted reasoning separately from the resulting plan. Frozen analysis
- * lets a writer comparison reuse identical evidence without billing it again. */
+/** Record each writer call's accepted answer or failure beside the resulting plan, for reading afterwards. */
 import { createHash } from "node:crypto";
 import type { Frame } from "../src/core/types.ts";
 import type { Reasoner } from "../src/context/reason.ts";
 
-export type WorkResult = { about: string; stage: "analysis" | "writing"; ms: number; reused?: true; answer?: Record<string, unknown>; error?: string };
+export type WorkResult = { about: string; ms: number; answer?: Record<string, unknown>; error?: string };
 export const positionKey = (frame: Frame): string => createHash("sha256").update(JSON.stringify(frame)).digest("hex");
-const analysis = (about: string) => /^(survey |branch |perspective |growth$)/.test(about);
 
-/** Reuse complete successful or failed analyst tasks, never a writer answer.
- * A different projected position or missing task is refused, not regenerated. */
-export function recordWork(writer: Reasoner, frame: Frame, output: WorkResult[], saved?: { position: string; work: WorkResult[] }): Reasoner {
-	if (saved && saved.position !== positionKey(frame)) throw new Error("Frozen analysis belongs to a different projected position.");
-	const incompatible: string[] = [];
+export function recordWork(writer: Reasoner, output: WorkResult[]): Reasoner {
 	return { ...writer, async work(about, ...args) {
-		const began = Date.now(), stage = analysis(about) ? "analysis" : "writing";
-		const refuse = (error: string) => {
-			output.push({ about, stage, ms: 0, error });
-			throw new Error(error);
-		};
-		// Optional analyst callers catch failures. An incompatible fixture must
-		// still stop the writer, rather than becoming a new missing analyst.
-		if (stage === "writing" && incompatible.length) return refuse(incompatible.join("\n"));
-		if (saved && stage === "analysis") {
-			const found = saved.work.filter((one) => one.about === about && one.stage === stage);
-			if (found.length !== 1 || !found[0]!.answer && !found[0]!.error) {
-				const error = `Frozen analysis needs exactly one completed task for ${about}.`;
-				incompatible.push(error); return refuse(error);
-			}
-			const row = structuredClone(found[0]!);
-			if (!row.error) {
-				let wrong: string | null;
-				try { wrong = args[1].submit.check(structuredClone(row.answer!)); } catch (error) { wrong = String(error); }
-				if (wrong) {
-					const error = `Frozen analysis for ${about} no longer satisfies its report contract: ${wrong}`;
-					incompatible.push(error); return refuse(error);
-				}
-			}
-			output.push({ ...row, ms: 0, reused: true });
-			if (row.error) throw new Error(row.error);
-			return structuredClone(row.answer!);
-		}
+		const began = Date.now();
 		try {
 			const answer = await writer.work(about, ...args);
-			output.push({ about, stage, ms: Date.now() - began, answer: structuredClone(answer) });
+			output.push({ about, ms: Date.now() - began, answer: structuredClone(answer) });
 			return answer;
 		} catch (error) {
-			output.push({ about, stage, ms: Date.now() - began, error: String(error) });
+			output.push({ about, ms: Date.now() - began, error: String(error) });
 			throw error;
 		}
 	} };

@@ -29,7 +29,6 @@ import { project } from "../src/core/view.ts";
 import { holds as conditionHolds, players, viewWorld } from "../src/core/selectors.ts";
 import { checkPlan, checkPosition } from "../tools/benchmark-checks.ts";
 import { matchTable } from "../tools/matchup-fixture.ts";
-import { planningFrame } from "../src/context/strategy-facts.ts";
 import { permissionForecasts } from "../src/context/strategy-permissions.ts";
 import { odds } from "../src/core/odds.ts";
 import type { Answer, Player } from "../src/core/player.ts";
@@ -52,9 +51,6 @@ import { actions, basePlan, changedPlan, conditionProblems, equipment, responseC
 import { actionFacts, bindingFacts, choiceProblems, movementActions, planFacts, planningChoices } from "../src/context/strategy-actions.ts";
 import { asState } from "../src/context/model.ts";
 import { dossier } from "../src/context/dossier.ts";
-import { perspectiveReports, reportsSection } from "../src/context/perspectives.ts";
-import { surveyPosition } from "../src/context/survey.ts";
-import { branchReports, branchesSection, firstActions } from "../src/context/branches.ts";
 import { announce, cardTexts, establish, example, finish, main, matchup, pack, passBoth, place, quiet, readDossier } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
@@ -638,7 +634,7 @@ test("strategy accepts scoped work before upkeep and reviews after draw, with no
 	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "work");
 	// A prepared version-zero position can hold card equipment without a planning policy.
 	editWork(table, 0, [{ do: "package.put", package: { card: "Forest", registers: [] } }], "carried-equipment");
-	const seated = await seatTable(table, roster, inference, universe, { format: standard.name, survey: false });
+	const seated = await seatTable(table, roster, inference, universe, { format: standard.name });
 	assert.equal(prompts.length, 0, "seating spends no strategy before a decision");
 	assert.ok(table.work[0]!.eachTurn && table.work[1]!.eachTurn, "both a prepared seat and a fresh seat plan each turn");
 	assert.deepEqual(table.work[0]!.packages, [{ card: "Forest", registers: [] }], "enabling strategy preserves carried card equipment");
@@ -839,7 +835,7 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "o", guidance: "g", steps: null, theirTurn } }], stopReason: "toolUse" }) })) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "unplanned");
-	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name, survey: false }), inference, undefined);
+	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name }), inference, undefined);
 	assert.ok(outcome, "the game reaches an outcome");
 	assert.ok(table.gaps.some((gap) => gap.includes("/steps must be array") && gap.endsWith("The standing plan is kept. Play goes on.")), "each failed session is a gap that names why");
 
@@ -1845,27 +1841,18 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
  assert.equal(signals.length, 2, "closed seats start nothing more");
 
 	// Exercise the real preparation pipeline with a provider that never finishes.
-	// Cancellation must stop the focused questions or the branches before the coordinator starts.
-	for (const stage of ["survey", "branch"] as const) {
+	// Cancellation must reach the coordinator's request, and nothing may publish after it.
+	{
 		const pending: AbortSignal[] = [], calls = tally();
-		let coordinated = 0;
-		const stream: Stream = (_model, request, options) => {
-			const schema = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
-			const survey = "findings" in schema.properties;
-			if (stage === "branch" && survey) return { result: async () => ({ content: [{ type: "toolCall", id: "finding", name: "submit", arguments: { findings: [] } }], stopReason: "toolUse" }) };
-			if (!survey && !("line" in schema.properties) && !("ledger" in schema.properties) && !("lines" in schema.properties)) coordinated++;
-			pending.push(options!.signal!);
-			return { result: () => new Promise(() => {}) };
-		};
+		const stream: Stream = (_model, _request, options) => { pending.push(options!.signal!); return { result: () => new Promise(() => {}) }; };
 		const planner = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: calls });
 		const pilot = aiSeat({ name: "Cancellation", api: {} as never, intent: startingIntent(0), onGap: assert.fail,
-			prepare: (frame, signal) => prepareTurn(frame, { survey: true }, planner, signal) });
+			prepare: (frame, signal) => prepareTurn(frame, {}, planner, signal) });
 		pilot.observe(workFrame(table, 0));
 		await new Promise((resolve) => setImmediate(resolve));
-		assert.ok(pending.length > (stage === "survey" ? 1 : 0), `${stage} calls began`);
+		assert.equal(pending.length, 1, "the coordinator's request began");
 		await pilot.close();
-		assert.ok(pending.every((signal) => signal.aborted), `closing cancels every ${stage} request`);
-		assert.equal(coordinated, 0, "a canceled round cannot launch the coordinator");
+		assert.ok(pending.every((signal) => signal.aborted), "closing cancels the request");
 		assert.ok(calls.spent().every((call) => !call.pending), "canceled attempts settle in the bill");
 	}
 });
@@ -2003,109 +1990,30 @@ test("a hold can end at a window, and object queries accept the writer's you", (
 	assert.equal(reached({ active: "self", phase: "combat" }, at(0, "begin-combat")), true, "a phase begins at its first step");
 });
 
-test("focused questions rate findings, branches follow each first action in parallel, and the coordinator weighs them", async () => {
-	const table = matchup("survey");
+test("the coordinator writes alone; a valid response edits only the current decision and invalid inherited work exposes the full editor", async () => {
+	const table = matchup("coordinator");
 	main(table, 0, 3);
 	place(table, 0, "battlefield", "Forest", "Forest");
 	place(table, 0, "hand", "Mossborn Hydra", "Forest");
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Prior tactical conclusion", guidance: "Prior payment assumption", steps: [] } },
 		{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const before = structuredClone(table);
-	const questions: string[] = [], outlooks: string[] = [], branches: string[] = [], grown: string[] = [], writer: string[] = [], coordinated: string[] = [];
+	const writer: string[] = [], coordinated: string[] = [];
 	const stream: Stream = (_model, request) => {
 		const submit = request.tools?.find((one) => one.name === "submit")?.parameters as { properties: Record<string, unknown> } | undefined;
 		const reply = (args: Record<string, unknown>) => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: args }], stopReason: "toolUse" }) });
-		if (submit && "findings" in submit.properties) { questions.push(JSON.stringify(request.messages)); return reply({ findings: [{ kind: "opportunity", what: "Hydra: 2 + 1 = 3 sources pay {2}{G}.", relevance: questions.length % 5 + 1, when: "now" }] }); }
-		if (submit && "line" in submit.properties) { outlooks.push(JSON.stringify(request.messages)); return reply({ line: ["Play Forest", "Cast Mossborn Hydra"], hold: "none", opponentTurn: "Block with Hydra", risks: "none", outcome: "20 to 20", confidence: 3 }); }
-		if (submit && "lines" in submit.properties) { grown.push(JSON.stringify(request.messages)); return reply({ entries: "One Forest play: one entry.",
-			lines: [{ sequence: ["Play Forest."], attacker: "None.", power: "0", damage: 1, theirLife: 19 }, { sequence: ["Cast Hydra.", "Play Forest."], attacker: "Hydra next turn.", power: "0 + 1", damage: 3, theirLife: 17 }] }); }
-		if (submit && "ledger" in submit.properties) { branches.push(JSON.stringify(request.messages)); return reply({ ledger: ["Play Forest: one land entry."], attackers: "None.", damage: branches.length, theirLife: 20 - branches.length }); }
+		assert.ok(submit && !("findings" in submit.properties) && !("line" in submit.properties) && !("ledger" in submit.properties) && !("lines" in submit.properties), "only the coordinator is asked");
 		writer.push(JSON.stringify(request.messages)); coordinated.push(JSON.stringify(submit));
 		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
 			...(submit && "current" in submit.properties ? { current: [{ label: "Pass now", action: { option: "pass" } }] }
 				: { steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }], theirTurn }) });
 	};
 	const brief = { ...emptyBrief(0), route: "Pregame growth expertise" };
-	await planWork(workFrame(table, 0), { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
-	const hand = new Set(cardsIn(table, "hand", 0).map((one) => one.card));
-	for (const card of hand) assert.ok(questions.some((one) => one.includes(`Your card ${card}.`)), `a focused question for ${card}`);
-	for (const kind of ["The opponent.", "Their next attack.", "Removal."]) assert.ok(questions.some((one) => one.includes(kind)), kind);
-	for (const kind of ["Your whole attack this turn,", "Orders of operations", "Your other resources."]) assert.ok(!questions.some((one) => one.includes(kind)), `branches replace ${kind}`);
-	assert.equal(outlooks.length, 0, "an own turn branches on first actions instead of asking six outlooks");
-	assert.ok(branches.some((one) => one.includes("Commit to this first action this turn: Play Forest from hand.")), "each land play is a first action");
-	const [doc, work] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
-	const facts = dossier({ frame: planningFrame(workFrame(table, 0), "turn"), brief }, "analyst");
-	assert.equal(grown.length, 1, "one growth analyst runs beside the branches");
-	assert.ok(JSON.parse(grown[0]!).at(-1).content.startsWith("## Your request\nGrowth question."));
-	for (const asked of [...questions, ...branches, ...grown]) {
-		const seen = (JSON.parse(asked) as { content: string }[])[0]!.content;
-		assert.equal(seen, facts, "every analyst reads the same projected facts");
-		assert.ok(seen.includes("Pregame growth expertise") && !seen.includes("## Your standing plan") && !seen.includes("Prior tactical conclusion"), "analysts receive matchup advice without earlier tactical conclusions");
-	}
-	assert.ok(doc!.startsWith(facts) && doc!.includes("Prior tactical conclusion"), "the coordinator keeps the same facts and the prior intent it must reconcile");
-	assert.ok(work!.indexOf("## Branches from each first action") < work!.indexOf("## Findings from focused questions") && work!.indexOf("## Findings from focused questions") < work!.indexOf("## Your request"), "analysts' work comes before the request, which comes last");
-	assert.ok(work!.indexOf("## Growth opportunities") < work!.indexOf("## Branches from each first action"), "growth opportunities come first");
-	const growthPart = work!.split("## Branches from each first action")[0]!, branchPart = work!.split("## Branches from each first action")[1]!;
-	assert.deepEqual([...growthPart.matchAll(/Claims (\d+) damage/g)].map((match) => Number(match[1])), [3, 1], "growth lines arrive ordered by the damage they claim");
-	const claimed = [...branchPart.matchAll(/Claims (\d+) damage/g)].map((match) => Number(match[1]));
-	assert.deepEqual(claimed, [...claimed].sort((a, b) => b - a), "branches arrive ordered by the damage they claim");
-	const ranks = [...work!.matchAll(/^\d+\. Relevance (\d)/gm)].map((match) => Number(match[1]));
-	assert.deepEqual(ranks, [...ranks].sort((a, b) => b - a), "findings arrive ranked by relevance");
-	assert.match(coordinated[0]!, /adopted/, "the coordinator records which reports it adopts");
-	assert.deepEqual(table, before, "asking questions changes nothing on the table");
-	const branchFrame = workFrame(table, 0), castHydra = printedCast("Mossborn Hydra", branchFrame.view.printed!["Mossborn Hydra"]!);
-	const branchActions = Object.fromEntries(Array.from({ length: 9 }, (_, n) => [`cast:${n}`, { label: "Same label", action: {
-		procedure: { ...castHydra, cost: { mana: `{${n}}{G}` } },
-	} }]));
-	branchActions.alias = { ...branchActions["cast:0"]!, label: "Prior plan's alias" };
-	const distinct = firstActions(branchFrame, branchActions);
-	assert.equal(distinct.length, 9, "different accepted costs survive identical labels and the former eight-action limit");
-	assert.deepEqual(distinct[0]!.aliases, ["alias"], "only identical accepted actions share a branch");
-	let active = 0, peak = 0, asked = 0;
-	const coverage = await branchReports(branchFrame, facts, branchActions, { work: async (about, prompt) => {
-		assert.equal(prompt.user, facts); asked++; active++; peak = Math.max(peak, active);
-		const key = about.slice("branch ".length);
-		assert.ok(prompt.task?.includes(JSON.stringify(branchActions[key]!.action)), "identical labels cannot hide different accepted terms from the analyst");
-		await new Promise((resolve) => setImmediate(resolve)); active--;
-		if (about.includes("cast:8")) throw new Error("Recorded analyst failure");
-		return { ledger: ["No inferred execution."], attackers: "None", damage: 0, theirLife: 20 };
-	} });
-	assert.equal(asked, 9); assert.equal(peak, 8, "the concurrency bound never drops a candidate");
-	assert.equal(coverage.branches.length, 8); assert.equal(coverage.failed?.length, 1);
-	assert.match(branchesSection(coverage), /9 distinct accepted-action candidates, 1 aliases, 8 reports, 1 failed calls/);
-	const cancelled = new AbortController(); asked = 0;
-	await assert.rejects(branchReports(branchFrame, facts, branchActions, { work: async () => {
-		asked++; cancelled.abort(); throw new Error("Cancelled");
-	} }, cancelled.signal), /abort/i);
-	assert.equal(asked, 1, "discarding work prevents queued branches from starting");
-	const missingFields: Stream = (_model, request) => {
-		assert.equal(request.tools?.[0]?.name, "submit");
-		return { result: async () => ({ content: [{ type: "toolCall", id: "missing", name: "submit", arguments: { line: ["Pass", "hold", "none"] } }], stopReason: "toolUse" }) };
-	};
-	const malformed = await perspectiveReports(facts, { findings: [] }, reasoner({ role: "strategy", stream: missingFields,
-		model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
-	assert.equal(Object.keys(malformed.reports).length, 0, "a partial line list is not a complete outlook report");
-	assert.equal(malformed.failed?.length, 6, "every unanswered outlook reaches the coordinator as a failure");
-	assert.doesNotMatch(reportsSection(malformed), /Hold: undefined|Outcome: undefined/, "missing report fields never become invented advice");
-	let findingAttempts = 0;
-	const invalidRank: Stream = (_model, request) => {
-		findingAttempts++;
-		if (findingAttempts === 2) assert.match(JSON.stringify(request.messages), /relevance/, "the repair names the malformed ranking field");
-		return { result: async () => ({ content: [{ type: "toolCall", id: `rank-${findingAttempts}`, name: "submit", arguments: {
-			findings: [{ kind: "opportunity", what: "No cast required.", relevance: findingAttempts === 1 ? ":4" : 4, when: "now" }],
-		} }], stopReason: "toolUse" }) };
-	};
-	const repairedFindings = await surveyPosition(workFrame(table, 0), facts, reasoner({ role: "strategy", stream: invalidRank,
-		model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }), undefined, ["attack"]);
-	assert.equal(findingAttempts, 2); assert.equal(repairedFindings.findings[0]!.relevance, 4);
-	const invalidFinding = await surveyPosition(workFrame(table, 0), facts, { work: async (_about, _prompt, tools) => {
-		const valid = { kind: "resource", what: "An untapped source.", relevance: 3, when: "now", ordering: "Before combat." };
-		assert.equal(tools.submit.check({ findings: [valid] }), null);
-		for (const invalid of [null, { ...valid, kind: "unknown" }, { ...valid, what: "" }, { ...valid, relevance: 6 },
-			{ ...valid, when: "yesterday" }, { ...valid, ordering: 7 }, { ...valid, extra: true }]) assert.ok(tools.submit.check({ findings: [invalid] }), "malformed fields cannot reach ranking");
-		throw new Error("No valid finding after repair.");
-	} }, undefined, ["attack"]);
-	assert.equal(invalidFinding.findings.length, 0); assert.equal(invalidFinding.failed?.length, 1, "an unrepaired question reaches later rounds as a failure");
+	await planWork(workFrame(table, 0), { brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+	assert.equal(writer.length, 1, "one call writes the turn");
+	const [doc] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
+	assert.ok(doc!.includes("Pregame growth expertise") && doc!.includes("Prior tactical conclusion"), "the coordinator reads the matchup advice and the prior intent it must reconcile");
+	assert.deepEqual(table, before, "writing changes nothing on the table");
 	const response = structuredClone(workFrame(table, 0));
 	if (response.view.window.kind === "turn") Object.assign(response.view.window, { active: 1, turn: 4 });
 	response.view.work!.request = "Review this opponent response.";
@@ -2113,18 +2021,14 @@ test("focused questions rate findings, branches follow each first action in para
 		if (invalid) response.view.work!.plan!.steps = [{ label: "Stale attacker", when: { active: "self", step: "declare-attackers" },
 			action: { prefix: "attack:", objects: { refs: [{ id: "absent", incarnation: 1 }] } } }];
 		const unchanged = structuredClone(response);
-		questions.length = 0; outlooks.length = 0; coordinated.length = 0;
-		await planWork(response, { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
-		if (invalid) {
-			assert.ok(questions.length > 3 && outlooks.length === 6, "invalid inherited work keeps full analysis for the broader repair");
-			assert.doesNotMatch(coordinated[0]!, /"current"/, "the full editor can remove invalid work outside this window");
-		} else {
-			assert.equal(questions.length, 3); assert.equal(outlooks.length, 0);
-			for (const kind of ["The opponent.", "Their next attack.", "Removal."]) assert.ok(questions.some((one) => one.includes(kind)));
+		coordinated.length = 0;
+		await planWork(response, { brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
+		if (invalid) assert.doesNotMatch(coordinated[0]!, /"current"/, "the full editor can remove invalid work outside this window");
+		else {
 			assert.match(coordinated[0]!, /"current"/, "a valid response edits only the current decision and its policies");
 			assert.doesNotMatch(coordinated[0]!, /"enum":\["keep"\]/, "response repairs do not gain a turn-retention directive");
 		}
-		assert.deepEqual(response, unchanged, "shorter analysis neither changes the projected frame nor repairs it for the player");
+		assert.deepEqual(response, unchanged, "planning neither changes the projected frame nor repairs it for the player");
 	}
 });
 

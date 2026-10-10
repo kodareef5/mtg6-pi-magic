@@ -78,11 +78,8 @@ export type Reasoner = {
 	 * named, up to `turns` replies in all. The final reply offers only submit,
 	 * so reference lookups cannot consume the delivery slot. Returns accepted arguments.
 	 */
-	/**
-	 * `attempts` overrides the reasoner's retries for this question. An `optional` question is one whose
-	 * caller drops a failure, such as one analyst among many: its failure does not count toward giving up.
-	 */
-	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number; signal?: AbortSignal; timeoutMs?: number; attempts?: number; optional?: true }, ceiling?: number): Promise<Record<string, unknown>>;
+	/** `attempts` overrides the reasoner's retries for this question. */
+	work(about: string, prompt: { system: string; user: string; task?: string }, tools: { submit: Submission; lookups?: Lookup[]; turns?: number; signal?: AbortSignal; timeoutMs?: number; attempts?: number }, ceiling?: number): Promise<Record<string, unknown>>;
 	/**
 	 * Why this reasoner stopped answering, or null while it is working.
 	 *
@@ -114,12 +111,15 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 900_000, strategy: 150_000, judge: 150_000, summary: 60_000 };
 /**
  * Every timeout and output ceiling in this package was measured on a low-effort model. A model asked to think
- * harder answers later and spends more tokens before its answer, so both scale with the thinking level here, in
- * the one place every chat call passes through. Low is the baseline and scales nothing. Measured on the growth
- * fixtures: Sol 6.1 high analysts ran a median of 50 seconds with a p95 of 83, and at four times the low limits
- * one call in nine still timed out, so high is six.
+ * harder answers later and writes longer answers, so both scale with the thinking level here, in the one place
+ * every chat call passes through. Low is the baseline and scales nothing. Pi adds a provider's thinking budget
+ * on top of the ceiling, so the ceiling sizes the answer alone. Measured October 10: Haiku 5.5 medium
+ * coordinator answers ran a median of 4,600 output tokens, a p90 of 9,900 and a longest of 18,100 against a
+ * 4,000-token base, with a p90 of 54 seconds and one call in twenty past 90, so medium is five. Sol 6.1 high
+ * fixture calls ran a median of 50 seconds with a p95 of 83, and at four times the low limits one call in nine still
+ * timed out, so high is six.
  */
-const EFFORT: Record<ThinkingLevel, number> = { off: 1, minimal: 1, low: 1, medium: 2, high: 6, xhigh: 8, max: 10 };
+const EFFORT: Record<ThinkingLevel, number> = { off: 1, minimal: 1, low: 1, medium: 5, high: 6, xhigh: 8, max: 10 };
 
 export function reasoner(options: {
 	role: Role;
@@ -214,7 +214,7 @@ export function reasoner(options: {
 	}
 
 	/** Try a request again while its failure is transient; give up on a settled one. */
-	async function retried<T>(about: string, request: () => Promise<T>, signal?: AbortSignal, call: { attempts?: number; optional?: true } = {}): Promise<T> {
+	async function retried<T>(about: string, request: () => Promise<T>, signal?: AbortSignal, call: { attempts?: number } = {}): Promise<T> {
 		if (gaveUp) throw new Error(`${named} stopped answering: ${gaveUp}`);
 		const failures: string[] = [];
 		const tries = call.attempts ?? attempts;
@@ -238,7 +238,6 @@ export function reasoner(options: {
 				if (attempt < tries) await wait(backoff * 2 ** (attempt - 1));
 			}
 		}
-		if (call.optional) throw new Error(`${named} failed ${about} after ${failures.length}: ${failures.join(" | ")}`);
 		consecutive += 1;
 		if (!gaveUp && consecutive >= patience) {
 			gaveUp = `${consecutive} questions in a row failed. Last: ${failures.at(-1)}`;
@@ -264,7 +263,7 @@ export function reasoner(options: {
 				if (finishing) messages.push({ role: "user", content: `This session's final reply is for ${tools.submit.name}. Reference lookups are closed. Submit your answer using the facts already returned. A use goes in unsupported only when it cannot be prepared at all; notes and caveats do not belong there and a non-empty unsupported refuses the whole request. Acceptance still depends on validation.`, timestamp: Date.now() });
 				const available = finishing ? specs.filter((one) => one.name === tools.submit.name) : specs;
 				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, available, tools.signal, tools.timeoutMs), tools.signal,
-					{ ...(tools.attempts ? { attempts: tools.attempts } : {}), ...(tools.optional ? { optional: true as const } : {}) });
+					{ ...(tools.attempts ? { attempts: tools.attempts } : {}) });
 				messages.push(reply);
 				const calls = reply.content.filter((part): part is { type: "toolCall"; id: string; name: string; arguments: Record<string, unknown> } =>
 					(part as { type?: unknown }).type === "toolCall");
