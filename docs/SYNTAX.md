@@ -130,7 +130,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 |---|---|
 | `damage` | `to` an object or player, `amount`, `from` (default the source) |
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
-| `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link` |
+| `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone |
 | `shuffle`, `draw`, `mill` | |
@@ -138,6 +138,9 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `life` | gain or lose |
 | `mana` | `colors` or `any`, `times` to repeat, `spendOnly` |
 | `tap`, `untap` | |
+| `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
+| `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
+| `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, words, registrations |
 | `modify` | change characteristics `until` a duration, written as a public label |
 | `permit` | a player may play a card, `from` now or next turn, `until` a duration |
@@ -256,6 +259,28 @@ the normal face from that exile incarnation (715.3d). A resolving Omen shuffles
 the card into its owner's library (720.3d). Countering either spell, or making
 all its targets illegal, sends it to the graveyard without that continuation.
 These shared rules supply no printed spell instructions.
+
+Rooms retain unlocked designations while on the battlefield. The table offers
+paying a locked door's printed cost as a special action in its controller's
+empty-stack main phase (709.5). Watches use `on: "unlocks"`, optional `face`,
+and optional `fully: true`. Transformation watches use `on: "transforms"`.
+
+Craft composes a source exile, a material choice and entry transformed.
+`cost.exile` can be `{choose, count, source: true}`. The choice selects controlled
+battlefield objects or owned graveyard cards; `source: true` also exiles the
+source and binds its new incarnation as `bound:cost-source`. Exiling `"this"`
+alone supplies the same binding. See [face examples](examples/faces.md).
+
+A Saga registers each chapter with `kind: "chapter"`, `numbers` and `effect`.
+The table supplies lore on entry and at the precombat main boundary, then
+sacrifices the Saga after its final chapter and any other pending chapters
+leave the stack (714). A finality counter changes that destination to exile.
+The chapter's printed instructions still belong to the resolving seat.
+
+`enters.prepared` prepares a permanent as it enters. `prepare` can later change
+the designation. Its controller may cast the resulting copy from exile using
+face 1; the source stays on the battlefield and becomes unprepared. The unused
+copy ceases when the source leaves or becomes unprepared (722.3c).
 This removes the repeated empty cast program.
 
 `deferred` identifies a cast or nonmana activation by `claim`, its complete
@@ -488,6 +513,6 @@ likely addition; no card in the matchup needs it yet.
   of these cards produce it.
 - Copies, effects that take control of a permanent, and face-down permanents.
   None of these cards produce them.
-- Room unlocking, transformation, crafting, Saga chapters and prepared copies.
+- Read ahead and general card or spell copying beyond Prepare's copy.
 - Hybrid and Phyrexian mana symbols. The printed cost reader and a stated cost
   both accept generic, colored and X symbols only.

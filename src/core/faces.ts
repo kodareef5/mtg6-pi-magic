@@ -3,14 +3,18 @@
 import type { Printed } from "./printed.ts";
 import type { Thing } from "./table.ts";
 
-export type Faced = Pick<Thing, "card" | "faceDown"> & Partial<Pick<Thing, "zone" | "face" | "doors">>;
+export type Faced = Pick<Thing, "card" | "faceDown"> & Partial<Pick<Thing, "zone" | "face" | "doors" | "copy">>;
 export const room = (printed?: Printed) => printed?.layout === "split" && !!printed.faces?.some((face) => /\bRoom\b/.test(face.type));
+export const doubleFaced = (printed?: Printed) => !!printed?.faces && ["transform", "modal_dfc"].includes(printed.layout ?? "");
+export const transformable = (printed: Printed | undefined, object: Faced) => doubleFaced(printed) && object.zone === "battlefield" && !object.faceDown &&
+	!/(?:Instant|Sorcery)/.test(printed!.faces![object.face ? 0 : 1]!.type.split("—")[0]!);
 export const faceFacts = (printed: Printed | undefined, face = 0): Printed | undefined => {
 	const chosen = printed?.faces?.[face];
 	return chosen ? { ...chosen, text: chosen.oracle.replace(/\([^)]*\)/g, "").trim().length > 0 } : face === 0 ? printed : undefined;
 };
 
 export function activeFaces(printed: Printed, object: Faced): number[] {
+	if (object.copy) return [object.copy.face];
 	if (object.zone === "stack") return [object.face ?? 0];
 	if (room(printed) && object.zone === "battlefield") return object.doors ?? [];
 	if (printed.layout === "split") return [0, 1];
@@ -30,7 +34,8 @@ export function currentFacts(printed: Printed | undefined, object: Faced): Print
 }
 
 /** Alternate faces may be cast only when their layout permits it. Prepare creates a separate copy. */
-export function castableFace(printed: Printed | undefined, face: number): boolean {
+export function castableFace(printed: Printed | undefined, face: number, object?: Pick<Thing, "copy">): boolean {
+	if (object?.copy) return face === object.copy.face && !!printed?.faces?.[face];
 	if (!printed?.faces) return face === 0;
 	if (!printed.faces[face]) return false;
 	return face === 0 || ["adventure", "split", "modal_dfc"].includes(printed.layout ?? "");

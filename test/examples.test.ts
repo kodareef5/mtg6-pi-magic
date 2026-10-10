@@ -27,20 +27,25 @@ test("every example block parses and quotes its card", () => {
 	const cards = load(join(import.meta.dirname, "..", "cards", "standard.tsv")).cards;
 	const inMatchup = new Set(decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
 	const named = new Set<string>();
-	const quotes = (card: string, basis: string, where: string) => {
-		const oracle = cards.get(card)?.oracle.replaceAll("\\n", " ");
+	const quotes = (card: string, basis: string, where: string, face?: number) => {
+		const source = face === undefined ? cards.get(card) : cards.get(card)?.faces?.[face];
+		const oracle = source?.oracle.replaceAll("\\n", " ");
 		assert.ok(oracle, `${where}: ${card} is not a Standard card`);
 		named.add(card);
 		for (const part of basis.split(" ... ")) assert.ok(oracle.includes(part), `${where}: "${part}" is not in ${card}'s text`);
-		assert.ok(sourceQuote(cards.get(card), basis), `${where}: ${basis} does not quote complete source sentences or lines`);
+		assert.ok(sourceQuote(source, basis), `${where}: ${basis} does not quote complete source sentences or lines`);
 	};
 	// A token is named by the card that made it; its procedures quote that card's reminder text.
 	const tokens = new Set<string>();
 	const procedure = (value: Procedure, where: string) => {
 		checkProcedure(value);
-		if (value.source.card && !tokens.has(value.source.card)) quotes(value.source.card, value.basis, where);
+		if (value.source.card && !tokens.has(value.source.card)) quotes(value.source.card, value.basis, where, value.face);
 	};
-	const pack = (value: Package, where: string) => value.registers.forEach((registration) => quotes(value.card, registration.basis, where));
+	const pack = (value: Package, where: string) => {
+		value.registers.forEach((registration) => quotes(value.card, registration.basis, where, registration.face));
+		(value.procedures ?? []).forEach((one) => procedure(one, where));
+		(value.deferred ?? []).forEach((one) => quotes(value.card, one.basis, where, one.face));
+	};
 	const files = readdirSync(DIR).filter((file) => file.endsWith(".md") && file !== "README.md");
 	assert.ok(files.length > 0);
 	for (const file of files) {

@@ -1,0 +1,57 @@
+{
+	"card": "Bramble Familiar // Fetch Quest",
+	"generated": "2026-10-10",
+	"source": "608de92b9800005a11e74f65f31655a8bff63e3f53da42e0eb2d830ca6359389",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bramble Familiar // Fetch Quest",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"face": 0,
+				"claim": "Return Bramble Familiar to its owner's hand",
+				"basis": "{1}{G}, {T}, Discard a card: Return this creature to its owner's hand.",
+				"source": {
+					"card": "Bramble Familiar // Fetch Quest",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"face": 1,
+				"claim": "Cast Fetch Quest",
+				"basis": "Mill seven cards. Then put a creature, enchantment, or land card from among the milled cards onto the battlefield.",
+				"source": {
+					"card": "Bramble Familiar // Fetch Quest",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

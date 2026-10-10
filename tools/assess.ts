@@ -30,16 +30,16 @@ const ledgerFile = ledgerPath(universe.generated);
 const ledger: Ledger = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, "utf8")) as Ledger : {};
 const stored = storedPackages(universe);
 
-// Every distinct main-deck card with rules text, and the decks that play it.
+// Setup registers the main deck and sideboard; both need source-backed equipment.
 const byCard = new Map<string, string[]>();
-for (const deck of decks) for (const card of Object.keys(deck.main)) byCard.set(card, [...(byCard.get(card) ?? []), deck.name]);
+for (const deck of decks) for (const card of Object.keys({ ...deck.main, ...deck.sideboard })) byCard.set(card, [...(byCard.get(card) ?? []), deck.name]);
 const printed = printedFacts(universe, [...byCard.keys()]);
 const todo = [...byCard.keys()].filter((card) => (!values.card?.length || values.card.includes(card)) && printed[card]?.text && !stored.has(card) && (values.retry || !ledger[card]));
 console.log(`${byCard.size} distinct cards in ${decks.length} decks; ${stored.size} stored, ${Object.keys(ledger).length} on the ledger, ${todo.length} to assess.`);
 
 const report = () => {
 	for (const deck of decks) {
-		const cards = Object.keys(deck.main).filter((card) => printed[card]?.text);
+		const cards = Object.keys({ ...deck.main, ...deck.sideboard }).filter((card) => printed[card]?.text);
 		const missing = cards.filter((card) => !stored.has(card));
 		const deferred = cards.filter((card) => stored.get(card)?.package.deferred?.length);
 		console.log(`${missing.length ? "BLOCKED" : "ASSESSED"} ${deck.name}: ${cards.length - missing.length}/${cards.length} standing assessments, ${deferred.length} cards with deferred uses${missing.length ? `; missing: ${missing.join(", ")}` : ""}`);

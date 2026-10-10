@@ -8,7 +8,7 @@
  * option, never removed: the table guides and does not restrain.
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
-import { faceFacts } from "./faces.ts";
+import { doubleFaced, faceFacts } from "./faces.ts";
 import { printedTraits } from "./characteristics.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
@@ -197,7 +197,13 @@ function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: F
 			: objects(scope, sacrifice as Exclude<typeof sacrifice, { choose: unknown }>).filter((one) => one.zone === "battlefield" && one.controller === frame.seat);
 		add(subsets(pool, chosen?.count ?? 1).map((set) => ({ paid: { sacrificed: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Sacrifice ${set.map(name).join(", ")}. ` })));
 	}
-	if (cost.exile) add(objects(scope, cost.exile).map((one) => ({ paid: { exiled: [ref(one)] }, uses: [one.id], consumes: [one.id], shows: `Exile ${name(one)}. ` })));
+	if (cost.exile) {
+		const chosen = typeof cost.exile === "object" && "choose" in cost.exile ? cost.exile : undefined;
+		const pool = chosen ? scope.world.objects.filter((one) => (one.zone === "battlefield" ? one.controller === frame.seat : one.zone === "graveyard" && one.owner === frame.seat) &&
+			(!chosen.source || one.id !== source.id) && matches(scope, one, chosen.choose)) : objects(scope, cost.exile as Exclude<typeof cost.exile, { choose: unknown }>);
+		const sets = subsets(pool, chosen?.count ?? 1).map((set) => chosen?.source ? [source, ...set] : set);
+		add(sets.map((set) => ({ paid: { exiled: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Exile ${set.map(name).join(", ")}. ` })));
+	}
 	if (cost.life !== undefined) add((frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0) >= cost.life ? [{ paid: { life: cost.life }, uses: [], shows: `Pay ${cost.life} life. ` }] : []);
 	if (cost.discard !== undefined) {
 		const hand = query({ zones: ["hand"], controller: "self" }, frame).filter((one) => one.id !== (procedure.timing === "spell" ? source.id : ""));
@@ -267,6 +273,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 								}), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 							},
 							activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+								...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),
+								...(extra.paid.exiled?.some((one) => one.id === source.id) ? { bound: { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } } : {}),
 								...(procedure.speed ? { speed: procedure.speed } : {}),
 								cost: { generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) }, paid: funding.paid,
 								...(funding.taps.length ? { funding: structuredClone(funding.taps) } : {}),

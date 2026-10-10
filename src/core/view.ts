@@ -97,6 +97,9 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	}
 	for (const permanent of cardsIn(table, "battlefield")) {
 		const marks = [
+			!permanent.faceDown && permanent.face !== undefined ? `face ${permanent.face}` : null,
+			!permanent.faceDown && permanent.doors ? `unlocked doors: ${permanent.doors.join(", ") || "none"}` : null,
+			!permanent.faceDown && permanent.prepared ? "prepared" : null,
 			permanent.tapped ? "tapped" : null,
 			permanent.damage ? `${permanent.damage} damage marked` : null,
 			...Object.entries(permanent.counters).map(([kind, n]) => `${n} ${kind}`),
@@ -313,6 +316,15 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			}
 			case "counters":
 				parts.push(`${change.amount < 0 ? "removed" : "put"} ${Math.abs(change.amount)} ${change.kind} ${change.amount < 0 ? "from" : "on"} ${publicName(receipt.before[change.what])}`);
+				break;
+			case "transform":
+				parts.push(`applied a transform instruction to ${publicName(receipt.before[change.what])}`);
+				break;
+			case "prepare":
+				parts.push(`${change.prepared ? "prepared" : "unprepared"} ${publicName(receipt.before[change.what])}`);
+				break;
+			case "door":
+				parts.push(`${change.unlocked ? "unlocked" : "locked"} door ${change.face} of ${publicName(receipt.before[change.what])}`);
 				break;
 			case "attach":
 				parts.push(change.to ? `attached ${publicName(receipt.before[change.what])} to ${publicName(table.things.get(change.to.id) ?? receipt.before[change.to.id])}` : `unattached ${publicName(receipt.before[change.what])}`);

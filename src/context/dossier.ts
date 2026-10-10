@@ -85,6 +85,9 @@ function state(frame: Frame, object: SeenObject, name: (seat: SeatId) => string)
 	const labels = (frame.view.notes ?? []).filter((note) => note.kind === "label" && note.on.id === object.id && note.on.incarnation === object.incarnation).map((note) => note.kind === "label" ? note.text : "");
 	const attached = object.attached && frame.view.objects?.find((one) => one.id === object.attached!.id);
 	return [object.tapped ? "tapped" : "untapped", object.faceDown ? "face down" : "",
+		!object.faceDown && object.traits?.name !== undefined && object.traits.name !== object.card ? `active name: ${object.traits.name || "none"}` : "",
+		object.prepared ? "prepared" : "", object.copy ? "Prepare spell copy" : "",
+		object.doors ? `unlocked doors: ${object.doors.join(", ") || "none"}` : "",
 		object.traits?.types.includes("creature") ? sickness(frame, object, name) : "",
 		object.damage ? `${object.damage} damage marked` : "", attached ? `attached to ${named(attached)}` : "",
 		object.controller !== object.owner ? `owned by ${name(object.owner)}` : "", ...labels.map((text) => `noted by an earlier effect: ${text}`)].filter(Boolean).join(", ");

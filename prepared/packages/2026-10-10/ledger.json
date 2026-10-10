@@ -1,6 +1,6 @@
 {
 	"Aang, Swift Savior // Aang and La, Ocean's Fury": {
-		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.) — Missing operations: a target selector combining battlefield creatures with arbitrary spells on the stack, and a granted casting permission with the alternative cost {2} for the exiled card.; Waterbend {8}: Transform Aang. — Missing operations: waterbend payment combining mana with tapping untapped artifacts or creatures for individual generic mana, and transforming the same per",
+		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: Face 0: \"When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)\" — Exiling the optional target is expressible, but the supplied permit syntax cannot grant that exiled card's owner a dynamically generated {2} alternative casting cost. An ordinary exile play permission does not implement airbend.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -8,7 +8,7 @@
 		"at": "2026-10-10"
 	},
 	"Aang, at the Crossroads // Aang, Destined Savior": {
-		"reason": "Aang, at the Crossroads // Aang, Destined Savior is not ready: When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order. — Missing operations for privately looking at a bounded top-five set, selecting within that set by mana value, and putting its remainder on the bottom in random order.; When another creature you control leaves the battlefield, transform Aang at the beginning of the next upkeep. — Missing transform operation and back-fac",
+		"reason": "Aang, at the Crossroads // Aang, Destined Savior is not ready: Face 0: \"When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order.\" Missing operations: privately inspect and bind the top five cards, select among that bounded set with a mana-value restriction, and put the unchosen cards on the library bottom in random order.; Face 1: \"Land creatures you control have vigilance.\" Missing selector operation: intersection of land and creature card types. A types list matches either type, not both; granting vigilance to all lands or all creatures would broaden the printed effect.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -87,14 +87,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Bramble Familiar // Fetch Quest": {
-		"reason": "Bramble Familiar // Fetch Quest is not ready: Mill seven cards. Then put a creature, enchantment, or land card from among the milled cards onto the battlefield. — Casting Fetch Quest as the Adventure requires alternate spell characteristics (Sorcery — Adventure, {5}{G}{G}), which the syntax cannot represent. Adventure resolution also requires exiling the card instead of putting it into its owner's graveyard and granting its controller permission to play the normal half for as long as it remains exiled (rule 715.3d).",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Bringer of the Last Gift": {
 		"reason": "Bringer of the Last Gift is not ready: When this creature enters, if you cast it, each player sacrifices all other creatures they control. Then each player returns all creature cards from their graveyard that weren't put there this way to the battlefield. — Missing operations: testing whether you cast this permanent for the intervening condition, and selecting graveyard creature cards while excluding exactly those put there by this ability's sacrifices. Cast history this turn does not establish this permanent's casting provenance; the supplied selectors cannot express the required exclusion.",
 		"decks": [
@@ -140,7 +132,7 @@
 		"at": "2026-10-10"
 	},
 	"Cecil, Dark Knight // Cecil, Redeemed Paladin": {
-		"reason": "Cecil, Dark Knight // Cecil, Redeemed Paladin is not ready: Darkness — Whenever Cecil deals damage, you lose that much life. Then if your life total is less than or equal to half your starting life total, untap Cecil and transform it. — Missing operations: a watch for all damage dealt (including noncombat damage), its damage amount for the corresponding life loss, comparison against half the controller's starting life total, and transformation to the back face with its characteristics and abilities replacing the front face. The life-total check occurs after the life loss during resolution, not",
+		"reason": "Cecil, Dark Knight // Cecil, Redeemed Paladin is not ready: Face 0: \"Darkness — Whenever Cecil deals damage, you lose that much life. Then if your life total is less than or equal to half your starting life total, untap Cecil and transform it.\" Cannot prepare this standing trigger: the supplied Event schema lacks a general damage-dealt event (combat-damage would omit noncombat damage), Amount lacks the triggering damage amount, and conditions cannot read half the controller's starting life total. The life loss must precede the resolution-only life-total check, followed by untapping and transforming if that check holds.",
 		"decks": [
 			"Dimir Midrange",
 			"Mardu Discard"
@@ -237,22 +229,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Elusive Otter // Grove's Bounty": {
-		"reason": "Elusive Otter // Grove's Bounty is not ready: Distribute X +1/+1 counters among any number of target creatures you control. (Then exile this card. You may cast the creature later from exile.) — Casting Grove's Bounty as the Adventure face is not expressible: the casting engine reads only the creature front face. The syntax also lacks announcement-time division of X counters among a variable number of targets.",
-		"decks": [
-			"Izzet Prowess"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Emeritus of Ideation // Ancestral Recall": {
-		"reason": "Emeritus of Ideation // Ancestral Recall is not ready: \"This creature enters prepared.\" — Missing entry behavior for the prepared designation and rule 722.3c: creating a copy in exile with the prepare spell's alternative characteristics, maintaining its conditional existence, and granting permission to cast it.; \"Whenever this creature attacks, you may exile eight cards from your graveyard. If you do, this creature becomes prepared.\" — The attack trigger's optional exile is expressible, but becoming prepared and creating the associated alternative-characteristic copy in exile are not supported",
-		"decks": [
-			"Dimir Excruciator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Emptiness": {
 		"reason": "Emptiness is not ready: \"When this creature enters, if {W}{W} was spent to cast it, return target creature card with mana value 3 or less from your graveyard to the battlefield.\" — Cannot register the intervening condition: the syntax cannot read the colors of mana spent to cast this object. Its target also requires a mana-value-at-most-3 selector, which is absent.; \"When this creature enters, if {B}{B} was spent to cast it, put three -1/-1 counters on up to one target creature.\" — Cannot register the intervening condition: the syntax cannot read the colors of mana spent to cast this object.; ",
 		"decks": [
@@ -277,26 +253,10 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Esper Origins // Summon: Esper Maduin": {
-		"reason": "Esper Origins // Summon: Esper Maduin is not ready: \"(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)\" — Missing standing operations for the nonstack lore-counter turn-based action as its controller's precombat main phase begins, and the state-based sacrifice when it has at least three lore counters and no chapter ability triggered from it remains pending or on the stack. A step trigger or immediate sacrifice after chapter III would not implement these rules.; \"I — Reveal the top card of your library. If it's a permanent card, put it into your hand.\" — M",
-		"decks": [
-			"Selesnya Landfall"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Forsaken Miner": {
 		"reason": "Forsaken Miner is not ready: Whenever you commit a crime, you may pay {B}. If you do, return this card from your graveyard to the battlefield. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.) — Requires a triggered ability functioning from this card's graveyard, a crime event covering qualifying spells, activated abilities, and triggered abilities once per announcement, and optional {B} payment during resolution with return conditional on that payment. The supplied registration and instruction syntax cannot express these operations.",
 		"decks": [
 			"Mono-Black Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Gandalf, Goblins' Bane // Flameshape": {
-		"reason": "Gandalf, Goblins' Bane // Flameshape is not ready: Look at the top two cards of your library and exile them face down. For as long as they remain exiled, you may play them if you control a Wizard. — Casting Flameshape as the Adventure half is not supported by the front-face casting engine. Its effect additionally requires unsupported face-down exile with private inspection and a lasting play permission dynamically conditional on controlling a Wizard.",
-		"decks": [
-			"Izzet Prowess"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
@@ -321,14 +281,6 @@
 		"reason": "Gollum, Riddle Master is not ready: As Gollum enters, choose odd or even. (Zero is even.) — Unsupported operation: choose and persist an odd/even quality during entry; the enters registration cannot express this choice.; Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card. — Unsupported operations: match a cast spell on the stack by mana-value parity against the entry choice, and select a triggered-ability mode while tracking which modes ha",
 		"decks": [
 			"Mono-Black Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Hearth Elemental // Stoke Genius": {
-		"reason": "Hearth Elemental // Stoke Genius is not ready: This spell costs {X} less to cast, where X is the number of cards in your graveyard that are instant cards, sorcery cards, and/or have an Adventure. — Missing selector operation for cards that have an Adventure, combined with instant and sorcery cards as a union counting each card once.; Discard your hand, then draw two cards. (Then exile this card. You may cast the creature later from exile.) — Casting the Adventure half is not supported: the engine reads only the front face rather than the Adventure's spell characteristics and cost.",
-		"decks": [
-			"Izzet Spellementals"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
@@ -367,7 +319,7 @@
 		"at": "2026-10-10"
 	},
 	"Jennifer Walters // The Sensational She-Hulk": {
-		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: \"Whenever a creature you control is dealt damage, you may have The Sensational She-Hulk deal that much damage to any target. Do this only once each turn.\" — The event schema cannot watch a creature being dealt damage, including noncombat damage, or capture that damage amount. Its once-per-turn trigger limit also cannot represent limiting the optional damage action rather than triggering. This back-face standing trigger cannot be faithfully registered.",
+		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: Face 1: \"Whenever a creature you control is dealt damage, you may have The Sensational She-Hulk deal that much damage to any target. Do this only once each turn.\" The available Event schema cannot watch a creature being dealt damage, including noncombat damage, and provides no recorded damage amount for \"that much.\" The optional effect also requires a once-per-turn resolution-use limit, not a once-per-turn triggering limit. These operations cannot be faithfully prepared with the supplied syntax.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -525,7 +477,7 @@
 		"at": "2026-10-10"
 	},
 	"Scalding Viper // Steam Clean": {
-		"reason": "Scalding Viper // Steam Clean is not ready: Whenever an opponent casts a spell with mana value 3 or less, this creature deals 1 damage to that player. — The syntax lacks a mana-value selector or amount for restricting the opponent's cast event to spells with mana value 3 or less.; Return target nonland permanent to its owner's hand. (Then exile this card. You may cast the creature later from exile.) — Casting the Adventure half with its separate name, mana cost, and sorcery characteristics is not supported; the casting engine reads the creature front face.",
+		"reason": "Scalding Viper // Steam Clean is not ready: Face 0: \"Whenever an opponent casts a spell with mana value 3 or less, this creature deals 1 damage to that player.\" The supplied syntax cannot select cast spells with mana value 3 or less: neither selectors nor amounts support mana value.",
 		"decks": [
 			"Izzet Aggro"
 		],
@@ -562,14 +514,6 @@
 		"reason": "Spider Manifestation is not ready: Printed mana cost {1}{R/G}: casting Spider Manifestation requires hybrid mana payment, which the printed cost reader and Cost schema do not support.; Whenever you cast a spell with mana value 4 or greater, untap this creature. — The cast watch requires a stack selector testing mana value at least 4; neither Selector nor Amount supports mana value. An unrestricted cast watch would incorrectly broaden this trigger.",
 		"decks": [
 			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Spring-Loaded Sawblades // Bladewheel Chariot": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Spring-Loaded Sawblades // Bladewheel Chariot: The basis \"Craft with artifact {3}{W} ({3}{W}, Exile this artifact, Exile another artifact you control or an artifact card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)\" is not on Spring-Loaded Sawblades // Bladewheel Chariot as complete sentences or printed lines in source order.; The basis \"Tap two other untapped artifacts you control: This Vehicle becomes an artifact creature until end of turn.\" is not on Spring-Loaded ",
-		"decks": [
-			"Jeskai Artifacts"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
@@ -647,6 +591,14 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
+	"The Legend of Roku // Avatar Roku": {
+		"reason": "The Legend of Roku // Avatar Roku is not ready: Face 0: \"I — Exile the top three cards of your library. Until the end of your next turn, you may play those cards.\" The supplied permission durations cannot express a permission starting immediately and expiring at the end of your next turn, including the intervening turns.; Face 1: \"Firebending 4 (Whenever this creature attacks, add {R}{R}{R}{R}. This mana lasts until end of combat.)\" An attack watch can add the mana, but the supplied mana instruction cannot preserve that mana through step and phase boundaries until end of combat.",
+		"decks": [
+			"Boros Dragons"
+		],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-10"
+	},
 	"The Mind Stone": {
 		"reason": "The Mind Stone is not ready: {5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.) — Missing operation: grant the harnessed designation until this permanent leaves the battlefield. Harnessed is not an ability or characteristic, so granting a word or counter is not equivalent.; ∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control. — Missing standing operation: grant this triggered ability only while the permanent has the harnessed designation. The schema has",
 		"decks": [
@@ -684,22 +636,6 @@
 		"reason": "Tishana's Tidebinder is not ready: When this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.) — Missing operations: select only activated or triggered abilities on the stack (excluding spells and mana abilities), obtain the targeted ability's source permanent, and condition that permanent's ability loss on successfully countering its ability this way and on its bein",
 		"decks": [
 			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Twinmaw Stormbrood // Charring Bite": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Twinmaw Stormbrood // Charring Bite: The basis \"Charring Bite deals 5 damage to target creature without flying. (Then shuffle this card into its owner's library.)\" is not on Twinmaw Stormbrood // Charring Bite as complete sentences or printed lines in source order.; Unassessed text on Twinmaw Stormbrood // Charring Bite: when this creature enters, you gain 5 life. // charring bite deals 5 damage to target creature without flying.",
-		"decks": [
-			"Boros Dragons"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Unholy Annex // Ritual Chamber": {
-		"reason": "Unholy Annex // Ritual Chamber is not ready: \"At the beginning of your end step, draw a card. If you control a Demon, each opponent loses 2 life and you gain 2 life. Otherwise, you lose 2 life.\" — Missing Room unlocked-designation support to grant this ability only while Unholy Annex is unlocked (rule 709.5). An unconditional end-step registration would incorrectly function while this door is locked.; \"(You may cast either half. That door unlocks on the battlefield. As a sorcery, you may pay the mana cost of a locked door to unlock it.)\" — Missing split-half casting and Room designation/charac",
-		"decks": [
-			"4c Control"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"

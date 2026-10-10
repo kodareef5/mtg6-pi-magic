@@ -1,0 +1,138 @@
+{
+	"card": "Unholy Annex // Ritual Chamber",
+	"generated": "2026-10-10",
+	"source": "3ecf6f89984b2d41240417b3cc175ab8bafb76e9d065d7333ff363f9acb13597",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unholy Annex // Ritual Chamber",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "At the beginning of your end step, draw a card. If you control a Demon, each opponent loses 2 life and you gain 2 life. Otherwise, you lose 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						},
+						{
+							"do": "each",
+							"players": "opponent",
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Demon"
+										]
+									}
+								},
+								"atLeast": 1
+							},
+							"instructions": [
+								{
+									"do": "life",
+									"who": "bound:player",
+									"amount": -2
+								}
+							]
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 2,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Demon"
+										]
+									}
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": -2,
+							"if": {
+								"amount": {
+									"count": {
+										"zones": [
+											"battlefield"
+										],
+										"controller": "you",
+										"subtypes": [
+											"Demon"
+										]
+									}
+								},
+								"atMost": 0
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "When you unlock this door, create a 6/6 black Demon creature token with flying.",
+				"kind": "watch",
+				"event": {
+					"on": "unlocks",
+					"face": 1,
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Demon",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Demon"
+								],
+								"colors": [
+									"B"
+								],
+								"power": 6,
+								"toughness": 6,
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": []
+	}
+}

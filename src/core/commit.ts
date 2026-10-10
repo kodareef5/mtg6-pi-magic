@@ -12,7 +12,8 @@
  * already import this file to perform it.
  */
 
-import { room } from "./faces.ts";
+import { room, transformable } from "./faces.ts";
+import { chapterTriggers } from "./sagas.ts";
 import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
@@ -152,6 +153,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const dying = change.do === "move" && change.to === "graveyard" ? table.things.get(change.what) : undefined;
 		const instead = dying?.zone === "battlefield" ? characteristics(table, dying)?.registrations.find((one) => one.kind === "replace" && one.on === "dies") : undefined;
 		if (change.do === "move" && instead?.kind === "replace") change.to = instead.to as Zone;
+		if (change.do === "move" && dying?.zone === "battlefield" && (dying.counters.finality ?? 0) > 0) change.to = "exile";
 	}
 	// A fixture's setup is not a game event, and triggers nothing.
 	const detecting = reason !== "game-setup";
@@ -200,9 +202,14 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.faceDown = false;
 				const previousFace = moving.face;
 				delete moving.face; delete moving.doors;
+				delete moving.transformed;
+				delete moving.prepared;
 				if ((change.to === "stack" || change.to === "battlefield") && change.face !== undefined) moving.face = change.face;
 				else if (change.to === "battlefield" && from === "stack" && previousFace !== undefined) moving.face = previousFace;
-				if (change.to === "battlefield" && room(moving.card ? table.printed[moving.card] : undefined)) moving.doors = from === "stack" ? [previousFace ?? 0] : [];
+				if (change.to === "battlefield" && room(moving.card ? table.printed[moving.card] : undefined)) {
+					moving.doors = from === "stack" ? [previousFace ?? 0] : [];
+					delete moving.face;
+				}
 				moving.counters = change.to === "battlefield" ? structuredClone(change.counters ?? {}) : {};
 				moving.damage = 0;
 				delete moving.deathtouched;
@@ -225,6 +232,24 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				}
 				table.notes = table.notes.filter((note) => !(("on" in note && note.on.id === moving.id) ||
 					(note.until === "while-source" && note.source?.id === moving.id)));
+				break;
+			}
+			case "transform": {
+				const object = thing(table, change.what);
+				if (!transformable(object.card ? table.printed[object.card] : undefined, object) ||
+					(change.since !== undefined && (object.transformed ?? 0) > change.since)) break;
+				object.face = object.face ? 0 : 1;
+				object.transformed = table.cursor.clock + 1;
+				break;
+			}
+			case "prepare":
+				if (change.prepared) prepare(table, thing(table, change.what));
+				else delete thing(table, change.what).prepared;
+				break;
+			case "door": {
+				const object = thing(table, change.what);
+				if (object.zone !== "battlefield" || !room(object.card ? table.printed[object.card] : undefined)) break;
+				object.doors = [...new Set([...(object.doors ?? []).filter((face) => face !== change.face), ...(change.unlocked ? [change.face] : [])])].sort();
 				break;
 			}
 			case "tap":
@@ -373,7 +398,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	if (detecting) {
 		forget(table);
 		const found = detect(table, changes, { before, known }, prior);
-		table.waiting.push(...found.waiting.map((trigger) => round ? { ...trigger, round } : trigger));
+		table.waiting.push(...[...found.waiting, ...chapterTriggers(table, before)].map((trigger) => round ? { ...trigger, round } : trigger));
 		if (found.spent.length) table.notes = table.notes.filter((note) => !found.spent.includes(note.id));
 	}
 
@@ -416,8 +441,19 @@ function enter(table: Table, object: Thing, change: { tapped?: true; counters?: 
 	forget(table);
 	const entering = terms(table, object, before, born, change.paid);
 	if (entering.tapped) object.tapped = change.tapped = true;
+	if (entering.prepared) prepare(table, object);
 	for (const [kind, count] of Object.entries(entering.counters)) if (count > 0) object.counters[kind] = (object.counters[kind] ?? 0) + count;
 	if (Object.keys(object.counters).length) change.counters = { ...object.counters };
+}
+
+/** 722.3c: the designation creates one castable copy with its prepare face. */
+function prepare(table: Table, object: Thing): void {
+	if (object.zone !== "battlefield" || object.prepared || table.printed[object.card ?? ""]?.layout !== "prepare" || object.copy) return;
+	object.prepared = true;
+	const id = `prepared-${table.cursor.clock + 1}-${object.id}`;
+	table.things.set(id, { id, card: object.card, incarnation: 0, owner: object.controller, controller: object.controller,
+		zone: "exile", face: 1, tapped: false, faceDown: false, counters: {}, damage: 0,
+		copy: { face: 1, source: { id: object.id, incarnation: object.incarnation } } });
 }
 
 /** Remaining instructions and choices belong to the table throughout resolution. */

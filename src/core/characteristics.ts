@@ -108,7 +108,7 @@ export function walk(table: Table): Map<string, Traits> {
 
 	const effects: Effect[] = [
 		...field.flatMap((source) => (now.get(source.id)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" ? [{
-			at: source.entered ?? 0, change: ability.change, source, ability,
+			at: source.transformed ?? source.entered ?? 0, change: ability.change, source, ability,
 			applies: (inner, object) => matches(inner, object, ability.affects), ...(ability.if ? { when: (inner: Scope) => holds(inner, ability.if!) } : {}),
 		}] : [])),
 		...table.notes.flatMap((note: Note): Effect[] => note.kind === "label" && note.change ? [{

@@ -42,12 +42,12 @@ export function entering(table: Table, seat: SeatId, card: string): string {
  * permanents entering together never shape each other's entry, whatever order
  * the changes are written in.
  */
-export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set(), paid?: boolean): { tapped?: true; counters: Record<string, number> } {
+export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set(), paid?: boolean): { tapped?: true; prepared?: true; counters: Record<string, number> } {
 	const live = tableWorld(table);
 	const objects = live.objects.flatMap((one) => one.id === object.id ? [one] : born.has(one.id) ? [] : [before[one.id] ?? one]);
 	for (const [id, was] of Object.entries(before)) if (id !== object.id && !table.things.has(id)) objects.push(was);
 	const world = { ...live, objects, get history() { return live.history; } };
-	const found: { tapped?: true; counters: Record<string, number> } = { counters: {} };
+	const found: { tapped?: true; prepared?: true; counters: Record<string, number> } = { counters: characteristics(table, object)?.subtypes.includes("Saga") ? { lore: 1 } : {} };
 	for (const holder of objects as Thing[]) {
 		if (holder.zone !== "battlefield") continue;
 		for (const registration of characteristics(table, holder)?.registrations ?? []) {
@@ -57,6 +57,7 @@ export function terms(table: Table, object: Thing, before: Record<ObjectId, Thin
 			if (registration.if && !holds(scope, registration.if)) continue;
 			// "If you don't, it enters tapped": its controller paid as it entered, so its own term does not tap it.
 			if (registration.tapped && !(registration.unlessPay && paid && holder === object)) found.tapped = true;
+			if (registration.prepared) found.prepared = true;
 			for (const [kind, count] of Object.entries(registration.counters ?? {})) found.counters[kind] = (found.counters[kind] ?? 0) + amount(scope, count);
 		}
 	}

@@ -37,7 +37,7 @@ export function begin(table: Table, object: Thing): Change {
 	return { do: "resolution", action: "begin", what: object.id, source: ability.timing === "spell" ? { id: object.id, incarnation: object.incarnation } : ability.source,
 		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const, controller: "you" as const } }] : []),
 			...ability.instructions.map((instruction) => ({ instruction }))], illegal, ...(lost ? { lost: true } : {}),
-		...(trigger?.bound ? { bound: structuredClone(trigger.bound) } : {}), ...(trigger?.may ? { optional: true } : {}) };
+		...(ability.bound || trigger?.bound ? { bound: structuredClone({ ...ability.bound, ...trigger?.bound }) } : {}), ...(trigger?.may ? { optional: true } : {}) };
 }
 
 export function resolving(table: Table): Pending | null {

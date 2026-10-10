@@ -10,6 +10,7 @@
  */
 import { amount, holds, objects, players, select, type Bound, type Scope, type Seen } from "./selectors.ts";
 import { characteristics, has } from "./characteristics.ts";
+import { doubleFaced, room, transformable } from "./faces.ts";
 import { fundings, paying } from "./funding.ts";
 import { symbols } from "./announce.ts";
 import { project } from "./view.ts";
@@ -88,6 +89,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const controlled = terms?.controller ? players(scope, terms.controller)[0] : undefined;
 			const changes: Change[] = moving.flatMap((object): Change[] => [
 				{ do: "move", what: object.id, to, reason: (destroy ? "destroy" : terms!.reason) as Reason, ...(terms?.position ? { position: terms.position as "top" | "bottom" } : {}),
+					...(terms?.face !== undefined ? { face: terms.face } : {}),
 					...(terms?.tapped ? { tapped: true as const } : {}), ...(counters ? { counters } : {}), ...(controlled !== undefined ? { controller: controlled } : {}) },
 				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + 1 }, source } }] : []),
 			]);
@@ -99,6 +101,27 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const own = bind(instruction, { objects: moving.map((object) => ({ id: object.id, incarnation: object.incarnation + 1 })), players: [] });
 			return one(`${destroy ? "Destroy" : `Put into ${to}`}: ${moving.map(name).join(", ") || "nothing"}`, changes,
 				{ ...follow, ...(Object.keys(followed).length || own.bind ? { bind: { ...followed, ...own.bind } } : {}) });
+		}
+		case "transform": {
+			const ability = table.things.get(pending.object)?.ability;
+			const turning = many(table, scope, instruction).filter((object) => transformable(table.printed[object.card ?? ""], object));
+			return one(`Transform ${turning.map(name).join(", ") || "nothing"}`, turning.map((object): Change => ({ do: "transform", what: object.id,
+				...(ability?.source.id === object.id && ability.source.incarnation === object.incarnation && ability.transformAt !== undefined ? { since: ability.transformAt } : {}) })));
+		}
+		case "prepare": {
+			const objectsToPrepare = live(table, objects(scope, instruction.what));
+			return one(`${instruction.prepared ? "Prepare" : "Unprepare"} ${objectsToPrepare.map(name).join(", ") || "nothing"}`,
+				objectsToPrepare.map((object): Change => ({ do: "prepare", what: object.id, prepared: instruction.prepared })));
+		}
+		case "door": {
+			const object = live(table, objects(scope, instruction.what))[0];
+			const unlocked = instruction.action === "unlock";
+			const faces = object?.zone === "battlefield" && room(table.printed[object.card ?? ""]) ? ([0, 1] as const)
+				.filter((face) => (instruction.face === undefined || instruction.face === face) && !!object.doors?.includes(face) !== unlocked) : [];
+			return faces.length ? { actor: controller, question: `Choose a door to ${instruction.action}.`, choices: faces.map((face) => ({
+				id: String(face), label: `${instruction.action} ${table.printed[object!.card!]!.faces![face]!.name}`,
+				changes: [{ do: "door", what: object!.id, face, unlocked }],
+			})) } : one(`No door to ${instruction.action}`, []);
 		}
 		case "choose": {
 			const who = players(scope, instruction.who)[0] ?? controller;
@@ -121,7 +144,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			});
 			// Up to, a hidden-zone search, and running out are all ways to stop short (701.23b).
 			// Declining gives up what the instruction is for, so the label says so; it reads as finishing otherwise.
-			if (instruction.upTo || instruction.may || !pool.length || picked.length >= count) choices.push({ id: "done",
+			if (instruction.upTo || instruction.may && !picked.length || !pool.length || picked.length >= count) choices.push({ id: "done",
 				label: picked.length ? `Stop here, with ${picked.length} chosen` : pool.length && count ? "Decline: choose none of them, so this finds nothing" : "Nothing can be chosen", changes: [], ...finish([]) });
 			return { actor: who, question: `${claim}: choose ${count === 1 ? "one" : `${count}`}${instruction.upTo ? " or fewer" : ""} (${picked.length} chosen).`, choices };
 		}
@@ -187,7 +210,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "delay": {
 			if (!source) return one("No source to delay a trigger for", []);
 			const note: Omit<Extract<Note, { kind: "delay" }>, "id" | "written"> = { kind: "delay", by: controller, until: (instruction.until ?? "indefinite") as Until, event: structuredClone(instruction.event),
-				effect: structuredClone(instruction.effect), fixed: { source, targets: structuredClone(scope.targets ?? []), bound: structuredClone(pending.bound), ...(scope.x !== undefined ? { x: scope.x } : {}) },
+				effect: structuredClone(instruction.effect), fixed: { source, targets: structuredClone(scope.targets ?? []), bound: structuredClone(pending.bound), ...(scope.x !== undefined ? { x: scope.x } : {}),
+					...(doubleFaced(table.printed[scope.source?.card ?? ""]) ? { transformAt: scope.source?.transformed ?? 0 } : {}) },
 				once: !instruction.until, ...(instruction.until === "while-source" ? { source } : {}) };
 			return one("Create a delayed trigger", [{ do: "note", note }]);
 		}

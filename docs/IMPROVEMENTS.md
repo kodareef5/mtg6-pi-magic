@@ -52,7 +52,37 @@ casting now pass 218 tests and the type check: face-specific source claims,
 modal and split casting, Adventure permission, Omen shuffling and replay. The
 card TSV is unchanged; a source-hashed companion carries structured faces.
 New journals pin it. Older journals keep their original single-face reading.
-Room unlocking and stage 5 remain next.
+Room unlocking, transformation, crafting, Saga lore and Prepare now pass 223
+offline tests and the type check, including replay and clone checks. The fresh
+assessment and pool audit include sideboards, since setup registers those too.
+
+The fresh pass accepted eleven of seventeen multi-face cards' standing terms
+and inventories for $0.5462. Six remain refused for separate operations. Ten of
+the accepted cards still have deferred uses. All nineteen imported lists remain
+blocked when sideboards count. [Status](STATUS.md#takeover-audit-october-10) records
+the evidence and the limits of those counts.
+
+## Next implementation chunk
+
+1. Extend shared fact queries with mana value, colors, intersecting types and
+   comparisons between objects. Carry the values of the selected spell face
+   through cast events. Use Scalding Viper, Aang's land creatures and Otter's
+   blocking restriction as distinct positions of the same query invariant.
+2. Give a permission its accepted alternative price and explicit expiry, and
+   give generated mana an explicit expiry. Airbend and Roku should use these
+   same records. Preserve them through zone changes, replay and cloning without
+   granting broader permission to an unrelated incarnation.
+3. Add damage events with their amount and recipient, then a resolution-use
+   marker for optional once-per-turn effects. Cecil and Jennifer should use the
+   same event data; a declined optional effect must leave the use available.
+4. Add bounded private look and selection, selection from an earlier binding,
+   and deterministic library ordering. Use earned visibility throughout. Then
+   interpret the deferred uses that currently need these operations, including
+   the accepted cards whose source coverage outpaces executable support.
+5. Assess the 55 remaining cards, mostly newly counted sideboard entries. Re-run
+   the complete pool report. Start ordinary-deck games only for lists whose
+   standing coverage is complete; a deferred-use stop becomes the next recorded
+   blocker. Keep Jev, the roster and two-game concurrency.
 
 ## Steps, in order
 
@@ -90,15 +120,9 @@ Room unlocking and stage 5 remain next.
    Keep every game: the saved journals are the benchmark material. First
    pass done: the audit in [Status](STATUS.md) ranks the blockers; shock
    lands, Verges and turn-counted entry are built and their 24 cards stored.
-   Next is the second face: adventures, omens, rooms and split cards (14
-   cards, 11 decks). The card file already joins both faces with ` // ` in
-   type, cost, stats and text, so printed facts can expose faces; a
-   procedure then names the face it casts, the spell carries that face's
-   characteristics on the stack, and resolution follows the kind: an
-   adventure exiles the card with a permission to cast the creature from
-   exile, an omen shuffles it in, a room enters with that door unlocked and
-   the other unlockable as a sorcery for its cost. After that: cast
-   triggers filtered by color or type, then copies.
+   Shared face mechanics and their fresh assessment are now built. The next
+   implementation chunk above names the remaining shared operations. General
+   copies and control changes remain separate work after those gaps.
 
 ## Judged how
 

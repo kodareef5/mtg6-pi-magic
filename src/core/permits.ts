@@ -29,6 +29,10 @@ export function allowance(world: World, seat: SeatId, assumed: readonly Registra
  * from a zone a permanent opens, or a card a `permit` note names from this turn on.
  */
 export function playable(world: World, seat: SeatId, object: Seen, turn: number, land: boolean, face?: number): boolean {
+	if (object.copy) {
+		const source = world.objects.find((one) => one.id === object.copy!.source.id && one.incarnation === object.copy!.source.incarnation);
+		return object.zone === "exile" && !!source?.prepared && source.zone === "battlefield" && source.controller === seat && face === object.copy.face;
+	}
 	if (object.zone === "hand") return object.owner === seat;
 	if (land && object.owner === seat && allowance(world, seat).landsFrom.includes(object.zone)) return true;
 	return world.notes.some((note) => note.kind === "permit" && note.who === seat && note.fromTurn <= turn &&

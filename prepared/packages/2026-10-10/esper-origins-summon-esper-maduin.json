@@ -1,0 +1,147 @@
+{
+	"card": "Esper Origins // Summon: Esper Maduin",
+	"generated": "2026-10-10",
+	"source": "52d9ab2444d6f48347e00ef509c588c7d4e3193caf059be2b0e62e0853cd80a1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Esper Origins // Summon: Esper Maduin",
+		"registers": [
+			{
+				"face": 1,
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Reveal the top card of your library. If it's a permanent card, put it into your hand.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": {
+									"top": 1,
+									"of": "you"
+								}
+							},
+							"count": 1,
+							"reveal": true,
+							"as": "revealed-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:revealed-card",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"is": "bound:revealed-card",
+								"matches": {
+									"zones": [
+										"library"
+									],
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"land",
+										"planeswalker"
+									]
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Add {G}{G}.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"G",
+								"G"
+							]
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Other creatures you control get +2/+2 and gain trample until end of turn.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 2,
+								"words": [
+									"trample"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"face": 0,
+				"claim": "Cast Esper Origins at its printed cost; surveil, gain life, and return transformed with a finality counter if cast from a graveyard.",
+				"basis": "Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.)",
+				"source": {
+					"card": "Esper Origins // Summon: Esper Maduin",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"face": 0,
+				"claim": "Cast Esper Origins from the graveyard for its flashback cost, including its surveil, life gain, transformed return, and flashback exile replacement.",
+				"basis": "Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.) ... Flashback {3}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"source": {
+					"card": "Esper Origins // Summon: Esper Maduin",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

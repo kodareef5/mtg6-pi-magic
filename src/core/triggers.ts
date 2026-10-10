@@ -11,6 +11,7 @@
  * Past 150 lines to keep detection beside the trigger window that empties it.
  */
 import { characteristics, walk, type Traits } from "./characteristics.ts";
+import { doubleFaced } from "./faces.ts";
 import { aiming, summary, targetings } from "./announce.ts";
 import { holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
 import { playing, type Activation, type Table, type Thing, type Trigger } from "./table.ts";
@@ -42,6 +43,8 @@ type Occurrence = {
 	whose?: SeatId;
 	toPlayer?: true;
 	lookBack?: true;
+	face?: 0 | 1;
+	fully?: true;
 };
 
 const ref = (object: Pick<Seen, "id" | "incarnation">): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -71,13 +74,28 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
 				if (!was || !is) break;
-				if (change.to === "battlefield") found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), from: was.zone, to: "battlefield" });
+				if (change.to === "battlefield") {
+					found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), from: was.zone, to: "battlefield" });
+					for (const face of is.doors ?? []) found.push({ on: "unlocks", object: is, traits: characteristics(table, is), found: ref(is), face, player: is.controller });
+				}
 				if (was.zone === "battlefield" && is.zone !== "battlefield") {
 					const left: Occurrence = { on: "leaves", object: was, traits: receipt.known[was.id], found: PUBLIC.has(is.zone) ? ref(is) : ref(was), from: "battlefield", to: is.zone, lookBack: true };
 					found.push(left);
 					// 700.4: dies means put into a graveyard from the battlefield.
 					if (is.zone === "graveyard") found.push({ ...left, on: "dies" });
 				}
+				break;
+			}
+			case "transform": {
+				const object = now(change.what), was = receipt.before[change.what];
+				if (object && was && object.transformed !== was.transformed) found.push({ on: "transforms", object, traits: characteristics(table, object), found: ref(object), face: object.face, player: object.controller });
+				break;
+			}
+			case "door": {
+				const object = now(change.what), was = receipt.before[change.what];
+				if (object && was && change.unlocked && !was.doors?.includes(change.face) && object.doors?.includes(change.face))
+					found.push({ on: "unlocks", object, traits: characteristics(table, object), found: ref(object), face: change.face, player: object.controller,
+						...(object.doors.length === 2 ? { fully: true } : {}) });
 				break;
 			}
 			case "token": {
@@ -129,6 +147,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
+	if (event.face !== undefined && event.face !== occurrence.face || event.fully && !occurrence.fully) return null;
 	const side = (ref: string | undefined, seat?: SeatId) => ref === undefined || ref === "any" || (seat !== undefined && players(scope, ref).includes(seat));
 	if (!side(event.by, occurrence.player) || !side(event.whose, occurrence.whose)) return null;
 	if (event.step && event.step !== occurrence.step) return null;
@@ -203,7 +222,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 	const waiting: Trigger[] = [], spent: string[] = [];
 	const stamp = () => `trigger-${table.cursor.clock + 1}-${waiting.length}`;
 
-	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x">, once = false): boolean => {
+	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x" | "transformAt">, once = false): boolean => {
 		const matched = live.filter((occurrence) => !!occurrence.lookBack === (scope.world !== after)).flatMap((occurrence) => fits(scope, event, occurrence) ?? []);
 		if (!matched.length) return false;
 		// Each occurrence is its own trigger (603.2c), unless the card says "one or more"; a once-only delayed trigger fires for the first alone (603.7b).
@@ -236,7 +255,8 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			const scope: Scope = { world, controller: note.by, source: world.lastKnown(note.fixed.source)?.object ?? after.lastKnown(note.fixed.source)?.object,
 				targets: note.fixed.targets, bound: note.fixed.bound, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) };
 			const fired = raise(scope, note.by, note.fixed.source, `Delayed: ${note.effect.instructions.map(summary).join(" ")}`, note.event, {
-				effect: note.effect, bound: note.fixed.bound, targets: note.fixed.targets, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) }, note.once);
+				effect: note.effect, bound: note.fixed.bound, targets: note.fixed.targets, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}),
+				...(note.fixed.transformAt !== undefined ? { transformAt: note.fixed.transformAt } : {}) }, note.once);
 			if (fired && note.once) spent.push(note.id);
 		}
 	}
@@ -283,8 +303,9 @@ export function triggerWindow(table: Table): Pending | null {
 		return aims.map((targets): Move => {
 			const id = `ability-${table.cursor.clock + 1}`;
 			const ability: Activation = { source: trigger.source, controller: trigger.controller, claim: `${name}: ${trigger.basis}`, basis: trigger.basis, timing: "stack",
+				...(doubleFaced(table.printed[source?.card ?? ""]) ? { transformAt: trigger.transformAt ?? source?.transformed ?? 0 } : {}),
 				cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(trigger.effect.instructions),
-				trigger: { event: structuredClone(trigger.event), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
+				trigger: { event: structuredClone(trigger.event), ...(trigger.chapter !== undefined ? { chapter: trigger.chapter } : {}), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
 					...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
 			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,

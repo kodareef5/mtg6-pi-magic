@@ -28,6 +28,8 @@ import { characteristics, has } from "./characteristics.ts";
 import { triggerWindow } from "./triggers.ts";
 import { STEPS } from "./steps.ts";
 import { preparation } from "./readiness.ts";
+import { unlocks } from "./rooms.ts";
+import { completedSaga } from "./sagas.ts";
 import { project } from "./view.ts";
 
 /**
@@ -89,7 +91,7 @@ function pending(table: Table): Pending | null {
 			seat: holder,
 			question: "You have priority.",
 			...(needed.length ? { preparation: needed } : { fallback: "pass" }),
-			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, frame), ...preparedMoves(table, frame)],
+			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, frame), ...preparedMoves(table, frame), ...unlocks(table, frame)],
 		};
 	}
 
@@ -207,6 +209,7 @@ function stateBased(table: Table): Pending | null {
 	}
 	for (const object of field) {
 		if (gone.has(object.id)) continue;
+		if (completedSaga(table, object)) { gone.add(object.id); changes.push({ do: "move", what: object.id, to: "graveyard", reason: "sacrifice" }); continue; }
 		const traits = characteristics(table, object);
 		const host = object.attached && table.things.get(object.attached.id);
 		const attachedNow = !!host && host.incarnation === object.attached!.incarnation && host.zone === "battlefield";
@@ -219,6 +222,12 @@ function stateBased(table: Table): Pending | null {
 	}
 	// 704.5d.
 	for (const object of table.things.values()) if (object.token && object.zone !== "battlefield") changes.push({ do: "cease", what: object.id });
+	// 704.5e and 722.3c: the Prepare exception lasts only while its source is prepared.
+	for (const object of table.things.values()) if (object.copy && object.zone !== "stack") {
+		const source = table.things.get(object.copy.source.id);
+		if (object.zone !== "exile" || !source?.prepared || source.zone !== "battlefield" || source.incarnation !== object.copy.source.incarnation)
+			changes.push({ do: "cease", what: object.id });
+	}
 	// 704.5j: the legend rule, one name at a time. It is found with the rest of this
 	// check (704.3), so a copy dying to damage still counts, and keeping it loses both.
 	const legends = new Map<string, Thing[]>();

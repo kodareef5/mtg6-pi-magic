@@ -1,0 +1,121 @@
+{
+	"card": "Spring-Loaded Sawblades // Bladewheel Chariot",
+	"generated": "2026-10-10",
+	"source": "0d58b60969156318feaabce1bc2294f42a8a9aff12b59d46391f3e6e3768268f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spring-Loaded Sawblades // Bladewheel Chariot",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When this artifact enters, it deals 5 damage to target tapped creature an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"tapped": true,
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 5
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"face": 0,
+				"claim": "Cast Spring-Loaded Sawblades with flash",
+				"basis": "Flash",
+				"source": {
+					"card": "Spring-Loaded Sawblades // Bladewheel Chariot",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"face": 0,
+				"claim": "Craft with an artifact to return this card transformed under its owner's control, only as a sorcery",
+				"basis": "Craft with artifact {3}{W} ({3}{W}, Exile this artifact, Exile another artifact you control or an artifact card from your graveyard: Return this card transformed under its owner's control. Craft only as a sorcery.)",
+				"source": {
+					"card": "Spring-Loaded Sawblades // Bladewheel Chariot",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"face": 1,
+				"claim": "Tap two other untapped artifacts you control to animate Bladewheel Chariot until end of turn",
+				"basis": "Tap two other untapped artifacts you control: This Vehicle becomes an artifact creature until end of turn.",
+				"source": {
+					"card": "Spring-Loaded Sawblades // Bladewheel Chariot",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"face": 1,
+				"claim": "Crew Bladewheel Chariot with creatures of total power at least 1 to animate it until end of turn",
+				"basis": "Crew 1 (Tap any number of creatures you control with total power 1 or more: This Vehicle becomes an artifact creature until end of turn.)",
+				"source": {
+					"card": "Spring-Loaded Sawblades // Bladewheel Chariot",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

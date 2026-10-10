@@ -6,6 +6,7 @@ import type { Reason } from "./syntax.ts";
 import { commit } from "./commit.ts";
 import { combatDamage, declareAttackers, declareBlockers } from "./combat.ts";
 import { cardsIn, playing, seat, type Table } from "./table.ts";
+import { chapters } from "./sagas.ts";
 
 /**
  * Situation 2. Untap, draw for the turn, declare attackers and blockers
@@ -22,6 +23,12 @@ export function turnBased(table: Table): Pending | null {
 	if (!mulligansSettled(table) || table.outcome || cursor.stepDone) return null;
 	const step = cursor.steps[0] ?? "";
 	const active = seat(table, cursor.active);
+	if (step === "precombat-main") {
+		const sagas = cardsIn(table, "battlefield").filter((object) => object.controller === active.id && chapters(table, object).length);
+		if (sagas.length) return { situation: "turn-based", seat: active.id, question: "Add a lore counter to each Saga (714.3c).",
+			moves: [{ option: { id: "lore", label: "Add the turn's lore counters", objects: sagas.map(({ id, incarnation }) => ({ id, incarnation })) },
+				changes: sagas.map((object) => ({ do: "counters", what: object.id, kind: "lore", amount: 1 })), reason: "state-based-action" }] };
+	}
 
 	if (step === "untap") {
 		const tapped = cardsIn(table, "battlefield").filter((t) => t.controller === active.id && t.tapped);

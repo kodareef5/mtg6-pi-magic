@@ -1,0 +1,76 @@
+{
+	"card": "Gandalf, Goblins' Bane // Flameshape",
+	"generated": "2026-10-10",
+	"source": "7e515ac2338f3f120e0567bda49e2a30e10622dc9382b89d34d27243e37a2574",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gandalf, Goblins' Bane // Flameshape",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Whenever you cast a noncreature spell, Gandalf gets +1/+1 until end of turn and deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "damage",
+									"to": "bound:player",
+									"amount": 1,
+									"from": "this"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"face": 1,
+				"claim": "Cast Flameshape",
+				"basis": "Look at the top two cards of your library and exile them face down. For as long as they remain exiled, you may play them if you control a Wizard.",
+				"source": {
+					"card": "Gandalf, Goblins' Bane // Flameshape",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

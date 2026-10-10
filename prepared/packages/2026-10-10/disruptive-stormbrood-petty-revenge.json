@@ -1,0 +1,75 @@
+{
+	"card": "Disruptive Stormbrood // Petty Revenge",
+	"generated": "2026-10-10",
+	"source": "2bed99a148479900d2864822e6535ab1f85c8ca91828ee5bcc0c17a113355d4e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Disruptive Stormbrood // Petty Revenge",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When this creature enters, destroy up to one target artifact or enchantment.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"enchantment"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"face": 1,
+				"claim": "Cast Petty Revenge",
+				"basis": "Destroy target creature with power 3 or less. (Then shuffle this card into its owner's library.)",
+				"source": {
+					"card": "Disruptive Stormbrood // Petty Revenge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

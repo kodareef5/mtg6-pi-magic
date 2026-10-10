@@ -76,7 +76,7 @@ export function defaultCasts(table: Table, frame: Frame): Move[] {
 	const world = tableWorld(table);
 	const shared = (card: Thing) => {
 		const pack = table.work[holder]?.packages?.find((pack) => pack.card === card.card);
-		if (!pack?.assessed || pack.printedCast) return true;
+		if (!pack?.assessed || pack.printedCast || pack.printedFaces?.includes(0)) return true;
 		if (pack.printedCast === false) return false;
 		const ordinary = (pack.procedures ?? []).filter((one) => isPrintedCast(one, pack.card, table.printed[pack.card]!));
 		return ordinary.length > 0 && !ordinary.some((one) => (one.source.zones ?? ["hand"]).includes(card.zone));

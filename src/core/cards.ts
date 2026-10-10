@@ -16,6 +16,7 @@
  * Every legal card is assumed supported. `cards/unsupported.txt` lists the names
  * this engine cannot play yet, one per line, and checkDeck refuses a deck that
  * contains one.
+ * Past 150 lines to keep card-file parsing and its source-pinned face companion together.
  */
 
 import { createHash } from "node:crypto";
@@ -87,7 +88,7 @@ export function load(path: string): Universe {
 		});
 	}
 	const facePath = path.replace(/\.tsv$/, "") + ".faces.json";
-	let faces: Universe["faces"];
+	let faces: Universe["faces"] = header.includes("faces") ? { path, sha256: createHash("sha256").update(readFileSync(path)).digest("hex") } : undefined;
 	if (existsSync(facePath)) {
 		const text = readFileSync(facePath, "utf8"), data = JSON.parse(text) as { source: string; cards: Record<string, { layout: string; faces: CardFace[] }> };
 		if (data.source !== createHash("sha256").update(readFileSync(path)).digest("hex")) throw new Error(`Face data does not match ${path}`);

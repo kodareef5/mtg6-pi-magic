@@ -52,7 +52,12 @@ export type ObjectId = string;
 export type Thing = {
 	/** Selected spell or battlefield face, and Room unlocked designations. */
 	face?: 0 | 1;
+	/** Last transformation's clock, for 701.27f and effect timestamps. */
+	transformed?: number;
 	doors?: (0 | 1)[];
+	prepared?: true;
+	/** A castable Prepare copy names its printed face and the permanent that sustains it. */
+	copy?: { face: 0 | 1; source: ObjectRef };
 	id: ObjectId;
 	incarnation: number;
 	/** Cards have a name. Spells and noncard stack objects hold accepted instructions. */
@@ -95,6 +100,10 @@ export type Mana = {
 /** One accepted announcement, frozen at execution so replay never infers its meaning again. */
 export type Activation = {
 	face?: 0 | 1;
+	/** Source's last transformation when this ability went on the stack, or its delay was created. */
+	transformAt?: number;
+	/** Objects a paid cost makes available to its resolving effect. */
+	bound?: Record<string, Bound>;
 	source: ObjectRef;
 	controller: SeatId;
 	claim: string;
@@ -115,7 +124,7 @@ export type Activation = {
 	words?: string[];
 	x?: number;
 	/** Set when a triggered ability was put on the stack: what it needs to resolve. */
-	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound">;
+	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound" | "chapter">;
 };
 /**
  * A triggered ability waiting to be put on the stack (603.3). It belongs to the
@@ -123,6 +132,8 @@ export type Activation = {
  * its controller puts it on the stack and chooses its targets.
  */
 export type Trigger = {
+	chapter?: number;
+	transformAt?: number;
 	id: string;
 	controller: SeatId;
 	/** "This": the object whose ability triggered, as it was when it triggered. */
@@ -219,7 +230,7 @@ export type Note = {
 	 * A delayed trigger (603.7). It belongs to the table, not its source, and its
 	 * refs other than the event's were fixed when it was created.
 	 */
-	| { kind: "delay"; event: GameEvent; effect: Effect; fixed: { source: ObjectRef; targets: Chosen[][]; bound: Record<string, Bound>; x?: number }; once: boolean }
+	| { kind: "delay"; event: GameEvent; effect: Effect; fixed: { source: ObjectRef; targets: Chosen[][]; bound: Record<string, Bound>; x?: number; transformAt?: number }; once: boolean }
 );
 
 /**

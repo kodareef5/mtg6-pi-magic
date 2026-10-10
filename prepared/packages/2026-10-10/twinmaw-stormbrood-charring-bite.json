@@ -1,0 +1,65 @@
+{
+	"card": "Twinmaw Stormbrood // Charring Bite",
+	"generated": "2026-10-10",
+	"source": "93854f0b1a7b8c6cfb81a2728533e8c8d21e5e766bb050c20e2af42ec46232ee",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Twinmaw Stormbrood // Charring Bite",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When this creature enters, you gain 5 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 5
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"face": 1,
+				"claim": "Cast Charring Bite",
+				"basis": "Charring Bite deals 5 damage to target creature without flying. (Then shuffle this card into its owner's library.)",
+				"source": {
+					"card": "Twinmaw Stormbrood // Charring Bite",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -78,6 +78,9 @@ export type Change =
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
 	| { do: "tap" | "untap"; what: string }
+	| { do: "transform"; what: string; since?: number }
+	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }
+	| { do: "prepare"; what: string; prepared: boolean }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }

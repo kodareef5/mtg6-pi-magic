@@ -77,7 +77,8 @@ export function checkProcedure(value: unknown): Procedure {
 			if (instruction.as) bound.add(instruction.as);
 		}
 	};
-	visit(procedure.instructions, procedure.targets?.length ?? 0, new Set());
+	const exilesSource = procedure.cost?.exile === "this" || (typeof procedure.cost?.exile === "object" && "choose" in procedure.cost.exile && procedure.cost.exile.source);
+	visit(procedure.instructions, procedure.targets?.length ?? 0, new Set(exilesSource ? ["cost-source"] : []));
 	return procedure;
 }
 
@@ -100,7 +101,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land", activation.face) :
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
-	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0)) throw new Error("This card cannot be cast using that face.");
+	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
 	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const } : object;
 	const traits = characteristics(table, spell);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
@@ -170,6 +171,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	];
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));
+	if (activation.timing === "spell" && object.copy) changes.push({ do: "prepare", what: object.copy.source.id, prepared: false });
 	changes.push({ do: "activate", what: source.id, id: `ability-${table.cursor.clock + 1}`, ability: structuredClone(activation) });
 	if (activation.timing === "mana") for (const instruction of activation.instructions) {
 		if (instruction.do !== "mana" || !instruction.colors) throw new Error("A mana ability only adds mana of stated colors.");

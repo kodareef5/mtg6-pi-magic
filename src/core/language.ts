@@ -133,7 +133,7 @@ export const Defs = {
 		/** `true` taps the source. A choice taps other objects, such as crew's creatures with total power N or more. */
 		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive) })])),
 		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
-		exile: Type.Optional(ObjectRef),
+		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) })])),
 		life: Type.Optional(positive),
 		/** A number of cards from hand, or this card ("Discard this card"). */
 		discard: Type.Optional(Type.Union([positive, ObjectRef])),
@@ -157,7 +157,8 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "step"),
+		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "step", "transforms", "unlocks"),
+		face: Type.Optional(Face), fully: Type.Optional(Type.Literal(true)),
 		of: Type.Optional(Type.Ref("Selector")),
 		/** Who cast, attacked, or controls the targeting spell or ability. */
 		by: Type.Optional(Side),
@@ -185,7 +186,7 @@ export const Defs = {
 		step({ do: Type.Literal("damage"), to: Type.Optional(Type.Union([ObjectRef, PlayerRef])), every: Type.Optional(Type.Ref("Selector")), amount: Type.Ref("Amount"), from: Type.Optional(ObjectRef) }),
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
-			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)),
+			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), controller: Type.Optional(PlayerRef),
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
@@ -198,6 +199,9 @@ export const Defs = {
 		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("tap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
+		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
+		step({ do: Type.Literal("door"), what: ObjectRef, action: one("unlock", "lock"), face: Type.Optional(Face) }),
+		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
 		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Ref("TokenSpec"), tapped: Type.Optional(Type.Literal(true)) }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
@@ -215,6 +219,8 @@ export const Defs = {
 
 	/** A public note on an object, quoting the text it carries out in `basis`. It lives while that object exists, unless `until` ends it sooner. */
 	Registration: Type.Union([
+		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** A triggered ability. `if` is its intervening if (603.4). */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect"),
 			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Literal("once-per-turn")) }),
@@ -222,6 +228,7 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("continuous"), affects: Type.Ref("Selector"), change: Type.Ref("Modification"), if: Type.Optional(Type.Ref("Condition")) }),
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
+			prepared: Type.Optional(Type.Literal(true)),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
 			/** "You may pay 2 life. If you don't, it enters tapped": tapped unless its controller pays this as it enters. The land play offers both. */
 			unlessPay: Type.Optional(object({ life: positive })) }),

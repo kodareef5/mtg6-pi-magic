@@ -20,7 +20,7 @@ export function printedFacts(universe: Universe, names: string[]): Record<string
 	return Object.fromEntries([...new Set(names)].sort().flatMap((name) => {
 		const card = universe.cards.get(name);
 		return card ? [[name, { ...(card.faces ? { faces: structuredClone(card.faces), layout: card.layout } : {}), type: front(card.type), mana: front(card.mana), stats: front(card.stats),
-			text: card.oracle.split(" // ")[0]!.replace(/\([^)]*\)/g, "").trim().length > 0, oracle: card.oracle }]] : [];
+			text: (card.faces?.map((face) => face.oracle) ?? [card.oracle.split(" // ")[0]!]).some((text) => text.replace(/\([^)]*\)/g, "").trim().length > 0), oracle: card.oracle }]] : [];
 	}));
 }
 const front = (field: string) => field.split(" // ")[0]!.trim();

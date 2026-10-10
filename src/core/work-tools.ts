@@ -138,8 +138,9 @@ function packageProblem(frame: Frame, pack: Package): string | null {
 		const missing = assessmentProblems(printed, { ...standing, ...pack });
 		if (missing.length) return `package ${pack.card}: ${missing.join("; ")}`;
 	}
-	const all = (registrations: Registration[]): Registration[] => registrations.flatMap((one) => [one, ...(one.kind === "continuous" && one.change.registers ? all(one.change.registers) : [])]);
-	const foreign = all(pack.registers).filter((one) => !quotes(printed, one.basis));
+	const all = (registrations: Registration[], face?: 0 | 1): { one: Registration; face?: 0 | 1 }[] => registrations.flatMap((one) =>
+		[{ one, face: one.face ?? face }, ...(one.kind === "continuous" && one.change.registers ? all(one.change.registers, one.face ?? face) : [])]);
+	const foreign = all(pack.registers).filter(({ one, face }) => !quotes(faceFacts(printed, face), one.basis)).map(({ one }) => one);
 	return foreign.length ? `package ${pack.card}: ${foreign.map((one) => JSON.stringify(one.basis)).join(", ")} ${foreign.length === 1 ? "is" : "are"} not on ${pack.card} as complete sentences or printed lines in source order; each registration quotes the card's own text word for word, and a card registers only abilities it has` : null;
 }
 const withPackages = (current: Package[] = [], added: Package[] = []) =>

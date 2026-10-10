@@ -1,0 +1,46 @@
+{
+	"card": "Hearth Elemental // Stoke Genius",
+	"generated": "2026-10-10",
+	"source": "af17b4d93467d220a31a7e5d20e5ebb4c146a6fa787494fecdb219ac25ab42b5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hearth Elemental // Stoke Genius",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"face": 0,
+				"claim": "Cast Hearth Elemental with its graveyard-based cost reduction, counting each instant, sorcery, or card with an Adventure once.",
+				"basis": "This spell costs {X} less to cast, where X is the number of cards in your graveyard that are instant cards, sorcery cards, and/or have an Adventure.",
+				"source": {
+					"card": "Hearth Elemental // Stoke Genius",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"face": 1,
+				"claim": "Cast Stoke Genius to discard your hand, then draw two cards.",
+				"basis": "Discard your hand, then draw two cards. (Then exile this card. You may cast the creature later from exile.)",
+				"source": {
+					"card": "Hearth Elemental // Stoke Genius",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
