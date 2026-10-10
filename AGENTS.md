@@ -150,8 +150,14 @@ game of basic lands, 107 recaps at a second or two each turn 24 seconds of play
 into minutes of it, so the call is started at the turn boundary and the answer
 lands when it lands.
 
-**`strategy` advances the pregame setup.** One planner prepares during the
-opponent's turn. After prior scoped tactical work, it accepts or amends before
+**`strategy` advances the pregame setup.** One session writes each plan. By
+default an analyst wave reads the same dossier first (a survey question per hand
+card and own creature plus six fixed questions, one branch analyst per first
+action, and a growth analyst), then one coordinator reconciles their reports
+and writes the plan; `--no-survey` in `tools/matchup.ts` and `tools/sim.ts`
+runs the coordinator alone, which is the arm that tests whether the wave earns
+its three hundred calls a game. The session prepares during the opponent's
+turn. After prior scoped tactical work, it accepts or amends before
 upkeep choices, then reviews the unfinished line after its draw. Opening and
 unscoped legacy work retain the post-draw deadline. Jev flies the phase
 scripts and ordered actions between sessions; a stop or help request changes
@@ -297,9 +303,10 @@ parameter, and a kind per action would mean a code change every three months. A
 bucket holding one card is fine; a third mechanism for the second awkward card
 is not. When a card will not fit, carve it out, record the gap, leave the bucket.
 
-No derived value is ever stored. A creature's power is read through the layers
-every time it is asked for. If a change would be easier by caching one, the walk
-is in the wrong place.
+No derived value is stored on an object. A creature's power is read through the
+layers every time it is asked for; `characteristics.ts` memoizes one walk per
+table revision and drops it on the next commit. If a change would be easier by
+storing one, the walk is in the wrong place.
 
 The table never reads printed card text. Meaning arrives as structured terms,
 checked against an enumeration before anything moves. Printed type line, mana
@@ -417,7 +424,7 @@ rather than adding a test for each branch.
 or the commit is not done. Neither makes a network call: the decision model is a
 double whose shape is Pi's own `classify`. `npm run smoke` is the live run, opt
 in, and it reports the seed, the outcome, the model calls, the forced ratio and
-the gaps. Tests live beside the code and ship with neither:
+the gaps. Tests live in `test/` and ship with nothing:
 `package.json#files` leaves them out of the package.
 
 ## Writing rules
@@ -441,6 +448,17 @@ call does not promise. Read `skills/AGENTS.md` before writing text a model reads
 index.ts               the Pi extension: commands and tools, no game logic
 src/core/              the game. Its own AGENTS.md holds the invariants
   table.ts, commit.ts  the shapes and their readers, and the one writer over them
+  loop.ts              the serial game loop: ask, retry once, fallback, stops, loop guard, objections
+  journal.ts           the stored form: header and lines, replay, clone, rollback, torn-line repair
+  view.ts              projection: the one reader on a seat's behalf, visibility as a filter
+  player.ts, intent.ts the Player interface and refusals; what a seat means to do
+  budget.ts            the mana and payment forecast a plan is checked against before acceptance
+  announce.ts          the announcement options a seat's packages and plan offer
+  knowledge.ts, odds.ts what a seat knows and the odds it may work out; transitions unfinished
+  derived.ts, declare.ts, concede.ts, say.ts  unwritten derived facts and raw declarations; conceding; table talk
+  syntax.ts, names.ts  zone, reason, change and layer types; seat names
+  combat-facts.ts      block conflicts and strike order facts for the pilot
+  readiness.ts, assessment.ts, purpose.ts, moves.ts  which uses have sources, assessment coverage, a stack object's purpose
   work.ts            a seat's private equipment: its accepted plan and packages
   language.ts        the syntax a seat writes: procedures, registrations, plans
   work-language.ts   the checked JSON tool vocabulary, not model-written code
@@ -478,6 +496,13 @@ src/context/           questions for a decision model. Its own AGENTS.md
   dial.ts              the routes a seat can ask for, answered from the rules
   packet.ts, seat.ts   one decision's context, and the seat that answers it
   sit.ts               seating a whole table, so one command cannot differ
+  survey.ts, branches.ts, growth.ts, perspectives.ts  the analyst wave: focused questions, one branch per first action, growth lines, six outlooks
+  coordinator.ts       the coordinator's system prompts and task sections
+  dossier.ts, dossier-strategy.ts  the projected position rendered for the writer, and the model-written sections
+  choices.ts, choice-space.ts, decision-facts.ts  inspection of option variants and the facts a decision carries
+  strategy-actions.ts, strategy-combat.ts, strategy-permissions.ts, strategy-position.ts  action text, the combat lookup, permissions, card definitions
+  metrics.ts, trace.ts usage arithmetic and the bill; exact requests and replies when tracing
+  playbook.ts, plan.ts the policy schema; the starting intent
 src/seating/           protocol and validation; sockets unfinished
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
@@ -485,6 +510,10 @@ tools/sim.ts           bulk games on fresh seeds carrying one source game's prep
 tools/adherence.ts     plan adherence read from a journal on replay: picks that carried out a due step
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
+tools/matchup-fixture.ts  the pinned lists, card and rules pins, and a table from a journal header
+tools/benchmark.ts     saved-position probes: offline checks, live arms, continuations, the pilot lab (benchmark-*.ts)
+tools/pregame.ts, tools/ability-fixture.ts  a pregame alone; a frozen ability position
+tools/stats.ts, tools/timeline.ts  read a saved result; render its timeline
 tools/game-report.ts   compact reports and saved results for each run
 tools/game-timeline.ts offline timeline rendering; HTML and script beside it
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
@@ -493,6 +522,9 @@ docs/examples/         worked uses of the syntax by shape, checked against card 
 decks/collection/      decks kept for tests and play: tournament lists and practice decks
 decks/standard-matchup.json  the pinned matchup: its two lists, legality date, card and rules hashes
 docs/STANDARD.md       first real opening, observed failures and mechanics inventory
+docs/STATUS.md         what is established, what is open, and the current baseline table
+docs/IMPROVEMENTS.md   the next change and how it is judged, one page
+docs/PLAYBOOK.md       the pregame policy families the brief is filed into
 cards/standard.tsv     5164 cards, committed, every field checked against source
 rules/cr.tsv           4063 rules, headings and glossary terms, committed
 docs/PLANS.md          the plan a seat flies: what it holds, how the table flies it
@@ -508,7 +540,9 @@ design-ref/            observations about Magic, on disk and not ours to publish
 ```
 
 `npm run cards` rebuilds the standard list and `npm run universe` writes all
-32,870 cards with every column. `npm run rules` rebuilds the rules. All three
+32,870 cards with every column. `npm run rules` rebuilds the rules. `npm run sim`
+plays bulk games, `npm run benchmark` runs saved positions, `npm run stats` and
+`npm run timeline` read a saved result, and `npm run pregame` prepares alone. All three
 verify every carried field against the source and refuse to pass on a mismatch.
 `/magic cards` and `/magic rules build` run them from inside Pi.
 

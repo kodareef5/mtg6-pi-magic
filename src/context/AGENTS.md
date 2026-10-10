@@ -26,8 +26,9 @@ still want it, it belongs in the core.
 ## Inference is Pi's
 
 Pi holds the providers, the credentials and the model catalogue. `roles.ts`
-names five parts and a Pi model pattern for each; `model.ts` is the one adapter
-and holds no endpoint and no key. The classifier vocabulary is Pi's own, not a
+names five parts and a Pi model pattern for each; `model.ts` (the classifier)
+and `reason.ts` (chat) are the two adapters, and neither holds an endpoint or a
+key. The classifier vocabulary is Pi's own, not a
 copy of Pi's, because a second definition of the same shape drifts.
 
 A pattern that does not resolve is reported. Do not fall back to another model,
@@ -48,7 +49,9 @@ reaches a decision is a short plan plus the facts.
   combat and recovery, with priorities, worked examples and reversing conditions.
   The implementation still uses four analysts and a synthesis; measure its wall
   time and repairs before claiming that a larger brief improves gameplay.
-- **strategy** advances the pregame reasoning with one planner per seat. It
+- **strategy** advances the pregame reasoning with one plan per seat per turn.
+  By default an analyst wave (survey, branches, growth) reads the dossier and
+  one coordinator writes the plan; `--no-survey` runs the coordinator alone. It
   prepares during the opponent's turn, accepts scoped work before upkeep choices,
   then reviews the unfinished line after draw. Without prior scoped work, opening
   planning waits for draw. It also answers stops or requests for help. It submits changed fields and reuses
