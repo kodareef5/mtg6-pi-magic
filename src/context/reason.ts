@@ -261,7 +261,7 @@ export function reasoner(options: {
 			for (let turn = 1; turn <= (tools.turns ?? 3); turn++) {
 				tools.signal?.throwIfAborted();
 				const finishing = turn === (tools.turns ?? 3) && !!tools.lookups?.length;
-				if (finishing) messages.push({ role: "user", content: `This session's final reply is for ${tools.submit.name}. Reference lookups are closed. Submit your answer using the facts already returned; state any unresolved limitation in the answer's supported fields. Acceptance still depends on validation.`, timestamp: Date.now() });
+				if (finishing) messages.push({ role: "user", content: `This session's final reply is for ${tools.submit.name}. Reference lookups are closed. Submit your answer using the facts already returned. A use goes in unsupported only when it cannot be prepared at all; notes and caveats do not belong there and a non-empty unsupported refuses the whole request. Acceptance still depends on validation.`, timestamp: Date.now() });
 				const available = finishing ? specs.filter((one) => one.name === tools.submit.name) : specs;
 				const reply = await retried(about, () => call(about, prompt.system, messages, ceiling, available, tools.signal, tools.timeoutMs), tools.signal,
 					{ ...(tools.attempts ? { attempts: tools.attempts } : {}), ...(tools.optional ? { optional: true as const } : {}) });

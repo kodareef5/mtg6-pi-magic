@@ -95,6 +95,9 @@ test("identified uses are prepared before priority choices, while hidden or unpe
 				interpretations++; assert.equal(about, "interpret Shock");
 				assert.equal(JSON.parse(prompt.user).printed.oracle, basis);
 				assert.match(tools.submit.check({ procedures: [{ ...procedure, source: { ...procedure.source, zones: ["hand"] } }], unsupported: [] })!, /from graveyard/);
+				// The refusal names every compared field. A writer that casts its own card writes controller "self" against a
+				// deferred "any"; a message about the basis alone sent three models back to re-quote an identical basis.
+				assert.match(tools.submit.check({ procedures: [{ ...procedure, source: { ...procedure.source, controller: "self" } }], unsupported: [] })!, /source\.controller \(any\)/);
 				assert.equal(tools.submit.check({ procedures: [procedure], unsupported: [] }), null); return {};
 			} }, universe),
 		});

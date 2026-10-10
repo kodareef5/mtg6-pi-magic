@@ -46,7 +46,7 @@ export async function interpret(frame: Frame, writer: Pick<Reasoner, "work">, un
 				for (const use of needed.uses) for (const zone of use.source.zones!) {
 					if (!procedures.some((one) => one.basis === use.basis && one.timing === use.timing && one.source.controller === use.source.controller
 						&& one.source.tapped === use.source.tapped && one.source.zones?.includes(zone)))
-						wrong.push(`${use.claim} needs a ${use.timing} procedure from ${zone} with its exact accepted basis.`);
+						wrong.push(`${use.claim} needs a ${use.timing} procedure from ${zone} whose basis, timing, source.controller (${use.source.controller}) and source.tapped (${String(use.source.tapped)}) equal the requested use exactly.`);
 				}
 				if (procedures.some((one) => !needed.uses.some((use) => one.basis === use.basis && one.timing === use.timing))) wrong.push("Prepare only the requested uses; no unrelated procedures.");
 				if (wrong.length) return wrong.join("; ");
