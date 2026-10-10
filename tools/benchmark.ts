@@ -37,7 +37,9 @@ type Case = PlanCheck & { id: string; journal: string; version: number; seat: nu
 	pilotPolicy?: string; prepared?: { file: string; name: string }; after?: After[]; throughTurn?: number };
 const { values } = parseArgs({ options: { positions: { type: "string" }, live: { type: "boolean" }, review: { type: "string" }, task: { type: "string" }, case: { type: "string", multiple: true },
 	pilot: { type: "string", multiple: true, default: ["jev"] }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
-	answers: { type: "string" }, findings: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" } } });
+	answers: { type: "string" }, findings: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" },
+	/** The strategy model for this run, as a Pi pattern. The default is the prescribed baseline. */
+	strategy: { type: "string", default: "gpt-6-luna:low" } } });
 const manifest = values.positions ?? join(import.meta.dirname, "benchmarks/positions.json");
 const catalog = JSON.parse(readFileSync(manifest, "utf8")) as { journals: Record<string, string>; cases: Case[] };
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
@@ -115,7 +117,7 @@ if (!values.live) process.exit(0);
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
 const available = { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") };
-const parts = cast(rosterFor({ every: { strategy: "gpt-6-luna:low", summary: "off" } }), available);
+const parts = cast(rosterFor({ every: { strategy: values.strategy!, summary: "off" } }), available);
 const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!, judging = parts.find((one) => one.role === "judge")!;
 const classifiers = new Map(pilots.filter((pilot) => pilot !== "luna").map((pilot) => {
 	const chosen = pilot === "jev" ? jev : cast({ decide: pilot }, available).find((one) => one.role === "decide")!;
@@ -123,7 +125,7 @@ const classifiers = new Map(pilots.filter((pilot) => pilot !== "luna").map((pilo
 	return [pilot, chosen.model] as const;
 }));
 if (selected.some((one) => one.task === "judge") && (!judging?.model || judging.off || judging.model.type === "classifier")) throw new Error("Judge probes require the prescribed judge model.");
-if (!jev.model || jev.off || !luna.model || luna.off) throw new Error("The prescribed Jev and Luna low models must both resolve.");
+if (!jev.model || jev.off || !luna.model || luna.off) throw new Error(`Jev and the strategy pattern ${values.strategy} must both resolve.`);
 const out = values.out ?? `.pi/benchmarks/${Date.now()}`;
 const source = { revision: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
 	dirty: execFileSync("git", ["status", "--porcelain"], { encoding: "utf8" }).trim() };

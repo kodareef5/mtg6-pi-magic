@@ -42,7 +42,8 @@
     "stats": "node tools/stats.ts",
     "pregame": "node tools/pregame.ts",
     "benchmark": "node tools/benchmark.ts",
-    "timeline": "node tools/timeline.ts"
+    "timeline": "node tools/timeline.ts",
+    "sim": "node tools/sim.ts"
   },
   "dependencies": {
     "ws": "^8.20.0",

@@ -112,6 +112,12 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * about one in six timed out, so the brief that every later turn reads gets fifteen minutes.
  */
 const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 900_000, strategy: 150_000, judge: 150_000, summary: 60_000 };
+/**
+ * Every timeout and output ceiling in this package was measured on a low-effort model. A model asked to think
+ * harder answers later and spends more tokens before its answer, so both scale with the thinking level here, in
+ * the one place every chat call passes through. Low is the baseline and scales nothing.
+ */
+const EFFORT: Record<ThinkingLevel, number> = { off: 1, minimal: 1, low: 1, medium: 2, high: 4, xhigh: 6, max: 8 };
 
 export function reasoner(options: {
 	role: Role;
@@ -136,9 +142,11 @@ export function reasoner(options: {
 	let gaveUp: string | null = null;
 
 	/** One request. Recorded whether it worked, because a failed call still costs. */
-	async function call(about: string, system: string, messages: unknown[], ceiling: number, tools?: ToolSpec[], taskSignal?: AbortSignal, timeoutMs = TIMEOUT[options.role]): Promise<Reply> {
+	async function call(about: string, system: string, messages: unknown[], asked: number, tools?: ToolSpec[], taskSignal?: AbortSignal, limitMs = TIMEOUT[options.role]): Promise<Reply> {
 		taskSignal?.throwIfAborted();
 		options.signal?.throwIfAborted();
+		const effort = EFFORT[(options.thinking ?? "low") as ThinkingLevel] ?? 1;
+		const ceiling = asked * effort, timeoutMs = limitMs * effort;
 		const began = Date.now();
 		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
 		const finish = meter(options.tally, {

@@ -7,7 +7,7 @@
 import { mkdirSync, appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { matchTable, matchup, universe } from "./matchup-fixture.ts";
+import { dealtTable, matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { open, save, replay, fork, reopen } from "../src/core/journal.ts";
 import { play } from "../src/core/loop.ts";
@@ -20,7 +20,9 @@ import { load as loadRules } from "../src/core/rules.ts";
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
 	turns: { type: "string", default: "40" }, prepare: { type: "boolean", default: false }, resume: { type: "string" }, version: { type: "string" },
 	/** Model patterns for a role this run only, such as gpt-6.1-sol:high. */
-	pregame: { type: "string" }, strategy: { type: "string" } } });
+	pregame: { type: "string" }, strategy: { type: "string" },
+	/** Skip the analyst wave: the coordinator writes each plan alone. */
+	"no-survey": { type: "boolean", default: false } } });
 if (values.version && (!values.resume || !/^\d+$/.test(values.version))) throw new Error("--version needs a journal supplied by --resume and a nonnegative decision count.");
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
@@ -29,7 +31,7 @@ const inference = { classify: (model: never, request: never, options: never) => 
 	stream: (model: never, request: never, options: never) => runtime.streamSimple(model, request, options) as never };
 
 const from = values.resume ? { path: values.resume, ...(values.version ? { version: Number(values.version) } : {}) } : undefined;
-const carried = from && replay(from.path, (header) => matchTable(header.seed), from.version,
+const carried = from && replay(from.path, dealtTable, from.version,
 	{ cards: matchup.cards, rules: matchup.rules });
 const table = carried ? carried.table : matchTable(values.seed!);
 const id = `${table.rng.seed}-${Date.now()}`;
@@ -46,7 +48,7 @@ const observed = traceInference(inference as never, (event) => {
 // The clock starts before seating, so the elapsed time includes the pregame.
 const began = Date.now();
 console.log(`${values.prepare ? "Preparing" : "Playing"} ${id}; journal ${path}`);
-const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
+const seated = await seatTable(table, async () => parts, observed, universe, { format: "standard", journal, rules: loadRules(matchup.rules.path), survey: !values["no-survey"], ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
 	const result = preparationFailure(table, error, began, { journal: path, trace: calls });
 	const paths = saveReport(join(values.out!, `${id}.result.json`), result);
 	console.error([...report(result), ...paths].join("\n"));
@@ -72,7 +74,7 @@ finally {
 while (!values.prepare && !table.outcome && !nextDecision(table)) advance(table);
 // The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
 const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome?.results });
-const replayMatches = state(replay(path, (header) => matchTable(header.seed)).table) === state(table);
+const replayMatches = state(replay(path, dealtTable).table) === state(table);
 seated.timing.finishedAt = Date.now();
 const result = gameResult(table, seated, { replayMatches, journal: path, trace: calls, ...(failure ? { error: String(failure) } : {}) });
 const paths = saveReport(join(values.out!, `${id}.result.json`), result);

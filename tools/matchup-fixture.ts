@@ -19,3 +19,6 @@ for (const pin of [matchup.cards, matchup.rules]) {
 export const decks = matchup.decks.map((name) => deck(name));
 /** A game of the two lists. Setup registers both; an illegal list refuses the game. */
 export const matchTable = (seed: string) => start(standard, decks.map((one, seat) => ({ name: seat ? "Red" : "Green", deck: one })), seed, universe);
+/** The table a journal header dealt, whichever list sits first. Seat 0 is always on the play, so a fair sample seats each list first half the time. */
+export const dealtTable = (header: { seed: string; seats: { name: string; deck: (typeof decks)[number] }[] }) =>
+	start(standard, header.seats.map(({ name, deck }) => ({ name, deck })), header.seed, universe);
