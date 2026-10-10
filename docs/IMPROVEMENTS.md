@@ -31,7 +31,17 @@ mana and tap costs can refute a step without claiming its other costs were
 checked. Across 86 saved plans this recovered 20 complete prefix witnesses and
 one conflict. This is a correctness gain, not a measured strength gain.
 
-## What the comparisons ruled out
+Own-turn and preparation answers must explicitly replace or keep their steps
+and opponent-turn policy. Omission is refused, and keep preserves the displayed
+base exactly before expansion into an ordinary journaled plan. Of 175 archived
+answers accepted by the old writer, 171 expand identically and four omissions
+are now refused. Six frozen-report sessions per arm used eight writer calls for
+control and seven for the change, with no analyst reruns. Both development
+continuations replayed and cloned without gaps or replacement plans. No live
+answer used keep; its fidelity is covered offline. Explicit intent does not
+fix contradictory reasoning or establish stronger play.
+
+## Unpromoted experiments
 
 - A broad policy-only context trim cut dossier bytes by 24.8% across 77 saved
   positions, but failed confirmation on resource dependencies and execution.
@@ -49,26 +59,32 @@ one conflict. This is a correctness gain, not a measured strength gain.
   fragments. Reject the unused mechanism. The planned downstream rewrite and
   physical comparisons were not run because no copy operation occurred.
 
+A calculation-only context trim cut those dossiers by 59.8% and total authoring
+input by 16.9%. It also removed prepared card understanding: candidate wins were
+four of seven completed immediate-win continuations, with one missing writer
+answer, versus five of eight for control. Both kept the needed blockers in one
+of two survival cases. Leave the trim unpromoted; these repeated positions and
+mixed outcomes do not rule out focused context in general.
+
 Pilot annotations for later tap costs did not improve four paired continuations.
 Automatic combat-fact attachments already failed in October 6 and 7 experiments.
 Do not repeat those approaches or turn a failed position into another card warning.
 Detailed evidence and rejected patches stay outside the production paths.
 
-## Next change
+## Next work
 
-Separate reading by the question being answered. First-action and growth calls
-calculate consequences this turn; test giving them the full projected position
-without repeated pregame advice. Keep that advice with focused strategic
-questions and the coordinator. Preserve card text, accepted terms, public deck
-counts, earned knowledge, restrictions, candidate coverage and every physical
-choice. Response repair and the pilot stay unchanged. This isolates a smaller
-change than the rejected trim of every strategy reader.
+Reduce repeated reading while preserving prepared card understanding. Prior
+trims removed useful guidance along with repetition; do not treat byte savings
+as sufficient evidence. The current writer still discards available wins and
+chooses attacks it predicts will lose. Locate those failures in discovery,
+selection or writing before adding a prompt rule or another review stage.
 
-Compare discovery first, then selection and physical execution. Use frozen
-findings to isolate the writer when needed. Do not add another selector or
-review stage until evidence identifies work it can remove. Measure active
-response latency against background preparation before changing concurrency;
-peak count alone proves little.
+Use frozen reports for writer changes and small mechanism-specific gates. An
+unused mechanism can stop before physical testing. A retention-contract change
+needs exact preservation and authoring checks, not another full analyst wave.
+Track keep counts in recorded writer answers. For concurrency changes, measure
+active response waits separately from background preparation; peak count alone
+proves little. General playing strength still needs fresh paired games.
 
 Keep opponent-turn preparation, scoped upkeep acceptance and post-draw review.
 Do not narrow amendments yet: 67 of 84 inspected draw reviews changed actions

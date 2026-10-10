@@ -57,7 +57,9 @@ Each result also records `work`: the accepted analyst reports and writer
 submission, or each task's failure. Use these to distinguish missing candidates,
 selection errors and commitments lost while writing. They are evidence for a
 review, not automatic strategic scores. Attribute fact, pilot and execution
-failures from the projected request and physical continuation separately.
+failures from the projected request and physical continuation separately. For turn
+writers, count explicit `steps: "keep"` and `theirTurn: "keep"` in these saved
+submissions; an accepted plan alone cannot distinguish retention from replacement.
 
 `--findings FILE` reuses that results file's analyst tasks for a live writer
 comparison. Case, repetition, projected position and analyst task coverage must

@@ -58,6 +58,8 @@ import { branchReports, branchesSection, firstActions } from "../src/context/bra
 import { announce, cardTexts, establish, example, finish, main, matchup, pack, passBoth, place, quiet, readDossier } from "./play.ts";
 
 const physical = (table: Table) => { const { work: _work, workLog: _history, ...state } = structuredClone(table); return state; };
+const theirTurn = { guidance: "No response held; pass unless the board changes.", complete: "pass" as const };
+const opponentPhase = { when: { active: "opponent" as const }, ...theirTurn };
 const turn3 = { active: "self" as const, fromTurn: 3, throughTurn: 3 };
 /** Green's third turn: a land, Fabled Passage, an attack with the Chocobo. */
 const line: Plan = { objective: "Grow the Chocobo with two land drops and attack.", guidance: "Land first, then the Passage, so the Chocobo sees both.",
@@ -216,6 +218,23 @@ test("the pilot flies the plan: actions and passes are chosen, and progress live
 	const childPath = join(directory, "child.jsonl");
 	fork(journal.path, after, "child", childPath);
 	assert.deepEqual(workFrame(replay(childPath, () => position()).table, 0).view.done, [0, 1], "a clone holds exactly the progress of its prefix");
+	const child = replay(childPath, () => position()), continued = child.table;
+	const journalChild = reopen(childPath, child.header, continued);
+	const completed = new Set(workFrame(continued, 0).view.done);
+	editWork(continued, 0, [{ do: "plan.put", plan: { ...continued.work[0]!.plan!, throughTurn: 4,
+		steps: continued.work[0]!.plan!.steps.filter((_, at) => !completed.has(at)), phases: [opponentPhase] } },
+		{ do: "plan.request", reason: "Review the unfinished line." }], "review");
+	const unfinished = basePlan(workFrame(continued, 0));
+	const retained = await planWork(workFrame(continued, 0), {}, { async work(_about, _prompt, { submit }) {
+		const args = { steps: "keep", theirTurn: "keep" }; assert.equal(submit.check(args), null); return args;
+	} });
+	assert.deepEqual(retained.tools, [{ do: "plan.put", plan: unfinished }]);
+	editWork(continued, 0, retained.tools, "retain"); save(journalChild, continued);
+	const grandchildPath = join(directory, "retained.jsonl"); fork(childPath, continued.ledger.length, "retained", grandchildPath);
+	for (const path of [childPath, grandchildPath]) {
+		assert.deepEqual(replay(path, () => position()).table.work, continued.work, "retained full plans replay and clone with the same unfinished work");
+		assert.ok(!readFileSync(path, "utf8").includes('"steps":"keep"'), "the writer directive never enters the journal");
+	}
 });
 
 test("a stop asks for a new plan once, a stop that already holds waits for a change, and help past the turn's budget is refused", async () => {
@@ -419,7 +438,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 		{ label: "A shorthand is not an id", when: { step: "precombat-main" }, action: { option: "land", objects: { card: "Forest" } } }],
 		packages: [{ card: "Hired Claw", registers: [{ basis: "{1}{R}: Put a +1/+1 counter on this creature.", kind: "watch", event: { on: "step", step: "end" },
 			effect: { instructions: [{ do: "counters", on: "this", kind: "+1/+1", amount: 1 }] } }] }] };
-	const replies = [broken, line];
+	const replies = [broken, line].map((plan) => ({ ...plan, theirTurn }));
 	const seen: string[] = [];
 	const stream: Stream = (_model, context) => {
 		seen.push(JSON.stringify(context.messages));
@@ -428,7 +447,7 @@ test("the writer's check names every problem at once, and a corrected plan is ac
 	};
 	const writer = reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 });
 	const { tools } = await planWork(frame, {}, writer);
-	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...line, throughTurn: 2 } }]);
+	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...line, throughTurn: 2, phases: [opponentPhase] } }]);
 	assert.match(seen[1]!, /\d problems: steps\[0\] \(Attack in the end step\): attack: options are listed only in declare-attackers.*steps\[1\] \(Nothing\): name an option id.*Hired Claw.*is an activated ability/, "every problem in one refusal");
 	assert.match(seen[1]!, /is not an option id; use prefix/, "an invented action shorthand is refused before it bypasses the resource forecast");
 	assert.match(seen[0]!, /## Your request\\nPlan the turn\./, "the request comes last and names the task");
@@ -501,15 +520,52 @@ test("a short amendment retains phase guidance and packages, reuses accepted syn
   assert.ok(!catalog.includes('"instructions"'), "ordinary strategy reads accepted claims and costs; equipment retains executable instructions");
   assert.ok(dossierText!.includes(`Steps left this turn, in order: ${table.cursor.steps.map((one) => one.replace(/-/g, " ")).join(", ")}.`), "the writer sees the real remaining turn windows");
   seen.push({ messages: JSON.stringify(request.messages), tools: request.tools!.map((one) => one.name) });
-  return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: { guidance: "Hold the Chocobo back." } }], stopReason: "toolUse" }) };
+  return { result: async () => ({ content: [{ type: "toolCall", id: "one", name: "submit", arguments: seen.length === 1 ? { guidance: "Hold the Chocobo back." } : { guidance: "Hold the Chocobo back.", steps: "keep", theirTurn } }], stopReason: "toolUse" }) };
  };
  const result = await planWork(frame, {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
- assert.equal(seen.length, 1, "no note-only or full-plan rewrite round");
+ assert.equal(seen.length, 2, "the omitted commitments are refused, then one explicit amendment is accepted");
+ assert.match(seen[1]!.messages, /Explicitly keep or replace steps and theirTurn/);
  const work = prepareWork(frame, result.tools);
  assert.equal(work.plan!.guidance, "Hold the Chocobo back.");
  assert.deepEqual(work.plan!.steps, base.steps);
  assert.deepEqual(work.packages, table.work[0]!.packages);
  assert.ok(!seen[0]!.tools.includes("note"));
+	// Retention is a writer instruction, resolved before core sees the plan.
+	const write = (on: Frame, args: Record<string, unknown>, prepared?: Prepared) => planWork(on, {}, {
+		async work(_about, _prompt, { submit }) {
+			const schema = submit.parameters as { required: string[]; properties: Record<string, unknown> };
+			assert.ok(schema.required.includes("steps") && schema.required.includes("theirTurn"));
+			assert.match(JSON.stringify(schema.properties.steps), /"keep"/);
+			const error = submit.check(args);
+			if (error) throw new Error(error);
+			return args;
+		},
+	}, prepared);
+	const retained = structuredClone(frame);
+	retained.view.work!.plan = { ...base, phases: [{ when: { active: "opponent", fromTurn: 4, throughTurn: 4 }, ...theirTurn,
+		reevaluate: ["An unexpected threat needs another answer."] }], steps: base.steps.map((step) => ({ ...step,
+		purpose: "Keep this accepted purpose exactly.", waitFor: "empty-stack", essential: true,
+		if: { amount: { life: "opponent" } }, // Accepted legacy condition: retaining it is not a new interpretation.
+	})) };
+	retained.view.done = [];
+	const preserved = structuredClone(retained), exact = basePlan(retained), keep = { steps: "keep", theirTurn: "keep" };
+	const kept = await write(retained, keep);
+	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: exact }], "keep preserves windows, labels, conditions, purposes and waits without restoring completed steps");
+	assert.ok(!JSON.stringify(kept.tools).includes('"keep"'), "only full plans reach core and its journal");
+	assert.deepEqual(retained, preserved, "preparing retained work changes neither progress nor the projected position");
+	await assert.rejects(write(retained, { theirTurn: "keep" }), /Explicitly keep or replace steps/);
+	await assert.rejects(write(retained, { steps: "keep" }), /Explicitly keep or replace theirTurn/);
+	await assert.rejects(write(retained, { ...keep, phases: [{ ...exact.phases![0], guidance: "Use a different response." }] }), /conflicts with a phases edit/);
+	const empty = structuredClone(retained);
+	empty.view.work!.plan!.steps = [];
+	await assert.rejects(write(empty, keep), /needs unfinished steps/);
+	empty.view.work!.plan = { ...exact, phases: [{ ...exact.phases![0]!, when: { active: "opponent", step: "declare-blockers" } }] };
+	await assert.rejects(write(empty, keep), /needs a whole-opponent-turn policy/);
+	const invalid = structuredClone(retained);
+	invalid.view.work!.plan!.steps = [{ label: "Wrong window", when: { active: "self", step: "end" }, action: { option: "attack:done" } }];
+	await assert.rejects(write(invalid, keep), /only in declare-attackers/, "keep cannot make invalid inherited work valid");
+	const pendingPreparation = { plan: { ...exact, throughTurn: 4 } };
+	assert.deepEqual((await write(frame, keep, pendingPreparation)).tools, [{ do: "plan.put", plan: pendingPreparation.plan }], "an amendment retains the displayed preparation, not the older installed plan");
  const reused = changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: `step:1 ${line.steps[1]!.label}` } }] }, available);
  assert.deepEqual(reused.steps[0]!.action, line.steps[1]!.action);
  assert.throws(() => changedPlan(base, { steps: [{ ...line.steps[1], action: { reuse: "step:999" } }] }, available), /No reusable action/);
@@ -575,7 +631,7 @@ test("strategy accepts scoped work before upkeep and reviews after draw, with no
 		})) as never,
 		stream: ((_model: unknown, context: { systemPrompt?: string; messages: { content: string }[] }, options: { maxTokens?: number }) => {
 			prompts.push({ user: context.messages[0]!.content, task: context.messages[1]?.content, system: context.systemPrompt, ceiling: options.maxTokens });
-			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { objective: "Develop.", guidance: "Play lands.",
+			return { result: async () => ({ content: [{ type: "toolCall", id: "call", name: "submit", arguments: { objective: "Develop.", guidance: "Play lands.", theirTurn,
 				steps: [{ label: "Pass the turn", when: { active: "self" }, action: { option: "pass" } }] } }], stopReason: "toolUse" }) };
 		}) as never,
 	};
@@ -780,7 +836,7 @@ test("a strategy session that gives nothing usable leaves a gap, and the game go
 			answers: Object.fromEntries(Object.entries(request.questions).map(([key, question]) => { const ids = Object.keys(question.criteria); const choice = ids.find((id) => id === "keep") ?? ids[0]!;
 				return [key, { type: "choice", choice, probabilities: { [choice]: 1 }, confidence: 1 }]; })) })) as never,
 		// Every answer is malformed: steps that are not a list.
-		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "o", guidance: "g", steps: null } }], stopReason: "toolUse" }) })) as never,
+		stream: (() => ({ result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { objective: "o", guidance: "g", steps: null, theirTurn } }], stopReason: "toolUse" }) })) as never,
 	};
 	const table = start(standard, [{ name: "A", deck: deck("Forest turns") }, { name: "B", deck: deck("Island turns") }], "unplanned");
 	const outcome = await run(table, await seatTable(table, roster, inference, universe, { format: standard.name, survey: false }), inference, undefined);
@@ -837,7 +893,7 @@ test("the writer is told its mana source by source, and what a land in hand woul
 	main(table, 0, 3);
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }, { do: "package.put", package: { card: "Forest", registers: [] } }], "request");
 	const seen: string[] = [];
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: line }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: "c", name: "submit", arguments: { ...line, theirTurn } }], stopReason: "toolUse" }) }; };
 	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.match(seen[0]!, /Mana now: Forest \(0-\d+@\d+\) makes G; Forest \(0-\d+@\d+\) makes G/);
 	assert.match(seen[0]!, /Land plays left this turn: 1\. In hand: .*Forest: enters untapped, makes G/);
@@ -1265,7 +1321,7 @@ test("every seat sees each turn begin, even a turn of only forced play", async (
 	assert.ok(seen.includes("2:untap"), `Green saw Red's turn begin: ${seen.slice(0, 6).join(", ")}`);
 });
 
-test("preparation makes a turn plan, and the same writer can keep it with an empty update", async () => {
+test("preparation makes a turn plan, and the same writer can explicitly keep it", async () => {
 	const table = position();
 	main(table, 0, 3);
 	editWork(table, 0, [{ do: "plan.each-turn" }, { do: "plan.put", plan: { objective: "o", guidance: "g", steps: [] } }], "planned");
@@ -1274,7 +1330,7 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	const forest = cardsIn(table, "battlefield", 0).find((one) => one.card === "Forest")!;
 	commit(table, [{ do: "tap", what: forest.id }], "resolve");
 	const before = structuredClone(table);
-	const replies: Record<string, unknown>[] = [{ steps: [] }, { objective: "Next turn.", guidance: "g",
+	const replies: Record<string, unknown>[] = [{ steps: [], theirTurn }, { objective: "Next turn.", guidance: "g", theirTurn,
 		steps: [{ label: "Wait under the response policy", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }],
 		phases: [{ when: { active: "self", fromTurn: 5, throughTurn: 5, step: "precombat-main" }, guidance: "Develop." }] }];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
@@ -1300,7 +1356,7 @@ test("preparation makes a turn plan, and the same writer can keep it with an emp
 	assert.equal(prepared.plan.objective, "Next turn.");
 
 	main(table, 0, 5);
-	replies.push({});
+	replies.push({ steps: "keep", theirTurn: "keep" });
 	const kept = await planWork(workFrame(table, 0), {}, writer, prepared, ["you drew Forest"]);
 	assert.match(seen[2]!, /you drew Forest/);
 	assert.deepEqual(kept.tools, [{ do: "plan.put", plan: prepared.plan }]);
@@ -1515,11 +1571,11 @@ test("the arithmetic is refused once and then left to the pilot, and a condition
 	assert.deepEqual(budget(workFrame(table, 0), { objective: "o", guidance: "g", steps: [conditional] }), [], "a step that may not happen is not counted");
 	const seen: string[] = [];
 	const plan = { objective: "o", guidance: "g", steps: [hydra], packages: [{ card: "Mossborn Hydra", registers: pack("Mossborn Hydra") }] };
-	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { assessment: "Opponent at 20; no attackers; develop.", ...plan } }], stopReason: "toolUse" }) }; };
+	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: { assessment: "Opponent at 20; no attackers; develop.", ...plan, theirTurn } }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
 	assert.equal(seen.length, 2, "refused once, then accepted");
 	assert.match(seen[1]!, /costs \{2\}\{G\}/);
-	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...plan, throughTurn: 4 } }])
+	assert.deepEqual(tools, [{ do: "plan.put", plan: { ...plan, throughTurn: 4, phases: [opponentPhase] } }])
 	assert.ok(!JSON.stringify(tools).includes("assessment"), "the written assessment never enters the plan or the pilot's packet");
 });
 
@@ -1574,7 +1630,7 @@ test("a plan the writer was told about once goes through the table, and a schema
 	editWork(table, 0, [{ do: "plan.request", reason: "Plan the turn." }], "request");
 	const plan = { objective: "o", guidance: "g", packages: [{ card: "Mossborn Hydra", registers: pack("Mossborn Hydra") }], steps: [{ label: "Cast Mossborn Hydra", when: { active: "self" as const, step: "precombat-main" as const, fromTurn: 3, throughTurn: 3 },
 		action: { prefix: "cast:", objects: { zones: ["hand" as const], card: "Mossborn Hydra" } } }] };
-	const replies: Record<string, unknown>[] = [{ objective: "o" }, plan, plan];
+	const replies: Record<string, unknown>[] = [{ objective: "o" }, { ...plan, theirTurn }, { ...plan, theirTurn }];
 	const seen: string[] = [];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); return { result: async () => ({ content: [{ type: "toolCall", id: `c${seen.length}`, name: "submit", arguments: replies.shift()! }], stopReason: "toolUse" }) }; };
 	const { tools } = await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
@@ -1772,6 +1828,7 @@ test("reset and close cancel preparation; superseded notes and plans never arriv
 	const stream: Stream = (_model, request) => {
 		const submit = request.tools!.find((one) => one.name === "submit")!.parameters as { properties: Record<string, unknown> };
 		assert.ok("steps" in submit.properties && !("current" in submit.properties), "an invalid inherited step needs the full editor, even during an opponent response");
+		assert.doesNotMatch(JSON.stringify(submit.properties.steps), /"keep"/, "the full opponent-response editor keeps its existing contract");
 		assert.match(JSON.stringify(request.messages), /outside this window/);
 		assert.match(JSON.stringify(request.messages), /assessment first, then the full plan fields/);
 		assert.doesNotMatch(JSON.stringify(request.messages), /assessment first, then current/);
@@ -1850,7 +1907,7 @@ test("the notebook is kept across plans, merged edit by edit, journaled, replaye
 	// Useful notes go in with the plan, with no separate tool round.
 	const seen: string[] = [];
 	const replies: { name: string; arguments: Record<string, unknown> }[][] = [
-		[{ name: "submit", arguments: { ...line, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
+		[{ name: "submit", arguments: { ...line, theirTurn, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); const calls = replies.shift()!;
 		return { result: async () => ({ content: calls.map((one, at) => ({ type: "toolCall", id: `c${seen.length}-${at}`, ...one })), stopReason: "toolUse" }) }; };
 	main(table, 0, 5);
@@ -1966,7 +2023,7 @@ test("focused questions rate findings, branches follow each first action in para
 		writer.push(JSON.stringify(request.messages)); coordinated.push(JSON.stringify(submit));
 		return reply({ assessment: { corrections: "none", adopted: "planner", win: "No attackers.", priorities: ["Develop"] },
 			...(submit && "current" in submit.properties ? { current: [{ label: "Pass now", action: { option: "pass" } }] }
-				: { steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }] }) });
+				: { steps: [{ label: "Pass", when: { active: "self", step: "precombat-main" }, action: { option: "pass" } }], theirTurn }) });
 	};
 	const brief = { ...emptyBrief(0), route: "Pregame growth expertise" };
 	await planWork(workFrame(table, 0), { survey: true, brief }, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally(), backoffMs: 0 }));
@@ -2065,6 +2122,7 @@ test("focused questions rate findings, branches follow each first action in para
 			assert.equal(questions.length, 3); assert.equal(outlooks.length, 0);
 			for (const kind of ["The opponent.", "Their next attack.", "Removal."]) assert.ok(questions.some((one) => one.includes(kind)));
 			assert.match(coordinated[0]!, /"current"/, "a valid response edits only the current decision and its policies");
+			assert.doesNotMatch(coordinated[0]!, /"enum":\["keep"\]/, "response repairs do not gain a turn-retention directive");
 		}
 		assert.deepEqual(response, unchanged, "shorter analysis neither changes the projected frame nor repairs it for the player");
 	}

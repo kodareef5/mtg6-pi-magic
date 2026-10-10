@@ -135,6 +135,16 @@ coordinator through the same signal; canceled attempts stay in the bill and
 cannot publish later work. A repair during the opponent's turn leaves the next
 turn's preparation running.
 
+Own-turn planning and preparation explicitly replace or keep both the unfinished
+steps and the whole-opponent-turn policy. In the writer's answer, `steps` is an
+array or `"keep"`, and `theirTurn` is `{guidance, complete}` or `"keep"`. Omission
+is refused. Keep preserves the displayed base exactly, including window metadata,
+and needs existing work to retain. It cannot bypass full-plan validation. Other
+fields retain their usual merge semantics. Context expands the answer into a
+complete plan before core accepts it; the journal stores no keep directive.
+Explicit retention proves neither agreement with the writer's rationale nor
+good strategy.
+
 A response normally edits only its current window. If the inherited plan is
 invalid, strategy instead exposes the existing full editor: validation of the
 whole plan cannot be repaired through fields that preserve the invalid part.

@@ -88,9 +88,9 @@ test("strategy can fetch the full syntax and every indexed example without loadi
 			assert.ok(submitted.required?.includes("assessment"));
 			const schema = JSON.stringify(fields);
 			assert.doesNotMatch(schema, /\$ref|\$defs/, "providers receive no recursive tool definitions");
-			assert.deepEqual(fields.steps.items.properties.when.properties.active.enum, ["self", "opponent", "any"], "ordinary turn windows are described at the submission field");
-			assert.equal(fields.steps.items.properties.action.anyOf[0].properties.objects.additionalProperties, false, "object queries cannot acquire invented fields");
-			assert.equal(fields.steps.items.properties.if.additionalProperties, true, "recursive conditions are checked locally without expanding the provider schema");
+			assert.deepEqual(fields.steps.anyOf[0].items.properties.when.properties.active.enum, ["self", "opponent", "any"], "ordinary turn windows are described at the submission field");
+			assert.equal(fields.steps.anyOf[0].items.properties.action.anyOf[0].properties.objects.additionalProperties, false, "object queries cannot acquire invented fields");
+			assert.equal(fields.steps.anyOf[0].items.properties.if.additionalProperties, true, "recursive conditions are checked locally without expanding the provider schema");
 			assert.deepEqual(fields.packages.items.properties, {}, "the card language remains behind its lookup");
 			assert.ok(!request.systemPrompt!.includes(reference), "ordinary planning does not load the whole card procedure language");
 			assert.match(request.systemPrompt!, /\$defs/, "ordinary planning definitions remain in the prompt");
@@ -104,7 +104,7 @@ test("strategy can fetch the full syntax and every indexed example without loadi
 		assert.match(messages, /Instruction/, "the lookup also supplies the complete nested schema");
 		for (const file of listed) assert.ok(messages.includes(JSON.stringify(readFileSync(join(DIR, file), "utf8")).slice(1, -1)), `${file} is answered by the real lookup`);
 		return { result: async () => ({ stopReason: "toolUse", content: [{ type: "toolCall", id: "done", name: "submit", arguments: {
-			objective: "Pass.", guidance: "Keep resources.", steps: [{ label: "Pass", when: {}, action: { option: "pass" } }] } }] }) };
+			objective: "Pass.", guidance: "Keep resources.", theirTurn: { guidance: "Pass under the standing plan.", complete: "pass" }, steps: [{ label: "Pass", when: {}, action: { option: "pass" } }] } }] }) };
 	};
 	await planWork(workFrame(table, 0), {}, reasoner({ role: "strategy", stream, model: { id: "fixture", provider: "offline" } as never, tally: tally() }));
 	assert.equal(rounds, 2);

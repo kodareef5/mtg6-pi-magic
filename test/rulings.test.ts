@@ -162,7 +162,7 @@ test("the writer objects only to an action the opponent took since its last plan
 	const frame = workFrame(table, 0);
 	const theirs = frame.view.actions!.find((one) => one.seat === 1)!;
 	assert.ok(theirs.what.length, "Red's actions are listed in public words");
-	const plan = { objective: "o", guidance: "g", steps: [{ label: "Pass", when: { active: "self" }, action: { option: "pass" } }] };
+	const plan = { objective: "o", guidance: "g", theirTurn: { guidance: "Pass unless the position changes.", complete: "pass" }, steps: [{ label: "Pass", when: { active: "self" }, action: { option: "pass" } }] };
 	const seen: string[] = [];
 	const answer = await planWork(frame, {}, offline("strategy", scripted([{ ...plan, objection: { row: 9999, claim: "x" } }, { ...plan, objection: { row: theirs.row, claim: "That land enters tapped.", rule: "614.1c" } }], seen)));
 	assert.match(seen[1]!, /An objection names a row/, "a row that is not listed is refused");

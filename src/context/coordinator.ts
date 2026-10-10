@@ -71,7 +71,7 @@ const ORDER = [
 	"3. Your request, last.",
 ].join("\n");
 
-export function coordinatorSystem(definitions: string): string {
+export function coordinatorSystem(definitions: string, turn = true): string {
 	return [
 		"You coordinate one Magic player's strategy. You write the plan that a fast pilot, Jev, carries out one decision at a time. Jev reads your steps with their purposes, branches, holds, theirTurn and phase guidance. It never reads your assessment.",
 		"", ORDER, "",
@@ -114,7 +114,8 @@ export function coordinatorSystem(definitions: string): string {
 		"- packages hold accepted card terms. Change one only when its interpretation was wrong. A new line does not change a card's abilities.",
 		"",
 		"## Your answer",
-		"Call submit once with theirTurn and the fields that change. Omitted fields stay. steps, holds, may and askWhen replace the whole list, and [] clears one; phases replace by window. Do not restore completed steps. You may look up a fact first. If submit refuses the answer, fix every named problem together and keep the rest.",
+		turn ? 'Call submit with assessment first, then steps and theirTurn. For each, write a replacement or "keep" to retain exactly what the displayed base plan contains. Use "keep" only when that field exists and still fits your chosen line. A different line needs replacement actions and any changed response policy; assessment never changes them. Other omitted fields stay. Lists replace whole lists and [] clears one; phases replace by window. Do not restore completed steps. You may look up a fact first. If submit refuses the answer, fix every named problem together and keep the rest.'
+			: "Call submit once with theirTurn and the fields that change. Omitted fields stay. steps, holds, may and askWhen replace the whole list, and [] clears one; phases replace by window. Do not restore completed steps. You may look up a fact first. If submit refuses the answer, fix every named problem together and keep the rest.",
 		"Object only to a listed opposing action that broke a rule or misread a card, with objection {row, claim, rule}. Poor play is not grounds. A judge may rewind the game.",
 		"Acceptance checks syntax, ids and mana arithmetic. It does not certify card meaning or good play.",
 		"",
@@ -188,7 +189,7 @@ export function coordinatorAsk(request: string, kind: "turn" | "preparation" | "
 	return ["## Your request", request, "",
 		kind === "response" ? current ? "Answer through submit: assessment first, then current and any changed holds or phases."
 			: "Answer through submit: assessment first, then the full plan fields that change, including steps to repair invalid inherited commitments."
-			: "Plan the turn and the opponent's next turn: the line, the mana it commits, theirTurn and the phase decisions. Check them together, then answer through submit with assessment first, theirTurn, and the plan fields that change.",
+			: 'Plan the turn and the opponent\'s next turn: the line, the mana it commits, theirTurn and the phase decisions. Check them together, then submit assessment first, steps and theirTurn (each a replacement or "keep"), and any other changed fields.',
 		...(kind === "response" ? [] : ["", "The plan fields of an answer, for their shape only. Your assessment comes first, as the submit tool describes it.", EXAMPLE]),
 	].join("\n");
 }

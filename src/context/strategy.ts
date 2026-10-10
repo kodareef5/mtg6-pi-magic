@@ -5,6 +5,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import type { Frame } from "../core/types.ts";
 import { NoteEditsSchema, type NoteEdit, type WorkCommand } from "../core/work-language.ts";
 import type { Prepared } from "./seat.ts";
@@ -68,6 +69,7 @@ const SUBMIT = {
 };
 
 const SYSTEM = coordinatorSystem(JSON.stringify(planReference));
+const REPAIR_SYSTEM = coordinatorSystem(JSON.stringify(planReference), false);
 const RESPONSE_SYSTEM = responseSystem(JSON.stringify(ResponseSchema));
 const FORECAST = "It shows your next upkeep after a normal untap, before the unknown draw and any upkeep effects. Your permanents survive and untap with their current characteristics; floating mana that does not persist is gone. It does not predict the opponent's actions or other effects before then.";
 
@@ -108,9 +110,14 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 	// The current-window editor preserves other steps. It cannot repair invalid
 	// inherited work there; expose the existing full editor so the seat can.
 	const response = responding && !baseProblems.length;
+	const fields: Record<string, unknown> = selectionFields(available, response);
+	const keep = { type: "string", enum: ["keep"], description: "Retain this field from the displayed base plan exactly. Refused when there is nothing to retain; does not certify that it still fits." };
+	const wholeOpponent = (plan: Plan) => plan.phases?.filter((one) => one.when.active === "opponent" && !one.when.step && !one.when.phase) ?? [];
 	const submit = { ...SUBMIT, ...(response ? { description: "Repair the current decision. current actions bind to this exact turn and step; unaffected steps stay. Guidance and holds replace their old fields. This updates intent, never executes a move or certifies the strategy." } : {}),
-		parameters: { ...SUBMIT.parameters, properties: { assessment: response && context.survey ? RESPONSE_ROLLUP : context.survey ? ROLLUP : ASSESSMENT, ...selectionFields(available, response), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
-			required: ["assessment", ...(response ? ["current"] : responding ? [] : ["theirTurn"])] } };
+		...(!responding ? { description: `${SUBMIT.description} steps and theirTurn are required: replace each or explicitly write \"keep\".` } : {}),
+		parameters: { ...SUBMIT.parameters, properties: { assessment: response && context.survey ? RESPONSE_ROLLUP : context.survey ? ROLLUP : ASSESSMENT, ...fields,
+			...(!responding ? { steps: { anyOf: [fields.steps, keep] }, theirTurn: { anyOf: [submissionFields.theirTurn, keep] } } : {}), notes: NoteEditsSchema, objection: SUBMIT.parameters.properties.objection },
+			required: ["assessment", ...(response ? ["current"] : responding ? [] : ["steps", "theirTurn"])] } };
 	const decision = !options.nextTurn && frame.decision ? ` The decision in front of the pilot: ${frame.decision.question}` : "";
 	const request = responding ? `${frame.view.work?.request}\nRepair this response or combat decision and the rest of the opponent's turn. Your next turn is prepared separately, so do not write its line. Keep the phase policies this decision does not touch.${response ? "" : " The inherited plan is invalid. Use the full changed fields to remove or replace every invalid commitment, including steps outside this window; omitted fields stay."}${decision}`
 		: `${task}${decision}`;
@@ -135,13 +142,21 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 		...(options.changed ? { changed: options.changed } : {}), ...(carried.length ? { pendingNotes: carried } : {}),
 		...(!options.nextTurn && frame.decision ? { choices: planningChoices(frame) } : {}), ...(frame.refused?.length ? { refused: frame.refused } : {}),
 		...(findings ? { analysts: [...(growth ? [growthSection(growth)] : []), ...(branched ? [branchesSection(branched)] : []), findingsSection(findings), ...(reported ? [reportsSection(reported)] : [])] } : {}) });
-	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
+	await reasoner.work(about, { system: response ? RESPONSE_SYSTEM : responding ? REPAIR_SYSTEM : SYSTEM, user: doc, task: `${work}\n\n${coordinatorAsk(request, scoped, response)}` }, {
 		submit: { ...submit, check(args) {
+			if (!responding) {
+				const missing = ["steps", "theirTurn"].filter((key) => args[key] === undefined);
+				if (missing.length) return `Explicitly keep or replace ${missing.join(" and ")}. An assessment alone cannot change the actions Jev follows. No equipment changed.`;
+				if (args.steps === "keep" && !base.steps.length) return 'steps: "keep" needs unfinished steps in the displayed base plan. Write the actions instead.';
+				if (args.theirTurn === "keep" && !wholeOpponent(base).length) return 'theirTurn: "keep" needs a whole-opponent-turn policy in the displayed base plan. Write {guidance, complete} instead.';
+			}
 			// assessment is the writer's own working: kept in the trace, never in the plan or the pilot's packet.
 			// objective and guidance are audit fields the schema no longer offers; the assessment fills whichever is not written.
 			// Assessment fields written beside the plan fields are still the writer's working, not plan content.
 			const stray = Object.fromEntries(Object.entries(args).filter(([key]) => ASSESSMENT_FIELDS.has(key)));
-			const { notes, objection: raised, assessment: written, theirTurn, objective, guidance, ...rest } = args;
+			const { notes, objection: raised, assessment: written, theirTurn: disposition, objective, guidance, ...rest } = args;
+			const theirTurn = !responding && disposition === "keep" ? undefined : disposition;
+			if (!responding && rest.steps === "keep") delete rest.steps;
 			const changes = labelled(Object.fromEntries(Object.entries(rest).filter(([key]) => !ASSESSMENT_FIELDS.has(key))), available);
 			const assessment = Object.keys(stray).length ? { ...(written && typeof written === "object" ? written : {}), ...stray } : written;
 			if (theirTurn !== undefined && (!theirTurn || typeof theirTurn !== "object" || Array.isArray(theirTurn))) return "theirTurn is {guidance, complete}.";
@@ -151,6 +166,7 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 				const turn = theirTurn as { guidance?: unknown; complete?: unknown } | undefined;
 				const whole = turn ? [{ when: { active: "opponent" }, guidance: turn.guidance, complete: turn.complete }] : [];
 				plan = changedPlan(base, { ...edited, ...audit(assessment), ...(typeof objective === "string" && objective ? { objective } : {}), ...(typeof guidance === "string" && guidance ? { guidance } : {}), ...(whole.length ? { phases: [...(Array.isArray(edited.phases) ? edited.phases : []), ...whole] } : {}) }, available);
+				if (!responding && disposition === "keep" && !isDeepStrictEqual(wholeOpponent(plan), wholeOpponent(base))) return 'theirTurn: "keep" conflicts with a phases edit to the whole-opponent-turn policy. Replace theirTurn explicitly.';
 			} catch (error) { return String(error); }
 			plan.throughTurn = base.throughTurn;
 			const objection = raised as Objection | undefined;
@@ -211,7 +227,8 @@ export async function planWork(frame: Frame, context: Context, reasoner: Pick<Re
 	const request = planReason(frame);
 	if (!request) throw new Error("Strategy needs an explicit request or a due turn plan.");
 	const repair = !!frame.view.work?.request && !!frame.view.work.plan;
-	const task = `${request}\n${repair ? "Answer the request from the current window. Change what the conflict requires, and replace stale guidance and phase decisions along with the actions. An answer with only assessment keeps the line when nothing needs to change."
+	const responding = frame.view.window.kind === "turn" && frame.view.window.active !== frame.seat;
+	const task = `${request}\n${repair ? `Answer the request from the current window. Change what the conflict requires, and replace stale guidance and phase decisions along with the actions. ${responding ? "An answer with only assessment keeps the line when nothing needs to change." : 'Explicitly keep or replace steps and theirTurn.'}`
 		: prepared || changed ? "Amend the plan you are editing for the listed changes since it was prepared or accepted. Keep what still fits and replace what the changes contradict." : "Build on your matchup plan from this position and write only what changes."}`;
 	const about = frame.view.work?.request ? "plan on request" : prepared || changed ? "turn amendment" : "turn plan";
 	const made = await write(frame, context, reasoner, task, about, { ...(prepared ? { prepared } : {}), ...(changed ? { changed } : {}) });
