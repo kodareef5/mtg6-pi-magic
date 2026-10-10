@@ -32,10 +32,30 @@ behind this page, October 5 to 9, is in ignored
 
 ## October 10 baseline
 
-Twenty fresh seeds at `4cda9c2`, Luna low with the analyst wave, two games at
-a time, carried preparation from the October 5 version zero. The table is
-written by `npm run sim -- --report .pi/sim-20261010/baseline` when the run
-finishes and replaces this paragraph.
+Twenty fresh seeds at `dc55706`, Luna low with the analyst wave, two games at
+a time, carried preparation from the October 5 version zero, each list on the
+play in ten games. Raw games and the per-game table are in
+`.pi/sim-20261010/baseline/`.
+
+| Measure | Baseline |
+| --- | --- |
+| Games finished / started | 20 / 20 |
+| Green wins / Red wins | 9 / 11 |
+| Wins on the play / on the draw | 11 / 9 |
+| Stopped, failed or stalled | 0 |
+| Median turns | 12 |
+| Median wall | 11.6 min |
+| Median strategy wait | 9.3 min |
+| Median cost / total | $0.52 / $9.66 |
+| Median strategy calls / Jev calls | 419 / 400 |
+| Plan adherence: on plan / due, passed over, deviated | 919 / 929, 2, 8 |
+| Help requests, total | 18 |
+| Gaps, total | 0 |
+| Replay mismatches | 0 |
+
+Reading: the matchup is close to even and the play-draw edge is small. Jev
+takes 99 percent of due plan steps, so the pilot is not where games are lost.
+Strategy waiting is 80 percent of wall time.
 
 ## How a change is judged now
 

@@ -15,7 +15,8 @@ comparison.
 
 ## Next, in order
 
-1. Baseline at `4cda9c2`: twenty games, Luna low, analyst wave on.
+1. Baseline at `dc55706`: twenty games, Luna low, analyst wave on. Done; the
+   table is in [Status](STATUS.md).
 2. The model question, once. The five growth and lethal fixtures with strategy
    on Sol 6.1 high and on Luna high, three repeats each, read for real wins
    against the Luna-low control. If a stronger model finds the lines, Luna-low
