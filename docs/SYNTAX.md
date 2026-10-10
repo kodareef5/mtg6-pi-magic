@@ -242,6 +242,20 @@ Core checks the structured card type and cost, and the current zone permission.
 It does not certify that the model's claim matches the rules text. Entry abilities
 still come from registrations. Alternative costs remain separate procedures.
 Set `printedCast: false` when a correction replaces that shared cast with a procedure.
+
+Structured `faces` and `layout` come from the pinned card source. A multi-face
+claim names `face: 0` or `face: 1` and quotes only that face. Procedures select
+their spell face with `face`; battlefield activations use `source.face` to
+require the active face or unlocked Room door. `printedFaces: [1]` accepts an
+additional ordinary permanent face. The full registered name still identifies
+one card through every zone change.
+
+Adventure and Omen casts use the chosen face's cost, type, color and targets.
+A resolving Adventure exiles the card and permits its controller to play only
+the normal face from that exile incarnation (715.3d). A resolving Omen shuffles
+the card into its owner's library (720.3d). Countering either spell, or making
+all its targets illegal, sends it to the graveyard without that continuation.
+These shared rules supply no printed spell instructions.
 This removes the repeated empty cast program.
 
 `deferred` identifies a cast or nonmana activation by `claim`, its complete
@@ -474,7 +488,6 @@ likely addition; no card in the matchup needs it yet.
   of these cards produce it.
 - Copies, effects that take control of a permanent, and face-down permanents.
   None of these cards produce them.
-- Casting the back half of a split, adventure or Omen card: the table reads the
-  front face.
+- Room unlocking, transformation, crafting, Saga chapters and prepared copies.
 - Hybrid and Phyrexian mana symbols. The printed cost reader and a stated cost
   both accept generic, colored and X symbols only.

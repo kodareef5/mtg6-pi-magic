@@ -16,6 +16,7 @@ import { STEPS } from "./steps.ts";
 
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
+const Face = Type.Union([Type.Literal(0), Type.Literal(1)]);
 const natural = Type.Integer({ minimum: 0 });
 const positive = Type.Integer({ minimum: 1 });
 const one = <const T extends string[]>(...values: T) => Type.Enum(values);
@@ -215,25 +216,25 @@ export const Defs = {
 	/** A public note on an object, quoting the text it carries out in `basis`. It lives while that object exists, unless `until` ends it sooner. */
 	Registration: Type.Union([
 		/** A triggered ability. `if` is its intervening if (603.4). */
-		object({ basis: text, kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect"),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect"),
 			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Literal("once-per-turn")) }),
 		/** A static ability. Applies while `if` holds, to whatever matches `affects` at each reading. */
-		object({ basis: text, kind: Type.Literal("continuous"), affects: Type.Ref("Selector"), change: Type.Ref("Modification"), if: Type.Optional(Type.Ref("Condition")) }),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("continuous"), affects: Type.Ref("Selector"), change: Type.Ref("Modification"), if: Type.Optional(Type.Ref("Condition")) }),
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */
-		object({ basis: text, kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
 			/** "You may pay 2 life. If you don't, it enters tapped": tapped unless its controller pays this as it enters. The land play offers both. */
 			unlessPay: Type.Optional(object({ life: positive })) }),
 		/** "If it would die, exile it instead." */
-		object({ basis: text, kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),
 		/** A mana ability, used while paying (605, 601.2g): `colors` once each, or `any` mana of one chosen color; `times` repeats it ("{G} for each Elf"). */
-		object({ basis: text, kind: Type.Literal("mana"), cost: Type.Ref("Cost"), colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("mana"), cost: Type.Ref("Cost"), colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive),
 			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")),
 			/** "Activate only if you control an Island or a Swamp": the ability is usable while this holds. */
 			if: Type.Optional(Type.Ref("Condition")) }),
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */
-		object({ basis: text, kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")) }),
-		object({ basis: text, kind: Type.Literal("suppress"), event: Type.Ref("Event") }),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")) }),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("suppress"), event: Type.Ref("Event") }),
 	]),
 };
 
@@ -259,7 +260,7 @@ const seatSide = one("self", "opponent", "any");
 /** Projected objects a seat can name: a procedure's source, a plan's option filter. */
 export const QuerySchema = object({
 	zones: Type.Optional(Type.Array(one("hand", "battlefield", "stack", "graveyard", "exile", "command", "dungeon"))),
-	controller: Type.Optional(seatSide), card: Type.Optional(text), tapped: Type.Optional(Type.Boolean()),
+	face: Type.Optional(Face), controller: Type.Optional(seatSide), card: Type.Optional(text), tapped: Type.Optional(Type.Boolean()),
 	types: Type.Optional(Type.Array(one(...CARD_TYPES), { description: "Matches any listed current card type on a projected object. Other query fields still narrow the selection." })),
 	refs: Type.Optional(Type.Array(RefSchema)),
 	ids: Type.Optional(Type.Array(text)),
@@ -278,7 +279,7 @@ export const WhenSchema = object({
  * Instructions on a permanent spell run after it enters, with `this` the permanent.
  */
 export const ProcedureDef = object({
-	source: QuerySchema, claim: text,
+	source: QuerySchema, face: Type.Optional(Face), claim: text,
 	/** The card text this procedure carries out, quoted. */
 	basis: text,
 	timing: one("spell", "land", "stack", "mana"),
@@ -304,14 +305,14 @@ export const LabelSchema = Type.Cyclic({ ...Defs, Label: object({ text, until: D
 export type Label = Static<typeof LabelSchema>;
 
 /** A known cast or activation whose executable procedure has not yet been prepared. */
-export const DeferredUseSchema = object({ claim: text, basis: text, source: QuerySchema, timing: one("spell", "stack") });
+export const DeferredUseSchema = object({ claim: text, basis: text, source: QuerySchema, face: Type.Optional(Face), timing: one("spell", "stack") });
 export type DeferredUse = Static<typeof DeferredUseSchema>;
 /** Accepted registrations, shared mechanics and known uses for one card. Private until used. */
 export const PackageDef = object({ card: text, registers: Type.Array(Type.Ref("Registration")),
 	procedures: Type.Optional(Type.Array(Type.Ref("Procedure"))), assessed: Type.Optional(Type.Literal(true)),
 	deferred: Type.Optional(Type.Array(DeferredUseSchema)),
 	/** The model accepts the shared targetless permanent cast at its printed cost, with no extra instructions or spell properties. */
-	printedCast: Type.Optional(Type.Boolean()) });
+	printedCast: Type.Optional(Type.Boolean()), printedFaces: Type.Optional(Type.Array(Face, { uniqueItems: true })) });
 export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Package: PackageDef }, "Package");
 
 /**

@@ -29,7 +29,8 @@ import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, playable } from "./permits.ts";
 import { reached, select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
-import { intrinsic } from "./characteristics.ts";
+import { intrinsic, printedTraits } from "./characteristics.ts";
+import { faceFacts } from "./faces.ts";
 import { permanentSpell } from "./printed.ts";
 import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
@@ -48,12 +49,13 @@ export function afterUntap(frame: Frame): Frame {
 /** Price one use before sequencing it. A land preview is one named drop, not a prediction of resolved effects. */
 export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObject) {
 	const cost = procedure.cost;
-	const printed = cost?.mana ?? (procedure.timing === "spell" ? frame.view.printed?.[source.card ?? ""]?.mana : "{0}");
+	const selected = faceFacts(frame.view.printed?.[source.card ?? ""], procedure.face);
+	const printed = cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : "{0}");
 	const mana = printed === undefined ? undefined : symbols(printed);
 	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof cost?.tap === "object")
 		return { scope: "Not priced: variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
-	const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const } : source;
+	const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const, ...(selected ? { traits: printedTraits(selected, source.card!) } : {}) } : source;
 	const possible = (position: Frame) => fundings(position, mana, reserved, spending).length > 0;
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
@@ -162,16 +164,18 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const fromHand = procedure.timing === "land" || procedure.timing === "spell";
 			const query = { ...procedure.source, zones: procedure.source.zones ?? [fromHand ? "hand" as const : "battlefield" as const] };
 			const chosen = select(query, hypothetical);
-			const source = fromHand ? offBoard(chosen, select(query, initial)) : chosen[0];
+			let source = fromHand ? offBoard(chosen, select(query, initial)) : chosen[0];
+			const selected = faceFacts(frame.view.printed?.[source?.card ?? ""], procedure.face);
+			if (source && selected && procedure.timing === "spell") source = { ...source, face: procedure.face ?? 0, traits: printedTraits(selected, source.card!) };
 			const named = procedure.source.card;
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
-			const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? source?.card ? frame.view.printed?.[source.card]?.mana : undefined : "{0}");
+			const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : "{0}");
 			const mana = stated ? symbols(stated) : undefined;
 			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key));
 			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: { generic: mana.generic, colors: mana.colors } } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
-				...(procedure.timing === "spell" && source?.card && permanentSpell(frame.view.printed?.[source.card]) && !procedure.instructions.length ? { enters: true } : {}) };
+				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
 		}
 		const id = action.option ?? action.prefix ?? "";
 		const offered = action.option ? frame.decision?.options.find((option) => option.id === action.option) : undefined;
@@ -182,7 +186,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		const refs = offered?.use ? [offered.use.source] : offered?.objects;
 		const query = refs ? { refs } : action.objects;
 		const selected = query ? select(query, hypothetical) : [];
-		const source = timing === "stack" ? selected[0] : offBoard(selected, query ? select(query, initial) : []);
+		let source = timing === "stack" ? selected[0] : offBoard(selected, query ? select(query, initial) : []);
+		const printed = faceFacts(frame.view.printed?.[source?.card ?? ""], offered?.use?.face);
+		if (source && printed && timing === "spell") source = { ...source, face: offered?.use?.face ?? 0, traits: printedTraits(printed, source.card!) };
 		const named = action.objects?.card;
 		if (kind === "land") return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}) };
 		if (offered?.use) {
@@ -194,7 +200,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			return { kind, ...(source ? { source } : {}), price: { generic, colors },
 				...(additional ? { unknown: true as const } : {}),
 				...(timing === "spell" ? { spell: true } : {}), ...(extra.tap ? { tap: true } : {}),
-				...(timing === "spell" && source?.card && permanentSpell(frame.view.printed?.[source.card]) && !offered.use.instructions.length ? { enters: true } : {}),
+				...(timing === "spell" && permanentSpell(printed) && !offered.use.instructions.length ? { enters: true } : {}),
 				fixed: { paid: offered.use.paid, taps: offered.use.funding ?? [] } };
 		}
 		const mana = source?.card ? symbols(frame.view.printed?.[source.card]?.mana ?? "") : undefined;
@@ -208,7 +214,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	const entered = (position: Frame, source: SeenObject): Frame => ({ ...position, view: { ...position.view,
 		objects: (position.view.objects ?? []).map((one) => one.id === source.id ? source : one) } });
 	const entry = (source: SeenObject, where: string, spell: boolean, when: PlanOption["when"]) => {
-		const registers = (source.card ? packages.get(source.card) : undefined) ?? (spell ? [] : undefined);
+		const registers = ((source.card ? packages.get(source.card) : undefined) ?? (spell ? [] : undefined))?.filter((one) => one.face === undefined || one.face === (source.face ?? 0));
 		const state = entersTapped(hypothetical, source, registers);
 		if (state === "conditional" || state === "unknown") honest = false;
 		const object: SeenObject = { ...source, zone: "battlefield", incarnation: source.incarnation + (spell ? 2 : 1), controller: frame.seat,

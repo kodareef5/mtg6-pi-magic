@@ -110,7 +110,7 @@ const journal = carried
 			format: standard.name,
 			seed,
 			seats: table.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
-			cards: { path: cards.path, generated: cards.generated },
+			cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}) },
 			rules: { path: "rules/cr.tsv", effective: rules.effective },
 			created: new Date().toISOString(),
 		});

@@ -1,3 +1,4 @@
+import { faceFacts } from "../core/faces.ts";
 /** The planner chooses uses and resource policy; Jev binds an offered payment.
  * Source descriptions and choice diagnostics stay together past 150 lines. */
 import type { Frame, Option } from "../core/types.ts";
@@ -95,7 +96,7 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 			((procedure.source.zones ?? ["battlefield"]).includes(one.zone) || playable(viewWorld(frame.view), frame.seat, one,
 				turn ?? (frame.view.window.kind === "turn" ? frame.view.window.turn : 0), !!one.traits?.types.includes("land"))));
 		if (!bound.length && !prior && (procedure.timing !== "stack" || !visible.length)) return undefined;
-		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? frame.view.printed?.[card]?.mana : undefined);
+		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? faceFacts(frame.view.printed?.[card], procedure.face)?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
 			manaBudgets: bound.map((source) => ({ source: { id: source.id, incarnation: source.incarnation }, ...manaBudget(resources, use, source) })),
 			...(turn === undefined ? {} : { permissionTurn: turn }),

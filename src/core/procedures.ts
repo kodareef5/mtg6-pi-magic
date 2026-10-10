@@ -4,6 +4,7 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
+import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
 import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
 import { offers, type ProcedureOption } from "./announce.ts";
@@ -21,10 +22,11 @@ import type { Change } from "./syntax.ts";
 export type { ProcedureOption } from "./announce.ts";
 
 /** Shared ordinary casting, accepted by the model through package.printedCast. No Oracle parsing. */
-export function printedCast(card: string, printed: Printed): Procedure {
-	if (!permanentSpell(printed)) throw new Error(`${card} needs a prepared casting procedure.`);
-	return { source: { card, zones: ["hand", "graveyard", "exile"], controller: "any" },
-		claim: "Cast for its printed cost", basis: `Printed ${printed.type}, ${printed.mana}`, timing: "spell", instructions: [] };
+export function printedCast(card: string, printed: Printed, face?: 0 | 1): Procedure {
+	const selected = faceFacts(printed, face ?? 0);
+	if (!castableFace(printed, face ?? 0) || !permanentSpell(selected)) throw new Error(`${card} needs a prepared casting procedure.`);
+	return { ...(face !== undefined ? { face } : {}), source: { card, zones: ["hand", "graveyard", "exile"], controller: "any" },
+		claim: "Cast for its printed cost", basis: `Printed ${selected!.type}, ${selected!.mana}`, timing: "spell", instructions: [] };
 }
 
 /** Older packages wrote an empty procedure for the shared cast. Recognize
@@ -32,7 +34,7 @@ export function printedCast(card: string, printed: Printed): Procedure {
  * the model's terms. This reads structured syntax, never printed prose.
  */
 export function isPrintedCast(procedure: Procedure, card: string, printed: Printed): boolean {
-	return permanentSpell(printed) && procedure.timing === "spell" && procedure.source.card === card &&
+	return permanentSpell(printed) && procedure.timing === "spell" && !procedure.face && procedure.source.card === card &&
 		(procedure.source.zones ?? ["hand"]).includes("hand") &&
 		(!procedure.source.controller || procedure.source.controller === "self" || procedure.source.controller === "any") &&
 		Object.keys(procedure.source).every((key) => ["card", "zones", "controller"].includes(key)) &&
@@ -95,12 +97,14 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
 	const world = tableWorld(table);
 	// A card is cast or played from hand, or where a permission lets this seat, whoever owns it.
-	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land") :
+	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land", activation.face) :
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
-	const traits = characteristics(table, object);
+	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0)) throw new Error("This card cannot be cast using that face.");
+	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const } : object;
+	const traits = characteristics(table, spell);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
-	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !flashed(world, controller, object) && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
+	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !flashed(world, controller, spell) && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
 	if (activation.timing === "spell" && activation.slots.length && traits && targetless(traits.types, traits.subtypes)) throw new Error("A permanent spell other than an Aura has no targets; its abilities target once it is on the battlefield (601.2c).");
 	if (activation.timing === "land" && (!main || seat(table, controller).landsPlayed >= allowance(world, controller).lands)) throw new Error("A land play needs this seat's main phase, an empty stack and an unused land play.");
 	if (activation.timing !== "spell" && activation.speed === "sorcery" && !main) throw new Error("This ability is activated only as a sorcery.");
@@ -133,8 +137,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const pool = seat(table, controller).pool;
 	const payment = paid.map((id) => pool.find((mana) => mana.id === id));
 	// Restricted mana pays only for what it allows, read against the spell as it will be on the stack.
-	const spending = activation.timing === "spell" ? { ...object, zone: "stack" as const } : object;
-	const allowed = (spendOnly?: Selector) => !spendOnly || matches(scope, spending, spendOnly, characteristics(table, object));
+	const spending = spell;
+	const allowed = (spendOnly?: Selector) => !spendOnly || matches(scope, spending, spendOnly, traits);
 	const tapped = new Set([...(cost.tap ? [source.id] : []), ...(cost.tapped ?? []).map((ref) => ref.id), ...funding.map((tap) => tap.source.id)]);
 	for (const tap of funding) {
 		const mana = live(table, tap.source);
@@ -154,7 +158,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 
 	const changes: Change[] = [
 		// Whoever casts or plays it controls it, though another seat may own it (110.2, 305.2).
-		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const, controller }] : []),
+		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const, controller, ...(activation.face !== undefined ? { face: activation.face } : {}) }] : []),
 		...(activation.timing === "land" ? [{ do: "move" as const, what: source.id, to: "battlefield" as const, reason: "play-land" as const, controller }] : []),
 		...(cost.tap ? [{ do: "tap" as const, what: source.id }] : []),
 		...(cost.tapped ?? []).map((ref) => ({ do: "tap" as const, what: ref.id })),

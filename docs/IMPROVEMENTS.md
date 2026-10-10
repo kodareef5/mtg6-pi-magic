@@ -47,6 +47,13 @@ Every imported deck still has setup blockers. Keep the current roster.
 Each stage requires `npm test` and `npm run check`. No inference runs in those
 checks. Live assessment and games retain calls, failures, cost and timing.
 
+Stages 1 and 2 landed in `1971a81`, with 216 passing tests. Stage 3 and alternate
+casting now pass 218 tests and the type check: face-specific source claims,
+modal and split casting, Adventure permission, Omen shuffling and replay. The
+card TSV is unchanged; a source-hashed companion carries structured faces.
+New journals pin it. Older journals keep their original single-face reading.
+Room unlocking and stage 5 remain next.
+
 ## Steps, in order
 
 1. **Decks as a formal list of names.** A deck file is counts by card name,

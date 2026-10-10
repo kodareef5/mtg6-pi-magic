@@ -36,7 +36,7 @@ export type Header = {
 	 * release changes oracle text, and a replay against different text is a
 	 * different game, so these are pinned rather than assumed.
 	 */
-	cards: { path: string; generated: string };
+	cards: { path: string; generated: string; faces?: { path: string; sha256: string } };
 	rules: { path: string; effective: string };
 	created: string;
 	forkedFrom?: { game: string; version: number };
@@ -387,7 +387,7 @@ export function replay(
 	path: string,
 	start: (header: Header) => Table,
 	upTo?: number,
-	against?: { cards: { generated: string }; rules: { effective: string } },
+	against?: { cards: Pick<Header["cards"], "generated" | "faces">; rules: { effective: string } },
 	/** Keep only the first `workAt` work entries recorded at `upTo`: the position as a seat saw it before its own later work there, such as a help request. */
 	options: { workAt?: number } = {},
 ): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
@@ -398,6 +398,8 @@ export function replay(
 	const lines = atVersion(all, upTo);
 	if (against) {
 		const drift = [
+			header.cards.faces && header.cards.faces.sha256 !== against.cards.faces?.sha256
+				? "structured face data differs from the game's pinned source" : null,
 			against.cards.generated === header.cards.generated
 				? null
 				: `cards are ${against.cards.generated}, the game used ${header.cards.generated}`,
@@ -408,7 +410,13 @@ export function replay(
 		if (drift.length) throw new Error(`${path} cannot be replayed here: ${drift.join("; ")}`);
 	}
 	const work = lines.flatMap((line) => "work" in line && (upTo === undefined || line.v <= upTo) ? [line.work] : []);
-	const table = relive(start(header), rowsOf(lines, upTo), work);
+	const initial = start(header);
+	// Older journals accepted the original single-face representation. Replaying
+	// their decisions cannot silently add faces and change the available moves.
+	if (!header.cards.faces) for (const printed of Object.values(initial.printed)) {
+		delete printed.faces; delete printed.layout;
+	}
+	const table = relive(initial, rowsOf(lines, upTo), work);
 	restoreWork(table, lines, upTo);
 	table.said = lines.flatMap((line) => "said" in line && (upTo === undefined || line.v <= upTo) ? [structuredClone(line.said)] : []);
 	table.rulings = lines.flatMap((line) => "ruling" in line ? [structuredClone(line.ruling)] : []);

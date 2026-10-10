@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createGunzip } from "node:zlib";
 import { createInterface } from "node:readline";
@@ -21,7 +22,7 @@ const LEG: J = { legal:"L", not_legal:"-", banned:"B", restricted:"R" };
 const RAR: J = { common:"c", uncommon:"u", rare:"r", mythic:"m", special:"s", bonus:"b" };
 const RAR_ORDER = "curmsb", NONCARD = new Set(["token","double_faced_token","art_series","emblem"]), PLAYABLE = new Set(["legal","banned","restricted"]);
 const FS = "\t", FACE = " // ", COLOR_ORDER = "WUBRG";
-const COLUMNS = ["name","mana","cmc","type","stats","colors","identity","layout","rarities","keywords","reserved","gamechanger",...FORMATS,"printings","oracle","oracle_id"];
+const COLUMNS = ["name","mana","cmc","type","stats","colors","identity","layout","rarities","keywords","reserved","gamechanger",...FORMATS,"printings","oracle","faces","oracle_id"];
 // Everything a compiler and a deck check need, and nothing else. With --format
 // only that format's legality column is carried, because the rows are already
 // filtered to it.
@@ -36,6 +37,10 @@ const esc = (s?:string) => (s || "").replace(/\n/g,"\\n");
 function joinFaces(a:string[]) { while (a.length && !a.at(-1)) a.pop(); return a.some(Boolean) ? a.join(FACE) : ""; }
 const faceted = (c:J, f:(x:J)=>string) => f(c) || joinFaces((c.card_faces || []).map(f));
 function colorField(c:J) { if ("colors" in c) return colors(c.colors); const f=c.card_faces||[]; return f.length ? joinFaces(f.map((x:J)=>"colors" in x ? colors(x.colors) : "")) : "-"; }
+const faceData = (c:J) => c.card_faces?.length ? JSON.stringify(c.card_faces.map((d:J) => ({
+  name: d.name, mana: d.mana_cost || "", type: d.type_line || c.type_line || "", stats: stats(d), oracle: d.oracle_text || "",
+  colors: d.colors ?? d.color_indicator ?? [...new Set((d.mana_cost || "").match(/\{[WUBRG]\}/g)?.map((one:string) => one[1]) ?? [])],
+}))) : "";
 const cnKey = (s:string) => [+(s.match(/^\d+/)?.[0] || 0), s] as const;
 const resolveOid = (c:J) => c.oracle_id || (c.card_faces || []).find((f:J)=>f.oracle_id)?.oracle_id;
 const printingToken = (c:J) => `${c.set}:${c.collector_number || ""}:${RAR[c.rarity] || "?"}`;
@@ -133,7 +138,7 @@ async function build(o:Opts) {
     const seen=new Set<string>(), pr=(prints.get(oid)||[]).filter(p=>{const k=p.join("\0"); if(seen.has(k)) return false; seen.add(k); return true;});
     pr.sort((a,b)=>cmp(a[0],b[0])||cmp(a[1],b[1])||(cnKey(a[2])[0]-cnKey(b[2])[0])||cmp(a[2],b[2]));
     const rar=new Set(pr.map(p=>RAR[p[3]]||"?"));
-    rows.push([c.name,faceted(c,d=>d.mana_cost||""),num(c.cmc),c.type_line||"",faceted(c,stats),colorField(c),colors(c.color_identity),c.layout,[...RAR_ORDER].filter(x=>rar.has(x)).join(""),(c.keywords||[]).join(","),c.reserved?"1":"0",c.game_changer?"1":"0",...FORMATS.map(f=>LEG[lg[f]]||"-"),pr.map(p=>`${p[1]}:${p[2]}:${RAR[p[3]]||"?"}`).join(","),faceted(c,d=>esc(d.oracle_text)),oid]);
+    rows.push([c.name,faceted(c,d=>d.mana_cost||""),num(c.cmc),c.type_line||"",faceted(c,stats),colorField(c),colors(c.color_identity),c.layout,[...RAR_ORDER].filter(x=>rar.has(x)).join(""),(c.keywords||[]).join(","),c.reserved?"1":"0",c.game_changer?"1":"0",...FORMATS.map(f=>LEG[lg[f]]||"-"),pr.map(p=>`${p[1]}:${p[2]}:${RAR[p[3]]||"?"}`).join(","),faceted(c,d=>esc(d.oracle_text)),faceData(c),oid]);
   }
   const nm=(r:Row)=>r[0]!; rows.sort((a,b)=>cmp(nm(a).toLowerCase(),nm(b).toLowerCase())||cmp(nm(a),nm(b)));
   const nprint=rows.reduce((n,r)=>n+new Set(prints.get(r.at(-1)!)!.map(p=>p.join("\0"))).size,0);
@@ -141,6 +146,12 @@ async function build(o:Opts) {
   const keep=o.format?rows.filter(r=>r[COLUMNS.indexOf(o.format!)]==="L"):rows;
   const full=!o.format&&!o.lean, top=o.bare?`${cols.join(FS)}\n`:full?header(rows,nprint):small(cols,keep.length,o);
   writeFileSync(o.out,top+keep.map(r=>pick.map(i=>r[i]!).join(FS)+"\n").join(""));
+  if (o.lean) {
+    const names = new Set(keep.map(row => row[0]));
+    const faces = Object.fromEntries([...cards.values()].filter(c => names.has(c.name) && c.card_faces?.length)
+      .sort((a,b) => cmp(a.name,b.name)).map(c => [c.name, { layout: c.layout, faces: JSON.parse(faceData(c)) }]));
+    writeFileSync(o.out.replace(/\.tsv$/, "") + ".faces.json", JSON.stringify({ source: createHash("sha256").update(readFileSync(o.out)).digest("hex"), cards: faces }, null, "\t") + "\n");
+  }
   return {rows,keep,cols};
 }
 
@@ -183,7 +194,7 @@ async function verify(o:Opts) {
     if(!wanted){if(has("oracle_id")) chk(!r,o.format?`not ${o.format}-legal but kept`:"unplayable card kept",c.name); continue;}
     srcCount++; if(!r){chk(false,"card MISSING",c.name); continue;}
     chk(r.name===c.name,"name",c.name);
-    for (const [col,want] of [["type",c.type_line||""],["cmc",num(c.cmc)],["mana",faceted(c,d=>d.mana_cost||"")],["identity",colors(c.color_identity)],["keywords",(c.keywords||[]).join(",")],["layout",c.layout],["reserved",c.reserved?"1":"0"]] as const) if(has(col)) chk(r[col]===want,col,c.name);
+    for (const [col,want] of [["type",c.type_line||""],["cmc",num(c.cmc)],["mana",faceted(c,d=>d.mana_cost||"")],["identity",colors(c.color_identity)],["keywords",(c.keywords||[]).join(",")],["layout",c.layout],["faces",faceData(c)],["reserved",c.reserved?"1":"0"]] as const) if(has(col)) chk(r[col]===want,col,c.name);
     FORMATS.filter(has).forEach(f=>chk(r[f]===(LEG[lg[f]]||"-"),`legality:${f}`,c.name));
     for(const t of c.oracle_text?[c.oracle_text]:(c.card_faces||[]).map((x:J)=>x.oracle_text||"")) if(t) chk(r.oracle.includes(esc(t)),"oracle text missing",c.name);
     if(has("stats")) for(const t of stats(c)?[stats(c)]:(c.card_faces||[]).map(stats)) if(t) chk(r.stats.includes(t),"stats missing",c.name);
@@ -207,7 +218,7 @@ async function main() {
 
   default        every constructed-playable card, every column
   -f FORMAT      only cards legal in FORMAT (${FORMATS.join(", ")})
-  -c lean        name, mana, cmc, type, stats, legality, oracle
+  -c lean        name, mana, cmc, type, stats, legality, oracle; structured faces in a source-pinned companion file
   --bare         no comment header, column line only
   --refresh      download the bulk file again
   --verify       cross-check every carried field against the source

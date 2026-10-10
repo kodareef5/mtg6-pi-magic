@@ -12,6 +12,7 @@ import { ASSESSMENT_CEILING } from "./spend.ts";
 const SYSTEM = [
 	"Assess one registered Magic card before play. Prepare its standing behavior and identify every use. This is card interpretation, not a strategic line. Complete executable programs for all casts and activations are not required.",
 	"Use the supplied printed fields and full Oracle text. Account for every ability, including flying and other keywords, entry counters, mana, triggers, static effects, replacements and play permissions.",
+	"When printed.faces is present, every registration, procedure and deferred use names face 0 or 1 and quotes that face alone. Use source.face on battlefield activations so they require the active face or unlocked Room door. Spell face selects the characteristics and printed cost used to cast. printedCast selects face 0; printedFaces lists additional ordinary permanent faces. A transforming back face cannot be cast merely because it has a face number.",
 	"registers describes ongoing abilities and entry behavior. A keyword such as flying is a continuous registration affecting this object with change.words. The table does not infer any keyword from card prose.",
 	"Use printedCast: true for an ordinary permanent cast: no targets, no X or unusual mana symbols, no additional costs, casting restrictions, spell properties or extra instructions. This selects the shared casting mechanic at the printed cost. Do not also write an ordinary casting procedure. Its registrations still supply the permanent's abilities on entry. Ordinary land plays need no procedure.",
 	"procedures describes spell effects, alternative costs, nonmana activations and casts that need more than the shared printed cast. Use the exact card name in source.card; never use game object ids. For normal casts, use zones hand, graveyard and exile with controller any: the table checks ownership and earned play permissions. Alternative costs may restrict their source zones. Each mode or optional cost can have its own procedure.",
@@ -39,15 +40,16 @@ export async function assessCard(card: string, printed: Printed, writer: Pick<Re
 			name: "submit", description: "Submit standing terms and a complete inventory of prepared or deferred uses, or name unsupported text. Acceptance is not a rules ruling.",
 			parameters: { type: "object", properties: {
 				registers: { type: "array", items: { type: "object" } }, procedures: { type: "array", items: { type: "object" } }, unsupported: { type: "array", items: { type: "string" } },
-				printedCast: { type: "boolean" },
+				printedCast: { type: "boolean" }, printedFaces: { type: "array", items: { type: "integer", enum: [0, 1] } },
 				deferred: { type: "array", items: { type: "object" } },
 			}, required: ["registers", "procedures", "unsupported"], additionalProperties: false },
 			check(args) {
-				if (Object.keys(args).some((key) => !["registers", "procedures", "unsupported", "printedCast", "deferred"].includes(key))) return "Submit only registers, procedures, unsupported, printedCast and deferred.";
+				if (Object.keys(args).some((key) => !["registers", "procedures", "unsupported", "printedCast", "printedFaces", "deferred"].includes(key))) return "Submit only registers, procedures, unsupported, printedCast, printedFaces and deferred.";
 				if (!Array.isArray(args.unsupported) || args.unsupported.some((one) => typeof one !== "string" || !one.trim())) return "unsupported is a list of quoted abilities and missing operations, or [].";
 				if (args.unsupported.length) { unsupported = args.unsupported as string[]; return null; }
 				const pack = { card, registers: args.registers, procedures: args.procedures, assessed: true,
 					...(args.printedCast === undefined ? {} : { printedCast: args.printedCast }),
+					...(args.printedFaces === undefined ? {} : { printedFaces: args.printedFaces }),
 					...(args.deferred === undefined ? {} : { deferred: args.deferred }) };
 				const shape = problems(PackageSchema, pack);
 				if (shape.length) return shape.join("; ");

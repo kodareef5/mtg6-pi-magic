@@ -5,6 +5,7 @@ import { seat } from "./table.ts";
 import type { Change, Reason } from "./syntax.ts";
 import type { Pending } from "./moves.ts";
 import { holds, tableWorld } from "./selectors.ts";
+import { activeFaces } from "./faces.ts";
 
 export type Entry = { changes: Change[]; reason: Reason; clock: number; choices: Record<number, boolean> };
 
@@ -13,10 +14,13 @@ function costs(table: Table, changes: Change[]) {
 		if (change.do !== "move" || change.to !== "battlefield" || change.paid !== undefined) return [];
 		const object = table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
-		const source = { ...object, zone: "battlefield" as const, controller: who };
+		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) };
+		const printed = object.card ? table.printed[object.card] : undefined;
+		const active = printed ? activeFaces(printed, source) : [0];
 		const world = tableWorld(table);
 		world.objects = world.objects.map((one) => one.id === object.id ? source : one);
 		const term = change.registers?.find((one) => one.kind === "enters" && !one.affects && one.unlessPay &&
+			(one.face === undefined || active.includes(one.face)) &&
 			(!one.if || holds({ world, controller: who, source }, one.if)));
 		return term?.kind === "enters" && term.unlessPay ? [{ index, who, life: term.unlessPay.life, object }] : [];
 	});

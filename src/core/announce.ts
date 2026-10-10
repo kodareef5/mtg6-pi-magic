@@ -8,6 +8,8 @@
  * option, never removed: the table guides and does not restrain.
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
+import { faceFacts } from "./faces.ts";
+import { printedTraits } from "./characteristics.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
@@ -213,7 +215,9 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 	const sources = useSources(frame, procedure).filter((source) =>
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	const offered: ProcedureOption[] = [];
-	for (const source of sources) {
+	for (const original of sources) {
+		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
+		const source = selected ? { ...original, traits: printedTraits(selected, original.card!), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
 		const scope: Scope = { world, controller: frame.seat, source };
 		// Timing: a spell's from its type line unless it claims flash; an activation's own restriction.
 		const instant = procedure.timing === "spell" && (source.traits?.types.includes("instant") || procedure.speed === "instant" || flashed(world, frame.seat, source));
@@ -226,7 +230,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		if (procedure.limit === "once-per-turn" && world.history.some((event) => event.kind === "activated" && event.source.id === source.id &&
 			event.source.incarnation === source.incarnation && event.basis === procedure.basis)) continue;
 		// The mana: stated, or printed for a spell; reduced, never below zero (601.2f).
-		const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? printed[source.card ?? ""]?.mana : undefined);
+		const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
 		const mana = stated === undefined || stated === "" ? { generic: 0, colors: [], x: 0 } : symbols(stated);
 		if (!mana) continue;
 		const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
@@ -246,9 +250,9 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 						const aimed = targets.flat();
 						offered.push({
 							option: {
-								id: `${prefix}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}`), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
+								id: `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}`), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
 								// The label names its targets, so an option says what it hits without a cross-reference.
-								label: `${procedure.claim} (${name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
+								label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
 								notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
 								shows: [
 									`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
@@ -262,7 +266,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									const object = frame.view.objects?.find((one) => one.id === id); return object ? [ref(object)] : [];
 								}), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 							},
-							activation: { source: ref(source), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+							activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 								...(procedure.speed ? { speed: procedure.speed } : {}),
 								cost: { generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) }, paid: funding.paid,
 								...(funding.taps.length ? { funding: structuredClone(funding.taps) } : {}),

@@ -5,6 +5,7 @@
  * priority. Finishing it is a checkpoint.
  */
 import { characteristics } from "./characteristics.ts";
+import { facts } from "./printed.ts";
 import { instructionStep } from "./instructions.ts";
 import { holds, matches, players, tableWorld, targetKey, type Scope } from "./selectors.ts";
 import { eventScope } from "./triggers.ts";
@@ -49,8 +50,18 @@ export function resolving(table: Table): Pending | null {
 		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;
 	// An instant or sorcery still on the stack goes to the graveyard as the last part (608.2n).
-	const finish = (changes: Change[]): Change[] => ability.timing === "spell" && object.zone === "stack" && !changes.some((change) => change.do === "move" && change.what === object.id)
-		? [{ do: "move", what: object.id, to: "graveyard", reason: "resolve" }] : [];
+	const finish = (changes: Change[]): Change[] => {
+		if (ability.timing !== "spell" || object.zone !== "stack" || changes.some((change) => change.do === "move" && change.what === object.id)) return [];
+		const subtypes = facts(table, object)?.type.split("—")[1]?.trim().split(/\s+/) ?? [];
+		if (!pending.lost && subtypes.includes("Adventure")) return [
+			{ do: "move", what: object.id, to: "exile", reason: "resolve" },
+			{ do: "note", note: { kind: "permit", by: ability.controller, until: "indefinite", on: { id: object.id, incarnation: object.incarnation + 1 }, who: ability.controller, fromTurn: table.cursor.turn, faces: [0] } },
+		];
+		if (!pending.lost && subtypes.includes("Omen")) return [
+			{ do: "move", what: object.id, to: "library", reason: "resolve" }, { do: "shuffle", whose: object.owner },
+		];
+		return [{ do: "move", what: object.id, to: "graveyard", reason: "resolve" }];
+	};
 	if (pending.lost || !item) {
 		const targeted = ability.targets.flat().length;
 		const label = !pending.lost ? `Finish resolving ${ability.claim}.` : targeted && pending.illegal.length === targeted ? "Every target is illegal; it does not resolve (608.2b)."

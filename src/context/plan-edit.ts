@@ -149,8 +149,10 @@ export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<st
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(frame.view.work?.packages ?? []).flatMap((pack) => (pack.procedures ?? []).map((procedure) => ({ card: pack.card, procedure })))
 			.flatMap(({ card, procedure }, at) => mine(card) ? [[`prepared:${at} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]] : []),
-		...(frame.view.work?.packages ?? []).filter((pack) => pack.printedCast && frame.view.printed?.[pack.card] && mine(pack.card)).map((pack) =>
-			[`printed:${pack.card}`, { label: `Cast ${pack.card} for its printed cost`, action: { procedure: printedCast(pack.card, frame.view.printed![pack.card]!) } }]),
+		...(frame.view.work?.packages ?? []).filter((pack) => frame.view.printed?.[pack.card] && mine(pack.card)).flatMap((pack) =>
+			[...new Set([...(pack.printedCast ? [0 as const] : []), ...(pack.printedFaces ?? [])])].map((face) =>
+				[`printed:${pack.card}${face ? `:f${face}` : ""}`, { label: `Cast ${pack.card}${face ? ` face ${face}` : ""} for its printed cost`,
+					action: { procedure: printedCast(pack.card, frame.view.printed![pack.card]!, frame.view.printed![pack.card]!.faces ? face : undefined) } }])),
 	]);
 }
 

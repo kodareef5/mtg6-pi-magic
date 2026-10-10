@@ -18,12 +18,17 @@
  * contains one.
  */
 
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { Format } from "./format.ts";
 
+export type CardFace = { name: string; mana: string; type: string; stats: string; oracle: string; colors: string[] };
+
 export type Card = {
+	layout?: string;
+	faces?: CardFace[];
 	name: string;
 	mana: string;
 	cmc: number;
@@ -39,7 +44,7 @@ export type Card = {
  * A journal pins it, because a set release changes oracle text and a replay
  * against different text is a different game.
  */
-export type Universe = { path: string; generated: string; cards: Map<string, Card> };
+export type Universe = { path: string; generated: string; cards: Map<string, Card>; faces?: { path: string; sha256: string } };
 
 const UNSUPPORTED = join(import.meta.dirname, "..", "..", "cards", "unsupported.txt");
 let listed: Set<string> | undefined;
@@ -49,7 +54,7 @@ export const unsupported = (): Set<string> => (listed ??= new Set(readFileSync(U
 const FIXED = new Set([
 	"name", "mana", "cmc", "type", "stats", "colors", "identity", "layout",
 	"rarities", "keywords", "reserved", "gamechanger", "printings", "oracle",
-	"oracle_id",
+	"oracle_id", "faces",
 ]);
 
 export function load(path: string): Universe {
@@ -70,6 +75,8 @@ export function load(path: string): Universe {
 		if (!name) continue;
 		cards.set(name, {
 			name,
+			...(field[at("layout")] ? { layout: field[at("layout")] } : {}),
+			...(field[at("faces")] ? { faces: JSON.parse(field[at("faces")]!) as CardFace[] } : {}),
 			mana: field[at("mana")] ?? "",
 			cmc: Number(field[at("cmc")] ?? 0),
 			type: field[at("type")] ?? "",
@@ -79,7 +86,19 @@ export function load(path: string): Universe {
 			legal: Object.fromEntries(formats.map((f) => [f, field[at(f)] ?? "-"])),
 		});
 	}
-	return { path, generated, cards };
+	const facePath = path.replace(/\.tsv$/, "") + ".faces.json";
+	let faces: Universe["faces"];
+	if (existsSync(facePath)) {
+		const text = readFileSync(facePath, "utf8"), data = JSON.parse(text) as { source: string; cards: Record<string, { layout: string; faces: CardFace[] }> };
+		if (data.source !== createHash("sha256").update(readFileSync(path)).digest("hex")) throw new Error(`Face data does not match ${path}`);
+		for (const [name, facts] of Object.entries(data.cards)) {
+			const card = cards.get(name);
+			if (!card) throw new Error(`Face data names absent card ${name}`);
+			Object.assign(card, facts);
+		}
+		faces = { path: facePath, sha256: createHash("sha256").update(text).digest("hex") };
+	}
+	return { path, generated, cards, ...(faces ? { faces } : {}) };
 }
 
 export function card(universe: Universe, name: string): Card {

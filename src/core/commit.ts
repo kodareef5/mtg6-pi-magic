@@ -12,6 +12,7 @@
  * already import this file to perform it.
  */
 
+import { room } from "./faces.ts";
 import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
@@ -197,6 +198,11 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.tapped = change.to === "battlefield" && !!change.tapped;
 				moving.controller = change.controller ?? moving.owner;
 				moving.faceDown = false;
+				const previousFace = moving.face;
+				delete moving.face; delete moving.doors;
+				if ((change.to === "stack" || change.to === "battlefield") && change.face !== undefined) moving.face = change.face;
+				else if (change.to === "battlefield" && from === "stack" && previousFace !== undefined) moving.face = previousFace;
+				if (change.to === "battlefield" && room(moving.card ? table.printed[moving.card] : undefined)) moving.doors = from === "stack" ? [previousFace ?? 0] : [];
 				moving.counters = change.to === "battlefield" ? structuredClone(change.counters ?? {}) : {};
 				moving.damage = 0;
 				delete moving.deathtouched;

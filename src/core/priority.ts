@@ -1,4 +1,5 @@
 /** Priority actions. Timing gates belong here; a seat may still declare its own motion. */
+import { castableFace, faceFacts } from "./faces.ts";
 import type { Registration } from "./language.ts";
 import type { Move } from "./moves.ts";
 import { cardsIn, seat, type Table, type Thing } from "./table.ts";
@@ -80,17 +81,24 @@ export function defaultCasts(table: Table, frame: Frame): Move[] {
 		const ordinary = (pack.procedures ?? []).filter((one) => isPrintedCast(one, pack.card, table.printed[pack.card]!));
 		return ordinary.length > 0 && !ordinary.some((one) => (one.source.zones ?? ["hand"]).includes(card.zone));
 	};
-	// From hand, and from another zone where a permission names the card ("you may cast it from exile").
-	const castable = [...table.things.values()].filter((card) => card.zone !== "battlefield" && card.zone !== "stack" && permanentSpell(facts(table, card)) &&
-		shared(card) &&
-		(card.zone === "hand" ? card.owner === holder : playable(world, holder, card, table.cursor.turn, false)));
-	const sources = [...new Set(castable.map((card) => `${card.zone}|${card.card}`))].sort().map((key) => key.split("|") as ["hand" | "exile" | "graveyard", string]);
-	return sources.flatMap(([zone, name]) => offers({ ...printedCast(name, table.printed[name]!),
-		source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name },
-		claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost` }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
-		const note = entering(table, holder, name);
-		return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
-	}));
+	const sources = [...new Set([...table.things.values()].flatMap((card) => {
+		if (card.zone === "battlefield" || card.zone === "stack" || !card.card) return [];
+		const printed = table.printed[card.card], pack = table.work[holder]?.packages?.find((one) => one.card === card.card);
+		const faces = printed?.faces ? [0, 1] as const : [0] as const;
+		return faces.flatMap((face) => castableFace(printed, face) && permanentSpell(faceFacts(printed, face)) &&
+			(face === 0 ? shared(card) : pack?.printedFaces?.includes(face)) &&
+			playable(world, holder, card, table.cursor.turn, false, face) ? [`${card.zone}|${card.card}|${face}`] : []);
+	}))].sort();
+	return sources.flatMap((key) => {
+		const [zone, name, index] = key.split("|") as ["hand" | "exile" | "graveyard", string, string];
+		const face = Number(index) as 0 | 1, printed = table.printed[name]!;
+		return offers({ ...printedCast(name, printed, printed.faces ? face : undefined),
+			source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name },
+			claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost` }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
+			const note = entering(table, holder, name);
+			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
+		});
+	});
 }
 
 /** Assessed card uses are ordinary prepared procedures, offered to every holder of the seat. */
@@ -98,7 +106,7 @@ export function preparedMoves(table: Table, frame: Frame): Move[] {
 	return (table.work[frame.seat]?.packages ?? []).flatMap((pack, card) => !pack.assessed ? [] : (pack.procedures ?? []).flatMap((procedure, at) => {
 		const prefix = procedure.timing === "spell" ? "cast" : "use";
 		return offers(procedure, frame, `${prefix}:${card}:${at}`).map(({ option, activation }) => {
-			const note = procedure.timing === "spell" && permanentSpell(table.printed[pack.card]) ? entering(table, frame.seat, pack.card) : "";
+			const note = procedure.timing === "spell" && permanentSpell(faceFacts(table.printed[pack.card], procedure.face)) ? entering(table, frame.seat, pack.card) : "";
 			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
 		});
 	}));

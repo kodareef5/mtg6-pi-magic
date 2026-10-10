@@ -9,6 +9,8 @@
  * needs more. A continuous ability granted by another effect is not applied.
  * Past 150 lines because the walk and the type-line reader belong together.
  */
+import { facts, type Printed } from "./printed.ts";
+import { activeFaces } from "./faces.ts";
 import { join } from "node:path";
 import { load as loadRules, rule, type Rules } from "./rules.ts";
 import { cardsIn, type Note, type Table, type Thing } from "./table.ts";
@@ -57,22 +59,28 @@ export const intrinsic = (traits?: Traits): Color[] => traits?.types.includes("l
 
 /** The printed card or the token spec, before any effect. */
 export function base(table: Table, object: Thing): Traits | undefined {
-	const own = [...(object.registrations ?? []), ...registered(table, object)];
+	const printedCard = object.card ? table.printed[object.card] : undefined;
+	const active = printedCard ? activeFaces(printedCard, object) : [0];
+	const own = [...(object.registrations ?? []), ...registered(table, object)].filter((one) => one.face === undefined || active.includes(one.face));
 	if (object.token) {
 		const spec = object.token;
 		return { name: spec.name, supertypes: [...(spec.supertypes ?? [])], types: [...spec.types], subtypes: [...(spec.subtypes ?? [])],
 			colors: [...spec.colors] as Color[], ...(spec.power !== undefined ? { power: spec.power, toughness: spec.toughness ?? 0 } : {}),
 			words: [...(spec.words ?? [])], registrations: [...(spec.registers ?? []), ...own] };
 	}
-	const printed = object.card && !object.faceDown ? table.printed[object.card] : undefined;
-	if (!printed) return undefined;
+	const printed = facts(table, object);
+	return printed ? printedTraits(printed, object.card!, own) : undefined;
+}
+
+/** The same printed reading is used before announcement and on the stack. */
+export function printedTraits(printed: Printed, name: string, own: Registration[] = []): Traits {
 	const [left, right = ""] = printed.type.split("—").map((part) => part.trim());
 	const words = left!.split(/\s+/).map((word) => word.toLowerCase());
 	const stats = printed.stats.match(/^(-?\d+)\/(-?\d+)$/);
 	return {
-		name: object.card!, supertypes: words.filter((word) => SUPERTYPES.has(word)), types: words.filter((word) => !SUPERTYPES.has(word)),
+		name: printed.name ?? name, supertypes: words.filter((word) => SUPERTYPES.has(word)), types: words.filter((word) => !SUPERTYPES.has(word)),
 		subtypes: right ? right.split(/\s+/) : [],
-		colors: [...new Set(printed.mana.match(/\{([WUBRG])\}/g)?.map((symbol) => symbol[1] as Color) ?? [])],
+		colors: printed.colors as Color[] ?? [...new Set(printed.mana.match(/\{([WUBRG])\}/g)?.map((symbol) => symbol[1] as Color) ?? [])],
 		...(stats ? { power: Number(stats[1]), toughness: Number(stats[2]) } : {}), words: [], registrations: own,
 	};
 }

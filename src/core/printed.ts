@@ -4,10 +4,11 @@
  * that change characteristics are not handled here.
  */
 import { join } from "node:path";
-import { load, type Universe } from "./cards.ts";
-import type { Mana, Table, Thing } from "./table.ts";
+import { load, type CardFace, type Universe } from "./cards.ts";
+import { currentFacts, type Faced } from "./faces.ts";
+import type { Mana, Table } from "./table.ts";
 
-export type Printed = { type: string; mana: string; stats: string; text: boolean; oracle: string };
+export type Printed = { type: string; mana: string; stats: string; text: boolean; oracle: string; name?: string; colors?: string[]; faces?: CardFace[]; layout?: string };
 
 const SHIPPED = join(import.meta.dirname, "..", "..", "cards", "standard.tsv");
 let shippedUniverse: Universe | undefined;
@@ -18,14 +19,14 @@ export const shipped = (): Universe => (shippedUniverse ??= load(SHIPPED));
 export function printedFacts(universe: Universe, names: string[]): Record<string, Printed> {
 	return Object.fromEntries([...new Set(names)].sort().flatMap((name) => {
 		const card = universe.cards.get(name);
-		return card ? [[name, { type: front(card.type), mana: front(card.mana), stats: front(card.stats),
+		return card ? [[name, { ...(card.faces ? { faces: structuredClone(card.faces), layout: card.layout } : {}), type: front(card.type), mana: front(card.mana), stats: front(card.stats),
 			text: card.oracle.split(" // ")[0]!.replace(/\([^)]*\)/g, "").trim().length > 0, oracle: card.oracle }]] : [];
 	}));
 }
 const front = (field: string) => field.split(" // ")[0]!.trim();
 
-export const facts = (table: Table, object: Pick<Thing, "card" | "faceDown">): Printed | undefined =>
-	object.card && !object.faceDown ? table.printed[object.card] : undefined;
+export const facts = (table: Table, object: Faced): Printed | undefined =>
+	object.card && !object.faceDown ? currentFacts(table.printed[object.card], object) : undefined;
 export const isLand = (printed?: Printed) => !!printed && /\bLand\b/.test(printed.type.split("—")[0]!);
 export const isCreature = (printed?: Printed) => !!printed && /\bCreature\b/.test(printed.type.split("—")[0]!);
 

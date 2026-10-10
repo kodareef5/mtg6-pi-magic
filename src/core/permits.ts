@@ -28,11 +28,11 @@ export function allowance(world: World, seat: SeatId, assumed: readonly Registra
  * Whether this seat may play this card from where it is: its own hand, a land
  * from a zone a permanent opens, or a card a `permit` note names from this turn on.
  */
-export function playable(world: World, seat: SeatId, object: Seen, turn: number, land: boolean): boolean {
+export function playable(world: World, seat: SeatId, object: Seen, turn: number, land: boolean, face?: number): boolean {
 	if (object.zone === "hand") return object.owner === seat;
 	if (land && object.owner === seat && allowance(world, seat).landsFrom.includes(object.zone)) return true;
 	return world.notes.some((note) => note.kind === "permit" && note.who === seat && note.fromTurn <= turn &&
-		note.on.id === object.id && note.on.incarnation === object.incarnation);
+		note.on.id === object.id && note.on.incarnation === object.incarnation && (!note.faces || note.faces.some((allowed) => allowed === (face ?? 0))));
 }
 
 /** A spell this seat may cast as though it had flash, read as it will be on the stack, where a flash selector looks unless it says otherwise. */

@@ -8,11 +8,12 @@ import { standard } from "../src/core/format.ts";
 
 export const matchup = JSON.parse(readFileSync(new URL("../decks/standard-matchup.json", import.meta.url), "utf8")) as {
 	event: string; eventDate: string; legalityDate: string;
-	cards: { path: string; generated: string; sha256: string }; rules: { path: string; effective: string; sha256: string };
+	cards: { path: string; generated: string; sha256: string; faces?: { path: string; sha256: string } }; rules: { path: string; effective: string; sha256: string };
 	/** Names in decks/collection. */
 	decks: string[];
 };
 export const universe = load(matchup.cards.path);
+if (universe.faces) matchup.cards.faces = universe.faces;
 for (const pin of [matchup.cards, matchup.rules]) {
 	if (createHash("sha256").update(readFileSync(pin.path)).digest("hex") !== pin.sha256) throw new Error(`Pinned data changed: ${pin.path}`);
 }

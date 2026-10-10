@@ -35,6 +35,7 @@ export function select(query: Query, frame: Frame): SeenObject[] {
 	return (frame.view.objects ?? []).filter((item) =>
 		(!query.zones || query.zones.includes(item.zone)) &&
 		(!query.controller || query.controller === "any" || (query.controller === "self" ? item.controller === frame.seat : item.controller !== frame.seat)) &&
+		(query.face === undefined || (item.doors ? item.doors.includes(query.face) : query.face === (item.face ?? 0))) &&
 		(!query.card || query.card === (item.card ?? item.token?.name)) && (query.tapped === undefined || query.tapped === item.tapped) &&
 		(!query.ids || query.ids.includes(item.id)) &&
 		(!query.types || query.types.some((type) => item.traits?.types.includes(type))) &&

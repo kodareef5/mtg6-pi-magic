@@ -50,6 +50,9 @@ export type ObjectId = string;
  * deck, and the engine is none the wiser.
  */
 export type Thing = {
+	/** Selected spell or battlefield face, and Room unlocked designations. */
+	face?: 0 | 1;
+	doors?: (0 | 1)[];
 	id: ObjectId;
 	incarnation: number;
 	/** Cards have a name. Spells and noncard stack objects hold accepted instructions. */
@@ -91,6 +94,7 @@ export type Mana = {
 
 /** One accepted announcement, frozen at execution so replay never infers its meaning again. */
 export type Activation = {
+	face?: 0 | 1;
 	source: ObjectRef;
 	controller: SeatId;
 	claim: string;
@@ -210,7 +214,7 @@ export type Note = {
 	| { kind: "register"; on: ObjectRef; registration: Registration }
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
 	/** "You may play that card": from a turn, while that card stays where it is. */
-	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number }
+	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[] }
 	/**
 	 * A delayed trigger (603.7). It belongs to the table, not its source, and its
 	 * refs other than the event's were fixed when it was created.
