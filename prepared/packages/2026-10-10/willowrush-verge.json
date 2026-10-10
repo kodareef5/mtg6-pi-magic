@@ -1,0 +1,48 @@
+{
+	"card": "Willowrush Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Willowrush Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {G}. Activate only if you control a Forest or an Island.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Forest",
+								"Island"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

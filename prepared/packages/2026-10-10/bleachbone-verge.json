@@ -1,0 +1,51 @@
+{
+	"card": "Bleachbone Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bleachbone Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {W}. Activate only if you control a Plains or a Swamp.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Plains",
+								"Swamp"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

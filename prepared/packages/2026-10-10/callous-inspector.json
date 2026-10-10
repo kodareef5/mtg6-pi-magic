@@ -1,0 +1,60 @@
+{
+	"card": "Callous Inspector",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Callous Inspector",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "When this creature dies, it deals 1 damage to you. Create a Clue token. (It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "you",
+							"amount": 1,
+							"from": "this"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Clue",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Clue"
+								],
+								"colors": []
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

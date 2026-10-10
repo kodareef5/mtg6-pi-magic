@@ -1,0 +1,52 @@
+{
+	"card": "Starting Town",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Starting Town",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless it's your first, second, or third turn of the game.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"any": [
+						{
+							"not": {
+								"turn": "self"
+							}
+						},
+						{
+							"amount": {
+								"turns": "self"
+							},
+							"atLeast": 4
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}, Pay 1 life: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true,
+					"life": 1
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

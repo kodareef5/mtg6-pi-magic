@@ -1,0 +1,51 @@
+{
+	"card": "Hushwood Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hushwood Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {W}. Activate only if you control a Forest or a Plains.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Forest",
+								"Plains"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

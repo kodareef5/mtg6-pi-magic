@@ -1,0 +1,77 @@
+{
+	"card": "Bloodghast",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bloodghast",
+		"registers": [
+			{
+				"basis": "This creature can't block.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"can't block"
+					]
+				}
+			},
+			{
+				"basis": "This creature has haste as long as an opponent has 10 or less life.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"life": "opponent"
+					},
+					"atMost": 10
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, you may return this card from your graveyard to the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"if": {
+					"is": "this",
+					"matches": {
+						"zones": [
+							"graveyard"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"may": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"card": "Wastewood Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wastewood Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{T}: Add {B}. Activate only if you control a Swamp or a Forest.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Swamp",
+								"Forest"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

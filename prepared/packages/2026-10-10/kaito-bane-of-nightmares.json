@@ -1,0 +1,104 @@
+{
+	"card": "Kaito, Bane of Nightmares",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kaito, Bane of Nightmares",
+		"registers": [
+			{
+				"basis": "During your turn, as long as Kaito has one or more loyalty counters on him, he's a 3/4 Ninja creature and has hexproof.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"amount": {
+								"counters": "loyalty",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"change": {
+					"types": {
+						"set": [
+							"creature"
+						]
+					},
+					"subtypes": {
+						"set": [
+							"Ninja"
+						],
+						"of": "creature"
+					},
+					"base": {
+						"power": 3,
+						"toughness": 4
+					},
+					"words": [
+						"hexproof"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate ninjutsu from hand for {1}{U}{B}, revealing Kaito and returning an unblocked attacking creature you control to its owner's hand; put Kaito onto the battlefield tapped and attacking the same defender.",
+				"basis": "Ninjutsu {1}{U}{B} ({1}{U}{B}, Return an unblocked attacker you control to hand: Put this card onto the battlefield from your hand tapped and attacking.)",
+				"source": {
+					"card": "Kaito, Bane of Nightmares",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate the +1 loyalty ability to get the Ninja-enhancing emblem, using loyalty timing and the shared once-per-turn loyalty restriction.",
+				"basis": "+1: You get an emblem with \"Ninjas you control get +1/+1.\"",
+				"source": {
+					"card": "Kaito, Bane of Nightmares",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate the 0 loyalty ability to surveil 2, then draw one card for each opponent who lost life this turn, using loyalty timing and the shared once-per-turn loyalty restriction.",
+				"basis": "0: Surveil 2. Then draw a card for each opponent who lost life this turn.",
+				"source": {
+					"card": "Kaito, Bane of Nightmares",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate the −2 loyalty ability targeting a creature; tap it and put two stun counters on it, using loyalty timing and the shared once-per-turn loyalty restriction.",
+				"basis": "−2: Tap target creature. Put two stun counters on it.",
+				"source": {
+					"card": "Kaito, Bane of Nightmares",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

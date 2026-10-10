@@ -1,0 +1,62 @@
+{
+	"card": "Chandra, Torch of Defiance",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chandra, Torch of Defiance",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate the first +1 loyalty ability: exile the top card, optionally cast it during resolution, and otherwise deal 2 damage to each opponent.",
+				"basis": "+1: Exile the top card of your library. You may cast that card. If you don't, Chandra deals 2 damage to each opponent.",
+				"source": {
+					"card": "Chandra, Torch of Defiance",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate the second +1 loyalty ability to add {R}{R}; this is a loyalty ability, not a mana ability.",
+				"basis": "+1: Add {R}{R}.",
+				"source": {
+					"card": "Chandra, Torch of Defiance",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate the −3 loyalty ability to deal 4 damage to target creature.",
+				"basis": "−3: Chandra deals 4 damage to target creature.",
+				"source": {
+					"card": "Chandra, Torch of Defiance",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate the −7 loyalty ability to create an emblem whose spell-cast trigger deals 5 damage to any target.",
+				"basis": "−7: You get an emblem with \"Whenever you cast a spell, this emblem deals 5 damage to any target.\"",
+				"source": {
+					"card": "Chandra, Torch of Defiance",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

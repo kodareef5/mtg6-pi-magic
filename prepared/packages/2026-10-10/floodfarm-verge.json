@@ -1,0 +1,51 @@
+{
+	"card": "Floodfarm Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Floodfarm Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {U}. Activate only if you control a Plains or an Island.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Plains",
+								"Island"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

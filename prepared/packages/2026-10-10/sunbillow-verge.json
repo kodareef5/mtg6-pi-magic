@@ -1,0 +1,51 @@
+{
+	"card": "Sunbillow Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunbillow Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {R}. Activate only if you control a Mountain or a Plains.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Mountain",
+								"Plains"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

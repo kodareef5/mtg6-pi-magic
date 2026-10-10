@@ -1,6 +1,6 @@
 {
 	"Aang, Swift Savior // Aang and La, Ocean's Fury": {
-		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.) — The supplied permit syntax cannot grant the owner of an arbitrary exiled card permission to cast it for the alternative cost {2}. Exile alone or ordinary play permission would not implement airbend.; Waterbend {8}: Transform Aang. — The supplied instruction syntax has no transform operation, and its cost syntax cannot express waterbend's choice to substitute tapping an untapped",
+		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.) — Missing operations: a target selector combining battlefield creatures with arbitrary spells on the stack, and a granted casting permission with the alternative cost {2} for the exiled card.; Waterbend {8}: Transform Aang. — Missing operations: waterbend payment combining mana with tapping untapped artifacts or creatures for individual generic mana, and transforming the same per",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -8,7 +8,7 @@
 		"at": "2026-10-10"
 	},
 	"Aang, at the Crossroads // Aang, Destined Savior": {
-		"reason": "Aang, at the Crossroads // Aang, Destined Savior is not ready: When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order. — Missing operations for privately inspecting and binding the top five cards, selecting among that set by mana value, and putting the remainder on the bottom in random order.; When another creature you control leaves the battlefield, transform Aang at the beginning of the next upkeep. — Missing transform operation, incl",
+		"reason": "Aang, at the Crossroads // Aang, Destined Savior is not ready: When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order. — Missing operations for privately looking at a bounded top-five set, selecting within that set by mana value, and putting its remainder on the bottom in random order.; When another creature you control leaves the battlefield, transform Aang at the beginning of the next upkeep. — Missing transform operation and back-fac",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -16,7 +16,7 @@
 		"at": "2026-10-10"
 	},
 	"Airbender Ascension": {
-		"reason": "Airbender Ascension is not ready: When this enchantment enters, airbend up to one target creature. — Airbend requires granting each exiled card's owner permission to cast it from exile by paying {2} rather than its mana cost. The supplied permission syntax cannot grant an alternative casting cost to an arbitrary exiled card.",
+		"reason": "Airbender Ascension is not ready: When this enchantment enters, airbend up to one target creature. — Airbend requires granting each exiled card's owner permission to cast that card from exile by paying {2} rather than its mana cost. The available permit syntax cannot grant this alternative-cost casting permission to an arbitrary exiled card; ordinary permission would incorrectly allow casting at its printed cost.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -24,7 +24,7 @@
 		"at": "2026-10-10"
 	},
 	"Ajani Resolute": {
-		"reason": "Ajani Resolute is not ready: Whenever you gain life, put a loyalty counter on Ajani. — The event schema has no life-gain event for this mandatory standing trigger.; −4: Create a 2/2 white Cat Soldier creature token named Ajani's Pridemate with \"Whenever you gain life, put a +1/+1 counter on this token.\" — The token's triggered ability requires a life-gain event, absent from the event schema.; −10: You get an emblem with \"Creatures you control get +2/+2.\" — No instruction creates an emblem in the command zone with its independent continuous ability.",
+		"reason": "Ajani Resolute is not ready: \"Whenever you gain life, put a loyalty counter on Ajani.\" — The registration event schema has no life-gain event, so this mandatory standing trigger cannot be registered faithfully.",
 		"decks": [
 			"Lifegain"
 		],
@@ -32,7 +32,7 @@
 		"at": "2026-10-10"
 	},
 	"Amalia Benavides Aguirre": {
-		"reason": "Amalia Benavides Aguirre is not ready: Whenever you gain life, Amalia Benavides Aguirre explores. Then destroy all other creatures if its power is exactly 20. (To have this creature explore, reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.) — Cannot register this standing trigger: the event schema has no life-gain event.",
+		"reason": "Amalia Benavides Aguirre is not ready: Whenever you gain life, Amalia Benavides Aguirre explores. Then destroy all other creatures if its power is exactly 20. (To have this creature explore, reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.) — Missing operation: a watch event for a source causing you to gain life (excluding gains of 0 life). The supported Event.on values contain no life-gain event; turn life-gained history cannot substitute for this trigger.",
 		"decks": [
 			"Lifegain"
 		],
@@ -40,7 +40,7 @@
 		"at": "2026-10-10"
 	},
 	"Appa, Steadfast Guardian": {
-		"reason": "Appa, Steadfast Guardian is not ready: When Appa enters, airbend any number of other target nonland permanents you control. (Exile them. While each one is exiled, its owner may cast it for {2} rather than its mana cost.) — The supplied syntax cannot express an unbounded number of announced targets or grant each exiled card's owner a casting permission with the alternative cost {2}. The permit instruction has no alternative-cost field; replacing airbend with ordinary exile/play permission would change the ability.",
+		"reason": "Appa, Steadfast Guardian is not ready: When Appa enters, airbend any number of other target nonland permanents you control. (Exile them. While each one is exiled, its owner may cast it for {2} rather than its mana cost.) — Missing operations: an unbounded announced target count and an exile permission granting each exiled card's owner the alternative casting cost {2}. The supplied target schema requires a fixed integer count, and permit has no alternative-cost field.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -48,7 +48,7 @@
 		"at": "2026-10-10"
 	},
 	"Ardyn, the Usurper": {
-		"reason": "Ardyn, the Usurper is not ready: Starscourge — At the beginning of combat on your turn, exile up to one target creature card from a graveyard. If you exiled a card this way, create a token that's a copy of that card, except it's a 5/5 black Demon. — Unsupported operation: create a token copying the exiled card's copiable characteristics and abilities, with the specified power/toughness, color, and subtype exceptions.",
+		"reason": "Ardyn, the Usurper is not ready: Starscourge — At the beginning of combat on your turn, exile up to one target creature card from a graveyard. If you exiled a card this way, create a token that's a copy of that card, except it's a 5/5 black Demon. — Unsupported operation: creating a token copying the exiled card's copiable characteristics and abilities, with the specified power, toughness, color, and creature-type exceptions. The syntax does not support copies.",
 		"decks": [
 			"4c Reanimator"
 		],
@@ -56,7 +56,7 @@
 		"at": "2026-10-10"
 	},
 	"Awaken the Honored Dead": {
-		"reason": "Awaken the Honored Dead is not ready: (As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.) — Missing support for the non-stack turn-based lore-counter addition as the controller's precombat main phase begins, and for the state-based sacrifice after reaching the final chapter when no chapter ability from this Saga remains pending or on the stack.; I — Destroy target nonland permanent. — Missing a lore-counter addition event with the chapter threshold-crossing test required by rule 714.2b; an enters or step trigger would not faithfully represent this chapter a",
+		"reason": "Awaken the Honored Dead is not ready: (As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.) — Missing operations: adding a lore counter as a turn-based action at the beginning of its controller's precombat main phase, and sacrificing the Saga as a state-based action when it has at least three lore counters and no chapter ability that has triggered but not yet left the stack. Neither operation is a step-triggered ability.; I — Destroy target nonland permanent. — Missing event: one or more lore counters being put on this Saga, with the previous count less than ",
 		"decks": [
 			"4c Reanimator"
 		],
@@ -64,7 +64,7 @@
 		"at": "2026-10-10"
 	},
 	"Azog, Moria's Ruin": {
-		"reason": "Azog, Moria's Ruin is not ready: When Azog enters, destroy up to one other target creature. Its controller amasses Goblins X, where X is that creature's power. If you controlled that creature, draw a card. (To amass Goblins X, that player puts X +1/+1 counters on an Army they control. It's also a Goblin. If they don't control an Army, they create a 0/0 black Goblin Army creature token first.) — Missing operation: create the required Goblin Army token under the destroyed creature's last controller's control. The token instruction has no player or controller field; creating it under Azog's contr",
+		"reason": "Azog, Moria's Ruin is not ready: When Azog enters, destroy up to one other target creature. Its controller amasses Goblins X, where X is that creature's power. If you controlled that creature, draw a card. (To amass Goblins X, that player puts X +1/+1 counters on an Army they control. It's also a Goblin. If they don't control an Army, they create a 0/0 black Goblin Army creature token first.) — Missing operation: creating a token for the targeted creature's controller. The token instruction has no creator/controller field; amassing must also work when that player is an opponent. The available ",
 		"decks": [
 			"Jund Sacrifice"
 		],
@@ -72,7 +72,7 @@
 		"at": "2026-10-10"
 	},
 	"Belladonna Took": {
-		"reason": "Belladonna Took is not ready: Whenever a token you control enters, you gain 1 life if this is the first time this ability has resolved this turn. If it's the second time, draw a card. If it's the third time, put a +1/+1 counter on each creature you control. — Unsupported operation: track this specific triggered ability's resolution count each turn and test that count during resolution to apply the first-, second-, or third-resolution effect. The syntax provides no ability-resolution history or equivalent per-turn resolution counter; token-entry counts and once-per-turn trigger limits are not e",
+		"reason": "Belladonna Took is not ready: Whenever a token you control enters, you gain 1 life if this is the first time this ability has resolved this turn. If it's the second time, draw a card. If it's the third time, put a +1/+1 counter on each creature you control. — Unsupported operation: track how many times this specific triggered ability has resolved this turn and condition its effects on the first, second, or third resolution. The available history operations do not track ability resolutions; a once-per-turn limit would not implement this ability.",
 		"decks": [
 			"Boros Tokens"
 		],
@@ -80,86 +80,31 @@
 		"at": "2026-10-10"
 	},
 	"Biotech Specialist": {
-		"reason": "Biotech Specialist is not ready: Whenever you sacrifice an artifact, this creature deals 2 damage to target opponent. — Missing operation: a sacrifice-specific trigger event, or a leaves-event sacrifice-reason filter, attributed to you. A generic leaves or dies watch would also trigger for nonsacrifice events and would not faithfully implement this ability.",
+		"reason": "Biotech Specialist is not ready: Whenever you sacrifice an artifact, this creature deals 2 damage to target opponent. — Missing operation: a sacrifice-specific watch event (or a sacrifice-reason filter on a leaves event). The available events cannot distinguish sacrificing an artifact from other ways it leaves the battlefield, including sacrifices whose graveyard destination is replaced. This needs a standing trigger with a target opponent and 2 damage from this creature.",
 		"decks": [
 			"Jund Sacrifice"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Blazemire Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Blazemire Verge: package Blazemire Verge: \"{T}: Add {R}. Activate only if you control a Swamp or a Mountain.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"4c Control",
-			"Jund Sacrifice",
-			"Mardu Discard",
-			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Bleachbone Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Bleachbone Verge: package Bleachbone Verge: \"{T}: Add {W}. Activate only if you control a Plains or a Swamp.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"Lifegain"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Blood Crypt": {
-		"reason": "Blood Crypt is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The enters registration schema cannot offer an optional life payment during entry and make tapped entry conditional on whether that payment was made. This replacement must apply to every entry, not just a land play.",
-		"decks": [
-			"4c Control",
-			"Jund Sacrifice",
-			"Mardu Discard",
-			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Bloodghast": {
-		"reason": "Bloodghast is not ready: Landfall — Whenever a land you control enters, you may return this card from your graveyard to the battlefield. — Missing operation: a standing triggered ability functioning from its source's graveyard (rule 113.6m). The watch registration schema has no source-zone scope; battlefield registration cannot implement this graveyard-only trigger.",
-		"decks": [
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Bramble Familiar // Fetch Quest": {
-		"reason": "Bramble Familiar // Fetch Quest is not ready: Mill seven cards. Then put a creature, enchantment, or land card from among the milled cards onto the battlefield. — Casting Fetch Quest with its Adventure characteristics is not expressible: the engine reads only the front face. The Adventure resolution exile and subsequent permission to play the normal face also require Adventure support (rule 715.3d).",
+		"reason": "Bramble Familiar // Fetch Quest is not ready: Mill seven cards. Then put a creature, enchantment, or land card from among the milled cards onto the battlefield. — Casting Fetch Quest as the Adventure requires alternate spell characteristics (Sorcery — Adventure, {5}{G}{G}), which the syntax cannot represent. Adventure resolution also requires exiling the card instead of putting it into its owner's graveyard and granting its controller permission to play the normal half for as long as it remains exiled (rule 715.3d).",
 		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Breeding Pool": {
-		"reason": "Breeding Pool is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The registration syntax cannot express an optional life payment during entry and entering tapped conditional on declining that payment.",
-		"decks": [
-			"4c Reanimator",
 			"Bant Airbending Combo"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
 	"Bringer of the Last Gift": {
-		"reason": "Bringer of the Last Gift is not ready: When this creature enters, if you cast it, each player sacrifices all other creatures they control. Then each player returns all creature cards from their graveyard that weren't put there this way to the battlefield. — Missing operations: an intervening condition testing whether you cast the spell that became this permanent (not merely cast history this turn), and selecting graveyard creature cards while excluding the cards put there by this ability's sacrifice instruction.",
+		"reason": "Bringer of the Last Gift is not ready: When this creature enters, if you cast it, each player sacrifices all other creatures they control. Then each player returns all creature cards from their graveyard that weren't put there this way to the battlefield. — Missing operations: testing whether you cast this permanent for the intervening condition, and selecting graveyard creature cards while excluding exactly those put there by this ability's sacrifices. Cast history this turn does not establish this permanent's casting provenance; the supplied selectors cannot express the required exclusion.",
 		"decks": [
 			"4c Reanimator"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Callous Inspector": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Callous Inspector: Deferred use Activate a Clue: pay {2} and sacrifice it to draw a card must name Callous Inspector, its source zones and controller, without game object ids. | A prepared procedure for Callous Inspector names that card, without game object ids.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Candy Trail": {
-		"reason": "Candy Trail is not ready: When this artifact enters, scry 2. — Scry 2 requires privately looking at the top two library cards, choosing any to put on the bottom in any order, and putting the rest on top in any order. The syntax lacks this bounded look and card-ordering operation; the enters trigger cannot be faithfully registered.",
+		"reason": "Candy Trail is not ready: When this artifact enters, scry 2. — The triggered effect requires looking at only the top two cards of your library, putting any number on the bottom, and ordering the remaining cards on top. The available instructions and selectors cannot express this restricted inspection and ordering.",
 		"decks": [
 			"Jeskai Artifacts"
 		],
@@ -167,7 +112,7 @@
 		"at": "2026-10-10"
 	},
 	"Carnage, Crimson Chaos": {
-		"reason": "Carnage, Crimson Chaos is not ready: When Carnage enters, return target creature card with mana value 3 or less from your graveyard to the battlefield. It gains \"This creature attacks each combat if able\" and \"When this creature deals combat damage to a player, sacrifice it.\" — The target requires a mana-value-at-most-3 selector, which the supplied Selector schema cannot express.",
+		"reason": "Carnage, Crimson Chaos is not ready: \"When Carnage enters, return target creature card with mana value 3 or less from your graveyard to the battlefield. It gains \"This creature attacks each combat if able\" and \"When this creature deals combat damage to a player, sacrifice it.\"\" — The target selector cannot express mana value 3 or less. The standing enters trigger cannot be faithfully registered without that target restriction.",
 		"decks": [
 			"Mardu Discard"
 		],
@@ -175,7 +120,7 @@
 		"at": "2026-10-10"
 	},
 	"Casey Jones, Vigilante": {
-		"reason": "Casey Jones, Vigilante is not ready: \"When Casey Jones enters, draw three cards. At the beginning of your next upkeep, discard three cards at random.\" — This enters-trigger must draw three cards and create a one-shot delayed trigger for its controller's next upkeep, even if Casey Jones leaves. The syntax supports drawing and delayed triggers, but lacks random selection of cards from a hand for the mandatory discard (discard all remaining cards if fewer than three). Choosing cards normally would not implement discarding at random.",
+		"reason": "Casey Jones, Vigilante is not ready: When Casey Jones enters, draw three cards. At the beginning of your next upkeep, discard three cards at random. — The entry trigger must draw three cards and create a one-shot delayed trigger for its controller's next upkeep, even if Casey Jones leaves. The syntax supports drawing and delayed triggers but lacks random selection from a hand for the required discard; player-chosen cards would not implement this ability.",
 		"decks": [
 			"Mardu Discard"
 		],
@@ -183,7 +128,7 @@
 		"at": "2026-10-10"
 	},
 	"Cavern of Souls": {
-		"reason": "Cavern of Souls is not ready: As this land enters, choose a creature type. — The entry registration syntax cannot make and persist a creature-type choice.; {T}: Add one mana of any color. Spend this mana only to cast a creature spell of the chosen type, and that spell can't be countered. — The mana registration syntax cannot reference a persisted chosen creature type in spendOnly or grant can't be countered specifically to the spell paid for with this mana.",
+		"reason": "Cavern of Souls is not ready: As this land enters, choose a creature type. — The entry schema cannot choose and store a creature type as this land enters.; {T}: Add one mana of any color. Spend this mana only to cast a creature spell of the chosen type, and that spell can't be countered. — The mana schema cannot reference a stored chosen creature type in spendOnly or grant can't be countered to the spell on which this mana is spent.",
 		"decks": [
 			"4c Reanimator",
 			"Bant Airbending Combo",
@@ -195,7 +140,7 @@
 		"at": "2026-10-10"
 	},
 	"Cecil, Dark Knight // Cecil, Redeemed Paladin": {
-		"reason": "Cecil, Dark Knight // Cecil, Redeemed Paladin is not ready: Darkness — Whenever Cecil deals damage, you lose that much life. Then if your life total is less than or equal to half your starting life total, untap Cecil and transform it. — Missing a general damage-dealt event (including noncombat damage), a reference to the amount of damage dealt in that event, a condition comparing current life to half the controller's starting life total, and a transform operation switching to the back face and its printed characteristics and abilities. This condition is checked after losing life during resolut",
+		"reason": "Cecil, Dark Knight // Cecil, Redeemed Paladin is not ready: Darkness — Whenever Cecil deals damage, you lose that much life. Then if your life total is less than or equal to half your starting life total, untap Cecil and transform it. — Missing operations: a watch for all damage dealt (including noncombat damage), its damage amount for the corresponding life loss, comparison against half the controller's starting life total, and transformation to the back face with its characteristics and abilities replacing the front face. The life-total check occurs after the life loss during resolution, not",
 		"decks": [
 			"Dimir Midrange",
 			"Mardu Discard"
@@ -203,16 +148,8 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Chandra, Torch of Defiance": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Chandra, Torch of Defiance: The basis \"L4\" is not on Chandra, Torch of Defiance as complete sentences or printed lines in source order.",
-		"decks": [
-			"Izzet Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Colorstorm Stallion": {
-		"reason": "Colorstorm Stallion is not ready: Opus — Whenever you cast an instant or sorcery spell, this creature gets +1/+1 until end of turn. If five or more mana was spent to cast that spell, create a token that's a copy of this creature. — Missing operations: testing the actual mana spent to cast the triggering spell and creating a token copy of this creature. Neither can be expressed by the supplied schemas; a fixed token specification would not implement copying.",
+		"reason": "Colorstorm Stallion is not ready: Opus — Whenever you cast an instant or sorcery spell, this creature gets +1/+1 until end of turn. If five or more mana was spent to cast that spell, create a token that's a copy of this creature. — Cannot prepare this complete standing trigger: the syntax lacks a test for actual mana spent to cast the triggering spell and an operation creating a token copy of this creature.",
 		"decks": [
 			"Izzet Aggro"
 		],
@@ -220,7 +157,7 @@
 		"at": "2026-10-10"
 	},
 	"Cool but Rude": {
-		"reason": "Cool but Rude is not ready: {1}{R}: Level 2\nWhenever you discard a card, this Class deals 2 damage to each opponent. — Missing Class-level designation and level-dependent ability granting (rule 716.2a), and a discard event for the triggered ability. Class levels are not counters.; {1}{R}: Level 3\nWhen this Class becomes level 3, search your library for a card, put it into your hand, shuffle, then discard a card at random. — Missing level-dependent ability granting, a becomes-level-3 trigger event, and random discard. Choosing a card does not implement random discard.",
+		"reason": "Cool but Rude is not ready: \"(Gain the next level as a sorcery to add its ability.) ... {1}{R}: Level 2 ... Whenever you discard a card, this Class deals 2 damage to each opponent.\" — Missing Class-level designation, level-dependent ability granting, level testing and level-setting operations; missing a discard event (a generic hand-to-graveyard move is not equivalent).; \"{1}{R}: Level 3 ... When this Class becomes level 3, search your library for a card, put it into your hand, shuffle, then discard a card at random.\" — Missing Class-level designation, level-dependent ability granting and a be",
 		"decks": [
 			"Mardu Discard"
 		],
@@ -228,7 +165,7 @@
 		"at": "2026-10-10"
 	},
 	"Corpses of the Lost": {
-		"reason": "Corpses of the Lost is not ready: At the beginning of your end step, if you descended this turn, you may pay 1 life. If you do, return this enchantment to its owner's hand. (You descended if a permanent card was put into your graveyard from anywhere.) — Missing operation: an intervening condition testing whether a permanent card entered your graveyard from any zone this turn, including before this enchantment entered and even if that card subsequently left the graveyard. Available history conditions do not record these movements.",
+		"reason": "Corpses of the Lost is not ready: At the beginning of your end step, if you descended this turn, you may pay 1 life. If you do, return this enchantment to its owner's hand. (You descended if a permanent card was put into your graveyard from anywhere.) — Missing operation: a turn-history condition tracking permanent cards put into your graveyard from anywhere, including before this enchantment entered and cards no longer in that graveyard, for the intervening-if trigger. The supplied history schema cannot express descent.",
 		"decks": [
 			"Mono-Black Aggro"
 		],
@@ -236,7 +173,7 @@
 		"at": "2026-10-10"
 	},
 	"Cosmogrand Zenith": {
-		"reason": "Cosmogrand Zenith is not ready: Whenever you cast your second spell each turn, choose one —\n• Create two 1/1 white Human Soldier creature tokens.\n• Put a +1/+1 counter on each creature you control.\nUnsupported operation: a modal triggered ability whose controller chooses exactly one mode when putting the trigger on the stack (603.3c). The registration syntax provides no modal-trigger choice; registering both modes separately would incorrectly produce both effects.",
+		"reason": "Cosmogrand Zenith is not ready: Whenever you cast your second spell each turn, choose one —\n• Create two 1/1 white Human Soldier creature tokens.\n• Put a +1/+1 counter on each creature you control.\nUnsupported operation: choosing exactly one mode of a triggered ability as it is put onto the stack. Watch registrations have a single effect and no modal-choice syntax; separate watches would incorrectly create two triggers, and spell or activation procedures cannot represent this triggered ability.",
 		"decks": [
 			"Azorius Momo"
 		],
@@ -244,7 +181,7 @@
 		"at": "2026-10-10"
 	},
 	"Deceit": {
-		"reason": "Deceit is not ready: Normal casting of Deceit at its printed cost {4}{U/B}{U/B}: hybrid mana symbols are not supported by the printed-cost reader or Cost schema.; When this creature enters, if {U}{U} was spent to cast it, return up to one other target nonland permanent to its owner's hand. — Missing a condition reading the colors and amounts of mana spent to cast this permanent, checked both at triggering and resolution. The bounce must target up to one other nonland permanent.; When this creature enters, if {B}{B} was spent to cast it, target opponent reveals their hand. You choose a nonland ",
+		"reason": "Deceit is not ready: Printed mana cost {4}{U/B}{U/B}: normal casting requires hybrid mana payment, which the printed-cost reader does not support.; When this creature enters, if {U}{U} was spent to cast it, return up to one other target nonland permanent to its owner's hand. — Missing operation: tracking blue mana actually spent to cast this object and testing that at least two blue mana were spent as an intervening condition, both when this enters and when the trigger resolves. The effect targets up to one other nonland permanent and returns it to its owner's hand.; When this creature enters,",
 		"decks": [
 			"4c Reanimator",
 			"Dimir Excruciator"
@@ -253,7 +190,7 @@
 		"at": "2026-10-10"
 	},
 	"Deep-Cavern Bat": {
-		"reason": "Deep-Cavern Bat is not ready: When this creature enters, look at target opponent's hand. You may exile a nonland card from it until this creature leaves the battlefield. — Missing operations: privately inspect a targeted opponent's hand and choose a nonland card from it; exile that card with a duration whose expiration returns it immediately to its owner's hand without using the stack, doing nothing if this creature has already left before the exile would occur (CR 610.3). A delayed leaves trigger would not faithfully implement this duration.",
+		"reason": "Deep-Cavern Bat is not ready: When this creature enters, look at target opponent's hand. You may exile a nonland card from it until this creature leaves the battlefield. — Missing operations: privately look at the target opponent's entire hand; exile a chosen card with an immediate, nontriggered return to its owner's hand when this creature leaves, and do not exile it if this creature has already left before the ability resolves. A delayed leaves trigger would not implement this duration correctly.",
 		"decks": [
 			"Lifegain"
 		],
@@ -261,7 +198,7 @@
 		"at": "2026-10-10"
 	},
 	"Doc Aurlock, Grizzled Genius": {
-		"reason": "Doc Aurlock, Grizzled Genius is not ready: Spells you cast from your graveyard or from exile cost {2} less to cast. — Missing standing registration operation for reducing the generic casting cost of your spells based on their source zone (graveyard or exile). Procedure cost.reduce cannot register this ongoing effect on other spells.; Plotting cards from your hand costs {2} less. — Missing standing registration operation for reducing the generic cost of plotting cards from your hand.",
+		"reason": "Doc Aurlock, Grizzled Genius is not ready: Spells you cast from your graveyard or from exile cost {2} less to cast. — Missing operation: an ongoing static reduction of generic casting costs for your spells cast from either specified zone. The syntax supports cost.reduce on an individual procedure, but no standing cost-reduction registration or cast-origin selector.; Plotting cards from your hand costs {2} less. — Missing operation: an ongoing static reduction of generic plotting costs for cards plotted from your hand; plotting is a special action, not casting or activating an ability.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -269,7 +206,7 @@
 		"at": "2026-10-10"
 	},
 	"Doomsday Excruciator": {
-		"reason": "Doomsday Excruciator is not ready: When this creature enters, if it was cast, each player exiles all but the bottom six cards of their library face down. — Missing operations: an intervening-if condition tracking whether this incarnation was cast; selecting each library's cards other than its bottom six without looking at or choosing cards; and moving those cards to exile face down.",
+		"reason": "Doomsday Excruciator is not ready: When this creature enters, if it was cast, each player exiles all but the bottom six cards of their library face down. — Cannot prepare this standing trigger faithfully: the syntax lacks a cast-origin condition for this permanent, selection of all library cards except the bottom six in existing order, and face-down exile.",
 		"decks": [
 			"Dimir Excruciator"
 		],
@@ -277,7 +214,7 @@
 		"at": "2026-10-10"
 	},
 	"Duress": {
-		"reason": "Duress is not ready: Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card. — Missing operation: reveal an opponent's entire hand so you can choose a card from it.",
+		"reason": "Duress is not ready: Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card. — Revealing a targeted opponent's entire hand for the caster to choose a noncreature, nonland card from is not expressible in the current syntax.",
 		"decks": [
 			"Dimir Excruciator"
 		],
@@ -285,7 +222,7 @@
 		"at": "2026-10-10"
 	},
 	"Dusk Rose Reliquary": {
-		"reason": "Dusk Rose Reliquary is not ready: When this artifact enters, exile target artifact or creature an opponent controls until this artifact leaves the battlefield. — Missing a zone-change-until operation (rule 610.3): exile only if this artifact has not already left, then return the exiled object immediately under its owner's control when this artifact leaves, without using the stack. A delayed leaves trigger would not implement this one-shot return.",
+		"reason": "Dusk Rose Reliquary is not ready: When this artifact enters, exile target artifact or creature an opponent controls until this artifact leaves the battlefield. — Missing operation: exile until a specified event with an immediate, non-stack return to the battlefield under its owner's control (610.3), doing nothing if this artifact already left before the enters trigger resolves. A delayed triggered ability would incorrectly put the return on the stack.",
 		"decks": [
 			"Jeskai Artifacts"
 		],
@@ -293,24 +230,15 @@
 		"at": "2026-10-10"
 	},
 	"Dyadrine, Synthesis Amalgam": {
-		"reason": "Dyadrine, Synthesis Amalgam is not ready: Dyadrine enters with a number of +1/+1 counters on it equal to the amount of mana spent to cast it. — The amount syntax cannot read the actual mana spent to cast this object for its entry counters; X plus two is not equivalent.; Whenever you attack, you may remove a +1/+1 counter from each of two creatures you control. If you do, draw a card and create a 2/2 colorless Robot artifact creature token. — The instruction syntax cannot express the optional, all-or-nothing resolution cost of removing one counter from each of two distinct creatures and conditi",
+		"reason": "Dyadrine, Synthesis Amalgam is not ready: Dyadrine enters with a number of +1/+1 counters on it equal to the amount of mana spent to cast it. — Missing amount operation reading actual mana spent to cast this object for its entry replacement; X plus two is not equivalent when costs change or it enters without being cast.; Whenever you attack, you may remove a +1/+1 counter from each of two creatures you control. If you do, draw a card and create a 2/2 colorless Robot artifact creature token. — Missing resolution-time optional cost operation requiring one +1/+1 counter from each of two distinct ",
 		"decks": [
 			"Selesnya Landfall"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Eddymurk Crab": {
-		"reason": "Eddymurk Crab is not ready: This creature enters tapped if it's not your turn. — The supplied condition schema cannot test whether the active player is this creature's controller, which is required for its conditional tapped entry.",
-		"decks": [
-			"Izzet Prowess",
-			"Izzet Spellementals"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Elusive Otter // Grove's Bounty": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Elusive Otter // Grove's Bounty: The basis \"Distribute X +1/+1 counters among any number of target creatures you control. (Then exile this card. You may cast the creature later from exile.)\" is not on Elusive Otter // Grove's Bounty as complete sentences or printed lines in source order.; Unassessed text on Elusive Otter // Grove's Bounty: creatures with power less than this creature's power can't block it. // distribute x +1/+1 counters among any number of target creatures you control.",
+		"reason": "Elusive Otter // Grove's Bounty is not ready: Distribute X +1/+1 counters among any number of target creatures you control. (Then exile this card. You may cast the creature later from exile.) — Casting Grove's Bounty as the Adventure face is not expressible: the casting engine reads only the creature front face. The syntax also lacks announcement-time division of X counters among a variable number of targets.",
 		"decks": [
 			"Izzet Prowess"
 		],
@@ -318,7 +246,7 @@
 		"at": "2026-10-10"
 	},
 	"Emeritus of Ideation // Ancestral Recall": {
-		"reason": "Emeritus of Ideation // Ancestral Recall is not ready: This creature enters prepared. — Missing entry support for the prepared designation and rule 722.3c: creating an Ancestral Recall copy in exile with alternative characteristics, maintaining its conditional lifetime and casting permission, and removing prepared when that copy is cast.; Whenever this creature attacks, you may exile eight cards from your graveyard. If you do, this creature becomes prepared. — The attack trigger requires the same unsupported prepared-designation and copy-creation operations after the optional exile of exactly ",
+		"reason": "Emeritus of Ideation // Ancestral Recall is not ready: \"This creature enters prepared.\" — Missing entry behavior for the prepared designation and rule 722.3c: creating a copy in exile with the prepare spell's alternative characteristics, maintaining its conditional existence, and granting permission to cast it.; \"Whenever this creature attacks, you may exile eight cards from your graveyard. If you do, this creature becomes prepared.\" — The attack trigger's optional exile is expressible, but becoming prepared and creating the associated alternative-characteristic copy in exile are not supported",
 		"decks": [
 			"Dimir Excruciator"
 		],
@@ -326,7 +254,7 @@
 		"at": "2026-10-10"
 	},
 	"Emptiness": {
-		"reason": "Emptiness is not ready: When this creature enters, if {W}{W} was spent to cast it, return target creature card with mana value 3 or less from your graveyard to the battlefield. — Missing operations: testing the colors of mana actually spent to cast this permanent as an intervening-if condition, and selecting a creature card by mana value 3 or less.; When this creature enters, if {B}{B} was spent to cast it, put three -1/-1 counters on up to one target creature. — Missing operation: testing the colors of mana actually spent to cast this permanent as an intervening-if condition.; Evoke {W/B}{W/B",
+		"reason": "Emptiness is not ready: \"When this creature enters, if {W}{W} was spent to cast it, return target creature card with mana value 3 or less from your graveyard to the battlefield.\" — Cannot register the intervening condition: the syntax cannot read the colors of mana spent to cast this object. Its target also requires a mana-value-at-most-3 selector, which is absent.; \"When this creature enters, if {B}{B} was spent to cast it, put three -1/-1 counters on up to one target creature.\" — Cannot register the intervening condition: the syntax cannot read the colors of mana spent to cast this object.; ",
 		"decks": [
 			"Lifegain"
 		],
@@ -334,7 +262,7 @@
 		"at": "2026-10-10"
 	},
 	"Enduring Curiosity": {
-		"reason": "Enduring Curiosity is not ready: When Enduring Curiosity dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.) — Missing operation: return the permanent with an indefinite type-setting continuous effect applying simultaneously with its entry (rule 611.2e), rather than entering as a creature and modifying it afterward. The supplied move instruction has no characteristic-change field.",
+		"reason": "Enduring Curiosity is not ready: When Enduring Curiosity dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.) — Missing operation: returning the permanent with an indefinite type-setting continuous effect applied simultaneously with its entry, as required by rule 611.2e. A move followed by modify would incorrectly have it enter as a creature.",
 		"decks": [
 			"Dimir Midrange"
 		],
@@ -342,7 +270,7 @@
 		"at": "2026-10-10"
 	},
 	"Enlightened Confidant": {
-		"reason": "Enlightened Confidant is not ready: At the beginning of your end step, if you gained life this turn, surveil 1. If you put a card with mana value less than or equal to the amount of life you gained this turn into your graveyard this way, put that card into your hand. — The supplied syntax cannot read the surveilled card's mana value or compare it against this turn's life-gained history to conditionally return that card from the graveyard to hand. This standing trigger cannot be fully registered.",
+		"reason": "Enlightened Confidant is not ready: At the beginning of your end step, if you gained life this turn, surveil 1. If you put a card with mana value less than or equal to the amount of life you gained this turn into your graveyard this way, put that card into your hand. — Missing operation: read the mana value of the card put into your graveyard by surveil and compare it with your total life gained this turn to conditionally return that specific card to your hand.",
 		"decks": [
 			"Lifegain"
 		],
@@ -350,26 +278,15 @@
 		"at": "2026-10-10"
 	},
 	"Esper Origins // Summon: Esper Maduin": {
-		"reason": "Esper Origins // Summon: Esper Maduin is not ready: Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.) — Missing operations for surveilling the top two cards with retained-card ordering and entering on the transformed face.; Flashback {3}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.) — Missing replacement for every departure from the stack when the fla",
+		"reason": "Esper Origins // Summon: Esper Maduin is not ready: \"(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)\" — Missing standing operations for the nonstack lore-counter turn-based action as its controller's precombat main phase begins, and the state-based sacrifice when it has at least three lore counters and no chapter ability triggered from it remains pending or on the stack. A step trigger or immediate sacrifice after chapter III would not implement these rules.; \"I — Reveal the top card of your library. If it's a permanent card, put it into your hand.\" — M",
 		"decks": [
 			"Selesnya Landfall"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Floodfarm Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Floodfarm Verge: package Floodfarm Verge: \"{T}: Add {U}. Activate only if you control a Plains or an Island.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"Azorius Control",
-			"Azorius Momo",
-			"Bant Airbending Combo",
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Forsaken Miner": {
-		"reason": "Forsaken Miner is not ready: Whenever you commit a crime, you may pay {B}. If you do, return this card from your graveyard to the battlefield. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.) — Requires a triggered ability functioning in the graveyard, a crime event covering casting spells, activating abilities, and putting triggered abilities on the stack (once per spell or ability, regardless of qualifying target count), and optional {B} payment during resolution followed by returning this card only if paid. The supplied registration/event/instructio",
+		"reason": "Forsaken Miner is not ready: Whenever you commit a crime, you may pay {B}. If you do, return this card from your graveyard to the battlefield. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.) — Requires a triggered ability functioning from this card's graveyard, a crime event covering qualifying spells, activated abilities, and triggered abilities once per announcement, and optional {B} payment during resolution with return conditional on that payment. The supplied registration and instruction syntax cannot express these operations.",
 		"decks": [
 			"Mono-Black Aggro"
 		],
@@ -377,7 +294,7 @@
 		"at": "2026-10-10"
 	},
 	"Gandalf, Goblins' Bane // Flameshape": {
-		"reason": "Gandalf, Goblins' Bane // Flameshape is not ready: Look at the top two cards of your library and exile them face down. For as long as they remain exiled, you may play them if you control a Wizard. — Missing support for casting the Adventure face, privately looking at and exiling cards face down, and a play permission that remains available only while its controller controls a Wizard.",
+		"reason": "Gandalf, Goblins' Bane // Flameshape is not ready: Look at the top two cards of your library and exile them face down. For as long as they remain exiled, you may play them if you control a Wizard. — Casting Flameshape as the Adventure half is not supported by the front-face casting engine. Its effect additionally requires unsupported face-down exile with private inspection and a lasting play permission dynamically conditional on controlling a Wizard.",
 		"decks": [
 			"Izzet Prowess"
 		],
@@ -385,7 +302,7 @@
 		"at": "2026-10-10"
 	},
 	"Gene Pollinator": {
-		"reason": "Gene Pollinator is not ready: {T}, Tap an untapped permanent you control: Add one mana of any color. — Missing cost operation: combine tapping the source via {T} with tapping a separately chosen untapped permanent you control. Cost.tap supports either the source tap or a chosen set, not both; choosing two permanents would not require the source or preserve its {T} summoning-sickness restriction.",
+		"reason": "Gene Pollinator is not ready: {T}, Tap an untapped permanent you control: Add one mana of any color. — Cannot represent the combined activation cost: tapping this source with {T} and tapping a separate untapped permanent you control. cost.tap supports either the source tap or a chosen-permanent tap, not both; substituting two chosen permanents would not preserve the source requirement or its summoning-sickness restriction. This must be a mana registration producing one mana of any color.",
 		"decks": [
 			"Jund Sacrifice"
 		],
@@ -393,55 +310,23 @@
 		"at": "2026-10-10"
 	},
 	"Gleaming Bastion": {
-		"reason": "Gleaming Bastion is not ready: {T}: Add {W} or {U}. Activate only if this land entered this turn or if you control a basic land. — Cannot represent the activation restriction: mana registrations lack an activation condition, and conditions lack a predicate for this land having entered this turn.",
+		"reason": "Gleaming Bastion is not ready: {T}: Add {W} or {U}. Activate only if this land entered this turn or if you control a basic land. — Missing operation: a condition testing whether this source entered the battlefield this turn, combined with controlling a basic land. The supported history conditions do not track entry events, so the complete activation restriction cannot be registered faithfully.",
 		"decks": [
 			"Azorius Momo"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Gloomlake Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Gloomlake Verge: package Gloomlake Verge: \"{T}: Add {B}. Activate only if you control an Island or a Swamp.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"4c Control",
-			"Dimir Excruciator",
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Godless Shrine": {
-		"reason": "Godless Shrine is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The enters registration cannot express an optional life payment during entry and entering tapped conditional on declining that payment.",
-		"decks": [
-			"4c Control",
-			"Lifegain",
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Gollum, Riddle Master": {
-		"reason": "Gollum, Riddle Master is not ready: As Gollum enters, choose odd or even. (Zero is even.) — The entry registration syntax cannot make and remember an odd-or-even choice as this permanent enters.; Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card. — The syntax cannot match a spell's mana-value parity against the remembered entry choice, or select a triggered ability's mode while tracking which modes have already been chosen for this perman",
+		"reason": "Gollum, Riddle Master is not ready: As Gollum enters, choose odd or even. (Zero is even.) — Unsupported operation: choose and persist an odd/even quality during entry; the enters registration cannot express this choice.; Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card. — Unsupported operations: match a cast spell on the stack by mana-value parity against the entry choice, and select a triggered-ability mode while tracking which modes ha",
 		"decks": [
 			"Mono-Black Aggro"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Hallowed Fountain": {
-		"reason": "Hallowed Fountain is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The entry registration syntax cannot offer an optional life payment during entry and make entering tapped conditional on declining that payment.",
-		"decks": [
-			"4c Control",
-			"Azorius Control",
-			"Azorius Momo",
-			"Bant Airbending Combo",
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Hearth Elemental // Stoke Genius": {
-		"reason": "Hearth Elemental // Stoke Genius is not ready: Discard your hand, then draw two cards. (Then exile this card. You may cast the creature later from exile.) — Casting Stoke Genius requires Adventure alternative spell characteristics, which the supplied syntax explicitly does not support. Its resolution must exile the Adventure instead of putting it into the graveyard and grant only the normal creature cast from that exile.",
+		"reason": "Hearth Elemental // Stoke Genius is not ready: This spell costs {X} less to cast, where X is the number of cards in your graveyard that are instant cards, sorcery cards, and/or have an Adventure. — Missing selector operation for cards that have an Adventure, combined with instant and sorcery cards as a union counting each card once.; Discard your hand, then draw two cards. (Then exile this card. You may cast the creature later from exile.) — Casting the Adventure half is not supported: the engine reads only the front face rather than the Adventure's spell characteristics and cost.",
 		"decks": [
 			"Izzet Spellementals"
 		],
@@ -449,24 +334,15 @@
 		"at": "2026-10-10"
 	},
 	"Hidden Lair": {
-		"reason": "Hidden Lair is not ready: {T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land. — Missing support for a conditional mana activation with an entry-this-turn test; mana registrations lack activation conditions, and history cannot test whether this land entered this turn.",
+		"reason": "Hidden Lair is not ready: {T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land. — Missing operation: testing whether this permanent's current incarnation entered the battlefield this turn. The basic-land condition and individual mana choices are expressible, but the complete activation restriction is not.",
 		"decks": [
 			"Dimir Midrange"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Hushwood Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Hushwood Verge: package Hushwood Verge: \"{T}: Add {W}. Activate only if you control a Forest or a Plains.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"Bant Airbending Combo",
-			"Selesnya Landfall"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Interdimensional Web Watch": {
-		"reason": "Interdimensional Web Watch is not ready: When this artifact enters, exile the top two cards of your library. Until the end of your next turn, you may play those cards. — The permission must start immediately and expire at the end of your next turn. The supplied permission syntax has no duration expressing that interval; from: next-turn postpones the permission's start.",
+		"reason": "Interdimensional Web Watch is not ready: When this artifact enters, exile the top two cards of your library. Until the end of your next turn, you may play those cards. — Missing operation: a play permission effective immediately and expiring at the end of your next turn; the available duration and permission-start fields do not express this interval.; {T}: Add two mana in any combination of colors. Spend this mana only to cast spells from exile. — Missing operation: restricting mana expenditure by the zone from which a spell was cast. A stack selector has no cast-origin field; selecting exile ",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -474,7 +350,7 @@
 		"at": "2026-10-10"
 	},
 	"Inti, Seneschal of the Sun": {
-		"reason": "Inti, Seneschal of the Sun is not ready: Whenever you discard one or more cards, exile the top card of your library. You may play that card until your next end step. — The event schema cannot watch a batch of discards (including discards paid as costs), and the permission duration schema cannot expire at the beginning of your next end step. A generic hand-to-graveyard watch or end-of-turn permission would not preserve this ability.",
+		"reason": "Inti, Seneschal of the Sun is not ready: Whenever you discard one or more cards, exile the top card of your library. You may play that card until your next end step. — Missing operations: a batched discard event watch (including discards paid as costs), and a play permission expiring at the beginning of your next end step. The available event and permission-duration schemas cannot express these.",
 		"decks": [
 			"Mardu Discard"
 		],
@@ -482,7 +358,7 @@
 		"at": "2026-10-10"
 	},
 	"Iridescent Vinelasher": {
-		"reason": "Iridescent Vinelasher is not ready: Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — The standing enters trigger requires tracking whether the offspring cost was paid and creating a token copy of the permanent with base power and toughness 1/1. The supplied syntax does not support copying or an offspring-payment condition.",
+		"reason": "Iridescent Vinelasher is not ready: Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — Missing operations: recording whether offspring was paid for the permanent's conditional enters trigger, and creating a token copy of that permanent with base power and toughness 1/1. A fixed TokenSpec cannot implement copying its copiable characteristics.",
 		"decks": [
 			"Mono-Black Aggro",
 			"Rakdos Lizards"
@@ -491,23 +367,15 @@
 		"at": "2026-10-10"
 	},
 	"Jennifer Walters // The Sensational She-Hulk": {
-		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: {3}{G}{W}{W}: Transform Jennifer Walters. Activate only as a sorcery. — Missing transform operation and double-faced characteristic/ability switching; an indefinite modification is not transformation.; Whenever a creature you control is dealt damage, you may have The Sensational She-Hulk deal that much damage to any target. Do this only once each turn. — Missing an event for a creature being dealt damage (including noncombat damage), capture of that damage amount, and a once-per-turn limit on choosing the optional effect rather than on",
+		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: \"Whenever a creature you control is dealt damage, you may have The Sensational She-Hulk deal that much damage to any target. Do this only once each turn.\" — The event schema cannot watch a creature being dealt damage, including noncombat damage, or capture that damage amount. Its once-per-turn trigger limit also cannot represent limiting the optional damage action rather than triggering. This back-face standing trigger cannot be faithfully registered.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Kaito, Bane of Nightmares": {
-		"reason": "Kaito, Bane of Nightmares is not ready: During your turn, as long as Kaito has one or more loyalty counters on him, he's a 3/4 Ninja creature and has hexproof. — Missing operation: a continuous-registration condition testing whether the current turn belongs to this permanent's controller. The change must set the card type to creature (not retain planeswalker), set the creature subtype to Ninja and base power/toughness to 3/4, and grant hexproof, only during that controller's turn and while this object has at least one loyalty counter.",
-		"decks": [
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Lich's Relic": {
-		"reason": "Lich's Relic is not ready: When this Equipment enters, you may pay {2}. When you do, for each opponent, destroy up to one target creature or planeswalker that player controls. — The supplied instruction syntax cannot perform an optional {2} mana payment during triggered-ability resolution and create the reflexive trigger only if that payment is made.",
+		"reason": "Lich's Relic is not ready: When this Equipment enters, you may pay {2}. When you do, for each opponent, destroy up to one target creature or planeswalker that player controls. — Missing operation: optional mana payment during triggered-ability resolution, with successful payment creating the reflexive targeted trigger. The available cost syntax pays on announcement; counter.unless is not an equivalent operation.",
 		"decks": [
 			"Mono-Black Aggro"
 		],
@@ -515,7 +383,7 @@
 		"at": "2026-10-10"
 	},
 	"Marauding Mako": {
-		"reason": "Marauding Mako is not ready: Whenever you discard one or more cards, put that many +1/+1 counters on this creature. — Missing a discard-specific event watch batched for one or more cards discarded by you, and a way to read the number of cards in that discard event for the +1/+1 counters. A leaves event from hand to graveyard is not equivalent to discarding.",
+		"reason": "Marauding Mako is not ready: Whenever you discard one or more cards, put that many +1/+1 counters on this creature. — Missing operation: a discard-event watch, batched for one or more cards discarded by you, with the number of cards discarded in that event available as the counter amount. A hand-to-graveyard leaves watch would also match nondiscard moves and miss discards redirected to another zone.",
 		"decks": [
 			"Mardu Discard"
 		],
@@ -523,23 +391,15 @@
 		"at": "2026-10-10"
 	},
 	"Master of Barbs": {
-		"reason": "Master of Barbs is not ready: Whenever one or more opponents are dealt noncombat damage, creatures you control get +1/+0 until end of turn. — Missing event operation: watch noncombat damage dealt to one or more opponents, triggering once per damage event (not combat damage or life loss); then modify creatures you control with +1/+0 until end of turn.",
+		"reason": "Master of Barbs is not ready: Whenever one or more opponents are dealt noncombat damage, creatures you control get +1/+0 until end of turn. — Missing event operation: watch noncombat damage dealt to opponents, once per damage event for one or more opponents. The Event schema only supports combat-damage, not noncombat damage. The resolving effect would modify all creatures you control with power +1 until end-of-turn.",
 		"decks": [
 			"Rakdos Lizards"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Meticulous Archive": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Meticulous Archive: The basis \"({T}: Add {W} or {U}.)\" is not on Meticulous Archive as complete sentences or printed lines in source order.; The basis \"({T}: Add {W} or {U}.)\" is not on Meticulous Archive as complete sentences or printed lines in source order.",
-		"decks": [
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Mockingbird": {
-		"reason": "Mockingbird is not ready: You may have this creature enter as a copy of any creature on the battlefield with mana value less than or equal to the amount of mana spent to cast this creature, except it's a Bird in addition to its other types and it has flying. — Unsupported optional as-enters copy replacement, including copying characteristics and abilities with copiable Bird and flying exceptions; selection also requires comparing a creature's mana value to the actual amount of mana spent to cast this creature, not merely X or its printed cost.",
+		"reason": "Mockingbird is not ready: \"You may have this creature enter as a copy of any creature on the battlefield with mana value less than or equal to the amount of mana spent to cast this creature, except it's a Bird in addition to its other types and it has flying.\" — Unsupported optional enters-as-copy replacement, including selecting an eligible creature by mana value compared with actual mana spent to cast this creature and applying the Bird and flying exceptions to its copiable characteristics. The supplied syntax does not support copies or this mana-spent eligibility test.",
 		"decks": [
 			"Azorius Momo",
 			"Izzet Aggro"
@@ -548,7 +408,7 @@
 		"at": "2026-10-10"
 	},
 	"Momo, Friendly Flier": {
-		"reason": "Momo, Friendly Flier is not ready: The first non-Lemur creature spell with flying you cast during each of your turns costs {1} less to cast. — Missing operation: a standing static registration reducing the generic casting cost of another spell, restricted to the first non-Lemur creature spell with flying cast during each of its controller's own turns.",
+		"reason": "Momo, Friendly Flier is not ready: The first non-Lemur creature spell with flying you cast during each of your turns costs {1} less to cast. — Missing operation: a standing static cost reduction of {1} for the first qualifying spell during each of your turns. The registration schema has no cost-modification field; cost.reduce on a procedure cannot register this effect on other spells.",
 		"decks": [
 			"Azorius Momo",
 			"Boros Dragons"
@@ -557,7 +417,7 @@
 		"at": "2026-10-10"
 	},
 	"Moseo, Vein's New Dean": {
-		"reason": "Moseo, Vein's New Dean is not ready: Infusion — At the beginning of your end step, if you gained life this turn, return up to one target creature card with mana value X or less from your graveyard to the battlefield, where X is the amount of life you gained this turn. — Missing operation: a target selector restricting mana value to at most the dynamically computed amount of life you gained this turn. The supplied Selector schema has neither a mana-value field nor an amount-based comparison for it.",
+		"reason": "Moseo, Vein's New Dean is not ready: Infusion — At the beginning of your end step, if you gained life this turn, return up to one target creature card with mana value X or less from your graveyard to the battlefield, where X is the amount of life you gained this turn. — Unsupported operation: selecting and checking a target by mana value bounded by the computed amount of life gained this turn. The supplied Selector schema has no mana-value field or computed mana-value comparison.",
 		"decks": [
 			"Lifegain"
 		],
@@ -565,7 +425,7 @@
 		"at": "2026-10-10"
 	},
 	"Multiversal Passage": {
-		"reason": "Multiversal Passage is not ready: As this land enters, choose a basic land type. Then you may pay 2 life. If you don't, it enters tapped. — The entry-registration syntax cannot choose and store a basic land type or offer an optional 2-life payment during entry and make entering tapped depend on whether that payment was made.; This land is the chosen type. — The continuous-registration syntax cannot reference a stored choice of basic land type to set this land's subtype and derive its corresponding intrinsic mana ability.",
+		"reason": "Multiversal Passage is not ready: As this land enters, choose a basic land type. Then you may pay 2 life. If you don't, it enters tapped. ... This land is the chosen type. — Missing operations: choose and retain one basic land type (Plains, Island, Swamp, Mountain, or Forest) as part of entry, then continuously give this land that chosen subtype and its corresponding intrinsic mana ability. The entry and continuous-registration schemas cannot express that choice or reference its chosen value.",
 		"decks": [
 			"Boros Dragons",
 			"Izzet Prowess",
@@ -575,7 +435,7 @@
 		"at": "2026-10-10"
 	},
 	"Mutagen Man, Living Ooze": {
-		"reason": "Mutagen Man, Living Ooze is not ready: Activated abilities of artifact tokens you control cost {1} less to activate. — The registration schema has no operation for an ongoing reduction of activation costs on affected artifact tokens.",
+		"reason": "Mutagen Man, Living Ooze is not ready: Activated abilities of artifact tokens you control cost {1} less to activate. — Missing operation: a standing continuous generic-mana activation-cost reduction applying to all artifact tokens you control, including future tokens and their activated abilities. Procedure-local cost.reduce cannot register this global static effect.",
 		"decks": [
 			"Jund Sacrifice"
 		],
@@ -583,7 +443,7 @@
 		"at": "2026-10-10"
 	},
 	"Oblivious Bookworm": {
-		"reason": "Oblivious Bookworm is not ready: At the beginning of your end step, you may draw a card. If you do, discard a card unless a permanent entered the battlefield face down under your control this turn or you turned a permanent face up this turn. — Unsupported operation: testing this turn's history for a permanent entering face down under your control or for you turning a permanent face up, including events before Oblivious Bookworm entered. These resolution-time history tests are required to determine whether the optional draw must be followed by discarding a card; the available history and event ",
+		"reason": "Oblivious Bookworm is not ready: At the beginning of your end step, you may draw a card. If you do, discard a card unless a permanent entered the battlefield face down under your control this turn or you turned a permanent face up this turn. — Unsupported operation: the end-step trigger must condition its discard on this turn's history of permanents entering face down under your control or being turned face up by you. The syntax lacks face-down state, turn-face-up events, and these historical conditions; a faithful complete watch cannot be registered.",
 		"decks": [
 			"4c Reanimator"
 		],
@@ -591,24 +451,15 @@
 		"at": "2026-10-10"
 	},
 	"Obsessive Pursuit": {
-		"reason": "Obsessive Pursuit is not ready: Whenever you attack, put X +1/+1 counters on target attacking creature, where X is the number of permanents you've sacrificed this turn. If X is three or more, that creature gains lifelink until end of turn. — Missing operation: count permanents sacrificed by you this turn from event history, evaluated at resolution, for the counter amount and the three-or-more lifelink condition. The supplied history amount supports cast, attacked, life-lost and life-gained, but not sacrifices.",
+		"reason": "Obsessive Pursuit is not ready: Whenever you attack, put X +1/+1 counters on target attacking creature, where X is the number of permanents you've sacrificed this turn. If X is three or more, that creature gains lifelink until end of turn. — Missing operation: count permanents sacrificed by you this turn from sacrifice history, to determine X on resolution and test whether X is at least three. The supplied history amount supports only cast, attacked, life-lost, and life-gained.",
 		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Overgrown Tomb": {
-		"reason": "Overgrown Tomb is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The entry registration syntax cannot offer an optional life payment during entry and make tapped entry depend on whether that payment was made. This is an entry replacement, not a triggered or activated ability.",
-		"decks": [
-			"4c Reanimator",
 			"Jund Sacrifice"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
 	"Overlord of the Balemurk": {
-		"reason": "Overlord of the Balemurk is not ready: Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.) — Missing operations: remember whether this permanent's impending cost was paid and test that fact in its entry replacement, continuous noncreature effect, and intervening-if end-step trigger; remove only the creature card type while preserving other card types. These standing abilities cannot be faithfully registered using the supplied schema",
+		"reason": "Overlord of the Balemurk is not ready: Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.) — Missing operation: remember whether this permanent's impending cost was paid and test that fact in standing registrations. Rule 702.176a requires that predicate for entering with five time counters, continuously not being a creature while it has a time counter, and the intervening-if end-step trigger removing a time counter. The supplied con",
 		"decks": [
 			"4c Reanimator"
 		],
@@ -616,7 +467,7 @@
 		"at": "2026-10-10"
 	},
 	"Perilous Snare": {
-		"reason": "Perilous Snare is not ready: Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.) — Missing player-speed state, the state-based action setting speed to 1, and the source-independent once-per-turn life-loss trigger increasing speed up to 4. The supplied syntax also lacks a player-speed test for max speed.; When this artifact enters, exile target nonland permanent an opponent controls until this artifact leaves the battlefield. — Missing an until-event zone-change operation implementing rule 610.3: no exi",
+		"reason": "Perilous Snare is not ready: \"Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)\" — Missing operations for initializing and tracking player speed, including its once-per-own-turn life-loss increase and maximum of 4.; \"When this artifact enters, exile target nonland permanent an opponent controls until this artifact leaves the battlefield.\" — Missing an exile-until-event operation with the immediate, nontriggered return required by rule 610.3, including no exile if this artifact has already left before",
 		"decks": [
 			"Jeskai Artifacts"
 		],
@@ -624,7 +475,7 @@
 		"at": "2026-10-10"
 	},
 	"Petrified Hamlet": {
-		"reason": "Petrified Hamlet is not ready: When this land enters, choose a land card name. — The syntax cannot choose an arbitrary land card name on resolution of an enters trigger and store that name on this source for its linked static abilities.; Activated abilities of sources with the chosen name can't be activated unless they're mana abilities. — The syntax cannot select sources across applicable zones by a name stored by this source's triggered ability and apply the nonmana-activation restriction to those sources.; Lands with the chosen name have \"{T}: Add {C}.\" — Granting a mana registration is exp",
+		"reason": "Petrified Hamlet is not ready: When this land enters, choose a land card name. — Missing operation: choose and persist a land card name when the enters trigger resolves, without choosing an existing object.; Lands with the chosen name have \"{T}: Add {C}.\" — Missing operation: dynamically select lands by the name chosen for this source and continuously grant them the colorless mana ability.",
 		"decks": [
 			"Azorius Control",
 			"Jeskai Artifacts"
@@ -633,7 +484,7 @@
 		"at": "2026-10-10"
 	},
 	"Pinnacle Starcage": {
-		"reason": "Pinnacle Starcage is not ready: When this artifact enters, exile all artifacts and creatures with mana value 2 or less until this artifact leaves the battlefield. — The supplied syntax lacks a mana-value selector and the zone-change-until operation of rule 610.3: exile the qualifying permanents only if this artifact has not already left, then return the surviving exiled objects immediately when it leaves, without using a triggered ability.",
+		"reason": "Pinnacle Starcage is not ready: When this artifact enters, exile all artifacts and creatures with mana value 2 or less until this artifact leaves the battlefield. — The supplied syntax lacks a mana-value selector and the paired one-shot zone-change effect of rule 610.3: no exile if this artifact has already left, otherwise immediate return under owners' control when it leaves (not a delayed triggered ability).",
 		"decks": [
 			"Azorius Control",
 			"Jeskai Artifacts"
@@ -642,7 +493,7 @@
 		"at": "2026-10-10"
 	},
 	"Political Triumph": {
-		"reason": "Political Triumph is not ready: When the fourth plan counter is put on this enchantment, sacrifice it, draw a card, and put a +1/+1 counter on each creature you control. — The event syntax cannot watch counter placement or detect the placement of the fourth plan counter.",
+		"reason": "Political Triumph is not ready: When the fourth plan counter is put on this enchantment, sacrifice it, draw a card, and put a +1/+1 counter on each creature you control. — Missing event support for putting the fourth counter on this object, including counters placed by other effects; a creature-entry watch or a counter-count condition cannot faithfully replace this trigger.",
 		"decks": [
 			"Boros Tokens"
 		],
@@ -650,46 +501,23 @@
 		"at": "2026-10-10"
 	},
 	"Quantum Riddler": {
-		"reason": "Quantum Riddler is not ready: As long as you have one or fewer cards in hand, if you would draw one or more cards, you draw that many cards plus one instead. — Requires a conditional draw-event replacement that increases the number of cards drawn by one while its controller has at most one card in hand. The registration syntax supports only dies-to-zone replacements, not draw replacements.",
+		"reason": "Quantum Riddler is not ready: As long as you have one or fewer cards in hand, if you would draw one or more cards, you draw that many cards plus one instead. — Requires a conditional card-draw replacement that increases the replaced draw by one; the available replacement registration supports only replacing dies events with zone moves, not replacing draws.",
 		"decks": [
 			"Azorius Momo"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Riverpyre Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Riverpyre Verge: package Riverpyre Verge: \"{T}: Add {U}. Activate only if you control an Island or a Mountain.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"4c Control",
-			"Izzet Aggro",
-			"Izzet Prowess",
-			"Izzet Spellementals"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Rottenmouth Viper": {
-		"reason": "Rottenmouth Viper is not ready: \"Whenever this creature enters or attacks, put a blight counter on it. Then for each blight counter on it, each opponent loses 4 life unless that player sacrifices a nonland permanent of their choice or discards a card.\" The syntax lacks a count-driven repetition of instructions and an opponent-controlled choice to sacrifice a nonland permanent or discard a card instead of losing 4 life for each repetition. Both the enters and attacks triggers require this full effect; neither can be faithfully registered using the available operations.",
+		"reason": "Rottenmouth Viper is not ready: Whenever this creature enters or attacks, put a blight counter on it. Then for each blight counter on it, each opponent loses 4 life unless that player sacrifices a nonland permanent of their choice or discards a card. — Missing operations: repeat an instruction group once for each blight counter, and let each opponent independently choose for each repetition between losing 4 life, sacrificing a nonland permanent they control, or discarding a card. The available `each` instruction iterates players, not counters; `life` has no `unless` payment choice. The entire ",
 		"decks": [
 			"Jund Sacrifice"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Sacred Foundry": {
-		"reason": "Sacred Foundry is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The available entry-registration syntax cannot offer an optional life payment during entry and make entering tapped conditional on declining that payment. This is an entry replacement, not an activated ability or an enters trigger.",
-		"decks": [
-			"4c Control",
-			"Boros Dragons",
-			"Boros Tokens",
-			"Jeskai Artifacts",
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Sage of the Skies": {
-		"reason": "Sage of the Skies is not ready: When you cast this spell, if you've cast another spell this turn, copy this spell. (The copy becomes a token.) — Unsupported operation: copying a permanent spell on the stack, with the copy becoming a token on resolution. This cast trigger has an intervening condition requiring another spell cast this turn; no spell-copy operation exists in the supplied syntax.",
+		"reason": "Sage of the Skies is not ready: When you cast this spell, if you've cast another spell this turn, copy this spell. (The copy becomes a token.) — Unsupported operation: copying a permanent spell on the stack and having that copy become a token upon resolution. This is a cast trigger with an intervening condition, not an enters trigger; it must check that its controller has cast another spell this turn both when triggering and when resolving. No copy instruction is available.",
 		"decks": [
 			"Azorius Momo"
 		],
@@ -697,7 +525,7 @@
 		"at": "2026-10-10"
 	},
 	"Scalding Viper // Steam Clean": {
-		"reason": "Scalding Viper // Steam Clean is not ready: Whenever an opponent casts a spell with mana value 3 or less, this creature deals 1 damage to that player. — Missing operation: filtering an opponent's cast event by the spell's mana value on the stack (3 or less). The available selectors and amounts cannot express mana value.; Return target nonland permanent to its owner's hand. (Then exile this card. You may cast the creature later from exile.) — Unsupported operation: casting the Adventure face Steam Clean with its own sorcery characteristics and {1}{U} cost; the engine reads only the front face.",
+		"reason": "Scalding Viper // Steam Clean is not ready: Whenever an opponent casts a spell with mana value 3 or less, this creature deals 1 damage to that player. — The syntax lacks a mana-value selector or amount for restricting the opponent's cast event to spells with mana value 3 or less.; Return target nonland permanent to its owner's hand. (Then exile this card. You may cast the creature later from exile.) — Casting the Adventure half with its separate name, mana cost, and sorcery characteristics is not supported; the casting engine reads the creature front face.",
 		"decks": [
 			"Izzet Aggro"
 		],
@@ -705,7 +533,7 @@
 		"at": "2026-10-10"
 	},
 	"Seam Rip": {
-		"reason": "Seam Rip is not ready: When this enchantment enters, exile target nonland permanent an opponent controls with mana value 2 or less until this enchantment leaves the battlefield. — The supplied syntax lacks a mana-value target selector and an exile-until-event one-shot effect with immediate return under its owner's control (610.3), including no exile if this enchantment leaves before the trigger resolves. A delayed trigger would not correctly implement the immediate return.",
+		"reason": "Seam Rip is not ready: When this enchantment enters, exile target nonland permanent an opponent controls with mana value 2 or less until this enchantment leaves the battlefield. — Missing a mana-value-at-most-2 target selector and an exile-until-source-leaves operation that returns the exiled object immediately without using the stack, and does not exile it if the source has already left.",
 		"decks": [
 			"Azorius Control",
 			"Azorius Momo",
@@ -715,7 +543,7 @@
 		"at": "2026-10-10"
 	},
 	"Simulacrum Synthesizer": {
-		"reason": "Simulacrum Synthesizer is not ready: \"When this artifact enters, scry 2.\" — Missing scry operation: privately inspect the top two library cards, put any number on the bottom in any order, and the rest on top in any order.; \"Whenever another artifact you control with mana value 3 or greater enters, create a 0/0 colorless Construct artifact creature token with \"This token gets +1/+1 for each artifact you control.\"\" — Missing mana-value selector or condition for the entering artifact. The token and its continuous artifact-count power/toughness bonus are expressible, but the trigger's mana-value r",
+		"reason": "Simulacrum Synthesizer is not ready: When this artifact enters, scry 2. — Unsupported operation: privately inspect the top two library cards, put any number on the bottom in any order, and put the rest on top in any order. The available syntax cannot prepare scry.; Whenever another artifact you control with mana value 3 or greater enters, create a 0/0 colorless Construct artifact creature token with \"This token gets +1/+1 for each artifact you control.\" — Unsupported operation: restrict the enters watch to artifacts with mana value 3 or greater. Neither selectors nor conditions support mana va",
 		"decks": [
 			"Jeskai Artifacts"
 		],
@@ -723,7 +551,7 @@
 		"at": "2026-10-10"
 	},
 	"Slickshot Show-Off": {
-		"reason": "Slickshot Show-Off is not ready: Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.) — The plot special action (702.170a–b), paying {1}{R} and exiling this card from hand to become plotted during your main phase with an empty stack, cannot be represented: the procedure timing schema has no special action that does not use the stack.",
+		"reason": "Slickshot Show-Off is not ready: Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.) — Performing plot from hand requires a special action that does not use the stack (702.170a–b). The supplied procedure and deferred-use timings cannot express that special action; timing stack would incorrectly make it an activated ability.",
 		"decks": [
 			"Izzet Prowess"
 		],
@@ -731,7 +559,7 @@
 		"at": "2026-10-10"
 	},
 	"Spider Manifestation": {
-		"reason": "Spider Manifestation is not ready: Printed mana cost {1}{R/G}: casting requires hybrid mana payment, which the supplied cost syntax and printed-cost reader do not support.; Whenever you cast a spell with mana value 4 or greater, untap this creature. — The supplied selector and amount syntax cannot test the cast spell's mana value against 4; an accurate cast-trigger registration cannot be prepared.",
+		"reason": "Spider Manifestation is not ready: Printed mana cost {1}{R/G}: casting Spider Manifestation requires hybrid mana payment, which the printed cost reader and Cost schema do not support.; Whenever you cast a spell with mana value 4 or greater, untap this creature. — The cast watch requires a stack selector testing mana value at least 4; neither Selector nor Amount supports mana value. An unrestricted cast watch would incorrectly broaden this trigger.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -747,7 +575,7 @@
 		"at": "2026-10-10"
 	},
 	"Springleaf Drum": {
-		"reason": "Springleaf Drum is not ready: {T}, Tap an untapped creature you control: Add one mana of any color. — Unsupported compound mana-ability cost: tap this source using {T} and also tap one chosen untapped creature you control. Cost.tap supports either the source tap or a chosen-creature tap, but not both together; both payments must occur before adding one mana of any color.",
+		"reason": "Springleaf Drum is not ready: {T}, Tap an untapped creature you control: Add one mana of any color. — The mana ability requires both tapping this source and tapping one chosen untapped creature you control as costs. Cost.tap supports either tapping the source or tapping chosen creatures, but not both in the same activation.",
 		"decks": [
 			"Azorius Momo"
 		],
@@ -755,7 +583,7 @@
 		"at": "2026-10-10"
 	},
 	"Stadium Headliner": {
-		"reason": "Stadium Headliner is not ready: Mobilize 1 (Whenever this creature attacks, create a tapped and attacking 1/1 red Warrior creature token. Sacrifice it at the beginning of the next end step.) — The token instruction cannot create a token attacking or specify what it attacks. Mobilize therefore cannot be faithfully registered with the supplied syntax.",
+		"reason": "Stadium Headliner is not ready: Mobilize 1 (Whenever this creature attacks, create a tapped and attacking 1/1 red Warrior creature token. Sacrifice it at the beginning of the next end step.) — The token instruction supports entering tapped but has no operation for entering attacking, including choosing what the token attacks. This standing triggered ability cannot be faithfully prepared with the supplied syntax.",
 		"decks": [
 			"Boros Tokens"
 		],
@@ -763,7 +591,7 @@
 		"at": "2026-10-10"
 	},
 	"Starfield Shepherd": {
-		"reason": "Starfield Shepherd is not ready: When this creature enters, search your library for a basic Plains card or a creature card with mana value 1 or less, reveal it, put it into your hand, then shuffle. — The triggered search requires a single choice from the union of basic Plains cards and creature cards with mana value at most 1. Selectors support neither mana-value filtering nor this union of differently constrained card sets. Cannot faithfully register the complete enters trigger.",
+		"reason": "Starfield Shepherd is not ready: When this creature enters, search your library for a basic Plains card or a creature card with mana value 1 or less, reveal it, put it into your hand, then shuffle. — The search requires a single choice from the union of basic Plains cards and creature cards with mana value 1 or less. Selectors support neither a mana-value predicate nor a union of these distinct selectors; the exact enters-trigger search cannot be registered without broadening or otherwise changing it.",
 		"decks": [
 			"Azorius Momo"
 		],
@@ -771,66 +599,23 @@
 		"at": "2026-10-10"
 	},
 	"Starscape Cleric": {
-		"reason": "Starscape Cleric is not ready: Offspring {2}{B} (You may pay an additional {2}{B} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — The standing enters trigger requires an intervening condition tracking whether its offspring cost was paid, and creation of a token copy with a 1/1 exception. Neither the payment-history condition nor copying is supported by the supplied syntax.; Whenever you gain life, each opponent loses 1 life. — The required life-gain event is absent from the supported watch events; cast, step, or history conditions cannot substitu",
+		"reason": "Starscape Cleric is not ready: Offspring {2}{B} (You may pay an additional {2}{B} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — Missing standing entry-trigger support for checking whether the offspring cost was paid, and an operation to create a token copy of the permanent with base power and toughness 1/1.; Whenever you gain life, each opponent loses 1 life. — Missing a life-gain event for a watch registration, triggering once per source causing its controller to gain positive life.",
 		"decks": [
 			"Lifegain"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Starting Town": {
-		"reason": "Starting Town is not ready: This land enters tapped unless it's your first, second, or third turn of the game. — The entry replacement requires testing its controller's turn number in the game; the available conditions and amounts cannot express that test.",
-		"decks": [
-			"4c Reanimator",
-			"Bant Airbending Combo",
-			"Jeskai Artifacts",
-			"Jund Sacrifice",
-			"Lifegain",
-			"Mardu Discard",
-			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Steam Vents": {
-		"reason": "Steam Vents is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The supplied registration syntax cannot represent an optional life payment during entry and entering tapped conditional on declining that payment. This is an entry replacement, not a triggered ability or a land-play additional cost.",
-		"decks": [
-			"4c Control",
-			"Izzet Aggro",
-			"Izzet Prowess",
-			"Izzet Spellementals"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Stingcaster Mage": {
-		"reason": "Stingcaster Mage is not ready: When this creature enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.) — The syntax cannot grant a target-dependent flashback alternative casting cost equal to that card's mana cost together with the replacement that exiles the spell instead of moving it anywhere else whenever it leaves the stack after that cost was paid. A generic play permission or a delayed exile after resolution does not impl",
+		"reason": "Stingcaster Mage is not ready: When this creature enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.) — Missing operation: granting flashback with its mana-cost-based alternative casting permission and a replacement that exiles the spell instead of putting it anywhere else whenever it would leave the stack if its flashback cost was paid (702.34a). The available replacement registration supports only dying, not leaving the stac",
 		"decks": [
 			"Izzet Aggro"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Stomping Ground": {
-		"reason": "Stomping Ground is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The enters registration cannot express an optional life payment during entry and make tapped entry conditional on whether that payment was made.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Sunbillow Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Sunbillow Verge: package Sunbillow Verge: \"{T}: Add {R}. Activate only if you control a Mountain or a Plains.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"4c Control",
-			"Boros Dragons",
-			"Boros Tokens"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Sunderflock": {
-		"reason": "Sunderflock is not ready: When this creature enters, if you cast it, return all non-Elemental creatures to their owners' hands. — Missing operation: an intervening condition that checks whether this permanent's originating spell was cast by its current controller, retaining that casting provenance across the stack-to-battlefield zone change. This is not equivalent to cast history this turn.",
+		"reason": "Sunderflock is not ready: This spell costs {X} less to cast, where X is the greatest mana value among Elementals you control. — Missing amount operation: greatest mana value among battlefield permanents with subtype Elemental controlled by you, defaulting to zero if none exist, for the casting cost reduction.; When this creature enters, if you cast it, return all non-Elemental creatures to their owners' hands. — Missing condition operation: whether you cast this particular entering permanent, preserved across its stack-to-battlefield transition and checked as an intervening condition both when",
 		"decks": [
 			"Izzet Spellementals"
 		],
@@ -838,7 +623,7 @@
 		"at": "2026-10-10"
 	},
 	"Superior Spider-Man": {
-		"reason": "Superior Spider-Man is not ready: Mind Swap — You may have Superior Spider-Man enter as a copy of any creature card in a graveyard, except his name is Superior Spider-Man and he's a 4/4 Spider Human Hero in addition to his other types. When you do, exile that card. — Unsupported operation: optional as-enters copying of a chosen creature card from any graveyard, including its copiable abilities, with the specified name, base power/toughness, and additional creature-type exceptions; creating the associated reflexive trigger to exile the chosen card when that entry option is taken. The syntax can",
+		"reason": "Superior Spider-Man is not ready: Mind Swap — You may have Superior Spider-Man enter as a copy of any creature card in a graveyard, except his name is Superior Spider-Man and he's a 4/4 Spider Human Hero in addition to his other types. When you do, exile that card. — Unsupported operation: optional as-entry copy replacement using a creature card in any graveyard, with copiable name, power/toughness and additional subtype exceptions, and its linked trigger exiling the chosen card only when that replacement is used. The available syntax does not support copy effects or a linked as-entry choice.",
 		"decks": [
 			"4c Reanimator",
 			"Dimir Excruciator"
@@ -846,25 +631,8 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Temple Garden": {
-		"reason": "Temple Garden is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The available enters registration cannot offer optional payment of 2 life during entry and make tapped entry conditional on whether that payment was made. This replacement must apply however the land enters, not as an activation or land-play procedure.",
-		"decks": [
-			"Bant Airbending Combo",
-			"Selesnya Landfall"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Terror of the Peaks": {
-		"reason": "Terror of the Peaks is not ready: Spells your opponents cast that target this creature cost an additional 3 life to cast. — Unsupported operation: a standing static ability imposing an additional life payment on opponents' casting costs for spells targeting this permanent; this is not a targeting trigger or ward.",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Tersa Lightshatter": {
-		"reason": "Tersa Lightshatter is not ready: Whenever Tersa Lightshatter attacks, if there are seven or more cards in your graveyard, exile a card at random from your graveyard. You may play that card this turn. — The syntax has no operation for selecting a card at random.",
+		"reason": "Tersa Lightshatter is not ready: Whenever Tersa Lightshatter attacks, if there are seven or more cards in your graveyard, exile a card at random from your graveyard. You may play that card this turn. — Missing operation: randomly select a card from your graveyard for exile; choose supports player choice, not random selection.",
 		"decks": [
 			"Mardu Discard"
 		],
@@ -872,7 +640,7 @@
 		"at": "2026-10-10"
 	},
 	"The Fire Crystal": {
-		"reason": "The Fire Crystal is not ready: Red spells you cast cost {1} less to cast. — Missing standing spell-cost reduction registration and color selector to restrict the reduction to red spells you cast.; {4}{R}{R}, {T}: Create a token that's a copy of target creature you control. Sacrifice it at the beginning of the next end step. — Creating a token copy of a targeted creature is not expressible in the supplied syntax.",
+		"reason": "The Fire Crystal is not ready: Red spells you cast cost {1} less to cast. — Missing standing cost-reduction registration and a selector for red spells on the stack; procedure-local cost.reduce cannot faithfully register this ongoing ability.; {4}{R}{R}, {T}: Create a token that's a copy of target creature you control. Sacrifice it at the beginning of the next end step. — Creating a token copy using the target's copiable characteristics is not expressible by the fixed token-spec instruction. The activation is identified as a deferred use, but its copy operation remains unsupported.",
 		"decks": [
 			"Jeskai Artifacts"
 		],
@@ -880,7 +648,7 @@
 		"at": "2026-10-10"
 	},
 	"The Mind Stone": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess The Mind Stone: package The Mind Stone: \"{5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.) ... ∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
+		"reason": "The Mind Stone is not ready: {5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.) — Missing operation: grant the harnessed designation until this permanent leaves the battlefield. Harnessed is not an ability or characteristic, so granting a word or counter is not equivalent.; ∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control. — Missing standing operation: grant this triggered ability only while the permanent has the harnessed designation. The schema has",
 		"decks": [
 			"Bant Airbending Combo",
 			"Jeskai Artifacts"
@@ -889,7 +657,7 @@
 		"at": "2026-10-10"
 	},
 	"The Sackville-Bagginses": {
-		"reason": "The Sackville-Bagginses is not ready: Whenever you sacrifice a token, target opponent loses 1 life. — The Event schema has no sacrifice event or sacrifice-reason filter. A token dying or leaving the battlefield is not equivalent to its being sacrificed; this standing trigger cannot be faithfully registered using the supplied syntax.",
+		"reason": "The Sackville-Bagginses is not ready: Whenever you sacrifice a token, target opponent loses 1 life. — Missing operation: a sacrifice event watch, or an event filter for reason sacrifice. A dies or leaves watch would incorrectly trigger on nonsacrifice removals.",
 		"decks": [
 			"Jund Sacrifice"
 		],
@@ -897,7 +665,7 @@
 		"at": "2026-10-10"
 	},
 	"Theorist's Sanctum": {
-		"reason": "Theorist's Sanctum is not ready: As this land enters, you may behold a Jace. If you don't, this land enters tapped. (To behold a Jace, choose a Jace you control or reveal a Jace card from your hand.) — The enters registration cannot perform an optional choice/reveal during entry and condition tapped entry on whether that choice was made. Checking whether a Jace is available does not implement the optional behold.",
+		"reason": "Theorist's Sanctum is not ready: As this land enters, you may behold a Jace. If you don't, this land enters tapped. (To behold a Jace, choose a Jace you control or reveal a Jace card from your hand.) — Missing operation: an optional choice of a Jace permanent you control or revelation of a Jace card from your hand during the entering replacement, with tapped entry if you decline. The enters registration supports optional life payment, but not a behold choice or revelation.",
 		"decks": [
 			"Azorius Control"
 		],
@@ -905,7 +673,7 @@
 		"at": "2026-10-10"
 	},
 	"Thor, God of Thunder": {
-		"reason": "Thor, God of Thunder is not ready: When Thor enters, exile target Equipment, instant, or sorcery card from your graveyard. Until the end of your next turn, you may play that card. — Missing selector union for Equipment OR instant OR sorcery, and a permission duration beginning now and ending at the end of your next turn. Using from: next-turn would omit the permission during the current turn.; Whenever you cast a noncreature spell, Thor deals damage equal to that spell's mana value to any target. — Missing amount operation for the triggering spell's mana value, including its last known informa",
+		"reason": "Thor, God of Thunder is not ready: When Thor enters, exile target Equipment, instant, or sorcery card from your graveyard. Until the end of your next turn, you may play that card. — Missing target-selector union for an Equipment card OR an instant card OR a sorcery card in your graveyard; combining subtypes and types would incorrectly require both.; Whenever you cast a noncreature spell, Thor deals damage equal to that spell's mana value to any target. — Missing amount operation reading the triggering spell's mana value, including its announced X and last known information if it has left the s",
 		"decks": [
 			"4c Control"
 		],
@@ -913,7 +681,7 @@
 		"at": "2026-10-10"
 	},
 	"Tishana's Tidebinder": {
-		"reason": "Tishana's Tidebinder is not ready: When this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.) — Missing operations: select only activated or triggered abilities on the stack, reference the targeted ability's source permanent, and apply loseAbilities to that permanent only if the ability was successfully countered this way and its source is an artifact, creature, or ",
+		"reason": "Tishana's Tidebinder is not ready: When this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.) — Missing operations: select only activated or triggered abilities on the stack (excluding spells and mana abilities), obtain the targeted ability's source permanent, and condition that permanent's ability loss on successfully countering its ability this way and on its bein",
 		"decks": [
 			"Dimir Midrange"
 		],
@@ -921,23 +689,15 @@
 		"at": "2026-10-10"
 	},
 	"Twinmaw Stormbrood // Charring Bite": {
-		"reason": "Twinmaw Stormbrood // Charring Bite is not ready: Charring Bite deals 5 damage to target creature without flying. (Then shuffle this card into its owner's library.) — Casting the Omen half with its own {1}{R} cost and Sorcery — Omen characteristics is unsupported: the table reads the front face and cannot cast the back half of an Omen card.",
+		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Twinmaw Stormbrood // Charring Bite: The basis \"Charring Bite deals 5 damage to target creature without flying. (Then shuffle this card into its owner's library.)\" is not on Twinmaw Stormbrood // Charring Bite as complete sentences or printed lines in source order.; Unassessed text on Twinmaw Stormbrood // Charring Bite: when this creature enters, you gain 5 life. // charring bite deals 5 damage to target creature without flying.",
 		"decks": [
 			"Boros Dragons"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Undercity Sewers": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Undercity Sewers: The basis \"({T}: Add {U} or {B}.)\" is not on Undercity Sewers as complete sentences or printed lines in source order.; The basis \"({T}: Add {U} or {B}.)\" is not on Undercity Sewers as complete sentences or printed lines in source order.",
-		"decks": [
-			"Dimir Excruciator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Unholy Annex // Ritual Chamber": {
-		"reason": "Unholy Annex // Ritual Chamber is not ready: At the beginning of your end step, draw a card. If you control a Demon, each opponent loses 2 life and you gain 2 life. Otherwise, you lose 2 life. — Missing Room unlocked-designation state and conditional rules-text availability (709.5). This trigger must exist only while Unholy Annex is unlocked; its Demon condition is checked after drawing during resolution, not as an intervening condition.; (You may cast either half. That door unlocks on the battlefield. As a sorcery, you may pay the mana cost of a locked door to unlock it.) — Missing split-perm",
+		"reason": "Unholy Annex // Ritual Chamber is not ready: \"At the beginning of your end step, draw a card. If you control a Demon, each opponent loses 2 life and you gain 2 life. Otherwise, you lose 2 life.\" — Missing Room unlocked-designation support to grant this ability only while Unholy Annex is unlocked (rule 709.5). An unconditional end-step registration would incorrectly function while this door is locked.; \"(You may cast either half. That door unlocks on the battlefield. As a sorcery, you may pay the mana cost of a locked door to unlock it.)\" — Missing split-half casting and Room designation/charac",
 		"decks": [
 			"4c Control"
 		],
@@ -945,7 +705,7 @@
 		"at": "2026-10-10"
 	},
 	"Unidentified Hovership": {
-		"reason": "Unidentified Hovership is not ready: When this Vehicle leaves the battlefield, the exiled card's owner manifests dread. — Manifest dread requires the linked exiled card's owner to choose one of the top two cards of their library, put it onto the battlefield face down as a 2/2 creature, and put the other into their graveyard. Face-down permanents and their manifest behavior are not expressible in the supplied syntax.",
+		"reason": "Unidentified Hovership is not ready: When this Vehicle leaves the battlefield, the exiled card's owner manifests dread. — Manifest dread requires putting one of the top two library cards onto the battlefield face down as a 2/2 creature and the other into the graveyard. Face-down permanents and manifest behavior are not expressible in the supplied syntax.",
 		"decks": [
 			"Jeskai Artifacts"
 		],
@@ -953,7 +713,7 @@
 		"at": "2026-10-10"
 	},
 	"Valley Flamecaller": {
-		"reason": "Valley Flamecaller is not ready: If a Lizard, Mouse, Otter, or Raccoon you control would deal damage to a permanent or player, it deals that much damage plus 1 instead. — Requires a damage replacement that increases each applicable damage amount by 1 while preserving its source and recipient. The supplied registration syntax supports only dies-to-zone replacements, not damage-amount replacements.",
+		"reason": "Valley Flamecaller is not ready: If a Lizard, Mouse, Otter, or Raccoon you control would deal damage to a permanent or player, it deals that much damage plus 1 instead. — Unsupported operation: a standing damage replacement that adds 1 to damage dealt to each permanent or player by a source you control with any of these subtypes. The replacement schema supports only replacing death with a zone move, not modifying damage events.",
 		"decks": [
 			"Rakdos Lizards"
 		],
@@ -961,7 +721,7 @@
 		"at": "2026-10-10"
 	},
 	"Voice of Victory": {
-		"reason": "Voice of Victory is not ready: Mobilize 2 (Whenever this creature attacks, create two tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.) — Missing operation: creating tokens that enter attacking. The token instruction supports tapped entry but not attacking entry.",
+		"reason": "Voice of Victory is not ready: Mobilize 2 (Whenever this creature attacks, create two tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.) — The token instruction supports tapped tokens but cannot put the created tokens onto the battlefield attacking, including choosing what each token attacks. Mobilize cannot be faithfully prepared without that operation.",
 		"decks": [
 			"Boros Dragons",
 			"Boros Tokens"
@@ -970,42 +730,15 @@
 		"at": "2026-10-10"
 	},
 	"Wan Shi Tong, Librarian": {
-		"reason": "Wan Shi Tong, Librarian is not ready: When Wan Shi Tong enters, put X +1/+1 counters on him. Then draw half X cards, rounded down. — This requires an enters watch that first puts X +1/+1 counters on this, then draws floor(X/2) cards. Amount supports X but has no division or rounding operation; the complete standing trigger cannot be represented.; Whenever an opponent searches their library, put a +1/+1 counter on Wan Shi Tong and draw a card. — This requires a watch for an opponent searching their own library, followed by one +1/+1 counter on this and one card drawn by you. Event has no search",
+		"reason": "Wan Shi Tong, Librarian is not ready: When Wan Shi Tong enters, put X +1/+1 counters on him. Then draw half X cards, rounded down. — The enters trigger requires a draw count of floor(X/2); the Amount schema has no division or rounding operation.; Whenever an opponent searches their library, put a +1/+1 counter on Wan Shi Tong and draw a card. — The Event schema has no library-search event to watch; library choice, movement, or shuffling cannot substitute for an opponent searching their library.",
 		"decks": [
 			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Wastewood Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Wastewood Verge: package Wastewood Verge: \"{T}: Add {B}. Activate only if you control a Swamp or a Forest.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Watery Grave": {
-		"reason": "Watery Grave is not ready: As this land enters, you may pay 2 life. If you don't, it enters tapped. — The entry replacement requires an optional life payment during entry and tapped entry conditional on declining that payment. The available enters registration has no payment or choice operation.",
-		"decks": [
-			"4c Control",
-			"4c Reanimator",
-			"Dimir Excruciator",
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Willowrush Verge": {
-		"reason": "openai-codex/gpt-6.1-sol did not submit an accepted answer for assess Willowrush Verge: package Willowrush Verge: \"{T}: Add {G}. Activate only if you control a Forest or an Island.\" is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.",
-		"decks": [
-			"4c Reanimator"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
 	"Wistfulness": {
-		"reason": "Wistfulness is not ready: When this creature enters, if {G}{G} was spent to cast it, exile target artifact or enchantment an opponent controls. — Missing operation: an intervening-if condition reading the actual green mana spent to cast this permanent, including mana spent on generic or additional costs.; When this creature enters, if {U}{U} was spent to cast it, draw two cards, then discard a card. — Missing operation: an intervening-if condition reading the actual blue mana spent to cast this permanent, including mana spent on generic or additional costs.; Evoke {G/U}{G/U} (You may cast this",
+		"reason": "Wistfulness is not ready: \"When this creature enters, if {G}{G} was spent to cast it, exile target artifact or enchantment an opponent controls.\" — Missing a condition that reads the green mana actually spent to cast this object, required both when this intervening-if ability triggers and when it resolves.; \"When this creature enters, if {U}{U} was spent to cast it, draw two cards, then discard a card.\" — Missing a condition that reads the blue mana actually spent to cast this object, required both when this intervening-if ability triggers and when it resolves.; \"Evoke {G/U}{G/U} (You may cast",
 		"decks": [
 			"4c Reanimator"
 		],
@@ -1013,7 +746,7 @@
 		"at": "2026-10-10"
 	},
 	"Wizard's Staff": {
-		"reason": "Wizard's Staff is not ready: If a triggered ability of equipped creature triggers, that ability triggers an additional time. — Missing operation: make each triggered ability of the equipped creature trigger an additional time, including its granted prowess ability. The available registration syntax has trigger suppression but no trigger-multiplicity modification.",
+		"reason": "Wizard's Staff is not ready: \"If a triggered ability of equipped creature triggers, that ability triggers an additional time.\" — The syntax lacks an operation that makes every triggered ability of the equipped creature trigger an additional time; duplicating its granted prowess alone would not implement this ability.",
 		"decks": [
 			"Izzet Prowess"
 		],
@@ -1021,7 +754,7 @@
 		"at": "2026-10-10"
 	},
 	"Wolverine, Fierce Fighter": {
-		"reason": "Wolverine, Fierce Fighter is not ready: If damage would be dealt to Wolverine, instead that damage is dealt, but all other damage already dealt to him is healed. — Requires a damage-event replacement that removes all previously marked damage while retaining the damage from the current event. The syntax supports only dies-zone replacements and has no operation to heal marked damage.",
+		"reason": "Wolverine, Fierce Fighter is not ready: If damage would be dealt to Wolverine, instead that damage is dealt, but all other damage already dealt to him is healed. — Requires a damage-event replacement that removes all previously marked damage from this object while retaining the incoming damage. The syntax supports neither damage-event replacements nor healing previously marked damage.",
 		"decks": [
 			"Jund Sacrifice"
 		],
@@ -1029,7 +762,7 @@
 		"at": "2026-10-10"
 	},
 	"Zoraline, Cosmos Caller": {
-		"reason": "Zoraline, Cosmos Caller is not ready: Whenever Zoraline enters or attacks, you may pay {W}{B} and 2 life. When you do, return target nonland permanent card with mana value 3 or less from your graveyard to the battlefield with a finality counter on it. — Missing operations: optional combined mana-and-life cost payment during triggered-ability resolution, with a reflexive trigger conditional on successful payment; and a target selector restricting mana value to 3 or less. This standing trigger cannot be deferred or replaced by an activated ability.",
+		"reason": "Zoraline, Cosmos Caller is not ready: \"Whenever Zoraline enters or attacks, you may pay {W}{B} and 2 life. When you do, return target nonland permanent card with mana value 3 or less from your graveyard to the battlefield with a finality counter on it.\" — The supplied syntax cannot express optional combined mana-and-life payment during trigger resolution, conditioned creation of the reflexive trigger upon that payment, or a target selector restricted to mana value 3 or less. Announcement costs cannot substitute for payment during resolution.",
 		"decks": [
 			"Lifegain"
 		],

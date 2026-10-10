@@ -1,0 +1,45 @@
+{
+	"card": "Riverpyre Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Riverpyre Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {U}. Activate only if you control an Island or a Mountain.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"subtypes": [
+								"Island",
+								"Mountain"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

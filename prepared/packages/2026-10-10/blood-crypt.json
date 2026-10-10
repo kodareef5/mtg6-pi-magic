@@ -1,0 +1,21 @@
+{
+	"card": "Blood Crypt",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blood Crypt",
+		"registers": [
+			{
+				"basis": "As this land enters, you may pay 2 life. If you don't, it enters tapped.",
+				"kind": "enters",
+				"tapped": true,
+				"unlessPay": {
+					"life": 2
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

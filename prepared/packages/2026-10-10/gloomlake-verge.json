@@ -1,0 +1,51 @@
+{
+	"card": "Gloomlake Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gloomlake Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {B}. Activate only if you control an Island or a Swamp.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Island",
+								"Swamp"
+							],
+							"controller": "you"
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

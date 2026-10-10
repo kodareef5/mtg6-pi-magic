@@ -1,0 +1,51 @@
+{
+	"card": "Blazemire Verge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blazemire Verge",
+		"registers": [
+			{
+				"basis": "{T}: Add {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {R}. Activate only if you control a Swamp or a Mountain.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"subtypes": [
+								"Swamp",
+								"Mountain"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						}
+					},
+					"atLeast": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}
