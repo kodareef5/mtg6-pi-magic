@@ -50,8 +50,16 @@ Those drive engine and syntax work, ordered by how many decks they block.
    syntax with its offline test, add back the decks it unblocks, run again.
    Keep every game: the saved journals are the benchmark material. First
    pass done: the audit in [Status](STATUS.md) ranks the blockers; shock
-   lands, Verges and turn-counted entry are built. Next are the omen and
-   adventure back halves, filtered cast triggers, and copies.
+   lands, Verges and turn-counted entry are built and their 24 cards stored.
+   Next is the second face: adventures, omens, rooms and split cards (14
+   cards, 11 decks). The card file already joins both faces with ` // ` in
+   type, cost, stats and text, so printed facts can expose faces; a
+   procedure then names the face it casts, the spell carries that face's
+   characteristics on the stack, and resolution follows the kind: an
+   adventure exiles the card with a permission to cast the creature from
+   exile, an omen shuffles it in, a room enters with that door unlocked and
+   the other unlockable as a sorcery for its cost. After that: cast
+   triggers filtered by color or type, then copies.
 
 ## Judged how
 

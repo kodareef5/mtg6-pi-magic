@@ -119,15 +119,17 @@ against that file.
 
 `tools/assess.ts` assessed every distinct main-deck card of the nineteen
 imported decks once on Sol 6.1 high: 250 cards, 128 stored, 122 refused, 551
-calls, $4.51. Every imported deck was blocked by at least one card. The
-refusals by concept, with the decks each blocks:
+calls, $4.51. A second pass after the land shapes below stored 28 more for
+$3.19: 156 stored, 94 refused. Every imported deck is still blocked by at
+least one card; the closest, 4c Control and Selesnya Landfall, by two. The
+first pass's refusals by concept, with the decks each blocked:
 
 | Concept | Decks | Cards | Status |
 | --- | --- | --- | --- |
-| Shock land: optional life payment on entry, else tapped | 18 | 11 | `enters.unlessPay` added |
-| Conditional mana ability (Verges, Hidden Lair) | 18 | 11 | `mana.if` added; Hidden Lair still needs "entered this turn" |
+| Shock land: optional life payment on entry, else tapped | 18 | 11 | built; all eleven stored |
+| Conditional mana ability (Verges, Hidden Lair) | 18 | 11 | built; ten stored, Hidden Lair needs "entered this turn" |
 | Omen, adventure or split back half | 11 | 14 | open |
-| Enters tapped unless a condition on the turn | 9 | 2 | `turn` condition and `turns` amount added |
+| Enters tapped unless a condition on the turn | 9 | 2 | built; both stored |
 | Cast trigger filtered by color or type | 8 | 5 | open |
 | Copy, control change, face-down | 7 | 9 | open |
 | Mana spent to cast | 5 | 4 | open |
