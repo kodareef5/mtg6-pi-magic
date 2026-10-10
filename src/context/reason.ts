@@ -115,9 +115,11 @@ const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 900_000, strate
 /**
  * Every timeout and output ceiling in this package was measured on a low-effort model. A model asked to think
  * harder answers later and spends more tokens before its answer, so both scale with the thinking level here, in
- * the one place every chat call passes through. Low is the baseline and scales nothing.
+ * the one place every chat call passes through. Low is the baseline and scales nothing. Measured on the growth
+ * fixtures: Sol 6.1 high analysts ran a median of 50 seconds with a p95 of 83, and at four times the low limits
+ * one call in nine still timed out, so high is six.
  */
-const EFFORT: Record<ThinkingLevel, number> = { off: 1, minimal: 1, low: 1, medium: 2, high: 4, xhigh: 6, max: 8 };
+const EFFORT: Record<ThinkingLevel, number> = { off: 1, minimal: 1, low: 1, medium: 2, high: 6, xhigh: 8, max: 10 };
 
 export function reasoner(options: {
 	role: Role;
