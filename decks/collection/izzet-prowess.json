@@ -1,0 +1,36 @@
+{
+	"name": "Izzet Prowess",
+	"source": "https://www.mtggoldfish.com/deck/7954766",
+	"main": {
+		"Burst Lightning": 4,
+		"Drake Hatcher": 4,
+		"Eddymurk Crab": 3,
+		"Elusive Otter // Grove's Bounty": 4,
+		"Flow State": 4,
+		"Gandalf, Goblins' Bane // Flameshape": 3,
+		"Heroes' Hangout": 1,
+		"Island": 6,
+		"Multiversal Passage": 2,
+		"Opt": 4,
+		"Riverpyre Verge": 4,
+		"Sear": 1,
+		"Sleight of Hand": 4,
+		"Slickshot Show-Off": 4,
+		"Spell Pierce": 2,
+		"Spirebluff Canal": 4,
+		"Steam Vents": 4,
+		"Wizard's Staff": 2
+	},
+	"sideboard": {
+		"Abrade": 1,
+		"Avengers Disassembled": 2,
+		"Broadside Barrage": 2,
+		"Disdainful Stroke": 2,
+		"Eddymurk Crab": 1,
+		"Flashfreeze": 2,
+		"Ghost Vacuum": 2,
+		"Ral, Crackling Wit": 2,
+		"Sear": 1
+	},
+	"checked": "2026-10-03"
+}

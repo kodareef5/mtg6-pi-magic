@@ -505,7 +505,9 @@ src/context/           questions for a decision model. Its own AGENTS.md
 src/seating/           protocol and validation; sockets unfinished
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
-tools/sim.ts           bulk games on fresh seeds carrying one source game's preparation; one table per arm
+tools/sim.ts           bulk games: carried seeds of one matchup, or seeded random pairings from the deck pool; one table per arm
+tools/packages.ts      card interpretations stored once per card and card-file date, loaded before seating and saved after
+tools/decks.ts         the deck collection as a formal list of names: check every list against the legal set, import a published text list
 tools/adherence.ts     plan adherence read from a journal on replay: picks that carried out a due step
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted

@@ -1,0 +1,40 @@
+{
+	"name": "Lifegain",
+	"source": "https://www.mtggoldfish.com/deck/7991954",
+	"main": {
+		"Ajani Resolute": 3,
+		"Amalia Benavides Aguirre": 4,
+		"Bleachbone Verge": 1,
+		"Case of the Uneaten Feast": 4,
+		"Concealed Courtyard": 3,
+		"Dalkovan Encampment": 1,
+		"Deep-Cavern Bat": 2,
+		"Emptiness": 1,
+		"Enlightened Confidant": 3,
+		"Erode": 2,
+		"Godless Shrine": 4,
+		"Haliya, Guided by Light": 3,
+		"Hinterland Sanctifier": 4,
+		"Liliana the Faultless": 3,
+		"Lunar Convocation": 3,
+		"Moseo, Vein's New Dean": 3,
+		"Plains": 3,
+		"Shattered Sanctum": 4,
+		"Starscape Cleric": 2,
+		"Starting Town": 4,
+		"Swamp": 2,
+		"Zoraline, Cosmos Caller": 1
+	},
+	"sideboard": {
+		"Curious Farm Animals": 2,
+		"Decorum Dissertation": 1,
+		"Duress": 3,
+		"Lunar Convocation": 1,
+		"Requisition Raid": 1,
+		"Seam Rip": 1,
+		"Shoot the Sheriff": 2,
+		"Starscape Cleric": 1,
+		"Strategic Betrayal": 3
+	},
+	"checked": "2026-10-03"
+}

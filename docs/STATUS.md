@@ -99,6 +99,22 @@ properly. A fresh pregame on Sol 6.1 high cost $1.46 and 13 minutes 41 seconds
 for two briefs of about 40,000 characters; it is saved in
 `.pi/sim-20261010/fresh-pregame/`.
 
+## Deck pool, October 10
+
+Twenty-six decks register: the two pinned lists, nineteen current Standard
+archetypes imported from MTGGoldfish representative lists (Izzet
+Spellementals, Jund Sacrifice, Dimir Midrange, Boros Dragons, Azorius Control,
+4c Control, Lifegain, Izzet Prowess, Dimir Excruciator, Jeskai Artifacts,
+Rakdos Lizards, Azorius Momo, 4c Reanimator, Mardu Discard, Selesnya Landfall,
+Boros Tokens, Mono-Black Aggro, Izzet Aggro, Bant Airbending Combo), and five
+practice lists. Boros Dwarves is wanted and refused: three of its cards are not
+Standard-legal in the card file. `npm run decks check` reports every list.
+
+The card file was refreshed to 2026-10-10. Its card rows are identical to the
+October 3 file; only the date changed, so the test fixtures were re-stamped.
+Games saved under `.pi/` before the refresh pin October 3 and replay only
+against that file.
+
 ## How a change is judged now
 
 A change gets one comparison on the bulk runner: the same twenty seeds, both

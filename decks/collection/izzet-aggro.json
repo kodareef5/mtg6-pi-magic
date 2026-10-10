@@ -1,0 +1,33 @@
+{
+	"name": "Izzet Aggro",
+	"source": "https://www.mtggoldfish.com/deck/7980848",
+	"main": {
+		"Bounce Off": 1,
+		"Burst Lightning": 4,
+		"Chandra, Torch of Defiance": 1,
+		"Channeled Dragonfire": 2,
+		"Colorstorm Stallion": 4,
+		"Hired Claw": 4,
+		"Mockingbird": 1,
+		"Mountain": 8,
+		"Nova Hellkite": 4,
+		"Riverpyre Verge": 4,
+		"Scalding Viper // Steam Clean": 4,
+		"Slick Sequence": 3,
+		"Smaug the Magnificent": 1,
+		"Soulstone Sanctuary": 2,
+		"Spirebluff Canal": 4,
+		"Steam Vents": 4,
+		"Stingcaster Mage": 4,
+		"Stormcarved Coast": 2,
+		"Vibrant Outburst": 3
+	},
+	"sideboard": {
+		"Hexing Squelcher": 2,
+		"Sear": 4,
+		"Soul-Guide Lantern": 2,
+		"Spell Pierce": 3,
+		"Sunspine Lynx": 4
+	},
+	"checked": "2026-10-03"
+}

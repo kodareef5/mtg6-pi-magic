@@ -1,0 +1,40 @@
+{
+	"name": "Dimir Midrange",
+	"source": "https://www.mtggoldfish.com/deck/7954750",
+	"main": {
+		"Bitter Triumph": 2,
+		"Cecil, Dark Knight // Cecil, Redeemed Paladin": 1,
+		"Dream Beavers": 4,
+		"Enduring Curiosity": 4,
+		"Floodpits Drowner": 4,
+		"Gloomlake Verge": 4,
+		"Hidden Lair": 3,
+		"Island": 5,
+		"Kaito, Bane of Nightmares": 4,
+		"Requiting Hex": 3,
+		"Restless Reef": 2,
+		"Shoot the Sheriff": 2,
+		"Soulstone Sanctuary": 2,
+		"Spell Pierce": 1,
+		"Spell Snare": 1,
+		"Spyglass Siren": 4,
+		"Swamp": 4,
+		"The Wondrous Wasp": 1,
+		"Tishana's Tidebinder": 2,
+		"Wan Shi Tong, Librarian": 1,
+		"Watery Grave": 4,
+		"We Say Thee Nay!": 2
+	},
+	"sideboard": {
+		"Annul": 1,
+		"Day of Black Sun": 2,
+		"Disdainful Stroke": 1,
+		"Duress": 3,
+		"Flashfreeze": 2,
+		"Raven Eagle": 1,
+		"Requiting Hex": 1,
+		"Strategic Betrayal": 3,
+		"Wan Shi Tong, Librarian": 1
+	},
+	"checked": "2026-10-03"
+}

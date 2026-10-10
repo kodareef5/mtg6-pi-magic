@@ -101,6 +101,19 @@ export function copiesAllowed(universe: Universe, name: string, format: Format):
 	return format.singleton ? 1 : format.deck.maxCopies;
 }
 
+/**
+ * The legal set's name for a card a list names. Published lists give a double-faced, split or adventure
+ * card by its front face; the legal set names it `Front // Back`. A unique front face resolves to that
+ * full name; anything else resolves to nothing, so the caller reports it rather than guessing.
+ */
+export function canonicalName(universe: Universe, name: string): string | undefined {
+	// Published lists write a two-faced name with "/" or "//" and no spaces; the legal set writes " // ".
+	const trimmed = name.trim().replace(/\s*\/\/?\s*/g, " // ");
+	if (universe.cards.has(trimmed)) return trimmed;
+	const fronts = [...universe.cards.keys()].filter((full) => full.includes(" // ") && full.split(" // ")[0]!.trim() === trimmed);
+	return fronts.length === 1 ? fronts[0] : undefined;
+}
+
 /** Every problem with a deck, named. An empty list means it may be played. */
 export function checkDeck(universe: Universe, deck: string[], format: Format, blocked = unsupported()): string[] {
 	const problems: string[] = [];

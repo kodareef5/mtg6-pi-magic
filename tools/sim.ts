@@ -15,15 +15,17 @@ import { editWork } from "../src/core/work-tools.ts";
 import { dealtTable, decks, matchup, universe } from "./matchup-fixture.ts";
 import type { GameResult } from "./game-report.ts";
 import { adherence, type Adherence } from "./adherence.ts";
+import { collection } from "../src/core/decks.ts";
 
 const { values: a } = parseArgs({ options: {
 	games: { type: "string", default: "20" }, arm: { type: "string", default: "baseline" }, "seed-base": { type: "string" },
 	source: { type: "string", default: ".pi/resume-20261007/scoped-full-game/next-version-gate-20261005-1791339573156.jsonl" },
 	strategy: { type: "string" }, green: { type: "string" }, red: { type: "string" }, jobs: { type: "string", default: "2" },
+	random: { type: "string" }, pool: { type: "string" },
 	turns: { type: "string", default: "40" }, stall: { type: "string", default: "300" }, out: { type: "string", default: ".pi/sim" },
 	report: { type: "string" }, "seeds-only": { type: "boolean", default: false }, help: { type: "boolean", short: "h" } } });
 if (a.help) {
-	console.log(`usage: sim.ts [--games N] [--arm NAME] [--seed-base S] [--source V0.jsonl] [--strategy P] [--green P] [--red P] [-j 2] [--out DIR]
+	console.log(`usage: sim.ts [--games N] [--arm NAME] [--seed-base S] [--source V0.jsonl] [--random N [--pool A,B,C]] [--strategy P] [--green P] [--red P] [-j 2] [--out DIR]
        sim.ts --report DIR/ARM
 
   --games N        fresh seeds; odd ones seat Red first, so each list is on the play half the time
@@ -31,6 +33,9 @@ if (a.help) {
   --seed-base S    seeds are S-0, S-1, ...; defaults to the clock
   --source J       the finished version-zero journal whose card assessments and briefs every game carries
   --strategy P     this arm's strategy model pattern, such as gpt-6.1-sol:high
+  --random N       N fresh games on seeded random pairings from the pool instead of carried seeds; each pairing's first-named
+                   deck is on the play, and odd games swap. Setup interprets cards and writes briefs live (stored packages first)
+  --pool A,B,C     the decks random pairings draw from; default every collection deck with a web source
   --green P        the strategy pattern for whichever seat plays the Green list; --red likewise. One roster facing another:
                    run the arm twice with the patterns swapped and count wins by roster, not by list
   --jobs N         games at once. Two: three games at once hit the strategy provider's rate limit
@@ -43,7 +48,7 @@ if (a.help) {
 	process.exit(0);
 }
 
-type Record_ = { seed: string; path: string; swapped: boolean };
+type Record_ = { seed: string; path: string; swapped: boolean; decks?: [string, string] };
 
 /** New tables at new seeds, carrying card packages and briefs by deck, never dealt state or tactical work. */
 function seedGames(base: string, n: number, source: string, dir: string): Record_[] {
@@ -87,7 +92,7 @@ type Run = { seed: string; exit: number | null; stalled: boolean; startedAt: num
 function playOne(record: Record_, dir: string, options: { turns: string; stall: number; strategy?: string; green?: string; red?: string }): Promise<Run> {
 	const log = join(dir, `${record.seed}.log`), out = join(dir, record.seed);
 	mkdirSync(out, { recursive: true });
-	const args = ["tools/matchup.ts", "--resume", record.path, "--version", "0", "--turns", options.turns, "--out", out,
+	const args = ["tools/matchup.ts", ...(record.decks ? ["--decks", record.decks.join(","), "--seed", record.seed] : ["--resume", record.path, "--version", "0"]), "--turns", options.turns, "--out", out,
 		...(options.strategy ? ["--strategy", options.strategy] : []), ...(options.green ? ["--green", options.green] : []), ...(options.red ? ["--red", options.red] : [])];
 	return new Promise((resolve) => {
 		const fd = openSync(log, "a"), startedAt = Date.now();
@@ -104,6 +109,24 @@ function playOne(record: Record_, dir: string, options: { turns: string; stall: 
 			resolve(run);
 		});
 	});
+}
+
+/** Seeded random pairings from the pool: a small xorshift from the seed text, so a base name names the same games again. */
+function randomGames(base: string, n: number, pool: string[], dir: string): Record_[] {
+	if (pool.length < 2) throw new Error("A random pool needs at least two decks.");
+	let x = [...`${base}`].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 2166136261) || 1;
+	const next = () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x; };
+	mkdirSync(dir, { recursive: true });
+	const records: Record_[] = [];
+	for (let i = 0; i < n; i++) {
+		const first = pool[next() % pool.length]!;
+		let second = pool[next() % pool.length]!;
+		while (second === first) second = pool[next() % pool.length]!;
+		const swapped = i % 2 === 1;
+		records.push({ seed: `${base}-r${i}`, path: "", swapped, decks: swapped ? [second, first] : [first, second] });
+	}
+	writeFileSync(join(dir, "provenance.json"), JSON.stringify({ pool, games: records.map((one) => ({ seed: one.seed, decks: one.decks })), carries: "nothing; stored card packages are loaded by the matchup tool, briefs are written live" }, null, 2) + "\n");
+	return records;
 }
 
 type Row = { seed: string; onPlay: string; winner: string; turn: number; wallMin: number; cost: number | null; strategyCalls: number; decideCalls: number;
@@ -137,13 +160,15 @@ const median = (xs: number[]) => { const s = [...xs].sort((p, q) => p - q); retu
 function summarizeArm(dir: string): { rows: Row[]; markdown: string[] } {
 	const rows = readdirSync(dir).filter((name) => { try { return statSync(join(dir, name)).isDirectory(); } catch { return false; } })
 		.map((name) => summarizeGame(join(dir, name), false)).sort((p, q) => p.seed.localeCompare(q.seed, undefined, { numeric: true }));
-	const finished = rows.filter((row) => ["Green", "Red", "draw"].includes(row.winner));
+	const unfinished = new Set(["stopped", "failed", "stalled", "no result"]);
+	const finished = rows.filter((row) => !unfinished.has(row.winner));
+	const names = [...new Set(rows.flatMap((row) => [row.onPlay, row.winner]))].filter((name) => !unfinished.has(name) && name !== "draw" && name !== "?").sort();
 	const count = (pick: (row: Row) => boolean) => finished.filter(pick).length;
 	const costs = rows.flatMap((row) => row.cost === null ? [] : [row.cost]);
 	const markdown = [
 		`| Measure | ${dir.split("/").at(-1)} |`, "| --- | --- |",
 		`| Games finished / started | ${finished.length} / ${rows.length} |`,
-		`| Green wins | ${count((row) => row.winner === "Green")} |`, `| Red wins | ${count((row) => row.winner === "Red")} |`,
+		...names.map((name) => `| ${name} wins | ${count((row) => row.winner === name)} |`),
 		`| Wins by the seat on the play | ${count((row) => row.winner === row.onPlay)} |`, `| Wins by the seat on the draw | ${count((row) => row.winner !== row.onPlay && row.winner !== "draw")} |`,
 		`| Stopped, failed or stalled | ${rows.length - finished.length} (stalled ${rows.filter((row) => row.stalled).length}) |`,
 		`| Median turns | ${median(finished.map((row) => row.turn))} |`, `| Median wall | ${median(finished.map((row) => row.wallMin)).toFixed(1)} min |`,
@@ -167,9 +192,11 @@ if (a.report) {
 	process.exit(0);
 }
 
-const games = Number(a.games), jobs = Math.max(1, Number(a.jobs)), base = a["seed-base"] ?? `sim-${Date.now()}`;
-const records = seedGames(base, games, a.source!, join(a.out!, "seeds"));
-console.log(`${records.length} seeds under ${join(a.out!, "seeds")} from ${a.source} version 0`);
+const jobs = Math.max(1, Number(a.jobs)), base = a["seed-base"] ?? `sim-${Date.now()}`;
+const pool = a.pool ? a.pool.split(",").map((one) => one.trim()) : [...collection().values()].filter((one) => /^https?:/.test(one.source)).map((one) => one.name);
+const games = a.random ? Number(a.random) : Number(a.games);
+const records = a.random ? randomGames(base, games, pool, join(a.out!, a.arm!)) : seedGames(base, games, a.source!, join(a.out!, "seeds"));
+console.log(a.random ? `${records.length} random pairings from ${pool.length} decks` : `${records.length} seeds under ${join(a.out!, "seeds")} from ${a.source} version 0`);
 if (a["seeds-only"]) process.exit(0);
 const arm = join(a.out!, a.arm!);
 mkdirSync(arm, { recursive: true });

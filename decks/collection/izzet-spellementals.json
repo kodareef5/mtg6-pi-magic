@@ -1,0 +1,37 @@
+{
+	"name": "Izzet Spellementals",
+	"source": "https://www.mtggoldfish.com/deck/7954745",
+	"main": {
+		"Burst Lightning": 3,
+		"Eddymurk Crab": 4,
+		"Flow State": 2,
+		"Get Out": 2,
+		"Hearth Elemental // Stoke Genius": 4,
+		"Impractical Joke": 2,
+		"Island": 6,
+		"Multiversal Passage": 1,
+		"Opt": 4,
+		"Prismari Charm": 4,
+		"Riverpyre Verge": 4,
+		"Sleight of Hand": 4,
+		"Spell Pierce": 2,
+		"Spirebluff Canal": 4,
+		"Steam Vents": 4,
+		"Stormcarved Coast": 1,
+		"Sunderflock": 4,
+		"Traumatic Critique": 3,
+		"Winternight Stories": 2
+	},
+	"sideboard": {
+		"Annul": 2,
+		"Colorstorm Stallion": 4,
+		"Disdainful Stroke": 1,
+		"Flashfreeze": 1,
+		"Ghost Vacuum": 1,
+		"Hydro-Man, Fluid Felon": 2,
+		"Ral, Crackling Wit": 2,
+		"Sear": 1,
+		"Soul-Guide Lantern": 1
+	},
+	"checked": "2026-10-03"
+}

@@ -1,0 +1,37 @@
+{
+	"name": "Azorius Momo",
+	"source": "https://www.mtggoldfish.com/deck/7991172",
+	"main": {
+		"Abandoned Air Temple": 2,
+		"Cosmogrand Zenith": 2,
+		"Curious Farm Animals": 1,
+		"Daydream": 4,
+		"Erode": 1,
+		"Floodfarm Verge": 4,
+		"Get Lost": 2,
+		"Gleaming Bastion": 4,
+		"Guiding Hydra": 1,
+		"Haliya, Guided by Light": 2,
+		"Hallowed Fountain": 4,
+		"Mockingbird": 1,
+		"Momo, Friendly Flier": 4,
+		"Nurturing Pixie": 2,
+		"Plains": 7,
+		"Quantum Riddler": 4,
+		"Sage of the Skies": 4,
+		"Seam Rip": 2,
+		"Springleaf Drum": 4,
+		"Starfield Shepherd": 4,
+		"Zack Fair": 1
+	},
+	"sideboard": {
+		"Disdainful Stroke": 2,
+		"Flashfreeze": 1,
+		"Rest in Peace": 4,
+		"Seam Rip": 2,
+		"Spectacular Spider-Man": 2,
+		"Spider-Sense": 2,
+		"The Queen of Dale": 2
+	},
+	"checked": "2026-10-03"
+}

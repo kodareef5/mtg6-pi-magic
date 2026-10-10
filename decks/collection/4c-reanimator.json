@@ -1,0 +1,40 @@
+{
+	"name": "4c Reanimator",
+	"source": "https://www.mtggoldfish.com/deck/7987028",
+	"main": {
+		"Ardyn, the Usurper": 2,
+		"Awaken the Honored Dead": 1,
+		"Breeding Pool": 4,
+		"Bringer of the Last Gift": 4,
+		"Cache Grab": 4,
+		"Cavern of Souls": 3,
+		"Deceit": 2,
+		"Forest": 1,
+		"Formidable Speaker": 4,
+		"Island": 1,
+		"Oblivious Bookworm": 4,
+		"Overgrown Tomb": 4,
+		"Overlord of the Balemurk": 2,
+		"Rapid Rescue": 2,
+		"Seasoned Cryomancer": 4,
+		"Starting Town": 3,
+		"Superior Spider-Man": 4,
+		"Terror of the Peaks": 2,
+		"Wastewood Verge": 2,
+		"Watery Grave": 3,
+		"Willowrush Verge": 2,
+		"Wistfulness": 2
+	},
+	"sideboard": {
+		"Awaken the Honored Dead": 1,
+		"Disruptive Stormbrood // Petty Revenge": 1,
+		"Duress": 3,
+		"Flashfreeze": 1,
+		"Negate": 2,
+		"Requiting Hex": 2,
+		"Strategic Betrayal": 3,
+		"Wistfulness": 1,
+		"Witherbloom Charm": 1
+	},
+	"checked": "2026-10-03"
+}

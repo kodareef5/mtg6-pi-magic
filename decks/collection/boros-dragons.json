@@ -1,0 +1,36 @@
+{
+	"name": "Boros Dragons",
+	"source": "https://www.mtggoldfish.com/deck/7974167",
+	"main": {
+		"Burst Lightning": 4,
+		"Cavern of Souls": 3,
+		"Clarion Conqueror": 4,
+		"Erode": 2,
+		"Inspiring Vantage": 4,
+		"Maelstrom of the Spirit Dragon": 3,
+		"Magmatic Hellkite": 4,
+		"Momo, Friendly Flier": 4,
+		"Mountain": 1,
+		"Multiversal Passage": 4,
+		"Nova Hellkite": 4,
+		"Plains": 1,
+		"Sacred Foundry": 4,
+		"Sarkhan, Dragon Ascendant": 4,
+		"Smaug the Magnificent": 4,
+		"Sunbillow Verge": 4,
+		"Twinmaw Stormbrood // Charring Bite": 2,
+		"Voice of Victory": 4
+	},
+	"sideboard": {
+		"Boros Charm": 2,
+		"Dawn's Truce": 1,
+		"Desolation of Smaug": 1,
+		"Essence Burn": 1,
+		"Fire Magic": 1,
+		"Get Lost": 1,
+		"Rest in Peace": 3,
+		"Seam Rip": 3,
+		"The Legend of Roku // Avatar Roku": 2
+	},
+	"checked": "2026-10-03"
+}

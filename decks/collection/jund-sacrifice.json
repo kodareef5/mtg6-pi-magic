@@ -1,0 +1,41 @@
+{
+	"name": "Jund Sacrifice",
+	"source": "https://www.mtggoldfish.com/deck/7974951",
+	"main": {
+		"Azog, Moria's Ruin": 1,
+		"Biotech Specialist": 4,
+		"Blazemire Verge": 3,
+		"Blood Crypt": 1,
+		"Blooming Marsh": 4,
+		"Callous Inspector": 3,
+		"Deadly Precision": 2,
+		"Forest": 1,
+		"Fountainport": 1,
+		"Gene Pollinator": 4,
+		"Greedy Freebooter": 4,
+		"Lively Dirge": 4,
+		"Mutagen Man, Living Ooze": 1,
+		"Obsessive Pursuit": 4,
+		"Overgrown Tomb": 4,
+		"Requiting Hex": 2,
+		"Rottenmouth Viper": 2,
+		"Starting Town": 4,
+		"Stomping Ground": 3,
+		"Swamp": 1,
+		"The Sackville-Bagginses": 4,
+		"Umbral Collar Zealot": 2,
+		"Wolverine, Fierce Fighter": 1
+	},
+	"sideboard": {
+		"Duress": 3,
+		"Leatherhead, Swamp Stalker": 1,
+		"Professor Dellian Fel": 1,
+		"Requiting Hex": 1,
+		"Shoot the Sheriff": 2,
+		"Strategic Betrayal": 2,
+		"The Ooze": 2,
+		"Vengeful Tracker": 2,
+		"Witherbloom Charm": 1
+	},
+	"checked": "2026-10-03"
+}

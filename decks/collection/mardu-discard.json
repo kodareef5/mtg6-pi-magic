@@ -1,0 +1,40 @@
+{
+	"name": "Mardu Discard",
+	"source": "https://www.mtggoldfish.com/deck/7954746",
+	"main": {
+		"Blazemire Verge": 2,
+		"Blood Crypt": 4,
+		"Bloodghast": 4,
+		"Burst Lightning": 2,
+		"Carnage, Crimson Chaos": 1,
+		"Casey Jones, Vigilante": 1,
+		"Cecil, Dark Knight // Cecil, Redeemed Paladin": 1,
+		"Concealed Courtyard": 2,
+		"Cool but Rude": 4,
+		"Erode": 2,
+		"Godless Shrine": 3,
+		"Hardened Academic": 4,
+		"Inspiring Vantage": 2,
+		"Inti, Seneschal of the Sun": 1,
+		"Iron-Shield Elf": 4,
+		"Marauding Mako": 4,
+		"Moonshadow": 4,
+		"Mountain": 2,
+		"Practiced Offense": 4,
+		"Sacred Foundry": 3,
+		"Starting Town": 4,
+		"Tersa Lightshatter": 2
+	},
+	"sideboard": {
+		"Bilbo's Gambit": 1,
+		"Erode": 1,
+		"Lorehold Charm": 2,
+		"Pyrrhic Strike": 1,
+		"Requiting Hex": 2,
+		"Seam Rip": 2,
+		"Strategic Betrayal": 2,
+		"The Queen of Dale": 2,
+		"Voice of Victory": 2
+	},
+	"checked": "2026-10-03"
+}

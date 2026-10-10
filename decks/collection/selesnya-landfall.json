@@ -1,0 +1,32 @@
+{
+	"name": "Selesnya Landfall",
+	"source": "https://www.mtggoldfish.com/deck/7954762",
+	"main": {
+		"Ba Sing Se": 3,
+		"Dyadrine, Synthesis Amalgam": 2,
+		"Earthbender Ascension": 4,
+		"Erode": 4,
+		"Escape Tunnel": 3,
+		"Esper Origins // Summon: Esper Maduin": 3,
+		"Fabled Passage": 4,
+		"Forest": 9,
+		"Hushwood Verge": 1,
+		"Icetill Explorer": 4,
+		"Llanowar Elves": 4,
+		"Mightform Harmonizer": 4,
+		"Mossborn Hydra": 3,
+		"Plains": 2,
+		"Sazh's Chocobo": 4,
+		"Shared Roots": 2,
+		"Temple Garden": 4
+	},
+	"sideboard": {
+		"Dawn's Truce": 2,
+		"Mossborn Hydra": 1,
+		"Rest in Peace": 3,
+		"Sapling Nursery": 4,
+		"Sheltered by Ghosts": 3,
+		"Torpor Orb": 2
+	},
+	"checked": "2026-10-03"
+}

@@ -1,0 +1,27 @@
+{
+	"name": "Mono-Black Aggro",
+	"source": "https://www.mtggoldfish.com/deck/7980837",
+	"main": {
+		"Corpses of the Lost": 4,
+		"Desolation Prowler": 4,
+		"Dissection Practice": 4,
+		"Forsaken Miner": 4,
+		"Gollum, Riddle Master": 2,
+		"Iridescent Vinelasher": 4,
+		"Lich's Relic": 3,
+		"Nighthowl Pursuer": 4,
+		"Realm of Koh": 2,
+		"Requiting Hex": 4,
+		"Soulstone Sanctuary": 3,
+		"Sunset Saboteur": 4,
+		"Swamp": 18
+	},
+	"sideboard": {
+		"Duress": 4,
+		"Elegy Acolyte": 2,
+		"Karn, Argent Defender": 3,
+		"Strategic Betrayal": 3,
+		"Terminal Criticism": 3
+	},
+	"checked": "2026-10-03"
+}

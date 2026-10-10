@@ -1,5 +1,5 @@
 # Magic: The Gathering - every card legal in standard, one row each
-# Generated: 2026-10-03   Cards: 5164   Source: Scryfall 'Default Cards' bulk data
+# Generated: 2026-10-10   Cards: 5164   Source: Scryfall 'Default Cards' bulk data
 # Rebuild: ./tools/cards.ts --format standard --columns lean
 # TAB-separated; '#' starts a comment; the next line names the columns.
 # Oracle line breaks are escaped as \n and faces are joined by ' // '.

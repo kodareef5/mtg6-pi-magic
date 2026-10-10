@@ -1,0 +1,40 @@
+{
+	"name": "Jeskai Artifacts",
+	"source": "https://www.mtggoldfish.com/deck/7954760",
+	"main": {
+		"Braided Net // Braided Quipu": 2,
+		"Candy Trail": 3,
+		"Castle Doom": 4,
+		"Cryogen Relic": 4,
+		"Dusk Rose Reliquary": 2,
+		"Floodfarm Verge": 4,
+		"Hallowed Fountain": 4,
+		"Meticulous Archive": 4,
+		"Perilous Snare": 4,
+		"Petrified Hamlet": 3,
+		"Pinnacle Starcage": 2,
+		"Plains": 3,
+		"Repurposing Bay": 3,
+		"Sacred Foundry": 1,
+		"Simulacrum Synthesizer": 4,
+		"Spring-Loaded Sawblades // Bladewheel Chariot": 1,
+		"Starting Town": 1,
+		"The Fire Crystal": 1,
+		"The Mind Stone": 4,
+		"Torpor Orb": 1,
+		"Unidentified Hovership": 1,
+		"United Battlefront": 4
+	},
+	"sideboard": {
+		"Authority of the Consuls": 2,
+		"Crystal Barricade": 1,
+		"Day of Judgment": 3,
+		"Disdainful Stroke": 2,
+		"Erode": 2,
+		"Negate": 2,
+		"Pinnacle Starcage": 1,
+		"Rest in Peace": 1,
+		"Torpor Orb": 1
+	},
+	"checked": "2026-10-03"
+}

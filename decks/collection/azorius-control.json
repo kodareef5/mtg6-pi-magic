@@ -1,0 +1,40 @@
+{
+	"name": "Azorius Control",
+	"source": "https://www.mtggoldfish.com/deck/7990810",
+	"main": {
+		"Consult the Star Charts": 4,
+		"Countersculpt": 4,
+		"Day of Judgment": 2,
+		"Deserted Beach": 4,
+		"Erode": 2,
+		"Fatehold Charm": 1,
+		"Floodfarm Verge": 4,
+		"Fountainport": 1,
+		"Get Lost": 4,
+		"Hallowed Fountain": 4,
+		"Island": 3,
+		"Jace's Machinations": 3,
+		"No More Lies": 3,
+		"Petrified Hamlet": 3,
+		"Pinnacle Starcage": 2,
+		"Plains": 3,
+		"Restless Anchorage": 2,
+		"Seam Rip": 3,
+		"Spell Snare": 1,
+		"The Theorist, Jace Beleren": 4,
+		"Theorist's Sanctum": 2,
+		"Three Steps Ahead": 1
+	},
+	"sideboard": {
+		"Beza, the Bounding Spring": 2,
+		"Captain Marvel, Earth's Protector": 1,
+		"Disdainful Stroke": 2,
+		"Emeritus of Ideation // Ancestral Recall": 1,
+		"Erode": 1,
+		"Flashfreeze": 2,
+		"Pinnacle Starcage": 2,
+		"Sphinx of False Conclusions": 2,
+		"Ultima": 2
+	},
+	"checked": "2026-10-03"
+}

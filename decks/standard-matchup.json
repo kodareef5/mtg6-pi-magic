@@ -1,20 +1,20 @@
 {
-  "event": "Standard Challenge 32",
-  "eventDate": "2026-09-18",
-  "legalityDate": "2026-10-03",
-  "retrieved": "2026-10-04",
-  "cards": {
-    "path": "cards/standard.tsv",
-    "generated": "2026-10-03",
-    "sha256": "c635cbb0051d6b699d1560911921af615bfbaee37dc91565e08b7768a87f3c2e"
-  },
-  "rules": {
-    "path": "rules/cr.tsv",
-    "effective": "September 25, 2026",
-    "sha256": "27cf88bcb2564eb2daabf198d5c4b28eb87d43cde02f48141f1441e1897f2002"
-  },
-  "decks": [
-    "Mono-Green Landfall",
-    "Mono-Red Aggro"
-  ]
+	"event": "Standard Challenge 32",
+	"eventDate": "2026-09-18",
+	"legalityDate": "2026-10-10",
+	"retrieved": "2026-10-04",
+	"cards": {
+		"path": "cards/standard.tsv",
+		"generated": "2026-10-10",
+		"sha256": "c54c2a8f97f8943933c62828906e855f1f97d77d7777ed005d3cd375f8984f06"
+	},
+	"rules": {
+		"path": "rules/cr.tsv",
+		"effective": "September 25, 2026",
+		"sha256": "27cf88bcb2564eb2daabf198d5c4b28eb87d43cde02f48141f1441e1897f2002"
+	},
+	"decks": [
+		"Mono-Green Landfall",
+		"Mono-Red Aggro"
+	]
 }
