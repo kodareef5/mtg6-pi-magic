@@ -70,11 +70,11 @@ Repeated unchanged controls also chose different actions. A single changed
 answer can locate a failure, but is too noisy to veto a mechanism's playing
 quality. Finish a fixed repeated comparison before drawing that conclusion.
 
-## Next implementation: rehearse a proposed line
+## Rehearsal implementation and result
 
 The writer sometimes receives the useful line and still chooses a worse one.
 It also cannot reliably calculate the board its own casts and triggers create.
-The next change supplies those consequences through the existing engine.
+The isolated rehearsal prototype supplies those consequences through the existing engine.
 It does not add another analyst or another manual recount.
 
 1. Build an offline core reader from an earned projection, never a copy of the
@@ -101,10 +101,40 @@ It does not add another analyst or another manual recount.
    work stays unknown. Jev still chooses every real voluntary action and pass.
    Remove manual recount fields only where the preview replaces their work.
 
-Keep preparation and response repair unchanged in this experiment. There is no
-live writer comparison until the preview covers the consequential sequences it
-will be judged on. A smaller request, passing tests or a correct hypothetical
-number cannot establish better play.
+Offline coverage passed for 65 projected prefixes and 1,720 concrete choices,
+nine archived plans and 122 choices, then six consequential witnesses and 180
+choices. Receipts and resulting states matched physical execution; hidden
+permutations changed nothing and the real inputs remained unchanged.
+
+The fixed screen then completed all 48 writer sessions and scheduled
+continuations. Control achieved six unassisted physical successes out of 24;
+the candidate achieved none. Control accepted 23 plans using 30 writer calls;
+the candidate accepted two using 91. Of 39 candidate previews, 37 stopped on
+script syntax and only two computed any choices, 19 in total. Both adopted
+plans matched their drafts exactly. One candidate eventually won after two
+replacement plans, which does not count as initial-plan success.
+
+The added authoring contract failed. It required the writer to serialize both
+an ordinary plan and a separate hypothetical script, then adopt an id. Schema
+errors consumed its single revision. Correct offline simulation does not show
+that this interface helps the strategy model, and this trial supplied too few
+computed previews to measure simulation's strategic value.
+
+Keep the prototype isolated. Do not promote it or run its fresh-game gate.
+Preparation and response repair stayed unchanged. Writer median/p95 elapsed
+time rose from 16.0/35.1 seconds to 27.3/85.7 seconds. Collection and the entire
+screen reported $0.804 across 1,899 requests; 423 requests lacked usage, mostly
+canceled background work, so the cost is a lower bound. All 25 physical
+continuations replayed and cloned without new gaps or fallbacks. Review found
+no material illegal play in their new selected actions; that does not certify
+the inherited positions or every card interpretation.
+
+The next interface must first demonstrate that the model can submit and inspect
+a consequential line without maintaining two descriptions of its execution.
+An interface usability check precedes another strategic comparison. Keep the
+simulation's information boundary and exact-adoption guarantee; a formatting
+repair is not a strategic revision. Do not tune the completed screen or count
+its inspected positions as fresh confirmation.
 
 ## Fixed comparison and retention
 
