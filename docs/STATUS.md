@@ -39,25 +39,26 @@ low; the Sol and Haiku arms changed only the strategy model.
 
 | Measure | Baseline, wave on | No survey | Haiku 5.5 medium, no survey | Sol 6.1 high, wave on |
 | --- | --- | --- | --- | --- |
-| Games finished / started | 20 / 20 | 18 / 20 | 8 / 10 | 2 / 4 |
-| Green wins / Red wins | 9 / 11 | 11 / 7 | 3 / 5 | 2 / 0 |
-| Wins on the play / on the draw | 11 / 9 | 10 / 8 | 5 / 3 | 1 / 1 |
-| Median turns | 12 | 11 | 9 | 9 |
+| Games finished / started | 20 / 20 | 20 / 20 | 10 / 10 | 2 / 4 |
+| Green wins / Red wins | 9 / 11 | 13 / 7 | 5 / 5 | 2 / 0 |
+| Wins on the play / on the draw | 11 / 9 | 11 / 9 | 6 / 4 | 1 / 1 |
+| Median turns | 12 | 11 | 10 | 9 |
 | Median wall | 11.6 min | 6.5 min | 6.8 min | 56 min |
 | Median strategy wait | 9.3 min | 4.9 min | 5.0 min | 55 min |
-| Median cost / total | $0.52 / $9.66 | $0.12 / $2.54 | $0.20 / $2.35 | $10.63 / $29.28 |
-| Median strategy calls / Jev calls | 419 / 400 | 35 / 325 | 26 / 283 | 303 / 262 |
+| Median cost / total | $0.52 / $9.66 | $0.13 / $2.72 | $0.19 / $2.53 | $10.63 / $29.28 |
+| Median strategy calls / Jev calls | 419 / 400 | 33 / 325 | 22 / 270 | 303 / 262 |
 | Plan steps taken / due, passed over, deviated | 919 / 929, 2, 8 | 786 / 821, 26, 9 | 393 / 398, 3, 2 | 96 / 96, 0, 0 |
-| Help requests | 18 | 21 | 6 | 0 |
-| Gaps | 0 | 2 | 3 | 0 |
+| Help requests | 18 | 22 | 6 | 0 |
+| Gaps | 0 | 0 | 0 | 0 |
 | Replay mismatches | 0 | 0 | 0 | 0 |
 
-Stopped games: one no-survey and two Haiku games stopped on the OpenRouter key
-limit or a Haiku coordinator timeout at 90 seconds; one no-survey game and, in
-a first attempt, two Haiku games stopped on an interpretation refusal that
-named the wrong field, fixed in `ca01bd8`. Two Sol games were lost to the
-runner's two-hour limit after $17. Twenty games separate nothing on wins
-between these arms; they do separate cost, speed and gaps.
+Stopped games were resumed from their saved journals rather than replayed:
+one no-survey and two Haiku games had stopped on the OpenRouter key limit or
+a Haiku coordinator timeout at 90 seconds, and one no-survey game on an
+interpretation refusal that named the wrong field, fixed in `ca01bd8` before
+the resume. Totals include the stopped prefixes. Two Sol games were cut off by
+the runner's two-hour limit after $17 and are resuming. Twenty games separate
+nothing on wins between these arms; they do separate cost, speed and gaps.
 
 Growth and lethal fixtures, five positions, three repeats, same prompts. A
 real win means the plan carries the payoff spell before the first land entry,
