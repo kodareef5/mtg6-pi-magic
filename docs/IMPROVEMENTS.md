@@ -66,6 +66,13 @@ answer, versus five of eight for control. Both kept the needed blockers in one
 of two survival cases. Leave the trim unpromoted; these repeated positions and
 mixed outcomes do not rule out focused context in general.
 
+Keeping pilot step notes out of strategy cut dossier bytes by 9.8%, preserving
+every other section. Six frozen-report writer sessions per arm used ten calls
+for the trim versus seven for control. The trimmed writer dropped the control's
+Harmonizer-before-land sequence and planned a three-mana cast with two mana.
+Leave this trim unpromoted too. Its writer gate stopped further analyst and
+physical runs; acceptance and smaller requests did not justify them.
+
 Pilot annotations for later tap costs did not improve four paired continuations.
 Automatic combat-fact attachments already failed in October 6 and 7 experiments.
 Do not repeat those approaches or turn a failed position into another card warning.
@@ -78,6 +85,9 @@ trims removed useful guidance along with repetition; do not treat byte savings
 as sufficient evidence. The current writer still discards available wins and
 chooses attacks it predicts will lose. Locate those failures in discovery,
 selection or writing before adding a prompt rule or another review stage.
+Do not repeat the advice-removal screens on these inspected positions. A further
+context change should preserve the information or test a different decision
+boundary, with its own bounded comparison.
 
 Use frozen reports for writer changes and small mechanism-specific gates. An
 unused mechanism can stop before physical testing. A retention-contract change
