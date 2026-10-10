@@ -77,29 +77,13 @@ It also cannot reliably calculate the board its own casts and triggers create.
 The isolated rehearsal prototype supplies those consequences through the existing engine.
 It does not add another analyst or another manual recount.
 
-1. Build an offline core reader from an earned projection, never a copy of the
-   omniscient table followed by redaction. Reuse payment, entry, trigger and
-   layer operations. Begin with a supplied precombat sequence at a certified
-   main-phase checkpoint. Every payment, target, trigger order and voluntary
-   choice is explicit. Return the checked prefix, resulting state and the first
-   contradiction, missing choice, missing information or unsupported operation.
-2. Compare with saved physical receipts and derived states. Permuting hidden
-   identities and order must not change the result; the real table, journal and
-   supplied projection must remain unchanged. Missing historical state, draws,
-   mills and searches stop this first slice. Coverage is an engineering result,
-   not a strategic score. Keep the prototype isolated from live play.
-3. Add conditional named searches and explicitly specified combat only after
-   prefix fidelity holds. Registered counts do not prove a searched card remains
-   in the library. An assumed search uses a hypothetical identity and states its
-   assumption. Code never chooses payments, responses, attacks or blocks, and
-   never searches for or ranks lines. The post-draw planning window also needs
-   an explicit hypothetical path to the main phase.
-4. Integrate preview into submission itself. The first answer supplies one
-   draft; the next adopts its session-local id or revises it once for a new
-   preview. Install the exact adopted plan and journal ordinary plan fields.
-   Refuse a demonstrated contradiction in its required prefix; unknown future
-   work stays unknown. Jev still chooses every real voluntary action and pass.
-   Remove manual recount fields only where the preview replaces their work.
+The reader starts from an earned projection, uses shared engine operations and
+returns the checked prefix plus its first unresolved boundary. It never chooses
+payments, responses, attacks or blocks. Named searches assume a registered card
+remains; they do not discover its hidden identity. Unknown draws, mills, missing
+history and unprepared meaning stop the checked prefix. The failed writer
+submitted an ordinary plan plus a separate scenario script and adopted a
+session-local draft id after preview.
 
 Offline coverage passed for 65 projected prefixes and 1,720 concrete choices,
 nine archived plans and 122 choices, then six consequential witnesses and 180
@@ -136,29 +120,80 @@ simulation's information boundary and exact-adoption guarantee; a formatting
 repair is not a strategic revision. Do not tune the completed screen or count
 its inspected positions as fresh confirmation.
 
+## Next implementation: construct the line through choices
+
+One Luna-low planner constructs a hypothetical line through listed choices.
+Each answer records its source, accepted use, payment, targets and timing, and
+core computes the next position before the following question. That same
+structural record supplies Jev's marks and instructions. No model rewrites the
+selected line. Existing objects use exact references; future objects use
+explicit provenance from a prior action or conditional search. An ambiguous
+binding or changed prerequisite stops instead of choosing another source.
+
+This replaces the own-turn analyst wave, prose calculations and whole-plan
+writer at the supported post-draw checkpoint. Keep the pregame advice initially.
+Preparation, upkeep acceptance and response authoring retain their current paths
+until projection supports their checkpoints. Core owns all hypothetical motion,
+compulsory operations and explicitly stated scenario assumptions; context only
+asks and renders. Jev still chooses every real voluntary action and pass.
+
+Development is inspected through the end step. Attack-dependent claims include
+supplied opposing blocks; defense includes the stated following attack and
+expiry of temporary effects. Unknown continuations remain unknown. The planner
+may return to one earlier checkpoint it names and build an alternative. An
+invalid format retries the current question within the request budget and does
+not spend that strategic revision. Code neither proposes nor ranks lines.
+
+For example, a development sequence selects a land, creature and payment, then
+inspects the end-of-turn board. A growth sequence chooses payment, land entry,
+trigger order and search at separate questions; the next question carries the
+computed creature and resource facts. If a spent source was needed later, the
+planner can revisit that payment. Acceptance preserves those exact choices.
+
 ## Fixed comparison and retention
 
-After offline coverage is sufficient, freeze six positions, their properties,
-acceptable alternatives, source-game split and the live-call budget. Prefixes
-must end before the writer, including work at the same version. Use two frozen
-report sets and two repetitions per set, with both arms: 48 writer sessions and 48
-physical continuations. Alternate arm order. Preserve failures, missing plans
-and incomplete usage; do not add repetitions to rescue an inconclusive result.
+First prove offline fidelity against the existing witnesses and audits. Include
+changed equipment indices, duplicate names, zone changes, conditional search
+bindings, stale prerequisites, hidden permutations and unchanged real inputs.
+Recorded intent must survive journal, replay and clone, with progress derived
+from physical ledger rows. Every original physical option remains available.
 
-Measure discovery, drafting, preview coverage, adoption and unassisted physical
-execution separately. A result after a replacement plan is not an initial-plan
-success. Advance to fresh games only with at least four additional unassisted
-successes among 24 candidate continuations, across at least two position types,
-and no position losing three of its four matched outcomes. This is a screening
-threshold, not statistical proof. Stop immediately for a leak, real mutation,
-false computed consequence or adoption/replay defect. Ordinary stochastic play
-errors remain in the fixed batch.
+Then run twelve known-line sessions: six positions twice, with the complete
+intended line supplied. Require at least eleven faithful constructions, every
+case succeeding at least once, and eleven scheduled physical executions without
+replacement plans. Jev chooses for both seats under the supplied scenario
+policies; record deviations. This tests usability, not discovery. Do not buy
+another comparison against the failed script interface.
 
-Before retaining a replacement or claiming stronger play, run eight fresh paired
-seeds with balanced decks and starting players. Review missed wins, avoidable
-losses, legality, repairs and obedience alongside outcomes; report calls, tokens,
-cost and median/tail strategy waits. Inspected positions are never fresh
-confirmation. Remove superseded paths when retaining a replacement.
+A passing interface reaches a fresh strategic screen: twelve positions, two
+repetitions per arm, 48 sessions and scheduled continuations. Cover immediate
+wins, visible defense, lasting development and resource preservation across
+source games; use held-out prefixes where available. Control runs its ordinary
+analysis anew. Candidate receives no frozen reports. Freeze inputs, properties,
+acceptable alternatives and spend/request limits before inference. Both arms
+have 32 strategy requests and 300 seconds per session, retries included, plus
+equal physical continuation limits. A limit is an incomplete result, not a pass.
+
+Advance only with four additional unassisted successes out of 24, gains across
+at least two position types, and no position losing both matched outcomes that
+control successfully achieves. Fewer than twenty candidate acceptances is an
+interface failure diagnosis, not a reason to add rescue repetitions. Finish
+ordinary model failures in the fixed batch. Stop for a new leak, real mutation,
+false computed consequence, binding/adoption defect or replay mismatch.
+
+Measure discovery, construction, retained commitments, Jev obedience, repairs
+and legality separately. A repaired win is not an initial-plan success. Record
+revision uptake and scenario assumptions; an unused revision proves nothing.
+All requests process input, including cached history. Report calls, tokens,
+cost and median/p95 waits rather than assuming one conversation means one read.
+
+Before retaining the replacement or claiming stronger play, run eight fresh
+paired seeds with balanced decks and starting players. Review missed wins,
+avoidable losses, legality, repairs and obedience alongside outcomes and waits.
+Inspected positions are never fresh confirmation. Remove superseded paths when
+retaining a replacement. If a usable single planner repeatedly misses lines
+that control finds across position types, compare broader discovery using the
+same construction primitive; do not add a permanent second strategy mode.
 
 Keep opponent-turn preparation, scoped upkeep acceptance and post-draw review.
 Do not narrow amendments yet: 67 of 84 inspected draw reviews changed actions
