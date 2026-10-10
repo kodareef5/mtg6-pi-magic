@@ -1,0 +1,93 @@
+{
+	"card": "Magmatic Hellkite",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Magmatic Hellkite",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, destroy target nonbasic land an opponent controls. Its controller searches their library for a basic land card, puts it onto the battlefield tapped with a stun counter on it, then shuffles. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "opponent",
+								"not": {
+									"supertypes": [
+										"basic"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						},
+						{
+							"do": "choose",
+							"who": "controller:target:0",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "controller:target:0",
+								"supertypes": [
+									"basic"
+								],
+								"types": [
+									"land"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "land"
+						},
+						{
+							"do": "move",
+							"what": "bound:land",
+							"to": "battlefield",
+							"tapped": true,
+							"counters": {
+								"stun": 1
+							},
+							"controller": "controller:target:0",
+							"reason": "resolve"
+						},
+						{
+							"do": "shuffle",
+							"who": "controller:target:0"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

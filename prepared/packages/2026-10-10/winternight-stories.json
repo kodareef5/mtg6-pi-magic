@@ -1,0 +1,40 @@
+{
+	"card": "Winternight Stories",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Winternight Stories",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Winternight Stories normally; draw three cards, then discard two cards unless discarding a creature card.",
+				"basis": "Draw three cards. Then discard two cards unless you discard a creature card.",
+				"source": {
+					"card": "Winternight Stories",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Winternight Stories from your graveyard for its harmonize cost, optionally tapping a creature you control to reduce the cost by its power; perform the draw and discard effect and exile the spell.",
+				"basis": "Draw three cards. Then discard two cards unless you discard a creature card. ... Harmonize {4}{U} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"source": {
+					"card": "Winternight Stories",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

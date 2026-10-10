@@ -8,8 +8,8 @@ schemas, and every `basis` is checked against the card's text.
 | File | Shows |
 |---|---|
 | `spells.md` | targets, any target, destroy, modes as separate procedures, kicker, a token's activated ability |
-| `mana.md` | mana abilities in a package, "or", counted mana, spend restrictions, a token's mana ability |
-| `entering.md` | entering tapped under a condition, entering with counters, how other permanents enter, 305.7 |
+| `mana.md` | mana abilities in a package, "or", counted mana, spend restrictions, a token's mana ability, a Verge's conditional ability |
+| `entering.md` | entering tapped under a condition, a shock land's optional life payment, a Town's own-turn count, entering with counters, how other permanents enter, 305.7 |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |
 | `until-end-of-turn.md` | temporary changes, counters with keywords, doubling power, `if` and `limit`, play permissions |

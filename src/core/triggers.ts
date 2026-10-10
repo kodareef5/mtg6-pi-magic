@@ -57,7 +57,7 @@ export function before(table: Table, changes: Change[]): World | undefined {
 	const world = tableWorld(table), history = world.history;
 	return {
 		objects, read: (object) => object.zone === "battlefield" ? traits.get(object.id) : world.read(object),
-		players: world.players.map((one) => ({ ...one })), notes: [...table.notes], combat: structuredClone(table.combat), history,
+		players: world.players.map((one) => ({ ...one })), notes: [...table.notes], combat: structuredClone(table.combat), history, ...(world.turn ? { turn: world.turn } : {}),
 		lastKnown: (wanted) => { const object = objects.find((one) => one.id === wanted.id && one.incarnation === wanted.incarnation); return object ? { object, traits: traits.get(object.id) } : undefined; },
 	};
 }

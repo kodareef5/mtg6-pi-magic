@@ -1,0 +1,27 @@
+{
+	"card": "Spell Pierce",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spell Pierce",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Spell Pierce to counter target noncreature spell unless its controller pays {2}.",
+				"basis": "Counter target noncreature spell unless its controller pays {2}.",
+				"source": {
+					"card": "Spell Pierce",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

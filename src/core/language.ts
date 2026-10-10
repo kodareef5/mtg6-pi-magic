@@ -100,6 +100,8 @@ export const Defs = {
 		object({ x: Type.Literal(true) }),
 		object({ sum: Type.Array(Type.Ref("Amount"), { minItems: 2 }) }),
 		object({ negate: Type.Ref("Amount") }),
+		/** How many turns that side has begun so far in the game, the current one included: "your first, second, or third turn". */
+		object({ turns: one("self", "opponent") }),
 	]),
 
 	Condition: Type.Union([
@@ -110,6 +112,8 @@ export const Defs = {
 		object({ all: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ any: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ not: Type.Ref("Condition") }),
+		/** Whose turn it is: "if it's not your turn". */
+		object({ turn: one("self", "opponent") }),
 	]),
 
 	/** One target slot. An object, a player, or either ("any target" names both). */
@@ -217,12 +221,16 @@ export const Defs = {
 		object({ basis: text, kind: Type.Literal("continuous"), affects: Type.Ref("Selector"), change: Type.Ref("Modification"), if: Type.Optional(Type.Ref("Condition")) }),
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */
 		object({ basis: text, kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
-			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")) }),
+			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
+			/** "You may pay 2 life. If you don't, it enters tapped": tapped unless its controller pays this as it enters. The land play offers both. */
+			unlessPay: Type.Optional(object({ life: positive })) }),
 		/** "If it would die, exile it instead." */
 		object({ basis: text, kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),
 		/** A mana ability, used while paying (605, 601.2g): `colors` once each, or `any` mana of one chosen color; `times` repeats it ("{G} for each Elf"). */
 		object({ basis: text, kind: Type.Literal("mana"), cost: Type.Ref("Cost"), colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive),
-			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")) }),
+			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")),
+			/** "Activate only if you control an Island or a Swamp": the ability is usable while this holds. */
+			if: Type.Optional(Type.Ref("Condition")) }),
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */
 		object({ basis: text, kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")) }),
 		object({ basis: text, kind: Type.Literal("suppress"), event: Type.Ref("Event") }),

@@ -1,0 +1,27 @@
+{
+	"card": "Dissection Practice",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dissection Practice",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Dissection Practice to drain an opponent and optionally give creatures +1/+1 and -1/-1 until end of turn.",
+				"basis": "Target opponent loses 1 life and you gain 1 life. ... Up to one target creature gets +1/+1 until end of turn. ... Up to one target creature gets -1/-1 until end of turn.",
+				"source": {
+					"card": "Dissection Practice",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

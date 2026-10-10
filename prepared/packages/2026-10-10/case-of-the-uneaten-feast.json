@@ -1,0 +1,94 @@
+{
+	"card": "Case of the Uneaten Feast",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Case of the Uneaten Feast",
+		"registers": [
+			{
+				"basis": "Whenever a creature you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "To solve — You've gained 5 or more life this turn. (If unsolved, solve at the beginning of your end step.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"not": {
+								"is": "this",
+								"matches": {
+									"words": [
+										"solved"
+									]
+								}
+							}
+						},
+						{
+							"amount": {
+								"history": "life-gained",
+								"by": "you"
+							},
+							"atLeast": 5
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "indefinite",
+							"change": {
+								"words": [
+									"solved"
+								]
+							},
+							"label": "Solved Case"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate the solved Case's sacrifice ability, only while this Case is solved; grant the creature cards currently in your graveyard permission to be cast from there until end of turn.",
+				"basis": "Solved — Sacrifice this Case: Creature cards in your graveyard gain \"You may cast this card from your graveyard\" until end of turn.",
+				"source": {
+					"card": "Case of the Uneaten Feast",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

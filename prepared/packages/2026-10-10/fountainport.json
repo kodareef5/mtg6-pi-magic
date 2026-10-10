@@ -1,0 +1,60 @@
+{
+	"card": "Fountainport",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fountainport",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Sacrifice a token to draw a card",
+				"basis": "{2}, {T}, Sacrifice a token: Draw a card.",
+				"source": {
+					"card": "Fountainport",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Pay 1 life to create a Fish token",
+				"basis": "{3}, {T}, Pay 1 life: Create a 1/1 blue Fish creature token.",
+				"source": {
+					"card": "Fountainport",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Create a Treasure token",
+				"basis": "{4}, {T}: Create a Treasure token.",
+				"source": {
+					"card": "Fountainport",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -388,7 +388,7 @@ export function entersTapped(frame: Frame, land: SeenObject, registers?: Registr
 		(world.read(holder)?.registrations ?? []).filter((one): one is Extract<Registration, { kind: "enters" }> => one.kind === "enters" && !!one.affects && !!one.tapped &&
 			matches({ world, controller: holder.controller, source: holder }, entering, one.affects, land.traits)));
 	const terms = [...(own ? [own] : []), ...others];
-	if (terms.some((one) => !one.if)) return "tapped";
+	if (terms.some((one) => !one.if && !one.unlessPay)) return "tapped";
 	if (terms.length) return "conditional";
 	return registers || intrinsic(land.traits).length ? "untapped" : "unknown";
 }

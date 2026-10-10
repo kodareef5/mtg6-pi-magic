@@ -1,0 +1,93 @@
+{
+	"card": "Drake Hatcher",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Drake Hatcher",
+		"registers": [
+			{
+				"basis": "Vigilance, prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Vigilance, prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					},
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature deals combat damage to a player, put that many incubation counters on it.",
+				"kind": "watch",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"is": "this"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "incubation",
+							"amount": {
+								"bound": "damage"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Remove three incubation counters to create a 2/2 blue Drake creature token with flying",
+				"basis": "Remove three incubation counters from this creature: Create a 2/2 blue Drake creature token with flying.",
+				"source": {
+					"card": "Drake Hatcher",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

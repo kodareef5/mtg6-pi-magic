@@ -1,0 +1,41 @@
+{
+	"card": "Consult the Star Charts",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Consult the Star Charts",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Consult the Star Charts without kicker.",
+				"basis": "Kicker {1}{U} (You may pay an additional {1}{U} as you cast this spell.) ... Look at the top X cards of your library, where X is the number of lands you control. Put one of those cards into your hand. If this spell was kicked, put two of those cards into your hand instead. Put the rest on the bottom of your library in a random order.",
+				"source": {
+					"card": "Consult the Star Charts",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Consult the Star Charts with the additional {1}{U} kicker cost.",
+				"basis": "Kicker {1}{U} (You may pay an additional {1}{U} as you cast this spell.) ... Look at the top X cards of your library, where X is the number of lands you control. Put one of those cards into your hand. If this spell was kicked, put two of those cards into your hand instead. Put the rest on the bottom of your library in a random order.",
+				"source": {
+					"card": "Consult the Star Charts",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

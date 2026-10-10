@@ -1,0 +1,58 @@
+{
+	"card": "Braided Net // Braided Quipu",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Braided Net // Braided Quipu",
+		"registers": [
+			{
+				"basis": "This artifact enters with three net counters on it.",
+				"kind": "enters",
+				"counters": {
+					"net": 3
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate Braided Net to tap another target nonland permanent and prevent its activated abilities from being activated for as long as it remains tapped.",
+				"basis": "{T}, Remove a net counter from this artifact: Tap another target nonland permanent. Its activated abilities can't be activated for as long as it remains tapped.",
+				"source": {
+					"card": "Braided Net // Braided Quipu",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate Braided Net's craft with artifact ability, only as a sorcery, to return it transformed as Braided Quipu.",
+				"basis": "Craft with artifact {1}{U} // {3}{U}, {T}: Draw a card for each artifact you control, then put this artifact into its owner's library third from the top.",
+				"source": {
+					"card": "Braided Net // Braided Quipu",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate Braided Quipu to draw a card for each artifact you control, then put it into its owner's library third from the top.",
+				"basis": "Craft with artifact {1}{U} // {3}{U}, {T}: Draw a card for each artifact you control, then put this artifact into its owner's library third from the top.",
+				"source": {
+					"card": "Braided Net // Braided Quipu",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

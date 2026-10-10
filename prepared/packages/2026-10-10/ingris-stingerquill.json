@@ -1,0 +1,68 @@
+{
+	"card": "Ingris Stingerquill",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ingris Stingerquill",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a creature you control attacks, that creature deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "damage",
+									"to": "bound:player",
+									"amount": 1,
+									"from": "event:object"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Create a Cadet, then give creatures you control haste until end of turn.",
+				"basis": "{4}: Create a 2/2 colorless Wizard Soldier creature token named Cadet. Then creatures you control gain haste until end of turn.",
+				"source": {
+					"card": "Ingris Stingerquill",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

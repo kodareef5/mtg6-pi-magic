@@ -25,7 +25,7 @@ export function attach(table: Table, changes: Change[], frozen?: Record<ObjectId
 	return used;
 }
 
-const pack = (table: Table, seat: SeatId, card: string) => table.work[seat]?.packages?.find((entry) => entry.card === card)?.registers;
+export const pack = (table: Table, seat: SeatId, card: string) => table.work[seat]?.packages?.find((entry) => entry.card === card)?.registers;
 
 /** What an option says about a permanent it puts onto the battlefield. An entry is never silent. */
 export function entering(table: Table, seat: SeatId, card: string): string {
@@ -42,7 +42,7 @@ export function entering(table: Table, seat: SeatId, card: string): string {
  * permanents entering together never shape each other's entry, whatever order
  * the changes are written in.
  */
-export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set()): { tapped?: true; counters: Record<string, number> } {
+export function terms(table: Table, object: Thing, before: Record<ObjectId, Thing> = {}, born: ReadonlySet<ObjectId> = new Set(), paid?: true): { tapped?: true; counters: Record<string, number> } {
 	const live = tableWorld(table);
 	const objects = live.objects.flatMap((one) => one.id === object.id ? [one] : born.has(one.id) ? [] : [before[one.id] ?? one]);
 	for (const [id, was] of Object.entries(before)) if (id !== object.id && !table.things.has(id)) objects.push(was);
@@ -55,7 +55,8 @@ export function terms(table: Table, object: Thing, before: Record<ObjectId, Thin
 			const scope: Scope = { world, controller: holder.controller, source: holder };
 			if (registration.affects ? !matches(scope, object, registration.affects) : holder !== object) continue;
 			if (registration.if && !holds(scope, registration.if)) continue;
-			if (registration.tapped) found.tapped = true;
+			// "If you don't, it enters tapped": its controller paid as it entered, so its own term does not tap it.
+			if (registration.tapped && !(registration.unlessPay && paid && holder === object)) found.tapped = true;
 			for (const [kind, count] of Object.entries(registration.counters ?? {})) found.counters[kind] = (found.counters[kind] ?? 0) + amount(scope, count);
 		}
 	}

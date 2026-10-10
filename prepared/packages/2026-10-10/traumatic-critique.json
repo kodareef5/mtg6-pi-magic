@@ -1,0 +1,28 @@
+{
+	"card": "Traumatic Critique",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Traumatic Critique",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Traumatic Critique with X announced, targeting any target; deal X damage, draw two cards, then discard a card.",
+				"basis": "Traumatic Critique deals X damage to any target. Draw two cards, then discard a card.",
+				"source": {
+					"card": "Traumatic Critique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

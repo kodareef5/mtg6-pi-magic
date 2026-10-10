@@ -1,0 +1,40 @@
+{
+	"card": "Concealed Courtyard",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Concealed Courtyard",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or fewer other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atLeast": 3
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"B"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

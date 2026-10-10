@@ -32,6 +32,36 @@ checking "unless you control two or more other lands" does not count itself.
 Ba Sing Se's earthbend ability is announced, not registered; see
 `animation.md`.
 
+A shock land asks its controller a question as it enters: pay 2 life, or
+arrive tapped. Register `tapped` with `unlessPay`, and the land play offers two
+options, one that pays and enters untapped and one that does not. The mana
+ability is intrinsic to the basic land types, so nothing registers it.
+
+```json package
+{
+  "card": "Steam Vents",
+  "registers": [
+    { "basis": "As this land enters, you may pay 2 life. If you don't, it enters tapped.", "kind": "enters", "tapped": true, "unlessPay": { "life": 2 } }
+  ]
+}
+```
+
+A land that counts its controller's turns reads `turns` of `self`, the current
+turn included, and `turn` for whose turn it is: on the opponent's turn it is
+never "your" turn.
+
+```json package
+{
+  "card": "Starting Town",
+  "registers": [
+    { "basis": "This land enters tapped unless it's your first, second, or third turn of the game.", "kind": "enters", "tapped": true,
+      "if": { "any": [{ "not": { "turn": "self" } }, { "amount": { "turns": "self" }, "atLeast": 4 }] } },
+    { "basis": "{T}: Add {C}.", "kind": "mana", "cost": { "tap": true }, "colors": ["C"] },
+    { "basis": "{T}, Pay 1 life: Add one mana of any color.", "kind": "mana", "cost": { "tap": true, "life": 1 }, "any": 1 }
+  ]
+}
+```
+
 ## Entering with counters
 
 Mossborn Hydra is printed 0/0. Without its counter it dies as soon as it

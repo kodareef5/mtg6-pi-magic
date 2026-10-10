@@ -1,0 +1,39 @@
+{
+	"card": "Daydream",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Daydream",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Daydream at its printed cost",
+				"basis": "Exile target creature you control, then return that card to the battlefield under its owner's control with a +1/+1 counter on it.",
+				"source": {
+					"card": "Daydream",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Daydream from your graveyard for its flashback cost, with flashback's exile replacement",
+				"basis": "Exile target creature you control, then return that card to the battlefield under its owner's control with a +1/+1 counter on it. ... Flashback {2}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"source": {
+					"card": "Daydream",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"card": "Deadly Precision",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deadly Precision",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Deadly Precision, paying {4} as its additional cost or sacrificing an artifact or creature.",
+				"basis": "As an additional cost to cast this spell, pay {4} or sacrifice an artifact or creature.\nDestroy target creature.",
+				"source": {
+					"card": "Deadly Precision",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

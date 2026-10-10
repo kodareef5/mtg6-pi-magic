@@ -1,0 +1,40 @@
+{
+	"card": "Sazh's Chocobo",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sazh's Chocobo",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, put a +1/+1 counter on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you",
+						"zones": [
+							"battlefield"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

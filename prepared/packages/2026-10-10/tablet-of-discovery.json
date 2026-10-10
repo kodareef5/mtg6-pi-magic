@@ -1,0 +1,70 @@
+{
+	"card": "Tablet of Discovery",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tablet of Discovery",
+		"registers": [
+			{
+				"basis": "When this artifact enters, mill a card. You may play that card this turn. (To mill a card, put the top card of your library into your graveyard.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 1,
+							"as": "card"
+						},
+						{
+							"do": "permit",
+							"what": "bound:card",
+							"who": "you",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {R}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R}{R}. Spend this mana only to cast instant and sorcery spells.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R",
+					"R"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"instant",
+						"sorcery"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,95 @@
+{
+	"card": "Haliya, Guided by Light",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Haliya, Guided by Light",
+		"registers": [
+			{
+				"basis": "Whenever Haliya or another creature or artifact you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Haliya or another creature or artifact you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature",
+							"artifact"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your end step, draw a card if you've gained 3 or more life this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"history": "life-gained",
+									"by": "you"
+								},
+								"atLeast": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Haliya, Guided by Light for its warp cost",
+				"basis": "Warp {W} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"source": {
+					"card": "Haliya, Guided by Light",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

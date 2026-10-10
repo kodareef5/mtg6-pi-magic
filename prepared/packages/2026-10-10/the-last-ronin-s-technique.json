@@ -1,0 +1,41 @@
+{
+	"card": "The Last Ronin's Technique",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Last Ronin's Technique",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast normally for the printed cost; create three 1/1 white Ninja Turtle Spirit creature tokens.",
+				"basis": "Create three 1/1 white Ninja Turtle Spirit creature tokens. If this spell's sneak cost was paid, they enter tapped and attacking.",
+				"source": {
+					"card": "The Last Ronin's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast for the sneak alternative cost of {1}{W}, also returning an unblocked attacker you control to hand during the declare blockers step; create three 1/1 white Ninja Turtle Spirit creature tokens tapped and attacking.",
+				"basis": "Sneak {1}{W} (You may cast this spell for {1}{W} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Create three 1/1 white Ninja Turtle Spirit creature tokens. If this spell's sneak cost was paid, they enter tapped and attacking.",
+				"source": {
+					"card": "The Last Ronin's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

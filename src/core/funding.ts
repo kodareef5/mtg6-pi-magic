@@ -8,9 +8,9 @@ import { currentPlan, select } from "./query.ts";
 import { intrinsic } from "./characteristics.ts";
 import type { Mana } from "./table.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
-import type { Amount, Registration, Selector } from "./language.ts";
+import type { Amount, Condition, Registration, Selector } from "./language.ts";
 import type { Change } from "./syntax.ts";
-import { amount, matches, viewWorld } from "./selectors.ts";
+import { amount, holds, matches, viewWorld } from "./selectors.ts";
 import type { SeenObject } from "./work.ts";
 
 /** The mana part of a locked cost. */
@@ -39,8 +39,9 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
  * What a registered mana ability produces when its cost is tapping, or tapping
  * and sacrificing the source. `count` works out "for each Elf you control".
  */
-export function produces(registration: Registration, count: (amount: Amount) => number): Yield[] {
+export function produces(registration: Registration, count: (amount: Amount) => number, holding: (condition: Condition) => boolean = () => true): Yield[] {
 	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
+	if (registration.if && !holding(registration.if)) return [];
 	const { tap: _, sacrifice, ...other } = registration.cost;
 	if (Object.keys(other).length || (sacrifice !== undefined && sacrifice !== "this")) return [];
 	const terms = { claim: registration.basis, ...(registration.spendOnly ? { spendOnly: registration.spendOnly } : {}), ...(sacrifice ? { sacrifice: true as const } : {}) };
@@ -74,7 +75,7 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 		const scope = { world: viewWorld(frame.view), controller: frame.seat, source: object };
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
-			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, (value) => amount(scope, value))),
+			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, (value) => amount(scope, value), (condition) => holds(scope, condition))),
 		];
 		// A source whose abilities make different amounts is one unit per amount; the walk uses an object once.
 		for (const size of [...new Set(yields.map((one) => one.colors.length))]) {

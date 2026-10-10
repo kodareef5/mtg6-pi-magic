@@ -1,0 +1,62 @@
+{
+	"card": "Fireglass Mentor",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fireglass Mentor",
+		"registers": [
+			{
+				"basis": "At the beginning of your second main phase, if an opponent lost life this turn, exile the top two cards of your library. Choose one of them. Until end of turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "postcombat-main",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "life-lost",
+						"by": "opponent"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 2,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"exile"
+								],
+								"is": "bound:exiled"
+							},
+							"count": 1,
+							"as": "chosen"
+						},
+						{
+							"do": "permit",
+							"what": "bound:chosen",
+							"who": "you",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

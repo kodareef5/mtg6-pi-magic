@@ -94,3 +94,20 @@ comes from the rules (111.10a), not from Smaug's card.
   ]
 }
 ```
+
+## A mana ability with a condition
+
+A Verge's second ability works only while its controller holds a land of a
+named type. Register it as `mana` with `if`; while the condition fails the
+ability is not offered as a source.
+
+```json package
+{
+  "card": "Gloomlake Verge",
+  "registers": [
+    { "basis": "{T}: Add {U}.", "kind": "mana", "cost": { "tap": true }, "colors": ["U"] },
+    { "basis": "{T}: Add {B}. Activate only if you control an Island or a Swamp.", "kind": "mana", "cost": { "tap": true }, "colors": ["B"],
+      "if": { "amount": { "count": { "types": ["land"], "subtypes": ["Island", "Swamp"], "controller": "you" } }, "atLeast": 1 } }
+  ]
+}
+```

@@ -1,0 +1,55 @@
+{
+	"card": "Abandoned Air Temple",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abandoned Air Temple",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a basic land.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"amount": {
+						"count": {
+							"controller": "you",
+							"types": [
+								"land"
+							],
+							"supertypes": [
+								"basic"
+							]
+						}
+					},
+					"atMost": 0
+				}
+			},
+			{
+				"basis": "{T}: Add {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Put a +1/+1 counter on each creature you control.",
+				"basis": "{3}{W}, {T}: Put a +1/+1 counter on each creature you control.",
+				"source": {
+					"card": "Abandoned Air Temple",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

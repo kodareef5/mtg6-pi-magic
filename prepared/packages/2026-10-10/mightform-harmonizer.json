@@ -1,0 +1,64 @@
+{
+	"card": "Mightform Harmonizer",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mightform Harmonizer",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, double the power of target creature you control until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "end-of-turn",
+							"change": {
+								"power": {
+									"power": "target:0"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Mightform Harmonizer for its warp cost, creating its delayed exile and later-turn casting permission.",
+				"basis": "Warp {2}{G} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"source": {
+					"card": "Mightform Harmonizer",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

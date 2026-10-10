@@ -1,0 +1,112 @@
+{
+	"card": "Sarkhan, Dragon Ascendant",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sarkhan, Dragon Ascendant",
+		"registers": [
+			{
+				"basis": "When Sarkhan enters, you may behold a Dragon. If you do, create a Treasure token. (To behold a Dragon, choose a Dragon you control or reveal a Dragon card from your hand.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"battlefield",
+									"hand"
+								],
+								"controller": "you",
+								"subtypes": [
+									"Dragon"
+								]
+							},
+							"count": 1,
+							"reveal": true,
+							"may": true,
+							"as": "dragon"
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"bound": "dragon"
+							},
+							"spec": {
+								"name": "Treasure",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Dragon you control enters, put a +1/+1 counter on Sarkhan. Until end of turn, Sarkhan becomes a Dragon in addition to his other types and gains flying.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"subtypes": [
+							"Dragon"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"subtypes": {
+									"add": [
+										"Dragon"
+									]
+								},
+								"words": [
+									"flying"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

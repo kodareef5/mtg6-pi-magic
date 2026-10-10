@@ -1,0 +1,70 @@
+{
+	"card": "Suki, Courageous Rescuer",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Suki, Courageous Rescuer",
+		"registers": [
+			{
+				"basis": "Other creatures you control get +1/+0.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 0
+				}
+			},
+			{
+				"basis": "Whenever another permanent you control leaves the battlefield during your turn, create a 1/1 white Ally creature token. This ability triggers only once each turn.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"controller": "you",
+						"other": true
+					},
+					"from": [
+						"battlefield"
+					],
+					"whose": "you"
+				},
+				"limit": "once-per-turn",
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Ally",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Ally"
+								],
+								"colors": [
+									"W"
+								],
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

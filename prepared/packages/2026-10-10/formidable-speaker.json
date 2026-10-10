@@ -1,0 +1,100 @@
+{
+	"card": "Formidable Speaker",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Formidable Speaker",
+		"registers": [
+			{
+				"basis": "When this creature enters, you may discard a card. If you do, search your library for a creature card, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"may": true,
+							"as": "discard-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard-card",
+							"to": "graveyard",
+							"reason": "discard",
+							"if": {
+								"bound": "discard-card"
+							},
+							"as": "discarded"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "creature-card",
+							"if": {
+								"bound": "discarded"
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:creature-card",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "creature-card"
+							}
+						},
+						{
+							"do": "shuffle",
+							"who": "you",
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate Formidable Speaker to untap another target permanent.",
+				"basis": "{1}, {T}: Untap another target permanent.",
+				"source": {
+					"card": "Formidable Speaker",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

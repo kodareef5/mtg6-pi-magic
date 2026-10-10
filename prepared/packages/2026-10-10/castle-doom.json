@@ -1,0 +1,52 @@
+{
+	"card": "Castle Doom",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Castle Doom",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast an artifact spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"artifact"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Create a Doombot by paying {3}, tapping Castle Doom, and sacrificing an artifact; activate only as a sorcery.",
+				"basis": "{3}, {T}, Sacrifice an artifact: Create a 3/3 colorless Robot Villain artifact creature token named Doombot. Activate only as a sorcery.",
+				"source": {
+					"card": "Castle Doom",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

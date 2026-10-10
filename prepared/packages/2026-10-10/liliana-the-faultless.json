@@ -1,0 +1,54 @@
+{
+	"card": "Liliana the Faultless",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Liliana the Faultless",
+		"registers": [
+			{
+				"basis": "Whenever another creature or planeswalker you control enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature",
+							"planeswalker"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Grant another creature or planeswalker you control hexproof until end of turn.",
+				"basis": "{1}, {T}, Discard a card: Another target creature or planeswalker you control gains hexproof until end of turn.",
+				"source": {
+					"card": "Liliana the Faultless",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

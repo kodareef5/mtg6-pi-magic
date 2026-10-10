@@ -1,0 +1,27 @@
+{
+	"card": "Vibrant Outburst",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vibrant Outburst",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Vibrant Outburst",
+				"basis": "Vibrant Outburst deals 3 damage to any target. Tap up to one target creature.",
+				"source": {
+					"card": "Vibrant Outburst",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

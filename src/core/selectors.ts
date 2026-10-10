@@ -31,7 +31,15 @@ export type World = {
 	history: Happened[];
 	/** The object as it is, or as it last was (608.2h). */
 	lastKnown(ref: ObjectRef): { object: Seen; traits?: Traits } | undefined;
+	/** Whose turn it is and how many turns each seat has begun, the current one included. Absent before the first turn. */
+	turn?: { active: SeatId; taken: Record<SeatId, number> };
 };
+
+/** Turns each seat has begun so far, from who started and the turn number: seats alternate from the first. */
+export function turnsTaken(starting: SeatId, seats: SeatId[], turn: number): Record<SeatId, number> {
+	const order = [starting, ...seats.filter((one) => one !== starting)];
+	return Object.fromEntries(order.map((seat, at) => [seat, Math.max(0, Math.floor((turn - at + order.length - 1) / order.length))])) as Record<SeatId, number>;
+}
 export type Chosen = ObjectRef | { player: SeatId };
 /** What an earlier instruction bound with `as`. */
 export type Bound = { objects: ObjectRef[]; players: SeatId[]; amount?: number };
@@ -58,6 +66,7 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 		objects: [...table.things.values()], read: reader,
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, name: one.name })),
 		notes: table.notes, combat: table.combat,
+		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn) } } : {}),
 		get history() { return (events ??= happened(table)); },
 		lastKnown(ref) {
 			const now = table.things.get(ref.id);
@@ -92,6 +101,8 @@ export function viewWorld(view: SeatView): World {
 		players: (view.players ?? []).map((one) => ({ ...one, name: view.seats?.find((seat) => seat.id === one.id)?.name })), notes: view.notes ?? [],
 		combat: view.combat ?? null, history: view.history ?? [],
 		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
+		...(view.window.kind === "turn" && view.starting !== undefined ? { turn: { active: view.window.active,
+			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn) } } : {}),
 	};
 }
 
@@ -217,6 +228,11 @@ export function amount(scope: Scope, value: Amount): number {
 	if ("history" in value) return history(scope, value);
 	if ("x" in value) return scope.x ?? 0;
 	if ("sum" in value) return value.sum.reduce((total: number, part) => total + amount(scope, part), 0);
+	if ("turns" in value) {
+		const turn = scope.world.turn; if (!turn) return 0;
+		const who = value.turns === "self" ? scope.controller : scope.world.players.find((one) => one.id !== scope.controller)?.id;
+		return who === undefined ? 0 : turn.taken[who] ?? 0;
+	}
 	return -amount(scope, value.negate);
 }
 
@@ -240,5 +256,6 @@ export function holds(scope: Scope, condition: Condition): boolean {
 	if ("is" in condition) return objects(scope, condition.is).some((one) => matches(scope, one, condition.matches));
 	if ("all" in condition) return condition.all.every((part) => holds(scope, part));
 	if ("any" in condition) return condition.any.some((part) => holds(scope, part));
+	if ("turn" in condition) { const turn = scope.world.turn; return !!turn && (condition.turn === "self" ? turn.active === scope.controller : turn.active !== scope.controller); }
 	return !holds(scope, condition.not);
 }

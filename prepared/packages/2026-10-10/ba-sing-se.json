@@ -1,0 +1,57 @@
+{
+	"card": "Ba Sing Se",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ba Sing Se",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a basic land.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"supertypes": [
+									"basic"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Earthbend 2 with Ba Sing Se; activate only as a sorcery",
+				"basis": "{2}{G}, {T}: Earthbend 2. Activate only as a sorcery. (Target land you control becomes a 0/0 creature with haste that's still a land. Put two +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"source": {
+					"card": "Ba Sing Se",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

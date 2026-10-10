@@ -1,0 +1,81 @@
+{
+	"card": "Sunset Saboteur",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunset Saboteur",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Ward—Discard a card.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"discard": 1
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever this creature attacks, put a +1/+1 counter on target creature an opponent controls.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

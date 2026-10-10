@@ -1,0 +1,27 @@
+{
+	"card": "Day of Black Sun",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Day of Black Sun",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Day of Black Sun with a chosen value of X; creatures with mana value X or less lose all abilities until end of turn, then those creatures are destroyed.",
+				"basis": "Each creature with mana value X or less loses all abilities until end of turn. Destroy those creatures.",
+				"source": {
+					"card": "Day of Black Sun",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

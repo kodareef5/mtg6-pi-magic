@@ -1,0 +1,26 @@
+{
+	"card": "Torpor Orb",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Torpor Orb",
+		"registers": [
+			{
+				"basis": "Creatures entering don't cause abilities to trigger.",
+				"kind": "suppress",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"card": "United Battlefront",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "United Battlefront",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast United Battlefront to look at the top seven cards, put up to two qualifying permanent cards onto the battlefield, and put the rest on the bottom in a random order.",
+				"basis": "Look at the top seven cards of your library. Put up to two noncreature, nonland permanent cards with mana value 3 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order.",
+				"source": {
+					"card": "United Battlefront",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,75 @@
+{
+	"card": "Restless Reef",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restless Reef",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {U} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "Whenever this land attacks, target player mills four cards.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "target:0",
+							"count": 4
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Animate Restless Reef until end of turn as a 4/4 blue and black Shark creature with deathtouch that is still a land.",
+				"basis": "{2}{U}{B}: Until end of turn, this land becomes a 4/4 blue and black Shark creature with deathtouch. It's still a land.",
+				"source": {
+					"card": "Restless Reef",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

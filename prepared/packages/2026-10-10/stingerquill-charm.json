@@ -1,0 +1,55 @@
+{
+	"card": "Stingerquill Charm",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stingerquill Charm",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Stingerquill Charm choosing 3 damage to any target.",
+				"basis": "Choose one — ... • Stingerquill Charm deals 3 damage to any target.",
+				"source": {
+					"card": "Stingerquill Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Stingerquill Charm choosing first strike and deathtouch for target creature until end of turn.",
+				"basis": "Choose one — ... • Target creature gains first strike and deathtouch until end of turn.",
+				"source": {
+					"card": "Stingerquill Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Stingerquill Charm choosing a 2/2 colorless Wizard Soldier Cadet token with haste until end of turn.",
+				"basis": "Choose one — ... • Create a 2/2 colorless Wizard Soldier creature token named Cadet. It gains haste until end of turn.",
+				"source": {
+					"card": "Stingerquill Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

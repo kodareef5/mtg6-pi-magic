@@ -1,0 +1,25 @@
+{
+	"card": "Fabled Passage",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fabled Passage",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Sacrifice Fabled Passage to search for a basic land, put it onto the battlefield tapped, shuffle, then untap it if you control four or more lands.",
+				"basis": "{T}, Sacrifice this land: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle. Then if you control four or more lands, untap that land.",
+				"source": {
+					"card": "Fabled Passage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

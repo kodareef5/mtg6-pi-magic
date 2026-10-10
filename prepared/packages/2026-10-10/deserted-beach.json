@@ -1,0 +1,40 @@
+{
+	"card": "Deserted Beach",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deserted Beach",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atMost": 1
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W",
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

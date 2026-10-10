@@ -1,0 +1,107 @@
+{
+	"card": "Smaug the Magnificent",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Smaug the Magnificent",
+		"registers": [
+			{
+				"basis": "Flying, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever Smaug attacks, he deals damage equal to the number of Treasures you control to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"from": "this",
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"subtypes": [
+										"Treasure"
+									],
+									"controller": "you"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your upkeep, create a Treasure token.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treasure",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

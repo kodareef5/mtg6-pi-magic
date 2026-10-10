@@ -1,0 +1,27 @@
+{
+	"card": "Day of Judgment",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Day of Judgment",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Day of Judgment to destroy all creatures.",
+				"basis": "Destroy all creatures.",
+				"source": {
+					"card": "Day of Judgment",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

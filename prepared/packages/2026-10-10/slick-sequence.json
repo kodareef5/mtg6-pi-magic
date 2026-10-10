@@ -1,0 +1,27 @@
+{
+	"card": "Slick Sequence",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slick Sequence",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Slick Sequence to deal 2 damage to any target, then draw a card if you've cast another spell this turn.",
+				"basis": "Slick Sequence deals 2 damage to any target. If you've cast another spell this turn, draw a card.",
+				"source": {
+					"card": "Slick Sequence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

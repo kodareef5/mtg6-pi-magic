@@ -48,7 +48,10 @@ Those drive engine and syntax work, ordered by how many decks they block.
    `tools/guide.ts` writes them; none is written yet.
 6. **The loop.** Run a batch, read the ledger, fix the top blocker in core or
    syntax with its offline test, add back the decks it unblocks, run again.
-   Keep every game: the saved journals are the benchmark material.
+   Keep every game: the saved journals are the benchmark material. First
+   pass done: the audit in [Status](STATUS.md) ranks the blockers; shock
+   lands, Verges and turn-counted entry are built. Next are the omen and
+   adventure back halves, filtered cast triggers, and copies.
 
 ## Judged how
 

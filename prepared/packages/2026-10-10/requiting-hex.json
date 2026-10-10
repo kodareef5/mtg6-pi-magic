@@ -1,0 +1,41 @@
+{
+	"card": "Requiting Hex",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Requiting Hex",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Requiting Hex without paying its optional blight additional cost: destroy target creature with mana value 2 or less.",
+				"basis": "As an additional cost to cast this spell, you may blight 1. (You may put a -1/-1 counter on a creature you control.) ... Destroy target creature with mana value 2 or less. If this spell's additional cost was paid, you gain 2 life.",
+				"source": {
+					"card": "Requiting Hex",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requiting Hex paying its optional blight 1 additional cost: destroy target creature with mana value 2 or less, then gain 2 life.",
+				"basis": "As an additional cost to cast this spell, you may blight 1. (You may put a -1/-1 counter on a creature you control.) ... Destroy target creature with mana value 2 or less. If this spell's additional cost was paid, you gain 2 life.",
+				"source": {
+					"card": "Requiting Hex",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

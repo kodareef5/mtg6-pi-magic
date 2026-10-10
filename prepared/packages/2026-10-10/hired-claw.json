@@ -1,0 +1,60 @@
+{
+	"card": "Hired Claw",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hired Claw",
+		"registers": [
+			{
+				"basis": "Whenever you attack with one or more Lizards, this creature deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "attacked-with",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"subtypes": [
+							"Lizard"
+						],
+						"controller": "you"
+					},
+					"by": "you",
+					"batch": true
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Put a +1/+1 counter on Hired Claw; activate only if an opponent lost life this turn and only once each turn.",
+				"basis": "{1}{R}: Put a +1/+1 counter on this creature. Activate only if an opponent lost life this turn and only once each turn.",
+				"source": {
+					"card": "Hired Claw",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

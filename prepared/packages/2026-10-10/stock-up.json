@@ -1,0 +1,27 @@
+{
+	"card": "Stock Up",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stock Up",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Stock Up to look at the top five cards, put two into hand, and put the rest on the bottom in any order.",
+				"basis": "Look at the top five cards of your library. Put two of them into your hand and the rest on the bottom of your library in any order.",
+				"source": {
+					"card": "Stock Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

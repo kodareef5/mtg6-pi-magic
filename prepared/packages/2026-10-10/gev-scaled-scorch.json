@@ -1,0 +1,91 @@
+{
+	"card": "Gev, Scaled Scorch",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gev, Scaled Scorch",
+		"registers": [
+			{
+				"basis": "Ward—Pay 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"life": 2
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Other creatures you control enter with an additional +1/+1 counter on them for each opponent who lost life this turn.",
+				"kind": "enters",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"counters": {
+					"+1/+1": 1
+				},
+				"if": {
+					"amount": {
+						"history": "life-lost",
+						"by": "opponent"
+					},
+					"atLeast": 1
+				}
+			},
+			{
+				"basis": "Whenever you cast a Lizard spell, Gev deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"subtypes": [
+							"Lizard"
+						]
+					},
+					"by": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

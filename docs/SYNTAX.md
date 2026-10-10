@@ -110,12 +110,14 @@ An **amount** is worked out when it is read and never stored.
 | `x` | the X announced for this spell or ability; a permanent remembers its X (107.3m) |
 | `sum` | amounts added together: Calamitous Cave-In's Caves plus Cave cards |
 | `negate` | an amount taken away |
+| `turns` of `self` or `opponent` | how many turns that side has begun, the current one included: Starting Town's "your first, second, or third turn" |
 
 `history` reads what the table recorded since the turn began.
 
 A **condition** is an amount against `atLeast` or `atMost`, a `bound` name that
-holds something, `is` a ref matching a selector, or `all`, `any`, `not` over
-conditions. Kicker and warp need no condition: their procedure variants already
+holds something, `is` a ref matching a selector, `turn` naming whose turn it is
+(`self` or `opponent`: Eddymurk Crab's "if it's not your turn"), or `all`,
+`any`, `not` over conditions. Kicker and warp need no condition: their procedure variants already
 say what they do.
 
 ## Doing things
@@ -211,9 +213,9 @@ checked by the table; the opponent sees both, and objects when they differ.
 |---|---|---|
 | `watch` | a triggered ability: an event, an intervening `if`, an effect, `may`, `limit` | 603 |
 | `continuous` | a static ability: what it affects, the change, an `if` | 604, 611.3 |
-| `enters` | how a permanent enters: tapped, with counters, under a condition; with `affects`, how others enter | 614.1c-d |
+| `enters` | how a permanent enters: tapped, with counters, under a condition; with `affects`, how others enter; `unlessPay: {life}` for "you may pay 2 life, if you don't it enters tapped", which the land play offers as a paid and an unpaid option | 614.1c-d |
 | `replace` | "if it would die, exile it instead" | 614 |
-| `mana` | a mana ability, used while paying | 605, 601.2g |
+| `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |
 | `permit` | an extra land play, lands from another zone, flash | 305.2 |
 | `suppress` | events that don't cause triggers | Torpor Orb |
 

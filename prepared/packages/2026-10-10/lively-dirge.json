@@ -1,0 +1,56 @@
+{
+	"card": "Lively Dirge",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lively Dirge",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Lively Dirge with only the +{1} spree option: search for a card, put it into your graveyard, then shuffle (total cost {2}{B}).",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Search your library for a card, put it into your graveyard, then shuffle.",
+				"source": {
+					"card": "Lively Dirge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Lively Dirge with only the +{2} spree option: return up to two creature cards with total mana value 4 or less from your graveyard to the battlefield (total cost {3}{B}; no targets).",
+				"basis": "Spree (Choose one or more additional costs.) ... + {2} — Return up to two creature cards with total mana value 4 or less from your graveyard to the battlefield.",
+				"source": {
+					"card": "Lively Dirge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Lively Dirge with both spree options (total cost {4}{B}): search, put the card into your graveyard, and shuffle, then choose and return up to two creature cards with total mana value 4 or less from your graveyard to the battlefield; no targets.",
+				"basis": "Spree (Choose one or more additional costs.)\n+ {1} — Search your library for a card, put it into your graveyard, then shuffle.\n+ {2} — Return up to two creature cards with total mana value 4 or less from your graveyard to the battlefield.",
+				"source": {
+					"card": "Lively Dirge",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

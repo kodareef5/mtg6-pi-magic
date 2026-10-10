@@ -1,0 +1,36 @@
+{
+	"card": "Soulstone Sanctuary",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Soulstone Sanctuary",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Animate Soulstone Sanctuary as a 3/3 creature with vigilance and all creature types, still a land.",
+				"basis": "{4}: This land becomes a 3/3 creature with vigilance and all creature types. It's still a land.",
+				"source": {
+					"card": "Soulstone Sanctuary",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

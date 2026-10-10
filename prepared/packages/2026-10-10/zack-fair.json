@@ -1,0 +1,34 @@
+{
+	"card": "Zack Fair",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zack Fair",
+		"registers": [
+			{
+				"basis": "Zack Fair enters with a +1/+1 counter on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Sacrifice Zack Fair to grant indestructible, put its counters on a creature you control, and attach an Equipment formerly attached to Zack Fair to that creature.",
+				"basis": "{1}, Sacrifice Zack Fair: Target creature you control gains indestructible until end of turn. Put Zack Fair's counters on that creature and attach an Equipment that was attached to Zack Fair to that creature.",
+				"source": {
+					"card": "Zack Fair",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

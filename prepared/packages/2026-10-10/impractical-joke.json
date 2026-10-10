@@ -1,0 +1,27 @@
+{
+	"card": "Impractical Joke",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Impractical Joke",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Impractical Joke: damage can't be prevented this turn; deal 3 damage to up to one target creature or planeswalker.",
+				"basis": "Damage can't be prevented this turn. Impractical Joke deals 3 damage to up to one target creature or planeswalker.",
+				"source": {
+					"card": "Impractical Joke",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

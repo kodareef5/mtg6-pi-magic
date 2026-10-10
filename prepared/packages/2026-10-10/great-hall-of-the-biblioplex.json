@@ -1,0 +1,54 @@
+{
+	"card": "Great Hall of the Biblioplex",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Great Hall of the Biblioplex",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}, Pay 1 life: Add one mana of any color. Spend this mana only to cast an instant or sorcery spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true,
+					"life": 1
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"instant",
+						"sorcery"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Animate this land if it isn't a creature into a 2/4 Wizard that remains a land and gains the instant-or-sorcery cast trigger.",
+				"basis": "{5}: If this land isn't a creature, it becomes a 2/4 Wizard creature with \"Whenever you cast an instant or sorcery spell, this creature gets +1/+0 until end of turn.\" It's still a land.",
+				"source": {
+					"card": "Great Hall of the Biblioplex",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

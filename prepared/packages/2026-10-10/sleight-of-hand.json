@@ -1,0 +1,27 @@
+{
+	"card": "Sleight of Hand",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sleight of Hand",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Sleight of Hand",
+				"basis": "Look at the top two cards of your library. Put one of them into your hand and the other on the bottom of your library.",
+				"source": {
+					"card": "Sleight of Hand",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

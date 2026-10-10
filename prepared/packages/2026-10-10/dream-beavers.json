@@ -1,0 +1,81 @@
+{
+	"card": "Dream Beavers",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dream Beavers",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, each opponent loses 1 life and you gain 1 life. Scry 1. (Look at the top card of your library. You may put that card on the bottom.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "life",
+									"who": "bound:player",
+									"amount": -1
+								}
+							]
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"is": {
+									"top": 1,
+									"of": "you"
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "scry-card"
+						},
+						{
+							"do": "move",
+							"what": "bound:scry-card",
+							"to": "library",
+							"position": "bottom",
+							"reason": "resolve",
+							"may": true
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

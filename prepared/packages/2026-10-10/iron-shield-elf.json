@@ -1,0 +1,26 @@
+{
+	"card": "Iron-Shield Elf",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iron-Shield Elf",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Discard a card to give Iron-Shield Elf indestructible until end of turn, then tap it.",
+				"basis": "Discard a card: This creature gains indestructible until end of turn. Tap it. (Damage and effects that say \"destroy\" don't destroy it. If its toughness is 0 or less, it still dies.)",
+				"source": {
+					"card": "Iron-Shield Elf",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

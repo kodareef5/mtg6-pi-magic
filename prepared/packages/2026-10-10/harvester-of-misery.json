@@ -1,0 +1,70 @@
+{
+	"card": "Harvester of Misery",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Harvester of Misery",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, other creatures get -2/-2 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": -2,
+								"toughness": -2
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Discard Harvester of Misery to give target creature -2/-2 until end of turn",
+				"basis": "{1}{B}, Discard this card: Target creature gets -2/-2 until end of turn.",
+				"source": {
+					"card": "Harvester of Misery",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

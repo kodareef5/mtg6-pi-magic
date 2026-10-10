@@ -1,0 +1,41 @@
+{
+	"card": "Bitter Triumph",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bitter Triumph",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Bitter Triumph, discarding a card as its additional cost, to destroy target creature or planeswalker.",
+				"basis": "As an additional cost to cast this spell, discard a card or pay 3 life.\nDestroy target creature or planeswalker.",
+				"source": {
+					"card": "Bitter Triumph",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Bitter Triumph, paying 3 life as its additional cost, to destroy target creature or planeswalker.",
+				"basis": "As an additional cost to cast this spell, discard a card or pay 3 life.\nDestroy target creature or planeswalker.",
+				"source": {
+					"card": "Bitter Triumph",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

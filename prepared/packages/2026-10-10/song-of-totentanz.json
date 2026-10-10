@@ -1,0 +1,27 @@
+{
+	"card": "Song of Totentanz",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Song of Totentanz",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Song of Totentanz to create X Rat tokens that can't block and give creatures you control haste until end of turn.",
+				"basis": "Create X 1/1 black Rat creature tokens with \"This token can't block.\" Creatures you control gain haste until end of turn.",
+				"source": {
+					"card": "Song of Totentanz",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"card": "Sear",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sear",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Sear to deal 4 damage to target creature or planeswalker.",
+				"basis": "Sear deals 4 damage to target creature or planeswalker.",
+				"source": {
+					"card": "Sear",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

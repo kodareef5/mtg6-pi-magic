@@ -1,0 +1,76 @@
+{
+	"card": "Moonshadow",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moonshadow",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters with six -1/-1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"-1/-1": 6
+				}
+			},
+			{
+				"basis": "Whenever one or more permanent cards are put into your graveyard from anywhere while this creature has a -1/-1 counter on it, remove a -1/-1 counter from this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"to": [
+						"graveyard"
+					],
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"owner": "you",
+						"types": [
+							"artifact",
+							"battle",
+							"creature",
+							"enchantment",
+							"land",
+							"planeswalker"
+						],
+						"token": false
+					},
+					"batch": true
+				},
+				"if": {
+					"amount": {
+						"counters": "-1/-1",
+						"on": "this"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "-1/-1",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

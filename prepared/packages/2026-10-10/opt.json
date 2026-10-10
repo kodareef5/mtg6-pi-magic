@@ -1,0 +1,27 @@
+{
+	"card": "Opt",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Opt",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Opt: scry 1, then draw a card",
+				"basis": "Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\nDraw a card.",
+				"source": {
+					"card": "Opt",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

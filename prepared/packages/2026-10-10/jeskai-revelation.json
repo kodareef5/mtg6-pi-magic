@@ -1,0 +1,27 @@
+{
+	"card": "Jeskai Revelation",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jeskai Revelation",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Jeskai Revelation: return a targeted spell or permanent, deal 4 damage to any target, create two Monk tokens with prowess, draw two cards, and gain 4 life.",
+				"basis": "Return target spell or permanent to its owner's hand. Jeskai Revelation deals 4 damage to any target. Create two 1/1 white Monk creature tokens with prowess. Draw two cards. You gain 4 life.",
+				"source": {
+					"card": "Jeskai Revelation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

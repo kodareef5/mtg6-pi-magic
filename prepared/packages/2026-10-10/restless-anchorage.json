@@ -1,0 +1,79 @@
+{
+	"card": "Restless Anchorage",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Restless Anchorage",
+		"registers": [
+			{
+				"basis": "This land enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			},
+			{
+				"basis": "Whenever this land attacks, create a Map token.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Map",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Map"
+								],
+								"colors": []
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Animate Restless Anchorage until end of turn as a 2/3 white and blue Bird creature with flying that's still a land.",
+				"basis": "{1}{W}{U}: Until end of turn, this land becomes a 2/3 white and blue Bird creature with flying. It's still a land.",
+				"source": {
+					"card": "Restless Anchorage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

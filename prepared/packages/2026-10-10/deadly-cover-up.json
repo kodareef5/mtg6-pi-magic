@@ -1,0 +1,41 @@
+{
+	"card": "Deadly Cover-Up",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deadly Cover-Up",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Deadly Cover-Up without collecting evidence.",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 6. ... Destroy all creatures. If evidence was collected, exile a card from an opponent's graveyard. Then search its owner's graveyard, hand, and library for any number of cards with that name and exile them. That player shuffles, then draws a card for each card exiled from their hand this way.",
+				"source": {
+					"card": "Deadly Cover-Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Deadly Cover-Up with the optional additional cost of collecting evidence 6.",
+				"basis": "As an additional cost to cast this spell, you may collect evidence 6. ... Destroy all creatures. If evidence was collected, exile a card from an opponent's graveyard. Then search its owner's graveyard, hand, and library for any number of cards with that name and exile them. That player shuffles, then draws a card for each card exiled from their hand this way.",
+				"source": {
+					"card": "Deadly Cover-Up",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

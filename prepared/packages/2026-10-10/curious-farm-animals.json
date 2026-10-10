@@ -1,0 +1,46 @@
+{
+	"card": "Curious Farm Animals",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Curious Farm Animals",
+		"registers": [
+			{
+				"basis": "When this creature dies, you gain 3 life.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 3
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Sacrifice Curious Farm Animals to destroy up to one target artifact or enchantment.",
+				"basis": "{2}, Sacrifice this creature: Destroy up to one target artifact or enchantment.",
+				"source": {
+					"card": "Curious Farm Animals",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

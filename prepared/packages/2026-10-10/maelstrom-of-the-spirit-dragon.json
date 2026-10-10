@@ -1,0 +1,53 @@
+{
+	"card": "Maelstrom of the Spirit Dragon",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Maelstrom of the Spirit Dragon",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a Dragon spell or an Omen spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"subtypes": [
+						"Dragon",
+						"Omen"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Search for a Dragon card",
+				"basis": "{4}, {T}, Sacrifice this land: Search your library for a Dragon card, reveal it, put it into your hand, then shuffle.",
+				"source": {
+					"card": "Maelstrom of the Spirit Dragon",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

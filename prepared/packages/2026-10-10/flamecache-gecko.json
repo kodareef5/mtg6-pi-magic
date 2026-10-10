@@ -1,0 +1,56 @@
+{
+	"card": "Flamecache Gecko",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flamecache Gecko",
+		"registers": [
+			{
+				"basis": "When this creature enters, if an opponent lost life this turn, add {B}{R}.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"history": "life-lost",
+						"by": "opponent"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"B",
+								"R"
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Pay {1}{R} and discard a card to draw a card.",
+				"basis": "{1}{R}, Discard a card: Draw a card.",
+				"source": {
+					"card": "Flamecache Gecko",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"card": "Hop to It",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hop to It",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Hop to It to create three 1/1 white Rabbit creature tokens.",
+				"basis": "Create three 1/1 white Rabbit creature tokens.",
+				"source": {
+					"card": "Hop to It",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

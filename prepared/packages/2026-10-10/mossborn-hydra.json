@@ -1,0 +1,59 @@
+{
+	"card": "Mossborn Hydra",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mossborn Hydra",
+		"registers": [
+			{
+				"basis": "Trample (This creature can deal excess combat damage to the player or planeswalker it's attacking.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters with a +1/+1 counter on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": 1
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, double the number of +1/+1 counters on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"counters": "+1/+1",
+								"on": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,60 @@
+{
+	"card": "Firdoch Core",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Firdoch Core",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"changeling"
+					],
+					"subtypes": {
+						"allCreatureTypes": true
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Animate Firdoch Core as a 4/4 artifact creature until end of turn",
+				"basis": "{4}: This artifact becomes a 4/4 artifact creature until end of turn.",
+				"source": {
+					"card": "Firdoch Core",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

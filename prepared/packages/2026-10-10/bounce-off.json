@@ -1,0 +1,27 @@
+{
+	"card": "Bounce Off",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bounce Off",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Bounce Off to return target creature or Vehicle to its owner's hand.",
+				"basis": "Return target creature or Vehicle to its owner's hand.",
+				"source": {
+					"card": "Bounce Off",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

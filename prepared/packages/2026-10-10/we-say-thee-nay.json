@@ -1,0 +1,41 @@
+{
+	"card": "We Say Thee Nay!",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "We Say Thee Nay!",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast We Say Thee Nay! without teamwork: counter target spell unless its controller pays {2}.",
+				"basis": "Teamwork 2 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 2 or more.) ... Counter target spell unless its controller pays {2}. Counter that spell unless its controller pays {4} instead if this spell was cast using teamwork.",
+				"source": {
+					"card": "We Say Thee Nay!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast We Say Thee Nay! using teamwork: additionally tap any number of creatures you control with total power 2 or more; counter target spell unless its controller pays {4} instead.",
+				"basis": "Teamwork 2 (As an additional cost to cast this spell, you may tap any number of creatures you control with total power 2 or more.) ... Counter target spell unless its controller pays {2}. Counter that spell unless its controller pays {4} instead if this spell was cast using teamwork.",
+				"source": {
+					"card": "We Say Thee Nay!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

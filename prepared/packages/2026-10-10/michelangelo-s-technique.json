@@ -1,0 +1,41 @@
+{
+	"card": "Michelangelo's Technique",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Michelangelo's Technique",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Michelangelo's Technique at its printed mana cost and resolve its library selection effect.",
+				"basis": "Look at the top eight cards of your library. Put up to two creature cards with total mana value 6 or less from among them onto the battlefield and the rest on the bottom of your library in a random order.",
+				"source": {
+					"card": "Michelangelo's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Michelangelo's Technique using sneak for {3}{G}, returning an unblocked attacker you control to hand during the declare blockers step, and resolve its library selection effect.",
+				"basis": "Sneak {3}{G} (You may cast this spell for {3}{G} if you also return an unblocked attacker you control to hand during the declare blockers step.) ... Look at the top eight cards of your library. Put up to two creature cards with total mana value 6 or less from among them onto the battlefield and the rest on the bottom of your library in a random order.",
+				"source": {
+					"card": "Michelangelo's Technique",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

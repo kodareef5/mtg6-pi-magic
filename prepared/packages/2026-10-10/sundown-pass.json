@@ -1,0 +1,50 @@
+{
+	"card": "Sundown Pass",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sundown Pass",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or more other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"amount": {
+						"count": {
+							"types": [
+								"land"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atMost": 1
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {W}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

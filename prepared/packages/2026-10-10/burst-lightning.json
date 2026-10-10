@@ -1,0 +1,41 @@
+{
+	"card": "Burst Lightning",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Burst Lightning",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Burst Lightning without kicker: deal 2 damage to any target",
+				"basis": "Burst Lightning deals 2 damage to any target. If this spell was kicked, it deals 4 damage instead.",
+				"source": {
+					"card": "Burst Lightning",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Burst Lightning kicked for {4}{R}: deal 4 damage to any target",
+				"basis": "Kicker {4} (You may pay an additional {4} as you cast this spell.) ... Burst Lightning deals 2 damage to any target. If this spell was kicked, it deals 4 damage instead.",
+				"source": {
+					"card": "Burst Lightning",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

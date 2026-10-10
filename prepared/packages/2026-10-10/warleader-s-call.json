@@ -1,0 +1,57 @@
+{
+	"card": "Warleader's Call",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Warleader's Call",
+		"registers": [
+			{
+				"basis": "Creatures you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			},
+			{
+				"basis": "Whenever a creature you control enters, this enchantment deals 1 damage to each opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "opponent",
+							"instructions": [
+								{
+									"do": "damage",
+									"to": "bound:player",
+									"amount": 1,
+									"from": "this"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

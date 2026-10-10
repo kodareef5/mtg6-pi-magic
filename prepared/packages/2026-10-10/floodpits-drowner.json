@@ -1,0 +1,98 @@
+{
+	"card": "Floodpits Drowner",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Floodpits Drowner",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, tap target creature an opponent controls and put a stun counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "stun",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Floodpits Drowner with flash at its printed cost",
+				"basis": "Flash",
+				"source": {
+					"card": "Floodpits Drowner",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Activate Floodpits Drowner to shuffle it and target creature with a stun counter into their owners' libraries",
+				"basis": "{1}{U}, {T}: Shuffle this creature and target creature with a stun counter on it into their owners' libraries.",
+				"source": {
+					"card": "Floodpits Drowner",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

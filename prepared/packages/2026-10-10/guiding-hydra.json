@@ -1,0 +1,80 @@
+{
+	"card": "Guiding Hydra",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Guiding Hydra",
+		"registers": [
+			{
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"kind": "enters",
+				"counters": {
+					"+1/+1": {
+						"x": true
+					}
+				}
+			},
+			{
+				"basis": "At the beginning of combat on your turn, you may remove a +1/+1 counter from this creature. If you do, put a +1/+1 counter on each other creature you control.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": -1,
+							"may": true,
+							"if": {
+								"amount": {
+									"counters": "+1/+1",
+									"on": "this"
+								},
+								"atLeast": 1
+							},
+							"as": "removed"
+						},
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you",
+								"other": true
+							},
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"bound": "removed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Guiding Hydra with an announced value of X.",
+				"basis": "This creature enters with X +1/+1 counters on it.",
+				"source": {
+					"card": "Guiding Hydra",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

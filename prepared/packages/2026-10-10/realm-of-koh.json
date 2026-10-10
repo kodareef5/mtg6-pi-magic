@@ -1,0 +1,57 @@
+{
+	"card": "Realm of Koh",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Realm of Koh",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a basic land.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"types": [
+									"land"
+								],
+								"supertypes": [
+									"basic"
+								],
+								"controller": "you"
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {B}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Create a 1/1 colorless Spirit creature token with the stated non-Spirit blocking restrictions.",
+				"basis": "{3}{B}, {T}: Create a 1/1 colorless Spirit creature token with \"This token can't block or be blocked by non-Spirit creatures.\"",
+				"source": {
+					"card": "Realm of Koh",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

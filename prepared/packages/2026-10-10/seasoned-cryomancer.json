@@ -1,0 +1,178 @@
+{
+	"card": "Seasoned Cryomancer",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Seasoned Cryomancer",
+		"registers": [
+			{
+				"basis": "When this creature enters, draw two cards, then discard two cards. When you discard one or more nonland cards this way, tap up to that many target creatures and put a stun counter on each of them.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "you"
+							},
+							"count": 2,
+							"as": "chosen-discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen-discard",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"amount": {
+									"count": {
+										"is": "bound:discarded",
+										"zones": [
+											"library",
+											"hand",
+											"battlefield",
+											"graveyard",
+											"stack",
+											"exile",
+											"command",
+											"outside"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								"atLeast": 1,
+								"atMost": 1
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										},
+										"upTo": true
+									}
+								],
+								"instructions": [
+									{
+										"do": "tap",
+										"what": "target:0"
+									},
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "stun",
+										"amount": 1
+									}
+								]
+							}
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"amount": {
+									"count": {
+										"is": "bound:discarded",
+										"zones": [
+											"library",
+											"hand",
+											"battlefield",
+											"graveyard",
+											"stack",
+											"exile",
+											"command",
+											"outside"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								"atLeast": 2,
+								"atMost": 2
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature"
+											]
+										},
+										"count": 2,
+										"upTo": true
+									}
+								],
+								"instructions": [
+									{
+										"do": "tap",
+										"what": "target:0"
+									},
+									{
+										"do": "tap",
+										"what": "target:1"
+									},
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "stun",
+										"amount": 1
+									},
+									{
+										"do": "counters",
+										"on": "target:1",
+										"kind": "stun",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Exile Seasoned Cryomancer from your graveyard to draw two cards",
+				"basis": "{3}{U}{U}, Exile this card from your graveyard: Draw two cards.",
+				"source": {
+					"card": "Seasoned Cryomancer",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

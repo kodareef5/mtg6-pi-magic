@@ -177,6 +177,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		return attack && block ? blockConflicts(attack, block, others).map((conflict) => `${block.card ?? block.token?.name ?? block.id} blocking ${attack.card ?? attack.token?.name ?? attack.id}: ${conflict}`) : [];
 	})) ?? [];
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
+		starting: table.seats[0]!.id,
 		...(at.kind === "opening" && viewer !== "spectator" ? { opening: { starting: table.seats[0]!.id, mulligans: table.opening?.taken[viewer] ?? 0,
 			bottom: at.action === "bottom" ? table.opening?.owed[viewer] ?? 0 : table.format.mulliganBottom === "on-keep" ? owedFor(table, viewer) : 0 } } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),

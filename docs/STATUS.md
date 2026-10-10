@@ -115,6 +115,31 @@ October 3 file; only the date changed, so the test fixtures were re-stamped.
 Games saved under `.pi/` before the refresh pin October 3 and replay only
 against that file.
 
+## Pool audit, October 10
+
+`tools/assess.ts` assessed every distinct main-deck card of the nineteen
+imported decks once on Sol 6.1 high: 250 cards, 128 stored, 122 refused, 551
+calls, $4.51. Every imported deck was blocked by at least one card. The
+refusals by concept, with the decks each blocks:
+
+| Concept | Decks | Cards | Status |
+| --- | --- | --- | --- |
+| Shock land: optional life payment on entry, else tapped | 18 | 11 | `enters.unlessPay` added |
+| Conditional mana ability (Verges, Hidden Lair) | 18 | 11 | `mana.if` added; Hidden Lair still needs "entered this turn" |
+| Omen, adventure or split back half | 11 | 14 | open |
+| Enters tapped unless a condition on the turn | 9 | 2 | `turn` condition and `turns` amount added |
+| Cast trigger filtered by color or type | 8 | 5 | open |
+| Copy, control change, face-down | 7 | 9 | open |
+| Mana spent to cast | 5 | 4 | open |
+| Arithmetic: half, X, counts of cards | 5 | 6 | open |
+| Model did not submit an accepted answer | 5 | 5 | retry |
+| Tokens with abilities | 4 | 6 | open |
+| Planeswalkers and loyalty | 3 | 4 | open |
+| Long tail: sagas, airbend, classes, explore, crimes, choices as it enters, hand reveals | 1 to 3 each | about 40 | open |
+
+The ledger is `prepared/packages/2026-10-10/ledger.json`; the grouping script
+is `.pi/phase2/ledger-concepts.py`.
+
 ## How a change is judged now
 
 A change gets one comparison on the bulk runner: the same twenty seeds, both

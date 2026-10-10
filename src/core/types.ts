@@ -90,6 +90,8 @@ export type Decision = {
 export type SeatView = {
 	/** This seat's opening obligation and the public starting seat, without hidden hands. */
 	opening?: { starting: SeatId; mulligans: number; bottom: number };
+	/** Who was on the play: seat 0 always starts, and a turn count per seat follows from it. */
+	starting?: SeatId;
 	/** What this seat saw in the last five turns, current turn last: event-time receipt text grouped by turn. Never the whole game. */
 	recent?: { turn: number; active: SeatId; lines: string[] }[];
 	/** Every seat's public name, in turn order. */

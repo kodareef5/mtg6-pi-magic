@@ -1,0 +1,68 @@
+{
+	"card": "Cryogen Relic",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cryogen Relic",
+		"registers": [
+			{
+				"basis": "When this artifact enters or leaves the battlefield, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters or leaves the battlefield, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					},
+					"from": [
+						"battlefield"
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Sacrifice Cryogen Relic to put a stun counter on up to one target tapped creature.",
+				"basis": "{1}{U}, Sacrifice this artifact: Put a stun counter on up to one target tapped creature. (If a permanent with a stun counter would become untapped, remove one from it instead.)",
+				"source": {
+					"card": "Cryogen Relic",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

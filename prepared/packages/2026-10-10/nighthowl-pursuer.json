@@ -1,0 +1,77 @@
+{
+	"card": "Nighthowl Pursuer",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Nighthowl Pursuer",
+		"registers": [
+			{
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Ferocious — Whenever this creature attacks while you control a creature with power 4 or greater, this creature gets +2/+2 until end of turn.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"power": {
+								"atLeast": 4
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Ferocious — Whenever this creature attacks while you control a creature with power 4 or greater, this creature gets +2/+2 until end of turn.",
+							"kind": "watch",
+							"event": {
+								"on": "attacks",
+								"of": {
+									"is": "this"
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "this",
+										"until": "end-of-turn",
+										"change": {
+											"power": 2,
+											"toughness": 2
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

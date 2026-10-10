@@ -1,0 +1,53 @@
+{
+	"card": "Blooming Marsh",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blooming Marsh",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control two or fewer other lands.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"controller": "you",
+							"other": true
+						}
+					},
+					"atLeast": 3
+				}
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				]
+			},
+			{
+				"basis": "{T}: Add {B} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

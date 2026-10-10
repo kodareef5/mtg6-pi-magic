@@ -1,0 +1,55 @@
+{
+	"card": "Mistrise Village",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mistrise Village",
+		"registers": [
+			{
+				"basis": "This land enters tapped unless you control a Mountain or a Forest.",
+				"kind": "enters",
+				"tapped": true,
+				"if": {
+					"not": {
+						"amount": {
+							"count": {
+								"controller": "you",
+								"subtypes": [
+									"Mountain",
+									"Forest"
+								]
+							}
+						},
+						"atLeast": 1
+					}
+				}
+			},
+			{
+				"basis": "{T}: Add {U}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Activate to make the next spell you cast this turn uncounterable",
+				"basis": "{U}, {T}: The next spell you cast this turn can't be countered.",
+				"source": {
+					"card": "Mistrise Village",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

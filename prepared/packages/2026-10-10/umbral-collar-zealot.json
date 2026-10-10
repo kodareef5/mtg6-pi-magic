@@ -1,0 +1,26 @@
+{
+	"card": "Umbral Collar Zealot",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Umbral Collar Zealot",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Sacrifice another creature or artifact to surveil 1",
+				"basis": "Sacrifice another creature or artifact: Surveil 1. (Look at the top card of your library. You may put it into your graveyard.)",
+				"source": {
+					"card": "Umbral Collar Zealot",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"card": "Spell Snare",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spell Snare",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Spell Snare to counter target spell with mana value 2.",
+				"basis": "Counter target spell with mana value 2.",
+				"source": {
+					"card": "Spell Snare",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"card": "Rockface Village",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rockface Village",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {R}. Spend this mana only to cast a creature spell.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				],
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"creature"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Give target Lizard, Mouse, Otter, or Raccoon you control +1/+0 and haste until end of turn; activate only as a sorcery.",
+				"basis": "{R}, {T}: Target Lizard, Mouse, Otter, or Raccoon you control gets +1/+0 and gains haste until end of turn. Activate only as a sorcery.",
+				"source": {
+					"card": "Rockface Village",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

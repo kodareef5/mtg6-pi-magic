@@ -1,0 +1,55 @@
+{
+	"card": "Archenemy's Charm",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Archenemy's Charm",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Archenemy's Charm choosing exile target creature or planeswalker",
+				"basis": "Choose one — ... • Exile target creature or planeswalker.",
+				"source": {
+					"card": "Archenemy's Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Archenemy's Charm choosing return one or two target creature and/or planeswalker cards from your graveyard to your hand",
+				"basis": "Choose one — ... • Return one or two target creature and/or planeswalker cards from your graveyard to your hand.",
+				"source": {
+					"card": "Archenemy's Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Archenemy's Charm choosing two +1/+1 counters and lifelink until end of turn for target creature you control",
+				"basis": "Choose one — ... • Put two +1/+1 counters on target creature you control. It gains lifelink until end of turn.",
+				"source": {
+					"card": "Archenemy's Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

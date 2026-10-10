@@ -1,0 +1,88 @@
+{
+	"card": "The Wondrous Wasp",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Wondrous Wasp",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "Wasp's Sting — When The Wondrous Wasp enters, tap up to one target creature. It loses all abilities for as long as The Wondrous Wasp remains on the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "tap",
+							"what": "target:0"
+						},
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "while-source",
+							"change": {
+								"loseAbilities": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast The Wondrous Wasp with flash at its printed mana cost",
+				"basis": "Flash",
+				"source": {
+					"card": "The Wondrous Wasp",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

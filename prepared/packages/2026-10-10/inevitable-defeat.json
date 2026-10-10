@@ -1,0 +1,28 @@
+{
+	"card": "Inevitable Defeat",
+	"generated": "2026-10-10",
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Inevitable Defeat",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Inevitable Defeat: it can't be countered; exile target nonland permanent, its controller loses 3 life, and you gain 3 life.",
+				"basis": "This spell can't be countered.\nExile target nonland permanent. Its controller loses 3 life and you gain 3 life.",
+				"source": {
+					"card": "Inevitable Defeat",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
