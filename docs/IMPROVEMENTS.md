@@ -41,86 +41,101 @@ continuations replayed and cloned without gaps or replacement plans. No live
 answer used keep; its fidelity is covered offline. Explicit intent does not
 fix contradictory reasoning or establish stronger play.
 
-## Unpromoted experiments
+## Completed comparisons
 
-- A broad policy-only context trim cut dossier bytes by 24.8% across 77 saved
-  positions, but failed confirmation on resource dependencies and execution.
-  Token savings alone did not justify retaining it.
-- Separate choose and write calls used 44 new calls versus 21 writer calls
-  with fixed findings, added failures and lost commitments. Leave them out.
-- Three attack, survival and development questions used 75 calls versus about
-  290, but missed both Hydra wins in the development screen. Keep coverage.
-- A win/survival/development branch objective preserved blockers more often
-  but won four of eight immediate-win continuations versus five for control.
-  Those repeated positions showed a tradeoff, not stronger play.
-- Checked candidate fragments with an optional copy selector added authoring
-  work: 406 calls versus 322 in the prior control, and 30 failed branch reports.
-  None of 18 accepted writer answers selected a fragment, despite 64 successful
-  fragments. Reject the unused mechanism. The planned downstream rewrite and
-  physical comparisons were not run because no copy operation occurred.
+No tested prompt simplification has established stronger play. Keep the current
+production prompts while replacing the failing handoff with a measured capability.
 
-A calculation-only context trim cut those dossiers by 59.8% and total authoring
-input by 16.9%. It also removed prepared card understanding: candidate wins were
-four of seven completed immediate-win continuations, with one missing writer
-answer, versus five of eight for control. Both kept the needed blockers in one
-of two survival cases. Leave the trim unpromoted; these repeated positions and
-mixed outcomes do not rule out focused context in general.
+- Broad context trimming cut dossier bytes by 24.8%; calculation-only trimming
+  cut them by 59.8%. Both lost useful prepared understanding or execution.
+  Removing only pilot step notes saved 9.8%, but its six writer sessions used
+  ten calls against seven and lost a supplied growth sequence.
+- Separate choose and write calls used 44 calls against 21, added failures and
+  lost commitments. Three narrower analyst questions saved calls but missed
+  both Hydra wins in their screen.
+- A win/survival/development objective kept two blockers twice against once for
+  control, but won four of eight immediate-win continuations against five.
+  That is a tradeoff on inspected positions, not a general strength result.
+- Optional checked fragments were unused in all 18 accepted writer answers.
+  Stop there: a downstream rewrite cannot test a copy operation nobody selected.
+- Writing the plan before a short rationale used 11 writer calls against 13
+  across nine positions, with identical frozen reports and no new analysts.
+  It lost supplied growth sequences and retained an impossible payment.
+  Acceptance and output order do not establish good choices.
 
-Keeping pilot step notes out of strategy cut dossier bytes by 9.8%, preserving
-every other section. Six frozen-report writer sessions per arm used ten calls
-for the trim versus seven for control. The trimmed writer dropped the control's
-Harmonizer-before-land sequence and planned a three-mana cast with two mana.
-Leave this trim unpromoted too. Its writer gate stopped further analyst and
-physical runs; acceptance and smaller requests did not justify them.
+Pilot tap annotations and earlier automatic combat-fact attachments also failed
+their comparisons. Do not repeat them or add another warning for a named card.
+Raw results and rejected patches remain in the local evidence directory.
+Repeated unchanged controls also chose different actions. A single changed
+answer can locate a failure, but is too noisy to veto a mechanism's playing
+quality. Finish a fixed repeated comparison before drawing that conclusion.
 
-Pilot annotations for later tap costs did not improve four paired continuations.
-Automatic combat-fact attachments already failed in October 6 and 7 experiments.
-Do not repeat those approaches or turn a failed position into another card warning.
-Detailed evidence and rejected patches stay outside the production paths.
+## Next implementation: rehearse a proposed line
 
-## Next work
+The writer sometimes receives the useful line and still chooses a worse one.
+It also cannot reliably calculate the board its own casts and triggers create.
+The next change supplies those consequences through the existing engine.
+It does not add another analyst or another manual recount.
 
-Reduce repeated reading while preserving prepared card understanding. Prior
-trims removed useful guidance along with repetition; do not treat byte savings
-as sufficient evidence. The current writer still discards available wins and
-chooses attacks it predicts will lose. Locate those failures in discovery,
-selection or writing before adding a prompt rule or another review stage.
-Do not repeat the advice-removal screens on these inspected positions. A further
-context change should preserve the information or test a different decision
-boundary, with its own bounded comparison.
+1. Build an offline core reader from an earned projection, never a copy of the
+   omniscient table followed by redaction. Reuse payment, entry, trigger and
+   layer operations. Begin with a supplied precombat sequence at a certified
+   main-phase checkpoint. Every payment, target, trigger order and voluntary
+   choice is explicit. Return the checked prefix, resulting state and the first
+   contradiction, missing choice, missing information or unsupported operation.
+2. Compare with saved physical receipts and derived states. Permuting hidden
+   identities and order must not change the result; the real table, journal and
+   supplied projection must remain unchanged. Missing historical state, draws,
+   mills and searches stop this first slice. Coverage is an engineering result,
+   not a strategic score. Keep the prototype isolated from live play.
+3. Add conditional named searches and explicitly specified combat only after
+   prefix fidelity holds. Registered counts do not prove a searched card remains
+   in the library. An assumed search uses a hypothetical identity and states its
+   assumption. Code never chooses payments, responses, attacks or blocks, and
+   never searches for or ranks lines. The post-draw planning window also needs
+   an explicit hypothetical path to the main phase.
+4. Integrate preview into submission itself. The first answer supplies one
+   draft; the next adopts its session-local id or revises it once for a new
+   preview. Install the exact adopted plan and journal ordinary plan fields.
+   Refuse a demonstrated contradiction in its required prefix; unknown future
+   work stays unknown. Jev still chooses every real voluntary action and pass.
+   Remove manual recount fields only where the preview replaces their work.
 
-Use frozen reports for writer changes and small mechanism-specific gates. An
-unused mechanism can stop before physical testing. A retention-contract change
-needs exact preservation and authoring checks, not another full analyst wave.
-Track keep counts in recorded writer answers. For concurrency changes, measure
-active response waits separately from background preparation; peak count alone
-proves little. General playing strength still needs fresh paired games.
+Keep preparation and response repair unchanged in this experiment. There is no
+live writer comparison until the preview covers the consequential sequences it
+will be judged on. A smaller request, passing tests or a correct hypothetical
+number cannot establish better play.
+
+## Fixed comparison and retention
+
+After offline coverage is sufficient, freeze six positions, their properties,
+acceptable alternatives, source-game split and the live-call budget. Prefixes
+must end before the writer, including work at the same version. Use two frozen
+report sets and two repetitions per set, with both arms: 48 writer sessions and 48
+physical continuations. Alternate arm order. Preserve failures, missing plans
+and incomplete usage; do not add repetitions to rescue an inconclusive result.
+
+Measure discovery, drafting, preview coverage, adoption and unassisted physical
+execution separately. A result after a replacement plan is not an initial-plan
+success. Advance to fresh games only with at least four additional unassisted
+successes among 24 candidate continuations, across at least two position types,
+and no position losing three of its four matched outcomes. This is a screening
+threshold, not statistical proof. Stop immediately for a leak, real mutation,
+false computed consequence or adoption/replay defect. Ordinary stochastic play
+errors remain in the fixed batch.
+
+Before retaining a replacement or claiming stronger play, run eight fresh paired
+seeds with balanced decks and starting players. Review missed wins, avoidable
+losses, legality, repairs and obedience alongside outcomes; report calls, tokens,
+cost and median/tail strategy waits. Inspected positions are never fresh
+confirmation. Remove superseded paths when retaining a replacement.
 
 Keep opponent-turn preparation, scoped upkeep acceptance and post-draw review.
 Do not narrow amendments yet: 67 of 84 inspected draw reviews changed actions
-or steps, and earlier narrow reviews retained stale advice. Changed blockers,
-response mana, source availability, relevant draws and resume without cached
-work must be covered before reusing findings. Reset, rollback and close cancel
-stale jobs; late answers cannot install plans.
-
-## Evidence required to retain a change
-
-State properties, acceptable alternatives, source-game split and live-call
-budget before a run. Check that the prefix ends before the planning answer,
-including work at the same revision. Use repeated unchanged controls, change
-one process decision at a time, and retain errors and incomplete usage.
-Inspected development positions are never fresh confirmation.
-
-Locate the earliest failure in facts, discovery, selection, writing, pilot
-execution, or card meaning and engine execution. Record later independent
-failures too. Acceptance, legality, playing strength and efficiency need separate
-evidence. A mechanism that is unused need not advance to more paid comparisons.
-
-Before claiming stronger play, run fresh paired seeds with balanced decks and
-starting players. Eight pairs is a screen. Review missed wins, avoidable losses,
-legal play, repairs and obedience alongside outcomes, then report calls, tokens,
-cost and median/tail strategy waits. Remove superseded paths when retaining a
-replacement. `npm test` and `npm run check` must pass before committing.
+or steps, and earlier narrow reviews retained stale advice. Reset, rollback and
+close must still cancel stale jobs. `npm test` and `npm run check` must pass
+before committing.
 
 Local evidence is in `.pi/process-improvements-20261009/` and
-`design-ref/process-review-20261009.md`.
+`design-ref/process-review-20261009.md`. The offline rehearsal prototype and
+its coverage report are kept there until the integration gates are met.
