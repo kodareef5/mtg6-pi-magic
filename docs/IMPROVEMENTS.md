@@ -13,21 +13,33 @@ on wins by deck, turns, wall time, cost, help requests, gaps and plan adherence,
 which is derived on replay. A change is kept or deleted on the day of its
 comparison.
 
-## Next, in order
+## October 10 outcomes
 
-1. Baseline at `dc55706`: twenty games, Luna low, analyst wave on. Done; the
-   table is in [Status](STATUS.md).
-2. The model question, once. The five growth and lethal fixtures with strategy
-   on Sol 6.1 high and on Luna high, three repeats each, read for real wins
-   against the Luna-low control. If a stronger model finds the lines, Luna-low
-   prompt work on growth stops; if it does not, the problem is facts and
-   structure.
-3. The fan-out question. Twenty games with `--no-survey`, the coordinator
-   alone. If it is no worse, the analyst wave goes.
-4. Attribute the recorded growth misses by stage (facts, discovery, selection,
-   writing, pilot, execution) before any planner rewrite. The
-   `process/explored-lines` branch waits on that reading.
-5. One fresh pregame, with its brief kept and its cost stated.
+1. Baseline at `dc55706`: done, twenty games, table in [Status](STATUS.md).
+2. The model question: answered. Luna low finds the recorded growth lines 6
+   of 15 times and 4 of 15 with six-times limits, Luna high 9 of 15, Haiku 5.5
+   medium, Haiku 5.5 high and Sol 6.1 high 15 of 15 each. Effort is the lever.
+   Luna-low prompt work on growth stops. The roster change is a decision, not
+   made here; a Haiku roster also needs the output ceiling to allow for
+   thinking tokens.
+3. The fan-out question: the coordinator alone matched the wave on wins,
+   adherence, gaps and replay at a tenth of the strategy calls and a quarter
+   of the cost. By the rule above, the analyst wave goes. That removal is the
+   next change.
+4. Attribution: 9 of 12 Luna-low growth misses were discovery, 3 selection, 0
+   facts or writing. A planner that carries an analyst's line forward would
+   not have fixed most of them. `process/explored-lines` stays paused.
+5. Fresh pregame: done, $1.46 and 13 minutes 41 seconds, brief kept.
+
+Found on the way and fixed: an interpretation refusal that named the wrong
+field stopped three games (`ca01bd8`); a prepare-only run compared replay at
+the wrong boundary (`b0233e9`).
+
+## Next
+
+Remove the analyst wave: survey, branch, growth and perspective analysts and
+the dossier they share. The coordinator alone is the strategy session. One
+comparison on the runner against the no-survey arm confirms nothing regressed.
 
 ## Retained from October 9
 
