@@ -45,6 +45,7 @@ Those drive engine and syntax work, ordered by how many decks they block.
    be played, its engine, sequencing, mulligans, what beats it. The brief
    wave reads the two guides as inputs, so matchup briefs start from a
    considered account of each list rather than from the raw cards.
+   `tools/guide.ts` writes them; none is written yet.
 6. **The loop.** Run a batch, read the ledger, fix the top blocker in core or
    syntax with its offline test, add back the decks it unblocks, run again.
    Keep every game: the saved journals are the benchmark material.
