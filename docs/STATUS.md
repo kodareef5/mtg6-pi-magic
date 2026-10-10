@@ -69,10 +69,10 @@ on the new code (`9197896`).
 
 | Measure | Green on Haiku, Red on Luna |
 | --- | --- |
-| Games finished / started | 16 / 20 so far |
-| Green (Haiku) wins / Red (Luna) wins | 13 / 3 |
+| Games finished / started | 20 / 20 |
+| Green (Haiku) wins / Red (Luna) wins | 17 / 3 |
 | Median turns | 9 |
-| Median wall | 5.8 min |
+| Median wall | 6.0 min |
 | Median cost | $0.15 |
 | Gaps, replay mismatches | 0, 0 |
 
