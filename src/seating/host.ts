@@ -80,6 +80,6 @@ export async function hostTable(options: TableOptions): Promise<Table> {
 	throw new Error(
 		`hostTable is unwritten. It needs: a WebSocket server on ${options.host ?? "127.0.0.1"}, ` +
 			"one invite per chair, the loop above, and a per seat record of applied actionIds. " +
-			"See src/AGENTS.md for the invariants it has to hold.",
+			"See src/core/AGENTS.md for the invariants it has to hold and docs/SEATING.md for the wire.",
 	);
 }

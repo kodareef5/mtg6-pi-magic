@@ -87,8 +87,7 @@ whether an option here takes each planned action. The pass option says what
 passing does now; nothing in the question grants or withholds a pass. A phase
 that asks for help is stated on the help option. Jev does not
 receive a separate response review or one strategic question per unmentioned
-card. Private review notes remain available as seat work, without completing
-steps. Resolution receives the accepted effect and its remaining instructions,
+card. Resolution receives the accepted effect and its remaining instructions,
 with the purpose recorded when the seat announced it.
 
 Asking one model to find the rules, work out the payment, invent a line and

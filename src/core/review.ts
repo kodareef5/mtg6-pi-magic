@@ -2,7 +2,6 @@
 import type { Frame, Option } from "./types.ts";
 import { laterStep, planState } from "./planning.ts";
 import { matches } from "./query.ts";
-import type { Review } from "./work.ts";
 import { select } from "./query.ts";
 import { holds, viewWorld } from "./selectors.ts";
 import { flashed } from "./permits.ts";
@@ -17,7 +16,6 @@ export type ReviewItem = {
 	cards: string[];
 	/** Unrecorded actions in a phase's current window; absent if it has no explicit steps. */
 	remaining?: string[];
-	judgment?: Review;
 };
 
 /** Only name the stack as a prerequisite when the accepted use requires it empty. */
@@ -54,8 +52,7 @@ export function checklist(frame: Frame): ReviewItem[] {
 			const card = objects.find((object) => object.id === ref.id && object.incarnation === ref.incarnation)?.card;
 			return card ? [card] : [];
 		}) ?? [])])].filter((card) => visible.has(card));
-		const judgment = view.work?.reviews?.find((one) => one.item === id && one.at === frame.version && one.plan === view.work?.planned);
-		items.push({ id, label, kind, status, options: options.map((one) => one.id), cards, ...(remaining ? { remaining } : {}), ...(judgment ? { judgment } : {}) });
+		items.push({ id, label, kind, status, options: options.map((one) => one.id), cards, ...(remaining ? { remaining } : {}) });
 	};
 	const steps = state?.plan.steps.flatMap((one, at) => matches(one.when, frame) ? [{ at, label: one.label }] : []) ?? [];
 	(state?.plan.phases ?? []).forEach((one, at) => {

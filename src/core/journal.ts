@@ -302,7 +302,9 @@ export function restoreWork(table: Table, lines: Line[], upTo?: number): void {
  * with a declaration is not fully reliveable, and that is a gap rather than a
  * silent approximation.
  */
-export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry[] = []): Table {
+export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry[] = [],
+	/** Sees each decision as the table asked it, just before its recorded row is applied. Reads only. */
+	observe?: (table: Table, decision: NonNullable<ReturnType<typeof nextDecision>>, row: LedgerRow) => void): Table {
 	let next = 0, edited = 0;
 	while (table.outcome === null) {
 		// Payment menus distinguish sources the seat held at this moment. Restore
@@ -326,6 +328,7 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 					`the table asks seat ${decision.seat} ${decision.situation}`,
 			);
 		}
+		observe?.(table, decision, row);
 		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why, ...(row.execution ? { execution: row.execution } : {}) }, row.registered ?? {});
 		else {
 			apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});

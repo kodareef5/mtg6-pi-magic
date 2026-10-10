@@ -40,8 +40,10 @@ The table guides and never restrains.
 - A seat's own statements narrow its own menu: its target selectors, its
   procedure's `if` and `limit`, and a spend restriction on mana it made.
 
-`ACTED` and `MARKED` in `language.ts` list the words the table acts on or marks.
-Any other lowercase word is recorded for the players and the judge.
+The table acts on the keywords its combat and layer code read: first strike,
+double strike, trample, vigilance, haste, indestructible and deathtouch. Flying,
+reach, menace, hexproof and the "can't block" family mark options without hiding
+any. Any other lowercase word is recorded for the players and the judge.
 
 ## Pointing at things
 

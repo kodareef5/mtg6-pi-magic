@@ -241,7 +241,7 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    model:** `/magic play` finishes a game through Pi's classifier API. Measured
    under the former auto-pass policy at 108 turns, 2357 decisions, 95.4% forced,
    109 model calls, 0 gaps. Jev now chooses priority passes for both seats.
-   The bulk runner is still unwritten.
+   `tools/sim.ts` plays bulk games on fresh seeds, each list on the play half the time.
 2. **Spells and activated abilities through prepared procedures.** The first experiment
    binds visible sources, pays tap and unrestricted mana costs, resolves two
    draw/discard abilities in stack order, and clones during a pending discard.
@@ -278,7 +278,7 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    replacements on one event is not.
 
 The engine's main job is bulk one on one games, so that interesting positions
-can be frozen as benchmarks. `tools/sim.ts` is still a stub. A fixture is a
+can be frozen as benchmarks. `tools/sim.ts` plays them, two at a time; seat 0 is always on the play, so it seats each list first in half its games. A fixture is a
 journal prefix rather than a format of its own. Two consequences: the core
 imports nothing from Pi and that has to stay true, and the ledger's five reasons
 never merge into one count.
@@ -411,8 +411,7 @@ rather than adding a test for each branch.
   derived status of unfinished steps and branches. False conditions, later
   steps, stack prerequisites and unavailable uses remain distinct; none counts
   as execution. Passing confirms the current completion or waiting conditions.
-  Optional private judgments survive replay and expire with the position or
-  plan. Unmentioned cards create no separate strategy review. Every move stays available.
+  Unmentioned cards create no separate strategy review. Every move stays available.
 
 `npm test` runs them, `npm run check` runs the types. Both pass on every commit
 or the commit is not done. Neither makes a network call: the decision model is a
@@ -482,7 +481,8 @@ src/context/           questions for a decision model. Its own AGENTS.md
 src/seating/           protocol and validation; sockets unfinished
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/rules.ts         build a searchable Comprehensive Rules
-tools/sim.ts           stub for bulk games and counters
+tools/sim.ts           bulk games on fresh seeds carrying one source game's preparation; one table per arm
+tools/adherence.ts     plan adherence read from a journal on replay: picks that carried out a due step
 tools/smoke.ts         one live game against a real model. Opt in, costs money
 tools/matchup.ts       the pinned Standard matchup, live through Pi, unscripted
 tools/game-report.ts   compact reports and saved results for each run

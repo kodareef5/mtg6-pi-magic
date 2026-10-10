@@ -121,19 +121,6 @@ function bottomOptions(table: Table, seat: SeatId): Option[] {
 }
 
 /**
- * 103.6. Once the mulligans are done the starting player may take the actions
- * its opening hand allows, then each other seat in turn order.
- *
- * The options come from cards in hand that grant a pregame permission, which
- * needs card structure to detect. With no such card there is nothing to ask,
- * so this returns nothing and the game starts.
- */
-export function openingOptions(table: Table, seat: SeatId): Option[] {
-	void [table, seat];
-	return [];
-}
-
-/**
  * Situation 7, in this order: put cards on the bottom, declare, then any
  * opening-hand action. pregame.ts owns the procedure and docs/MULLIGAN.md owns
  * the reasoning.

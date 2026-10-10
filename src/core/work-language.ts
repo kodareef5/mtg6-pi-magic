@@ -53,9 +53,6 @@ const Vocabulary = { ...PlanDefs,
 		object({ do: Type.Literal("package.put"), package: Type.Ref("Package") }),
 		/** Edit the strategist's notebook, topic by topic. */
 		object({ do: Type.Literal("notebook.edit"), edits: NoteEditsSchema }),
-		/** Record a judgment about a listed checklist item. It does not perform the action or pass priority. */
-		object({ do: Type.Literal("review.record"), item: text, verdict: Type.Union([Type.Literal("act"), Type.Literal("hold"), Type.Literal("skip")]), reason: text }),
-		object({ do: Type.Literal("review.finish") }),
 		/** The seat plans each of its own turns once it has drawn. */
 		object({ do: Type.Literal("plan.each-turn") }),
 	]),

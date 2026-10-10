@@ -14,6 +14,7 @@ import { keep, open, replay, save } from "../src/core/journal.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { dealtTable, decks, matchup, universe } from "./matchup-fixture.ts";
 import type { GameResult } from "./game-report.ts";
+import { adherence, type Adherence } from "./adherence.ts";
 
 const { values: a } = parseArgs({ options: {
 	games: { type: "string", default: "20" }, arm: { type: "string", default: "baseline" }, "seed-base": { type: "string" },
@@ -105,7 +106,7 @@ function playOne(record: Record_, dir: string, options: { turns: string; stall: 
 }
 
 type Row = { seed: string; onPlay: string; winner: string; turn: number; wallMin: number; cost: number | null; strategyCalls: number; decideCalls: number;
-	waitMin: number | null; help: number; gaps: number; replay: string; stalled: boolean; funding: string[] };
+	waitMin: number | null; help: number; gaps: number; replay: string; stalled: boolean; funding: string[]; plan?: Adherence };
 
 /** Read one game's saved result. Funding problems are read from the failed calls, so a run short of credit says so. */
 function summarizeGame(dir: string, swapped: boolean): Row {
@@ -118,13 +119,16 @@ function summarizeGame(dir: string, swapped: boolean): Row {
 	const winner = result.outcome ? seats.find((one) => result.outcome!.results[one.id] === "win")?.name ?? "draw" : result.error ? "failed" : run?.stalled ? "stalled" : "stopped";
 	const role = (name: string) => result.llm?.roles.find((one) => one.role === name)?.calls ?? 0;
 	const funding = [...new Set(result.calls.flatMap((call) => call.failed && /402|insufficient|credit|quota|429|rate limit|billing|payment|exceeded your/i.test(call.failed) ? [call.failed.slice(0, 120)] : []))];
-	return { seed, onPlay: seats[0]?.name ?? "?", winner, turn: result.turn, wallMin: result.elapsedMs / 60_000, cost: result.llm?.total.cost ?? null,
+	const journal = readdirSync(dir).find((name) => name.endsWith(".jsonl") && !name.endsWith(".calls.jsonl"));
+	let plan: Adherence | undefined;
+	try { plan = journal ? adherence(join(dir, journal)) : undefined; } catch { /* a torn or foreign journal reports no adherence */ }
+	return { seed, onPlay: seats[0]?.name ?? "?", winner, turn: result.turn, wallMin: result.elapsedMs / 60_000, cost: result.llm?.total.cost ?? null, ...(plan ? { plan } : {}),
 		strategyCalls: role("strategy"), decideCalls: role("decide"), waitMin: result.planned ? result.planned.reduce((sum, one) => sum + one.waitedMs, 0) / 60_000 : null,
 		help: result.interruptions?.help ?? 0, gaps: result.gaps.length, replay: result.replayMatches === undefined ? "?" : result.replayMatches ? "yes" : "NO", stalled: !!run?.stalled, funding };
 }
 
 const line = (row: Row) => `${row.seed.padEnd(22)} play ${row.onPlay.padEnd(5)} ${row.winner.padEnd(9)} T${String(row.turn).padStart(2)}  ${row.wallMin.toFixed(1).padStart(5)}m  ` +
-	`$${(row.cost ?? 0).toFixed(2)}  strategy ${String(row.strategyCalls).padStart(3)}  jev ${String(row.decideCalls).padStart(3)}  wait ${row.waitMin === null ? "?" : row.waitMin.toFixed(1) + "m"}  help ${row.help}  gaps ${row.gaps}  replay ${row.replay}${row.stalled ? "  STALLED" : ""}${row.funding.length ? "  FUNDING: " + row.funding[0] : ""}`;
+	`$${(row.cost ?? 0).toFixed(2)}  strategy ${String(row.strategyCalls).padStart(3)}  jev ${String(row.decideCalls).padStart(3)}  wait ${row.waitMin === null ? "?" : row.waitMin.toFixed(1) + "m"}  help ${row.help}  gaps ${row.gaps}  plan ${row.plan ? `${row.plan.onPlan}/${row.plan.due}` : "?"}  replay ${row.replay}${row.stalled ? "  STALLED" : ""}${row.funding.length ? "  FUNDING: " + row.funding[0] : ""}`;
 
 const median = (xs: number[]) => { const s = [...xs].sort((p, q) => p - q); return s.length ? s[Math.floor((s.length - 1) / 2)]! : 0; };
 
@@ -145,6 +149,7 @@ function summarizeArm(dir: string): { rows: Row[]; markdown: string[] } {
 		`| Median strategy wait | ${median(finished.flatMap((row) => row.waitMin === null ? [] : [row.waitMin])).toFixed(1)} min |`,
 		`| Median cost / total | $${median(costs).toFixed(2)} / $${costs.reduce((sum, cost) => sum + cost, 0).toFixed(2)} |`,
 		`| Median strategy calls / Jev calls | ${median(finished.map((row) => row.strategyCalls))} / ${median(finished.map((row) => row.decideCalls))} |`,
+		`| Plan adherence: on plan / due, passed over, deviated | ${["onPlan", "due", "passedOver", "deviated"].map((key) => rows.reduce((sum, row) => sum + (row.plan?.[key as keyof Adherence] ?? 0), 0)).reduce((text, n, i) => i === 1 ? `${text} / ${n}` : i === 2 ? `${text}, ${n}` : i === 3 ? `${text}, ${n}` : String(n), "")} |`,
 		`| Help requests, total | ${rows.reduce((sum, row) => sum + row.help, 0)} |`, `| Gaps, total | ${rows.reduce((sum, row) => sum + row.gaps, 0)} |`,
 		`| Replay mismatches | ${rows.filter((row) => row.replay === "NO").length} |`,
 		...(rows.some((row) => row.funding.length) ? [`| FUNDING problems | ${rows.flatMap((row) => row.funding).slice(0, 3).join("; ")} |`] : []),

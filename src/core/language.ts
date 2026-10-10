@@ -23,9 +23,6 @@ const name = Type.String({ pattern: "^[a-z][a-z0-9-]*$" });
 
 export const ZONES = ["library", "hand", "battlefield", "graveyard", "stack", "exile", "command", "outside"] as const;
 export const CARD_TYPES = ["artifact", "battle", "creature", "enchantment", "instant", "kindred", "land", "planeswalker", "sorcery"] as const;
-/** Words the table acts on or marks. Any other lowercase word is recorded for players and the judge. */
-export const ACTED = ["first strike", "double strike", "trample", "vigilance", "haste", "indestructible", "deathtouch"] as const;
-export const MARKED = ["flying", "reach", "menace", "hexproof", "can't be blocked", "can't block", "can't be blocked by more than one creature"] as const;
 
 const Zone = one(...ZONES);
 const Color = one("W", "U", "B", "R", "G", "C");

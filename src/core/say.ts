@@ -30,8 +30,3 @@ export type Said = {
 	at: number;
 };
 
-/**
- * One per seat per phase ending, or none, which is the expected answer. A
- * message changes nothing, so it is not a receipt and replay does not read it.
- */
-export const SAY_LIMIT_PER_PHASE = 1;

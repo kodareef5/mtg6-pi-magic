@@ -135,7 +135,7 @@ export async function play(
 			continue;
 		}
 		const version = table.cursor.clock;
-		if (walk?.version !== version) walk = { version, edits: table.workLog.filter((entry) => entry.clock === version && entry.seat === decision.seat && entry.tools?.some((tool) => tool.do !== "review.record")).length };
+		if (walk?.version !== version) walk = { version, edits: table.workLog.filter((entry) => entry.clock === version && entry.seat === decision.seat && entry.tools?.length).length };
 		if (walk.edits >= workBudget) {
 			const gap = `Seat ${decision.seat}: work edit budget ${workBudget} exhausted at version ${version}; decision remains pending. No pass or completion was chosen.`;
 			if (table.gaps.at(-1) !== gap) table.gaps.push(gap);
@@ -269,9 +269,8 @@ export async function play(
 				return null;
 		}
 
-		// Each checklist item can be reviewed once at this position. Its finite
-		// walk does not spend the separate budget for rewriting equipment.
-		if (table.cursor.clock === version && !(answer.kind === "work" && answer.tools.every((tool) => tool.do === "review.record"))) walk.edits += 1;
+		// An answer that left the table where it was spent one of this version's equipment edits.
+		if (table.cursor.clock === version) walk.edits += 1;
 		told = report(table, told, watch);
 	}
 

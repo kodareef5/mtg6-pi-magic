@@ -1,9 +1,10 @@
 # Combat, characteristics, and what to automate
 
-Design notes for combat and derived characteristics. The layer walk is
-implemented in `src/core/characteristics.ts`; attack and block choices and
-damage assignment are unfinished. Rule numbers refer to the
-committed `rules/cr.tsv`; these notes do not describe working combat support.
+Design notes for combat and derived characteristics. The layer walk is in
+`src/core/characteristics.ts`; attacking, blocking and damage assignment are in
+`src/core/combat.ts`, with `test/combat.test.ts` beside them. Parts no card in
+the pinned matchup needs are listed under "Not built yet" in the root brief.
+Rule numbers refer to the committed `rules/cr.tsv`.
 
 ## Nothing is calculated and stored
 

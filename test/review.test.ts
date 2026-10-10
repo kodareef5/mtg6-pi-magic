@@ -1,4 +1,4 @@
-/** Considered: a derived checklist guides direct choices; optional private judgments remain replayable. */
+/** Considered: a derived checklist guides direct choices without moving cards or completing steps. */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { mkdtempSync } from "node:fs";
@@ -17,7 +17,7 @@ import { announce, establish, example, finish, main, matchup, passBoth, place } 
 import { question as moveQuestion } from "../src/context/seat.ts";
 import { activate } from "../src/core/procedures.ts";
 
-test("a pilot executes with derived plan status, while private judgments neither move cards nor complete steps", async () => {
+test("a pilot executes with derived plan status, and the checklist shows unavailable steps and phases without moving cards", async () => {
 	const position = () => {
 		const table = matchup("review");
 		place(table, 0, "hand", "Forest", "Forest", "Mossborn Hydra");
@@ -90,32 +90,21 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.ok(items.some((one) => one.label === "Cast Hydra" && !one.options.length), "an unavailable planned use stays visible");
 	assert.ok(items.some((one) => one.kind === "phase"), "the phase strategy stays visible in the action question");
 	assert.deepEqual(items.find((one) => one.kind === "phase")!.remaining, ["Play Forest", "Cast Hydra"]);
-	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:1", verdict: "act", reason: "Use Hydra" }], "unavailable"), /has no current option/);
-	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "made-up", verdict: "skip", reason: "Skip" }], "unknown"), /No checklist item/);
 	assert.equal(JSON.stringify(items).includes('"zone":"library"'), false);
-	for (const [item, verdict] of [["step:0", "act"], ["step:1", "skip"], ["phase:0", "act"]] as const) {
-		const tools = [{ do: "review.record" as const, item, verdict, reason: "Explicit seat note." }];
-		editWork(table, 0, tools, item);
-		assert.equal(editWork(table, 0, tools, item), false, "redelivery is idempotent");
-		assert.equal(physical(), before, "review moves no cards, clock, priority or ledger");
-		assert.deepEqual(nextDecision(table), offered, "every physical option remains available");
-	}
-	assert.deepEqual(workFrame(table, 0).view.done, [], "a review never completes a step");
-	assert.equal(project(table, 1).work?.reviews, undefined, "another seat cannot read these judgments");
+	assert.equal(physical(), before, "listing the checklist moves no cards, clock, priority or ledger");
+	assert.deepEqual(nextDecision(table), offered, "every physical option remains available");
+	assert.deepEqual(workFrame(table, 0).view.done, [], "a checklist never completes a step");
 	assert.equal(project(table, "spectator").work, undefined);
-	assert.throws(() => editWork(table, 0, [{ do: "review.record", item: "step:0", verdict: "act", reason: "Again" }], "duplicate-review"), /already reviewed/);
 	const frame = workFrame(table, 0), packet = focus(frame, startingIntent(0));
 	const shownPhase = packet.checklist!.find((one) => one.kind === "phase")!;
 	assert.equal(shownPhase.status, STATUS.open);
-	assert.equal(shownPhase.judgment!.verdict, "act", "phase assessments remain available without earning action credit");
 	assert.equal(Object.hasOwn(shownPhase, "available"), false, "unbound physical options are not phase availability");
 	assert.equal(Object.hasOwn(shownPhase, "cards"), false, "unrelated options supply no phase card list");
 	assert.ok(checklist(frame).find((one) => one.kind === "phase")!.options.length, "core keeps its private assessment options");
 	assert.deepEqual(packet.checklist!.filter((one) => one.kind !== "phase"), checklist(frame).filter((one) => one.kind !== "phase")
 		.map(({ options, ...item }) => ({ ...item, status: STATUS[item.status], available: options.length })), "step and branch presentation stays exact, in plain status words");
 	const missing = packet.checklist!.find((one) => one.label === "Cast Hydra")!;
-	assert.equal(missing.judgment!.verdict, "skip");
-	assert.equal(missing.status, STATUS.later, "a recorded skip cannot complete or remove the planned use");
+	assert.equal(missing.status, STATUS.later, "an unavailable planned use stays listed as later");
 	const dir = mkdtempSync(join(tmpdir(), "magic-review-"));
 	const header: Header = { id: "review", seed: table.rng.seed, format: table.format.name,
 		seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })), cards: { path: "cards/standard.tsv", generated: "fixture" }, rules: { path: "rules/cr.tsv", effective: "fixture" }, created: "fixture" };
@@ -123,13 +112,12 @@ test("a pilot executes with derived plan status, while private judgments neither
 	const restored = replay(journal.path, () => position()).table;
 	assert.deepEqual(checklist(workFrame(restored, 0)), checklist(frame), "replay preserves considered uses at the pending decision");
 	fork(journal.path, table.ledger.length, "child", join(dir, "child.jsonl"));
-	assert.deepEqual(replay(join(dir, "child.jsonl"), () => position()).table.work, table.work, "cloning carries judgments");
+	assert.deepEqual(replay(join(dir, "child.jsonl"), () => position()).table.work, table.work, "cloning carries the seat's work");
 	const answer = await pilot.answer(frame);
 	assert.equal(answer.kind, "pick");
 	if (answer.kind !== "pick") assert.fail();
-	assert.equal(prompts.length, 1, "the available planned action is chosen directly, including when judgments are absent");
+	assert.equal(prompts.length, 1, "the available planned action is chosen directly");
 	apply(table, answer.option, "model", "chosen", execution(planState(frame)!, answer.option));
-	assert.ok(checklist(workFrame(table, 0)).every((one) => !one.judgment), "an action invalidates judgments from the old position");
 	const afterLand = focus(workFrame(table, 0), startingIntent(0));
 	assert.deepEqual(afterLand.plan!.done, ["Play Forest"], "reviews carry execution progress in state alongside the phase guidance");
 	assert.deepEqual(afterLand.checklist!.find((one) => one.kind === "phase")!.remaining, ["Cast Hydra"], "an unavailable unfinished action is not counted as complete");
@@ -169,7 +157,6 @@ test("a pilot executes with derived plan status, while private judgments neither
 	await idle.close();
 	await help.close();
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Wait.", guidance: "Retain the cards.", steps: [] } }], "amend");
-	assert.equal(table.work[0]!.reviews, undefined, "a changed plan cannot inherit the old judgment");
 	await pilot.close();
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Keep resources.", guidance: "Use the current policy.", throughTurn: 1, steps: [],
 		phases: [{ when: { active: "self", step: "precombat-main" }, guidance: "Keep the hand; reassess a listed response if needed." }] } }], "prose-policy");
@@ -226,7 +213,6 @@ test("a pilot executes with derived plan status, while private judgments neither
 	assert.equal(stackPolicy.checklist![0]!.status, STATUS.policy);
 	assert.match(moveQuestion(stackPolicy, true).instructions!, /The stack is not empty/);
 	assert.deepEqual(stackPolicy.plan!.script!.guidance, waiting.plan!.script!.guidance, "response prose survives policy display");
-	editWork(response, 1, [{ do: "review.record", item: land.id, verdict: "hold", reason: "Wait for the spell to resolve." }], "wait-for-stack");
 	apply(response, "pass", "model", "chosen");
 	assert.equal(nextDecision(response)!.seat, 0);
 	const pending = structuredClone(response);
@@ -248,7 +234,6 @@ test("a pilot executes with derived plan status, while private judgments neither
 	apply(response, "pass", "model", "chosen"); finish(response);
 	const cleared = focus(workFrame(response, 1), startingIntent(1));
 	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.status, STATUS.available, "resolution restores the land use without a new plan");
-	assert.equal(cleared.checklist!.find((one) => one.id === land.id)?.judgment, undefined, "waiting is reassessed against the new position");
 	assert.doesNotMatch(moveQuestion(cleared, true).instructions!, /their absence now is no reason to ask for help/, "empty-stack passes still end the step or phase");
 	const playLand = checklist(workFrame(response, 1)).find((one) => one.id === land.id)!.options[0]!;
 	apply(response, playLand, "model", "chosen", execution(planState(workFrame(response, 1))!, playLand));

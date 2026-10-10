@@ -39,7 +39,9 @@ const { values } = parseArgs({ options: { positions: { type: "string" }, live: {
 	pilot: { type: "string", multiple: true, default: ["jev"] }, repeat: { type: "string", default: "1" }, out: { type: "string" }, play: { type: "boolean" },
 	answers: { type: "string" }, findings: { type: "string" }, through: { type: "string" }, decisions: { type: "string" }, "judge-attempts": { type: "string" },
 	/** The strategy model for this run, as a Pi pattern. The default is the prescribed baseline. */
-	strategy: { type: "string", default: "gpt-6-luna:low" } } });
+	strategy: { type: "string", default: "gpt-6-luna:low" },
+	/** Skip the analyst wave: the coordinator writes each plan alone. */
+	"no-survey": { type: "boolean", default: false } } });
 const manifest = values.positions ?? join(import.meta.dirname, "benchmarks/positions.json");
 const catalog = JSON.parse(readFileSync(manifest, "utf8")) as { journals: Record<string, string>; cases: Case[] };
 if (values.play && !values.live || values.answers && !values.play) throw new Error("--play requires --live; --answers requires --play.");
@@ -152,7 +154,7 @@ for (let iteration = 0; iteration < repeat; iteration++) for (const [position, {
 				answer = await rule(table, { row: one.judgeRow, raisedBy: one.seat, claim: "Check whether this complete blocking assignment satisfies declaration-time blocking restrictions." }, writer, { rules, universe });
 				passed = (answer as { legal: boolean; remedy: string }).legal === one.legal && (answer as { remedy: string }).remedy === (one.legal ? "stand" : "rollback");
 			} else if (one.task !== "pilot") {
-				const context = { brief, cards: universe, rules, survey: process.env.MAGIC_SURVEY !== "off" };
+				const context = { brief, cards: universe, rules, survey: !values["no-survey"] };
 				if (one.task === "continue") {
 					if (!frame.view.work?.plan) throw new Error("Continuation needs an accepted plan in the prefix.");
 					answer = { plan: frame.view.work.plan, fromPrefix: true };

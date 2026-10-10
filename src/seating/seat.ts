@@ -22,6 +22,6 @@ export type Seat = {
 export async function joinTable(invite: string, name: string): Promise<Seat> {
 	throw new Error(
 		`joinTable is unwritten. It needs: parseInvite, a WebSocket dial, hello with the secret, ` +
-			`welcome, then a frame cache for ${name}. See src/AGENTS.md.`,
+			`welcome, then a frame cache for ${name}. See src/core/AGENTS.md and docs/SEATING.md.`,
 	);
 }

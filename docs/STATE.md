@@ -136,10 +136,11 @@ scope; storage does not need to change for that choice.
 
 ## Simulation later
 
-`tools/sim.ts` parses arguments and throws at its unfinished game runner. The
-core imports nothing from Pi, and the offline fixtures already run from plain
-scripts. A bulk runner still needs to create games, attach players, save
-journals and collect results.
+`tools/sim.ts` plays bulk games of the pinned matchup on fresh seeds. Each game
+carries one source game's card assessments and briefs into a new table, runs
+as its own `matchup.ts` process under a stall watchdog, and saves its journal,
+calls and result. Seat 0 is always on the play, so odd seeds seat Red first.
+The summary reads the saved results and derives plan adherence by replay.
 
 Compare outcomes, ledger reasons, gaps, turns, model calls, tokens, cost and
 elapsed time separately. The physical forced ratio omits calls spent navigating
