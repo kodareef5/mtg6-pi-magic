@@ -39,9 +39,13 @@ the wrong boundary (`b0233e9`).
 
 Done the same day: the analyst wave is removed (the coordinator writes alone),
 the roster is Haiku 5.5 medium for strategy and judge, and the
-`process/explored-lines` branch is deleted. Next: twenty games on the runner
-at the new roster against the October 10 Haiku arm, then fix whatever stops a
-game or loses one, reading the saved journals first.
+`process/explored-lines` branch is deleted. Twenty games at the new roster
+finished clean: no gaps, exact replay, median 7.8 minutes and $0.25.
+
+Next: measure strength directly. Seat one roster against another on the same
+twenty seeds, each list on the play half the time, and count wins by roster
+rather than by deck. The runner and `tools/matchup.ts` need a per-seat
+strategy option for that; `rosterFor` already takes per-seat rosters.
 
 ## Retained from October 9
 

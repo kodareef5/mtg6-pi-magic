@@ -22,37 +22,37 @@ behind this page, October 5 to 9, is in ignored
 ## Open
 
 - Judge rulings are rare and the summary role has been off in every game.
-- The analyst wave is not earning its place: the coordinator alone played
-  twenty seeds at a tenth of the strategy calls and a quarter of the cost with
-  no loss of legality or adherence (table below). Deleting it is the next
-  change to make.
-- Luna low finds the recorded growth lines about one time in three at any
-  timeout; Luna high about three in five; Haiku 5.5 medium, Haiku 5.5 high and
-  Sol 6.1 high every time. Effort is the lever, not the prompt or the limits.
-  The roster is unchanged pending a decision.
+- Playing strength is unmeasured beyond legality. Wins follow the seed as
+  much as the roster: Sol high won four of four as Green where Haiku medium
+  and Luna low split them. The direct measure is a seat on one roster against
+  a seat on another, each list on the play half the time; the runner does not
+  seat two rosters yet.
+- The longest new-roster game ran 22 minutes and 778 Jev calls over 16 turns.
+  Long games are where strategy wait and pilot cost pile up.
 
 ## October 10 measurements
 
 All arms on the same twenty fresh seeds, each list on the play in half, from
 the same carried preparation, two games at a time. Raw games, call traces and
 per-game rows are in `.pi/sim-20261010/`. Baseline and no-survey ran Luna
-low; the Sol and Haiku arms changed only the strategy model.
+low; the Sol and Haiku arms changed only the strategy model. The last column
+is the roster and code now on main: coordinator alone, strategy and judge on
+Haiku 5.5 medium, run after the wave was removed.
 
-| Measure | Baseline, wave on | No survey | Haiku 5.5 medium, no survey | Sol 6.1 high, wave on |
-| --- | --- | --- | --- | --- |
-| Games finished / started | 20 / 20 | 20 / 20 | 10 / 10 | 4 / 4 |
-| Green wins / Red wins | 9 / 11 | 13 / 7 | 5 / 5 | 4 / 0 |
-| Wins on the play / on the draw | 11 / 9 | 11 / 9 | 6 / 4 | 2 / 2 |
-| Median turns | 12 | 11 | 10 | 10 |
-| Median wall | 11.6 min | 6.5 min | 6.8 min | 56.3 min |
-| Median strategy wait | 9.3 min | 4.9 min | 5.0 min | 54.8 min |
-| Median cost / total | $0.52 / $9.66 | $0.13 / $2.72 | $0.19 / $2.53 | $10.63 / $61.67 |
-| Median strategy calls / Jev calls | 419 / 400 | 33 / 325 | 22 / 270 | 271 / 262 |
-| Plan steps taken / due, passed over, deviated | 919 / 929, 2, 8 | 786 / 821, 26, 9 | 393 / 398, 3, 2 | 146 / 147, 0, 1 |
-| Help requests | 18 | 22 | 6 | 0 |
-| Gaps | 0 | 0 | 0 | 0 |
-| Replay mismatches | 0 | 0 | 0 | 0 |
-
+| Measure | Baseline, wave on | No survey | Haiku 5.5 medium, no survey | Sol 6.1 high, wave on | New roster, `2d13d2b` |
+| --- | --- | --- | --- | --- | --- |
+| Games finished / started | 20 / 20 | 20 / 20 | 10 / 10 | 4 / 4 | 20 / 20 |
+| Green wins / Red wins | 9 / 11 | 13 / 7 | 5 / 5 | 4 / 0 | 11 / 9 |
+| Wins on the play / on the draw | 11 / 9 | 11 / 9 | 6 / 4 | 2 / 2 | 11 / 9 |
+| Median turns | 12 | 11 | 10 | 10 | 10 |
+| Median wall | 11.6 min | 6.5 min | 6.8 min | 56.3 min | 7.8 min |
+| Median strategy wait | 9.3 min | 4.9 min | 5.0 min | 54.8 min | 6.1 min |
+| Median cost / total | $0.52 / $9.66 | $0.13 / $2.72 | $0.19 / $2.53 | $10.63 / $61.67 | $0.25 / $5.14 |
+| Median strategy calls / Jev calls | 419 / 400 | 33 / 325 | 22 / 270 | 271 / 262 | 25 / 355 |
+| Plan steps taken / due, passed over, deviated | 919 / 929, 2, 8 | 786 / 821, 26, 9 | 393 / 398, 3, 2 | 146 / 147, 0, 1 | 812 / 823, 8, 3 |
+| Help requests | 18 | 22 | 6 | 0 | 10 |
+| Gaps | 0 | 0 | 0 | 0 | 0 |
+| Replay mismatches | 0 | 0 | 0 | 0 | 0 |
 Stopped games were resumed from their saved journals rather than replayed:
 one no-survey and two Haiku games had stopped on the OpenRouter key limit or
 a Haiku coordinator timeout at 90 seconds, and one no-survey game on an
