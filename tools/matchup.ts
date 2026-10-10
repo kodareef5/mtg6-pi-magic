@@ -70,8 +70,9 @@ finally {
 	await Promise.all(Object.values(seated.players).map((player) => player.close()));
 	save(journal, table);
 }
-// Replay returns at the next decision; reach that same boundary without answering it.
-while (!values.prepare && !table.outcome && !nextDecision(table)) advance(table);
+// Replay returns at the next decision; reach that same boundary without answering it. A prepare-only run must too,
+// or its health line reports a mismatch between an unadvanced table and an advanced replay of the same journal.
+while (!table.outcome && !nextDecision(table)) advance(table);
 // The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
 const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome?.results });
 const replayMatches = state(replay(path, dealtTable).table) === state(table);
