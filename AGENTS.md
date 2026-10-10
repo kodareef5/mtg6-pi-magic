@@ -284,7 +284,7 @@ Within Standard, from `design-ref/archive/CIRCUITRY.md` section 12:
    replacements on one event is not.
 
 The engine's main job is bulk one on one games, so that interesting positions
-can be frozen as benchmarks. `tools/sim.ts` plays them, two at a time; seat 0 is always on the play, so it seats each list first in half its games. A fixture is a
+can be frozen as benchmarks. `tools/sim.ts` plays them, two at a time; seat 0 is always on the play, so it seats each list first in half its games. Its `--green` and `--red` options give one list's seat its own strategy model, so one roster can face another: run the arm twice with the patterns swapped and count wins by roster, not by list. A fixture is a
 journal prefix rather than a format of its own. Two consequences: the core
 imports nothing from Pi and that has to stay true, and the ledger's five reasons
 never merge into one count.

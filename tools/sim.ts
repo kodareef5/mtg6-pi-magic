@@ -19,11 +19,11 @@ import { adherence, type Adherence } from "./adherence.ts";
 const { values: a } = parseArgs({ options: {
 	games: { type: "string", default: "20" }, arm: { type: "string", default: "baseline" }, "seed-base": { type: "string" },
 	source: { type: "string", default: ".pi/resume-20261007/scoped-full-game/next-version-gate-20261005-1791339573156.jsonl" },
-	strategy: { type: "string" }, jobs: { type: "string", default: "2" },
+	strategy: { type: "string" }, green: { type: "string" }, red: { type: "string" }, jobs: { type: "string", default: "2" },
 	turns: { type: "string", default: "40" }, stall: { type: "string", default: "300" }, out: { type: "string", default: ".pi/sim" },
 	report: { type: "string" }, "seeds-only": { type: "boolean", default: false }, help: { type: "boolean", short: "h" } } });
 if (a.help) {
-	console.log(`usage: sim.ts [--games N] [--arm NAME] [--seed-base S] [--source V0.jsonl] [--strategy P] [-j 2] [--out DIR]
+	console.log(`usage: sim.ts [--games N] [--arm NAME] [--seed-base S] [--source V0.jsonl] [--strategy P] [--green P] [--red P] [-j 2] [--out DIR]
        sim.ts --report DIR/ARM
 
   --games N        fresh seeds; odd ones seat Red first, so each list is on the play half the time
@@ -31,6 +31,8 @@ if (a.help) {
   --seed-base S    seeds are S-0, S-1, ...; defaults to the clock
   --source J       the finished version-zero journal whose card assessments and briefs every game carries
   --strategy P     this arm's strategy model pattern, such as gpt-6.1-sol:high
+  --green P        the strategy pattern for whichever seat plays the Green list; --red likewise. One roster facing another:
+                   run the arm twice with the patterns swapped and count wins by roster, not by list
   --jobs N         games at once. Two: three games at once hit the strategy provider's rate limit
   --stall S        a game whose log is silent this long is killed and counted as a stall
   --seeds-only     write the seed journals and stop, with no model call
@@ -82,11 +84,11 @@ function seedGames(base: string, n: number, source: string, dir: string): Record
 type Run = { seed: string; exit: number | null; stalled: boolean; startedAt: number; endedAt: number };
 
 /** One game in its own process. A log silent past the stall limit is a loop or a hung call, not a wait. */
-function playOne(record: Record_, dir: string, options: { turns: string; stall: number; strategy?: string }): Promise<Run> {
+function playOne(record: Record_, dir: string, options: { turns: string; stall: number; strategy?: string; green?: string; red?: string }): Promise<Run> {
 	const log = join(dir, `${record.seed}.log`), out = join(dir, record.seed);
 	mkdirSync(out, { recursive: true });
 	const args = ["tools/matchup.ts", "--resume", record.path, "--version", "0", "--turns", options.turns, "--out", out,
-		...(options.strategy ? ["--strategy", options.strategy] : [])];
+		...(options.strategy ? ["--strategy", options.strategy] : []), ...(options.green ? ["--green", options.green] : []), ...(options.red ? ["--red", options.red] : [])];
 	return new Promise((resolve) => {
 		const fd = openSync(log, "a"), startedAt = Date.now();
 		const child = spawn(process.execPath, args, { stdio: ["ignore", fd, fd], detached: true });
@@ -171,11 +173,11 @@ console.log(`${records.length} seeds under ${join(a.out!, "seeds")} from ${a.sou
 if (a["seeds-only"]) process.exit(0);
 const arm = join(a.out!, a.arm!);
 mkdirSync(arm, { recursive: true });
-writeFileSync(join(arm, "arm.json"), JSON.stringify({ arm: a.arm, strategy: a.strategy ?? "roster default", turns: a.turns, jobs, seeds: base, games, startedAt: new Date().toISOString() }, null, 2) + "\n");
-console.log(`Playing ${games} games into ${arm}, ${jobs} at a time${a.strategy ? `, strategy ${a.strategy}` : ""}`);
+writeFileSync(join(arm, "arm.json"), JSON.stringify({ arm: a.arm, strategy: a.strategy ?? "roster default", ...(a.green ? { green: a.green } : {}), ...(a.red ? { red: a.red } : {}), turns: a.turns, jobs, seeds: base, games, startedAt: new Date().toISOString() }, null, 2) + "\n");
+console.log(`Playing ${games} games into ${arm}, ${jobs} at a time${a.strategy ? `, strategy ${a.strategy}` : ""}${a.green ? `, Green on ${a.green}` : ""}${a.red ? `, Red on ${a.red}` : ""}`);
 let next = 0;
 await Promise.all(Array.from({ length: jobs }, async () => {
-	for (let record = records[next++]; record; record = records[next++]) await playOne(record, arm, { turns: a.turns!, stall: Number(a.stall), ...(a.strategy ? { strategy: a.strategy } : {}) });
+	for (let record = records[next++]; record; record = records[next++]) await playOne(record, arm, { turns: a.turns!, stall: Number(a.stall), ...(a.strategy ? { strategy: a.strategy } : {}), ...(a.green ? { green: a.green } : {}), ...(a.red ? { red: a.red } : {}) });
 }));
 const { rows, markdown } = summarizeArm(arm);
 console.log(`\n${markdown.join("\n")}`);
