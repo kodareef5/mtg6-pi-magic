@@ -13,6 +13,7 @@ import type { Amount, Condition, Selector } from "./language.ts";
 import { characteristics, creatureType, type Traits } from "./characteristics.ts";
 import type { ObjectRef, SeatId, SeatView } from "./types.ts";
 import type { SeenObject } from "./work.ts";
+import { casting, type Casting } from "./casting.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
 	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy">> & { card?: string };
@@ -31,6 +32,7 @@ export type World = {
 	history: Happened[];
 	/** The object as it is, or as it last was (608.2h). */
 	lastKnown(ref: ObjectRef): { object: Seen; traits?: Traits } | undefined;
+	casting?(ref: ObjectRef): Casting | undefined;
 	/** Whose turn it is and how many turns each seat has begun, the current one included. Absent before the first turn. */
 	turn?: { active: SeatId; taken: Record<SeatId, number> };
 };
@@ -68,6 +70,7 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 		notes: table.notes, combat: table.combat,
 		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn) } } : {}),
 		get history() { return (events ??= happened(table)); },
+		casting: (ref) => casting(table, ref),
 		lastKnown(ref) {
 			const now = table.things.get(ref.id);
 			if (now?.incarnation === ref.incarnation) return { object: now, traits: reader(now) };
@@ -107,6 +110,7 @@ export function viewWorld(view: SeatView): World {
 		players: (view.players ?? []).map((one) => ({ ...one, name: view.seats?.find((seat) => seat.id === one.id)?.name })), notes: view.notes ?? [],
 		combat: view.combat ?? null, history: view.history ?? [],
 		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
+		casting: (ref) => view.castings?.[targetKey(ref)],
 		...(view.window.kind === "turn" && view.starting !== undefined ? { turn: { active: view.window.active,
 			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn) } } : {}),
 	};
@@ -240,6 +244,14 @@ export function amount(scope: Scope, value: Amount): number {
 	if ("power" in value) { const one = objects(scope, value.power)[0]; return (one && traitsOf(scope, one)?.power) ?? 0; }
 	if ("toughness" in value) { const one = objects(scope, value.toughness)[0]; return (one && traitsOf(scope, one)?.toughness) ?? 0; }
 	if ("manaValue" in value) { const one = objects(scope, value.manaValue)[0]; return (one && traitsOf(scope, one)?.manaValue) ?? 0; }
+	if ("manaSpent" in value || "colorsSpent" in value) {
+		const one = objects(scope, "manaSpent" in value ? value.manaSpent : value.colorsSpent)[0];
+		const paid = one && scope.world.casting?.(one);
+		if (!paid) return 0;
+		if ("manaSpent" in value && !value.color) return paid.mana.length;
+		if (paid.mana.includes(null)) throw new Error("This cast's recorded mana has an unknown color.");
+		return "colorsSpent" in value ? new Set(paid.mana.filter((color) => color !== "C")).size : paid.mana.filter((color) => color === value.color).length;
+	}
 	if ("bound" in value) { const bound = scope.bound?.[value.bound]; return bound?.amount ?? (bound ? bound.objects.length + bound.players.length : 0); }
 	if ("distinct" in value) return new Set(select(scope, value.among).flatMap((one) => traitsOf(scope, one)?.types ?? [])).size;
 	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.life ?? 0), 0);
@@ -247,7 +259,7 @@ export function amount(scope: Scope, value: Amount): number {
 	if ("event" in value) return scope.event?.amount ?? 0;
 	if ("half" in value) return Math[value.round === "up" ? "ceil" : "floor"](amount(scope, value.half) / 2);
 	if ("history" in value) return history(scope, value);
-	if ("x" in value) return scope.x ?? 0;
+	if ("x" in value) return scope.x ?? (scope.source && scope.world.casting?.(scope.source)?.x) ?? 0;
 	if ("sum" in value) return value.sum.reduce((total: number, part) => total + amount(scope, part), 0);
 	if ("turns" in value) {
 		const turn = scope.world.turn; if (!turn) return 0;
@@ -269,6 +281,10 @@ function history(scope: Scope, value: Extract<Amount, { history: string }>): num
 }
 
 export function holds(scope: Scope, condition: Condition): boolean {
+	if ("cast" in condition) {
+		const one = objects(scope, condition.cast)[0], paid = one && scope.world.casting?.(one);
+		return !!paid && (condition.from === undefined || paid.from === condition.from) && (condition.by === undefined || players(scope, condition.by).includes(paid.by));
+	}
 	if ("amount" in condition) {
 		const value = amount(scope, condition.amount);
 		return (condition.atLeast === undefined || value >= amount(scope, condition.atLeast)) && (condition.atMost === undefined || value <= amount(scope, condition.atMost));

@@ -8,6 +8,31 @@ anyone chooses how to pay. These facts do not prepare hybrid payment.
 An identified deferred cast may use these selectors when interpreted. Source
 coverage and syntax acceptance do not certify that the interpretation is legal.
 
+## Actual casting payment
+
+This is Dyadrine's entry term only. The attack trigger and chosen-X cast remain
+separate preparation. Mana spent comes from the recorded payment, including
+floating mana and abilities used while paying. Casting it with X equal to two
+normally supplies four counters; a reduction of two supplies two. Putting it
+onto the battlefield without casting it supplies none.
+
+```json package
+{
+  "card": "Dyadrine, Synthesis Amalgam",
+  "registers": [{
+    "kind": "enters",
+    "basis": "Dyadrine enters with a number of +1/+1 counters on it equal to the amount of mana spent to cast it.",
+    "counters": { "+1/+1": { "manaSpent": "this" } }
+  }]
+}
+```
+
+`colorsSpent` counts distinct colors of that same payment, excluding colorless.
+`manaSpent` with `color: "W"` counts white mana. Neither substitutes mana value
+or the unreduced price for what the player actually spent. `{cast: "this", by:
+"you"}` retains who cast the permanent across resolution and ends on a later
+zone change.
+
 ## Selecting a spell
 
 Disdainful Stroke reads the spell on the stack, including its X.

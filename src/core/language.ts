@@ -100,6 +100,9 @@ export const Defs = {
 		object({ power: ObjectRef }),
 		object({ toughness: ObjectRef }),
 		object({ manaValue: ObjectRef }),
+		/** The actual payment for this spell, or the spell this permanent resolved from. Uncast objects yield zero. */
+		object({ manaSpent: ObjectRef, color: Type.Optional(Color) }),
+		object({ colorsSpent: ObjectRef }),
 		object({ bound: name }),
 		object({ distinct: Type.Literal("card-types"), among: Type.Ref("Selector") }),
 		object({ life: PlayerRef }),
@@ -124,6 +127,7 @@ export const Defs = {
 		object({ all: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ any: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ not: Type.Ref("Condition") }),
+		object({ cast: ObjectRef, from: Type.Optional(Zone), by: Type.Optional(PlayerRef) }),
 		/** Whose turn it is: "if it's not your turn". */
 		object({ turn: one("self", "opponent") }),
 	]),

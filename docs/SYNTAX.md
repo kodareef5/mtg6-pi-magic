@@ -117,6 +117,8 @@ An **amount** is worked out when it is read and never stored.
 | `power`, `toughness` of a ref, captured when applied (608.2h) | Mightform Harmonizer's "double the power" |
 | `manaValue` of a ref | Thor's damage from `event:object`; a departed spell keeps its last stack value, including X |
 | `bound` | "that much", "that many" |
+| `manaSpent` | actual mana spent to cast the referenced spell or the permanent it became; optional `color` counts one mana type |
+| `colorsSpent` | distinct colors spent on that cast; colorless mana adds no color |
 | `distinct: "card-types"` among a selector | Keen-Eyed Curator |
 | `life` of a player | "if you have 10 or less life" |
 | `startingLife` of a player | the format's starting life total, independent of current life |
@@ -133,7 +135,13 @@ An **amount** is worked out when it is read and never stored.
 A **condition** is an amount against `atLeast` or `atMost`, a `bound` name that
 holds something, `is` a ref matching a selector, `turn` naming whose turn it is
 (`self` or `opponent`: Eddymurk Crab's "if it's not your turn"), or `all`,
-`any`, `not` over conditions. Kicker and warp need no condition: their procedure variants already
+`any`, `not` over conditions. `{cast: "this", by: "you"}` asks whether that
+object was cast by that player, with optional `from` for the casting zone.
+Casting facts follow a resolving spell onto the battlefield, including its X
+and actual payment. A blink or reanimation starts a new object with no cast;
+amounts for an uncast object are zero. A reduction, alternative price or free
+cast therefore changes the payment query without changing the printed cost.
+Kicker and warp need no condition: their procedure variants already
 say what they do.
 
 ## Doing things

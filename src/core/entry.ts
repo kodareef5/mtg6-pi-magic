@@ -46,7 +46,12 @@ export function terms(table: Table, object: Thing, before: Record<ObjectId, Thin
 	const live = tableWorld(table);
 	const objects = live.objects.flatMap((one) => one.id === object.id ? [one] : born.has(one.id) ? [] : [before[one.id] ?? one]);
 	for (const [id, was] of Object.entries(before)) if (id !== object.id && !table.things.has(id)) objects.push(was);
-	const world = { ...live, objects, get history() { return live.history; } };
+	const world = { ...live, objects, get history() { return live.history; },
+		// The move is still committing. Its stack incarnation is in this group's before snapshot.
+		casting: (ref: { id: string; incarnation: number }) => {
+			const was = before[ref.id];
+			return live.casting?.(ref.id === object.id && was?.zone === "stack" && was.incarnation + 1 === ref.incarnation ? was : ref);
+		} };
 	const found: { tapped?: true; prepared?: true; counters: Record<string, number> } = { counters: characteristics(table, object)?.subtypes.includes("Saga") ? { lore: 1 } : {} };
 	for (const holder of objects as Thing[]) {
 		if (holder.zone !== "battlefield") continue;

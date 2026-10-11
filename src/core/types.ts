@@ -117,6 +117,8 @@ export type SeatView = {
 	since: string[];
 	/** Visible objects only; unknown public identities have no card field. */
 	objects?: SeenObject[];
+	/** Public casting provenance for visible objects and this turn's cast events. */
+	castings?: Record<string, import("./casting.ts").Casting>;
 	/** Registered composition is public. Counts carry no object ids or hidden order. */
 	decks?: { seat: SeatId; name: string; cards: Record<string, number>; sideboard: Record<string, number> }[];
 	/** Actual step visit. A repeated combat is a new scheduling opportunity. */

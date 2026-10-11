@@ -26,6 +26,7 @@ import { currentPlan } from "./query.ts";
 import { recentBlock, pendingBlockRuling } from "./judge.ts";
 import { blockConflicts } from "./combat-facts.ts";
 import { withdrawnChoices } from "./combat.ts";
+import { casting } from "./casting.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
@@ -179,6 +180,11 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		const others = new Set(declaration.blockers.filter((one) => one.blocking.some((aim) => aim.id === ref.id && aim.incarnation === ref.incarnation)).map((one) => `${one.id}@${one.incarnation}`)).size - 1;
 		return attack && block ? blockConflicts(attack, block, others).map((conflict) => `${block.card ?? block.token?.name ?? block.id} blocking ${attack.card ?? attack.token?.name ?? attack.id}: ${conflict}`) : [];
 	})) ?? [];
+	const history = happened(table);
+	const castings = Object.fromEntries([...objects, ...history.flatMap((event) => event.kind === "cast" ? [event.spell] : [])].flatMap((object) => {
+		const paid = !object.faceDown && casting(table, object);
+		return paid ? [[`${object.id}@${object.incarnation}`, structuredClone(paid)]] : [];
+	}));
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		starting: table.seats[0]!.id,
 		...(at.kind === "opening" && viewer !== "spectator" ? { opening: { starting: table.seats[0]!.id, mulligans: table.opening?.taken[viewer] ?? 0,
@@ -194,7 +200,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		...(declarationReview ? { declarationReview } : {}),
 		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts } } : {}),
-		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
+		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history, castings,
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),

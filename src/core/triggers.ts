@@ -20,6 +20,7 @@ import type { GameEvent, Registration } from "./language.ts";
 import type { Change, Zone } from "./syntax.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
 import type { Step } from "./steps.ts";
+import { casting } from "./casting.ts";
 
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
@@ -254,6 +255,9 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 	const happened = occurrences(table, changes, receipt);
 	if (!happened.length) return { waiting: [], spent: [] };
 	const after = tableWorld(table);
+	// Watches inspect the group before its receipt is appended, including its new casts and resolved entries.
+	const pending = { ...receipt, changes, after: Object.fromEntries([...table.things]) };
+	after.casting = (ref) => casting(table, ref, pending);
 	const forward = watches(after, after.objects), back = prior ? watches(prior, prior.objects) : [];
 	const scopeOf = (watch: Watch): Scope => ({ world: watch.world, controller: watch.controller, source: watch.object });
 	// Torpor Orb: an event a suppression names causes no triggers.
