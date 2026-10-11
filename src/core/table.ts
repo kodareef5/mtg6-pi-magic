@@ -373,6 +373,8 @@ export type Seat = {
 };
 
 export type Table = {
+	/** Public Oracle name choices are source-pinned and never read from hidden card objects. */
+	cardNames?: import("./card-names.ts").NameSource;
 	/** A proposed group awaiting optional entry payments. */
 	entry?: import("./entry-payments.ts").Entry;
 	payment?: import("./cost-selection.ts").Payment;

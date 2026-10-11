@@ -67,6 +67,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 
 	const table: Table = {
 		format,
+		...(universe.names ? { cardNames: { ...universe.names } } : {}),
 		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
 		things: new Map(),
@@ -291,6 +292,11 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "tap":
 				thing(table, change.what).tapped = true;
 				break;
+			case "name-card": {
+				const object = thing(table, change.what);
+				object.choices = { ...object.choices, [change.key]: change.name };
+				break;
+			}
 			case "untap":
 				thing(table, change.what).tapped = false;
 				break;

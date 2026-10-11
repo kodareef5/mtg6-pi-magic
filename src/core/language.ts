@@ -53,7 +53,7 @@ const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.
 /** Objects that exist and match. Each field narrows; a list field matches any of its members. */
 const SelectorFields = {
 	/** A printed name, as cards say "named" and plans name what they mean. */
-	name: Type.Optional(text),
+	name: Type.Optional(Type.Union([text, object({ chosen: text })])),
 	/** Shares a name with an object already named or bound by this effect. */
 	nameOf: Type.Optional(ObjectRef),
 	/** Default battlefield. */
@@ -238,6 +238,8 @@ export const Defs = {
 			] }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
+		/** Choose from the pinned Oracle catalog, not registered decks or hidden objects; remember it on the named incarnation. */
+		step({ do: Type.Literal("name-card"), who: PlayerRef, on: ObjectRef, key: name, types: Type.Optional(Type.Array(one(...CARD_TYPES), { minItems: 1 })) }),
 		/** A private inspection binds exactly the inspected objects, not the whole hidden zone. */
 		step({ do: Type.Literal("look"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		/** Reorder a named library subset without changing its zone or incarnation. */

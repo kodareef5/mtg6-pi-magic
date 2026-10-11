@@ -471,6 +471,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   review.ts          the current decision's checklist and the seat's recorded judgments
   query.ts           whether a window is now, and which projected objects a query names
   printed.ts         type line, mana cost and power/toughness from the card file
+  card-names.ts      source-pinned Oracle names and printed types, independent of deck legality
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
   durations.ts       immediate returns when an exile-until duration ends
@@ -520,6 +521,7 @@ src/context/           questions for a decision model. Its own AGENTS.md
   playbook.ts, plan.ts the policy schema; the starting intent
 src/seating/           protocol and validation; sockets unfinished
 tools/cards.ts         build a card list from Scryfall, any format or all of it
+tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot
 tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           bulk games: carried seeds of one matchup, or seeded random pairings from the deck pool; one table per arm
 src/core/packages.ts   source-checked card interpretations, reused through shared seating for new games

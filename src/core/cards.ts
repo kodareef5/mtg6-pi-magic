@@ -22,6 +22,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { nameSource, type NameSource } from "./card-names.ts";
 
 import type { Format } from "./format.ts";
 
@@ -45,7 +46,7 @@ export type Card = {
  * A journal pins it, because a set release changes oracle text and a replay
  * against different text is a different game.
  */
-export type Universe = { path: string; generated: string; cards: Map<string, Card>; faces?: { path: string; sha256: string } };
+export type Universe = { path: string; generated: string; cards: Map<string, Card>; faces?: { path: string; sha256: string }; names?: NameSource };
 
 const UNSUPPORTED = join(import.meta.dirname, "..", "..", "cards", "unsupported.txt");
 let listed: Set<string> | undefined;
@@ -99,7 +100,8 @@ export function load(path: string): Universe {
 		}
 		faces = { path: facePath, sha256: createHash("sha256").update(text).digest("hex") };
 	}
-	return { path, generated, cards, ...(faces ? { faces } : {}) };
+	const names = nameSource(path);
+	return { path, generated, cards, ...(faces ? { faces } : {}), ...(names ? { names } : {}) };
 }
 
 export function card(universe: Universe, name: string): Card {

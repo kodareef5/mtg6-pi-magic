@@ -16,9 +16,11 @@ Each game is an append-only JSONL file with a header and ordered entries.
 {"v":1,"work":{...}}
 ```
 
-The header pins seat names, decks, the seed, and card/rules file dates. Replay
-refuses mismatched data. Naming has its own random stream so restoring saved
-names does not change the shuffle draws.
+The header pins seat names, decks, the seed, card/rules file dates, and hashes
+for structured faces and the Oracle name catalog. Replay refuses mismatched
+data. Older journals without a name-catalog pin retain no card-name choices.
+Random seat and object naming has its own stream so restoring saved names does
+not change the shuffle draws.
 
 Receipts record committed changes. Ledger rows record decisions and whether
 they were forced, delegated, chosen, declared or fallback. Prepared briefs and

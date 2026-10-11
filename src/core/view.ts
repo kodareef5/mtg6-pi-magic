@@ -339,6 +339,9 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				if (shown) parts.push(`${seat(table, shown.owner).name} revealed ${shown.card ?? shown.token?.name ?? "a card"} from ${shown.zone}`);
 				break;
 			}
+			case "name-card":
+				parts.push(`${publicName(receipt.before[change.what])}: chose the name ${change.name}`);
+				break;
 			case "look": {
 				const seen = receipt.before[change.what];
 				parts.push(`${seat(table, change.who).name} looked at ${viewer === change.who ? seen?.card ?? "a card" : "a card"} privately`);

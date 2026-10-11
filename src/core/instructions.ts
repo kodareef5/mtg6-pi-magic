@@ -16,6 +16,7 @@ import { manaTerms } from "./funding.ts";
 import { inspection, selectionBlock } from "./inspection.ts";
 import { project } from "./view.ts";
 import { summary } from "./announce.ts";
+import { cardNameChoices } from "./card-names.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
@@ -51,6 +52,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "name-card": {
+			const actor = players(scope, instruction.who)[0] ?? controller, on = live(table, objects(scope, instruction.on));
+			if (!table.cardNames) return { actor, question: "Choose an Oracle card name.", choices: [], blocked: "No pinned Oracle name catalog; the name choice remains pending." };
+			return { actor, question: `Choose ${instruction.types?.join(" or ") ?? "a"} card name from the Oracle catalog.`,
+				choices: cardNameChoices(table.cardNames, instruction.types).map((value) => ({ id: `name:${value}`, label: `Choose the name ${value}`, changes:
+					on.map((object) => ({ do: "name-card" as const, what: object.id, key: instruction.key, name: value })) })) };
+		}
 		case "damage-rule": return one(`${instruction.combat === undefined ? "All" : instruction.combat ? "Combat" : "Noncombat"} damage ${instruction.mode === "prevent" ? "is prevented" : "can't be prevented"} until ${instruction.until.replaceAll("-", " ")}`,
 			[{ do: "note", note: { kind: "damage-rule", by: controller, mode: instruction.mode, until: instruction.until as Until,
 				...(instruction.combat !== undefined ? { combat: instruction.combat } : {}), ...(source ? { source } : {}) } }]);

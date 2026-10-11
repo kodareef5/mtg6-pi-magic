@@ -171,6 +171,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone; another hand needs an earlier explicit look, and a library search must name its owner or controller, or a bound inspected subset |
+| `name-card` | `who` chooses an Oracle card name, optionally filtered by printed `types`; remember it as `key` on the current incarnation of `on` |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
 | `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
@@ -200,6 +201,14 @@ whole sequence inside `perform` with `may`, so accepting and finding nothing
 still shuffles but declining does not. See [optional search](examples/optional-search.md).
 Beholding is `choose` from the battlefield or hand with `reveal`. There is no
 search or behold instruction, because hands do neither: they look, pick, move.
+
+Naming a card is a different choice from selecting a card object. `name-card`
+reads the journal's pinned Oracle catalog, including individual faces and
+names outside the format. `name: {chosen: "key"}` in a selector reads its
+source's remembered choice and matches nothing before that choice resolves.
+The choice expires when that incarnation leaves its zone. See
+[card names](examples/card-names.md). Name qualifications beyond printed card
+types remain unsupported.
 
 **Modifications** change characteristics and are applied by the layer walk
 (613). `types` and `subtypes` are set or added, and `of` says whose subtypes are

@@ -197,7 +197,8 @@ const subtypes = (scope: Scope, types: NonNullable<Selector["subtypes"]>): strin
 /** Freeze a source's named type choice for mana that can outlive that source. */
 export function chosenSelector(scope: Scope, selector: Selector): Selector {
 	return { ...selector, ...(selector.subtypes ? { subtypes: subtypes(scope, selector.subtypes) } : {}),
-		...(selector.not?.subtypes ? { not: { ...selector.not, subtypes: subtypes(scope, selector.not.subtypes) } } : {}),
+		...(typeof selector.name === "object" ? { name: scope.source?.choices?.[selector.name.chosen] ?? "" } : {}),
+		...(selector.not ? { not: chosenSelector(scope, selector.not) } : {}),
 		...(selector.any ? { any: selector.any.map((one) => chosenSelector(scope, one)) } : {}),
 		...(selector.all ? { all: selector.all.map((one) => chosenSelector(scope, one)) } : {}) };
 }
@@ -214,7 +215,10 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
 	if (!side(scope, selector.controller, holder) || !side(scope, selector.owner, object.owner)) return false;
 	const subtype = (wanted: string) => traits.subtypes.some((one) => same(one, wanted)) || (!!traits.allCreatureTypes && creatureType(wanted));
-	if (selector.name && !same(traits.name, selector.name)) return false;
+	if (selector.name !== undefined) {
+		const name = typeof selector.name === "string" ? selector.name : scope.source?.choices?.[selector.name.chosen];
+		if (!name || !same(traits.name, name)) return false;
+	}
 	if (selector.nameOf) {
 		const names = objects(scope, selector.nameOf, true).flatMap((one) => traitsOf(scope, one)?.name.split(" // ").filter(Boolean) ?? []);
 		if (!traits.name.split(" // ").some((name) => names.some((other) => same(name, other)))) return false;

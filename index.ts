@@ -173,7 +173,7 @@ export default function (pi: ExtensionAPI) {
 				format: standard.name,
 				seed: from.seed,
 				seats: opened.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
-				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}) },
+				cards: { path: cards.path, generated: cards.generated, ...(cards.faces ? { faces: cards.faces } : {}), ...(cards.names ? { names: cards.names } : {}) },
 				rules: { path: RULES, effective: rules.effective },
 				created: new Date().toISOString(),
 			};

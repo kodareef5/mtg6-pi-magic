@@ -36,7 +36,7 @@ export type Header = {
 	 * release changes oracle text, and a replay against different text is a
 	 * different game, so these are pinned rather than assumed.
 	 */
-	cards: { path: string; generated: string; faces?: { path: string; sha256: string } };
+	cards: { path: string; generated: string; faces?: { path: string; sha256: string }; names?: import("./card-names.ts").NameSource };
 	rules: { path: string; effective: string };
 	created: string;
 	forkedFrom?: { game: string; version: number };
@@ -388,7 +388,7 @@ export function replay(
 	path: string,
 	start: (header: Header) => Table,
 	upTo?: number,
-	against?: { cards: Pick<Header["cards"], "generated" | "faces">; rules: { effective: string } },
+	against?: { cards: Pick<Header["cards"], "generated" | "faces" | "names">; rules: { effective: string } },
 	/** Keep only the first `workAt` work entries recorded at `upTo`: the position as a seat saw it before its own later work there, such as a help request. */
 	options: { workAt?: number } = {},
 ): { table: Table; header: Header; prepared: { seat: SeatId; made: unknown }[] } {
@@ -399,6 +399,8 @@ export function replay(
 	const lines = atVersion(all, upTo);
 	if (against) {
 		const drift = [
+			header.cards.names && header.cards.names.sha256 !== against.cards.names?.sha256
+				? "Oracle name data differs from the game's pinned source" : null,
 			header.cards.faces && header.cards.faces.sha256 !== against.cards.faces?.sha256
 				? "structured face data differs from the game's pinned source" : null,
 			against.cards.generated === header.cards.generated
@@ -412,6 +414,9 @@ export function replay(
 	}
 	const work = lines.flatMap((line) => "work" in line && (upTo === undefined || line.v <= upTo) ? [line.work] : []);
 	const initial = start(header);
+	// A catalog cannot change the options of a journal that never pinned it.
+	if (!header.cards.names) delete initial.cardNames;
+	else if (initial.cardNames?.sha256 !== header.cards.names.sha256) throw new Error(`${path} cannot be replayed here: Oracle name data differs from the game's pinned source`);
 	// Older journals accepted the original single-face representation. Replaying
 	// their decisions cannot silently add faces and change the available moves.
 	if (!header.cards.faces) for (const printed of Object.values(initial.printed)) {

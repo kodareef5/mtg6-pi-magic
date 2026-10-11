@@ -78,6 +78,8 @@ export type Change =
 	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
+	/** A chosen name belongs to this permanent's incarnation, as entry choices do. */
+	| { do: "name-card"; what: string; key: string; name: string }
 	/** A private inspection during resolution. Nothing moves. */
 	| { do: "look"; who: SeatId; what: string }
 	/** A library subset placed in the stated order, or shuffled before placement. */
