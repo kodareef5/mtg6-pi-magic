@@ -40,10 +40,9 @@ export type Inspection = { use?: string; binding?: string; path?: Filter[] };
 export type Menu = { options: Choice[]; enter: Record<string, Inspection>; stage: "choice" | "use" | "binding" | "payment" | "component"; selected?: Use; scope?: string[]; field?: string; path?: Filter[]; facts?: string[] };
 const bindingKey = (one: Choice) => JSON.stringify({ targets: one.targets, x: one.x });
 function notes(variants: Choice[]): string[] {
-	return [...new Set(variants.flatMap((one) => one.notes ?? []))].map((note) => {
-		const count = variants.filter((one) => one.notes?.includes(note)).length;
-		return count === variants.length ? note : `${count} of ${variants.length} alternatives: ${note}`;
-	});
+	const counts = new Map<string, number>();
+	for (const one of variants) for (const note of new Set(one.notes ?? [])) counts.set(note, (counts.get(note) ?? 0) + 1);
+	return [...counts].map(([note, count]) => count === variants.length ? note : `${count} of ${variants.length} alternatives: ${note}`);
 }
 
 /** A stage partitions complete original offers. Backtracking restores the whole menu. */

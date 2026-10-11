@@ -25,6 +25,7 @@ import { establish, example, main, matchup, offered, place } from "./play.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { annotate, planState } from "../src/core/planning.ts";
 import { combatDamage, declareBlockers } from "../src/core/combat.ts";
+import { printedCast } from "../src/core/procedures.ts";
 import { CHOICE_LIMIT, decisionApi, type DecisionApi } from "../src/context/model.ts";
 import { tally } from "../src/context/spend.ts";
 import { dossier } from "../src/context/dossier.ts";
@@ -290,6 +291,32 @@ test("inspection preserves every complete choice within provider capacity and ne
 	assert.equal(blocks.options.length, 5);
 	assert.equal(inspect(blocks, {}, 4).field, "Blocker");
 	paths(blocks, 4);
+	// A use can have many payments but only a few held resources. Each warning
+	// must factor by resource, rather than enumerating every spent subset.
+	const held = matchup("held-payment-inspection");
+	place(held, 0, "hand", "Mossborn Hydra");
+	const forests = place(held, 0, "battlefield", ...Array<string>(8).fill("Forest"));
+	// Distinct counters keep these lands from being interchangeable payments.
+	commit(held, forests.map((one, at) => ({ do: "counters", what: one.id, kind: "+1/+1", amount: at + 1 })), "game-setup");
+	main(held, 0);
+	editWork(held, 0, [{ do: "plan.put", plan: { objective: "Reserve a response", guidance: "Compare the stated payments", steps: [],
+		holds: [{ objects: { zones: ["battlefield"], controller: "self", card: "Forest" }, purpose: "Keep mana for the response." }] } }], "held-payments");
+	const heldFrame = workFrame(held, 0), heldBefore = structuredClone(held);
+	const payments = offered(held, printedCast("Mossborn Hydra", heldFrame.view.printed!["Mossborn Hydra"]!));
+	assert.ok(payments.length > forests.length * 4);
+	const marked = annotate([...payments.map((one) => one.option), { id: "pass", label: "Pass" }], planState(heldFrame)!);
+	for (const option of marked) {
+		const warnings = option.notes?.filter((one) => one.startsWith("Spends ")) ?? [];
+		const sources = option.use?.funding?.map((one) => `${one.source.id}@${one.source.incarnation}`) ?? [];
+		assert.equal(warnings.length, sources.length);
+		for (const source of sources) assert.equal(warnings.filter((one) => one.includes(`(${source})`)).length, 1);
+	}
+	const heldFacts = choices(marked), menu = inspect(heldFacts, {});
+	assert.equal(menu.options.find((one) => one.use)?.notes?.length, forests.length, "the use compares each held resource once, with its variant count");
+	paths(heldFacts, 8);
+	const heldPacket = focus({ ...heldFrame, decision: { ...heldFrame.decision!, options: marked } }, startingIntent(0), { inspection: {} });
+	assert.ok(JSON.stringify({ state: heldPacket, questions: question(heldPacket, false) }).length < 20000);
+	assert.deepEqual(held, heldBefore, "payment inspection leaves the table and its plan untouched");
 	const counted = tally();
 	const api = decisionApi(async () => { throw new Error("An oversized request reached the provider"); },
 		{ id: "fixture", provider: "offline", api: "typesafe-system-one" } as never, { tally: counted });
