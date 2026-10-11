@@ -6,6 +6,8 @@ import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
+import { play } from "../src/core/loop.ts";
+import { startingIntent } from "../src/context/plan.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { describe, project } from "../src/core/view.ts";
 import { viewWorld } from "../src/core/selectors.ts";
@@ -82,4 +84,52 @@ test("private inspection exposes only its bounded window and orders it without c
 		assert.equal(table.outcome, null, "looking and choosing from a short library is not a failed draw");
 		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
 	}
+});
+
+test("private selection cannot expose another hand through a malformed selector or an unearned library order", async () => {
+	for (const from of [{ zones: ["hand"] }, { zones: ["hand"], types: ["creature"] }, { zones: ["hand"], name: "Forest" }]) {
+		const table = start(standard, [{ deck: deck("Izzet Spellementals") }, { deck: deck("4c Control") }], "unseen-choice");
+		main(table, 0); place(table, 0, "hand", "Winternight Stories");
+		commit(table, [{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
+		announce(table, { source: { card: "Winternight Stories", zones: ["hand"] }, claim: "Malformed hand selection", basis: table.printed["Winternight Stories"]!.oracle,
+			timing: "spell", instructions: [{ do: "choose", who: "you", from, count: 1, as: "chosen" }] });
+		passBoth(table);
+		const before = structuredClone(table), decision = nextDecision(table)!;
+		assert.deepEqual(table, before, "checking visibility grants no knowledge and moves nothing");
+		assert.deepEqual(decision.options, []); assert.match(decision.blocked!, /unseen cards/);
+		assert.throws(() => apply(table, "pass", "model", "chosen"), /unseen cards/);
+		assert.deepEqual(table, before, "no pick or fallback can bypass visibility");
+		let asked = 0;
+		const player = { name: "Unasked", observe() {}, close() {}, answer: async () => { asked++; throw new Error("must not be asked"); } };
+		assert.equal(await play(table, { 0: player, 1: player }, { 0: startingIntent(0), 1: startingIntent(1) }), null);
+		assert.equal(asked, 0); assert.equal(table.gaps.length, 1); assert.deepEqual(table.things, before.things);
+	}
+	for (const chooser of ["you", "opponent"] as const) {
+		const table = start(standard, [{ deck: deck("Izzet Spellementals") }, { deck: deck("4c Control") }], "earned-choice");
+		main(table, 0); place(table, 0, "hand", "Winternight Stories");
+		commit(table, [{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
+		const hand = cardsIn(table, "hand", 1), initial = structuredClone(table), at = table.ledger.length;
+		announce(table, { source: { card: "Winternight Stories", zones: ["hand"] }, claim: "Visibility fixture", basis: table.printed["Winternight Stories"]!.oracle,
+			timing: "spell", instructions: [
+			...(chooser === "you" ? [{ do: "look" as const, who: "you", every: { zones: ["hand"], controller: "opponent" } }] : []),
+			{ do: "choose", who: chooser, from: { zones: ["hand"], controller: "opponent" }, count: 1, as: "chosen" },
+			{ do: "move", what: "bound:chosen", to: "graveyard", reason: "discard" },
+		] });
+		passBoth(table);
+		if (chooser === "you") step(table);
+		const decision = nextDecision(table)!;
+		assert.equal(decision.seat, chooser === "you" ? 0 : 1); assert.equal(decision.blocked, undefined);
+		assert.ok(decision.options.some((one) => one.cards?.some((card) => hand.some((one) => one.card === card))));
+		assert.ok(!project(table, "spectator").objects!.some((one) => one.zone === "hand"));
+		step(table, () => true);
+		if (chooser === "opponent") assert.ok(nextDecision(table)!.options.every((one) => !hand.some((card) => one.label.includes(card.card!))), "the controller cannot read the other chooser's private card before it moves");
+		finish(table);
+		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
+	}
+	const order = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], "unseen-order");
+	main(order, 0); place(order, 0, "hand", "Stock Up");
+	commit(order, [{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
+	announce(order, { ...example("Stock Up from five cards"), instructions: [{ do: "order", who: "you", what: { top: 2, of: "you" }, position: "top" }] });
+	passBoth(order);
+	assert.match(nextDecision(order)!.blocked!, /unseen library/); assert.deepEqual(nextDecision(order)!.options, []);
 });

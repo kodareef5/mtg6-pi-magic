@@ -121,6 +121,13 @@ export async function play(
 			continue;
 		}
 
+		if (decision.blocked) {
+			const gap = `Seat ${decision.seat}, ${decision.situation}: ${decision.blocked} Decision remains pending; no action was chosen.`;
+			if (table.gaps.at(-1) !== gap) table.gaps.push(gap);
+			report(table, told, watch);
+			return null;
+		}
+
 		// Strategy maintains the plan. The player executes its voluntary actions.
 		const current = table.work[decision.seat] ? workFrame(table, decision.seat) : undefined;
 		const attention = !!current && planReason(current) !== undefined;

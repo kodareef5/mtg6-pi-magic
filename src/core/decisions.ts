@@ -125,6 +125,7 @@ export function apply(
 	const p = pending(table);
 	if (p === null) throw new Error("apply was called with nothing pending");
 	if (p.preparation?.length) throw new Error(`Prepare the known uses of ${p.preparation.map((one) => one.card).join(", ")} before choosing an action or passing.`);
+	if (p.blocked) throw new Error(p.blocked);
 	const move = p.moves.find((candidate) => candidate.option.id === optionId);
 	if (!move) {
 		throw new Error(

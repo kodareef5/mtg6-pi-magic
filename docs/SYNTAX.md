@@ -165,7 +165,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
-| `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone |
+| `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone; another hand needs an earlier explicit look, and a library selection declares a search |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
 | `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
@@ -630,3 +630,13 @@ Standing `damage-rule` registrations accept the same `mode` and optional
 event; departed damage sources use their last known characteristics. Source
 selectors default to any zone. See [prevention](examples/prevention.md) for
 limits and a spell that prohibits prevention before dealing its damage.
+
+Private selections are checked against the actor's earned view before card
+identities can enter a choice. A selector that can reach another unseen hand
+stays pending, including when a name or type filter would find nothing there.
+Scope your own hand with `controller: "you"`; an opponent choosing from their
+own hand uses `who: "opponent"` and `controller: "opponent"`. A prior `look`
+permits selection from its inspected objects. Choosing library order also needs
+a prior look; a random order names no cards and requires none. A blocked
+selection creates a gap without asking a player, moving a card or choosing a
+fallback. These checks enforce visibility, not the legality of the card claim.

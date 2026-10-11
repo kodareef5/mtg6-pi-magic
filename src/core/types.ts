@@ -79,6 +79,8 @@ export type Decision = {
 	fallback?: string;
 	/** Known uses with visible sources. Prepare them before answering this physical decision. */
 	preparation?: { card: string; uses: DeferredUse[] }[];
+	/** A physical choice cannot be offered without missing information or machinery. No pick or fallback can bypass it. */
+	blocked?: string;
 };
 
 /**

@@ -13,17 +13,17 @@ import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
 import { manaTerms } from "./funding.ts";
-import { inspection } from "./inspection.ts";
+import { inspection, selectionBlock } from "./inspection.ts";
+import { project } from "./view.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 
 export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: ObjectRef; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef };
-export type Step = { actor: SeatId; question: string; choices: Choice[] };
+export type Step = { actor: SeatId; question: string; choices: Choice[]; blocked?: string };
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
-const name = (object?: Seen) => object ? object.card ?? object.token?.name ?? object.id : "nothing";
 const COLORS: Mana["color"][] = ["W", "U", "B", "R", "G"];
 type Until = Note["until"];
 
@@ -45,6 +45,8 @@ function captured(scope: Scope, change: Modification): Modification {
 
 export function instructionStep(table: Table, scope: Scope, instruction: Instruction, pending: Resolution, claim: string): Step {
 	const controller = scope.controller;
+	const visible = new Set((project(table, controller).objects ?? []).filter((one) => !one.faceDown).map((one) => `${one.id}@${one.incarnation}`));
+	const name = (object?: Seen) => !object ? "nothing" : !visible.has(`${object.id}@${object.incarnation}`) ? "an unknown card" : object.card ?? object.token?.name ?? object.id;
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
@@ -146,6 +148,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "choose": {
 			const who = players(scope, instruction.who)[0] ?? controller;
+			const blocked = selectionBlock(table, scope, instruction.from, who);
+			if (blocked) return { actor: who, question: blocked, choices: [], blocked };
 			const count = amount(scope, instruction.count);
 			const picked = pending.picked;
 			// "You" in the selector is still the ability's controller, whoever chooses.
@@ -160,7 +164,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			// Once the count is met there is nothing left to pick, even when it is zero.
 			const choices: Choice[] = picked.length >= count ? [] : pool.map((object) => {
 				const last = picked.length + 1 >= count;
-				return { id: object.id, label: `Choose ${name(object)} (${object.zone})`, objects: [ref(object)], ...(object.card ? { cards: [object.card] } : {}), changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
+				return { id: object.id, label: `Choose ${object.card ?? object.token?.name ?? "an unknown card"} (${object.zone})`, objects: [ref(object)], ...(object.card ? { cards: [object.card] } : {}), changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
 					...(last ? finish([ref(object)]) : { pick: ref(object) }) };
 			});
 			// Up to, a hidden-zone search, and running out are all ways to stop short (701.23b).
