@@ -145,16 +145,17 @@ const live = (world: World, ref: ObjectRef) => world.objects.find((one) => one.i
 const traitsOf = (scope: Scope, object: Seen) =>
 	live(scope.world, object) ? scope.world.read(object) : scope.world.lastKnown(object)?.traits ?? scope.world.read(object);
 
-/** The objects a ref names, as they are now. A target or binding that changed zones names nothing. */
-export function objects(scope: Scope, ref: string | { top: Amount; of: string }): Seen[] {
+/** Motion needs live objects. Information can read a departed target or binding as it last existed (608.2h). */
+export function objects(scope: Scope, ref: string | { top: Amount; of: string }, information = false): Seen[] {
 	if (typeof ref !== "string") return players(scope, ref.of).flatMap((owner) => scope.world.objects.filter((one) => one.zone === "library" && one.owner === owner)
 		.sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).slice(0, Math.max(0, amount(scope, ref.top))));
 	const [head, rest] = [ref.split(":")[0], ref.slice(ref.indexOf(":") + 1)];
+	const read = (one: ObjectRef) => live(scope.world, one) ?? (information ? scope.world.lastKnown(one)?.object : undefined);
 	switch (head) {
 		case "this": return scope.source ? [scope.source] : [];
 		case "attached": { const at = scope.source?.attached && live(scope.world, scope.source.attached); return at ? [at] : []; }
-		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "id" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? live(scope.world, chosen) ?? [] : []);
-		case "bound": return (scope.bound?.[rest]?.objects ?? []).flatMap((one) => live(scope.world, one) ?? []);
+		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "id" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? read(chosen) ?? [] : []);
+		case "bound": return (scope.bound?.[rest]?.objects ?? []).flatMap((one) => read(one) ?? []);
 		case "event": {
 			if (rest === "objects") return scope.event?.objects ?? [];
 			const object = scope.event?.[rest as "object" | "source" | "recipient"];
@@ -175,8 +176,8 @@ export function players(scope: Scope, ref: string): SeatId[] {
 		case "event": return scope.event?.player === undefined ? [] : [scope.event.player];
 		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "player" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? [chosen.player] : []);
 		case "bound": return scope.bound?.[rest]?.players ?? [];
-		case "controller": return objects(scope, rest).map((one) => one.controller);
-		case "owner": return objects(scope, rest).map((one) => one.owner);
+		case "controller": return objects(scope, rest, true).map((one) => one.controller);
+		case "owner": return objects(scope, rest, true).map((one) => one.owner);
 		default: return [];
 	}
 }
@@ -240,10 +241,10 @@ export const select = (scope: Scope, selector: Selector): Seen[] =>
 export function amount(scope: Scope, value: Amount): number {
 	if (typeof value === "number") return value;
 	if ("count" in value) return select(scope, value.count).length;
-	if ("counters" in value) { const one = objects(scope, value.on)[0]; return one ? one.counters[value.counters] ?? 0 : 0; }
-	if ("power" in value) { const one = objects(scope, value.power)[0]; return (one && traitsOf(scope, one)?.power) ?? 0; }
-	if ("toughness" in value) { const one = objects(scope, value.toughness)[0]; return (one && traitsOf(scope, one)?.toughness) ?? 0; }
-	if ("manaValue" in value) { const one = objects(scope, value.manaValue)[0]; return (one && traitsOf(scope, one)?.manaValue) ?? 0; }
+	if ("counters" in value) { const one = objects(scope, value.on, true)[0]; return one ? one.counters[value.counters] ?? 0 : 0; }
+	if ("power" in value) { const one = objects(scope, value.power, true)[0]; return (one && traitsOf(scope, one)?.power) ?? 0; }
+	if ("toughness" in value) { const one = objects(scope, value.toughness, true)[0]; return (one && traitsOf(scope, one)?.toughness) ?? 0; }
+	if ("manaValue" in value) { const one = objects(scope, value.manaValue, true)[0]; return (one && traitsOf(scope, one)?.manaValue) ?? 0; }
 	if ("manaSpent" in value || "colorsSpent" in value) {
 		const one = objects(scope, "manaSpent" in value ? value.manaSpent : value.colorsSpent)[0];
 		const paid = one && scope.world.casting?.(one);

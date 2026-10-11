@@ -62,6 +62,11 @@ any. Any other lowercase word is recorded for the players and the judge.
 | `you` (or `self`), `opponent`, `each-player` | players relative to the source's controller |
 | `controller:target:0`, `owner:this` | a player read off an object |
 
+Information readers retain a departed target's last controller, owner and
+characteristics. Preserve printed instruction order: exile first, then read
+`controller:target:0` for life loss. A physical instruction still requires the
+live incarnation, and an illegal target supplies neither motion nor information.
+
 Refs inside a delayed or reflexive effect, other than `event:*`, are fixed when
 that trigger is created. Warp's "exile it at the next end step" exiles that
 permanent, not whatever `this` names later.
