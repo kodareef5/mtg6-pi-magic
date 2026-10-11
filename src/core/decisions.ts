@@ -31,6 +31,7 @@ import { preparation } from "./readiness.ts";
 import { unlocks } from "./rooms.ts";
 import { completedSaga } from "./sagas.ts";
 import { project } from "./view.ts";
+import { selectingPayment } from "./cost-selection.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
@@ -45,6 +46,7 @@ import { project } from "./view.ts";
 function pending(table: Table): Pending | null {
 	if (table.outcome) return null;
 	if (table.entry) return entryPayment(table);
+	if (table.payment) return selectingPayment(table);
 
 	// 2. Pregame: mulligan, then the opening actions a card permits. Situation 7.
 	//    Null before the hands are dealt and between rounds: advance deals and
@@ -146,6 +148,7 @@ function take(
 		activate(table, move.activation, { picked: move.option.id, offered: p.moves.map((candidate) => candidate.option.id), by, why, ...(execution ? { execution } : {}) }, registered);
 		return;
 	}
+	if (table.payment) execution = undefined;
 	const changes = [...move.changes, ...bookkeeping(table, p, move)];
 	const entered = table.entry ? Object.fromEntries(changes.flatMap((change) => change.do === "move" && change.to === "battlefield" && change.registers ? [[change.what, structuredClone(change.registers)]] : [])) : attach(table, changes, registered);
 	// The row goes in first, so every group this decision commits is stamped with
@@ -168,6 +171,7 @@ function take(
 
 /** A listed action and its bookkeeping are one committed event. */
 function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
+	if (table.payment) return [];
 	const id = move.option.id;
 	if (table.cursor.steps[0] === "cleanup" && table.cursor.stepDone && !table.cursor.cleanupPriority &&
 		(p.situation === "state-based" || p.situation === "trigger-order")) return [{ do: "turn", action: "priority" }];

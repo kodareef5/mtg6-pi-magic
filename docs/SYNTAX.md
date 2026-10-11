@@ -118,6 +118,7 @@ An **amount** is worked out when it is read and never stored.
 |---|---|
 | a literal | Shock's 2 |
 | `count` of a selector | Smaug's "number of Treasures you control" |
+| `aggregate: "max"`, `"min"` or `"sum"`, with `of` and `value` | Sunderflock's greatest mana value among controlled Elementals; reads current characteristics and yields zero for an empty set |
 | `counters` of a kind on a ref | Mossborn Hydra's doubling |
 | `power`, `toughness` of a ref, captured when applied (608.2h) | Mightform Harmonizer's "double the power" |
 | `manaValue` of a ref | Thor's damage from `event:object`; a departed spell keeps its last stack value, including X |
@@ -345,6 +346,12 @@ empty-stack main phase (709.5). Watches use `on: "unlocks"`, optional `face`,
 and optional `fully: true`. Transformation watches use `on: "transforms"`.
 
 Craft composes a source exile, a material choice and entry transformed.
+For a payment by total mana value, `cost.exile` can instead be
+`{graveyard: {}, totalManaValue: 6}`. The filter narrows the payer's graveyard.
+Selection precedes spending; confirmation pays the full cost in one group.
+Every eligible subset remains reachable, including extras after the threshold.
+See [payments](examples/payments.md).
+
 `cost.exile` can be `{choose, count, source: true}`. The choice selects controlled
 battlefield objects or owned graveyard cards; `source: true` also exiles the
 source and binds its new incarnation as `bound:cost-source`. Exiling `"this"`

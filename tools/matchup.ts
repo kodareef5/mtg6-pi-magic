@@ -94,7 +94,7 @@ finally {
 // or its health line reports a mismatch between an unadvanced table and an advanced replay of the same journal.
 while (!table.outcome && !nextDecision(table)) advance(table);
 // The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
-const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, outcome: game.outcome?.results });
+const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, payment: game.payment, outcome: game.outcome?.results });
 const replayMatches = state(replay(path, dealtTable).table) === state(table);
 seated.timing.finishedAt = Date.now();
 const result = gameResult(table, seated, { replayMatches, journal: path, trace: calls, ...(failure ? { error: String(failure) } : {}) });

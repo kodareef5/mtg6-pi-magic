@@ -325,6 +325,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.entry) table.entry = structuredClone(change.entry);
 				else delete table.entry;
 				break;
+			case "payment":
+				if (change.payment) table.payment = structuredClone(change.payment);
+				else delete table.payment;
+				break;
 			case "shuffle": {
 				// The shuffle is the only randomness in the game. Positions are
 				// swapped so the library stays a list the engine fully knows.

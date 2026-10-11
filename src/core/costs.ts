@@ -9,6 +9,7 @@ import type { Paid, Table } from "./table.ts";
 import type { Change } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 import type { Choice } from "./instructions.ts";
+import { exilePool, exileValue } from "./cost-selection.ts";
 
 export function paymentChoices(table: Table, scope: Scope, cost: Cost, who: SeatId, resolving: string): Choice[] {
 	const frame = { seat: who, version: table.cursor.clock, view: project(table, who) };
@@ -20,14 +21,24 @@ export function paymentChoices(table: Table, scope: Scope, cost: Cost, who: Seat
 	if (!mana) return [];
 	const price = { generic: Math.max(0, mana.generic + mana.x * (scope.x ?? 0) - (cost.reduce ? amount(context, cost.reduce) : 0)), colors: mana.colors };
 	const ways = extras({ source: {}, claim: "Pay", basis: "Accepted resolving cost", timing: "stack", cost, instructions: [] }, context, origin, frame);
-	return ways.flatMap((way, part) => fundings(frame, { ...price, life: way.paid.life }, new Set(way.uses)).map(({ funding, shows }, at) => {
-		const changes = costChanges(way.paid, origin, who);
+	const selection = typeof cost.exile === "object" && "graveyard" in cost.exile ? cost.exile : undefined;
+	const picked = table.resolution?.picked ?? [], pool = selection ? exilePool(context, selection) : [];
+	const chosen = pool.filter((one) => picked.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation));
+	const total = exileValue(context, chosen);
+	const funded = ways.flatMap((way, part) => fundings(frame, { ...price, life: way.paid.life }, new Set(way.uses)).map(({ funding, shows }, at): Choice => {
+		const changes = costChanges({ ...way.paid, ...(selection ? { exiled: picked } : {}) }, origin, who);
 		const simple = Object.keys(cost).every((key) => key === "mana" || key === "life");
 		const label = simple ? `Pay${cost.life ? ` ${cost.life} life` : ""}${cost.mana ? ` ${cost.mana}` : ""}. ${cost.mana ? shows : ""}`
-			: `Pay ${cost.mana ?? "the cost"}. ${way.shows}${shows}`;
+			: `Pay ${cost.mana ?? "the cost"}. ${selection ? `Exile ${chosen.map((one) => one.card ?? one.id).join(", ")} (total mana value ${total}). ` : way.shows}${shows}`;
 		return { id: ways.length === 1 ? `pay-${at}` : `pay-${part}-${at}`, label,
 			changes: [...changes, ...paying(funding, who, table.cursor.clock, changes.length)] };
 	}));
+	if (!selection || !funded.length) return funded;
+	const choices: Choice[] = pool.filter((one) => !picked.some((ref) => ref.id === one.id)).map((one) => ({ id: `select-${one.id}`,
+		label: `Select ${one.card ?? one.id} (mana value ${context.world.read(one)?.manaValue ?? 0}); selected ${total}, required ${selection.totalManaValue}`,
+		pick: { id: one.id, incarnation: one.incarnation }, ...(one.card ? { cards: [one.card] } : {}), changes: [] }));
+	if (chosen.length === picked.length && total >= selection.totalManaValue) choices.push(...funded);
+	return choices;
 }
 
 /** One physical payment, shared by announcement and a resolving pay instruction. */

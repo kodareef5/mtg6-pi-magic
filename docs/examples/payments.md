@@ -32,3 +32,27 @@ Dyadrine's [attack example](cast-facts.md) instead pays during resolution. It
 offers a complete pair of creatures with counters, or decline. One creature
 cannot supply both shares; if the pair is unavailable, no counter is removed
 and the later draw and token creation do not happen.
+
+## Graveyard cards with a required total
+
+Collect evidence 6 is a payment by mana value, not a fixed number of cards:
+
+```json
+{ "exile": { "graveyard": {}, "totalManaValue": 6 } }
+```
+
+The `graveyard` selector can narrow eligible cards in the payer's own graveyard.
+It cannot open another zone or another player's graveyard. A spell being cast
+from the graveyard is already the proposed spell and cannot pay its own cost.
+
+An announcement first selects the payment. Each eligible card has a pick or
+remove option; payment becomes available when the total reaches the requirement.
+Extra cards, including cards with mana value zero, remain selectable. Cancel
+spends nothing. Confirmation exiles the selected cards, pays the other resources
+and completes the cast or activation in one group. A plan step executes at that
+confirmation. Cloning during selection preserves its unfinished progress.
+
+The same cost can appear in a resolving `pay` or `counter.unless` instruction.
+Each pick leaves the instruction pending. Only confirmation pays and binds
+success; an optional decline pays nothing. This cost fragment does not supply
+Deadly Cover-Up's subsequent named-card search.

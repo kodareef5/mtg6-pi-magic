@@ -6,6 +6,8 @@
  */
 import { costChanges } from "./costs.ts";
 import { castWords } from "./cast-words.ts";
+import { checkExile, enoughExile } from "./cost-selection.ts";
+import { isDeepStrictEqual } from "node:util";
 import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
 import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
@@ -117,6 +119,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 
 	// Targets are checked with every announced target in scope, so a slot can depend on an earlier one.
 	const scope: Scope = { world, controller, source: spell, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
+	if (activation.exileSelection) checkExile(scope, activation.exileSelection, cost.exiled ?? []);
 	activation.slots.forEach((slot, at) => {
 		for (const chosen of activation.targets[at] ?? []) {
 			const ok = "player" in chosen ? (slot.player === "any" ? table.seats.some((one) => one.id === chosen.player && !one.result) : !!slot.player && players(scope, slot.player).includes(chosen.player))
@@ -195,7 +198,25 @@ export function activationChanges(table: Table, activation: Activation): Change[
 /** One announced activation is one recorded decision, including its accepted meaning. */
 export function activate(table: Table, activation: Activation, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">,
 	registered?: LedgerRow["registered"]): void {
+	if (table.payment) {
+		const expected = { ...table.payment.activation, cost: { ...table.payment.activation.cost, exiled: table.payment.picked } };
+		if (!isDeepStrictEqual(activation, expected)) throw new Error("Finish or cancel the pending payment before announcing another action.");
+		if (table.payment.execution) choice = { ...choice, execution: table.payment.execution };
+	}
+	if (activation.exileSelection && !activation.cost.exiled) {
+		const { exileSelection, ...rest } = activation;
+		activationChanges(table, rest); // Validate the other resources without spending them.
+		const source = table.things.get(activation.source.id)!;
+		const scope = { world: tableWorld(table), controller: activation.controller, source: activation.timing === "spell" ? { ...source, zone: "stack" as const } : source, targets: activation.targets, x: activation.x };
+		if (!enoughExile(scope, exileSelection)) throw new Error("The graveyard cannot pay the required mana value.");
+		const { execution, ...answer } = choice;
+		table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: activation.controller, ...structuredClone(answer), activation: structuredClone(activation),
+			...(execution ? { preparing: structuredClone(execution) } : {}) });
+		commit(table, [{ do: "payment", payment: { activation, picked: [], ...(execution ? { execution } : {}) } }], "cost-payment");
+		return;
+	}
 	const changes = activationChanges(table, activation);
+	if (table.payment) changes.push({ do: "payment" });
 	const entered = attach(table, changes, registered);
 	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: activation.controller,
 		...structuredClone(choice), activation: structuredClone(activation), ...(Object.keys(entered).length ? { registered: entered } : {}) });

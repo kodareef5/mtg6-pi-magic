@@ -58,6 +58,7 @@ export type Reason =
  * them. A motion arrives here when a milestone needs it, never in advance.
  */
 export type Change =
+	| { do: "payment"; payment?: import("./cost-selection.ts").Payment }
 	| { do: "entry"; entry?: import("./entry-payments.ts").Entry }
 	/** Control transitions are recorded too: a pass changes who can answer next. */
 	| { do: "turn"; action: "pass" | "act"; who: SeatId; land?: boolean }

@@ -54,7 +54,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "pay": {
 			const who = players(scope, instruction.who)[0] ?? controller;
 			const choices = paymentChoices(table, scope, instruction.cost, who, pending.object).map((choice) => ({ ...choice,
-				...bind(instruction, { objects: [], players: [], amount: 1 }) }));
+				...(!choice.pick ? bind(instruction, { objects: [], players: [], amount: 1 }) : {}) }));
 			if (!choices.length) choices.push({ id: "unpaid", label: "The full cost cannot be paid", changes: [], ...bind(instruction, { objects: [], players: [], amount: 0 }) });
 			return { actor: who, question: `${claim}: pay the full cost.`, choices };
 		}

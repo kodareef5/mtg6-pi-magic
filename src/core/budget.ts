@@ -209,7 +209,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const { generic, colors, ...extra } = offered.use.cost;
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
-			const additional = Object.keys(extra).some((key) => key !== "tap");
+			const additional = !!offered.use.exileSelection || Object.keys(extra).some((key) => key !== "tap");
 			if (additional || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
 			return { kind, ...(source ? { source } : {}), price: { generic, colors },
 				...(additional ? { unknown: true as const } : {}),

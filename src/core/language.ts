@@ -149,7 +149,9 @@ export const Defs = {
 		/** `true` taps the source. A choice taps other objects, such as crew's creatures with total power N or more. */
 		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive) })])),
 		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
-		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) })])),
+		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) }),
+			/** Select any number of own graveyard cards meeting this total; do not enumerate their subsets. */
+			object({ graveyard: Type.Ref("Selector"), totalManaValue: positive })])),
 		life: Type.Optional(positive),
 		/** A number of cards from hand, or this card ("Discard this card"). */
 		discard: Type.Optional(Type.Union([positive, ObjectRef])),

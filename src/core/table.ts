@@ -25,7 +25,7 @@ import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, Outcome, SeatId } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
 import type { Ruled } from "./judge.ts";
-import type { Instruction, Procedure, Target } from "./language.ts";
+import type { Cost, Instruction, Procedure, Target } from "./language.ts";
 import type { Bound, Chosen } from "./selectors.ts";
 import type { Traits } from "./characteristics.ts";
 import type { Condition, Effect, GameEvent, Modification, Registration, Selector, TokenSpec } from "./language.ts";
@@ -109,6 +109,8 @@ export const manaDuration = (mana: Pick<Mana, "until">): string => mana.until
 
 /** One accepted announcement, frozen at execution so replay never infers its meaning again. */
 export type Activation = {
+	/** A chosen graveyard payment is assembled before this announcement commits. */
+	exileSelection?: Extract<Cost["exile"], { graveyard: unknown }>;
 	/** The permission whose alternative price was chosen, frozen with the announcement. */
 	permission?: string;
 	/** Departure replacement carried by the selected casting permission. */
@@ -307,6 +309,8 @@ export type LedgerRow = {
 	clock?: number;
 	/** The plan step or standing branch this action carried out, by the plan's equipment revision. Plan progress is read from these. */
 	execution?: { plan: number; step?: number; branch?: number };
+	/** Intended progress while a payment is being selected; it is not execution yet. */
+	preparing?: LedgerRow["execution"];
 	/** A prepared physical operation, recorded so replay never infers its meaning again. */
 	activation?: Activation;
 	/** What each permanent entering through this decision registered, by object id. Frozen so replay never reads private work. */
@@ -365,6 +369,7 @@ export type Seat = {
 export type Table = {
 	/** A proposed group awaiting optional entry payments. */
 	entry?: import("./entry-payments.ts").Entry;
+	payment?: import("./cost-selection.ts").Payment;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

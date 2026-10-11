@@ -11,6 +11,7 @@
 import { doubleFaced, faceFacts } from "./faces.ts";
 import { printedTraits } from "./characteristics.ts";
 import { castWords } from "./cast-words.ts";
+import { enoughExile } from "./cost-selection.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
@@ -167,7 +168,7 @@ export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots
 	subsets(candidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.upTo ? 0 : slot.count ?? 1).map((option) => [...set, option])), [[]]);
 
 /** The extra costs a procedure states, as each way they can be paid. */
-type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string };
+type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; exileSelection?: Activation["exileSelection"] };
 export function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
 	const cost = procedure.cost ?? {};
 	let ways: Way[] = [{ paid: {}, uses: [], consumes: [], shows: "" }];
@@ -177,6 +178,7 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 		ways = ways.flatMap((way) => options.filter((option) => !(option.consumes ?? []).some((id) => way.consumes!.includes(id)) &&
 			!option.uses.some((id) => id !== source.id && way.uses.includes(id)))
 			.map((option) => ({ paid: { ...way.paid, ...option.paid }, uses: [...new Set([...way.uses, ...option.uses])], consumes: [...way.consumes!, ...(option.consumes ?? [])],
+				...(option.exileSelection ?? way.exileSelection ? { exileSelection: option.exileSelection ?? way.exileSelection } : {}),
 				shows: `${way.shows}${option.shows}` })));
 	};
 	if (cost.tap === true) {
@@ -198,7 +200,10 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 			: objects(scope, sacrifice as Exclude<typeof sacrifice, { choose: unknown }>).filter((one) => one.zone === "battlefield" && one.controller === frame.seat);
 		add(subsets(pool, chosen?.count ?? 1).map((set) => ({ paid: { sacrificed: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Sacrifice ${set.map(name).join(", ")}. ` })));
 	}
-	if (cost.exile) {
+	if (typeof cost.exile === "object" && "graveyard" in cost.exile) {
+		if (!enoughExile(scope, cost.exile)) return [];
+		add([{ paid: {}, uses: [], exileSelection: cost.exile, shows: `Select own graveyard cards with total mana value at least ${cost.exile.totalManaValue} before paying. ` }]);
+	} else if (cost.exile) {
 		const chosen = typeof cost.exile === "object" && "choose" in cost.exile ? cost.exile : undefined;
 		const pool = chosen ? scope.world.objects.filter((one) => (one.zone === "battlefield" ? one.controller === frame.seat : one.zone === "graveyard" && one.owner === frame.seat) &&
 			(!chosen.source || one.id !== source.id) && matches(scope, one, chosen.choose)) : objects(scope, cost.exile as Exclude<typeof cost.exile, { choose: unknown }>);
@@ -296,6 +301,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									}), ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? []), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 								},
 								activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+									...(extra.exileSelection ? { exileSelection: structuredClone(extra.exileSelection) } : {}),
 									...(granted.permission ? { permission: granted.permission } : {}),
 									...(granted.leavesStack ? { leavesStack: granted.leavesStack } : {}),
 									...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),

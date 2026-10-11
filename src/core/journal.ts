@@ -329,7 +329,8 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 			);
 		}
 		observe?.(table, decision, row);
-		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why, ...(row.execution ? { execution: row.execution } : {}) }, row.registered ?? {});
+		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why,
+			...(row.execution ?? row.preparing ? { execution: row.execution ?? row.preparing } : {}) }, row.registered ?? {});
 		else {
 			apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});
 			// Preserve historical menus, allowing only the appended declaration withdrawals.
