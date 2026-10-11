@@ -168,7 +168,7 @@ export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots
 	subsets(candidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1)).map((option) => [...set, option])), [[]]);
 
 /** The extra costs a procedure states, as each way they can be paid. */
-type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; exileSelection?: Activation["exileSelection"] };
+type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; reduce?: number; exileSelection?: Activation["exileSelection"] };
 export function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
 	const cost = procedure.cost ?? {};
 	let ways: Way[] = [{ paid: {}, uses: [], consumes: [], shows: "" }];
@@ -179,6 +179,7 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 			!option.uses.some((id) => id !== source.id && way.uses.includes(id)))
 			.map((option) => ({ paid: { ...way.paid, ...option.paid }, uses: [...new Set([...way.uses, ...option.uses])], consumes: [...way.consumes!, ...(option.consumes ?? [])],
 				...(option.exileSelection ?? way.exileSelection ? { exileSelection: option.exileSelection ?? way.exileSelection } : {}),
+				...(option.reduce || way.reduce ? { reduce: (option.reduce ?? 0) + (way.reduce ?? 0) } : {}),
 				shows: `${way.shows}${option.shows}` })));
 	};
 	if (cost.tap === true) {
@@ -190,8 +191,11 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 		const enough = (chosen: SeenObject[]) => (crew.count === undefined || chosen.length >= crew.count) &&
 			(crew.totalPower === undefined || chosen.reduce((sum, one) => sum + (one.traits?.power ?? 0), 0) >= crew.totalPower);
 		// Only the smallest sets that pay: a larger one taps something for nothing.
-		const sets = subsets(able, able.length, 1).filter((set) => enough(set) && set.every((_, at) => !enough(set.filter((__, other) => other !== at))));
-		add(sets.map((set) => ({ paid: { tapped: set.map(ref) }, uses: set.map((one) => one.id), shows: `Tap ${set.map(name).join(", ")}. ` })));
+		const sets = crew.upTo ? subsets(able, crew.count ?? 1, 0) : subsets(able, able.length, 1)
+			.filter((set) => enough(set) && set.every((_, at) => !enough(set.filter((__, other) => other !== at))));
+		add(sets.map((set) => ({ paid: { tapped: set.map(ref) }, uses: set.map((one) => one.id),
+			...(crew.reduce ? { reduce: Math.max(0, set.reduce((sum, one) => sum + (one.traits?.power ?? 0), 0)) } : {}),
+			shows: set.length ? `Tap ${set.map(name).join(", ")}. ` : "Tap no permanents. " })));
 	}
 	const sacrifice = cost.sacrifice;
 	if (sacrifice) {
@@ -256,15 +260,18 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		// The mana: stated, or printed for a spell; reduced, never below zero (601.2f).
 		const turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 		const prices = procedure.timing === "spell" ? castingPrices(world, frame.seat, original, turn, procedure.face,
-			procedure.cost?.mana !== undefined && procedure.cost.mana !== selected?.mana) : [{}];
+			procedure.cost?.mana !== selected?.mana ? procedure.cost?.mana : undefined) : [{}];
 		for (const granted of prices) {
 			if (granted.mana === "printed" && !selected?.mana) continue;
 			const stated = permissionMana(granted.mana, selected?.mana) ?? procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
 			const mana = stated === undefined || stated === "" ? { generic: 0, colors: [], x: 0 } : symbols(stated);
 			if (!mana) continue;
 			const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
+			// A safe bound for X; exact chosen taps and payment are checked below for every candidate.
+			const tapReduction = typeof procedure.cost?.tap === "object" && procedure.cost.tap.reduce ? (frame.view.objects ?? [])
+				.filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).reduce((sum, one) => sum + Math.max(0, one.traits?.power ?? 0), 0) : 0;
 			// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
-			const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce - mana.colors.length) + 1 }, (_, at) => at) : [0];
+			const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction - mana.colors.length) + 1 }, (_, at) => at) : [0];
 			// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
 			const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 				.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
@@ -276,8 +283,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
 				const aims = targetings(procedure.targets ?? [], announced);
-				const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
 				for (const extra of extras(procedure, announced, source, frame)) {
+					const reduction = reduce + (extra.reduce ?? 0), price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
 					for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
 						const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
 						for (const targets of aims) {
@@ -292,7 +299,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 										`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
 										granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
 										procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
-											`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduce ? ` (reduced by ${reduce})` : ""}. ${extra.shows}${paying}`,
+											`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduction ? ` (reduced by ${reduction})` : ""}. ${extra.shows}${paying}`,
 										procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
 										spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
 										(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",

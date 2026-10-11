@@ -50,6 +50,8 @@ export function isPrintedCast(procedure: Procedure, card: string, printed: Print
 /** Shape, then the structure the schema cannot say: refs that point somewhere, timing that fits. */
 export function checkProcedure(value: unknown): Procedure {
 	const procedure = check(ProcedureSchema, value, "Procedure");
+	if (typeof procedure.cost?.tap === "object" && procedure.cost.tap.upTo && procedure.cost.tap.totalPower !== undefined)
+		throw new Error("An optional bounded tap cost cannot also require a total power.");
 	if (procedure.timing === "land" && (procedure.cost || procedure.targets?.length || procedure.instructions.length)) throw new Error("Playing a land has no cost, targets or instructions; what it registers is its package.");
 	if (procedure.timing !== "spell" && procedure.timing !== "land" && !procedure.cost) throw new Error("An activated ability states its cost.");
 	if (procedure.timing === "mana" && (procedure.targets?.length || procedure.instructions.some((instruction) => instruction.do !== "mana" || !instruction.colors)))
@@ -140,6 +142,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	// Costs other than mana: each object must still be there to pay with.
 	const own = (ref: ObjectRef, zone: string) => { const one = live(table, ref); if (!one || one.zone !== zone || (zone === "battlefield" ? one.controller : one.owner) !== controller) throw new Error("A cost names something no longer there to pay with."); return one; };
 	if (cost.tap && (object.zone !== "battlefield" || object.tapped || sick(table, object))) throw new Error("The source cannot be tapped to pay this cost.");
+	if (new Set((cost.tapped ?? []).map((one) => one.id)).size !== (cost.tapped ?? []).length) throw new Error("One permanent cannot be tapped twice to pay a cost.");
 	for (const ref of cost.tapped ?? []) if (own(ref, "battlefield").tapped) throw new Error("A creature tapped as a cost was already tapped.");
 	cost.sacrificed?.forEach((ref) => own(ref, "battlefield"));
 	cost.discarded?.forEach((ref) => own(ref, "hand"));

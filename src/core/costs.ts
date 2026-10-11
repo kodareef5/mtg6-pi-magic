@@ -19,13 +19,13 @@ export function paymentChoices(table: Table, scope: Scope, cost: Cost, who: Seat
 	const origin = source ?? table.things.get(resolving)!;
 	const mana = cost.mana ? symbols(cost.mana) : { generic: 0, colors: [], x: 0 };
 	if (!mana) return [];
-	const price = { generic: Math.max(0, mana.generic + mana.x * (scope.x ?? 0) - (cost.reduce ? amount(context, cost.reduce) : 0)), colors: mana.colors };
+	const generic = mana.generic + mana.x * (scope.x ?? 0) - (cost.reduce ? amount(context, cost.reduce) : 0);
 	const ways = extras({ source: {}, claim: "Pay", basis: "Accepted resolving cost", timing: "stack", cost, instructions: [] }, context, origin, frame);
 	const selection = typeof cost.exile === "object" && "graveyard" in cost.exile ? cost.exile : undefined;
 	const picked = table.resolution?.picked ?? [], pool = selection ? exilePool(context, selection) : [];
 	const chosen = pool.filter((one) => picked.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation));
 	const total = exileValue(context, chosen);
-	const funded = ways.flatMap((way, part) => fundings(frame, { ...price, life: way.paid.life }, new Set(way.uses)).map(({ funding, shows }, at): Choice => {
+	const funded = ways.flatMap((way, part) => fundings(frame, { generic: Math.max(0, generic - (way.reduce ?? 0)), colors: mana.colors, life: way.paid.life }, new Set(way.uses)).map(({ funding, shows }, at): Choice => {
 		const changes = costChanges({ ...way.paid, ...(selection ? { exiled: picked } : {}) }, origin, who);
 		const simple = Object.keys(cost).every((key) => key === "mana" || key === "life");
 		const label = simple ? `Pay${cost.life ? ` ${cost.life} life` : ""}${cost.mana ? ` ${cost.mana}` : ""}. ${cost.mana ? shows : ""}`

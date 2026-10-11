@@ -43,7 +43,7 @@ type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?:
 function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: string): string | undefined {
 	const printed = faceFacts(frame.view.printed?.[source.card ?? ""], face)?.mana;
 	const turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
-	const prices = castingPrices(viewWorld(frame.view), frame.seat, source, turn, face, stated !== undefined && stated !== printed);
+	const prices = castingPrices(viewWorld(frame.view), frame.seat, source, turn, face, stated !== printed ? stated : undefined);
 	return prices.length === 1 ? permissionMana(prices[0]!.mana, printed) ?? stated ?? printed : undefined;
 }
 

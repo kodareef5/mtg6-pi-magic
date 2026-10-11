@@ -22,6 +22,7 @@ schemas, and every `basis` is checked against the card's text.
 | `prevention.md` | all-damage prevention, standing source and recipient filters, turn-wide prohibition and printed instruction order |
 | `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |
 | `casting-permissions.md` | alternative and printed prices, spell filters, stack departure replacements, exiled ownership, permission through the next turn and firebending mana |
+| `native-casting.md` | a card's own graveyard permission, optional tap payment reducing generic mana by power, creature-or-two-card discard |
 | `exile-until.md` | immediate nontriggered returns, source incarnation, private hand exile and simultaneous durations |
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |
 | `until-end-of-turn.md` | temporary changes, counters with keywords, doubling power, `if` and `limit`, play permissions |

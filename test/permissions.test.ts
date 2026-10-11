@@ -117,7 +117,7 @@ test("a granted casting price belongs to its player and incarnation, with explic
 	for (const mana of ["{2}", "{1}", undefined]) commit(table, [{ do: "note", note: { kind: "permit", by: 0, who: 1, fromTurn: 0, until: "indefinite", on: { id: claw.id, incarnation: claw.incarnation }, ...(mana ? { mana } : {}) } }], "resolve");
 	const world = viewWorld(project(table, 1));
 	assert.equal(castingPrices(world, 1, claw, 2).length, 3);
-	assert.deepEqual(castingPrices(world, 1, claw, 2, 0, true), [{}]);
+	assert.deepEqual(castingPrices(world, 1, claw, 2, 0, "{0}"), [{}]);
 	assert.equal(castingPrices(viewWorld(project(table, 0)), 0, claw, 2).length, 0);
 
 	for (const duringOwnTurn of [true, false]) {

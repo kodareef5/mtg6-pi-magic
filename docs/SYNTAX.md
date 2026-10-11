@@ -290,7 +290,7 @@ checked by the table; the opponent sees both, and objects when they differ.
 | `enters` | how a permanent enters: tapped, with counters, under a condition; with `affects`, how others enter; `unlessPay: {life}` asks the controller to pay or decline before any battlefield entry | 614.1c-d |
 | `replace` | "if it would die, exile it instead" | 614 |
 | `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |
-| `permit` | an extra land play, lands from another zone, flash | 305.2 |
+| `permit` | an extra land play, lands from another zone, flash; `cast: {from, mana, leavesStack?}` grants this card's owner an alternative cast from the named zones | 305.2, 702.180 |
 | `prohibit` | `cast` names players who cannot cast; optional `during` names whose turn and `if` a condition | 101.2 |
 | `suppress` | events that don't cause triggers | Torpor Orb |
 
@@ -300,6 +300,18 @@ and current turn. They apply to casts from every permitted zone. Losing
 abilities removes the restriction through the layers. Activations, land plays
 and required interpretation work keep their existing handling. This shape does
 not express spell-count limits or restrictions on particular spell types.
+
+A native `permit.cast` is read from the card's accepted standing terms in its
+stated zone. It activates readiness before affordability or timing, then
+supplies the price and any departure replacement to the usual casting path.
+A deferred source zone alone grants no casting permission. This registration
+does not express mandatory nonmana permission costs. Harmonize's optional tap
+is a cost variant: `tap: {choose: {types: ["creature"], controller: "you"},
+count: 1, upTo: true, reduce: "power"}` reserves zero or one untapped creature
+and reduces only generic mana by its current power. The reduction never goes
+below zero; the tap needs no tap-symbol ability or freedom from summoning
+sickness. See `native-casting.md` for complete discard branches and casting
+terms. Syntax acceptance still does not certify the source interpretation.
 
 **Events** are what the table records: `enters`, `leaves`, `dies`, `attacks`,
 `attacked-with` (a player attacked with one or more), `blocks`, `cast`,

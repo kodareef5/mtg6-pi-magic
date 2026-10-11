@@ -156,7 +156,8 @@ export const Defs = {
 		/** Omitted on a spell: its printed mana cost. */
 		mana: Type.Optional(ManaCost),
 		/** `true` taps the source. A choice taps other objects, such as crew's creatures with total power N or more. */
-		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive) })])),
+		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive),
+			upTo: Type.Optional(Type.Literal(true)), reduce: Type.Optional(Type.Literal("power")) })])),
 		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
 		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) }),
 			/** Select any number of own graveyard cards meeting this total; do not enumerate their subsets. */
@@ -305,7 +306,9 @@ export const Defs = {
 			/** "Activate only if you control an Island or a Swamp": the ability is usable while this holds. */
 			if: Type.Optional(Type.Ref("Condition")) }),
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */
-		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")) }),
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")),
+			/** This card's owner may cast it from the named zones at this alternative mana price. */
+			cast: Type.Optional(object({ from: Type.Array(Zone, { minItems: 1 }), mana: ManaCost, leavesStack: Type.Optional(Zone) })) }),
 		/** A standing restriction on the named players' casting, optionally during a named player's turn. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), cast: PlayerRef, during: Type.Optional(PlayerRef), if: Type.Optional(Type.Ref("Condition")) }),
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("suppress"), event: Type.Ref("Event") }),

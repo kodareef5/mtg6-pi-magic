@@ -74,7 +74,8 @@ export function base(table: Table, object: Thing): Traits | undefined {
 	// A self characteristic with an explicit nonbattlefield scope applies there, such as changeling.
 	// Its accepted source terms are journaled equipment until an entry freezes the permanent's registrations.
 	const standing = object.zone !== "battlefield" && object.card ? (table.work[object.owner]?.packages?.find((one) => one.card === object.card)?.registers ?? [])
-		.filter((one) => one.kind === "continuous" && one.affects.is === "this" && one.affects.zones?.includes(object.zone as never)) : [];
+		.filter((one) => one.kind === "continuous" && one.affects.is === "this" && one.affects.zones?.includes(object.zone as never) ||
+			one.kind === "permit" && one.cast?.from.includes(object.zone as never)) : [];
 	const own = [...(object.registrations ?? []), ...registered(table, object), ...standing].filter((one) => one.face === undefined || active.includes(one.face));
 	if (object.token) {
 		const spec = object.token;

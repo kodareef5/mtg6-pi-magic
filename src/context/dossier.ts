@@ -155,6 +155,8 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 		return here.length ? here.map((one) => {
 			const granted = permits.flatMap((note) => note.kind === "permit" && note.on.id === one.id && note.on.incarnation === one.incarnation ? [
 				`${note.who === frame.seat ? "you" : name(note.who)} may ${note.mana ? `cast it for ${note.mana === "printed" ? "its printed mana cost" : `${note.mana} instead of its mana cost`}` : "cast or play it"} from turn ${note.fromTurn} at its normal timing; ${typeof note.until === "object" ? `until the end of ${name(note.until.endOfNextTurn)}'s next turn after turn ${note.until.afterTurn}` : `duration ${note.until}`}${note.of ? `; matching spell ${JSON.stringify(note.of)}` : ""}${note.leavesStack ? `; put it into ${note.leavesStack} whenever it leaves the stack` : ""}`] : []);
+			for (const registration of one.traits?.registrations ?? []) if (registration.kind === "permit" && registration.cast?.from.includes(zone))
+				granted.push(`its owner may cast it for ${registration.cast.mana} at normal timing${registration.cast.leavesStack ? `; put it into ${registration.cast.leavesStack} whenever it leaves the stack` : ""}`);
 			for (const note of frame.view.notes ?? []) if (note.kind === "return" && note.on.id === one.id && note.on.incarnation === one.incarnation) {
 				const source = frame.view.objects?.find((item) => item.id === note.source.id && item.incarnation === note.source.incarnation);
 				granted.push(`returns to its owner's ${note.to} immediately when ${source ? named(source) : note.source.id} leaves the battlefield`);
