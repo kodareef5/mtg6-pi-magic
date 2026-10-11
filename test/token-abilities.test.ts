@@ -34,7 +34,10 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 		assert.ok(use); assert.ok(offered(table, use.procedure).length);
 		// A creature without haste cannot tap on entry, but a Map is not a creature.
 		announce(table, use.procedure); assert.equal(map.zone, "graveyard");
+		const sacrificed = table.log.findLast((one) => one.changes.some((change) => change.do === "move" && change.what === map.id && change.reason === "sacrifice"))!;
+		for (const viewer of [0, 1, "spectator"] as const) assert.match(describe(table, sacrificed, viewer), /put Map into graveyard \(sacrifice\)/);
 		finish(table); assert.equal(table.things.has(map.id), false, "sacrificed token ceases while its ability remains on the stack");
+		assert.match(describe(table, sacrificed), /put Map into graveyard/, "the receipt keeps the token's event-time name after it ceases");
 		passBoth(table);
 		const hidden = structuredClone(table);
 		assert.ok(!JSON.stringify(nextDecision(table)).includes(top.id), "the reveal confirmation names no unseen object");

@@ -86,6 +86,9 @@ it means `you`. A departed target supplies its last controller, rather than
 its owner or the spell's controller. An empty reference creates nothing.
 The tokens belong to their creator, and their abilities read that token's
 controller when activated.
+`perform.who` names who accepts an instruction group. It does not change `you`
+or the default token creator. Wrapping token creation in `perform` therefore
+does not replace `token.controller`.
 
 Get Lost destroys first and creates the Maps second. An indestructible target
 still gives its controller Maps. A target that became illegal before resolution

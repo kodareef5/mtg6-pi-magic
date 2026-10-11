@@ -23,11 +23,11 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-4c Control, Selesnya Landfall, Izzet Spellementals and Azorius Control have
-standing assessments for every main-deck card. They still have thirteen, eight,
-thirteen and fifteen cards with deferred uses respectively. The first three
-and Azorius have completed source-reviewed games.
-[Status](STATUS.md) holds the current count. The other fifteen lists still need
+4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control and Boros
+Dragons have standing assessments for every main-deck card. They still have
+thirteen, eight, thirteen, fifteen and five cards with deferred uses respectively.
+The first four have completed source-reviewed games.
+[Status](STATUS.md) holds the current count. The other fourteen lists still need
 standing assessments.
 
 1. Continue saved games from their reviewed repair points, then run fresh
@@ -40,9 +40,10 @@ standing assessments.
    invariant test. Native graveyard prices, Harmonize payments and optional
    search groups now have that support. Refuse malformed library scopes during
    preparation and retain the runtime visibility guard.
-4. Widen standing coverage toward the next complete main deck. Static casting
-   costs and copies remain prominent blockers. Boros Dragons now needs Momo's
-   first qualifying spell reduction after Voice of Victory's Mobilize support.
+4. Widen standing coverage toward the next complete main deck. Copies, damage
+   replacements, counter thresholds and ability-resolution counts remain
+   blockers. Momo's standing spell reduction admits Boros Dragons; its first
+   ordinary games must exercise the new meaning.
    Review stored restriction words as well as refusals: accepted prose does
    not execute a missing mechanic.
    Sideboard-only refusals do not delay this alpha.
