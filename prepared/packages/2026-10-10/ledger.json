@@ -273,15 +273,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Mockingbird": {
-		"reason": "Mockingbird is not ready: You may have this creature enter as a copy of any creature on the battlefield with mana value less than or equal to the amount of mana spent to cast this creature, except it's a Bird in addition to its other types and it has flying. — Unsupported entry replacement: optional copying of a battlefield creature's copiable characteristics, constrained by actual mana spent to cast Mockingbird (not simply X or mana value), with Bird and flying exceptions. The syntax supplies neither this copy operation nor an amount for actual mana spent. This standing entry behavior cannot be deferred.",
-		"decks": [
-			"Azorius Momo",
-			"Izzet Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Mutagen Man, Living Ooze": {
 		"reason": "Mutagen Man, Living Ooze is not ready: Activated abilities of artifact tokens you control cost {1} less to activate. — Missing operation: a standing continuous generic-mana activation-cost reduction applying to all artifact tokens you control, including future tokens and their activated abilities. Procedure-local cost.reduce cannot register this global static effect.",
 		"decks": [

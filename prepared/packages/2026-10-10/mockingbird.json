@@ -1,0 +1,74 @@
+{
+	"card": "Mockingbird",
+	"generated": "2026-10-10",
+	"source": "0bb7cd7f525cc1e1f3b36c52281995904652b96bcb968b1b85287536b35a744e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mockingbird",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "You may have this creature enter as a copy of any creature on the battlefield with mana value less than or equal to the amount of mana spent to cast this creature, except it's a Bird in addition to its other types and it has flying.",
+				"kind": "enters",
+				"copy": {
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"creature"
+						],
+						"manaValue": {
+							"atMost": {
+								"manaSpent": "this"
+							}
+						}
+					},
+					"may": true,
+					"add": {
+						"creatureTypes": [
+							"Bird"
+						],
+						"words": [
+							"flying"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Mockingbird, choosing X and paying its printed {X}{U} cost; its optional copy replacement applies on entry.",
+				"basis": "You may have this creature enter as a copy of any creature on the battlefield with mana value less than or equal to the amount of mana spent to cast this creature, except it's a Bird in addition to its other types and it has flying.",
+				"source": {
+					"card": "Mockingbird",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
