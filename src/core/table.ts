@@ -94,17 +94,16 @@ export type Mana = {
 	color: "W" | "U" | "B" | "R" | "G" | "C";
 	/** "Spend this mana only to cast a creature spell": what it may pay for, as a selector. */
 	spendOnly?: Selector;
-	/** Omitted mana empties at each step end. An explicit duration overrides legacy persistence. */
+	/** Omitted mana empties at each step end. */
 	until?: "end-of-combat" | "end-of-turn";
-	persists?: boolean;
 };
 
 /** Whether unspent mana remains after this step ends, including a skipped combat's cleanup. */
-export const manaSurvives = (mana: Mana, step: Step): boolean => mana.until
-	? step !== "cleanup" && (mana.until === "end-of-turn" || step !== "end-of-combat") : !!mana.persists;
+export const manaSurvives = (mana: Mana, step: Step): boolean => !!mana.until &&
+	step !== "cleanup" && (mana.until === "end-of-turn" || step !== "end-of-combat");
 
-export const manaDuration = (mana: Pick<Mana, "until" | "persists">): string => mana.until
-	? `lasts until ${mana.until.replaceAll("-", " ")}` : mana.persists ? "persists" : "expires at step end";
+export const manaDuration = (mana: Pick<Mana, "until">): string => mana.until
+	? `lasts until ${mana.until.replaceAll("-", " ")}` : "expires at step end";
 
 /** One accepted announcement, frozen at execution so replay never infers its meaning again. */
 export type Activation = {

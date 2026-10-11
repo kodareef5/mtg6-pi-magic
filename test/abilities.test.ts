@@ -112,14 +112,14 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 		fundings({ seat: 0, version: 0, view: { window: { kind: "turn" }, table: [], yours: [], since: [], objects: [], pools: [{ seat: 0, mana }] } } as never, cost);
 	assert.deepEqual(payments([{ id: "a", color: "U", spendOnly: { types: ["creature"] } }], { generic: 1, colors: [] }), [], "restricted mana pays for nothing unnamed");
 	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U" }], { generic: 1, colors: [] }).length, 1, "identical unrestricted units do not multiply a menu");
-	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", persists: true }], { generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
+	assert.equal(payments([{ id: "a", color: "U" }, { id: "b", color: "U", until: "end-of-turn" }], { generic: 1, colors: [] }).length, 2, "a lasting unit is not interchangeable with an expiring one");
 
 	// The actual classifier request must distinguish the payments, each marked as the plan's step.
 	const twins = start(standard, [{ name: "A", deck: deck("Dimir Control") }, { name: "B", deck: deck("Dimir Control") }], "payment-descriptions");
 	const [first, second] = cardsIn(twins, "library", 0).filter((one) => one.card === "Qiqirn Merchant");
 	commit(twins, [first!.id, second!.id].map((what) => ({ do: "move", what, to: "battlefield", reason: "game-setup" })), "game-setup");
 	const frame = workFrame(position(twins), 0);
-	frame.view.pools = [{ seat: 0, mana: [{ id: "green", color: "G", persists: true }, { id: "blue", color: "U" }] }];
+	frame.view.pools = [{ seat: 0, mana: [{ id: "green", color: "G", until: "end-of-turn" }, { id: "blue", color: "U" }] }];
 	frame.view.work = prepareWork(frame, [{ do: "plan.put", plan: { objective: "Loot.", guidance: "Preserve green mana.",
 		steps: [{ label: "Loot with a Merchant", when: {}, action: { procedure: lootProcedure() } }] } }]);
 	frame.decision = { ...frame.decision!, options: annotate(frame.decision!.options, planState(frame)!) };
