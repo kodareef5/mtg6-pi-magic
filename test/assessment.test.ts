@@ -57,6 +57,14 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const modal = table.printed["Origin of Metalbending"]!;
 	assert.equal(quotes(modal, modal.oracle), true, "a full multiline quotation keeps every printed bullet line");
 	assert.deepEqual(assessmentProblems(printed, pack), []);
+	const brokenStanding = structuredClone(pack), watch = brokenStanding.registers[1]!;
+	if (watch.kind !== "watch") assert.fail("Expected a standing watch");
+	watch.effect.instructions.push({ do: "damage", to: "target:1", amount: 1 });
+	assert.match(assessmentProblems(printed, brokenStanding).join("; "), /target:1 names a target slot/,
+		"a standing effect checks target slots before its first trigger, just as a procedure does");
+	watch.effect.instructions.pop();
+	watch.effect.targets![0] = { ...watch.effect.targets![0], count: 1, atLeast: 2 };
+	assert.match(assessmentProblems(printed, brokenStanding).join("; "), /target minimum/);
 	const shared: Package = { ...pack, printedCast: true, procedures: pack.procedures!.slice(1) };
 	assert.deepEqual(assessmentProblems(printed, shared), [], "the shared cast needs no empty per-card program");
 	assert.match(assessmentProblems(printed, { ...shared, registers: [] }).join("; "), /Unassessed text.*flying/,

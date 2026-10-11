@@ -56,6 +56,13 @@ export function checkProcedure(value: unknown): Procedure {
 	if (procedure.timing !== "spell" && procedure.timing !== "land" && !procedure.cost) throw new Error("An activated ability states its cost.");
 	if (procedure.timing === "mana" && (procedure.targets?.length || procedure.instructions.some((instruction) => instruction.do !== "mana" || !instruction.colors)))
 		throw new Error("A mana ability has no targets and only adds mana of stated colors (605.1a).");
+	const exilesSource = procedure.cost?.exile === "this" || (typeof procedure.cost?.exile === "object" && "choose" in procedure.cost.exile && procedure.cost.exile.source);
+	checkReferences(procedure, procedure.targets?.length ?? 0, new Set(exilesSource ? ["cost-source"] : []));
+	return procedure;
+}
+
+/** Procedures and standing effects obey the same target and binding scopes. This does not interpret their source. */
+export function checkReferences(value: unknown, slots = 0, bound = new Set<string>()): void {
 	// A granted registration has its own target slots and local bindings. A
 	// delayed or reflexive effect captures current bindings, but cannot bind a
 	// name for the program that creates it.
@@ -75,22 +82,20 @@ export function checkProcedure(value: unknown): Procedure {
 				else if (key === "effect") {
 					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
 					const ownSlots = effect.targets?.length || ((value as { do?: string }).do === "delay" ? slots : 0);
-					refs(effect.targets, ownSlots, bound); visit(effect.instructions, ownSlots, new Set(bound));
+					refs(effect, ownSlots, new Set(bound));
 				} else if (key !== "instructions") refs(one, slots, bound);
 			}
+			if ("instructions" in value && Array.isArray(value.instructions))
+				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...bound, "player"]) : bound);
 		}
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>) => {
 		for (const instruction of instructions) {
 			refs(instruction, slots, bound);
-			if (instruction.do === "each") visit(instruction.instructions, slots, new Set([...bound, "player"]));
 			if (instruction.as) bound.add(instruction.as);
 		}
 	};
-	const exilesSource = procedure.cost?.exile === "this" || (typeof procedure.cost?.exile === "object" && "choose" in procedure.cost.exile && procedure.cost.exile.source);
-	refs({ targets: procedure.targets }, procedure.targets?.length ?? 0, new Set());
-	visit(procedure.instructions, procedure.targets?.length ?? 0, new Set(exilesSource ? ["cost-source"] : []));
-	return procedure;
+	refs(value, slots, bound);
 }
 
 /** A procedure's announcements, while this seat holds priority. */

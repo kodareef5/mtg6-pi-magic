@@ -30,14 +30,14 @@
 								"zones": [
 									"hand"
 								],
-								"owner": "you"
+								"controller": "you"
 							},
 							"count": 2,
-							"as": "chosen-discard"
+							"as": "discard-choice"
 						},
 						{
 							"do": "move",
-							"what": "bound:chosen-discard",
+							"what": "bound:discard-choice",
 							"to": "graveyard",
 							"reason": "discard",
 							"as": "discarded"
@@ -47,17 +47,17 @@
 							"if": {
 								"amount": {
 									"count": {
-										"is": "bound:discarded",
 										"zones": [
-											"library",
-											"hand",
-											"battlefield",
 											"graveyard",
-											"stack",
 											"exile",
+											"hand",
+											"library",
+											"battlefield",
+											"stack",
 											"command",
 											"outside"
 										],
+										"is": "bound:discarded",
 										"not": {
 											"types": [
 												"land"
@@ -76,6 +76,7 @@
 												"creature"
 											]
 										},
+										"count": 1,
 										"upTo": true
 									}
 								],
@@ -98,17 +99,17 @@
 							"if": {
 								"amount": {
 									"count": {
-										"is": "bound:discarded",
 										"zones": [
-											"library",
-											"hand",
-											"battlefield",
 											"graveyard",
-											"stack",
 											"exile",
+											"hand",
+											"library",
+											"battlefield",
+											"stack",
 											"command",
 											"outside"
 										],
+										"is": "bound:discarded",
 										"not": {
 											"types": [
 												"land"
@@ -116,8 +117,7 @@
 										}
 									}
 								},
-								"atLeast": 2,
-								"atMost": 2
+								"atLeast": 2
 							},
 							"effect": {
 								"targets": [
@@ -137,18 +137,8 @@
 										"what": "target:0"
 									},
 									{
-										"do": "tap",
-										"what": "target:1"
-									},
-									{
 										"do": "counters",
 										"on": "target:0",
-										"kind": "stun",
-										"amount": 1
-									},
-									{
-										"do": "counters",
-										"on": "target:1",
 										"kind": "stun",
 										"amount": 1
 									}
@@ -164,7 +154,7 @@
 		"printedCast": true,
 		"deferred": [
 			{
-				"claim": "Exile Seasoned Cryomancer from your graveyard to draw two cards",
+				"claim": "Exile Seasoned Cryomancer from your graveyard to draw two cards.",
 				"basis": "{3}{U}{U}, Exile this card from your graveyard: Draw two cards.",
 				"source": {
 					"card": "Seasoned Cryomancer",

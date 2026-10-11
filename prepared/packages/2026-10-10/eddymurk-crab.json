@@ -54,10 +54,6 @@
 						{
 							"do": "tap",
 							"what": "target:0"
-						},
-						{
-							"do": "tap",
-							"what": "target:1"
 						}
 					]
 				}
@@ -65,9 +61,10 @@
 		],
 		"procedures": [],
 		"assessed": true,
+		"printedCast": false,
 		"deferred": [
 			{
-				"claim": "Cast Eddymurk Crab with flash and its graveyard-based cost reduction",
+				"claim": "Cast Eddymurk Crab with flash and a cost reduction of {1} for each instant and sorcery card in your graveyard.",
 				"basis": "Flash ... This spell costs {1} less to cast for each instant and sorcery card in your graveyard.",
 				"source": {
 					"card": "Eddymurk Crab",

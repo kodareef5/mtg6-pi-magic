@@ -1,6 +1,6 @@
 /** Check an accepted card assessment's coverage. This does not interpret its rules. */
 import type { Package } from "./language.ts";
-import { checkProcedure } from "./procedures.ts";
+import { checkProcedure, checkReferences } from "./procedures.ts";
 import { isLand, permanentSpell, quotes, type Printed } from "./printed.ts";
 import { castableFace, faceFacts } from "./faces.ts";
 
@@ -10,6 +10,7 @@ const plain = (text: string) => text.replace(/\([^)]*\)/g, " ").replace(/^\s*•
 /** Every source paragraph must have accepted terms; matching a quote does not prove those terms correct. */
 export function assessmentProblems(printed: Printed, pack: Package): string[] {
 	const problems: string[] = [];
+	try { checkReferences(pack.registers); } catch (error) { problems.push(String(error)); }
 	const claims = [...pack.registers, ...(pack.procedures ?? []), ...(pack.deferred ?? [])];
 	const shared = new Set([...(pack.printedCast ? [0] : []), ...(pack.printedFaces ?? [])]);
 	for (const face of shared) if (!castableFace(printed, face) || !permanentSpell(faceFacts(printed, face)))
