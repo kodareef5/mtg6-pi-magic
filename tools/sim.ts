@@ -16,6 +16,7 @@ import { dealtTable, decks, matchup, universe } from "./matchup-fixture.ts";
 import type { GameResult } from "./game-report.ts";
 import { adherence, type Adherence } from "./adherence.ts";
 import { collection } from "../src/core/decks.ts";
+import { admittedAlpha } from "../src/core/packages.ts";
 
 const { values: a } = parseArgs({ options: {
 	games: { type: "string", default: "20" }, arm: { type: "string", default: "baseline" }, "seed-base": { type: "string" },
@@ -36,7 +37,7 @@ if (a.help) {
   --random N       N fresh games on seeded random pairings from the pool instead of carried seeds; each pairing's first-named
                    deck is on the play, and odd games swap. Setup interprets cards and writes briefs live (stored packages first)
   --pool A,B,C     the decks random pairings draw from; default every collection deck with a web source
-  --alpha          register sideboardless copies for fresh --random games; journals retain those exact lists
+  --alpha          draw from admitted imported main decks; register no sideboards and journal those exact lists
   --green P        the strategy pattern for whichever seat plays the Green list; --red likewise. One roster facing another:
                    run the arm twice with the patterns swapped and count wins by roster, not by list
   --jobs N         games at once. Two: three games at once hit the strategy provider's rate limit
@@ -200,6 +201,11 @@ if (a.report) {
 if (a.alpha && !a.random) throw new Error("--alpha needs --random; a carried journal owns its registered lists.");
 const jobs = Math.max(1, Number(a.jobs)), base = a["seed-base"] ?? `sim-${Date.now()}`;
 const pool = a.pool ? a.pool.split(",").map((one) => one.trim()) : [...collection().values()].filter((one) => /^https?:/.test(one.source)).map((one) => one.name);
+if (a.alpha) {
+	const admitted = new Set(admittedAlpha(universe).map((one) => one.name));
+	if (a.pool && pool.some((name) => !admitted.has(name))) throw new Error(`Alpha pool includes decks without standing coverage: ${pool.filter((name) => !admitted.has(name)).join(", ")}`);
+	pool.splice(0, pool.length, ...pool.filter((name) => admitted.has(name)));
+}
 const games = a.random ? Number(a.random) : Number(a.games);
 const records = a.random ? randomGames(base, games, pool, join(a.out!, a.arm!)) : seedGames(base, games, a.source!, join(a.out!, "seeds"));
 console.log(a.random ? `${records.length} random pairings from ${pool.length} decks` : `${records.length} seeds under ${join(a.out!, "seeds")} from ${a.source} version 0`);

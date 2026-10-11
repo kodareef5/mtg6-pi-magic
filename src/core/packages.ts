@@ -10,6 +10,8 @@ import { printedFacts } from "./printed.ts";
 import type { Universe } from "./cards.ts";
 import type { Table } from "./table.ts";
 import { editWork } from "./work-tools.ts";
+import { alpha, collection, problems as deckProblems, type Deck } from "./decks.ts";
+import { standard } from "./format.ts";
 
 export const PACKAGE_SEED = join(import.meta.dirname, "..", "..", "prepared", "packages");
 export type PackageStore = { seed: string; cache: string; notice: (message: string) => void };
@@ -56,6 +58,15 @@ export function storedPackages(universe: Universe, options: Partial<PackageStore
 		} catch (error) { notice(`Skipped preparation ${join(dir, file)}: ${String(error)}`); }
 	}
 	return kept;
+}
+
+/** Random alpha games draw only legal imported main decks with complete standing coverage.
+ * Deferred uses still require interpretation in the game; admission does not certify play. */
+export function admittedAlpha(universe: Universe, options: Partial<PackageStore> = {}): Deck[] {
+	const kept = storedPackages(universe, options);
+	return [...collection().values()].filter((one) => /^https?:/.test(one.source)).map(alpha).filter((one) =>
+		!deckProblems(universe, one, standard).length && Object.entries(printedFacts(universe, Object.keys(one.main)))
+			.every(([card, printed]) => !printed.text || kept.has(card)));
 }
 
 /** Every seat needs the registered universe, including cards it may gain control of. */

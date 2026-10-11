@@ -4,8 +4,9 @@ import { test } from "node:test";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { PACKAGE_SEED, loadStored, saveAssessed, storedPackages, storePackage, writeRecord } from "../src/core/packages.ts";
+import { PACKAGE_SEED, admittedAlpha, loadStored, saveAssessed, storedPackages, storePackage, writeRecord } from "../src/core/packages.ts";
 import { shipped } from "../src/core/printed.ts";
+import { deck } from "../src/core/decks.ts";
 import { matchup } from "./play.ts";
 
 test("stored preparation is source-checked, atomic, and separate from refusals and carried work", () => {
@@ -56,5 +57,24 @@ test("stored preparation is source-checked, atomic, and separate from refusals a
 		assert.ok(notices.some((note) => note.includes("Could not cache preparation")));
 		assert.equal(loadStored(matchup("seed-only"), universe, () => false, { ...split, cache: blocked }), 2,
 			"an unreadable cache does not prevent seating from the seed");
+	} finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("random alpha admission checks every main card without modifying tournament sideboards", () => {
+	const dir = mkdtempSync(join(tmpdir(), "magic-alpha-pool-")), universe = shipped();
+	const store = { seed: dir, cache: dir, notice: () => {} }, original = deck("Selesnya Landfall");
+	try {
+		assert.equal(admittedAlpha(universe, store).length, 0);
+		const accepted = storedPackages(universe, { cache: PACKAGE_SEED });
+		for (const name of Object.keys(original.main)) if (accepted.has(name)) storePackage(universe, accepted.get(name)!.package, "test", store);
+		const pool = admittedAlpha(universe, store), entry = pool.find((one) => one.name === original.name)!;
+		assert.ok(entry); assert.deepEqual(entry.main, original.main); assert.deepEqual(entry.sideboard, {});
+		assert.deepEqual(deck(original.name), original); assert.ok(Object.keys(original.sideboard).length);
+		assert.ok(!pool.some((one) => one.name === "4c Control"), "an unassessed main deck cannot enter the random pool");
+		assert.ok(accepted.get("Shared Roots")!.package.deferred?.length, "deferred uses do not block standing admission");
+		const changed = structuredClone(universe); changed.cards.get("Shared Roots")!.oracle += " Changed source.";
+		assert.ok(!admittedAlpha(changed, store).some((one) => one.name === original.name), "a stale main-card interpretation blocks admission");
+		const illegal = structuredClone(universe); illegal.cards.get("Shared Roots")!.legal.standard = "B";
+		assert.ok(!admittedAlpha(illegal, store).some((one) => one.name === original.name), "source coverage cannot override format legality");
 	} finally { rmSync(dir, { recursive: true, force: true }); }
 });
