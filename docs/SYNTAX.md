@@ -615,3 +615,8 @@ objects and an amount counting those that came from that zone.
 
 `{ "enteredThisTurn": ObjectRef }` holds only for a current battlefield
 incarnation whose entry followed the start of the current turn.
+
+An exile `move` may use `until: { leaves: ObjectRef }`. It does nothing if that
+battlefield incarnation already left. Otherwise the exiled card returns to its
+original zone immediately after that source leaves, without a triggered ability.
+This tracks only the exiled incarnation and also makes it `linked` to the source.

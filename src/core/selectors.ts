@@ -230,7 +230,7 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if (selector.other && object.id === scope.source?.id) return false;
 	if (selector.is && !objects(scope, selector.is).some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
 	if (selector.attachedTo && !objects(scope, selector.attachedTo).some((one) => object.attached?.id === one.id && object.attached.incarnation === one.incarnation)) return false;
-	if (selector.linked && !scope.world.notes.some((note) => note.kind === "link" && note.on.id === object.id && note.on.incarnation === object.incarnation &&
+	if (selector.linked && !scope.world.notes.some((note) => (note.kind === "link" || note.kind === "return") && note.on.id === object.id && note.on.incarnation === object.incarnation &&
 		note.source.id === scope.source?.id && note.source.incarnation === scope.source.incarnation)) return false;
 	if (selector.targeting && !(object.zone === "stack" && (object.ability?.targets ?? []).flat().some((chosen) => {
 		const aimed = "id" in chosen ? live(scope.world, chosen) : undefined;

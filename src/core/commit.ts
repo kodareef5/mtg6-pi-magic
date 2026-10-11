@@ -19,7 +19,9 @@ import { createHash } from "node:crypto";
 import { firstMulliganFree, type Format } from "./format.ts";
 import { printedFacts, shipped } from "./printed.ts";
 import { characteristics, forget, has, type Traits } from "./characteristics.ts";
-import { terms } from "./entry.ts";
+import { attach, terms } from "./entry.ts";
+import { beforeEntry } from "./entry-payments.ts";
+import { returns } from "./durations.ts";
 import { before as lookBack, detect } from "./triggers.ts";
 import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
@@ -481,6 +483,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	table.cursor.clock += 1;
 	if (control(changes)) return receipt;
 	table.log.push(receipt);
+	if (!table.entry) {
+		const returning = returns(table);
+		if (returning.length) {
+			attach(table, returning);
+			commit(table, beforeEntry(table, returning, "resolve"), "resolve");
+		}
+	}
 	return receipt;
 }
 

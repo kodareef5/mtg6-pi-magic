@@ -20,6 +20,7 @@ schemas, and every `basis` is checked against the card's text.
 | `entry-choices.md` | choose a basic land type before entry payment; derive its intrinsic mana ability |
 | `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |
 | `casting-permissions.md` | alternative and printed prices, spell filters, stack departure replacements, exiled ownership, permission through the next turn and firebending mana |
+| `exile-until.md` | immediate nontriggered returns, source incarnation, private hand exile and simultaneous durations |
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |
 | `until-end-of-turn.md` | temporary changes, counters with keywords, doubling power, `if` and `limit`, play permissions |
 | `costs.md` | sacrifice with last known information, discard or exile the card itself, life, reductions |

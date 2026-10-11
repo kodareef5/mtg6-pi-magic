@@ -85,9 +85,12 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "move": case "destroy": {
 			const destroy = instruction.do === "destroy";
-			const moving = many(table, scope, instruction).filter((object) => !destroy || (object.zone === "battlefield" && !has(characteristics(table, object as never), "indestructible")));
 			const to: Zone = destroy ? "graveyard" : instruction.to as Zone;
 			const terms = instruction.do === "move" ? instruction : undefined;
+			const specified = terms?.until && objects(scope, terms.until.leaves)[0];
+			const duration = specified && table.things.get(specified.id);
+			const waiting = duration?.zone === "battlefield" && duration.incarnation === specified!.incarnation ? ref(duration) : undefined;
+			const moving = terms?.until && !waiting ? [] : many(table, scope, instruction).filter((object) => !destroy || (object.zone === "battlefield" && !has(characteristics(table, object as never), "indestructible")));
 			if (terms && to === "library" && moving.every((one) => one.zone === "library")) {
 				const ordered = inspection(table, scope, { do: "order", who: "you", what: terms.what, every: terms.every, position: terms.position ?? "top", as: terms.as }, pending);
 				if (terms.countFrom && terms.as) for (const choice of ordered.choices) {
@@ -103,6 +106,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 					...(terms?.face !== undefined ? { face: terms.face } : {}),
 					...(terms?.tapped ? { tapped: true as const } : {}), ...(counters ? { counters } : {}), ...(controlled !== undefined ? { controller: controlled } : {}) },
 				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + (object.zone === to ? 0 : 1) }, source } }] : []),
+				...(waiting && object.zone !== to ? [{ do: "note" as const, note: { kind: "return" as const, by: controller, until: "indefinite" as const,
+					on: { id: object.id, incarnation: object.incarnation + 1 }, source: waiting, to: object.zone } }] : []),
 			]);
 			const follow = source && to === "battlefield" && moving.some((object) => object.id === source.id && object.zone !== to) ? { follow: { id: source.id, incarnation: source.incarnation + 1 } } : {};
 			// "That card" follows it to where this put it (400.7).

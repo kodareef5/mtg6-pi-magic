@@ -243,6 +243,8 @@ export type Note = {
 	| { kind: "label"; on: ObjectRef; text: string; change?: Modification }
 	| { kind: "register"; on: ObjectRef; registration: Registration }
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
+	/** A second one-shot effect under 610.3, not a leaves trigger. */
+	| { kind: "return"; on: ObjectRef; source: ObjectRef; to: Zone }
 	/** "You may play that card": from a turn, while that card stays where it is. */
 	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone }
 	/** Restriction words for future matching spells, applied as they are cast. */

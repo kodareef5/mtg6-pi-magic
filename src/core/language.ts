@@ -219,10 +219,15 @@ export const Defs = {
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
 			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face),
+			/** Exile until this battlefield incarnation leaves; return immediately to the original zone. */
+			until: Type.Optional(object({ leaves: ObjectRef })),
 			/** With as, bind how many moved objects came from this zone, before their incarnations change. */
 			countFrom: Type.Optional(Zone),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), controller: Type.Optional(PlayerRef),
-			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { if: { required: ["countFrom"] }, then: { required: ["as"] } }),
+			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { allOf: [
+				{ if: { required: ["countFrom"] }, then: { required: ["as"] } },
+				{ if: { required: ["until"] }, then: { properties: { to: { const: "exile" } } } },
+			] }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
 		/** A private inspection binds exactly the inspected objects, not the whole hidden zone. */
