@@ -7,7 +7,7 @@ import type { SeenObject } from "../core/work.ts";
 import { matches, reached, select } from "../core/query.ts";
 import { sources } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
-import { playable } from "../core/permits.ts";
+import { castRestrictions, castingPrices, playable } from "../core/permits.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
 import type { actions } from "./plan-edit.ts";
 import { isDeepStrictEqual } from "node:util";
@@ -98,11 +98,15 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 		if (!bound.length && !prior && (procedure.timing !== "stack" || !visible.length)) return undefined;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? faceFacts(frame.view.printed?.[card], procedure.face)?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
+			...(procedure.timing === "spell" ? { castingRestrictions: castRestrictions(viewWorld(resources.view), frame.seat),
+				castingPrices: bound.map((source) => ({ source: { id: source.id, incarnation: source.incarnation }, prices: castingPrices(viewWorld(resources.view), frame.seat, source,
+					turn ?? (frame.view.window.kind === "turn" ? frame.view.window.turn : 0), procedure.face,
+					cost?.mana !== undefined && cost.mana !== faceFacts(frame.view.printed?.[source.card ?? ""], procedure.face)?.mana) })) } : {}),
 			manaBudgets: bound.map((source) => ({ source: { id: source.id, incarnation: source.incarnation }, ...manaBudget(resources, use, source) })),
 			...(turn === undefined ? {} : { permissionTurn: turn }),
 			...(!bound.length ? { visibleSources: visible.map(sourceFact), availability: "No permitted source now. Earlier actions must satisfy the source's zone, permission and conditions before this use becomes available. This is accepted equipment, not an offered action or a forecast that it will work." } : {}),
 			cost: { ...cost, mana: mana ?? (procedure.timing === "spell" ? "Read the bound source's printed cost" : "{0}") },
-			costBasis: cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost" }] as const;
+			costBasis: `${cost?.mana === undefined && procedure.timing === "spell" ? "printed mana cost" : "stated cost"}${procedure.timing === "spell" ? "; castingPrices lists current permission alternatives, replacing only the mana cost. Restrictions and timing remain separate." : ""}` }] as const;
 	}).filter((one) => one !== undefined);
 	return Object.fromEntries(entries.map(([key, description], at) => {
 		const earlier = entries.find(([other, facts], n) => n < at && isDeepStrictEqual(available[key]!.action, available[other]!.action) && isDeepStrictEqual(description, facts));

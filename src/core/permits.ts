@@ -4,7 +4,7 @@
  * zone, flash, and "you may play that card". Read from a world, so the table and
  * a seat's view agree on what is offered.
  */
-import { matches, type Seen, type World } from "./selectors.ts";
+import { holds, matches, players, type Seen, type World } from "./selectors.ts";
 import type { Registration, Selector } from "./language.ts";
 import type { SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
@@ -22,6 +22,16 @@ export function castingPrices(world: World, seat: SeatId, object: Seen, turn: nu
 	const prices: { mana?: string; permission?: string }[] = normal ? [{}] : [];
 	if (!alternative) for (const note of permitted) if (note.mana !== undefined && !prices.some((price) => price.mana === note.mana)) prices.push({ mana: note.mana, permission: note.id });
 	return prices;
+}
+
+/** Read standing casting restrictions through the layer walk, so removal of abilities ends them. */
+export function castRestrictions(world: World, seat: SeatId): string[] {
+	return world.objects.filter((source) => source.zone === "battlefield").flatMap((source) => {
+		const scope = { world, source, controller: source.controller };
+		return (world.read(source)?.registrations ?? []).flatMap((registration) => registration.kind === "prohibit" &&
+			players(scope, registration.cast).includes(seat) && (!registration.during || world.turn && players(scope, registration.during).includes(world.turn.active)) &&
+			(!registration.if || holds(scope, registration.if)) ? [`${world.read(source)?.name ?? source.id}: ${registration.basis}`] : []);
+	});
 }
 
 /** What this seat's permanents permit it. Additional assumed registrations

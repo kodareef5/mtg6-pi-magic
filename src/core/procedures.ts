@@ -14,7 +14,7 @@ import { beforeEntry } from "./entry-payments.ts";
 import { covers, paying, produces } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, holds, matches, players, tableWorld, type Scope } from "./selectors.ts";
-import { allowance, castingPrices, flashed, playable } from "./permits.ts";
+import { allowance, castingPrices, castRestrictions, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Change } from "./syntax.ts";
@@ -55,7 +55,7 @@ export function checkProcedure(value: unknown): Procedure {
 	// name for the program that creates it.
 	const refs = (value: unknown, slots: number, bound: Set<string>): void => {
 		if (typeof value === "string") {
-			const target = value.match(/^(?:(?:controller|owner):)?target:(\d+)$/), name = value.match(/^bound:([a-z][a-z0-9-]*)$/)?.[1];
+			const target = value.match(/^(?:(?:controller|owner):)?target:(\d+)$/), name = value.match(/^(?:(?:controller|owner):)?bound:([a-z][a-z0-9-]*)$/)?.[1];
 			if (target && Number(target[1]) >= slots) throw new Error(`target:${target[1]} names a target slot the procedure does not have.`);
 			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
 		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
@@ -97,6 +97,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const object = live(table, source);
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
 	const world = tableWorld(table);
+	if (activation.timing === "spell" && castRestrictions(world, controller).length) throw new Error(`Casting is prohibited: ${castRestrictions(world, controller).join("; ")}`);
 	// A card is cast or played from hand, or where a permission lets this seat, whoever owns it.
 	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land", activation.face) :
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))

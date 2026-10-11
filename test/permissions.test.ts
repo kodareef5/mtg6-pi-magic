@@ -6,7 +6,7 @@ import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
-import { activate, printedCast } from "../src/core/procedures.ts";
+import { activate, checkProcedure, printedCast } from "../src/core/procedures.ts";
 import { castingPrices, playable } from "../src/core/permits.ts";
 import { tableWorld, viewWorld } from "../src/core/selectors.ts";
 import { manaBudget } from "../src/core/budget.ts";
@@ -30,6 +30,7 @@ test("a granted casting price belongs to its player and incarnation, with explic
 	assert.deepEqual([permit.who, permit.mana, claw.zone, permit.on.incarnation], [1, "{2}", "exile", claw.incarnation]);
 	assert.equal(playable(tableWorld(table), 0, claw, table.cursor.turn, false), false, "the owner's opponent gets no permission");
 	const cast = printedCast("Hired Claw", table.printed["Hired Claw"]!);
+	assert.throws(() => checkProcedure({ ...cast, instructions: [{ do: "permit", what: "this", who: "owner:bound:missing", until: "indefinite" }] }), /used before/);
 	assert.equal(offered(table, cast).length, 0, "the permission does not grant flash");
 	main(table, 1, 2);
 	const choices = offered(table, cast);

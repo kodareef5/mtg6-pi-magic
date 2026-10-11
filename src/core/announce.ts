@@ -15,7 +15,7 @@ import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
-import { allowance, castingPrices, flashed } from "./permits.ts";
+import { allowance, castingPrices, castRestrictions, flashed } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
@@ -217,6 +217,7 @@ function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: F
 /** Every source, X, cost, payment and target this seat could announce for one procedure now. */
 export function offers(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
 	const world = viewWorld(frame.view), printed = frame.view.printed ?? {};
+	if (procedure.timing === "spell" && castRestrictions(world, frame.seat).length) return [];
 	const seen = new Set<string>();
 	const sources = useSources(frame, procedure).filter((source) =>
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));

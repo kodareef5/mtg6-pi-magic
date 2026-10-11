@@ -46,8 +46,8 @@ states its rounding; a starting total of 21 permits transformation at 10 life.
 
 ## She-Hulk's optional use
 
-This isolates the back face's damage trigger. Jennifer's casting restriction
-and transformation activation need their own accepted terms.
+The damage trigger and both faces' casting restrictions have structured terms.
+The transformation activation still needs its own accepted procedure.
 
 ```json package
 {
@@ -57,7 +57,9 @@ and transformation activation need their own accepted terms.
       "kind": "watch", "may": true, "limit": "once-per-turn-use",
       "event": { "on": "damage", "received": true, "of": { "types": ["creature"], "controller": "you" } },
       "effect": { "targets": [{ "object": { "types": ["creature", "planeswalker", "battle"] }, "player": "any" }],
-        "instructions": [{ "do": "damage", "to": "target:0", "amount": { "event": "amount" } }] } }
+        "instructions": [{ "do": "damage", "to": "target:0", "amount": { "event": "amount" } }] } },
+    { "face": 0, "basis": "Your opponents can't cast spells during your turn.", "kind": "prohibit", "cast": "opponent", "during": "you" },
+    { "face": 1, "basis": "Your opponents can't cast spells during your turn.", "kind": "prohibit", "cast": "opponent", "during": "you" }
   ]
 }
 ```

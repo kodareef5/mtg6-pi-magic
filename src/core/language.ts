@@ -257,6 +257,8 @@ export const Defs = {
 			if: Type.Optional(Type.Ref("Condition")) }),
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")) }),
+		/** A standing restriction on the named players' casting, optionally during a named player's turn. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), cast: PlayerRef, during: Type.Optional(PlayerRef), if: Type.Optional(Type.Ref("Condition")) }),
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("suppress"), event: Type.Ref("Event") }),
 	]),
 };
