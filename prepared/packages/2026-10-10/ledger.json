@@ -55,14 +55,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Awaken the Honored Dead": {
-		"reason": "Awaken the Honored Dead is not ready: (As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.) — Missing operations: adding a lore counter as a turn-based action at the beginning of its controller's precombat main phase, and sacrificing the Saga as a state-based action when it has at least three lore counters and no chapter ability that has triggered but not yet left the stack. Neither operation is a step-triggered ability.; I — Destroy target nonland permanent. — Missing event: one or more lore counters being put on this Saga, with the previous count less than ",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Azog, Moria's Ruin": {
 		"reason": "Azog, Moria's Ruin is not ready: When Azog enters, destroy up to one other target creature. Its controller amasses Goblins X, where X is that creature's power. If you controlled that creature, draw a card. (To amass Goblins X, that player puts X +1/+1 counters on an Army they control. It's also a Goblin. If they don't control an Army, they create a 0/0 black Goblin Army creature token first.) — Missing operation: creating a token for the targeted creature's controller. The token instruction has no creator/controller field; amassing must also work when that player is an opponent. The available ",
 		"decks": [
@@ -216,14 +208,6 @@
 		"reason": "Dusk Rose Reliquary is not ready: When this artifact enters, exile target artifact or creature an opponent controls until this artifact leaves the battlefield. — Missing operation: exile until a specified event with an immediate, non-stack return to the battlefield under its owner's control (610.3), doing nothing if this artifact already left before the enters trigger resolves. A delayed triggered ability would incorrectly put the return on the stack.",
 		"decks": [
 			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Dyadrine, Synthesis Amalgam": {
-		"reason": "Dyadrine, Synthesis Amalgam is not ready: Dyadrine enters with a number of +1/+1 counters on it equal to the amount of mana spent to cast it. — Missing amount operation reading actual mana spent to cast this object for its entry replacement; X plus two is not equivalent when costs change or it enters without being cast.; Whenever you attack, you may remove a +1/+1 counter from each of two creatures you control. If you do, draw a card and create a 2/2 colorless Robot artifact creature token. — Missing resolution-time optional cost operation requiring one +1/+1 counter from each of two distinct ",
-		"decks": [
-			"Selesnya Landfall"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
@@ -606,14 +590,6 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
-	},
-	"Sunderflock": {
-		"reason": "Sunderflock is not ready: When this creature enters, if you cast it, return all non-Elemental creatures to their owners' hands. — Missing a condition tracking whether this entering permanent was cast by its controller. Current-turn cast history cannot faithfully represent this intervening-if condition across zone changes or turn boundaries.",
-		"decks": [
-			"Izzet Spellementals"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
 	},
 	"Superior Spider-Man": {
 		"reason": "Superior Spider-Man is not ready: Mind Swap — You may have Superior Spider-Man enter as a copy of any creature card in a graveyard, except his name is Superior Spider-Man and he's a 4/4 Spider Human Hero in addition to his other types. When you do, exile that card. — Unsupported operation: optional as-entry copy replacement using a creature card in any graveyard, with copiable name, power/toughness and additional subtype exceptions, and its linked trigger exiling the chosen card only when that replacement is used. The available syntax does not support copy effects or a linked as-entry choice.",

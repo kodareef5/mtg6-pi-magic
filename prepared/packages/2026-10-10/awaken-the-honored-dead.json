@@ -1,0 +1,122 @@
+{
+	"card": "Awaken the Honored Dead",
+	"generated": "2026-10-10",
+	"source": "0e3535b26def2a73762d421ace4473493b648bda921f850e827ded3db16766f6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Awaken the Honored Dead",
+		"registers": [
+			{
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Destroy target nonland permanent.",
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "destroy",
+							"what": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Mill three cards.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 3
+						}
+					]
+				}
+			},
+			{
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — You may discard a card. When you do, return target creature or land card from your graveyard to your hand.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"may": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "graveyard",
+							"reason": "discard",
+							"if": {
+								"bound": "chosen"
+							},
+							"as": "discarded"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "discarded"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"creature",
+												"land"
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "hand",
+										"reason": "bounce"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

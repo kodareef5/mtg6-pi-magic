@@ -1,0 +1,76 @@
+{
+	"card": "Sunderflock",
+	"generated": "2026-10-10",
+	"source": "eaf0cf65c9272e383e148fd72971c837acf05a3ecfa64ad3b213d486d38400b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunderflock",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, if you cast it, return all non-Elemental creatures to their owners' hands.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"not": {
+									"subtypes": [
+										"Elemental"
+									]
+								}
+							},
+							"to": "hand",
+							"reason": "bounce"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Sunderflock with its printed cost reduced by the greatest mana value among Elementals you control.",
+				"basis": "This spell costs {X} less to cast, where X is the greatest mana value among Elementals you control.",
+				"source": {
+					"card": "Sunderflock",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
