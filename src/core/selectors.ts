@@ -242,6 +242,11 @@ export const select = (scope: Scope, selector: Selector): Seen[] =>
 export function amount(scope: Scope, value: Amount): number {
 	if (typeof value === "number") return value;
 	if ("count" in value) return select(scope, value.count).length;
+	if ("aggregate" in value) {
+		const values = select(scope, value.of).map((one) => traitsOf(scope, one)?.[value.value as "manaValue" | "power" | "toughness"] ?? 0);
+		if (value.aggregate === "sum") return values.reduce((sum, one) => sum + one, 0);
+		return values.length ? Math[value.aggregate === "max" ? "max" : "min"](...values) : 0;
+	}
 	if ("counters" in value) { const one = objects(scope, value.on, true)[0]; return one ? one.counters[value.counters] ?? 0 : 0; }
 	if ("power" in value) { const one = objects(scope, value.power, true)[0]; return (one && traitsOf(scope, one)?.power) ?? 0; }
 	if ("toughness" in value) { const one = objects(scope, value.toughness, true)[0]; return (one && traitsOf(scope, one)?.toughness) ?? 0; }

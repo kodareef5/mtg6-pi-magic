@@ -95,6 +95,7 @@ export const Defs = {
 	Amount: Type.Union([
 		Type.Integer(),
 		object({ count: Type.Ref("Selector") }),
+		object({ aggregate: one("max", "min", "sum"), of: Type.Ref("Selector"), value: one("manaValue", "power", "toughness") }),
 		object({ counters: text, on: ObjectRef }),
 		/** Captured when the instruction is applied (608.2h, 701.10b). */
 		object({ power: ObjectRef }),
