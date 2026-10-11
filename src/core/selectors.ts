@@ -198,7 +198,7 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if (selector.all && !selector.all.every((branch) => matches(scope, object, branch, read, zones))) return false;
 	// A card this seat cannot see matches only a selector that asks nothing about what it is.
 	const blind = !read && !object.ability && object.faceDown && !object.card;
-	if (blind && (selector.name || selector.nameOf || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors)) return false;
+	if (blind && (selector.name || selector.nameOf || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors || selector.hasAdventure !== undefined)) return false;
 	const traits = blind ? FACELESS : read ?? ability(object);
 	if (!traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
@@ -210,6 +210,11 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 		if (!traits.name.split(" // ").some((name) => names.some((other) => same(name, other)))) return false;
 	}
 	if (selector.types && !selector.types.some((type) => traits.types.includes(type))) return false;
+	// 715.2a: inactive alternative characteristics still count. A Prepare copy has only its copied face.
+	if (selector.hasAdventure !== undefined) {
+		const adventure = !object.faceDown && !object.copy && !!object.card && !!scope.world.printed?.[object.card]?.faces?.some((face) => face.type.split("—")[1]?.trim().split(/\s+/).includes("Adventure"));
+		if (selector.hasAdventure !== adventure) return false;
+	}
 	if (selector.subtypes && !selector.subtypes.some(subtype)) return false;
 	if (selector.supertypes && !selector.supertypes.some((one) => traits.supertypes.includes(one))) return false;
 	if (selector.words && !selector.words.every((word) => traits.words.includes(word))) return false;

@@ -85,6 +85,7 @@ watched. Each field narrows, and a list matches any of its members.
 | `colors` | `["R", "G"]` means red or green; `[]` means colorless; `not.colors` excludes the same set |
 | `words` | "creature with flying" |
 | `power`, `toughness`, `manaValue` | `manaValue: {atMost: 3}`; bounds may also be amounts, such as `{atMost: {x: true}}` |
+| `hasAdventure` | whether the visible object has Adventure characteristics, including when its normal face is active (715.2a) |
 | `tapped`, `token`, `attacking`, `blocking` | |
 | `other` | "another": not the source |
 | `is`, `not.is` | include or exclude the objects a ref names, including a bound set |

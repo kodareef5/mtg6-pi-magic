@@ -70,6 +70,8 @@ const SelectorFields = {
 	power: Type.Optional(Range),
 	toughness: Type.Optional(Range),
 	manaValue: Type.Optional(Range),
+	/** Has the alternative Adventure characteristics, even when they are inactive (715.2a). */
+	hasAdventure: Type.Optional(Type.Boolean()),
 	tapped: Type.Optional(Type.Boolean()),
 	token: Type.Optional(Type.Boolean()),
 	attacking: Type.Optional(Type.Boolean()),

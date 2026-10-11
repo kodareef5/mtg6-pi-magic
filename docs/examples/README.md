@@ -12,7 +12,7 @@ schemas, and every `basis` is checked against the card's text.
 | `entering.md` | entering tapped under a condition, a shock land's optional life payment, a Town's own-turn count, entering with counters, how other permanents enter, 305.7 |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `cast-facts.md` | mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
-| `aggregates.md` | greatest, least and total characteristics across selected objects; Sunderflock's reduction |
+| `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |

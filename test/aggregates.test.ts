@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { amount, tableWorld, viewWorld } from "../src/core/selectors.ts";
+import { amount, matches, select, tableWorld, viewWorld } from "../src/core/selectors.ts";
 import { project } from "../src/core/view.ts";
 import { relive } from "../src/core/journal.ts";
 import type { Amount } from "../src/core/language.ts";
@@ -38,4 +38,33 @@ test("set aggregates read layers, empty sets and distinct extrema for a replayab
 	passBoth(table); finish(table);
 	assert.deepEqual(relive(clone, table.ledger.slice(at)), table);
 	assert.deepEqual(relive(prefix, table.ledger.slice(from)), table);
+});
+
+test("Adventure alternatives count once with normal characteristics and never reveal a hidden identity", () => {
+	const table = start(standard, [{ deck: deck("Izzet Spellementals") }, { deck: deck("Boros Dragons") }], "adventure-count");
+	main(table, 0);
+	const card = "Hearth Elemental // Stoke Genius", spell = example("Cast Hearth Elemental with its graveyard reduction");
+	const grave = place(table, 0, "graveyard", card, "Burst Lightning", "Sleight of Hand", "Eddymurk Crab");
+	const hand = place(table, 0, "hand", card)[0]!;
+	const omen = place(table, 1, "graveyard", "Twinmaw Stormbrood // Charring Bite")[0]!;
+	const scope = () => ({ world: tableWorld(table), controller: 0 });
+	assert.equal(amount(scope(), spell.cost!.reduce!), 3, "creature Adventure, instant and sorcery each count once");
+	assert.equal(select(scope(), { zones: ["graveyard"], hasAdventure: true }).length, 1, "an Omen is not an Adventure");
+	assert.ok(select(scope(), { zones: ["graveyard"], hasAdventure: false }).some((one) => one.id === omen.id));
+	for (const viewer of [0, 1, "spectator"] as const) {
+		const seen = { world: viewWorld(project(table, viewer)), controller: 0 };
+		assert.equal(amount(seen, spell.cost!.reduce!), 3);
+		assert.equal(select(seen, { zones: ["hand"], owner: "you", hasAdventure: true }).some((one) => one.id === hand.id), viewer === 0);
+		if (viewer !== 0) assert.equal(select(seen, { zones: ["hand"], owner: "you", hasAdventure: false }).length, 0, "negation cannot identify unseen cards either");
+	}
+	assert.equal(matches(scope(), { ...grave[0]!, faceDown: true }, { zones: ["graveyard"], hasAdventure: true }, scope().world.read(grave[0]!)), false);
+	commit(table, [{ do: "add-mana", who: 0, colors: ["R", "C", "C"] }], "game-setup");
+	assert.ok(offered(table, spell).length);
+	assert.ok(offered(table, spell).every((one) => one.activation.cost.generic === 2));
+	const prefix = structuredClone(table), at = table.ledger.length;
+	const chosen = announce(table, spell); const clone = structuredClone(table), after = table.ledger.length;
+	assert.ok(select(scope(), { zones: ["stack"], hasAdventure: true }).some((one) => one.id === chosen.activation.source.id));
+	passBoth(table); finish(table);
+	assert.deepEqual(relive(prefix, table.ledger.slice(at)), table);
+	assert.deepEqual(relive(clone, table.ledger.slice(after)), table);
 });
