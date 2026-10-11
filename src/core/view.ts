@@ -300,6 +300,9 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			case "untap":
 				parts.push(`${change.do}ped ${publicName(receipt.before[change.what])}`);
 				break;
+			case "token":
+				parts.push(`${seat(table, change.controller).name} created ${change.spec.name}${change.tapped ? " tapped" : ""}${change.attacking ? ` attacking ${change.attacking.to ? publicName(receipt.before[change.attacking.to.id]) : seat(table, change.attacking.defending).name}` : ""}`);
+				break;
 			case "damage": {
 				const source = typeof change.source === "string" ? change.source : change.source.id;
 				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount}${change.combat ? " combat" : ""} damage from ${publicName(receipt.before[source])}${change.prevented ? ` (${change.prevented} prevented)` : ""}`);

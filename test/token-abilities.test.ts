@@ -10,8 +10,8 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { printedCast } from "../src/core/procedures.ts";
 import { activatedUses } from "../src/core/activated.ts";
 import { relive } from "../src/core/journal.ts";
-import { project } from "../src/core/view.ts";
-import { announce, establish, finish, main, offered, pack, passBoth, place, step } from "./play.ts";
+import { describe, project } from "../src/core/view.ts";
+import { announce, establish, example, finish, main, offered, pack, passBoth, place, step } from "./play.ts";
 
 test("a Map's own activation reveals before branching, pays once, and survives its source's departure and replay", () => {
 	for (const mode of ["land", "keep", "graveyard", "empty"] as const) {
@@ -74,4 +74,40 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 	announce(table, use.procedure); finish(table); assert.equal(table.things.has(clue.id), false);
 	passBoth(table); finish(table); assert.equal(cardsIn(table, "hand", 0).length, hand + 1);
 	assert.deepEqual(relive(prefix, table.ledger.slice(at)), table);
+});
+
+test("token creation uses the target's last controller, survives failed destruction, and is lost with an illegal target", () => {
+	for (const mode of ["destroyed", "indestructible", "illegal"] as const) {
+		const table = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: alpha(deck("Selesnya Landfall")) }], `get-lost-${mode}`);
+		const victim = place(table, 0, "hand", "The Theorist, Jace Beleren")[0]!;
+		commit(table, [{ do: "move", what: victim.id, to: "battlefield", controller: 1, reason: "game-setup", registers: [] }], "game-setup");
+		if (mode === "indestructible") commit(table, [{ do: "note", note: { kind: "label", by: 0, on: { id: victim.id, incarnation: victim.incarnation },
+			until: "indefinite", text: "Fixture makes the target indestructible.", change: { words: ["indestructible"] } } }], "game-setup");
+		main(table, 0); place(table, 0, "hand", "Get Lost");
+		commit(table, [{ do: "add-mana", who: 0, colors: ["C", "W"] }], "game-setup");
+		const initial = structuredClone(table), from = table.ledger.length;
+		announce(table, example("Get Lost"));
+		if (mode === "illegal") commit(table, [{ do: "move", what: victim.id, to: "hand", reason: "resolve" }], "resolve");
+		passBoth(table);
+		if (mode === "illegal") {
+			finish(table); assert.equal(cardsIn(table, "battlefield").filter((one) => one.token).length, 0);
+			continue;
+		}
+		step(table); // Destruction happens before anyone creates a token.
+		assert.equal(victim.zone, mode === "destroyed" ? "graveyard" : "battlefield");
+		assert.equal(victim.controller, mode === "destroyed" ? 0 : 1);
+		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token).length, 0);
+		const pending = structuredClone(table), at = table.ledger.length;
+		assert.equal(nextDecision(table)!.options[0]!.label, `${table.seats[1]!.name} create 2 Map`);
+		assert.deepEqual(table, pending, "listing a creator reads last known information without writing it");
+		finish(table);
+		const maps = cardsIn(table, "battlefield").filter((one) => one.token?.name === "Map");
+		assert.equal(maps.length, 2); assert.ok(maps.every((one) => one.owner === 1 && one.controller === 1));
+		assert.equal(activatedUses(workFrame(table, 0)).filter((one) => maps.some((map) => one.procedure.source.refs?.[0]?.id === map.id)).length, 0);
+		assert.equal(activatedUses(workFrame(table, 1)).filter((one) => maps.some((map) => one.procedure.source.refs?.[0]?.id === map.id)).length, 2);
+		const receipt = table.log.findLast((one) => one.changes.some((change) => change.do === "token"))!;
+		assert.ok(describe(table, receipt).startsWith(`${table.seats[1]!.name} created Map (x2)`));
+		assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+	}
 });

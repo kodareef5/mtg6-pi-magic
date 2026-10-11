@@ -187,6 +187,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// receipt no trigger can read.
 	const before: Receipt["before"] = {}, known: Record<string, Traits> = {};
 	for (const change of changes) {
+		if (change.do === "token" && change.attacking?.to) {
+			const target = table.things.get(change.attacking.to.id); if (target) before[target.id] = structuredClone(target);
+		}
 		if (change.do === "attack") for (const one of change.attackers) if (one.to) {
 			const target = table.things.get(one.to.id); if (target) before[target.id] = structuredClone(target);
 		}

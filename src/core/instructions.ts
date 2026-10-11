@@ -227,18 +227,21 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			return one(`${instruction.do === "tap" ? "Tap" : "Untap"} ${which.map(name).join(", ") || "nothing"}`, which.map((object) => ({ do: instruction.do, what: object.id })));
 		}
 		case "token": {
-			const count = amount(scope, instruction.count);
-			const ids = Array.from({ length: count }, (_, at) => `token-${table.cursor.clock + 1}-${at}`);
-			const options = instruction.attacking && count && controller === table.cursor.active && STEPS[table.cursor.steps[0]!]?.phase === "combat" ? defenders(table, controller) : [];
-			const create = (chosen: Chosen[]): Choice => ({ id: "do", label: `Create ${count} ${instruction.spec.name}${instruction.tapped ? " tapped" : ""}${options.length ? " attacking" : ""}`,
-				changes: ids.map((id, at) => { const defender = options.find((one) => targetKey(one.chosen) === targetKey(chosen[at]!));
-					return { do: "token", id, spec: structuredClone(instruction.spec), controller, ...(instruction.tapped ? { tapped: true as const } : {}),
+			const count = amount(scope, instruction.count), creators = [...new Set(players(scope, instruction.controller ?? "you"))];
+			const tokens = creators.flatMap((who) => Array.from({ length: count }, () => ({ controller: who })))
+				.map((token, at) => ({ ...token, id: `token-${table.cursor.clock + 1}-${at}` }));
+			const attacking = instruction.attacking && STEPS[table.cursor.steps[0]!]?.phase === "combat" ? tokens.filter((one) => one.controller === table.cursor.active) : [];
+			const options = attacking.length ? defenders(table, table.cursor.active) : [];
+			const create = (chosen: Chosen[]): Choice => ({ id: "do", label: tokens.length ? `${creators.map((who) => seat(table, who).name).join(", ")} create ${count} ${instruction.spec.name}${instruction.tapped ? " tapped" : ""}${options.length ? "; the active player's tokens enter attacking" : ""}` : "No player creates a token",
+				changes: tokens.map((token) => { const pick = chosen[attacking.findIndex((one) => one.id === token.id)];
+					const defender = pick && options.find((one) => targetKey(one.chosen) === targetKey(pick));
+					return { do: "token", ...token, spec: structuredClone(instruction.spec), ...(instruction.tapped ? { tapped: true as const } : {}),
 						...(defender ? { attacking: { defending: defender.defending, ...("id" in defender.chosen ? { to: defender.chosen } : {}) } } : {}) }; }),
-				...bind(instruction, { objects: ids.map((id) => ({ id, incarnation: 0 })), players: [] }) });
-			if (!options.length) return { actor: controller, question: `Create ${count} ${instruction.spec.name}.`, choices: [create([])] };
+				...bind(instruction, { objects: tokens.map(({ id }) => ({ id, incarnation: 0 })), players: [] }) });
+			if (!options.length) return { actor: controller, question: `Create ${instruction.spec.name} tokens.`, choices: [create([])] };
 			const previous = pending.picked.map((pick, at) => `token ${at + 1} at ${options.find((one) => targetKey(one.chosen) === targetKey(pick))?.label ?? "the former defender"}`);
-			return { actor: controller, question: `Choose what ${instruction.spec.name} token ${pending.picked.length + 1} of ${count} enters attacking.${previous.length ? ` Chosen: ${previous.join(", ")}.` : ""}`,
-				choices: options.map((defender) => ({ ...(pending.picked.length + 1 === count ? create([...pending.picked, defender.chosen]) : { changes: [], pick: defender.chosen }),
+			return { actor: table.cursor.active, question: `Choose what ${instruction.spec.name} token ${pending.picked.length + 1} of ${attacking.length} enters attacking.${previous.length ? ` Chosen: ${previous.join(", ")}.` : ""}`,
+				choices: options.map((defender) => ({ ...(pending.picked.length + 1 === attacking.length ? create([...pending.picked, defender.chosen]) : { changes: [], pick: defender.chosen }),
 					id: `attack-${targetKey(defender.chosen)}`, label: `${instruction.spec.name} token ${pending.picked.length + 1} attacks ${defender.label}`,
 					...("id" in defender.chosen ? { objects: [defender.chosen] } : {}) })) };
 		}

@@ -76,3 +76,46 @@ ability remains on the stack and draws when it resolves.
   ]
 }
 ```
+
+## Another player creates the tokens
+
+`token.controller` names each player who creates the stated number; omitted,
+it means `you`. A departed target supplies its last controller, rather than
+its owner or the spell's controller. An empty reference creates nothing.
+The tokens belong to their creator, and their abilities read that token's
+controller when activated.
+
+Get Lost destroys first and creates the Maps second. An indestructible target
+still gives its controller Maps. A target that became illegal before resolution
+causes the whole spell to fail, including token creation. This example supplies
+the complete Map ability; it does not supply the still-unsupported explore event.
+
+```json procedure
+{
+  "claim": "Get Lost", "source": { "zones": ["hand"], "card": "Get Lost" }, "timing": "spell",
+  "basis": "Destroy target creature, enchantment, or planeswalker. Its controller creates two Map tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
+  "cost": { "mana": "{1}{W}" },
+  "targets": [{ "object": { "types": ["creature", "enchantment", "planeswalker"] } }],
+  "instructions": [
+    { "do": "destroy", "what": "target:0" },
+    { "do": "token", "count": 2, "controller": "controller:target:0", "spec": {
+      "name": "Map", "types": ["artifact"], "subtypes": ["Map"], "colors": [],
+      "registers": [{
+        "kind": "activated", "basis": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.",
+        "cost": { "mana": "{1}", "tap": true, "sacrifice": "this" }, "speed": "sorcery",
+        "effect": {
+          "targets": [{ "object": { "types": ["creature"], "controller": "you" } }],
+          "instructions": [
+            { "do": "reveal", "what": { "top": 1, "of": "you" }, "as": "top" },
+            { "do": "choose", "who": "controller:target:0", "from": { "zones": ["library"], "is": "bound:top", "types": ["land"] }, "count": 1, "as": "land" },
+            { "do": "move", "what": "bound:land", "to": "hand", "reason": "resolve" },
+            { "do": "counters", "on": "target:0", "kind": "+1/+1", "amount": 1, "if": { "not": { "bound": "land" } } },
+            { "do": "perform", "who": "controller:target:0", "may": true, "if": { "all": [{ "bound": "top" }, { "not": { "bound": "land" } }] },
+              "instructions": [{ "do": "move", "what": "bound:top", "to": "graveyard", "reason": "resolve" }] }
+          ]
+        }
+      }]
+    } }
+  ]
+}
+```

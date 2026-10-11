@@ -264,7 +264,7 @@ export const Defs = {
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("door"), what: ObjectRef, action: one("unlock", "lock"), face: Type.Optional(Face) }),
 		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
-		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Ref("TokenSpec"), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) }),
+		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Ref("TokenSpec"), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
 		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */

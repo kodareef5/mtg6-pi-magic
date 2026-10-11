@@ -186,7 +186,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
-| `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
+| `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `controller` names each creator (default `you`); `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
 | `modify` | change characteristics `until` a duration, written as a public label |
 | `permit` | a player may play a card, `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only |
 | `register` | add a registration to an object |
