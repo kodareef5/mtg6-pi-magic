@@ -4,7 +4,7 @@ import test from "node:test";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { start, commit } from "../src/core/commit.ts";
+import { start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { editWork } from "../src/core/work-tools.ts";
@@ -19,7 +19,7 @@ test("private source evidence preserves changed, unused and announced meanings t
 	const card = "Impractical Joke", good = { ...example("Cast Impractical Joke"), claim: "Cast spell" };
 	editWork(table, 0, [{ do: "package.put", package: { card, registers: [] } }], "initial");
 	main(table, 0); place(table, 0, "hand", card, "Burst Lightning");
-	commit(table, [{ do: "add-mana", who: 0, colors: ["R", "R"] }], "game-setup");
+	place(table, 0, "battlefield", "Steam Vents", "Steam Vents");
 	const put = (procedure: Procedure, id: string) => editWork(table, 0, [{ do: "package.put", package: { card: procedure.source.card!, registers: [], procedures: [procedure] } }], id);
 	put({ ...good, instructions: [...good.instructions].reverse() }, "wrong-order");
 	const prefix = structuredClone(table), version = table.ledger.length, work = table.workLog.length;
@@ -41,6 +41,11 @@ test("private source evidence preserves changed, unused and announced meanings t
 	assert.equal(joke.announced.length, 1); assert.equal(joke.announced[0]!.program.instructions[0]!.do, "damage-rule");
 	assert.ok(review.cards.some((one) => one.card === "Burst Lightning" && one.announced[0]?.program.claim === good.claim), "equal claims on different cards remain distinct");
 	assert.ok(review.cards.some((one) => one.card === "Opt" && one.prepared.length && !one.announced.length), "unused private work is included");
+	const vents = review.cards.find(one => one.card === "Steam Vents")!;
+	assert.equal(vents.announced.length, 0, "a mana source need not have an announced spell or ability");
+	assert.equal(vents.mana.length, 1); assert.deepEqual(vents.mana[0]!.output.colors, ["R"]);
+	assert.equal(vents.mana[0]!.payment!.intrinsic, true); assert.equal(vents.mana[0]!.sources.length, 2);
+	assert.equal(vents.mana[0]!.rows.length, 2); assert.equal(vents.mana[0]!.clocks.length, 2);
 	assert.deepEqual(joke.source, table.printed[card]);
 	assert.deepEqual(sourceReview(relive(prefix, table.ledger.slice(version), table.workLog.slice(work)), version), review);
 	const dir = mkdtempSync(join(tmpdir(), "magic-review-"));
@@ -53,6 +58,7 @@ test("private source evidence preserves changed, unused and announced meanings t
 		const text = readFileSync(stored.sourceReview, "utf8");
 		assert.match(text, /Private card source review/); assert.ok(text.includes(table.printed[card]!.oracle));
 		assert.match(text, /Not announced/); assert.match(text, /does not prove its instructions resolved/);
+		assert.match(text, /Mana produced at clocks/); assert.match(text, /amount and colors it actually supplied/);
 		assert.equal(statSync(stored.sourceReview).mode & 0o777, 0o600);
 		assert.equal(stored.cards, undefined, "private card meanings stay out of the compact result and timeline");
 	} finally { rmSync(dir, { recursive: true, force: true }); }
