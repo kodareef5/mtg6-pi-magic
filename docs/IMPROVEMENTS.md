@@ -25,19 +25,22 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 4c Control, Selesnya Landfall and Izzet Spellementals have standing assessments
 for every main-deck card. They still have thirteen, eight and thirteen cards
-with deferred uses respectively. Selesnya completed three ordinary alpha games,
+with deferred uses respectively. Selesnya completed four ordinary alpha games,
 with replay and continuation from three saved prefixes checked for each.
-Izzet completed two source-audited games and Control completed one, each with
-matching replay and clone continuation. Matchups among these three imported
-lists are now running. The other sixteen lists still need standing assessments.
+Izzet completed two source-audited games and Control completed two, each with
+matching replay and clone continuation. The first matchup between imported
+lists finished with Selesnya beating Control. Both Izzet versus Control seat
+orders reached Impractical Joke's missing prevention restriction. The other
+sixteen lists still need standing assessments.
 
 1. Continue the admitted lists against supported opponents on fresh seeds.
    Review accepted runtime procedures against their source as well as checking
    gaps and replay. A publicly exiled substitute for a private look disqualifies
    a game even when its journal replays.
-2. Continue widening shared standing support. Exile-until returns now admit
-   Seam Rip, Deep-Cavern Bat and Pinnacle Starcage assessments. Chosen creature
-   types and restricted mana remain a frequent main-deck blocker.
+2. Add damage prevention and its prohibition, then continue both stopped Izzet
+   games. Hearth Elemental's Adventure count and Cavern's chosen creature type,
+   restricted mana and spent-mana spell protection now have shared mechanics.
+   Exile-until returns also admit Dusk Rose Reliquary's standing assessment.
 3. Audit completed games against source instructions. A Control run completed
    with no gaps but reordered Inevitable Defeat's exile and life changes; it
    remains excluded from coverage. Last-known information now supports the

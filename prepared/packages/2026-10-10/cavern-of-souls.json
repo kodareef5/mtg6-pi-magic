@@ -1,0 +1,55 @@
+{
+	"card": "Cavern of Souls",
+	"generated": "2026-10-10",
+	"source": "802f4470e412b42ca3381803051c277016848ad6e0a79cc5e44359ab1fa2b8cd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cavern of Souls",
+		"registers": [
+			{
+				"basis": "As this land enters, choose a creature type.",
+				"kind": "enters",
+				"choose": {
+					"as": "creatureType",
+					"from": "creature-type"
+				}
+			},
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add one mana of any color. Spend this mana only to cast a creature spell of the chosen type, and that spell can't be countered.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1,
+				"spendOnly": {
+					"zones": [
+						"stack"
+					],
+					"types": [
+						"creature"
+					],
+					"subtypes": {
+						"chosen": "creatureType"
+					}
+				},
+				"spellWords": [
+					"can't be countered"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

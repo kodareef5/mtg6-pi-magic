@@ -79,18 +79,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Cavern of Souls": {
-		"reason": "Cavern of Souls is not ready: As this land enters, choose a creature type. — The entry schema cannot choose and store a creature type as this land enters.; {T}: Add one mana of any color. Spend this mana only to cast a creature spell of the chosen type, and that spell can't be countered. — The mana schema cannot reference a stored chosen creature type in spendOnly or grant can't be countered to the spell on which this mana is spent.",
-		"decks": [
-			"4c Reanimator",
-			"Bant Airbending Combo",
-			"Boros Dragons",
-			"Dimir Excruciator",
-			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Colorstorm Stallion": {
 		"reason": "Colorstorm Stallion is not ready: Opus — Whenever you cast an instant or sorcery spell, this creature gets +1/+1 until end of turn. If five or more mana was spent to cast that spell, create a token that's a copy of this creature. — Cannot prepare this complete standing trigger: the syntax lacks a test for actual mana spent to cast the triggering spell and an operation creating a token copy of this creature.",
 		"decks": [
@@ -168,14 +156,6 @@
 		"reason": "Duress is not ready: Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card. — Revealing a targeted opponent's entire hand for the caster to choose a noncreature, nonland card from is not expressible in the current syntax.",
 		"decks": [
 			"Dimir Excruciator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Dusk Rose Reliquary": {
-		"reason": "Dusk Rose Reliquary is not ready: When this artifact enters, exile target artifact or creature an opponent controls until this artifact leaves the battlefield. — Missing operation: exile until a specified event with an immediate, non-stack return to the battlefield under its owner's control (610.3), doing nothing if this artifact already left before the enters trigger resolves. A delayed triggered ability would incorrectly put the return on the stack.",
-		"decks": [
-			"Jeskai Artifacts"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"

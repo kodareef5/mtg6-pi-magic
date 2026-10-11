@@ -1,0 +1,89 @@
+{
+	"card": "Dusk Rose Reliquary",
+	"generated": "2026-10-10",
+	"source": "ce1bbb0d6b3075b801be29cce6a3197f55b6651a2f5a32864bb54050b0cedc79",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dusk Rose Reliquary",
+		"registers": [
+			{
+				"basis": "Ward {2}",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{2}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "When this artifact enters, exile target artifact or creature an opponent controls until this artifact leaves the battlefield.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Dusk Rose Reliquary with its required additional sacrifice of an artifact or creature.",
+				"basis": "As an additional cost to cast this spell, sacrifice an artifact or creature.",
+				"source": {
+					"card": "Dusk Rose Reliquary",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
