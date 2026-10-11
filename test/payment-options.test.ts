@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { isDeepStrictEqual } from "node:util";
+import { readFileSync } from "node:fs";
 import { start, commit } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
@@ -94,4 +95,19 @@ test("partial mana selections retain every complete payment without spending or 
 	assert.equal(alternatives.length, 2, "floating mana with different duration or granted words is not interchangeable");
 	assert.ok(alternatives.some(one => one.label.includes("can't be countered")));
 	assert.ok(alternatives.every(one => one.leaves.includes("Keeps floating")));
+	// Review caught two shipped dual lands offering both colors in one activation.
+	for (const [slug, list, colors] of [["deserted-beach", "Azorius Control", ["W", "U"]], ["concealed-courtyard", "Mardu Discard", ["W", "B"]]] as const) {
+		const record = JSON.parse(readFileSync(new URL(`../prepared/packages/2026-10-10/${slug}.json`, import.meta.url), "utf8"));
+		const dual = start(standard, [{ deck: deck(list) }, { deck: deck("Mono-Red Aggro") }], slug);
+		establish(dual, 0, record.card, record.package.registers); main(dual, 0);
+		const frame = workFrame(dual, 0), before = structuredClone(dual);
+		for (const color of colors) {
+			const price = { generic: 0, colors: [color] }, menu = paymentOptions(frame, price);
+			assert.equal(menu.possible, true);
+			assert.equal(completePayments(frame, price, menu)![0]!.funding.taps[0]!.colors.length, 1);
+		}
+		assert.equal(payable(frame, { generic: 0, colors: [...colors] }), false);
+		assert.equal(payable(frame, { generic: 2, colors: [] }), false);
+		assert.deepEqual(dual, before);
+	}
 });

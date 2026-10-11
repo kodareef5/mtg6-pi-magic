@@ -18,8 +18,11 @@ sickness to a creature's tap abilities; you do not write it.
 
 ## "Or" is two registrations
 
-"{T}: Add {W} or {U}" is two abilities sharing a cost. Register both, and the
-payment menu offers whichever color the cost needs.
+"{T}: Add {W} or {U}" has two alternative outputs. Represent them with two
+registrations sharing the same cost and basis. Each activation produces one
+mana, and tapping the source prevents using its other alternative. By contrast,
+`colors: ["W", "U"]` means adding both mana together. Deserted Beach and
+Concealed Courtyard use the alternatives below with their own printed colors.
 
 ```json package
 {
