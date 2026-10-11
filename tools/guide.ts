@@ -49,6 +49,7 @@ const SYSTEM = [
 	"7. What beats it and how to adapt: the opposing plans and cards that punish the deck, and the adjustments that answer them.",
 	"8. Common mistakes: the misplays a careful player avoids with this list.",
 	"Name cards exactly as printed. Where a count matters, give the arithmetic. Do not invent cards or abilities. Submit the guide as markdown text with those eight numbered headings.",
+	"Use sentence case headings, straight quotes and ordinary punctuation. Do not use em dashes. Name the card or player that acts.",
 	"This guide is strategic advice. It does not certify card interpretations, rules legality or an executable line in a future position.",
 ].join("\n");
 
@@ -73,7 +74,7 @@ for (const name of wanted) {
 	let guide = "";
 	try {
 		const answer = await writer.work(`guide ${name}`, { system: SYSTEM, user: list(deck) }, {
-			submit: { name: "submit", description: "Submit the finished deck guide.", parameters: { type: "object", properties: { guide: { type: "string", minLength: 400 } }, required: ["guide"], additionalProperties: false },
+			submit: { name: "submit", description: "Submit deck advice, not a certified card interpretation or executable turn plan.", parameters: { type: "object", properties: { guide: { type: "string", minLength: 400 } }, required: ["guide"], additionalProperties: false },
 				check: (args) => typeof args.guide === "string" && /1\./.test(args.guide) && /8\./.test(args.guide) ? null : "guide is markdown text with the eight numbered sections." },
 			lookups: lookups(universe, rules), turns: 3,
 		}, 6000);
