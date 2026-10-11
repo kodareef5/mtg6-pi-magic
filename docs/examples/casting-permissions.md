@@ -48,3 +48,20 @@ turn. It survives the creating turn and every intervening opponent turn.
 
 The procedure above exercises the chapter's instructions directly. The full
 assessment registers a chapter watch to announce them.
+
+## Firebending mana
+
+The mana instruction's `until` keeps unspent mana through combat step endings.
+It expires as the end of combat step ends. Omitting `until` empties the mana at
+the current step's end; `end-of-turn` keeps it until cleanup ends.
+
+```json package
+{
+  "card": "The Legend of Roku // Avatar Roku",
+  "registers": [
+    { "face": 1, "basis": "Firebending 4 (Whenever this creature attacks, add {R}{R}{R}{R}. This mana lasts until end of combat.)", "kind": "watch",
+      "event": { "on": "attacks", "of": { "is": "this" } },
+      "effect": { "instructions": [{ "do": "mana", "who": "you", "colors": ["R", "R", "R", "R"], "until": "end-of-combat" }] } }
+  ]
+}
+```

@@ -106,7 +106,7 @@ export function summary(instruction: Instruction): string {
 		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${words(instruction.count, "amount")}` : ""}${gate}.`;
 		case "life": return `${of(instruction.who)} changes life by ${words(instruction.amount, "amount")}${gate}.`;
 		case "counters": return `Put ${words(instruction.amount, "amount")} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
-		case "mana": return `${who(instruction.who, "add")} ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${gate}.`;
+		case "mana": return `${who(instruction.who, "add")} ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${instruction.until ? `, lasting until ${instruction.until.replaceAll("-", " ")}` : ""}${gate}.`;
 		case "modify": return `${what} gets ${changed(instruction.change)} ${instruction.until === "indefinite" ? "indefinitely" : `until ${instruction.until.replace(/-/g, " ")}`}${gate}.`;
 		default: return `${instruction.do}${what ? ` ${what}` : ""}${gate}.`;
 	}

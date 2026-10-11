@@ -28,6 +28,7 @@ import { damageSource, targetKey } from "./selectors.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Activation,
+	manaSurvives,
 	cardsIn,
 	ORDERED,
 	orderedWithin,
@@ -276,7 +277,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				break;
 			case "add-mana":
 				seat(table, change.who).pool.push(...change.colors.map((color, unit) => ({ id: `mana-${table.cursor.clock + 1}-${index}-${unit}`, color,
-					...(change.spendOnly ? { spendOnly: structuredClone(change.spendOnly) } : {}) })));
+					...(change.spendOnly ? { spendOnly: structuredClone(change.spendOnly) } : {}), ...(change.until ? { until: change.until } : {}) })));
 				break;
 			case "spend-mana":
 				seat(table, change.who).pool = seat(table, change.who).pool.filter((mana) => !change.ids.includes(mana.id));
@@ -570,7 +571,7 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 		case "end": {
 			const step = cursor.steps.shift();
 			cursor.visit += 1;
-			for (const s of table.seats) s.pool = s.pool.filter((mana) => mana.persists);
+			for (const s of table.seats) s.pool = s.pool.filter((mana) => manaSurvives(mana, step!));
 			if (step === "cleanup" && cursor.cleanupPriority) cursor.steps.unshift("cleanup");
 			delete cursor.cleanupPriority;
 			// 511.3: everything is removed from combat as the end of combat step ends.

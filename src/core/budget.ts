@@ -35,6 +35,7 @@ import { permanentSpell } from "./printed.ts";
 import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
+import { manaSurvives, manaDuration } from "./table.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
 
@@ -51,7 +52,7 @@ export function afterUntap(frame: Frame): Frame {
 	return { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0,
 		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield"
 			? { ...object, tapped: false, summoningSick: false } : object),
-		pools: (frame.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => mana.persists) })) } };
+		pools: (frame.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => manaSurvives(mana, "cleanup")) })) } };
 }
 
 /** Price one use before sequencing it. A land preview is one named drop, not a prediction of resolved effects. */
@@ -133,7 +134,12 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 
 	// On a later turn every permanent of ours has untapped and none is new.
 	// Floating mana that does not persist is gone by then.
-	const lasting = (pools: Frame["view"]["pools"]) => (pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => mana.persists) }));
+	const lasting = (pools: Frame["view"]["pools"], when?: PlanOption["when"]) => {
+		const step = when?.step ?? (when?.phase ? TURN.find((one) => STEPS[one].phase === when.phase) : undefined);
+		const endings = now && step && TURN.indexOf(step as Step) >= TURN.indexOf(at.step as Step)
+			? TURN.slice(TURN.indexOf(at.step as Step), TURN.indexOf(step as Step)) : ["cleanup" as const];
+		return (pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => endings.every((ended) => manaSurvives(mana, ended))) }));
+	};
 	const initial = now ? frame : afterUntap(frame);
 	let hypothetical = initial;
 	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
@@ -309,7 +315,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			`${kept.length ? `, and the plan holds ${kept.map(({ object }) => object.card ?? object.token?.name).join(", ")}` : ""}`;
 	};
 	const pool = (position: Frame) => position.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? [];
-	const drained = (position: Frame): Frame => ({ ...position, view: { ...position.view, pools: lasting(position.view.pools) } });
+	const drained = (position: Frame, when?: PlanOption["when"]): Frame => ({ ...position, view: { ...position.view, pools: lasting(position.view.pools, when) } });
 	// A position is its index, the sources spent and the mana left floating: one that failed once fails again.
 	const failed = new Set<string>();
 	const spending = (act: { source?: SeenObject; spell?: true }) => act.spell ? { ...act.source!, zone: "stack" as const } : act.source!;
@@ -322,7 +328,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		if (++visits > SEARCH) throw INCOMPLETE;
 		const item = items[index];
 		const held = heldAt(item?.when);
-		if (item?.expired) position = drained(position);
+		if (item?.expired) position = drained(position, item.when);
 		const ok = ((): boolean => {
 			if (!item) {
 				// A branch is on the opponent's turn, when nothing floats; a hold may be what it is for, so held sources pay for it.
@@ -358,7 +364,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
 			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent, held)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
-			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}${mana?.persists ? "+" : ""}${JSON.stringify(mana?.spendOnly ?? null)}`; };
+			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}|${mana ? manaDuration(mana) : ""}|${JSON.stringify(mana?.spendOnly ?? null)}`; };
 			const distinct = new Map(ways.map((way) => [`${way.funding.taps.map((tap) => `${tap.source.id}:${tap.life ?? 0}`).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}`, way]));
 			return [...distinct.values()].some(({ funding }) => {
 				const paid = new Set(funding.paid);

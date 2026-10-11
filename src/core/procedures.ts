@@ -150,7 +150,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
 		const count = (value: Amount) => amount({ world, controller, source: mana }, value);
 		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, count, (condition) => holds({ world, controller, source: mana }, condition))).some((one) => one.colors.join() === tap.colors.join() &&
-			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
+			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && one.until === tap.until && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
 			throw new Error("The source has no registered mana ability that makes that mana.");
 		if (!allowed(tap.spendOnly)) throw new Error("That mana may not be spent on this.");
 	}
@@ -179,7 +179,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		if (instruction.do !== "mana" || !instruction.colors) throw new Error("A mana ability only adds mana of stated colors.");
 		const times = instruction.times === undefined ? 1 : amount(scope, instruction.times);
 		const colors = Array.from({ length: times }, () => instruction.colors as Mana["color"][]).flat();
-		for (const who of players(scope, instruction.who)) changes.push({ do: "add-mana", who, colors, ...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}) });
+		for (const who of players(scope, instruction.who)) changes.push({ do: "add-mana", who, colors, ...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}), ...(instruction.until ? { until: instruction.until as Mana["until"] } : {}) });
 	}
 	return [...changes, { do: "turn", action: "act", who: controller, ...(activation.timing === "land" ? { land: true } : {}) }];
 }

@@ -81,7 +81,7 @@ export type Change =
 	| { do: "transform"; what: string; since?: number }
 	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }
 	| { do: "prepare"; what: string; prepared: boolean }
-	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector }
+	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; until?: Mana["until"] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }
 	| { do: "activate"; what: string; id: string; ability: Activation }

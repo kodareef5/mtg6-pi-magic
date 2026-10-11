@@ -147,7 +147,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
-| `mana` | `colors` or `any`, `times` to repeat, `spendOnly` |
+| `mana` | `colors` or `any`, `times` to repeat, `spendOnly`; optional `until` end of combat or end of turn |
 | `tap`, `untap` | |
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
@@ -187,6 +187,13 @@ their own choices. A separately priced procedure, such as warp, cannot combine
 its price with a permission's price. Mana costs that already combine kicker
 with a base price need a separate cost representation before combining with
 this permission. `owner:bound:name` reads the owner of an earlier bound object.
+
+Mana normally empties at every step end. `until: "end-of-combat"` retains it
+through combat steps and removes it as the end of combat step ends;
+`until: "end-of-turn"` removes it as cleanup ends. Cleanup also removes combat
+mana if that combat ending was skipped. Mana registrations accept the same
+duration. Payments keep otherwise identical mana with different expiry as
+separate choices, and resource forecasts respect the stated step boundaries.
 
 ## Announcing
 

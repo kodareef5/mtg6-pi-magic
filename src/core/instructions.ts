@@ -166,10 +166,11 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "mana": {
 			const times = instruction.times === undefined ? 1 : amount(scope, instruction.times);
 			const who = players(scope, instruction.who);
+			const duration = instruction.until ? `, lasting until ${instruction.until.replaceAll("-", " ")}` : "";
 			const add = (colors: Mana["color"][]) => who.map((one) => ({ do: "add-mana" as const, who: one, colors: Array.from({ length: times }, () => colors).flat(),
-				...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}) }));
-			if (instruction.colors) return one(`Add ${instruction.colors.join("")}${times > 1 ? ` ${times} times` : ""}`, add(instruction.colors as Mana["color"][]));
-			return { actor: controller, question: `${claim}: choose a color.`, choices: COLORS.map((color) => ({ id: color, label: `Add ${color.repeat(instruction.any ?? 1)}`, changes: add(Array(instruction.any ?? 1).fill(color)) })) };
+				...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}), ...(instruction.until ? { until: instruction.until as Mana["until"] } : {}) }));
+			if (instruction.colors) return one(`Add ${instruction.colors.join("")}${times > 1 ? ` ${times} times` : ""}${duration}`, add(instruction.colors as Mana["color"][]));
+			return { actor: controller, question: `${claim}: choose a color.`, choices: COLORS.map((color) => ({ id: color, label: `Add ${color.repeat(instruction.any ?? 1)}${duration}`, changes: add(Array(instruction.any ?? 1).fill(color)) })) };
 		}
 		case "tap": case "untap": {
 			const which = many(table, scope, instruction).filter((object) => object.zone === "battlefield");

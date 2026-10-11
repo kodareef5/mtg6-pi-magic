@@ -14,7 +14,7 @@
  * both use the same visibility filter.
  */
 
-import { cardsIn, playing, seat, type Receipt, type Table, type Thing } from "./table.ts";
+import { cardsIn, playing, seat, manaDuration, type Receipt, type Table, type Thing } from "./table.ts";
 import { happened } from "./selectors.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
 import { STEPS } from "./steps.ts";
@@ -93,7 +93,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			lines.push(`  ${opening?.taken[s.id] ?? 0} mulligans; ` +
 				(opening?.kept.includes(s.id) ? "kept" : opening?.declared[s.id] ?? "has not declared"));
 		}
-		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""}${mana.persists ? " (persists)" : ""}`).join(", ")}`);
+		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""} (${manaDuration(mana)})`).join(", ")}`);
 	}
 	for (const permanent of cardsIn(table, "battlefield")) {
 		const marks = [
@@ -290,7 +290,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				else parts.push(change.ability ? `${seat(table, change.ability.controller).name} put on the stack: ${change.ability.claim}` : "a trigger with no legal targets was removed");
 				break;
 			case "add-mana":
-				parts.push(`${seat(table, change.who).name} added ${change.colors.join(" ")}`);
+				parts.push(`${seat(table, change.who).name} added ${change.colors.join(" ")}${change.until ? ` (${manaDuration(change)})` : ""}`);
 				break;
 			case "spend-mana":
 				parts.push(`${seat(table, change.who).name} spent ${change.ids.join(", ")}`);

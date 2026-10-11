@@ -16,6 +16,7 @@ import { allowance } from "../core/permits.ts";
 import { holds, viewWorld } from "../core/selectors.ts";
 import { odds, within } from "../core/odds.ts";
 import { useSources } from "../core/readiness.ts";
+import { manaDuration } from "../core/table.ts";
 
 export function mana(frame: Frame): string {
 	return manaLines(frame).join(" ");
@@ -29,7 +30,7 @@ export function manaLines(frame: Frame): string[] {
 	const now = sources(frame);
 	const floating = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? [];
 	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}@${object.incarnation}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
-		`${floating.length ? `; floating ${floating.map((one) => one.color).join("")}` : ""}.`];
+		`${floating.length ? `; floating ${floating.map((one) => `${one.color} (${manaDuration(one)})`).join(", ")}` : ""}.`];
 	lines.push(`Maximum mana from these sources and the pool now: ${floating.length + now.reduce((n, one) => n + Math.max(...one.yields.map((yielded) => yielded.colors.length)), 0)}; colors and spending restrictions still apply.`);
 	const tapped = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && one.controller === frame.seat && one.tapped);
 	if (tapped.length) lines.push(`Already tapped, so unavailable for tap costs: ${tapped.map((one) => `${one.card ?? one.token?.name ?? "unknown"} (${one.id}@${one.incarnation})`).join(", ")}.`);
