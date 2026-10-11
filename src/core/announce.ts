@@ -10,6 +10,7 @@
  */
 import { doubleFaced, faceFacts } from "./faces.ts";
 import { printedTraits } from "./characteristics.ts";
+import { castWords } from "./cast-words.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
@@ -266,6 +267,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const,
 					...(selected ? { traits: printedTraits(selected, source.card!, [], x) } : {}) } : source;
 				const announced = { ...scope, source: spending, x };
+				const spellWords = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
 				const aims = targetings(procedure.targets ?? [], announced);
 				const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
@@ -300,7 +302,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									cost: { generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) }, paid: funding.paid,
 									...(funding.taps.length ? { funding: structuredClone(funding.taps) } : {}),
 									targets, slots: structuredClone(procedure.targets ?? []), instructions: structuredClone(procedure.instructions),
-									...(procedure.words ? { words: [...procedure.words] } : {}), ...(mana.x ? { x } : {}) },
+									...(spellWords.length ? { words: spellWords } : {}), ...(mana.x ? { x } : {}) },
 							});
 						}
 					}

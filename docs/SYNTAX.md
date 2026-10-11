@@ -159,6 +159,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
+| `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
 | `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |

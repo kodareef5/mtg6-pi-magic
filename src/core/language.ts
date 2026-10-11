@@ -220,6 +220,8 @@ export const Defs = {
 		step({ do: Type.Literal("look"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		/** Reorder a named library subset without changing its zone or incarnation. */
 		step({ do: Type.Literal("order"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), position: one("top", "bottom"), random: Type.Optional(Type.Literal(true)) }),
+		/** Apply restriction words during announcement, before any player can respond. */
+		step({ do: Type.Literal("spell-words"), who: PlayerRef, words: Type.Array(text, { minItems: 1 }), of: Type.Optional(Type.Ref("Selector")), next: Type.Optional(Type.Literal(true)), until: Duration }),
 		/** Bind success only when every part of the stated cost is paid together. */
 		step({ do: Type.Literal("pay"), who: PlayerRef, cost: Type.Ref("Cost") }),
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),

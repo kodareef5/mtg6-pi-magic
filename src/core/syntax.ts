@@ -117,6 +117,8 @@ export type Change =
 	| { do: "attach"; what: string; to?: ObjectRef }
 	/** Write on the notepad: a label, a registration added after entry, a link. Its id and timestamp come from the clock. */
 	| { do: "note"; note: DistributiveOmit<Note, "id" | "written"> }
+	/** Consume a one-use accepted effect in the same group that uses it. */
+	| { do: "use-note"; id: string }
 	/** A token outside the battlefield ceases to exist (704.5d). */
 	| { do: "cease"; what: string }
 	/** The finished declaration of attackers, one group (508.1). With none, there are no blockers or damage (508.8). */

@@ -361,6 +361,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			case "note":
 				if (change.note.kind === "label") parts.push(`labelled ${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])}: ${change.note.text}`);
 				if (change.note.kind === "register") parts.push(`${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])} registered: ${change.note.registration.basis}`);
+				if (change.note.kind === "cast-words") parts.push(`${seat(table, change.note.who).name}'s ${change.note.next ? "next matching spell" : "matching spells"}: ${change.note.words.join(", ")} (${change.note.until})`);
 				break;
 			case "cease":
 				parts.push(`${publicName(receipt.before[change.what])} ceased to exist`);

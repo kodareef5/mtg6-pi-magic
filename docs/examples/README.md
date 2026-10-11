@@ -14,6 +14,7 @@ schemas, and every `basis` is checked against the card's text.
 | `cast-facts.md` | mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
 | `payments.md` | blight and behold as additional costs, and optional counter payment during resolution |
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
+| `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |
 | `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |
 | `casting-permissions.md` | alternative prices, exiled ownership, permission through the next turn and firebending mana |
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |

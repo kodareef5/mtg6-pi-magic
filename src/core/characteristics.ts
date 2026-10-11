@@ -76,6 +76,7 @@ export function base(table: Table, object: Thing): Traits | undefined {
 	const printed = facts(table, object);
 	if (!printed) return undefined;
 	const traits = printedTraits(printed, object.card!, own, object.zone === "stack" ? object.ability?.x ?? 0 : 0);
+	if (object.zone === "stack" && object.ability?.words) traits.words = [...object.ability.words];
 	// 202.3b: a transformed permanent uses its front's cost, unless it is a copy of that back face.
 	if (printedCard?.layout === "transform" && object.face === 1 && !object.copy && ["battlefield", "stack"].includes(object.zone))
 		traits.manaValue = manaValue({ ...printed, mana: printedCard.faces![0]!.mana }, object.zone === "stack" ? object.ability?.x ?? 0 : 0);

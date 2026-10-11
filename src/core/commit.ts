@@ -381,6 +381,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "note":
 				table.notes.push({ ...structuredClone(change.note), id: `note-${table.cursor.clock + 1}-${index}`, written: table.cursor.clock + 1 } as Note);
 				break;
+			case "use-note":
+				table.notes = table.notes.filter((one) => one.id !== change.id);
+				break;
 			case "cease": {
 				const gone = thing(table, change.what);
 				table.things.delete(gone.id);

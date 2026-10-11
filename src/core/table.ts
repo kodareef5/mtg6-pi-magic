@@ -240,6 +240,8 @@ export type Note = {
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
 	/** "You may play that card": from a turn, while that card stays where it is. */
 	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string }
+	/** Restriction words for future matching spells, applied as they are cast. */
+	| { kind: "cast-words"; who: SeatId; words: string[]; of?: Selector; next?: true }
 	/**
 	 * A delayed trigger (603.7). It belongs to the table, not its source, and its
 	 * refs other than the event's were fixed when it was created.

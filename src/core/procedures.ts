@@ -5,6 +5,7 @@
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
 import { costChanges } from "./costs.ts";
+import { castWords } from "./cast-words.ts";
 import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
 import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
@@ -178,7 +179,10 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));
 	if (activation.timing === "spell" && object.copy) changes.push({ do: "prepare", what: object.copy.source.id, prepared: false });
-	changes.push({ do: "activate", what: source.id, id: `ability-${table.cursor.clock + 1}`, ability: structuredClone(activation) });
+	const future = activation.timing === "spell" ? castWords(scope, spell, traits) : [];
+	const prepared = structuredClone(activation);
+	if (future.length) prepared.words = [...new Set([...(prepared.words ?? []), ...future.flatMap((note) => note.words)])];
+	changes.push({ do: "activate", what: source.id, id: `ability-${table.cursor.clock + 1}`, ability: prepared }, ...future.filter((note) => note.next).map((note): Change => ({ do: "use-note", id: note.id })));
 	if (activation.timing === "mana") for (const instruction of activation.instructions) {
 		if (instruction.do !== "mana" || !instruction.colors) throw new Error("A mana ability only adds mana of stated colors.");
 		const times = instruction.times === undefined ? 1 : amount(scope, instruction.times);
