@@ -4,6 +4,11 @@ Damage watches read what the group dealt, not marked damage or a later life
 total. These examples prepare standing terms; they do not certify the card's
 interpretation or supply every casting and activation procedure.
 
+Drake Hatcher's combat-damage watch uses `amount: {"event": "amount"}` for
+its incubation counters. A `bound` amount requires an earlier named binding;
+damage triggers supply their quantity through the event. Combat damage to a
+creature and noncombat damage to a player do not match that watch.
+
 ## Effects on a damaged permanent
 
 Torch the Tower's unbargained variant binds the recipients of actual damage.

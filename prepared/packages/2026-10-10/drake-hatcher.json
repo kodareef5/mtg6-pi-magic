@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "d7f36c8386a6e58e58e590d4d6185c98a1e6154d513446b64ee30d044a2030c6",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Drake Hatcher",
 		"registers": [
@@ -67,7 +66,7 @@
 							"on": "this",
 							"kind": "incubation",
 							"amount": {
-								"bound": "damage"
+								"event": "amount"
 							}
 						}
 					]

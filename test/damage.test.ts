@@ -1,6 +1,7 @@
 /** Damage facts describe the event, including simultaneous recipients and a departed source. */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
@@ -69,4 +70,19 @@ test("damage groups retain amounts, sources and recipients through transformatio
 	commit(table, [{ do: "reveal", what: hidden!.id }, { do: "move", what: hidden!.id, to: "graveyard", reason: "resolve" }], "resolve");
 	assert.ok(!describe(table, receipt).includes("Lightning Strike"), "later visibility cannot name an earlier hidden source");
 	assert.equal(amount({ world: tableWorld(table), controller: 0 }, { history: "life-lost", by: "opponent" }), 9);
+
+	// The first finished Prowess game used an unbound name and silently added zero counters.
+	const hatch = start(standard, [{ deck: deck("Izzet Prowess") }, { deck: deck("Mono-Red Aggro") }], "incubation-event");
+	const kept = JSON.parse(readFileSync(new URL("../prepared/packages/2026-10-10/drake-hatcher.json", import.meta.url), "utf8"));
+	const drake = establish(hatch, 0, "Drake Hatcher", kept.package.registers), lizard = establish(hatch, 1, "Hired Claw", []);
+	main(hatch, 0);
+	commit(hatch, [{ do: "damage", source: ref(drake), target: ref(lizard), amount: 1, combat: true },
+		{ do: "damage", source: ref(drake), target: { player: 1 }, amount: 1 }], "resolve");
+	assert.equal(hatch.waiting.length, 0, "only combat damage to a player gives incubation");
+	commit(hatch, [{ do: "damage", source: ref(drake), target: { player: 1 }, amount: 2, combat: true }], "resolve");
+	assert.equal(hatch.waiting.length, 1); assert.equal(hatch.waiting[0]!.event.amount, 2);
+	const incubation = structuredClone(hatch), at = hatch.ledger.length;
+	apply(hatch, nextDecision(hatch)!.options[0]!.id, "model", "chosen"); passBoth(hatch); finish(hatch);
+	assert.equal(drake.counters.incubation, 2);
+	assert.deepEqual(relive(incubation, hatch.ledger.slice(at)), hatch);
 });
