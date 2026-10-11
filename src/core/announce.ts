@@ -14,7 +14,7 @@ import { castWords } from "./cast-words.ts";
 import { enoughExile } from "./cost-selection.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
-import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
+import { capacity, fundings, sameness, sick, spentWords, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import { allowance, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
@@ -273,17 +273,18 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const,
 					...(selected ? { traits: printedTraits(selected, source.card!, [], x) } : {}) } : source;
 				const announced = { ...scope, source: spending, x };
-				const spellWords = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
+				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
 				const aims = targetings(procedure.targets ?? [], announced);
 				const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
 				for (const extra of extras(procedure, announced, source, frame)) {
 					for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
+						const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
 						for (const targets of aims) {
 							const aimed = targets.flat();
 							offered.push({
 								option: {
-									id: `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
+									id: `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
 									// The label names its targets, so an option says what it hits without a cross-reference.
 									label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
 									notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
@@ -293,6 +294,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 										procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
 											`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduce ? ` (reduced by ${reduce})` : ""}. ${extra.shows}${paying}`,
 										procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
+										spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
 										(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
 										...aiming(targets, world, frame.seat), ...procedure.instructions.map(summary), `Claimed basis: ${procedure.basis}`,
 									].filter(Boolean).join(" "),

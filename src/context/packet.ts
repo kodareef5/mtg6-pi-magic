@@ -181,7 +181,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const purpose = view.purposes?.find((one) => one.object.id === view.resolution?.object);
 	const selection = view.window.kind === "opening" && view.window.action === "bottom" || decision.situation === "turn-based" && view.window.kind === "turn" && view.window.step === "cleanup";
 	const available = !view.resolution && view.window.kind === "turn" ? sources(frame).map(({ object, yields }) =>
-		`${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}): ${[...new Set(yields.map((one) => `${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`) : [];
+		`${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}): ${[...new Set(yields.map((one) => `${one.colors.join("")}${one.spendOnly ? `, only on ${JSON.stringify(one.spendOnly)}` : ""}${one.spellWords ? `, the spell ${one.spellWords.join(", ")}` : ""}${one.sacrifice ? ", sacrificing it" : ""}`))].join(" or ")}`) : [];
 	// A payment question must name the resources being compared. The structured
 	// references remain authoritative; reading a label spends nothing.
 	const listed = (menu?.options ?? data.options).map((one) => {

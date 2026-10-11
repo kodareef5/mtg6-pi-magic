@@ -10,14 +10,14 @@ import { checkExile, enoughExile } from "./cost-selection.ts";
 import { isDeepStrictEqual } from "node:util";
 import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
-import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
+import { check, ProcedureSchema, type Instruction, type Procedure, type Selector } from "./language.ts";
 import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
-import { covers, paying, produces } from "./funding.ts";
+import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
-import { amount, holds, matches, players, tableWorld, type Scope } from "./selectors.ts";
+import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
 import { allowance, castingPrices, castRestrictions, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
@@ -161,10 +161,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		const mana = live(table, tap.source);
 		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
 		const made = characteristics(table, mana);
-		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!))) throw new Error("A basic land type produces one mana of that type's color.");
-		const count = (value: Amount) => amount({ world, controller, source: mana }, value);
-		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, count, (condition) => holds({ world, controller, source: mana }, condition))).some((one) => one.colors.join() === tap.colors.join() &&
-			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && one.until === tap.until && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
+		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!) && !tap.spellWords && !tap.spendOnly && !tap.until && !tap.sacrifice && !tap.life)) throw new Error("A basic land type produces one mana of that type's color with no additional effects.");
+		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, { world, controller, source: mana })).some((one) => one.colors.join() === tap.colors.join() &&
+			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && JSON.stringify(one.spellWords) === JSON.stringify(tap.spellWords) && one.until === tap.until && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
 			throw new Error("The source has no registered mana ability that makes that mana.");
 		if (!allowed(tap.spendOnly)) throw new Error("That mana may not be spent on this.");
 	}
@@ -184,13 +183,14 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (activation.timing === "spell" && object.copy) changes.push({ do: "prepare", what: object.copy.source.id, prepared: false });
 	const future = activation.timing === "spell" ? castWords(scope, spell, traits) : [];
 	const prepared = structuredClone(activation);
-	if (future.length) prepared.words = [...new Set([...(prepared.words ?? []), ...future.flatMap((note) => note.words)])];
+	const grantedWords = activation.timing === "spell" ? [...future.flatMap((note) => note.words), ...spentWords({ paid, taps: funding }, pool)] : [];
+	if (grantedWords.length) prepared.words = [...new Set([...(prepared.words ?? []), ...grantedWords])];
 	changes.push({ do: "activate", what: source.id, id: `ability-${table.cursor.clock + 1}`, ability: prepared }, ...future.filter((note) => note.next).map((note): Change => ({ do: "use-note", id: note.id })));
 	if (activation.timing === "mana") for (const instruction of activation.instructions) {
 		if (instruction.do !== "mana" || !instruction.colors) throw new Error("A mana ability only adds mana of stated colors.");
 		const times = instruction.times === undefined ? 1 : amount(scope, instruction.times);
 		const colors = Array.from({ length: times }, () => instruction.colors as Mana["color"][]).flat();
-		for (const who of players(scope, instruction.who)) changes.push({ do: "add-mana", who, colors, ...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}), ...(instruction.until ? { until: instruction.until as Mana["until"] } : {}) });
+		for (const who of players(scope, instruction.who)) changes.push({ do: "add-mana", who, colors, ...manaTerms(instruction, scope) });
 	}
 	return [...changes, { do: "turn", action: "act", who: controller, ...(activation.timing === "land" ? { land: true } : {}) }];
 }

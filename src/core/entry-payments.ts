@@ -6,7 +6,7 @@ import type { Change, Reason } from "./syntax.ts";
 import type { Pending } from "./moves.ts";
 import { holds, tableWorld } from "./selectors.ts";
 import { activeFaces } from "./faces.ts";
-import { basicLandTypes } from "./characteristics.ts";
+import { basicLandTypes, creatureTypeChoices } from "./characteristics.ts";
 
 export type Entry = { changes: Change[]; reason: Reason; clock: number; choices: Record<number, "paid" | "declined">;
 	values?: Record<number, Record<string, string>> };
@@ -64,8 +64,8 @@ export function entryPayment(table: Table): Pending | null {
 	if (!entry) return null;
 	const all = requirements(table, entry.changes), next = all.find((one) => pending(entry, one))!;
 	const choice = unanswered(entry, next), cards = next.object.card ? [next.object.card] : [];
-	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, choose a basic land type for ${choice.as}.`,
-		moves: basicLandTypes.map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${next.object.card}`, cards },
+	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, choose a ${choice.from.replaceAll("-", " ")} for ${choice.as}.`,
+		moves: (choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${next.object.card}`, cards },
 			changes: answered(table, { ...entry, values: { ...entry.values, [next.index]: { ...entry.values?.[next.index], [choice.as]: value } } }, all), reason: entry.reason })) };
 	const life = next.life!;
 	const spent = all.filter((one) => one.who === next.who && entry.choices[one.index] === "paid").reduce((sum, one) => sum + one.life!, 0);

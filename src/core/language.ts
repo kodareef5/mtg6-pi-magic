@@ -61,7 +61,7 @@ const SelectorFields = {
 	controller: Type.Optional(Side),
 	owner: Type.Optional(Side),
 	types: Type.Optional(Type.Array(one(...CARD_TYPES), { minItems: 1 })),
-	subtypes: Type.Optional(Type.Array(text, { minItems: 1 })),
+	subtypes: Type.Optional(Type.Union([Type.Array(text, { minItems: 1 }), object({ chosen: text })])),
 	supertypes: Type.Optional(Type.Array(one("basic", "legendary", "snow"), { minItems: 1 })),
 	/** Any listed color; an empty list means colorless. C is a mana type, not a color. */
 	colors: Type.Optional(Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true })),
@@ -245,7 +245,7 @@ export const Defs = {
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("Amount") }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),
-		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration) }),
+		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })) }),
 		step({ do: Type.Literal("tap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
@@ -284,7 +284,7 @@ export const Defs = {
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			prepared: Type.Optional(Type.Literal(true)),
-			choose: Type.Optional(object({ as: text, from: Type.Literal("basic-land-type") })),
+			choose: Type.Optional(object({ as: text, from: one("basic-land-type", "creature-type") })),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
 			/** "You may pay 2 life. If you don't, it enters tapped": the generic entry decision asks its controller before the group commits. */
 			unlessPay: Type.Optional(object({ life: positive })) }),
@@ -292,7 +292,7 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),
 		/** A mana ability, used while paying (605, 601.2g): `colors` once each, or `any` mana of one chosen color; `times` repeats it ("{G} for each Elf"). */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("mana"), cost: Type.Ref("Cost"), colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive),
-			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration),
+			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })),
 			/** "Activate only if you control an Island or a Swamp": the ability is usable while this holds. */
 			if: Type.Optional(Type.Ref("Condition")) }),
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */

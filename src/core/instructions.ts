@@ -12,6 +12,7 @@ import { amount, holds, objects, players, select, type Bound, type Scope, type S
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
+import { manaTerms } from "./funding.ts";
 import { inspection } from "./inspection.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
@@ -192,7 +193,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const who = players(scope, instruction.who);
 			const duration = instruction.until ? `, lasting until ${instruction.until.replaceAll("-", " ")}` : "";
 			const add = (colors: Mana["color"][]) => who.map((one) => ({ do: "add-mana" as const, who: one, colors: Array.from({ length: times }, () => colors).flat(),
-				...(instruction.spendOnly ? { spendOnly: instruction.spendOnly } : {}), ...(instruction.until ? { until: instruction.until as Mana["until"] } : {}) }));
+				...manaTerms(instruction, scope) }));
 			if (instruction.colors) return one(`Add ${instruction.colors.join("")}${times > 1 ? ` ${times} times` : ""}${duration}`, add(instruction.colors as Mana["color"][]));
 			return { actor: controller, question: `${claim}: choose a color.`, choices: COLORS.map((color) => ({ id: color, label: `Add ${color.repeat(instruction.any ?? 1)}${duration}`, changes: add(Array(instruction.any ?? 1).fill(color)) })) };
 		}

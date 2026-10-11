@@ -9,16 +9,16 @@ import { currentPlan, select } from "./query.ts";
 import { intrinsic } from "./characteristics.ts";
 import { manaDuration, type Mana } from "./table.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
-import type { Amount, Condition, Registration, Selector } from "./language.ts";
+import type { Registration, Selector } from "./language.ts";
 import type { Change } from "./syntax.ts";
-import { amount, holds, matches, viewWorld } from "./selectors.ts";
+import { amount, chosenSelector, holds, matches, viewWorld, type Scope } from "./selectors.ts";
 import type { SeenObject } from "./work.ts";
 
 /** The mana part of a locked cost. */
 export type Price = { generic: number; colors: Mana["color"][]; life?: number };
 type Color = Mana["color"];
 /** One mana ability activated while paying, with the claim it was accepted under. `sacrifice` is part of its cost, as a Treasure's is. */
-export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; until?: Mana["until"]; sacrifice?: true; life?: number };
+export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; until?: Mana["until"]; spellWords?: string[]; sacrifice?: true; life?: number };
 export type Funding = { paid: string[]; taps: Tap[] };
 /** One way a source can produce mana, what it claims, and what that mana may pay for. */
 type Yield = Omit<Tap, "source">;
@@ -33,24 +33,37 @@ const heldBy = (frame: Frame): Set<string> => new Set((currentPlan(frame)?.holds
 /** Two objects are interchangeable only when every fact this seat can see about them matches, and the plan holds both or neither. */
 export const sameness = (frame: Frame, object: SeenObject): string => [
 	object.card, object.zone, object.tapped, heldBy(frame).has(object.id), JSON.stringify(object.counters), object.damage, sick(frame, object), JSON.stringify(object.registrations ?? []),
+	JSON.stringify(object.choices),
 	...(frame.view.notes ?? []).filter((note) => "on" in note && note.on.id === object.id && note.on.incarnation === object.incarnation).map((note) => JSON.stringify(note)).sort(),
 ].join("|");
 
 /**
  * What a registered mana ability produces when its cost is tapping, or tapping
- * and sacrificing the source. `count` works out "for each Elf you control".
+ * and sacrificing the source. The scope supplies conditions, counts and entry choices.
  */
-export function produces(registration: Registration, count: (amount: Amount) => number, holding: (condition: Condition) => boolean): Yield[] {
+export function produces(registration: Registration, scope: Scope): Yield[] {
 	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
-	if (registration.if && !holding(registration.if)) return [];
+	if (registration.if && !holds(scope, registration.if)) return [];
 	const { tap: _, sacrifice, life, ...other } = registration.cost;
 	if (Object.keys(other).length || (sacrifice !== undefined && sacrifice !== "this")) return [];
-	const terms = { claim: registration.basis, ...(registration.spendOnly ? { spendOnly: registration.spendOnly } : {}), ...(registration.until ? { until: registration.until as Mana["until"] } : {}), ...(sacrifice ? { sacrifice: true as const } : {}), ...(life ? { life } : {}) };
-	const times = count(registration.times ?? 1);
+	const terms = { claim: registration.basis, ...manaTerms(registration, scope), ...(sacrifice ? { sacrifice: true as const } : {}), ...(life ? { life } : {}) };
+	const times = amount(scope, registration.times ?? 1);
 	const repeat = (colors: Color[]) => Array.from({ length: times }, () => colors).flat();
 	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), ...terms }];
 	return registration.any ? COLORS.map((color) => ({ colors: repeat(Array(registration.any).fill(color)), ...terms })) : [];
 }
+
+/** Additional effects travel with the produced mana, independent of later source changes. */
+export function manaTerms(terms: { spendOnly?: Selector; until?: string; spellWords?: string[] }, scope: Scope): Pick<Mana, "spendOnly" | "until" | "spellWords"> {
+	return { ...(terms.spendOnly ? { spendOnly: chosenSelector(scope, terms.spendOnly) } : {}),
+		...(terms.until ? { until: terms.until as Mana["until"] } : {}), ...(terms.spellWords ? { spellWords: [...terms.spellWords] } : {}) };
+}
+
+/** Only mana selected for this payment grants words; the rest of the pool grants nothing. */
+export const spentWords = (funding: Funding, pool: Mana[]): string[] => [...new Set([
+	...pool.filter((mana) => funding.paid.includes(mana.id)).flatMap((mana) => mana.spellWords ?? []),
+	...funding.taps.flatMap((tap) => tap.spellWords ?? []),
+])];
 
 /**
  * The changes that activate these mana abilities and spend what they make and
@@ -63,7 +76,7 @@ export function paying(funding: Funding, who: SeatId, clock: number, offset: num
 		if (tap.life) changes.push({ do: "change-life", who, amount: -tap.life, reason: "cost-payment" });
 		if (tap.sacrifice) changes.push({ do: "move", what: tap.source.id, to: "graveyard", reason: "sacrifice" });
 		tap.colors.forEach((_, unit) => made.push(`mana-${clock + 1}-${offset + changes.length}-${unit}`));
-		changes.push({ do: "add-mana", who, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}), ...(tap.until ? { until: tap.until } : {}) });
+		changes.push({ do: "add-mana", who, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}), ...(tap.until ? { until: tap.until } : {}), ...(tap.spellWords ? { spellWords: tap.spellWords } : {}) });
 	}
 	if (funding.paid.length || made.length) changes.push({ do: "spend-mana", who, ids: [...funding.paid, ...made] });
 	return changes;
@@ -78,10 +91,10 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 		const life = frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0;
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
-			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, (value) => amount(scope, value), (condition) => holds(scope, condition))),
+			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, scope)),
 		].filter((one) => (one.life ?? 0) <= life);
 		// Different payment costs remain choices. The walk uses an object once.
-		const costKey = (one: Yield) => JSON.stringify([one.colors.length, one.life ?? 0, !!one.sacrifice]);
+		const costKey = (one: Yield) => JSON.stringify([one.colors.length, one.life ?? 0, !!one.sacrifice, one.spellWords]);
 		for (const size of [...new Set(yields.map(costKey))]) {
 			const sized = yields.filter((one) => costKey(one) === size);
 			units.push({ key: `${sameness(frame, object)}|${JSON.stringify(sized)}`, id: object.id, source: object, yields: sized,
@@ -99,7 +112,7 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject): { funding: Funding; shows: string }[] {
 	const allowed = (spendOnly?: Selector) => !spendOnly || (!!spending && matches({ world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, spendOnly, spending.traits));
 	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter((mana) => allowed(mana.spendOnly))
-		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
+		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}|${JSON.stringify(mana.spellWords ?? null)}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
 			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""})` }));
 	const sources = manaSources(frame, except).map((unit) => ({ ...unit, yields: unit.yields.filter((one) => allowed(one.spendOnly)) })).filter((unit) => unit.yields.length);
 	const life = (frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0) - (cost.life ?? 0);
@@ -111,6 +124,7 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 					claim: made.get(unit.id)!.claim, ...(made.get(unit.id)!.intrinsic ? { intrinsic: true as const } : {}), ...(made.get(unit.id)!.sacrifice ? { sacrifice: true as const } : {}),
 					...(made.get(unit.id)!.life ? { life: made.get(unit.id)!.life! } : {}),
 					...(made.get(unit.id)!.until ? { until: made.get(unit.id)!.until! } : {}),
+					...(made.get(unit.id)!.spellWords ? { spellWords: made.get(unit.id)!.spellWords! } : {}),
 					...(made.get(unit.id)!.spendOnly ? { spendOnly: made.get(unit.id)!.spendOnly! } : {}) }] : []) },
 			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label}${made.get(unit.id)!.sacrifice ? " and sacrifice it" : ""}${made.get(unit.id)!.life ? ` and pay ${made.get(unit.id)!.life} life` : ""} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
 		};
@@ -127,7 +141,7 @@ export function sources(frame: Frame): { object: SeenObject; yields: Omit<Yield,
 	const found = new Map<string, { object: SeenObject; yields: Omit<Yield, "claim" | "intrinsic">[] }>();
 	for (const unit of manaSources(frame, new Set())) {
 		const entry = found.get(unit.id) ?? { object: unit.source!, yields: [] };
-		entry.yields.push(...unit.yields.map(({ colors, spendOnly, sacrifice, life }) => ({ colors, ...(life ? { life } : {}), ...(spendOnly ? { spendOnly } : {}), ...(sacrifice ? { sacrifice } : {}) })));
+		entry.yields.push(...unit.yields.map(({ claim: _, intrinsic: __, ...terms }) => terms));
 		found.set(unit.id, entry);
 	}
 	return [...found.values()];

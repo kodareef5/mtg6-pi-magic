@@ -96,6 +96,8 @@ export type Mana = {
 	color: "W" | "U" | "B" | "R" | "G" | "C";
 	/** "Spend this mana only to cast a creature spell": what it may pay for, as a selector. */
 	spendOnly?: Selector;
+	/** Words granted to the spell this mana actually pays for (106.6). */
+	spellWords?: string[];
 	/** Omitted mana empties at each step end. */
 	until?: "end-of-combat" | "end-of-turn";
 };

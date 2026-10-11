@@ -191,6 +191,16 @@ const ability = (object: Seen): Traits | undefined => object.ability && !object.
 	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], manaValue: 0, words: [], registrations: [] } : undefined;
 
 const FACELESS: Traits = { name: "", supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] };
+const subtypes = (scope: Scope, types: NonNullable<Selector["subtypes"]>): string[] => Array.isArray(types) ? types :
+	scope.source?.choices?.[types.chosen] ? [scope.source.choices[types.chosen]!] : [];
+
+/** Freeze a source's named type choice for mana that can outlive that source. */
+export function chosenSelector(scope: Scope, selector: Selector): Selector {
+	return { ...selector, ...(selector.subtypes ? { subtypes: subtypes(scope, selector.subtypes) } : {}),
+		...(selector.not?.subtypes ? { not: { ...selector.not, subtypes: subtypes(scope, selector.not.subtypes) } } : {}),
+		...(selector.any ? { any: selector.any.map((one) => chosenSelector(scope, one)) } : {}),
+		...(selector.all ? { all: selector.all.map((one) => chosenSelector(scope, one)) } : {}) };
+}
 export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object), inherited: readonly string[] = ["battlefield"]): boolean {
 	const zones = selector.zones ?? inherited;
 	if ((selector.zones || !selector.any && !selector.all) && !zones.includes(object.zone)) return false;
@@ -215,13 +225,13 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 		const adventure = !object.faceDown && !object.copy && !!object.card && !!scope.world.printed?.[object.card]?.faces?.some((face) => face.type.split("—")[1]?.trim().split(/\s+/).includes("Adventure"));
 		if (selector.hasAdventure !== adventure) return false;
 	}
-	if (selector.subtypes && !selector.subtypes.some(subtype)) return false;
+	if (selector.subtypes && !subtypes(scope, selector.subtypes).some(subtype)) return false;
 	if (selector.supertypes && !selector.supertypes.some((one) => traits.supertypes.includes(one))) return false;
 	if (selector.words && !selector.words.every((word) => traits.words.includes(word))) return false;
 	const colored = (colors: readonly string[]) => colors.length ? colors.some((color) => traits.colors.includes(color as never)) : !traits.colors.some((color) => color !== "C");
 	if (selector.colors && !colored(selector.colors)) return false;
 	const not = selector.not;
-	if (not && (not.types?.some((type) => traits.types.includes(type)) || not.subtypes?.some(subtype) ||
+	if (not && (not.types?.some((type) => traits.types.includes(type)) || not.subtypes && subtypes(scope, not.subtypes).some(subtype) ||
 		not.supertypes?.some((one) => traits.supertypes.includes(one)) || not.words?.some((word) => traits.words.includes(word)) || not.colors && colored(not.colors) ||
 		not.is && objects(scope, not.is).some((one) => one.id === object.id && one.incarnation === object.incarnation))) return false;
 	const within = (value: number | undefined, range?: { atLeast?: Amount; atMost?: Amount }) => !range ||

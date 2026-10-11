@@ -86,6 +86,7 @@ watched. Each field narrows, and a list matches any of its members.
 | `words` | "creature with flying" |
 | `power`, `toughness`, `manaValue` | `manaValue: {atMost: 3}`; bounds may also be amounts, such as `{atMost: {x: true}}` |
 | `hasAdventure` | whether the visible object has Adventure characteristics, including when its normal face is active (715.2a) |
+| `subtypes.chosen` | read the source's named entry choice; a missing choice matches nothing; mana freezes it when produced |
 | `tapped`, `token`, `attacking`, `blocking` | |
 | `other` | "another": not the source |
 | `is`, `not.is` | include or exclude the objects a ref names, including a bound set |
@@ -171,7 +172,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
-| `mana` | `colors` or `any`, `times` to repeat, `spendOnly`; optional `until` end of combat or end of turn |
+| `mana` | `colors` or `any`, `times` to repeat, `spendOnly`; optional `until` end of combat or end of turn; `spellWords` granted only to the spell it pays for |
 | `tap`, `untap` | |
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |

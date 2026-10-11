@@ -94,7 +94,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			lines.push(`  ${opening?.taken[s.id] ?? 0} mulligans; ` +
 				(opening?.kept.includes(s.id) ? "kept" : opening?.declared[s.id] ?? "has not declared"));
 		}
-		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""} (${manaDuration(mana)})`).join(", ")}`);
+		if (s.pool.length) lines.push(`  Mana for ${s.name}: ${s.pool.map((mana) => `${mana.id} ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""}${mana.spellWords ? ` (the spell ${mana.spellWords.join(", ")})` : ""} (${manaDuration(mana)})`).join(", ")}`);
 	}
 	for (const permanent of cardsIn(table, "battlefield")) {
 		const marks = [
@@ -127,7 +127,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		);
 		const pool = seat(table, viewer).pool;
 		for (const mana of pool) {
-			yours.push(`Mana: ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""}`);
+			yours.push(`Mana: ${mana.color}${mana.spendOnly ? ` (only on ${JSON.stringify(mana.spendOnly)})` : ""}${mana.spellWords ? ` (the spell ${mana.spellWords.join(", ")})` : ""}`);
 		}
 		const owed = table.opening?.owed[viewer] ?? 0;
 		if (owed) yours.push(`${owed} card${owed === 1 ? "" : "s"} still owed to the bottom of your library`);

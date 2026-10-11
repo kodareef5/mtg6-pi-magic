@@ -39,6 +39,14 @@ export type Traits = {
 const SUPERTYPES = new Set(["basic", "legendary", "ongoing", "snow", "world"]);
 let shippedRules: Rules | undefined;
 let categories: Record<string, Set<string>> | undefined;
+let creatureTypes: string[] | undefined;
+let creatureNames: Set<string> | undefined;
+/** Every permitted creature-type choice, including the two-word type, from the pinned 205.3m list. */
+export function creatureTypeChoices(): string[] {
+	shippedRules ??= loadRules(join(import.meta.dirname, "..", "..", "rules", "cr.tsv"));
+	const text = rule(shippedRules, "205.3m").text;
+	return creatureTypes ??= [text.match(/two words long: ([^.]+)\./)![1]!, ...text.match(/one word long: (.*)\.$/)![1]!.replace(/, and /, ", ").split(/,\s*/)].sort();
+}
 /** Subtypes by the card type they belong to, read from 205.3g-k in the pinned rules. */
 export function subtypesOf(kind: "artifact" | "enchantment" | "land" | "planeswalker" | "spell"): Set<string> {
 	if (!categories) {
@@ -50,8 +58,8 @@ export function subtypesOf(kind: "artifact" | "enchantment" | "land" | "planeswa
 	}
 	return categories[kind]!;
 }
-/** A subtype belongs to the creature types when it is no other card type's subtype. */
-export const creatureType = (subtype: string) => !(["artifact", "enchantment", "land", "planeswalker", "spell"] as const).some((kind) => subtypesOf(kind).has(subtype.toLowerCase()));
+/** Changeling uses the same permitted types as an entry choice. */
+export const creatureType = (subtype: string) => (creatureNames ??= new Set(creatureTypeChoices().map((one) => one.toLowerCase()))).has(subtype.toLowerCase());
 
 const BASIC: Record<string, Color> = { plains: "W", island: "U", swamp: "B", mountain: "R", forest: "G" };
 export const basicLandTypes = Object.keys(BASIC).map((name) => name[0]!.toUpperCase() + name.slice(1));

@@ -17,7 +17,7 @@ schemas, and every `basis` is checked against the card's text.
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |
 | `last-known.md` | exile before life changes, using a departed target's former controller |
-| `entry-choices.md` | choose a basic land type before entry payment; derive its intrinsic mana ability |
+| `entry-choices.md` | basic land and creature-type choices; restricted mana that grants spell properties when spent |
 | `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |
 | `casting-permissions.md` | alternative and printed prices, spell filters, stack departure replacements, exiled ownership, permission through the next turn and firebending mana |
 | `exile-until.md` | immediate nontriggered returns, source incarnation, private hand exile and simultaneous durations |

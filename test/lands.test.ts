@@ -70,8 +70,10 @@ test("a Town enters untapped through its controller's third turn and tapped from
 });
 
 test("a conditional mana ability produces only while its condition holds", () => {
-	assert.deepEqual(produces(verge, () => 1, () => false), []);
-	assert.equal(produces(verge, () => 1, () => true).length, 1);
+	const table = pool("conditional-production");
+	assert.deepEqual(produces(verge, { world: tableWorld(table), controller: 0 }), []);
+	place(table, 0, "battlefield", "Island");
+	assert.equal(produces(verge, { world: tableWorld(table), controller: 0 }).length, 1);
 });
 
 
