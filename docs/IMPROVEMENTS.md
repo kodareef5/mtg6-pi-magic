@@ -17,26 +17,24 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-The pool report includes every registered sideboard: 210 stored assessments,
-97 refusals, five basic lands and no unassessed cards. Mana-value and color
-queries now read the selected spell face and announced X, and preserve the
-departed spell's facts. Damage events carry amounts and recipients, and optional
-effects can count a use during resolution. Cecil and Master of Barbs have stored
-assessments; Jennifer still needs a structured casting restriction. All nineteen
-imported lists remain blocked.
+The pool report includes every registered sideboard: 213 stored assessments,
+94 refusals, five basic lands and no unassessed cards. Cast and damage event
+queries, alternative casting prices, next-turn permission expiry, mana expiry
+and standing casting restrictions now have replay coverage. Airbender Ascension,
+Jennifer and Roku have stored assessments. All nineteen imported lists remain
+blocked; the closest three lists each lack three assessments.
 
-1. Give permissions an accepted alternative price and explicit expiry, and give
-   generated mana an explicit expiry. Airbend and Roku should use these records
-   without granting permission to an unrelated incarnation. Add structured cast
-   restrictions for Jennifer before counting her as standing-ready; a continuous
-   word with no handler cannot supply the restriction.
-2. Add bounded private look and selection, selection from an earlier binding,
+1. Add bounded private look and selection, selection from an earlier binding,
    and deterministic library ordering, starting with Aang at the Crossroads.
    Keep earned visibility through the whole sequence.
-3. Extend selectors with unions, intersecting types and object comparisons where
-   accepted terms require them. Thor still needs unions and permission expiry;
-   Colorstorm Stallion needs actual mana-spent facts and token copying. The new
-   queries alone do not unblock either card.
+2. Extend selectors with unions, intersecting types and object comparisons where
+   accepted terms require them. Aang, Swift Savior needs a creature-or-spell
+   target; Thor needs Equipment-or-instant-or-sorcery in one selector. Appa needs
+   any number of targets and per-object permission ownership.
+3. Add cast-origin and actual mana-spent facts, then token copying where the
+   source requires it. Interdimensional Web Watch needs restricted spending from
+   exile and independent mana-color choices; Colorstorm Stallion needs spent-mana
+   facts and token copying.
 
 Start ordinary-deck games when two lists have complete standing coverage; a
 required deferred use that cannot execute becomes the next recorded blocker.

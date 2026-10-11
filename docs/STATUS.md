@@ -142,11 +142,11 @@ first pass's refusals by concept, with the decks each blocked:
 The ledger is `prepared/packages/2026-10-10/ledger.json`; the grouping script
 is `.pi/phase2/ledger-concepts.py`.
 
-## Current breadth coverage, October 10
+## Current breadth coverage, October 11
 
 The main-deck-only counts above are historical. Setup registers sideboards too.
 The report now covers all 312 distinct cards across nineteen imported lists:
-210 have compatible stored standing assessments, 97 have refusal records, five
+213 have compatible stored standing assessments, 94 have refusal records, five
 are basic lands, and none remains unassessed. Every imported list is blocked.
 The closest are 4c Control, Izzet Aggro and Selesnya Landfall, each missing three
 assessments. No new whole-deck game was started or counted as complete.
@@ -185,11 +185,12 @@ retries; input totals include cached tokens.
 | Query-related reassessment | 18 | 6 / 12 | 47 | 1,100,239 / 894,336 | 9,801 / 3,002 | 5m49s / 1m35s | $0.5992 |
 | Deferred counterspell interpretation | 2 | 2 / 0 | 3 | 91,998 / 91,988 | 2,118 / 1,498 | 18.3s / 10.4s | $0.0091 |
 | Damage reassessment, after source review | 3 | 2 / 1 | 6 | 139,735 / 106,112 | 1,177 / 190 | 40.6s / 16.5s | $0.0896 |
+| Casting permissions, expiry and restrictions | 7 | 3 / 4 | 19 | 486,260 / 359,424 | 4,810 / 1,797 | 3m32s / 1m15s | $0.3377 |
 
 No provider failures or truncations were recorded in these passes. The private
 traces are under `.pi/assess/takeover-faces/`, `.pi/assess/sideboards-20261010/`,
 `.pi/assess/cast-facts-20261010/`, `.pi/assess/cast-facts-runtime/` and
-`.pi/assess/damage-20261010/`.
+`.pi/assess/damage-20261010/` and `.pi/assess/permissions-20261011/`.
 Query reassessment accepted Scalding Viper, Starfield Shepherd, Spider
 Manifestation, Moseo, Enlightened Confidant and Carnage. These are accepted source
 claims and inventories, not proof that all their deferred uses can execute or
@@ -203,27 +204,36 @@ including a source that left before its ability resolved. A watch can record
 an optional use during resolution; declining, countering or losing all targets
 spends nothing. The pilot sees the amount before ordering or accepting a trigger.
 
-The model accepted Cecil, Jennifer and Master of Barbs. Source review retained
-Cecil and Master of Barbs: their model-written standing terms match the tested
-terms, and paid casts registered those terms and replayed exactly. Jennifer's
-damage trigger fits, but her opponent casting restriction was encoded as a word
-with no handler. Her model response remains in the private audit, and the
-refusal ledger names that remaining operation. No card became whole-game
-coverage merely because its damage trigger passed.
+Source review retained Cecil and Master of Barbs after the damage pass. Jennifer
+now has structured casting prohibitions on both faces. They read current
+control, active face, abilities and turn, and check both offers and execution.
+They preserve activation choices and required interpretation work.
+
+Permissions can carry an alternative casting price and expire at the end of a
+named player's next turn. A price grants casting only and follows one exiled
+incarnation; it changes neither timing nor additional nonmana costs. Mana can
+last through combat steps until combat ends, or through cleanup. Payment
+choices and resource forecasts preserve those lifetimes.
+
+The new assessment retained Airbender Ascension, Jennifer and Roku. Their source
+terms match the tested mechanics, and paid casts from registered-deck fixtures
+installed those terms and replayed exactly. Ascension airbent an opposing
+creature and granted its owner the {2} price; Roku's first chapter granted three
+permissions. These fixtures establish those operations, not whole-deck coverage.
 
 The [source-backed ledger](../prepared/packages/2026-10-10/ledger.json) records
 every refusal. The next shared operations include:
 
 | Card | Remaining operation |
 | --- | --- |
-| Aang, Swift Savior | Airbend permission carrying its alternative casting price |
+| Aang, Swift Savior | One target from the union of a battlefield creature and any spell |
 | Aang, at the Crossroads | Private bounded look, random bottom order, intersecting card types |
-| Jennifer Walters | Structured opponent casting restriction during its controller's turn |
-| The Legend of Roku | Permission through the next turn; mana lasting until combat ends |
-| Thor, God of Thunder | Selector unions and permission through the next turn |
+| Appa, Steadfast Guardian | Any number of targets and a separate permission for each owner |
+| Interdimensional Web Watch | Independent mana colors and spending restricted by casting origin |
+| Thor, God of Thunder | Equipment subtype or instant/sorcery type in one selector |
 | Colorstorm Stallion | Actual mana spent on a cast and token copying |
 
-All 225 invariant tests and the type check pass. The fixtures cover announced X,
+All 228 invariant tests and the type check pass. The fixtures cover announced X,
 hybrid colors, alternate faces, hidden-card filtering, replay and cloning with a
 pending trigger after its spell was countered. Haiku's two live interpretations,
 Flashfreeze and Disdainful Stroke, selected the expected targets, countered them
@@ -231,7 +241,10 @@ and replayed exactly in a registered-deck fixture. This establishes those uses,
 not a completed deck game. Damage fixtures also cover Cecil's transformation,
 Jennifer's unused and spent triggers, illegal targets before acceptance, source
 removal and reincarnation, and replay and clones on both sides of a use.
-All twenty-six collection decks loaded 756 seat
+Permission fixtures add owner and incarnation checks, next-turn expiry, mana
+expiry through combat, lost abilities, stale casting refusals and replay and
+clones across each boundary.
+All twenty-six collection decks loaded 762 seat
 packages without inference or notices. This checks seed integration; missing
 standing assessments still stop full setup.
 

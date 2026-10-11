@@ -1,11 +1,11 @@
 {
 	"Aang, Swift Savior // Aang and La, Ocean's Fury": {
-		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: Face 0: \"When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)\" — Exiling the optional target is expressible, but the supplied permit syntax cannot grant that exiled card's owner a dynamically generated {2} alternative casting cost. An ordinary exile play permission does not implement airbend.",
+		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: Face 0: \"When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)\" The target schema cannot represent one optional target selected from the union of another battlefield creature and any spell on the stack. A single selector cannot apply the creature restriction only to battlefield objects; two optional target slots would incorrectly allow two targets, and two watches would incorrectly create two triggers.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
 		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
+		"at": "2026-10-11"
 	},
 	"Aang, at the Crossroads // Aang, Destined Savior": {
 		"reason": "Aang, at the Crossroads // Aang, Destined Savior is not ready: Face 0: \"When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order.\" Missing operations: privately inspect and bind the top five cards as a bounded set, choose only from that set, and put its remaining cards on the bottom in random order. The available library choose operation searches the library and cannot implement this bounded inspection.; Face 1: \"Land creatures you control have vigilance.\" Missing selector operation: intersection of the land and creature card types. The documented types list matches either listed type, not both; granting vigilance to every land or every creature would broaden the printed effect.",
@@ -14,14 +14,6 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
-	},
-	"Airbender Ascension": {
-		"reason": "Airbender Ascension is not ready: When this enchantment enters, airbend up to one target creature. — Airbend requires granting each exiled card's owner permission to cast that card from exile by paying {2} rather than its mana cost. The available permit syntax cannot grant this alternative-cost casting permission to an arbitrary exiled card; ordinary permission would incorrectly allow casting at its printed cost.",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
 	},
 	"Ajani Resolute": {
 		"reason": "Ajani Resolute is not ready: \"Whenever you gain life, put a loyalty counter on Ajani.\" — The registration event schema has no life-gain event, so this mandatory standing trigger cannot be registered faithfully.",
@@ -40,12 +32,12 @@
 		"at": "2026-10-10"
 	},
 	"Appa, Steadfast Guardian": {
-		"reason": "Appa, Steadfast Guardian is not ready: When Appa enters, airbend any number of other target nonland permanents you control. (Exile them. While each one is exiled, its owner may cast it for {2} rather than its mana cost.) — Missing operations: an unbounded announced target count and an exile permission granting each exiled card's owner the alternative casting cost {2}. The supplied target schema requires a fixed integer count, and permit has no alternative-cost field.",
+		"reason": "Appa, Steadfast Guardian is not ready: When Appa enters, airbend any number of other target nonland permanents you control. (Exile them. While each one is exiled, its owner may cast it for {2} rather than its mana cost.) — The target schema supports only fixed finite counts, not an unrestricted number of announced targets; it also lacks iteration over those targets to exile each and grant each exiled incarnation's owner its individual {2} casting permission.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
 		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
+		"at": "2026-10-11"
 	},
 	"Ardyn, the Usurper": {
 		"reason": "Ardyn, the Usurper is not ready: Starscourge — At the beginning of combat on your turn, exile up to one target creature card from a graveyard. If you exiled a card this way, create a token that's a copy of that card, except it's a 5/5 black Demon. — Unsupported operation: creating a token copying the exiled card's copiable characteristics and abilities, with the specified power, toughness, color, and creature-type exceptions. The syntax does not support copies.",
@@ -309,12 +301,12 @@
 		"at": "2026-10-11"
 	},
 	"Interdimensional Web Watch": {
-		"reason": "Interdimensional Web Watch is not ready: When this artifact enters, exile the top two cards of your library. Until the end of your next turn, you may play those cards. — Missing operation: a play permission effective immediately and expiring at the end of your next turn; the available duration and permission-start fields do not express this interval.; {T}: Add two mana in any combination of colors. Spend this mana only to cast spells from exile. — Missing operation: restricting mana expenditure by the zone from which a spell was cast. A stack selector has no cast-origin field; selecting exile ",
+		"reason": "Interdimensional Web Watch is not ready: \"{T}: Add two mana in any combination of colors. Spend this mana only to cast spells from exile.\" Source review retains two missing operations: independent color choices for the two mana, and a spending predicate for the spell's casting-origin zone. Registered any: 2 makes two mana of one chosen color, and selecting zones [\"exile\"] does not restrict payment for a spell as it will be on the stack. Its next-turn play permission now fits.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
 		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
+		"at": "2026-10-11"
 	},
 	"Inti, Seneschal of the Sun": {
 		"reason": "Inti, Seneschal of the Sun is not ready: Whenever you discard one or more cards, exile the top card of your library. You may play that card until your next end step. — Missing operations: a batched discard event watch (including discards paid as costs), and a play permission expiring at the beginning of your next end step. The available event and permission-duration schemas cannot express these.",
@@ -337,14 +329,6 @@
 		"decks": [
 			"Mono-Black Aggro",
 			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Jennifer Walters // The Sensational She-Hulk": {
-		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: the damage-received event, amount and optional once-per-turn use are implemented. Source review still refuses \"Your opponents can't cast spells during your turn.\" on both faces. The model encoded it as a continuous word, but no cast-restriction handler reads that word. A structured restriction and its offer/execution checks are required; the accepted assessment is retained with the private audit trace.",
-		"decks": [
-			"Bant Airbending Combo"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
@@ -656,14 +640,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"The Legend of Roku // Avatar Roku": {
-		"reason": "The Legend of Roku // Avatar Roku is not ready: Face 0: \"I — Exile the top three cards of your library. Until the end of your next turn, you may play those cards.\" The supplied permission durations cannot express a permission starting immediately and expiring at the end of your next turn, including the intervening turns.; Face 1: \"Firebending 4 (Whenever this creature attacks, add {R}{R}{R}{R}. This mana lasts until end of combat.)\" An attack watch can add the mana, but the supplied mana instruction cannot preserve that mana through step and phase boundaries until end of combat.",
-		"decks": [
-			"Boros Dragons"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"The Mind Stone": {
 		"reason": "The Mind Stone is not ready: {5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.) — Missing operation: grant the harnessed designation until this permanent leaves the battlefield. Harnessed is not an ability or characteristic, so granting a word or counter is not equivalent.; ∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control. — Missing standing operation: grant this triggered ability only while the permanent has the harnessed designation. The schema has",
 		"decks": [
@@ -707,7 +683,7 @@
 		"at": "2026-10-10"
 	},
 	"Thor, God of Thunder": {
-		"reason": "Thor, God of Thunder is not ready: When Thor enters, exile target Equipment, instant, or sorcery card from your graveyard. Until the end of your next turn, you may play that card. — Requires a single target selector matching Equipment subtype OR instant/sorcery card types, and an immediate play permission lasting through the end of the controller's next turn. The supplied selector and permission-duration syntax cannot express these operations faithfully.",
+		"reason": "Thor, God of Thunder is not ready: When Thor enters, exile target Equipment, instant, or sorcery card from your graveyard. Until the end of your next turn, you may play that card. — The target requires a selector union (Equipment subtype OR instant/sorcery type) within your graveyard. The available selector fields intersect; they cannot express this union faithfully.",
 		"decks": [
 			"4c Control"
 		],

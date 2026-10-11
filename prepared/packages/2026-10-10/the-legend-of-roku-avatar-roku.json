@@ -1,0 +1,131 @@
+{
+	"card": "The Legend of Roku // Avatar Roku",
+	"generated": "2026-10-10",
+	"source": "96a9e2b15b1d45f092bab013c4be6092b32468816e3fe2081fa6080b599b942d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Legend of Roku // Avatar Roku",
+		"registers": [
+			{
+				"face": 0,
+				"kind": "chapter",
+				"numbers": [
+					1
+				],
+				"basis": "I — Exile the top three cards of your library. Until the end of your next turn, you may play those cards.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 3,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"kind": "chapter",
+				"numbers": [
+					2
+				],
+				"basis": "II — Add one mana of any color.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"any": 1
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"kind": "chapter",
+				"numbers": [
+					3
+				],
+				"basis": "III — Exile this Saga, then return it to the battlefield transformed under your control.",
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled-saga"
+						},
+						{
+							"do": "move",
+							"what": "bound:exiled-saga",
+							"to": "battlefield",
+							"face": 1,
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"kind": "watch",
+				"basis": "Firebending 4 (Whenever this creature attacks, add {R}{R}{R}{R}. This mana lasts until end of combat.)",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mana",
+							"who": "you",
+							"colors": [
+								"R",
+								"R",
+								"R",
+								"R"
+							],
+							"until": "end-of-combat"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"face": 1,
+				"claim": "Create a 4/4 red Dragon token with flying and firebending 4",
+				"basis": "{8}: Create a 4/4 red Dragon creature token with flying and firebending 4.",
+				"source": {
+					"card": "The Legend of Roku // Avatar Roku",
+					"face": 1,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

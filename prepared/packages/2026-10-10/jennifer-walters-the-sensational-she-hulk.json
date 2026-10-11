@@ -1,0 +1,103 @@
+{
+	"card": "Jennifer Walters // The Sensational She-Hulk",
+	"generated": "2026-10-10",
+	"source": "7e6e3f654171cf4eb134632eeaf924a8e4f52f454c8d0030d5847b367db12dca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Jennifer Walters // The Sensational She-Hulk",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Your opponents can't cast spells during your turn.",
+				"kind": "prohibit",
+				"cast": "opponent",
+				"during": "you"
+			},
+			{
+				"face": 1,
+				"basis": "Reach, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Your opponents can't cast spells during your turn.",
+				"kind": "prohibit",
+				"cast": "opponent",
+				"during": "you"
+			},
+			{
+				"face": 1,
+				"basis": "Whenever a creature you control is dealt damage, you may have The Sensational She-Hulk deal that much damage to any target. Do this only once each turn.",
+				"kind": "watch",
+				"may": true,
+				"limit": "once-per-turn-use",
+				"event": {
+					"on": "damage",
+					"received": true,
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"to": "target:0",
+							"amount": {
+								"event": "amount"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"printedFaces": [
+			1
+		],
+		"deferred": [
+			{
+				"face": 0,
+				"claim": "Activate Jennifer Walters's sorcery-speed transformation ability",
+				"basis": "{3}{G}{W}{W}: Transform Jennifer Walters. Activate only as a sorcery.",
+				"source": {
+					"card": "Jennifer Walters // The Sensational She-Hulk",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}
