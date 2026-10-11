@@ -18,7 +18,7 @@ import { resolutionNumber } from "./resolution-counts.ts";
 import type { Step } from "./steps.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "copied" | "choices" | "registrations">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
@@ -214,8 +214,8 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if ((selector.zones || !selector.any && !selector.all) && !zones.includes(object.zone)) return false;
 	if (selector.any && !selector.any.some((branch) => matches(scope, object, branch, read, zones))) return false;
 	if (selector.all && !selector.all.every((branch) => matches(scope, object, branch, read, zones))) return false;
-	// A card this seat cannot see matches only a selector that asks nothing about what it is.
-	const blind = !read && !object.ability && object.faceDown && !object.card;
+	// Neither an unknown card nor a face-down exiled card supplies characteristics.
+	const blind = !read && !object.ability && object.faceDown;
 	if (blind && (selector.name || selector.nameOf || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors || selector.hasAdventure !== undefined)) return false;
 	const traits = blind ? FACELESS : read ?? ability(object);
 	if (!traits) return false;

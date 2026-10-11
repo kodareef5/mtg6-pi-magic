@@ -271,7 +271,7 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 		if ((procedure.timing === "stack" || procedure.timing === "mana") && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
 		if (procedure.timing === "special" && (!mainWindow(frame) || original.zone !== "hand" || original.owner !== frame.seat)) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
-		const source = selected ? { ...original, traits: spellCharacteristics(frame.view, original, frame.seat, procedure.face), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
+		const source = selected ? { ...original, faceDown: false, traits: spellCharacteristics(frame.view, original, frame.seat, procedure.face), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
 		const sourceRef = immutable(ref(source));
 		const scope: Scope = { world, controller: frame.seat, source };
 		// Timing: a spell's from its type line unless it claims flash; an activation's own restriction.

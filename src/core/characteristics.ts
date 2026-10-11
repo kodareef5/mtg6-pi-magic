@@ -139,7 +139,7 @@ export function walk(table: Table, override?: Thing): Map<string, Traits> {
 
 /** The same layer walk can read a proposed spell using only the caster's projected facts. */
 export function spellCharacteristics(view: SeatView, object: Seen, controller: number, face = 0, x = 0, words: string[] = []): Traits | undefined {
-	const printed = view.printed?.[object.card ?? ""], spell = { ...object, controller, zone: "stack" as const, face: face as 0 | 1 };
+	const printed = view.printed?.[object.card ?? ""], spell = { ...object, controller, zone: "stack" as const, faceDown: false, face: face as 0 | 1 };
 	const chosen = currentFacts(printed, spell);
 	if (!chosen || !object.card) return undefined;
 	const own = (view.work?.packages?.find((one) => one.card === object.card)?.registers ?? []).filter((one) =>

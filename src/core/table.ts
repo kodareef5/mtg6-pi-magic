@@ -82,6 +82,8 @@ export type Thing = {
 	position?: number;
 	tapped: boolean;
 	faceDown: boolean;
+	/** Seats allowed to keep looking at this face-down exiled incarnation (406.3). */
+	lookedBy?: SeatId[];
 	counters: Record<string, number>;
 	/** Marked damage. Not a counter. Wiped at cleanup. */
 	damage: number;
@@ -207,6 +209,8 @@ export type Resolution = {
 	picked: Chosen[];
 	/** Inspection entitlements while this effect resolves; public reveals also grant them to the spectator. Receipts preserve the disclosure afterward. */
 	seen?: Partial<Record<Viewer, ObjectRef[]>>;
+	/** Explicit private looks, distinct from a public reveal, before face-down exile. */
+	looked?: Partial<Record<SeatId, ObjectRef[]>>;
 	/** A "you may" trigger whose controller has not yet said whether to use it. */
 	optional?: true;
 };
@@ -256,7 +260,7 @@ export type Note = {
 	/** A second one-shot effect under 610.3, not a leaves trigger. */
 	| { kind: "return"; on: ObjectRef; source: ObjectRef; to: Zone }
 	/** "You may play that card": from a turn, while that card stays where it is. */
-	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone; speed?: "sorcery"; plotted?: true }
+	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone; speed?: "sorcery"; plotted?: true; while?: Condition }
 	/** Restriction words for future matching spells, applied as they are cast. */
 	| { kind: "cast-words"; who: SeatId; words: string[]; of?: Selector; next?: true }
 	/** A rules permission, read against current sources including ones that enter later. */

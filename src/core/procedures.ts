@@ -23,7 +23,7 @@ import { instantLoyalty, loyaltyUsed } from "./activated.ts";
 import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
-import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, playable } from "./permits.ts";
+import { allowance, activationRestrictions, castingPrices, castRestrictions, checkOngoingCondition, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Change } from "./syntax.ts";
@@ -109,6 +109,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "permit" && instruction.while) checkOngoingCondition(instruction.while);
 			if (instruction.do === "counter" && instruction.as)
 				throw new Error("counter does not supply an as binding. Use counter.to for a countered spell's replacement destination; report other unsupported counter-result dependencies.");
 			if (instruction.do === "choose" && instruction.from.zones?.includes("library") && !selectionScoped(instruction.from))
@@ -149,7 +150,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const price = activation.timing === "spell" ? castingPrices(world, controller, object, table.cursor.turn, activation.face)
 		.find((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack) : undefined;
 	if (activation.timing === "spell" && !price) throw new Error("The selected casting permission or its departure replacement is no longer available.");
-	const spell = activation.timing === "spell" ? { ...object, controller, zone: "stack" as const, face: activation.face ?? 0 as const, ability: activation } : object;
+	const spell = activation.timing === "spell" ? { ...object, controller, zone: "stack" as const, faceDown: false, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
 	if (activation.registered && !traits?.registrations.some((one) => one.kind === "activated" && one.basis === activation.registered))
 		throw new Error("The source no longer has that registered activated ability.");

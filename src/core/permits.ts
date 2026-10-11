@@ -5,7 +5,7 @@
  * a seat's view agree on what is offered.
  */
 import { holds, matches, players, type Seen, type World } from "./selectors.ts";
-import type { Registration, Selector } from "./language.ts";
+import type { Condition, Registration, Selector } from "./language.ts";
 import type { SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
 import type { Note } from "./table.ts";
@@ -17,14 +17,31 @@ import { printedTraits } from "./characteristics.ts";
 export const permissions = (world: World, seat: SeatId, object: Seen, turn: number, face?: number) => [
 	...world.notes.filter((note): note is Extract<Note, { kind: "permit" }> => note.kind === "permit" && note.who === seat && note.fromTurn <= turn &&
 		note.on.id === object.id && note.on.incarnation === object.incarnation && (!note.faces || note.faces.some((allowed) => allowed === (face ?? 0))) &&
+		(!note.while || holds({ world, controller: note.by }, note.while)) &&
 		(!note.of || permittedSpell(world, seat, object, face, note.of))),
 	...(object.owner === seat ? world.read(object)?.registrations ?? [] : []).flatMap((one, at) => one.kind === "permit" && one.cast?.from.includes(object.zone as never) &&
 		(one.face === undefined || one.face === (face ?? 0)) ? [{ id: `own:${object.id}@${object.incarnation}:${at}`, mana: one.cast.mana, leavesStack: one.cast.leavesStack as Zone | undefined }] : []),
 ];
 
+/** Ongoing conditions read live state with "you" fixed to the granting controller.
+ * Source, target, binding and event captures need separate terms before they can persist. */
+export function checkOngoingCondition(condition: Condition): void {
+	const visit = (value: unknown): void => {
+		if (typeof value === "string" && /^(this$|attached$|(?:controller|owner|event|target|bound):)/.test(value))
+			throw new Error("A permit.while condition cannot retain source, target, binding or event references.");
+		if (Array.isArray(value)) value.forEach(visit);
+		else if (value && typeof value === "object") for (const [key, child] of Object.entries(value)) {
+			if (["other", "linked", "chosen", "bound", "event", "resolution", "x"].includes(key))
+				throw new Error(`A permit.while condition cannot retain ${key} from resolution.`);
+			visit(child);
+		}
+	};
+	visit(condition);
+}
+
 function permittedSpell(world: World, controller: SeatId, object: Seen, face: number | undefined, selector: Selector): boolean {
 	const printed = faceFacts(world.printed?.[object.card ?? ""], face);
-	const source = { ...object, zone: "stack" as const, face: (face ?? 0) as 0 | 1 };
+	const source = { ...object, zone: "stack" as const, faceDown: false, face: (face ?? 0) as 0 | 1 };
 	return matches({ world, controller, source }, source, { zones: ["stack"], ...selector }, printed ? printedTraits(printed, object.card!) : world.read(source));
 }
 
@@ -34,6 +51,7 @@ type CastingPrice = { mana?: string; permission?: string; leavesStack?: Zone; sp
 
 /** A normal route and each distinct granted alternative price. Two alternative costs cannot combine. */
 export function castingPrices(world: World, seat: SeatId, object: Seen, turn: number, face?: number, alternative?: string): CastingPrice[] {
+	if (object.faceDown && (object.zone !== "exile" || !object.lookedBy?.includes(seat))) return [];
 	const permitted = permissions(world, seat, object, turn, face);
 	const normal = object.zone === "hand" && object.owner === seat || !!object.copy && playable(world, seat, object, turn, false, face) || permitted.some((note) => note.mana === undefined);
 	const prices: CastingPrice[] = normal ? [{}] : [];
@@ -84,6 +102,7 @@ export function allowance(world: World, seat: SeatId, assumed: readonly Registra
  * from a zone a permanent opens, or a card a `permit` note names from this turn on.
  */
 export function playable(world: World, seat: SeatId, object: Seen, turn: number, land: boolean, face?: number): boolean {
+	if (object.faceDown && (object.zone !== "exile" || !object.lookedBy?.includes(seat))) return false;
 	if (object.copy) {
 		const source = world.objects.find((one) => one.id === object.copy!.source.id && one.incarnation === object.copy!.source.incarnation);
 		return object.zone === "exile" && !!source?.prepared && source.zone === "battlefield" && source.controller === seat && face === object.copy.face;

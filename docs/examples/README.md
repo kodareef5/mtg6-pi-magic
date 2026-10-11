@@ -7,6 +7,7 @@ schemas, and every `basis` is checked against the card's text.
 
 | File | Shows |
 |---|---|
+| `face-down-exile.md` | Private face-down exile and play while a live condition holds |
 | `spells.md` | targets, any target, destroy, modes as separate procedures, kicker, a token's activated ability |
 | `target-counts.md` | one or two distinct targets, mixed players and permanents, simultaneous damage and returns |
 | `mana.md` | mana abilities in a package, "or", counted mana, spend restrictions, a token's mana ability, a Verge's conditional ability |

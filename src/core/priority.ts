@@ -42,7 +42,7 @@ export function priorityMoves(table: Table, holder: SeatId): Move[] {
 	const world = tableWorld(table);
 	if (main && table.cursor.active === holder && seat(table, holder).landsPlayed < allowance(world, holder).lands && !cardsIn(table, "stack").length) {
 		for (const card of [...table.things.values()]) {
-			if (!card.card || !isLand(facts(table, card)) || !["hand", "graveyard", "exile"].includes(card.zone) || !playable(world, holder, card, table.cursor.turn, true)) continue;
+			if (!card.card || !playable(world, holder, card, table.cursor.turn, true) || !isLand(facts(table, { ...card, faceDown: false })) || !["hand", "graveyard", "exile"].includes(card.zone)) continue;
 			const note = entering(table, holder, card.card!);
 			const from = card.zone === "hand" ? "" : ` from ${card.zone}`;
 			moves.push({

@@ -151,6 +151,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// Mana added earlier in the same group, by a mana ability activated while paying, can be spent.
 	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
 	for (const [index, change] of changes.entries()) {
+		if (change.do === "move" && change.faceDown && change.to !== "exile") throw new Error("Face-down motion is supported only into exile.");
 		if (change.do === "add-mana") change.colors.forEach((_, unit) => available.get(change.who)?.add(`mana-${table.cursor.clock + 1}-${index}-${unit}`));
 		if (change.do === "spend-mana") for (const id of change.ids) {
 			if (!available.get(change.who)?.delete(id)) throw new Error(`Mana ${id} is not available to spend.`);
@@ -237,7 +238,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				const moving = thing(table, change.what);
 				const from = moving.zone;
 				// Motion inside one zone cannot create a new object or reset its state (400.7).
-				if (from === change.to) {
+				// Exiling an already exiled card is the explicit exception (406.7).
+				if (from === change.to && from !== "exile") {
 					if (from === "library") order(table, { cards: [{ id: moving.id, incarnation: moving.incarnation }], whose: moving.owner, position: change.position ?? "top" });
 					break;
 				}
@@ -246,13 +248,17 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 						if ((other.position ?? 0) > (moving.position ?? 0)) other.position = (other.position ?? 0) - 1;
 					}
 				}
+				const lookedBy = change.faceDown ? table.seats.filter(({ id }) => table.resolution?.looked?.[id]?.some((one) =>
+					one.id === moving.id && one.incarnation === moving.incarnation)).map(({ id }) => id) : [];
 				moving.zone = change.to;
 				// Identity changes on a zone change, so every note left on the
 				// old incarnation stops applying.
 				moving.incarnation += 1;
 				moving.tapped = change.to === "battlefield" && !!change.tapped;
 				moving.controller = change.controller ?? moving.owner;
-				moving.faceDown = false;
+				moving.faceDown = !!change.faceDown;
+				delete moving.lookedBy;
+				if (lookedBy.length) moving.lookedBy = lookedBy;
 				const previousFace = moving.face;
 				delete moving.face; delete moving.doors;
 				delete moving.transformed;
@@ -381,6 +387,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				const library = cardsIn(table, "library", change.whose);
 				const ids = new Set(library.map((one) => one.id));
 				if (table.resolution?.seen) table.resolution.seen = Object.fromEntries(Object.entries(table.resolution.seen).map(([who, seen]) => [who, (seen ?? []).filter((one) => !ids.has(one.id))]));
+				if (table.resolution?.looked) table.resolution.looked = Object.fromEntries(Object.entries(table.resolution.looked).map(([who, seen]) => [who, (seen ?? []).filter((one) => !ids.has(one.id))]));
 				for (let i = library.length - 1; i > 0; i--) {
 					const j = random(table, i + 1);
 					const a = library[i]!;
@@ -430,6 +437,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (!pending) throw new Error("A private inspection needs a resolving instruction.");
 				const object = thing(table, change.what), seen = (pending.seen ??= {})[change.who] ??= [];
 				if (!seen.some((one) => one.id === object.id && one.incarnation === object.incarnation)) seen.push({ id: object.id, incarnation: object.incarnation });
+				const looked = (pending.looked ??= {})[change.who] ??= [];
+				if (!looked.some((one) => one.id === object.id && one.incarnation === object.incarnation)) looked.push({ id: object.id, incarnation: object.incarnation });
+				if (object.zone === "exile" && object.faceDown && !object.lookedBy?.includes(change.who)) (object.lookedBy ??= []).push(change.who);
 				break;
 			}
 			case "order":
@@ -568,6 +578,8 @@ function order(table: Table, change: Omit<Extract<Change, { do: "order" }>, "do"
 	const rest = cardsIn(table, "library", change.whose).filter((one) => !ids.has(one.id));
 	(change.position === "top" ? [...picked, ...rest] : [...rest, ...picked]).forEach((one, at) => { one.position = at; });
 	if (table.resolution?.seen) table.resolution.seen = Object.fromEntries(Object.entries(table.resolution.seen).map(([who, seen]) =>
+		[who, change.random || who !== String(change.who) ? (seen ?? []).filter((one) => !ids.has(one.id)) : seen]));
+	if (table.resolution?.looked) table.resolution.looked = Object.fromEntries(Object.entries(table.resolution.looked).map(([who, seen]) =>
 		[who, change.random || who !== String(change.who) ? (seen ?? []).filter((one) => !ids.has(one.id)) : seen]));
 }
 

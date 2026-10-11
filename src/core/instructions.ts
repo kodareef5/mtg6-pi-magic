@@ -51,7 +51,7 @@ function captured(scope: Scope, change: Modification): Modification {
 
 export function instructionStep(table: Table, scope: Scope, instruction: Instruction, pending: Resolution, claim: string): Step {
 	const controller = scope.controller;
-	const visible = new Set((project(table, controller).objects ?? []).filter((one) => !one.faceDown).map((one) => `${one.id}@${one.incarnation}`));
+	const visible = new Set((project(table, controller).objects ?? []).filter((one) => !one.faceDown || one.card).map((one) => `${one.id}@${one.incarnation}`));
 	const name = (object?: Seen) => !object ? "nothing" : !visible.has(`${object.id}@${object.incarnation}`) ? "an unknown card" : object.card ?? object.token?.name ?? object.id;
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
@@ -136,14 +136,15 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const changes: Change[] = moving.flatMap((object): Change[] => [
 				{ do: "move", what: object.id, to, reason: (destroy ? "destroy" : terms!.reason) as Reason, ...(terms?.position ? { position: terms.position as "top" | "bottom" } : {}),
 					...(terms?.face !== undefined ? { face: terms.face } : {}),
+					...(terms?.faceDown ? { faceDown: true as const } : {}),
 					...(terms?.tapped ? { tapped: true as const } : {}), ...(counters ? { counters } : {}), ...(controlled !== undefined ? { controller: controlled } : {}) },
-				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + (object.zone === to ? 0 : 1) }, source } }] : []),
+				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + (object.zone !== to || to === "exile" ? 1 : 0) }, source } }] : []),
 				...(waiting && object.zone !== to ? [{ do: "note" as const, note: { kind: "return" as const, by: controller, until: "indefinite" as const,
 					on: { id: object.id, incarnation: object.incarnation + 1 }, source: waiting, to: object.zone } }] : []),
 			]);
 			const follow = source && to === "battlefield" && moving.some((object) => object.id === source.id && object.zone !== to) ? { follow: { id: source.id, incarnation: source.incarnation + 1 } } : {};
 			// "That card" follows it to where this put it (400.7).
-			const moved = (one: ObjectRef) => moving.some((object) => object.id === one.id && object.incarnation === one.incarnation && object.zone !== to) ? { id: one.id, incarnation: one.incarnation + 1 } : one;
+			const moved = (one: ObjectRef) => moving.some((object) => object.id === one.id && object.incarnation === one.incarnation && (object.zone !== to || to === "exile")) ? { id: one.id, incarnation: one.incarnation + 1 } : one;
 			const followed = Object.fromEntries(Object.entries(pending.bound).filter(([, value]) => value.objects.some((one) => moved(one) !== one))
 				.map(([key, value]) => [key, { ...value, objects: value.objects.map(moved) }]));
 			const own = bind(instruction, { objects: moving.map((object) => moved(ref(object))), players: [],
@@ -275,6 +276,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				endOfNextTurn: players(scope, instruction.until.endOfNextTurn)[0] ?? controller, afterTurn: table.cursor.turn };
 			return one(`${seat(table, who).name} may ${instruction.mana ? `cast for ${instruction.mana === "printed" ? "its printed mana cost" : instruction.mana}` : "play"} ${cards.map(name).join(", ") || "nothing"}${instruction.leavesStack ? `; put it into ${instruction.leavesStack} whenever it leaves the stack` : ""}`, cards.map((object): Change => ({ do: "note", note: {
 				kind: "permit", by: controller, until, on: ref(object), who, fromTurn, ...(instruction.mana ? { mana: instruction.mana } : {}),
+				...(instruction.while ? { while: structuredClone(instruction.while) } : {}),
 				...(instruction.of ? { of: structuredClone(instruction.of) } : {}), ...(instruction.leavesStack ? { leavesStack: instruction.leavesStack as Zone } : {}),
 				...(source && until === "while-source" ? { source } : {}) } })));
 		}

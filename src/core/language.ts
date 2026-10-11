@@ -248,7 +248,7 @@ export const Defs = {
 		step({ do: Type.Literal("damage-rule"), mode: DamageMode, combat: Type.Optional(Type.Boolean()), until: Duration }),
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
-			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face),
+			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face), faceDown: Type.Optional(Type.Literal(true)),
 			/** Exile until this battlefield incarnation leaves; return immediately to the original zone. */
 			until: Type.Optional(object({ leaves: ObjectRef })),
 			/** With as, bind how many moved objects came from this zone, before their incarnations change. */
@@ -257,6 +257,7 @@ export const Defs = {
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { allOf: [
 				{ if: { required: ["countFrom"] }, then: { required: ["as"] } },
 				{ if: { required: ["until"] }, then: { properties: { to: { const: "exile" } } } },
+				{ if: { required: ["faceDown"] }, then: { properties: { to: { const: "exile" } }, not: { required: ["face"] } } },
 			] }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
@@ -291,6 +292,7 @@ export const Defs = {
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
 		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */
 		step({ do: Type.Literal("permit"), what: ObjectRef, who: PlayerRef, from: Type.Optional(one("now", "next-turn")),
+			while: Type.Optional(Type.Ref("Condition")),
 			until: Type.Union([Duration, object({ endOfNextTurn: PlayerRef })]),
 			/** An alternative price grants casting only, not a land play or the printed price. */
 			mana: Type.Optional(Type.Union([ManaCost, Type.Literal("printed")])), of: Type.Optional(Type.Ref("Selector")),

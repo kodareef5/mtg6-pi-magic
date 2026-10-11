@@ -74,7 +74,7 @@ export type Change =
 	 * battlefield: part of the motion, never a step after it (614.1c-d).
 	 */
 	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[];
-		tapped?: true; counters?: Record<string, number>; controller?: SeatId; choices?: Record<string, string>;
+		tapped?: true; counters?: Record<string, number>; controller?: SeatId; choices?: Record<string, string>; faceDown?: true;
 		/** The controller's answer to the optional entry cost. Absent until that choice is settled. */
 		entry?: "paid" | "declined"; face?: 0 | 1; copied?: { source: ObjectRef; spec: TokenSpec } }
 	/** A token made on the battlefield (111.1). */

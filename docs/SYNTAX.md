@@ -199,7 +199,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `controller` names each creator (default `you`); `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
 | `modify` | change characteristics `until` a duration, written as a public label |
-| `permit` | a player may play a card, `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only |
+| `permit` | a player may play a card, `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only; `while` rechecks a live condition on each use |
 | `register` | add a registration to an object |
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
 | `reflect` | "when you do": a reflexive trigger with its intervening `check` (603.12) |
@@ -750,3 +750,19 @@ permits selection from its inspected objects. Choosing library order also needs
 a prior look; a random order names no cards and requires none. A blocked
 selection creates a gap without asking a player, moving a card or choosing a
 fallback. These checks enforce visibility, not the legality of the card claim.
+
+### Face-down exile and ongoing play conditions
+
+A `move` into exile may set `faceDown: true`. An explicit private `look` earlier
+in that resolution lets its viewer keep looking at the new exiled incarnation
+(406.3). Its identity stays private and it has no characteristics in exile.
+A permitted cast or land play reads its prospective face-up characteristics
+and turns it face up on confirmation. Departing exile or being exiled again
+ends the old permission and look entitlement. Face-down battlefield objects
+and uninformed selection from exiled piles remain unsupported.
+
+`permit.while` checks a condition on each use, with "you" fixed to the granting
+controller. It can become false and true again without removing the note.
+It supports live counts, life, history and turn conditions; source, target,
+binding, event and named-choice captures are refused. An instruction
+`if` checks only on resolution. See `examples/face-down-exile.md`.

@@ -15,7 +15,7 @@ export const selectionScoped = (selector: Selector): boolean => !!(selector.owne
  * Library selection declares a search of an explicitly scoped library. Other private
  * selections require an earlier look, even when their hidden cards would not match. */
 export function selectionBlock(table: Table, scope: Scope, from: Selector, who: number): string | undefined {
-	const visible = new Set((project(table, who).objects ?? []).filter((one) => !one.faceDown).map((one) => `${one.id}@${one.incarnation}`));
+	const visible = new Set((project(table, who).objects ?? []).filter((one) => !one.faceDown || one.card).map((one) => `${one.id}@${one.incarnation}`));
 	const extent = (selector: Selector): Selector => ({ zones: selector.zones, controller: selector.controller, owner: selector.owner, is: selector.is,
 		...(selector.any ? { any: selector.any.map(extent) } : {}), ...(selector.all ? { all: selector.all.map(extent) } : {}) });
 	const range = extent(from);
