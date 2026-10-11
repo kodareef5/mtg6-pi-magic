@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "56ea2598535cc06b3fea791ee7644cfd884f37da68eeb3884622bad83549e3c6",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Scalding Viper // Steam Clean",
 		"registers": [
@@ -34,10 +33,7 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
 				"face": 1,
 				"claim": "Cast Steam Clean to return target nonland permanent to its owner's hand",
@@ -51,8 +47,41 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{U}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"creature",
+								"enchantment",
+								"planeswalker",
+								"battle"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"count": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
 	}
 }

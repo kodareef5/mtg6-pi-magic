@@ -20,7 +20,7 @@ import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import type { Procedure, Package } from "../src/core/language.ts";
-import { main, place, announce, offered, passBoth, finish, step } from "./play.ts";
+import { main, place, announce, offered, passBoth, finish, step, example } from "./play.ts";
 
 const viper = "Scalding Viper // Steam Clean", dragon = "Twinmaw Stormbrood // Charring Bite", hero = "Jennifer Walters // The Sensational She-Hulk";
 const build = (name: string) => start(standard, [{ name: "Faces", deck: deck(name) }, { name: "Red", deck: deck("Mono-Red Aggro") }], "faces-0");
@@ -293,6 +293,38 @@ test("Saga chapters cross lore thresholds, wait through resolution and sacrifice
 		subtypes: ["Saga", "Elemental"], colors: ["G"], power: 4, toughness: 4, registers: registers.map(({ face, ...term }) => term) } }], "resolve");
 	assert.equal(tokens.things.get("saga-token")!.counters.lore, 1);
 	assert.deepEqual(tokens.waiting.map(one => one.chapter), [1], "a newly created token has no before object, but its entry counter triggers its chapter");
+	// The live reverse Landfall/Izzet game repeated the cast condition after exile.
+	// Exercise the complete front-face instructions and isolate chapter I here.
+	for (const zone of ["hand", "graveyard"] as const) {
+		const cast = build("Selesnya Landfall"), [source] = place(cast, 0, zone, card);
+		main(cast, 0);
+		const use = example("Esper Origins checks its graveyard cast before both moves");
+		editWork(cast, 0, [{ do: "package.put", package: { card, registers: [...registers,
+			{ face: 0, kind: "permit", basis: "Flashback {3}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				cast: { from: ["graveyard"], mana: "{3}{G}", leavesStack: "exile" } }], procedures: [use] } }], "esper-conditional-source");
+		commit(cast, [{ do: "add-mana", who: 0, colors: ["G", "C", "C", "C"] }], "game-setup");
+		const initial = structuredClone(cast), at = cast.ledger.length, life = cast.seats[0]!.life;
+		announce(cast, use); passBoth(cast);
+		step(cast); // Look, then choose both cards for the graveyard.
+		step(cast, label => label.startsWith("Choose ")); step(cast, label => label.startsWith("Choose "));
+		step(cast); step(cast); step(cast); // Mill, empty order, gain life.
+		assert.equal(cast.seats[0]!.life, life + 2);
+		step(cast); // Check the one condition for the whole group.
+		if (zone === "graveyard") {
+			step(cast); // Exile before the return, with a new bound incarnation.
+			assert.equal(source!.zone, "exile");
+			const exiled = structuredClone(cast), from = cast.ledger.length;
+			assert.deepEqual(cast.resolution!.bound.transformed!.objects, [{ id: source!.id, incarnation: source!.incarnation }]);
+			finish(cast);
+			assert.equal(source!.zone, "battlefield"); assert.equal(source!.face, 1);
+			assert.equal(source!.counters.finality, 1); assert.equal(source!.counters.lore, 1);
+			assert.deepEqual(cast.waiting.map(one => one.chapter), [1]);
+			assert.deepEqual(relive(exiled, cast.ledger.slice(from)), cast, "a clone between moves keeps the accepted branch");
+		} else {
+			finish(cast); assert.equal(source!.zone, "graveyard"); assert.equal(cast.waiting.length, 0);
+		}
+		assert.deepEqual(relive(initial, cast.ledger.slice(at)), cast);
+	}
 });
 
 test("Prepare creates one castable copy, preserves the permanent and expires only the unused copy", () => {

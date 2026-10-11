@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "52d9ab2444d6f48347e00ef509c588c7d4e3193caf059be2b0e62e0853cd80a1",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Esper Origins // Summon: Esper Maduin",
 		"registers": [
@@ -129,12 +128,10 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"face": 0,
-				"claim": "Cast Esper Origins at its printed cost; surveil, gain life, and return transformed with finality if cast from a graveyard",
+				"claim": "Cast Esper Origins at its printed cost {1}{G}; surveil 2, gain 2 life, and if it was cast from a graveyard, exile it and put it onto the battlefield transformed with a finality counter. A graveyard cast is available only through the card's flashback permission, which sets its own cost.",
 				"basis": "Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.)",
 				"source": {
 					"card": "Esper Origins // Summon: Esper Maduin",
@@ -145,11 +142,89 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{G}"
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"as": "surveil-window"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:surveil-window"
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "put-in-graveyard"
+					},
+					{
+						"do": "move",
+						"what": "bound:put-in-graveyard",
+						"to": "graveyard",
+						"reason": "mill"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:surveil-window"
+						},
+						"position": "top"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"cast": "this",
+							"by": "you",
+							"from": "graveyard"
+						},
+						"instructions": [
+							{
+								"do": "move",
+								"what": "this",
+								"to": "exile",
+								"reason": "exile",
+								"as": "transformed"
+							},
+							{
+								"do": "move",
+								"what": "bound:transformed",
+								"to": "battlefield",
+								"face": 1,
+								"controller": "owner:bound:transformed",
+								"counters": {
+									"finality": 1
+								},
+								"reason": "resolve"
+							}
+						]
+					}
+				]
 			},
 			{
 				"face": 0,
-				"claim": "Flashback Esper Origins; surveil, gain life, then exile and return transformed under its owner's control with a finality counter",
+				"claim": "Flashback Esper Origins from your graveyard for {3}{G}; surveil 2, gain 2 life, then exile it and put it onto the battlefield transformed under its owner's control with a finality counter.",
 				"basis": "Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.) ... Flashback {3}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
 				"source": {
 					"card": "Esper Origins // Summon: Esper Maduin",
@@ -158,8 +233,88 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{3}{G}"
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"as": "surveil-window"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:surveil-window"
+						},
+						"count": 2,
+						"upTo": true,
+						"as": "put-in-graveyard"
+					},
+					{
+						"do": "move",
+						"what": "bound:put-in-graveyard",
+						"to": "graveyard",
+						"reason": "mill"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:surveil-window"
+						},
+						"position": "top"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					},
+					{
+						"do": "perform",
+						"who": "you",
+						"if": {
+							"cast": "this",
+							"by": "you",
+							"from": "graveyard"
+						},
+						"instructions": [
+							{
+								"do": "move",
+								"what": "this",
+								"to": "exile",
+								"reason": "exile",
+								"as": "transformed"
+							},
+							{
+								"do": "move",
+								"what": "bound:transformed",
+								"to": "battlefield",
+								"face": 1,
+								"controller": "owner:bound:transformed",
+								"counters": {
+									"finality": 1
+								},
+								"reason": "resolve"
+							}
+						]
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }
