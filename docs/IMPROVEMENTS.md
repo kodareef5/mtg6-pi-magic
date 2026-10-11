@@ -28,25 +28,26 @@ source-reviewed games; Izzet Aggro is admitted and still needs its first game.
 [Status](STATUS.md) holds the current evidence. Twelve lists still need standing
 assessments.
 
-1. Stage announcements in core before resuming the parked Control versus
-   Azorius game. Priority chooses a use; X, targets, additional costs and mana
-   payment follow as recorded decisions. Do not build their full Cartesian
-   product first. Preserve every available choice, prepared plan guidance,
-   pending-state visibility, cancellation, replay and clone continuation.
-2. Keep large journal menus as an ordered hash and count, retaining the chosen
-   action and accepted terms. Preserve old journal reads. Keep pregame's
-   already measured fifteen-minute request timeout independent of effort scaling.
-3. Resume saved games from their reviewed repair points, then run fresh
+1. Complete Izzet Aggro's first game, then run fresh
    imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
-4. Widen standing coverage after announcement staging is validated. Iridescent
+2. Widen standing coverage. Iridescent
    Vinelasher blocks both Rakdos Lizards and Mono-Black Aggro; its additional
-   cost and token-copy exceptions are next. Valley Flamecaller's damage
+   cost is supported and token-copy exceptions are next. Valley Flamecaller's damage
    replacement is the other Rakdos blocker. Keep replacement-order choices
    explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
+3. Retain reviewed runtime uses in the reusable store, preserving complete
+   abilities, target scope, instruction order and additional casting costs.
+   Syntax and source-quote checks alone do not establish correct interpretation.
+
+Staged announcements are live. Priority chooses a use; X, targets, additional
+costs and mana payment follow as recorded decisions. Large historical menus
+use ordered hashes and counts in the journal. The Control versus Azorius
+continuation finished and matched replay and three clone continuations.
+Pregame requests have a fifteen-minute timeout independent of effort scaling.
 
 One assessed imported list can play an established opponent; it need not wait
 for a second imported list. A required deferred use that cannot execute becomes

@@ -3,13 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "c5562220ba6167ca61f6296aa819d986340c528916cd008974e1db879b4c4edb",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Torch the Tower",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Torch the Tower without bargaining: deal 2 damage to target creature or planeswalker and create its damage-linked exile replacement for this turn.",
 				"basis": "Bargain (You may sacrifice an artifact, enchantment, or token as you cast this spell.)\nTorch the Tower deals 2 damage to target creature or planeswalker. If this spell was bargained, instead it deals 3 damage to that permanent and you scry 1.\nIf a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
@@ -22,7 +19,36 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2,
+						"as": "damaged"
+					},
+					{
+						"do": "register",
+						"on": "bound:damaged",
+						"registration": {
+							"basis": "If a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
+							"kind": "replace",
+							"on": "dies",
+							"to": "exile",
+							"until": "end-of-turn"
+						}
+					}
+				]
 			},
 			{
 				"claim": "Cast Torch the Tower bargained, sacrificing an artifact, enchantment, or token as an additional cost: deal 3 damage to target creature or planeswalker, scry 1, and create its damage-linked exile replacement for this turn.",
@@ -36,8 +62,80 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"any": [
+								{
+									"types": [
+										"artifact"
+									],
+									"controller": "you"
+								},
+								{
+									"types": [
+										"enchantment"
+									],
+									"controller": "you"
+								},
+								{
+									"token": true,
+									"controller": "you"
+								}
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3,
+						"as": "damaged"
+					},
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 1,
+							"of": "you"
+						},
+						"as": "scried"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"what": "bound:scried",
+						"position": "bottom",
+						"may": true
+					},
+					{
+						"do": "register",
+						"on": "bound:damaged",
+						"registration": {
+							"basis": "If a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
+							"kind": "replace",
+							"on": "dies",
+							"to": "exile",
+							"until": "end-of-turn"
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

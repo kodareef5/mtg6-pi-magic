@@ -3,13 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "7d0f56fef494342c287f97040e3069c063a8ac160a8f0d20c46248526b93a7bc",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Burst Lightning",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Burst Lightning without kicker: deal 2 damage to any target",
 				"basis": "Burst Lightning deals 2 damage to any target. If this spell was kicked, it deals 4 damage instead.",
@@ -22,7 +19,26 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
 			},
 			{
 				"claim": "Cast Burst Lightning kicked for {4}{R}: deal 4 damage to any target",
@@ -36,8 +52,37 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{4}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

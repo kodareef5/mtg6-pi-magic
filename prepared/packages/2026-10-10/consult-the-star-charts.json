@@ -3,13 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "20091acc909af546c60de2faaca1baf8db3f99d1f9213e55f64973c1eb9c4f78",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Consult the Star Charts",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Consult the Star Charts without kicker.",
 				"basis": "Kicker {1}{U} (You may pay an additional {1}{U} as you cast this spell.) ... Look at the top X cards of your library, where X is the number of lands you control. Put one of those cards into your hand. If this spell was kicked, put two of those cards into your hand instead. Put the rest on the bottom of your library in a random order.",
@@ -22,7 +19,58 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{U}"
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								}
+							},
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
 			},
 			{
 				"claim": "Cast Consult the Star Charts with the additional {1}{U} kicker cost.",
@@ -36,8 +84,66 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "kicker",
+							"mana": "{1}{U}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": {
+								"count": {
+									"types": [
+										"land"
+									],
+									"controller": "you"
+								}
+							},
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 2,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom",
+						"random": true
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

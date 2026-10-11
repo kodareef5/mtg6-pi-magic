@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "019f797d712ab86db14eb38670d0d4cbc100846d959e20cd241d3ff1c58a1a81",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Fountainport",
 		"registers": [
@@ -18,11 +17,9 @@
 				]
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Sacrifice a token to draw a card",
+				"claim": "Pay {2}, tap Fountainport, and sacrifice a token to draw a card",
 				"basis": "{2}, {T}, Sacrifice a token: Draw a card.",
 				"source": {
 					"card": "Fountainport",
@@ -31,10 +28,28 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"token": true,
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
 			},
 			{
-				"claim": "Pay 1 life to create a Fish token",
+				"claim": "Pay {3}, tap Fountainport, and pay 1 life to create a 1/1 blue Fish creature token",
 				"basis": "{3}, {T}, Pay 1 life: Create a 1/1 blue Fish creature token.",
 				"source": {
 					"card": "Fountainport",
@@ -43,10 +58,36 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}",
+					"tap": true,
+					"life": 1
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "you",
+						"spec": {
+							"name": "Fish",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Fish"
+							],
+							"colors": [
+								"U"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
 			},
 			{
-				"claim": "Create a Treasure token",
+				"claim": "Pay {4} and tap Fountainport to create a Treasure token",
 				"basis": "{4}, {T}: Create a Treasure token.",
 				"source": {
 					"card": "Fountainport",
@@ -55,8 +96,42 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"controller": "you",
+						"spec": {
+							"name": "Treasure",
+							"types": [
+								"artifact"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"basis": "{T}, Sacrifice this artifact: Add one mana of any color.",
+									"kind": "mana",
+									"cost": {
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"any": 1
+								}
+							],
+							"subtypes": [
+								"Treasure"
+							]
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

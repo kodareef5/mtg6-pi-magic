@@ -51,12 +51,11 @@ Auntie's Sentence's second mode:
 }
 ```
 
-Its first mode, revealing a hand for you to choose from, is not in the syntax yet.
+## Kicker is a named additional cost
 
-## Kicker is a procedure with the bigger cost
-
-A kicked Burst Lightning is the same card announced with `{4}` added and its
-kicked effect. There is no "was it kicked" flag: the procedure already says 4.
+A kicked Burst Lightning adds `{4}` to its base or alternative casting price
+and uses its kicked effect. The cast records the named additional cost, even
+if reductions make the final payment zero. See [named costs](named-costs.md).
 Quote both pieces of text the variant relies on, joined by ` ... `.
 
 ```json procedure
@@ -65,7 +64,7 @@ Quote both pieces of text the variant relies on, joined by ` ... `.
   "claim": "Cast Burst Lightning kicked",
   "basis": "Kicker {4} ... If this spell was kicked, it deals 4 damage instead.",
   "timing": "spell",
-  "cost": { "mana": "{4}{R}" },
+  "cost": { "additional": [{ "name": "kicker", "mana": "{4}" }] },
   "targets": [{ "object": { "types": ["creature", "planeswalker", "battle"] }, "player": "any" }],
   "instructions": [{ "do": "damage", "to": "target:0", "amount": 4 }]
 }

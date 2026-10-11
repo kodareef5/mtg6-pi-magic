@@ -3,14 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "44f0d61c8c7cfcebb5d57b0deac6f10503efcaaa20e476e0226c27da19024c3e",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Countersculpt",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": false,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Countersculpt by beholding a Jace as its additional cost; counter target spell, then empower Jace 1, including creating the specified token if necessary.",
 				"basis": "As an additional cost to cast this spell, behold a Jace or pay {1}. (To behold a Jace, choose a Jace you control or reveal a Jace card from your hand.)\nCounter target spell. Empower Jace 1. (Put a loyalty counter on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
@@ -23,7 +19,173 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{U}{U}",
+					"show": {
+						"choose": {
+							"zones": [
+								"battlefield",
+								"hand"
+							],
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"types": [
+										"planeswalker"
+									],
+									"subtypes": [
+										"Jace"
+									],
+									"token": true
+								}
+							},
+							"atMost": 0
+						},
+						"spec": {
+							"name": "Jace",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"colors": [
+								"U"
+							],
+							"loyalty": 0,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "[−1]: Surveil 1",
+									"cost": {
+										"loyalty": -1
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "look",
+												"who": "you",
+												"what": {
+													"top": 1,
+													"of": "you"
+												},
+												"as": "looked"
+											},
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"is": "bound:looked"
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "binned"
+											},
+											{
+												"do": "move",
+												"what": "bound:binned",
+												"to": "graveyard",
+												"reason": "mill"
+											},
+											{
+												"do": "order",
+												"who": "you",
+												"every": {
+													"zones": [
+														"library"
+													],
+													"is": "bound:looked"
+												},
+												"position": "top"
+											}
+										]
+									}
+								},
+								{
+									"kind": "activated",
+									"basis": "[−3]: Draw a card",
+									"cost": {
+										"loyalty": -3
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"token": true
+						},
+						"count": 1,
+						"as": "jace"
+					},
+					{
+						"do": "counters",
+						"on": "bound:jace",
+						"kind": "loyalty",
+						"amount": 1
+					}
+				]
 			},
 			{
 				"claim": "Cast Countersculpt by paying the additional {1}; counter target spell, then empower Jace 1, including creating the specified token if necessary.",
@@ -37,8 +199,166 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"additional": [
+						{
+							"name": "additional-mana",
+							"mana": "{1}"
+						}
+					]
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 1,
+						"if": {
+							"amount": {
+								"count": {
+									"controller": "you",
+									"types": [
+										"planeswalker"
+									],
+									"subtypes": [
+										"Jace"
+									],
+									"token": true
+								}
+							},
+							"atMost": 0
+						},
+						"spec": {
+							"name": "Jace",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"colors": [
+								"U"
+							],
+							"loyalty": 0,
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "[−1]: Surveil 1",
+									"cost": {
+										"loyalty": -1
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "look",
+												"who": "you",
+												"what": {
+													"top": 1,
+													"of": "you"
+												},
+												"as": "looked"
+											},
+											{
+												"do": "choose",
+												"who": "you",
+												"from": {
+													"zones": [
+														"library"
+													],
+													"is": "bound:looked"
+												},
+												"count": 1,
+												"upTo": true,
+												"as": "binned"
+											},
+											{
+												"do": "move",
+												"what": "bound:binned",
+												"to": "graveyard",
+												"reason": "mill"
+											},
+											{
+												"do": "order",
+												"who": "you",
+												"every": {
+													"zones": [
+														"library"
+													],
+													"is": "bound:looked"
+												},
+												"position": "top"
+											}
+										]
+									}
+								},
+								{
+									"kind": "activated",
+									"basis": "[−3]: Draw a card",
+									"cost": {
+										"loyalty": -3
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "draw",
+												"who": "you",
+												"count": 1
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"controller": "you",
+							"types": [
+								"planeswalker"
+							],
+							"subtypes": [
+								"Jace"
+							],
+							"token": true
+						},
+						"count": 1,
+						"as": "jace"
+					},
+					{
+						"do": "counters",
+						"on": "bound:jace",
+						"kind": "loyalty",
+						"amount": 1
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
 	}
 }

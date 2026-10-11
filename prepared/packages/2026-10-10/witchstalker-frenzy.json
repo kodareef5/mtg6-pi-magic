@@ -1,0 +1,57 @@
+{
+	"card": "Witchstalker Frenzy",
+	"generated": "2026-10-10",
+	"source": "bdc47f389a228272da95732e51f94a7697221017d557ead365526d3817e5d518",
+	"contract": 1,
+	"package": {
+		"card": "Witchstalker Frenzy",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast Witchstalker Frenzy with its cost reduced by {1} for each creature that attacked this turn, dealing 5 damage to target creature.",
+				"basis": "This spell costs {1} less to cast for each creature that attacked this turn. ... Witchstalker Frenzy deals 5 damage to target creature.",
+				"source": {
+					"card": "Witchstalker Frenzy",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"cost": {
+					"mana": "{3}{R}",
+					"reduce": {
+						"history": "attacked",
+						"of": {
+							"types": [
+								"creature"
+							]
+						},
+						"by": "any"
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						},
+						"count": 1
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"deferred": []
+	}
+}

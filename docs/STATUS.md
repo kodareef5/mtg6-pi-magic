@@ -13,16 +13,16 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 7 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro |
-| Completed source-reviewed alpha games | 18, covering six admitted decks; Izzet Aggro still needs a completed game |
+| Completed source-reviewed alpha games | 20, covering six admitted decks; Izzet Aggro's first game is running |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Control versus Azorius is parked while casting and payment become staged decisions; Boros Tokens completed its first reviewed game |
-| Recent shared mechanics | Return-to-hand payments and unblocked-attacker selection; entry copies with copied entry choices; complete token activations and direct counter destinations |
-| Stored card assessments | 237 accepted, 70 refused, five basic lands; Fire Crystal, Simulacrum Synthesizer and Bringer of the Last Gift are source-reviewed |
+| Current runtime work | Control versus Azorius finished through staged casting; priority selects a use before X, targets, extra costs and mana payment |
+| Recent shared mechanics | Staged announcements and matching replans; named additional mana costs; damage bindings read actual recipients after prevention |
+| Stored card assessments | 238 accepted, 70 refused, five basic lands; seven reviewed runtime packages retained with explicit corrections |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and 276 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
-| Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
+| Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded; unused bad terms found in the latest reviews were corrected for future games |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
 
 Standing coverage admits setup; it does not prove that every deferred use or

@@ -3,15 +3,12 @@
 	"generated": "2026-10-10",
 	"source": "2c5373051b19bf13c361d39049e539ea58834e2a2ddb70bef5affcba2a204aa9",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Song of Totentanz",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Cast Song of Totentanz to create X Rat tokens that can't block and give creatures you control haste until end of turn.",
+				"claim": "Cast Song of Totentanz with X announced: create X black Rat tokens that can't block, then creatures you control gain haste until end of turn.",
 				"basis": "Create X 1/1 black Rat creature tokens with \"This token can't block.\" Creatures you control gain haste until end of turn.",
 				"source": {
 					"card": "Song of Totentanz",
@@ -22,8 +19,58 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{X}{R}"
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": {
+							"x": true
+						},
+						"spec": {
+							"name": "Rat",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Rat"
+							],
+							"colors": [
+								"B"
+							],
+							"power": 1,
+							"toughness": 1,
+							"words": [
+								"can't block"
+							]
+						},
+						"controller": "you"
+					},
+					{
+						"do": "modify",
+						"every": {
+							"types": [
+								"creature"
+							],
+							"controller": "you",
+							"zones": [
+								"battlefield"
+							]
+						},
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"haste"
+							]
+						},
+						"label": "Creatures you control gain haste until end of turn"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }
