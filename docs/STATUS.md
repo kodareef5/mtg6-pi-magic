@@ -142,117 +142,60 @@ first pass's refusals by concept, with the decks each blocked:
 The ledger is `prepared/packages/2026-10-10/ledger.json`; the grouping script
 is `.pi/phase2/ledger-concepts.py`.
 
-## Current breadth coverage, October 11
+## Sideboardless alpha, October 11
 
-The main-deck-only counts above are historical. Setup registers sideboards too.
-The report now covers all 312 distinct cards across nineteen imported lists:
-213 have compatible stored standing assessments, 94 have refusal records, five
-are basic lands, and none remains unassessed. Every imported list is blocked.
-The closest are 4c Control, Izzet Aggro and Selesnya Landfall, each missing three
-assessments. No new whole-deck game was started or counted as complete.
+The alpha registers main-deck copies of the nineteen imported legal lists.
+The original tournament files keep their sideboards. No main-deck requirement
+is waived. The pool contains 255 distinct main-deck cards. The complete store,
+including sideboard cards, has 219 source-pinned assessments and 88 recorded
+refusals, plus five basic lands requiring no assessment.
 
-Preparation storage now checks source fingerprints and the interpreter contract,
-excludes the ledger from packages, writes records atomically, and serves the
-shared seating path. Seating reads `prepared/packages` as a shipped seed and
-writes new assessments to `~/.pi/agent/magic/packages/<date>/`, respecting
-`PI_CODING_AGENT_DIR`. A bad record or cache write emits a notice and leaves the
-game's accepted equipment intact. `tools/assess.ts` explicitly maintains the
-shipped seed. Existing journals keep their accepted equipment. Life-cost
-mana, conditional mana at payment, and optional entry payments have conservation
-and replay coverage.
-
-Shared face mechanics cover alternate casts, Adventure exile permission,
-Omen shuffling, paid Room unlocks, transformation, craft's paid source binding,
-Saga lore and chapter completion, finality counters, and Prepare's copy lifetime.
-The unchanged card TSV has a source-hashed face companion. New journals pin it;
-old journals retain the prior single-face representation.
-
-Mana-value and color queries derive facts from structured costs and faces.
-They read announced X on the stack, computed selector bounds and the previous
-incarnation after a spell leaves. Payment does not change mana value. The pilot
-and strategy receive these facts only through the seat's projection. A modify
-instruction binds its affected objects for a later instruction, so Day of Black
-Sun can destroy exactly the creatures whose abilities it removed.
-
-The completed assessment passes used Sol 6.1 high. The runtime check used the
-selected strategy role, Haiku 5.5 medium. Costs include every request, including
-retries; input totals include cached tokens.
-
-| Pass | Cards | Accepted / refused | Calls | Input / cached | Output / thinking | Summed / active time | Cost |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Face mechanics | 17 | 11 / 6 | 41 | 945,904 / 761,344 | 10,090 / 3,071 | 5m43s / 1m36s | $0.5462 |
-| Remaining main and sideboard cards | 55 | 36 / 19 | 111 | 2,427,792 / 2,211,840 | 21,351 / 6,777 | 13m48s / 3m41s | $0.8666 |
-| Query-related reassessment | 18 | 6 / 12 | 47 | 1,100,239 / 894,336 | 9,801 / 3,002 | 5m49s / 1m35s | $0.5992 |
-| Deferred counterspell interpretation | 2 | 2 / 0 | 3 | 91,998 / 91,988 | 2,118 / 1,498 | 18.3s / 10.4s | $0.0091 |
-| Damage reassessment, after source review | 3 | 2 / 1 | 6 | 139,735 / 106,112 | 1,177 / 190 | 40.6s / 16.5s | $0.0896 |
-| Casting permissions, expiry and restrictions | 7 | 3 / 4 | 19 | 486,260 / 359,424 | 4,810 / 1,797 | 3m32s / 1m15s | $0.3377 |
-
-No provider failures or truncations were recorded in these passes. The private
-traces are under `.pi/assess/takeover-faces/`, `.pi/assess/sideboards-20261010/`,
-`.pi/assess/cast-facts-20261010/`, `.pi/assess/cast-facts-runtime/` and
-`.pi/assess/damage-20261010/` and `.pi/assess/permissions-20261011/`.
-Query reassessment accepted Scalding Viper, Starfield Shepherd, Spider
-Manifestation, Moseo, Enlightened Confidant and Carnage. These are accepted source
-claims and inventories, not proof that all their deferred uses can execute or
-that every registered keyword has a handler. Otter's power-based blocking word,
-for example, still needs a structured comparison.
-
-Damage events now carry amounts, source incarnations and recipients. They
-distinguish damage dealt from damage received, sum simultaneous occurrences,
-and filter combat or noncombat damage. Lifelink applies in the damage group,
-including a source that left before its ability resolved. A watch can record
-an optional use during resolution; declining, countering or losing all targets
-spends nothing. The pilot sees the amount before ordering or accepting a trigger.
-
-Source review retained Cecil and Master of Barbs after the damage pass. Jennifer
-now has structured casting prohibitions on both faces. They read current
-control, active face, abilities and turn, and check both offers and execution.
-They preserve activation choices and required interpretation work.
-
-Permissions can carry an alternative casting price and expire at the end of a
-named player's next turn. A price grants casting only and follows one exiled
-incarnation; it changes neither timing nor additional nonmana costs. Mana can
-last through combat steps until combat ends, or through cleanup. Payment
-choices and resource forecasts preserve those lifetimes.
-
-The new assessment retained Airbender Ascension, Jennifer and Roku. Their source
-terms match the tested mechanics, and paid casts from registered-deck fixtures
-installed those terms and replayed exactly. Ascension airbent an opposing
-creature and granted its owner the {2} price; Roku's first chapter granted three
-permissions. These fixtures establish those operations, not whole-deck coverage.
-
-The [source-backed ledger](../prepared/packages/2026-10-10/ledger.json) records
-every refusal. The next shared operations include:
-
-| Card | Remaining operation |
+| Measure | Current evidence |
 | --- | --- |
-| Aang, Swift Savior | One target from the union of a battlefield creature and any spell |
-| Aang, at the Crossroads | Private bounded look, random bottom order, intersecting card types |
-| Appa, Steadfast Guardian | Any number of targets and a separate permission for each owner |
-| Interdimensional Web Watch | Independent mana colors and spending restricted by casting origin |
-| Thor, God of Thunder | Equipment subtype or instant/sorcery type in one selector |
-| Colorstorm Stallion | Actual mana spent on a cast and token copying |
+| Imported main decks admitted to setup | 2 of 19: 4c Control and Selesnya Landfall |
+| Imported lists with a completed alpha game | 1: Selesnya Landfall |
+| First Landfall game | Mono-Red won on turn 12; 400 decisions, 359 chosen, 41 forced, no fallbacks or gaps |
+| Replay and clone continuation | Matched; clones at decisions 0, 200 and 399 continued to the same outcome, cards, cursor, log and equipment |
+| First Landfall run cost and time | $1.0158 reported, 19m31s wall; one failed call lacks usage and cost |
+| Main-deck guides | All 19 written; 57 provider calls, $0.8770 |
+| Control runtime failures found | Additional blight and behold costs, metadata copying, private inspection, next-cast properties, collected evidence |
+| Rejected Control branch | Stock Up moved inspected cards into public exile; replay parity does not make that interpretation legal |
 
-All 228 invariant tests and the type check pass. The fixtures cover announced X,
-hybrid colors, alternate faces, hidden-card filtering, replay and cloning with a
-pending trigger after its spell was countered. Haiku's two live interpretations,
-Flashfreeze and Disdainful Stroke, selected the expected targets, countered them
-and replayed exactly in a registered-deck fixture. This establishes those uses,
-not a completed deck game. Damage fixtures also cover Cecil's transformation,
-Jennifer's unused and spent triggers, illegal targets before acceptance, source
-removal and reincarnation, and replay and clones on both sides of a use.
-Permission fixtures add owner and incarnation checks, next-turn expiry, mana
-expiry through combat, lost abilities, stale casting refusals and replay and
-clones across each boundary.
-All twenty-six collection decks loaded 762 seat
-packages without inference or notices. This checks seed integration; missing
-standing assessments still stop full setup.
+Landfall's completed game is seed `alpha-landfall-20261011-r0`, journal
+`alpha-landfall-20261011-r0-1791719352675.jsonl`. Its 426 requests comprised
+15 pregame, 40 strategy and 371 Jev calls. The raw journal, bill, trace and
+clone checks are under `.pi/alpha-20261011/`. A second seed reverses the seats.
+This first game does not establish coverage of every deferred use.
+
+Control's ordinary games produced the payment and inspection fixes. They use
+the same saved preparation when resuming a valid prefix. An interpretation
+failure blocks the next physical decision; the model must supply the missing
+meaning before play continues. The new private look and library-order tests
+cover hidden identities, exact selection windows, short libraries, seeded
+random order, incarnation preservation and cloning during a partial choice.
+Haiku has prepared both Consult the Star Charts modes with those operations,
+and the live game has resolved its computed private window and random bottom.
+
+Standing reassessment retained Thor, Dyadrine, Sunderflock, Awaken the Honored
+Dead and both Aang cards. This establishes source-backed terms and use
+inventories, not complete deck execution. Izzet Spellementals is one assessment
+away from setup: Multiversal Passage needs an entry choice of basic land type.
+The [refusal ledger](../prepared/packages/2026-10-10/ledger.json) retains the
+remaining concepts, including sideboard work deferred from this alpha.
+
+The current mechanics include selector unions and intersections, casting
+provenance and actual mana-spent facts, payment of chosen counters and reveals,
+and explicitly scoped self characteristics outside the battlefield. Firdoch
+Core therefore counts as a Dragon when beheld from hand. Standing storage
+remains source-pinned; ordinary seating reads shipped seeds, writes to Pi's
+cache, and reports corrupt records or failed writes without stopping the game.
+The selected Jev/Sol/Haiku roster is unchanged.
 
 ## How a breadth change is judged
 
 Run the invariant suite and type check, reassess affected source claims, and
-interpret deferred uses when their visible source requires them. Once a pair of
-lists has complete standing coverage, play from ordinary setup with the current
-roster, two games at a time. Keep the journals, gaps, rulings, bill and replay
+interpret deferred uses when their visible source requires them. Once an imported main deck has complete standing coverage, play it against
+a supported opponent from ordinary setup with the current roster, two games
+at a time. Keep the journals, gaps, rulings, bill and replay
 checks. Established positions test a mechanic; completed deck games establish
 coverage. Strength comparisons remain closed during this breadth work.

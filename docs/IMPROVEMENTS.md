@@ -23,18 +23,20 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-4c Control has standing assessments for every main-deck card after Thor's
-selector union was accepted. Thirteen cards still have deferred uses. This
-permits setup; it does not establish that those uses execute. Selesnya Landfall
-has one missing main-deck assessment, Dyadrine. The other seventeen lists have
-between two and nine missing main-deck assessments.
+4c Control and Selesnya Landfall have standing assessments for every main-deck
+card. They still have thirteen and eight cards with deferred uses respectively.
+Selesnya completed its first ordinary alpha game, with replay and continuation
+from three saved prefixes checked. Control games are finding missing runtime
+operations and incorrect interpretations. The other seventeen lists still have
+missing standing assessments; Izzet Spellementals needs only Multiversal Passage.
 
-1. Play 4c Control against the supported pinned and practice lists now. Record
-   each failed required interpretation and repair the mechanic it needs.
-2. Prepare the main-deck guides with `tools/guide.ts --all --alpha`.
-3. Add actual mana-spent facts and optional counter payment for Dyadrine, then
-   admit Selesnya Landfall. Add bounded private look and ordering when the live
-   uses require them, including Consult the Star Charts and Stock Up in Control.
+1. Continue the two admitted lists against supported opponents on fresh seeds.
+   Review accepted runtime procedures against their source as well as checking
+   gaps and replay. A publicly exiled substitute for a private look disqualifies
+   a game even when its journal replays.
+2. Repair Control's observed blockers: next-cast spell properties and collected
+   evidence costs, followed by the named-card search those costs enable.
+3. Add entry type choices for Multiversal Passage to admit Izzet Spellementals.
 4. Order further shared mechanics by observed game failures and the main decks
    they unblock. Sideboard-only blockers do not delay this alpha.
 
@@ -76,7 +78,8 @@ gaps, rulings and replay checks. [Status](STATUS.md) holds the current evidence.
    be played, its engine, sequencing, mulligans, what beats it. The brief
    wave reads the two guides as inputs, so matchup briefs start from a
    considered account of each list rather than from the raw cards.
-   `tools/guide.ts` writes them; none is written yet.
+   All nineteen main-deck guides are written. Their scope and generation bill
+   are in [the guide directory](../decks/guides/README.md).
 6. **The loop.** Run a batch, read the ledger, fix the top blocker in core or
    syntax with its offline test, add back the decks it unblocks, run again.
    Keep every game: the saved journals are the benchmark material. First
