@@ -16,11 +16,11 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 17, covering five admitted decks; Boros Tokens is newly admitted |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Control versus Azorius resumes after large-menu memory and summary fixes; Boros Tokens is in live testing; No More Lies needs its unused counter-to-exile branch corrected |
+| Current runtime work | Control versus Azorius exposed another large-menu memory failure; Boros Tokens is in live testing; No More Lies now counters directly to exile when its tax is declined |
 | Recent shared mechanics | Completed ability resolution counts, token copies with base terms and complete activations, counter-placement thresholds, standing spell reductions, token abilities and ownership |
 | Stored card assessments | 233 accepted, 74 refused, five basic lands; Izzet Aggro lacks Mockingbird's entry copy |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 271 invariant tests pass |
+| Validation | Type check and 272 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

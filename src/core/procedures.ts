@@ -98,6 +98,8 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "counter" && instruction.as)
+				throw new Error("counter does not supply an as binding. Use counter.to for a countered spell's replacement destination; report other unsupported counter-result dependencies.");
 			if (instruction.do === "choose" && instruction.from.zones?.includes("library") && !selectionScoped(instruction.from))
 				throw new Error("A library selection needs an explicit owner, controller or inspected binding in every branch; card characteristics do not grant a search.");
 			refs(instruction, slots, bound);

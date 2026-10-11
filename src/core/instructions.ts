@@ -307,17 +307,18 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "counter": {
 			const stacked = live(table, objects(scope, instruction.what)).filter((object) => object.zone === "stack");
-			const counter: Change[] = stacked.map((object): Change => object.card ? { do: "move", what: object.id, to: "graveyard", reason: "counter" } : { do: "cease", what: object.id });
+			const counter: Change[] = stacked.map((object): Change => object.card ? { do: "move", what: object.id, to: instruction.to === "exile" ? "exile" : "graveyard", reason: "counter" } : { do: "cease", what: object.id });
+			const destination = instruction.to === "exile" ? " Countered spells go directly to exile." : "";
 			const protectedIds = new Set(stacked.filter((object) => has(characteristics(table, object as never), "can't be countered")).map((one) => one.id));
 			const respect: Choice[] = protectedIds.size ? [{ id: "restrictions", label: "Apply can't be countered: leave protected spells on the stack",
 				changes: counter.filter((change) => !("what" in change && protectedIds.has(change.what))) }] : [];
 			const warning = protectedIds.size ? " (conflicts with can't be countered)" : "";
 			const unless = instruction.unless;
 			if (!unless) return { actor: controller, question: `Counter ${stacked.map(name).join(", ") || "nothing"}.`,
-				choices: [...respect, { id: "do", label: `Counter ${stacked.map(name).join(", ") || "nothing"}${warning}`, changes: counter }] };
+				choices: [...respect, { id: "do", label: `Counter ${stacked.map(name).join(", ") || "nothing"}${warning}${destination}`, changes: counter }] };
 			const payer = players(scope, unless.who)[0] ?? controller;
 			const pay = paymentChoices(table, scope, unless.pays, payer, pending.object);
-			return { actor: payer, question: `${claim}: pay, or apply the counter instruction.`, choices: [...respect, ...pay, { id: "decline", label: `Do not pay; it is countered${warning}`, changes: counter }] };
+			return { actor: payer, question: `${claim}: pay, or apply the counter instruction.`, choices: [...respect, ...pay, { id: "decline", label: `Do not pay; it is countered${warning}${destination}`, changes: counter }] };
 		}
 		case "perform": {
 			const actor = players(scope, instruction.who)[0] ?? controller, player = pending.program[0]?.player;

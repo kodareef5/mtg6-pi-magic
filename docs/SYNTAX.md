@@ -200,7 +200,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
 | `reflect` | "when you do": a reflexive trigger with its intervening `check` (603.12) |
 | `attach` | an Aura or Equipment to an object |
-| `counter` | a spell or ability, `unless` a player pays a cost |
+| `counter` | a spell or ability, `unless` a player pays a cost; `to: "exile"` replaces the countered spell's graveyard destination, without an intermediate move; no `as` binding |
 | `each` | repeat for each player, with `bound:player` |
 
 Searching a library is `choose` from the library, then `move`, then `shuffle`.
