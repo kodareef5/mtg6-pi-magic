@@ -88,20 +88,28 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const moving = many(table, scope, instruction).filter((object) => !destroy || (object.zone === "battlefield" && !has(characteristics(table, object as never), "indestructible")));
 			const to: Zone = destroy ? "graveyard" : instruction.to as Zone;
 			const terms = instruction.do === "move" ? instruction : undefined;
+			if (terms && to === "library" && moving.every((one) => one.zone === "library")) {
+				const ordered = inspection(table, scope, { do: "order", who: "you", what: terms.what, every: terms.every, position: terms.position ?? "top", as: terms.as }, pending);
+				if (terms.countFrom && terms.as) for (const choice of ordered.choices) {
+					const bound = choice.bind?.[terms.as];
+					if (bound) bound.amount = moving.filter((one) => one.zone === terms.countFrom).length;
+				}
+				return ordered;
+			}
 			const counters = terms?.counters ? Object.fromEntries(Object.entries(terms.counters).map(([kind, value]) => [kind, amount(scope, value)])) : undefined;
 			const controlled = terms?.controller ? players(scope, terms.controller)[0] : undefined;
 			const changes: Change[] = moving.flatMap((object): Change[] => [
 				{ do: "move", what: object.id, to, reason: (destroy ? "destroy" : terms!.reason) as Reason, ...(terms?.position ? { position: terms.position as "top" | "bottom" } : {}),
 					...(terms?.face !== undefined ? { face: terms.face } : {}),
 					...(terms?.tapped ? { tapped: true as const } : {}), ...(counters ? { counters } : {}), ...(controlled !== undefined ? { controller: controlled } : {}) },
-				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + 1 }, source } }] : []),
+				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + (object.zone === to ? 0 : 1) }, source } }] : []),
 			]);
-			const follow = source && to === "battlefield" && moving.some((object) => object.id === source.id) ? { follow: { id: source.id, incarnation: source.incarnation + 1 } } : {};
+			const follow = source && to === "battlefield" && moving.some((object) => object.id === source.id && object.zone !== to) ? { follow: { id: source.id, incarnation: source.incarnation + 1 } } : {};
 			// "That card" follows it to where this put it (400.7).
-			const moved = (one: ObjectRef) => moving.some((object) => object.id === one.id && object.incarnation === one.incarnation) ? { id: one.id, incarnation: one.incarnation + 1 } : one;
+			const moved = (one: ObjectRef) => moving.some((object) => object.id === one.id && object.incarnation === one.incarnation && object.zone !== to) ? { id: one.id, incarnation: one.incarnation + 1 } : one;
 			const followed = Object.fromEntries(Object.entries(pending.bound).filter(([, value]) => value.objects.some((one) => moved(one) !== one))
 				.map(([key, value]) => [key, { ...value, objects: value.objects.map(moved) }]));
-			const own = bind(instruction, { objects: moving.map((object) => ({ id: object.id, incarnation: object.incarnation + 1 })), players: [],
+			const own = bind(instruction, { objects: moving.map((object) => moved(ref(object))), players: [],
 				...(terms?.countFrom ? { amount: moving.filter((object) => object.zone === terms.countFrom).length } : {}) });
 			return one(`${destroy ? "Destroy" : `Put into ${to}`}: ${moving.map(name).join(", ") || "nothing"}`, changes,
 				{ ...follow, ...(Object.keys(followed).length || own.bind ? { bind: { ...followed, ...own.bind } } : {}) });

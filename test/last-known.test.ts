@@ -6,11 +6,11 @@ import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { relive } from "../src/core/journal.ts";
 import { amount, objects, players, tableWorld, targetKey } from "../src/core/selectors.ts";
-import { announce, establish, example, finish, main, passBoth, place, step } from "./play.ts";
+import { announce, example, finish, main, passBoth, place, step } from "./play.ts";
 
 test("resolution reads departed targets without moving their new incarnation or changing instruction order", () => {
 	const table = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], "defeat-last-controller");
-	const victim = establish(table, 0, "Thor, God of Thunder", []);
+	const victim = place(table, 0, "hand", "Thor, God of Thunder")[0]!;
 	commit(table, [{ do: "move", what: victim.id, to: "battlefield", controller: 1, reason: "game-setup" }], "game-setup");
 	main(table, 0);
 	place(table, 0, "hand", "Inevitable Defeat");

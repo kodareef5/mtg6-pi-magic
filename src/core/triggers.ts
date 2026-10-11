@@ -78,7 +78,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 		switch (change.do) {
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
-				if (!was || !is) break;
+				if (!was || !is || was.incarnation === is.incarnation) break;
 				if (change.to === "battlefield") {
 					found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), from: was.zone, to: "battlefield" });
 					for (const face of is.doors ?? []) found.push({ on: "unlocks", object: is, traits: characteristics(table, is), found: ref(is), face, player: is.controller });

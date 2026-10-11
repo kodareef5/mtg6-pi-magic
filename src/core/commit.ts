@@ -210,6 +210,11 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "move": {
 				const moving = thing(table, change.what);
 				const from = moving.zone;
+				// Motion inside one zone cannot create a new object or reset its state (400.7).
+				if (from === change.to) {
+					if (from === "library") order(table, { cards: [{ id: moving.id, incarnation: moving.incarnation }], whose: moving.owner, position: change.position ?? "top" });
+					break;
+				}
 				if (ORDERED.has(from)) {
 					for (const other of cardsIn(table, from, orderedWithin(from, moving.owner))) {
 						if ((other.position ?? 0) > (moving.position ?? 0)) other.position = (other.position ?? 0) - 1;
@@ -244,7 +249,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else delete moving.registrations;
 				if (change.to === "battlefield") enter(table, moving, change, before, born);
 				if (ORDERED.has(change.to)) {
-					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner));
+					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner)).filter((one) => one.id !== moving.id);
 					if (change.position === "bottom") {
 						moving.position = zone.length;
 					} else {
@@ -372,20 +377,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (!seen.some((one) => one.id === object.id && one.incarnation === object.incarnation)) seen.push({ id: object.id, incarnation: object.incarnation });
 				break;
 			}
-			case "order": {
-				const picked = change.cards.map((ref) => thing(table, ref.id));
-				if (new Set(picked.map((one) => one.id)).size !== picked.length || picked.some((one, at) => one.zone !== "library" || one.owner !== change.whose || one.incarnation !== change.cards[at]!.incarnation))
-					throw new Error("Reordering needs distinct current cards from one library.");
-				if (change.random) for (let i = picked.length - 1; i > 0; i--) {
-					const j = random(table, i + 1); [picked[i], picked[j]] = [picked[j]!, picked[i]!];
-				}
-				const ids = new Set(picked.map((one) => one.id));
-				const rest = cardsIn(table, "library", change.whose).filter((one) => !ids.has(one.id));
-				(change.position === "top" ? [...picked, ...rest] : [...rest, ...picked]).forEach((one, at) => { one.position = at; });
-				for (const [who, seen] of Object.entries(table.resolution?.seen ?? {})) if (change.random || Number(who) !== change.who)
-					table.resolution!.seen![Number(who)] = seen.filter((one) => !ids.has(one.id));
+			case "order":
+				order(table, change);
 				break;
-			}
 			case "note":
 				table.notes.push({ ...structuredClone(change.note), id: `note-${table.cursor.clock + 1}-${index}`, written: table.cursor.clock + 1 } as Note);
 				break;
@@ -488,6 +482,21 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	if (control(changes)) return receipt;
 	table.log.push(receipt);
 	return receipt;
+}
+
+/** Reorder current library objects; only the actor keeps a private inspection of their order. */
+function order(table: Table, change: Omit<Extract<Change, { do: "order" }>, "do" | "who"> & { who?: number }): void {
+	const picked = change.cards.map((ref) => thing(table, ref.id));
+	if (new Set(picked.map((one) => one.id)).size !== picked.length || picked.some((one, at) => one.zone !== "library" || one.owner !== change.whose || one.incarnation !== change.cards[at]!.incarnation))
+		throw new Error("Reordering needs distinct current cards from one library.");
+	if (change.random) for (let i = picked.length - 1; i > 0; i--) {
+		const j = random(table, i + 1); [picked[i], picked[j]] = [picked[j]!, picked[i]!];
+	}
+	const ids = new Set(picked.map((one) => one.id));
+	const rest = cardsIn(table, "library", change.whose).filter((one) => !ids.has(one.id));
+	(change.position === "top" ? [...picked, ...rest] : [...rest, ...picked]).forEach((one, at) => { one.position = at; });
+	for (const [who, seen] of Object.entries(table.resolution?.seen ?? {})) if (change.random || Number(who) !== change.who)
+		table.resolution!.seen![Number(who)] = seen.filter((one) => !ids.has(one.id));
 }
 
 /** An ability or trigger goes on top of the stack as its own object. */

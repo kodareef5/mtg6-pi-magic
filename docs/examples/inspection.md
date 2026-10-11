@@ -49,3 +49,50 @@ positions. No choice reads or changes the RNG before the action commits.
   ]
 }
 ```
+
+## A card stays the same object inside its library
+
+Library arrangement changes positions, not zones or incarnations (400.7).
+Use `order` for scry. A `move` whose objects already occupy the destination
+library also asks for their order and preserves their bindings. This does not
+permit inspecting other cards. Moving a card from another zone to the bottom
+does change its incarnation and keeps library positions contiguous.
+
+```json procedure
+{
+  "source": {
+    "card": "Opt",
+    "zones": [
+      "hand"
+    ],
+    "controller": "self"
+  },
+  "claim": "Opt with a private scry",
+  "basis": "Scry 1. (Look at the top card of your library. You may put that card on the bottom.)\nDraw a card.",
+  "timing": "spell",
+  "speed": "instant",
+  "instructions": [
+    {
+      "do": "look",
+      "who": "you",
+      "what": {
+        "top": 1,
+        "of": "you"
+      },
+      "as": "looked"
+    },
+    {
+      "do": "order",
+      "who": "you",
+      "what": "bound:looked",
+      "position": "bottom",
+      "may": true
+    },
+    {
+      "do": "draw",
+      "who": "you",
+      "count": 1
+    }
+  ]
+}
+```
