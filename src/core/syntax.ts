@@ -86,6 +86,8 @@ export type Change =
 	| { do: "name-card"; what: string; key: string; name: string }
 	/** A private inspection during resolution. Nothing moves. */
 	| { do: "look"; who: SeatId; what: string }
+	/** A completed keyword operation, never a substitute for its physical choices. */
+	| { do: "keyword"; name: "scry" | "surveil"; who: SeatId; count: number }
 	/** A library subset placed in the stated order, or shuffled before placement. */
 	| { do: "order"; who: SeatId; whose: SeatId; cards: ObjectRef[]; position: "top" | "bottom"; random?: true }
 	| { do: "tap" | "untap"; what: string }

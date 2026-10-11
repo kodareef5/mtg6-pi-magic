@@ -23,10 +23,7 @@ token survives long enough to receive that counter.
           {
             "kind": "activated", "basis": "[−1]: Surveil 1", "cost": { "loyalty": -1 },
             "effect": { "instructions": [
-              { "do": "look", "who": "you", "what": { "top": 1, "of": "you" }, "as": "looked" },
-              { "do": "choose", "who": "you", "from": { "zones": ["library"], "is": "bound:looked" }, "count": 1, "upTo": true, "as": "binned" },
-              { "do": "move", "what": "bound:binned", "to": "graveyard", "reason": "mill" },
-              { "do": "order", "who": "you", "every": { "zones": ["library"], "is": "bound:looked" }, "position": "top" }
+              { "do": "keyword", "name": "surveil", "who": "you", "count": 1 }
             ] }
           },
           {
@@ -41,6 +38,10 @@ token survives long enough to receive that counter.
   ]
 }
 ```
+
+The token's abilities quote the rule-defined token text from 701.71a; the
+creator's procedure still quotes its own printed Empower instruction. Surveil
+uses the shared keyword operation and records completion after the choices.
 
 `activated` registrations become ordinary listed procedures. Removing the
 ability removes those uses, including a previously reused source requirement.
@@ -100,10 +101,7 @@ activation without priority. The grant expires during cleanup.
             "cost": {"loyalty": -1},
             "effect": {
               "instructions": [
-                {"do": "look", "who": "you", "what": {"top": 1, "of": "you"}, "as": "looked"},
-                {"do": "choose", "who": "you", "from": {"zones": ["library"], "is": "bound:looked"}, "count": 1, "upTo": true, "as": "binned"},
-                {"do": "move", "what": "bound:binned", "to": "graveyard", "reason": "mill"},
-                {"do": "order", "who": "you", "every": {"zones": ["library"], "is": "bound:looked"}, "position": "top"}
+                { "do": "keyword", "name": "surveil", "who": "you", "count": 1 }
               ]
             }
           },

@@ -97,12 +97,21 @@ export function resolving(table: Table): Pending | null {
 	if (!skipped && instruction.may && instruction.do !== "choose") step.choices.push({ id: "decline", label: "Decline: it is optional", changes: [],
 		...(instruction.as ? { bind: { [instruction.as]: { objects: [], players: [], amount: 0 } } } : {}) });
 	const last = pending.program.length === 1;
-	const moves: Move[] = step.choices.map((choice) => ({
-		option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick && "id" in choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },
-		changes: [...choice.changes, ...(last && !choice.pick && !choice.expand ? finish(choice.changes) : []),
-			{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(choice.bind ? { bind: choice.bind } : {}),
-				...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
-		reason: "resolve",
-	}));
-	return { situation: "resolution", seat: step.actor, question: `Resolve: ${ability.claim}. ${step.question}`, moves: checked(moves) };
+	const moves: Move[] = step.choices.map((choice) => {
+		const done = item.completed && !choice.pick && !choice.expand && !skipped ? item.completed : undefined;
+		const keyword = done ? [{ do: "keyword" as const, name: done.name, who: done.who, count: done.count }] : [];
+		const selected = (done && pending.bound[done.selected]?.objects || []).filter(ref => {
+			const now = table.things.get(ref.id);
+			return now?.incarnation === ref.incarnation && now.zone === (done!.name === "surveil" ? "graveyard" : "library");
+		});
+		const bind = { ...choice.bind, ...(done?.as ? { [done.as]: { objects: selected, players: [], amount: selected.length } } : {}) };
+		return {
+			option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick && "id" in choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },
+			changes: [...choice.changes, ...keyword, ...(last && !choice.pick && !choice.expand ? finish(choice.changes) : []),
+				{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(Object.keys(bind).length ? { bind } : {}),
+					...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
+			reason: "resolve",
+		};
+	});
+	return { situation: "resolution", seat: step.actor, question: `Resolve: ${ability.claim}. ${step.question}${item.detail ? ` ${item.detail}` : ""}`, moves: checked(moves) };
 }

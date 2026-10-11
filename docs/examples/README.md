@@ -7,6 +7,7 @@ schemas, and every `basis` is checked against the card's text.
 
 | File | Shows |
 |---|---|
+| `library-keywords.md` | Scry and surveil choices, privacy, actual selected results and completion events |
 | `library-windows.md` | Simultaneous top or all-but-bottom windows across separate libraries |
 | `face-down-exile.md` | Private face-down exile and play while a live condition holds |
 | `spells.md` | targets, any target, destroy, modes as separate procedures, kicker, a token's activated ability |

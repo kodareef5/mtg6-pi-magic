@@ -42,7 +42,7 @@ const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
  * what the source is attached to. Refs inside a delayed or reflexive effect
  * other than `event:*` are fixed when that trigger is created.
  */
-	export const ObjectRef = Type.Union([
+export const ObjectRef = Type.Union([
 	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
 	object({ top: Type.Ref("Amount"), of: Type.String({ pattern: "^(you|self|opponent|each-player|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
 	/** One window per named library, combined before motion for simultaneous effects. */
@@ -206,7 +206,8 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters"),
+		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword"),
+		keyword: Type.Optional(one("scry", "surveil")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
 		/** Ordinal among all spells cast by that caster this turn, not only those matching of. */
@@ -245,6 +246,8 @@ export const Defs = {
 
 	/** One step of resolution. `if` gates it, `as` binds its result, `may` makes it optional for its actor. */
 	Instruction: Type.Union([
+		/** Shared library keyword choices; completion is recorded after all their movement. */
+		step({ do: Type.Literal("keyword"), name: one("scry", "surveil"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("damage"), to: Type.Optional(Type.Union([ObjectRef, PlayerRef])), every: Type.Optional(Type.Ref("Selector")), amount: Type.Ref("Amount"), from: Type.Optional(ObjectRef) }),
 		/** A global prevention rule. Bounded shields and prevention with additional effects are not represented. */
 		step({ do: Type.Literal("damage-rule"), mode: DamageMode, combat: Type.Optional(Type.Boolean()), until: Duration }),

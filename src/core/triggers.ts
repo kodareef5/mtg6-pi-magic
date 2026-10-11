@@ -25,6 +25,7 @@ import { casting } from "./casting.ts";
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
 	on: GameEvent["on"];
+	keyword?: "scry" | "surveil";
 	ordinal?: number;
 	/** What it happened to, as it was then. */
 	object?: Seen;
@@ -97,6 +98,9 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	};
 	for (const change of changes) {
 		switch (change.do) {
+			case "keyword":
+				if (change.count > 0) found.push({ on: "keyword", keyword: change.name, player: change.who, amount: change.count });
+				break;
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
 				if (!was || !is || was.incarnation === is.incarnation) break;
@@ -185,6 +189,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
+	if (event.keyword !== undefined && event.keyword !== occurrence.keyword) return null;
 	if (event.ordinal !== undefined && event.ordinal !== occurrence.ordinal) return null;
 	if (event.counter !== undefined && event.counter !== occurrence.counter) return null;
 	if (event.reaches !== undefined && !(occurrence.beforeCount !== undefined && occurrence.beforeCount < event.reaches && occurrence.afterCount! >= event.reaches)) return null;
@@ -213,10 +218,11 @@ function eventOf(occurrences: Occurrence[]): Trigger["event"] {
 		.map((one) => [targetKey(one), one])).values()];
 	const common = (key: "source" | "recipient") => first[key] && occurrences.every((one) => one[key]?.id === first[key]!.id && one[key]?.incarnation === first[key]!.incarnation) ? ref(first[key]!) : undefined;
 	const source = common("source"), recipient = common("recipient");
-	const player = first.amount !== undefined ? first.dealt : first.dealt ?? first.player;
+	const actor = (one: Occurrence) => one.on === "keyword" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
+	const player = actor(first);
 	const object = first.amount !== undefined ? objects.length === 1 ? objects[0] : undefined : first.found ?? objects[0];
 	return { ...(object ? { object } : {}), ...(objects.length ? { objects } : {}),
-		...(player !== undefined && occurrences.every((one) => (one.amount !== undefined ? one.dealt : one.dealt ?? one.player) === player) ? { player } : {}), ...(source ? { source } : {}), ...(recipient ? { recipient } : {}),
+		...(player !== undefined && occurrences.every((one) => actor(one) === player) ? { player } : {}), ...(source ? { source } : {}), ...(recipient ? { recipient } : {}),
 		...(first.amount !== undefined ? { amount: occurrences.reduce((sum, one) => sum + (one.amount ?? 0), 0) } : {}) };
 }
 

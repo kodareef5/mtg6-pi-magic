@@ -16,11 +16,11 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 29, covering eight decks; Izzet Prowess awaits its first finish |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Prowess versus Rakdos reached Grove's Bounty target division; the reversed pairing is running. Sanctum needs recorded surveil completion and token preparation |
+| Current runtime work | Prowess versus Rakdos reached Grove's Bounty target division; the reversed finish exposed Drake Hatcher's missing damage binding. Sanctum can now prepare surveil and its token |
 | Recent shared mechanics | Complete payments with explicit remaining resources; plot with later-turn casting; private face-down exile and continuing play conditions; stun-counter untap replacement |
 | Stored card assessments | 248 accepted, 60 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 282 invariant tests pass |
+| Validation | Type check and 283 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Stun-counter review withdrew three earlier counted Dragons games; the newest Dragons finish is also excluded. Earlier visibility, binding, permission and instruction-order failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

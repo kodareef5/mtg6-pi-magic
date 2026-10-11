@@ -197,7 +197,7 @@ export type Resolution = {
 	object: ObjectId;
 	/** "This": the source, or the permanent a resolving spell became. */
 	source: ObjectRef;
-	program: { instruction: Instruction; player?: SeatId }[];
+	program: { instruction: Instruction; player?: SeatId; detail?: string; completed?: Extract<Change, { do: "keyword" }> & { as?: string; selected: string } }[];
 	bound: Record<string, Bound>;
 	/** Targets illegal as resolution began, by target key (608.2b). */
 	illegal: string[];

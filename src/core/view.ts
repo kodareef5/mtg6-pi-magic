@@ -364,6 +364,9 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				parts.push(`${seat(table, change.who).name} looked at ${viewer === change.who ? seen?.card ?? "a card" : "a card"} privately`);
 				break;
 			}
+			case "keyword":
+				parts.push(`${seat(table, change.who).name} ${change.name === "scry" ? "scried" : "surveilled"} ${change.count}`);
+				break;
 			case "order":
 				parts.push(`${seat(table, change.who).name} put ${change.cards.length} cards on the ${change.position} of ${seat(table, change.whose).name}'s library${change.random ? " in random order" : " in their chosen order"}${viewer === change.who && !change.random ? `: ${change.cards.map((one) => receipt.before[one.id]?.card ?? "a card").join(", ")} (topmost first)` : ""}`);
 				break;

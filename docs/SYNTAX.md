@@ -186,6 +186,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `name-card` | `who` chooses an Oracle card name, optionally filtered by printed `types`; remember it as `key` on the current incarnation of `on` |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
+| `keyword` | `name` scry or surveil, `who`, `count`; one player's private choices followed by a completion event; `as` binds cards actually put away |
 | `activation-timing` | `who`, `ability: "loyalty"`, source selector `of`, and `until`; permits instant-speed loyalty activation, retaining priority, costs and each permanent's turn allowance |
 | `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
 | `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |

@@ -485,6 +485,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   cost-reductions.ts standing generic spell discounts, read from active abilities and proposed spell traits
   cost-selection.ts  staged graveyard payments by total mana value, before any resource is spent
   inspection.ts      bounded private looks and chosen or random library ordering
+  library-keywords.ts scry and surveil choices, followed by their recorded completion
   cast-words.ts      properties applied to matching spells during announcement
   faces.ts, rooms.ts  face characteristics, casting faces and unlocked Room doors
   sagas.ts            chapter entry, lore on the main-phase boundary and completed Saga sacrifice

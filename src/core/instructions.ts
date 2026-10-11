@@ -15,6 +15,7 @@ import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
 import { manaTerms } from "./funding.ts";
 import { inspection, selectionBlock } from "./inspection.ts";
+import { libraryKeyword } from "./library-keywords.ts";
 import { project } from "./view.ts";
 import { summary } from "./announce.ts";
 import { cardNameChoices } from "./card-names.ts";
@@ -56,6 +57,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "keyword": return libraryKeyword(table, scope, instruction);
 		case "reveal": {
 			const revealing = many(table, scope, instruction);
 			if (revealing.some((one) => one.faceDown)) return { actor: controller, question: "Reveal the selected face-down objects.", choices: [], blocked: "Revealing face-down objects requires identity visibility that this operation does not yet provide." };

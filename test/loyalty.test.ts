@@ -55,7 +55,7 @@ test("Empower creates a complete token, waits for the loyalty counter, and share
 		assert.ok(loyaltyUsed(tableWorld(table), token));
 		finish(table); // A token paid down to zero ceases before its ability resolves.
 		assert.equal(table.things.has(token.id), existing);
-		passBoth(table); step(table); // Surveil look.
+		passBoth(table); step(table); step(table); // Begin surveil, then look.
 		step(table, (label) => label.startsWith("Decline")); finish(table);
 		assert.equal(offered(table, minusOne.procedure).length, 0);
 		assert.equal(offered(table, minusThree.procedure).length, 0, "another ability cannot spend the same turn allowance");
