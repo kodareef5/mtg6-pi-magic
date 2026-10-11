@@ -13,7 +13,7 @@ import { facts, manaValue, type Printed } from "./printed.ts";
 import { activeFaces } from "./faces.ts";
 import { join } from "node:path";
 import { load as loadRules, rule, type Rules } from "./rules.ts";
-import { cardsIn, type Note, type Table, type Thing } from "./table.ts";
+import { type Note, type Table, type Thing } from "./table.ts";
 import type { Mana } from "./table.ts";
 import type { Modification, Registration } from "./language.ts";
 import { amount, holds, matches, tableWorld, type Scope, type Seen } from "./selectors.ts";
@@ -62,7 +62,11 @@ export const intrinsic = (traits?: Traits): Color[] => traits?.types.includes("l
 export function base(table: Table, object: Thing): Traits | undefined {
 	const printedCard = object.card ? table.printed[object.card] : undefined;
 	const active = printedCard ? activeFaces(printedCard, object) : [0];
-	const own = [...(object.registrations ?? []), ...registered(table, object)].filter((one) => one.face === undefined || active.includes(one.face));
+	// A self characteristic with an explicit nonbattlefield scope applies there, such as changeling.
+	// Its accepted source terms are journaled equipment until an entry freezes the permanent's registrations.
+	const standing = object.zone !== "battlefield" && object.card ? (table.work[object.owner]?.packages?.find((one) => one.card === object.card)?.registers ?? [])
+		.filter((one) => one.kind === "continuous" && one.affects.is === "this" && one.affects.zones?.includes(object.zone as never)) : [];
+	const own = [...(object.registrations ?? []), ...registered(table, object), ...standing].filter((one) => one.face === undefined || active.includes(one.face));
 	if (object.token) {
 		const spec = object.token;
 		return { name: spec.name, supertypes: [...(spec.supertypes ?? [])], types: [...spec.types], subtypes: [...(spec.subtypes ?? [])],
@@ -94,27 +98,32 @@ export function printedTraits(printed: Printed, name: string, own: Registration[
 const registered = (table: Table, object: Thing) => table.notes.flatMap((note) =>
 	note.kind === "register" && note.on.id === object.id && note.on.incarnation === object.incarnation ? [note.registration] : []);
 
-/** One object's characteristics now. Battlefield objects go through the layers. */
+/** One object's characteristics now, including explicitly scoped self terms outside the battlefield. */
 export function characteristics(table: Table, object: Thing): Traits | undefined {
-	return object.zone === "battlefield" ? walk(table).get(object.id) : base(table, object);
+	const real = table.things.get(object.id);
+	const same = real && real.incarnation === object.incarnation && real.zone === object.zone && real.face === object.face && real.ability?.x === object.ability?.x;
+	return walk(table, same ? undefined : object).get(object.id);
 }
 
 type Effect = { at: number; change: Modification; source?: Thing; applies: (scope: Scope, object: Seen) => boolean; when?: (scope: Scope) => boolean; ability?: Registration };
 
-const cache = new WeakMap<Table, { clock: number; size: number; traits: Map<string, Traits> }>();
+const cache = new WeakMap<Table, { clock: number; size: number; work: number; traits: Map<string, Traits> }>();
 /** Drop the walk for this revision: `commit` changes the table before the clock moves. */
 export const forget = (table: Table) => void cache.delete(table);
-/** Every battlefield object's characteristics, walked once per table revision. */
-export function walk(table: Table): Map<string, Traits> {
+/** Every object's characteristics, walked once per table revision and accepted equipment revision. */
+export function walk(table: Table, override?: Thing): Map<string, Traits> {
 	const cached = cache.get(table);
-	if (cached && cached.clock === table.cursor.clock && cached.size === table.things.size) return cached.traits;
-	const field = cardsIn(table, "battlefield");
+	if (!override && cached && cached.clock === table.cursor.clock && cached.size === table.things.size && cached.work === table.workLog.length) return cached.traits;
+	const field = [...table.things.values()].filter((one) => one.id !== override?.id);
+	if (override) field.push(override);
 	const now = new Map(field.flatMap((object) => { const traits = base(table, object); return traits ? [[object.id, traits] as const] : []; }));
-	const world = tableWorld(table, (object: Seen) => object.zone === "battlefield" ? now.get(object.id) : base(table, object as Thing));
+	const world = tableWorld(table, (object: Seen) => now.get(object.id));
+	world.objects = field;
 	const scope = (source?: Thing): Scope => ({ world, controller: source?.controller ?? 0, ...(source ? { source } : {}) });
 
 	const effects: Effect[] = [
-		...field.flatMap((source) => (now.get(source.id)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" ? [{
+		...field.flatMap((source) => (now.get(source.id)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" &&
+			(source.zone === "battlefield" || ability.affects.is === "this" && ability.affects.zones?.includes(source.zone as never)) ? [{
 			at: source.transformed ?? source.entered ?? 0, change: ability.change, source, ability,
 			applies: (inner, object) => matches(inner, object, ability.affects), ...(ability.if ? { when: (inner: Scope) => holds(inner, ability.if!) } : {}),
 		}] : [])),
@@ -180,7 +189,7 @@ export function walk(table: Table): Map<string, Traits> {
 			if (counter) { traits.power += Number(counter[1]) * count; traits.toughness! += Number(counter[2]) * count; }
 		}
 	}
-	cache.set(table, { clock: table.cursor.clock, size: table.things.size, traits: now });
+	if (!override) cache.set(table, { clock: table.cursor.clock, size: table.things.size, work: table.workLog.length, traits: now });
 	return now;
 }
 

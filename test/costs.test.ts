@@ -7,6 +7,9 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
 import { activationChanges } from "../src/core/procedures.ts";
 import { cardsIn } from "../src/core/table.ts";
+import { editWork } from "../src/core/work-tools.ts";
+import { characteristics } from "../src/core/characteristics.ts";
+import { project } from "../src/core/view.ts";
 import type { Registration } from "../src/core/language.ts";
 import { announce, establish, example, finish, main, offered, passBoth, place, step } from "./play.ts";
 
@@ -53,12 +56,23 @@ test("costs select distinct available resources and pay once before any conditio
 	passBoth(table); finish(table);
 	assert.equal(claw.zone, "graveyard"); assert.equal(table.seats[0]!.life, 22);
 	assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
-	const beheld = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], "behold-announcement");
+	for (const zone of ["battlefield", "hand"] as const) {
+	const beheld = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], `behold-${zone}`);
 	const changeling: Registration = { kind: "continuous", basis: "Changeling (This card is every creature type.)",
-		affects: { is: "this" }, change: { subtypes: { allCreatureTypes: true } } };
-	const core = establish(beheld, 0, "Firdoch Core", [changeling]);
+		affects: { is: "this", zones: ["hand", "battlefield", "stack"] }, change: { subtypes: { allCreatureTypes: true } } };
 	place(beheld, 1, "hand", "Shock");
 	main(beheld, 1, 2);
+	const core = zone === "battlefield" ? establish(beheld, 0, "Firdoch Core", [changeling]) : place(beheld, 0, "hand", "Firdoch Core")[0]!;
+	if (zone === "hand") {
+		assert.ok(!characteristics(beheld, core)!.allCreatureTypes);
+		const clock = beheld.cursor.clock;
+		editWork(beheld, 0, [{ do: "package.put", package: { card: "Firdoch Core", registers: [changeling] } }], "known-changeling");
+		assert.equal(beheld.cursor.clock, clock, "accepting source meaning moves nothing");
+		assert.equal(characteristics(beheld, core)!.allCreatureTypes, true, "accepted self terms invalidate the derived reading without motion");
+		assert.equal(characteristics(beheld, { ...core, zone: "stack" })!.allCreatureTypes, true, "a proposed spell retains its all-zone characteristic");
+		assert.equal(project(beheld, 0).objects!.find((one) => one.id === core.id)!.traits!.allCreatureTypes, true);
+		assert.equal(project(beheld, 1).objects!.find((one) => one.id === core.id)?.traits, undefined, "a private characteristic reveals no identity");
+	}
 	place(beheld, 0, "hand", "Dispelling Exhale");
 	commit(beheld, [{ do: "add-mana", who: 0, colors: ["U", "C"] }, { do: "add-mana", who: 1, colors: ["R"] }], "game-setup");
 	const before = structuredClone(beheld), startAt = beheld.ledger.length;
@@ -66,10 +80,11 @@ test("costs select distinct available resources and pay once before any conditio
 		targets: [{ player: "opponent" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] });
 	apply(beheld, "pass", "model", "chosen");
 	const shown = announce(beheld, example("Dispelling Exhale with a beheld Dragon"));
-	assert.deepEqual(shown.activation.cost.shown, [{ id: core.id, incarnation: core.incarnation }]);
-	assert.ok(!beheld.log.at(-1)!.changes.some((change) => change.do === "reveal"), "choosing a public Dragon is not revealing a hand card");
+	assert.deepEqual(shown.activation.cost.shown, [{ id: core.id, incarnation: core.incarnation, ...(zone === "hand" ? { reveal: true } : {}) }]);
+	assert.equal(beheld.log.at(-1)!.changes.some((change) => change.do === "reveal"), zone === "hand", "only a Dragon in hand must be revealed");
 	passBoth(beheld); finish(beheld);
 	assert.equal(cardsIn(beheld, "stack").length, 0);
 	assert.equal(beheld.seats[0]!.life, 20);
 	assert.deepEqual(relive(before, beheld.ledger.slice(startAt)), beheld);
+	}
 });
