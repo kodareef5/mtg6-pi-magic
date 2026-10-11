@@ -147,7 +147,7 @@ is `.pi/phase2/ledger-concepts.py`.
 The alpha registers main-deck copies of the nineteen imported legal lists.
 The original tournament files keep their sideboards. No main-deck requirement
 is waived. The pool contains 255 distinct main-deck cards. The complete store,
-including sideboard cards, has 221 source-pinned assessments and 86 recorded
+including sideboard cards, has 223 source-pinned assessments and 84 recorded
 refusals, plus five basic lands requiring no assessment.
 
 | Measure | Current evidence |

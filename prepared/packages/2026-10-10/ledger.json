@@ -228,14 +228,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Gleaming Bastion": {
-		"reason": "Gleaming Bastion is not ready: {T}: Add {W} or {U}. Activate only if this land entered this turn or if you control a basic land. — Missing operation: a condition testing whether this source entered the battlefield this turn, combined with controlling a basic land. The supported history conditions do not track entry events, so the complete activation restriction cannot be registered faithfully.",
-		"decks": [
-			"Azorius Momo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Gollum, Riddle Master": {
 		"reason": "Gollum, Riddle Master is not ready: As Gollum enters, choose odd or even. (Zero is even.) — The entry-registration syntax cannot make and retain an odd/even choice as part of entering.; Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card. — The syntax cannot test mana-value parity against the retained entry choice or offer a modal triggered ability while tracking and excluding modes previously chosen for this permanent. Separate watches would incorrectly trigger all modes; spell-mode procedures cannot implement this standing trigger.",
 		"decks": [
@@ -243,14 +235,6 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
-	},
-	"Hidden Lair": {
-		"reason": "Hidden Lair is not ready: {T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land. — Missing operation: testing whether this permanent's current incarnation entered the battlefield this turn. The basic-land condition and individual mana choices are expressible, but the complete activation restriction is not.",
-		"decks": [
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
 	},
 	"Hydro-Man, Fluid Felon": {
 		"reason": "Hydro-Man, Fluid Felon is not ready: At the beginning of your end step, untap Hydro-Man. Until your next turn, he becomes a land and gains \"{T}: Add {U}.\" (He's not a creature during that time.) — Untapping, setting the card type to land, and granting the blue tap mana ability are expressible, but the required duration \"until your next turn\" is not. The available durations cannot expire the type-changing effect and granted mana ability as your next turn begins; restoring printed types later would not correctly end this effect amid other type-changing effects. This standing trigger cannot be deferred or shortened to end of turn.",

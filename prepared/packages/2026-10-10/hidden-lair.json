@@ -1,0 +1,93 @@
+{
+	"card": "Hidden Lair",
+	"generated": "2026-10-10",
+	"source": "f3db672311af73da09951d4931ef94843b19e6c65118c451a6edfabb718b2fc7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hidden Lair",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"B"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}

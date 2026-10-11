@@ -1,0 +1,93 @@
+{
+	"card": "Gleaming Bastion",
+	"generated": "2026-10-10",
+	"source": "df9ab8c2352384e2255b1c271c5cf8ee38ba02848c463d180ced243e3d39ea84",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gleaming Bastion",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			},
+			{
+				"basis": "{T}: Add {W} or {U}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"W"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {W} or {U}. Activate only if this land entered this turn or if you control a basic land.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"U"
+				],
+				"if": {
+					"any": [
+						{
+							"enteredThisTurn": "this"
+						},
+						{
+							"amount": {
+								"count": {
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"land"
+									],
+									"supertypes": [
+										"basic"
+									],
+									"controller": "you"
+								}
+							},
+							"atLeast": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}
