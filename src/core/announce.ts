@@ -17,7 +17,7 @@ import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, spentWords, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
-import { allowance, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
+import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
@@ -245,6 +245,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	const offered: ProcedureOption[] = [];
 	for (const original of sources) {
+		if (procedure.timing !== "spell" && procedure.timing !== "land" && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
 		const source = selected ? { ...original, traits: printedTraits(selected, original.card!), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
 		const scope: Scope = { world, controller: frame.seat, source };

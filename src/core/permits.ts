@@ -47,9 +47,20 @@ export function castingPrices(world: World, seat: SeatId, object: Seen, turn: nu
 export function castRestrictions(world: World, seat: SeatId): string[] {
 	return world.objects.filter((source) => source.zone === "battlefield").flatMap((source) => {
 		const scope = { world, source, controller: source.controller };
-		return (world.read(source)?.registrations ?? []).flatMap((registration) => registration.kind === "prohibit" &&
+		return (world.read(source)?.registrations ?? []).flatMap((registration) => registration.kind === "prohibit" && "cast" in registration &&
 			players(scope, registration.cast).includes(seat) && (!registration.during || world.turn && players(scope, registration.during).includes(world.turn.active)) &&
 			(!registration.if || holds(scope, registration.if)) ? [`${world.read(source)?.name ?? source.id}: ${registration.basis}`] : []);
+	});
+}
+
+/** Activation restrictions follow the source in every zone, including a visible card in hand. */
+export function activationRestrictions(world: World, object: Seen, mana = false): string[] {
+	return world.objects.filter((source) => source.zone === "battlefield").flatMap((source) => {
+		const scope = { world, source, controller: source.controller };
+		return (world.read(source)?.registrations ?? []).flatMap((registration) => registration.kind === "prohibit" && "activate" in registration &&
+			!(mana && registration.exceptMana) && (!registration.if || holds(scope, registration.if)) &&
+			matches(scope, object, registration.activate, world.read(object), [object.zone])
+			? [`${world.read(source)?.name ?? source.id}: ${registration.basis}`] : []);
 	});
 }
 

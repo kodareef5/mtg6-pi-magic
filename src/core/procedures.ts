@@ -18,7 +18,7 @@ import { beforeEntry } from "./entry-payments.ts";
 import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
-import { allowance, castingPrices, castRestrictions, flashed, playable } from "./permits.ts";
+import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Change } from "./syntax.ts";
@@ -118,6 +118,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land", activation.face) :
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
+	if (!fromHand && activationRestrictions(world, object, activation.timing === "mana").length)
+		throw new Error(`Activation is prohibited: ${activationRestrictions(world, object, activation.timing === "mana").join("; ")}`);
 	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
 	if (activation.timing === "spell" && !castingPrices(world, controller, object, table.cursor.turn, activation.face)
 		.some((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack)) throw new Error("The selected casting permission or its departure replacement is no longer available.");
@@ -176,6 +178,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	for (const tap of funding) {
 		const mana = live(table, tap.source);
 		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
+		if (activationRestrictions(world, mana, true).length) throw new Error("A mana source in the payment cannot activate its ability.");
 		const made = characteristics(table, mana);
 		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!) && !tap.spellWords && !tap.spendOnly && !tap.until && !tap.sacrifice && !tap.life)) throw new Error("A basic land type produces one mana of that type's color with no additional effects.");
 		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, { world, controller, source: mana })).some((one) => one.colors.join() === tap.colors.join() &&

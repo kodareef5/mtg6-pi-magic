@@ -8,8 +8,8 @@
 		"card": "Clarion Conqueror",
 		"registers": [
 			{
-				"basis": "Flying",
 				"kind": "continuous",
+				"basis": "Flying",
 				"affects": {
 					"is": "this"
 				},
@@ -20,14 +20,16 @@
 				}
 			},
 			{
+				"kind": "prohibit",
 				"basis": "Activated abilities of artifacts, creatures, and planeswalkers can't be activated.",
-				"kind": "continuous",
-				"affects": {
-					"is": "this"
-				},
-				"change": {
-					"words": [
-						"activated abilities of artifacts, creatures, and planeswalkers can't be activated"
+				"activate": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"artifact",
+						"creature",
+						"planeswalker"
 					]
 				}
 			}

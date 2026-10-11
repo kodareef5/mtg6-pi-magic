@@ -6,9 +6,8 @@ the operation does not yet support other name qualifications. The catalog
 includes individual faces and cards outside the game's format (201.4a-f).
 It never learns names from hidden game objects.
 
-This example covers Petrified Hamlet's name choice and granted mana ability.
-Its restriction on activating other abilities still needs separate standing
-terms before the complete card can be admitted to setup.
+Petrified Hamlet's restriction reads the named source in any zone. Its mana
+exception allows both native mana abilities and the colorless ability it grants.
 
 ```json package
 {
@@ -18,6 +17,10 @@ terms before the complete card can be admitted to setup.
       "kind": "watch", "basis": "When this land enters, choose a land card name.",
       "event": { "on": "enters", "of": { "is": "this" } },
       "effect": { "instructions": [{ "do": "name-card", "who": "you", "on": "this", "key": "land", "types": ["land"] }] }
+    },
+    {
+      "kind": "prohibit", "basis": "Activated abilities of sources with the chosen name can't be activated unless they're mana abilities.",
+      "activate": { "name": { "chosen": "land" } }, "exceptMana": true
     },
     {
       "kind": "continuous", "basis": "Lands with the chosen name have \"{T}: Add {C}.\"",

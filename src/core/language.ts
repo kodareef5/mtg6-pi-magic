@@ -315,6 +315,8 @@ export const Defs = {
 			cast: Type.Optional(object({ from: Type.Array(Zone, { minItems: 1 }), mana: ManaCost, leavesStack: Type.Optional(Zone) })) }),
 		/** A standing restriction on the named players' casting, optionally during a named player's turn. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), cast: PlayerRef, during: Type.Optional(PlayerRef), if: Type.Optional(Type.Ref("Condition")) }),
+		/** Restrictions name sources in any zone; a mana exception preserves payment abilities. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), activate: Type.Ref("Selector"), exceptMana: Type.Optional(Type.Literal(true)), if: Type.Optional(Type.Ref("Condition")) }),
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("suppress"), event: Type.Ref("Event") }),
 	]),
 };

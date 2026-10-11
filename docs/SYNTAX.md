@@ -304,15 +304,19 @@ checked by the table; the opponent sees both, and objects when they differ.
 | `replace` | "if it would die, exile it instead" | 614 |
 | `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |
 | `permit` | an extra land play, lands from another zone, flash; `cast: {from, mana, leavesStack?}` grants this card's owner an alternative cast from the named zones | 305.2, 702.180 |
-| `prohibit` | `cast` names players who cannot cast; optional `during` names whose turn and `if` a condition | 101.2 |
+| `prohibit` | `cast` names players who cannot cast, with optional `during`; alternatively, `activate` selects sources whose abilities cannot be activated, with optional `exceptMana: true`; either shape accepts `if` | 101.2 |
 | `suppress` | events that don't cause triggers | Torpor Orb |
 
 Keywords are `continuous` registrations with `words` on the object itself.
 Casting restrictions use `prohibit`, evaluated from the active registrations
 and current turn. They apply to casts from every permitted zone. Losing
-abilities removes the restriction through the layers. Activations, land plays
-and required interpretation work keep their existing handling. This shape does
-not express spell-count limits or restrictions on particular spell types.
+abilities removes the restriction through the layers. `prohibit.activate`
+defaults to sources in any zone, unless its selector narrows the zones. It
+checks both listed activations and mana abilities used during payment. The
+`exceptMana` exception preserves both registered and intrinsic mana abilities.
+Neither shape hides required interpretation work. These restrictions do not
+express spell-count limits or restrictions on particular spell types, or
+distinguish individual non-mana abilities on the same source.
 
 A native `permit.cast` is read from the card's accepted standing terms in its
 stated zone. It activates readiness before affordability or timing, then

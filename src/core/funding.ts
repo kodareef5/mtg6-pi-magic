@@ -7,6 +7,7 @@
  */
 import { currentPlan, select } from "./query.ts";
 import { intrinsic } from "./characteristics.ts";
+import { activationRestrictions } from "./permits.ts";
 import { manaDuration, type Mana } from "./table.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
 import type { Registration, Selector } from "./language.ts";
@@ -43,6 +44,7 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
  */
 export function produces(registration: Registration, scope: Scope): Yield[] {
 	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
+	if (scope.source && activationRestrictions(scope.world, scope.source, true).length) return [];
 	if (registration.if && !holds(scope, registration.if)) return [];
 	const { tap: _, sacrifice, life, ...other } = registration.cost;
 	if (Object.keys(other).length || (sacrifice !== undefined && sacrifice !== "this")) return [];
@@ -88,6 +90,7 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 	for (const object of select({ zones: ["battlefield"], controller: "self", tapped: false }, frame)) {
 		if (except.has(object.id) || sick(frame, object)) continue;
 		const scope = { world: viewWorld(frame.view), controller: frame.seat, source: object };
+		if (activationRestrictions(scope.world, object, true).length) continue;
 		const life = frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0;
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),

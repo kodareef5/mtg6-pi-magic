@@ -1,0 +1,84 @@
+{
+	"card": "Petrified Hamlet",
+	"generated": "2026-10-10",
+	"source": "b58dd07ce12e1fbc43fa33fc7c4075487b52d652ccf7267e301681ea4e2819c5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Petrified Hamlet",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this land enters, choose a land card name.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "name-card",
+							"who": "you",
+							"on": "this",
+							"key": "land",
+							"types": [
+								"land"
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "prohibit",
+				"basis": "Activated abilities of sources with the chosen name can't be activated unless they're mana abilities.",
+				"activate": {
+					"name": {
+						"chosen": "land"
+					}
+				},
+				"exceptMana": true
+			},
+			{
+				"kind": "continuous",
+				"basis": "Lands with the chosen name have \"{T}: Add {C}.\"",
+				"affects": {
+					"types": [
+						"land"
+					],
+					"name": {
+						"chosen": "land"
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "mana",
+							"basis": "Lands with the chosen name have \"{T}: Add {C}.\"",
+							"cost": {
+								"tap": true
+							},
+							"colors": [
+								"C"
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add {C}.",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}
