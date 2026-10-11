@@ -55,8 +55,13 @@ const reduced = (frame: Frame, source: SeenObject, price: Price): Price => ({ ..
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
 export function afterUntap(frame: Frame): Frame {
 	return { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0, history: [],
-		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield"
-			? { ...object, tapped: false, summoningSick: false } : object),
+		objects: (frame.view.objects ?? []).map((object) => {
+			if (object.controller !== frame.seat || object.zone !== "battlefield") return object;
+			const stun = object.tapped ? object.counters?.stun ?? 0 : 0;
+			const counters = { ...object.counters };
+			if (stun > 1) counters.stun = stun - 1; else if (stun) delete counters.stun;
+			return { ...object, tapped: stun > 0, ...(stun ? { counters } : {}), summoningSick: false };
+		}),
 		pools: (frame.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => manaSurvives(mana, "cleanup")) })) } };
 }
 
@@ -138,7 +143,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	// Conditional steps, such as "if I drew a land", are not counted: they may not happen.
 	const ours = (one: PlanOption) => !one.if && one.when.active !== "opponent" && (one.when.fromTurn ?? 0) <= turn && turn <= (one.when.throughTurn ?? Infinity);
 
-	// On a later turn every permanent of ours has untapped and none is new.
+	// Forecast the next untap, including stun counters. None of our permanents is new.
 	// Floating mana that does not persist is gone by then.
 	const lasting = (pools: Frame["view"]["pools"], when?: PlanOption["when"]) => {
 		const step = when?.step ?? (when?.phase ? TURN.find((one) => STEPS[one].phase === when.phase) : undefined);

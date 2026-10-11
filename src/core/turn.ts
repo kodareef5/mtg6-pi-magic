@@ -15,8 +15,8 @@ import { chapters } from "./sagas.ts";
  * Nobody is asked when there is one lawful answer, and most untap steps, most
  * discards and most damage assignments have exactly one. Untapping looks
  * mechanical and is not: a permanent may refuse, an effect may cap how many,
- * and untapping may cost something. Milestone one has none of those, so it
- * untaps everything in one move.
+ * and untapping may cost something. Stun counters replace untaps in commit;
+ * other optional or restricted untap choices still need handlers.
  */
 export function turnBased(table: Table): Pending | null {
 	const cursor = table.cursor;
@@ -33,13 +33,14 @@ export function turnBased(table: Table): Pending | null {
 	if (step === "untap") {
 		const tapped = cardsIn(table, "battlefield").filter((t) => t.controller === active.id && t.tapped);
 		if (!tapped.length) return null;
+		const stunned = tapped.filter((one) => (one.counters.stun ?? 0) > 0).length;
 		return {
 			situation: "turn-based",
 			seat: active.id,
 			question: "Untap.",
 			moves: [
 				{
-					option: { id: "untap", label: `Untap ${tapped.length}`, objects: tapped.map(({ id, incarnation }) => ({ id, incarnation })) },
+					option: { id: "untap", label: stunned ? `Untap ${tapped.length - stunned}; remove one stun counter from each of ${stunned} other permanents` : `Untap ${tapped.length}`, objects: tapped.map(({ id, incarnation }) => ({ id, incarnation })) },
 					changes: tapped.map((t) => ({ do: "untap" as const, what: t.id })),
 					reason: "state-based-action",
 				},

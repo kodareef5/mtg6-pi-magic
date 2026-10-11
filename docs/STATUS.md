@@ -16,11 +16,11 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 25, covering seven decks; Boros Dragons needs corrected replay and Izzet Prowess awaits its first finish |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Correct stun-counter untaps found in Dragons review; Izzet Prowess versus Rakdos and Azorius versus Control are running |
+| Current runtime work | Corrected Dragons games are running; Flameshape needs private face-down exile and a continuing play condition; Sanctum needs surveil and token preparation |
 | Recent shared mechanics | Complete payments with explicit remaining resources; plot with later-turn casting; offspring copies; damage increases; additional triggers; relative-power blocking restrictions |
 | Stored card assessments | 247 accepted, 61 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 279 invariant tests pass |
+| Validation | Type check and 280 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Stun-counter review withdrew three earlier counted Dragons games; the newest Dragons finish is also excluded. Earlier visibility, binding, permission and instruction-order failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

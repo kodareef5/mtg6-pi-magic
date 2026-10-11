@@ -67,7 +67,7 @@ const SUBMIT = {
 const SYSTEM = coordinatorSystem(JSON.stringify(planReference));
 const REPAIR_SYSTEM = coordinatorSystem(JSON.stringify(planReference), false);
 const RESPONSE_SYSTEM = responseSystem(JSON.stringify(ResponseSchema));
-const FORECAST = "It shows your next upkeep after a normal untap, before the unknown draw and any upkeep effects. Your permanents survive and untap with their current characteristics; floating mana that does not persist is gone. It does not predict the opponent's actions or other effects before then.";
+const FORECAST = "It shows your next upkeep after untapping, before the unknown draw and any upkeep effects. Your permanents survive with their current characteristics. Each tapped permanent with stun counters loses one counter and stays tapped; other permanents untap. Floating mana that does not persist is gone. It does not predict the opponent's actions or other untap effects before then.";
 
 /** Interpreter checks: activated effects need procedures, and cast selectors must reach the stack. */
 export function registrationProblems(packages: readonly Package[]): string[] {

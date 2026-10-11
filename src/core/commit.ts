@@ -165,6 +165,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		if (change.do === "move" && instead?.kind === "replace") change.to = instead.to as Zone;
 		if (change.do === "move" && dying?.zone === "battlefield" && (dying.counters.finality ?? 0) > 0) change.to = "exile";
 	}
+	// 122.1d: one or more stun counters replace an actual untap with removing one.
+	// Rewrite the event so receipts and counter watches see the removal, not an untap.
+	changes = changes.map((change) => {
+		const object = change.do === "untap" ? table.things.get(change.what) : undefined;
+		return object?.zone === "battlefield" && object.tapped && (object.counters.stun ?? 0) > 0
+			? { do: "counters", what: object.id, kind: "stun", amount: -1 } : change;
+	});
 	// Read the damage sources and recipients before any result changes the group.
 	const damage = new Map<Extract<Change, { do: "damage" }>, { source: ReturnType<typeof damageSource>; target?: Traits }>();
 	const world = changes.some((change) => change.do === "damage") ? tableWorld(table) : undefined;
