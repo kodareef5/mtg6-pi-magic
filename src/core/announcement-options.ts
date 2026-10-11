@@ -2,6 +2,7 @@
  * Feasibility reads projected resources; it neither chooses nor spends them. */
 import { offerBases, offerCosts, paidActivation, targetCandidates, type OfferBase, type OfferCost } from "./announce.ts";
 import { payable, paymentOptions } from "./payment-options.ts";
+import { completePayments } from "./complete-payments.ts";
 import { targetKey, type Chosen } from "./selectors.ts";
 import type { Activation, LedgerRow } from "./table.ts";
 import type { Procedure } from "./language.ts";
@@ -10,6 +11,8 @@ import type { Frame, ObjectRef, Option } from "./types.ts";
 export type Announcement = {
 	controller: number; source: ObjectRef; prefix: string; procedure: Procedure; permission?: string;
 	x?: number; targets: Chosen[][]; selecting: Chosen[]; cost?: OfferCost; payment: string[];
+	/** Recorded per announcement; absence preserves historical individual menus. */
+	paymentMode?: "complete" | "individual";
 	execution?: LedgerRow["execution"];
 	/** Accepted plan whose guidance accompanies the selected use. */
 	plan?: number;
@@ -58,7 +61,7 @@ export function announcementOffers(procedure: Procedure, frame: Frame, prefix: s
 		if (seen.has(key) || !canAnnounce(base, frame)) continue;
 		seen.add(key);
 		const announcement: Announcement = { controller: frame.seat, source: base.sourceRef, prefix, procedure: base.procedure,
-			...(base.granted.permission ? { permission: base.granted.permission } : {}), ...(!base.mana.x ? { x: 0 } : {}), targets: [], selecting: [], payment: [] };
+			...(base.granted.permission ? { permission: base.granted.permission } : {}), ...(!base.mana.x ? { x: 0 } : {}), targets: [], selecting: [], payment: [], paymentMode: "complete" };
 		const option: Option = { id: `${prefix}:begin${procedure.face ? `:f${procedure.face}` : ""}:${key}`,
 			label: `${procedure.claim} (${base.selected?.name ?? base.source.card ?? base.source.id})`, objects: [base.sourceRef],
 			shows: [base.granted.mana ? `Permission ${base.granted.permission}: cast for ${base.granted.mana === "printed" ? `the printed ${base.selected?.mana}` : `${base.granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${base.granted.leavesStack ? ` Put it into ${base.granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
@@ -78,4 +81,19 @@ export function announcedActivation(frame: Frame, draft: Announcement): Activati
 	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, new Set(draft.cost.extra.uses), base.spending);
 	if (!menu.complete) return;
 	return { ...paidActivation(base, frame, draft.cost, menu.funding), targets: structuredClone(draft.targets) };
+}
+
+/** A complete payment confirms the already selected use in one voluntary pick. */
+export function announcementPayments(frame: Frame, draft: Announcement) {
+	if (draft.paymentMode !== "complete" || !draft.cost || draft.x === undefined) return undefined;
+	const base = announcementBases(frame, draft).next().value;
+	if (!base || draft.targets.length !== base.slots.length) return undefined;
+	const cost = { ...draft.cost.price, life: draft.cost.extra.paid.life };
+	const menu = paymentOptions(frame, cost, draft.payment, new Set(draft.cost.extra.uses), base.spending);
+	return completePayments(frame, cost, menu)?.map((payment, at) => {
+		const activation = { ...paidActivation(base, frame, draft.cost!, payment.funding), targets: structuredClone(draft.targets) };
+		return { activation, option: { id: `announce:payment:${at}`, label: `Confirm and pay: ${payment.label}`, use: activation,
+			objects: [draft.source, ...draft.targets.flat().flatMap(one => "id" in one ? [one] : []), ...draft.cost!.extraRefs, ...payment.funding.taps.map(one => one.source)],
+			shows: [draft.cost!.extra.shows, payment.leaves].filter(Boolean).join(" ") } };
+	});
 }

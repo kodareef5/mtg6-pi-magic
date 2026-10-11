@@ -6,7 +6,8 @@ import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { fundings, type Price } from "../src/core/funding.ts";
 import { payable, paymentOptions } from "../src/core/payment-options.ts";
-import { workFrame } from "../src/core/work-tools.ts";
+import { completePayments } from "../src/core/complete-payments.ts";
+import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { main, establish, place } from "./play.ts";
 
 test("partial mana selections retain every complete payment without spending or enumerating the product", () => {
@@ -24,6 +25,10 @@ test("partial mana selections retain every complete payment without spending or 
 			const price = { generic, colors }, all = fundings(frame, price, except);
 			assert.equal(payable(frame, price, except), all.length > 0);
 			assert.equal(paymentOptions(frame, price, [], except).possible, all.length > 0);
+			const compact = completePayments(frame, price, paymentOptions(frame, price, [], except), 256, 10000)!;
+			assert.ok(compact, "the small position is completely searched");
+			for (const { funding } of all) assert.ok(compact.some(one => isDeepStrictEqual(one.funding.paid.slice().sort(), funding.paid.slice().sort()) &&
+				isDeepStrictEqual(one.funding.taps.slice().sort((a, b) => a.source.id.localeCompare(b.source.id)), funding.taps.slice().sort((a, b) => a.source.id.localeCompare(b.source.id)))), "every historical representative remains reachable in a complete menu");
 			for (const { funding } of all) {
 				const selected: string[] = [];
 				for (const part of [...funding.paid.map((id) => ({ paid: [id], taps: [] })), ...funding.taps.map((tap) => ({ paid: [], taps: [tap] }))]) {
@@ -48,6 +53,11 @@ test("partial mana selections retain every complete payment without spending or 
 	onlyTown.view.pools = [];
 	assert.equal(payable(onlyTown, { generic: 1, colors: ["W"] }), false, "two abilities of the same land cannot supply two mana");
 	const townMenu = paymentOptions(onlyTown, { generic: 1, colors: [] });
+	const townPayments = completePayments(onlyTown, { generic: 1, colors: [] }, townMenu)!;
+	assert.equal(townPayments.length, 6, "same tapped land retains colorless and all five paid colored abilities");
+	assert.equal(townPayments.filter(one => one.parts[0]!.life === 1).length, 5);
+	assert.equal(completePayments(onlyTown, { generic: 1, colors: [] }, townMenu, 1), undefined, "a short menu cap never returns only its first payment");
+	assert.equal(completePayments(onlyTown, { generic: 1, colors: [] }, townMenu, 16, 1), undefined, "a work bound returns to individual choices");
 	assert.ok(townMenu.next.length > 1, "the player chooses which mana ability to use");
 	assert.throws(() => paymentOptions(onlyTown, { generic: 2, colors: [] }, townMenu.next.slice(0, 2).map((one) => one.id)), /selected twice/);
 
@@ -55,13 +65,33 @@ test("partial mana selections retain every complete payment without spending or 
 	place(wide, 0, "battlefield", ...Array(15).fill("Forest")); main(wide, 0);
 	const visible = workFrame(wide, 0), price = { generic: 6, colors: ["G" as const] }, selected: string[] = [];
 	assert.equal(paymentOptions(visible, price).next.length, 15, "one choice per physical source, not one per seven-land subset");
+	const whole = completePayments(visible, price, paymentOptions(visible, price))!;
+	assert.equal(whole.length, 1, "interchangeable Forests produce one named representative payment");
+	assert.equal(whole[0]!.funding.taps.length, 7); assert.match(whole[0]!.leaves, /Forest/);
 	for (let at = 0; at < 7; at++) {
 		const menu = paymentOptions(visible, price, selected);
 		assert.equal(menu.next.length, 15 - at); assert.equal(menu.complete, false);
 		selected.push(menu.next.at(-1)!.id);
 	}
 	assert.equal(paymentOptions(visible, price, selected).complete, true);
+	assert.notDeepEqual(paymentOptions(visible, price, selected).funding, whole[0]!.funding, "individual selection retains the other physical Forest identities");
+	const partialMenu = paymentOptions(visible, price, selected.slice(0, 3));
+	assert.ok(completePayments(visible, price, partialMenu)!.every(one => partialMenu.chosen.every(part => one.parts.includes(part))), "complete choices keep every already selected source");
 	assert.equal(paymentOptions(visible, price, selected.slice(0, -1)).complete, false, "withdrawing one selection reopens payment");
 	assert.equal(payable(visible, { generic: 6, colors: ["R"] }), false);
 	assert.ok([...wide.things.values()].filter((one) => one.zone === "battlefield").every((one) => !one.tapped));
+	const forest = visible.view.objects!.find(one => one.zone === "battlefield")!;
+	editWork(wide, 0, [{ do: "plan.put", plan: { objective: "Keep a particular Forest open", guidance: "Retain its identity in payment choices.", steps: [],
+		holds: [{ objects: { refs: [{ id: forest.id, incarnation: forest.incarnation }] }, purpose: "A later response" }] } }], "held-source");
+	const held = workFrame(wide, 0), heldPayments = completePayments(held, price, paymentOptions(held, price))!;
+	assert.equal(heldPayments.length, 2, "a held Forest is distinct from the interchangeable unheld Forests");
+	assert.ok(heldPayments.some(one => one.funding.taps.some(tap => tap.source.id === forest.id)));
+	assert.ok(heldPayments.some(one => one.funding.taps.every(tap => tap.source.id !== forest.id)), "a reservation labels choices without removing them");
+	commit(wide, [{ do: "add-mana", who: 0, colors: ["G"], until: "end-of-turn" },
+		{ do: "add-mana", who: 0, colors: ["G"], spellWords: ["can't be countered"] }], "game-setup");
+	const floating = workFrame(wide, 0); floating.view.objects = [];
+	const alternatives = completePayments(floating, { generic: 1, colors: [] }, paymentOptions(floating, { generic: 1, colors: [] }))!;
+	assert.equal(alternatives.length, 2, "floating mana with different duration or granted words is not interchangeable");
+	assert.ok(alternatives.some(one => one.label.includes("can't be countered")));
+	assert.ok(alternatives.every(one => one.leaves.includes("Keeps floating")));
 });

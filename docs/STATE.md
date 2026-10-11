@@ -41,12 +41,18 @@ preserving priority and turn progression.
 
 New games record `announcementsFrom: 0` in their header. Priority offers each
 source, accepted mode and permission once. The seat then chooses X, targets,
-additional costs and individual mana sources. Each answer is a ledger row;
+additional costs and a complete payment or individual mana sources. Each answer is a ledger row;
 the private pending announcement survives replay and cloning. No card moves,
 mana is spent, trigger fires or opponent receives priority during selection.
 Confirmation commits the accepted operation and its payment together. A
 graveyard payment, when required, continues into its own selection before that
 commit. Cancellation clears the pending choices and spends nothing.
+
+Each new announcement records `paymentMode: "complete"`. A bounded complete
+menu gives named payment alternatives and the resources left available;
+selecting one confirms the use. `"individual"` retains one-source selections.
+An absent field keeps historical staged menus, including halfway through a
+resumed payment. Every mode preserves the same accepted terms and payment checks.
 
 The selected use retains its accepted terms and plan revision. Only the final
 operation records plan execution. Pending-choice changes write no public

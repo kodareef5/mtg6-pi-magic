@@ -3,7 +3,7 @@
 import { commit } from "./commit.ts";
 import { project } from "./view.ts";
 import { aiming, targetCandidates } from "./announce.ts";
-import { affordableCosts, announcedActivation, announcementBases, canAnnounce, type Announcement } from "./announcement-options.ts";
+import { affordableCosts, announcedActivation, announcementBases, announcementPayments, canAnnounce, type Announcement } from "./announcement-options.ts";
 import { paymentOptions } from "./payment-options.ts";
 import { targetKey } from "./selectors.ts";
 import type { LedgerRow, Table } from "./table.ts";
@@ -70,19 +70,27 @@ export function announcing(table: Table): Pending | null {
 		if (draft.targets.length) choose("announce:back", "Return to the last target group", { ...draft, targets: draft.targets.slice(0, -1), selecting: draft.targets.at(-1)! });
 		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined });
 	} else {
-		const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending);
-		preparing = { stage: "mana", selected: menu.chosen.map((one) => one.label), remainingMana: menu.remainingMana, missingColors: menu.missingColors, ready: menu.complete };
-		question += ` Select mana sources one at a time for ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${preparing.selected!.join("; ") || "none"}. Still needs ${menu.remainingMana} mana${menu.missingColors.length ? `, including ${menu.missingColors.map((color) => `{${color}}`).join("")}` : ""}.`;
-		for (const part of menu.next) {
-			choose(`announce:pay:${part.id}`, `Add to payment: ${part.label}`, { ...draft, payment: [...draft.payment, part.id] }, `Keeps every source already selected and adds ${part.colors.length} mana. Nothing is spent yet.`);
-			moves.at(-1)!.option.spends = part.funding.taps.map((one) => one.source);
-			moves.at(-1)!.option.objects!.push(...part.funding.taps.map((one) => one.source));
+		const complete = announcementPayments(frame, draft);
+		if (complete?.length) {
+			preparing = { stage: "mana", payments: true };
+			question += " Choose a complete payment and confirm this use. Each option names its sources and what remains available. Choose sources individually to use other identities or mana abilities.";
+			moves.push(...complete.map(one => ({ ...one, changes: [], reason: "announcement" as const })));
+			choose("announce:individual", "Choose mana sources individually; spend nothing yet", { ...draft, paymentMode: "individual" });
+		} else {
+			const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending);
+			preparing = { stage: "mana", selected: menu.chosen.map((one) => one.label), remainingMana: menu.remainingMana, missingColors: menu.missingColors, ready: menu.complete };
+			question += ` Select mana sources one at a time for ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${preparing.selected!.join("; ") || "none"}. Still needs ${menu.remainingMana} mana${menu.missingColors.length ? `, including ${menu.missingColors.map((color) => `{${color}}`).join("")}` : ""}.`;
+			for (const part of menu.next) {
+				choose(`announce:pay:${part.id}`, `Add to payment: ${part.label}`, { ...draft, payment: [...draft.payment, part.id] }, `Keeps every source already selected and adds ${part.colors.length} mana. Nothing is spent yet.`);
+				moves.at(-1)!.option.spends = part.funding.taps.map((one) => one.source);
+				moves.at(-1)!.option.objects!.push(...part.funding.taps.map((one) => one.source));
+			}
+			for (const part of menu.chosen) choose(`announce:unpay:${part.id}`, `Undo selection: ${part.label}`, { ...draft, payment: draft.payment.filter((id) => id !== part.id) }, `Removes ${part.colors.length} mana from the pending payment; it will need ${menu.remainingMana + part.colors.length} mana again.`);
+			const activation = announcedActivation(frame, draft);
+			if (activation) moves.push({ option: { id: "announce:confirm", label: `Confirm ${draft.procedure.claim} and pay`, use: activation,
+				objects: [draft.source, ...draft.targets.flat().flatMap((one) => "id" in one ? [one] : [])],
+				shows: [...aiming(draft.targets, base.world, frame.seat), cost.extra.shows, ...menu.chosen.map((one) => one.label)].join(" ") }, activation, changes: [], reason: "announcement" });
 		}
-		for (const part of menu.chosen) choose(`announce:unpay:${part.id}`, `Undo selection: ${part.label}`, { ...draft, payment: draft.payment.filter((id) => id !== part.id) }, `Removes ${part.colors.length} mana from the pending payment; it will need ${menu.remainingMana + part.colors.length} mana again.`);
-		const activation = announcedActivation(frame, draft);
-		if (activation) moves.push({ option: { id: "announce:confirm", label: `Confirm ${draft.procedure.claim} and pay`, use: activation,
-			objects: [draft.source, ...draft.targets.flat().flatMap((one) => "id" in one ? [one] : [])],
-			shows: [...aiming(draft.targets, base.world, frame.seat), cost.extra.shows, ...menu.chosen.map((one) => one.label)].join(" ") }, activation, changes: [], reason: "announcement" });
 		choose("announce:back", "Return to choosing additional costs", { ...draft, cost: undefined, payment: [] });
 	}
 	choose("announce:cancel", "Cancel this use and return to priority; spend nothing", undefined);

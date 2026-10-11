@@ -33,6 +33,6 @@ export function paymentOptions(frame: Frame, cost: Price, selected: readonly str
 		cost.colors.filter((one) => one === color).length - colors.filter((one) => one === color).length)).fill(color) as Mana["color"][]);
 	const next = possible ? parts.filter((one) => !spent.has(one.resource) && canPay(remaining.filter((unit) => unit.id !== one.resource), cost, life,
 		{ colors: [...colors, ...one.colors], life: paidLife + one.life })) : [];
-	return { chosen, next, possible, complete: possible && covers(colors, cost), remainingMana: cost.generic + cost.colors.length - colors.length, missingColors,
+	return { units, parts, chosen, next, possible, complete: possible && covers(colors, cost), remainingMana: cost.generic + cost.colors.length - colors.length, missingColors,
 		funding: { paid: chosen.flatMap((one) => one.funding.paid), taps: chosen.flatMap((one) => one.funding.taps) } };
 }

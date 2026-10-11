@@ -5,7 +5,7 @@
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
 import { costChanges } from "./costs.ts";
-import { announcedActivation } from "./announcement-options.ts";
+import { announcedActivation, announcementPayments } from "./announcement-options.ts";
 import { project } from "./view.ts";
 import { castWords } from "./cast-words.ts";
 import { checkExile, enoughExile } from "./cost-selection.ts";
@@ -248,7 +248,9 @@ export function activate(table: Table, activation: Activation, choice: Pick<Ledg
 	registered?: LedgerRow["registered"]): void {
 	if (table.announcement && !table.payment) {
 		const draft = table.announcement;
-		const expected = announcedActivation({ seat: draft.controller, version: table.cursor.clock, view: project(table, draft.controller) }, draft);
+		const frame = { seat: draft.controller, version: table.cursor.clock, view: project(table, draft.controller) };
+		const expected = choice.picked.startsWith("announce:payment:")
+			? announcementPayments(frame, draft)?.find(one => one.option.id === choice.picked)?.activation : announcedActivation(frame, draft);
 		if (!expected || !isDeepStrictEqual(activation, expected)) throw new Error("Finish or cancel the selected announcement before performing another action.");
 		choice = { ...choice, execution: choice.execution ?? draft.execution };
 	}

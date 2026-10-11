@@ -116,7 +116,7 @@ export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set
 	const allowed = (spendOnly?: Selector) => !spendOnly || (!!spending && matches({ world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, spendOnly, spending.traits));
 	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter((mana) => allowed(mana.spendOnly))
 		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}|${JSON.stringify(mana.spellWords ?? null)}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
-			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""})` }));
+			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""}${mana.spellWords?.length ? `, grants ${mana.spellWords.join(", ")}` : ""})` }));
 	const sources = manaSources(frame, except).map((unit) => ({ ...unit, yields: unit.yields.filter((one) => allowed(one.spendOnly)) })).filter((unit) => unit.yields.length);
 	return [...pool, ...sources];
 }

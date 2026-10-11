@@ -11,7 +11,7 @@ export type Funding = NonNullable<Activation["funding"]>[number];
 export type Payment = Pick<Activation, "cost" | "paid"> & { funding?: string[] };
 
 /** Factor by equality of structured facts, never by a label or a decoded option id. */
-export function choices(options: readonly Option[]) {
+export function choices(options: readonly Option[], completePayments = false) {
 	const uses: Record<string, Use> = {}, payments: Record<string, Payment> = {}, funding: Record<string, Funding> = {};
 	const useKeys = new Map<string, string>(), paymentKeys = new Map<string, string>(), fundingKeys = new Map<string, string>();
 	const intern = <T>(facts: T | (() => T), keys: Map<string, string>, records: Record<string, T>, prefix: string, identity?: unknown) => {
@@ -23,7 +23,7 @@ export function choices(options: readonly Option[]) {
 		// The trigger fact groups target choices for the seat's order questions; the label already says it.
 		if (!option.use) { const { use: _, trigger: __, announcement: ___, ...plain } = option; return structuredClone(plain); }
 		const { source, claim, basis, timing, speed, slots, words, instructions, cost, paid, funding: taps, targets, x } = option.use;
-		return { id: option.id, label: option.label,
+		return { id: option.id, label: option.label, ...(option.shows ? { shows: option.shows } : {}),
 			use: intern(() => ({ source, claim, basis, timing, ...(speed ? { speed } : {}), slots, ...(words ? { words } : {}), effects: instructions.map(summary) }), useKeys, uses, "use:", { source, claim, basis, timing, speed, slots, words, instructions }),
 			payment: intern({ cost, paid, ...(taps ? { funding: taps.map((tap) => intern(tap, fundingKeys, funding, "funding:")) } : {}) }, paymentKeys, payments, "payment:"),
 			targets: structuredClone(targets), ...(x === undefined ? {} : { x }), ...(option.notes?.length ? { notes: [...option.notes] } : {}) };
@@ -33,7 +33,7 @@ export function choices(options: readonly Option[]) {
 		if (!shared.length) continue; use.notes = shared;
 		for (const one of variants) { const remaining = one.notes?.filter((note) => !shared.includes(note)); if (remaining?.length) one.notes = remaining; else delete one.notes; }
 	}
-	return { options: listed, uses, payments, funding };
+	return { options: listed, uses, payments, funding, completePayments };
 }
 
 export type Inspection = { use?: string; binding?: string; path?: Filter[] };
@@ -48,6 +48,8 @@ function notes(variants: Choice[]): string[] {
 /** A stage partitions complete original offers. Backtracking restores the whole menu. */
 function stages(facts: ReturnType<typeof choices>, selected: Inspection): Menu {
 	const enter: Record<string, Inspection> = {};
+	// Core has already recorded this use and its targets. Offer its payments now.
+	if (facts.completePayments) return { stage: "payment", enter, options: facts.options, selected: Object.values(facts.uses)[0] };
 	const terminals = facts.options.filter((one) => !one.use);
 	if (!selected.use) {
 		const seen = new Set<string>();

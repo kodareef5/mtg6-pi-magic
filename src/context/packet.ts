@@ -86,7 +86,7 @@ function inPlanOrder<T extends { id: string }>(options: readonly T[], state: Ret
 }
 
 /** The same canonical grouping drives inspection and the question's facts. */
-export function decisionChoices(frame: Frame) { return choices(inPlanOrder(frame.decision?.options ?? [], planState(frame))); }
+export function decisionChoices(frame: Frame) { return choices(inPlanOrder(frame.decision?.options ?? [], planState(frame)), !!frame.decision?.preparing?.payments); }
 
 /** A remaining occurrence is a schedule fact, not future action availability. */
 function scheduled(when: When, frame: Frame): PlanSlice["next"][number]["scheduled"] {
@@ -160,7 +160,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 			reevaluate: scripts.flatMap((one) => one.reevaluate ?? []) } } : {}),
 	} : undefined;
 	const all = inPlanOrder(decision.options, state);
-	const factored = choices(all), menu = context.inspection ? inspect(factored, context.inspection, context.capacity) : undefined;
+	const factored = choices(all, !!decision.preparing?.payments), menu = context.inspection ? inspect(factored, context.inspection, context.capacity) : undefined;
 	const inspected = menu?.scope && new Set(menu.scope);
 	const offered = inspected ? all.filter((one) => inspected.has(one.id)) : all, data = factored;
 	const itemList = checklist(frame, state);

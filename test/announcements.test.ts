@@ -18,7 +18,7 @@ import { execution, planState } from "../src/core/planning.ts";
 import { activationChanges, activate } from "../src/core/procedures.ts";
 import { fork, open, replay, save, relive, type Header } from "../src/core/journal.ts";
 import { focus } from "../src/context/packet.ts";
-import { question } from "../src/context/seat.ts";
+import { aiSeat, question } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
@@ -54,6 +54,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 		assert.deepEqual(table, before, "listing the next announcement part is pure");
 		assert.ok(decision.options.some((one) => one.id === id), id);
 		apply(table, id, "model", "chosen", planState(workFrame(table, 0)) ? execution(planState(workFrame(table, 0))!, id) : undefined);
+		if (id.startsWith("announce:cost:")) apply(table, "announce:individual", "model", "chosen");
 	};
 	const begin = (card: string) => nextDecision(table)!.options.find((one) => one.announcement?.procedure.source.card === card)!;
 	const cast = begin("Song of Totentanz"), physical = structuredClone([...table.things]), log = table.log.length, priority = table.cursor.priority;
@@ -187,21 +188,58 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	editWork(mixed, 0, [{ do: "plan.put", plan: { objective: "Make two Rats", guidance: "Choose X = 2 and three Mountains.", throughTurn: 1,
 		steps: [{ label: "Make two Rats", when, action: { procedure: song }, purpose: "Choose X = 2 and three Mountains." }] } }], "song-plan");
 	const frames: string[] = [], stop = new Error("Cast reached the stack");
+	const compactSnapshots: { table: Table; version: number }[] = [];
 	const pilot: Player = { name: "staged pilot", observe(frame) { assert.equal(frame.view.announcement, undefined); }, close() {}, async answer(frame) {
 		const options = frame.decision!.options;
+		if (frame.decision!.preparing?.payments) {
+			assert.ok(!options.some(one => one.id.startsWith("announce:pay:") || one.id.startsWith("announce:unpay:")));
+			assert.ok(options.some(one => one.id === "announce:individual"));
+			assert.match(question(focus(frame, startingIntent(0)), false).instructions, /complete-payment option confirms/);
+			const before = structuredClone(mixed), picked = options.find(one => one.id.startsWith("announce:payment:"))!;
+			let calls = 0;
+			const classifier = aiSeat({ name: "complete payments", intent: startingIntent(0), onGap: assert.fail, api: { named: "fixture", async ask(request) {
+				calls++;
+				const packet = request.state as unknown as ReturnType<typeof focus>;
+				assert.deepEqual(packet.options.map(one => one.id).sort(), options.map(one => one.id).sort(), "complete payments reach the pilot without another use inspection");
+				for (const option of packet.options.filter(one => one.id.startsWith("announce:payment:")))
+					assert.match(option.shows!, /Leaves available:/, "the pilot sees which resources remain open");
+				return { pick: { type: "choice", choice: picked.id, probabilities: { [picked.id]: 1 }, confidence: 1 } };
+			} } });
+			const answer = await classifier.answer(frame);
+			assert.equal(answer.kind, "pick"); if (answer.kind === "pick") assert.equal(answer.option, picked.id);
+			await classifier.close(); assert.equal(calls, 1);
+			assert.throws(() => activate(mixed, { ...picked.use!, cost: { ...picked.use!.cost, generic: 99 } },
+				{ picked: picked.id, offered: options.map(one => one.id), by: "model", why: "chosen" }), /Finish or cancel/);
+			assert.deepEqual(mixed, before);
+			compactSnapshots.push({ table: before, version: mixed.ledger.length });
+		}
 		const option = options.find((one) => one.announcement?.prefix.startsWith("plan:")) ?? options.find((one) => one.id === "announce:x:2") ??
-			options.find((one) => one.id === "announce:cost:0") ?? options.find((one) => one.id === "announce:confirm") ??
+			options.find((one) => one.id === "announce:cost:0") ?? options.find((one) => one.id.startsWith("announce:payment:")) ?? options.find((one) => one.id === "announce:confirm") ??
 			options.find((one) => one.id.startsWith("announce:pay:") && one.label.includes("Mountain"));
 		assert.ok(option, frame.decision!.question); frames.push(option.id);
 		return { kind: "pick", option: option.id, actionId: `part-${frames.length}` };
 	} };
 	await assert.rejects(play(mixed, { 0: pilot, 1: pilot }, {}, { checkpoint() { if (cardsIn(mixed, "stack").length) throw stop; } }), (error) => error === stop);
-	assert.equal(frames.length, 7); assert.equal(mixed.ledger.length - version, frames.length);
+	assert.equal(frames.length, 4); assert.equal(mixed.ledger.length - version, frames.length);
 	assert.ok(mixed.ledger.slice(version).every((one) => one.by === "model" && one.why === "chosen"));
 	assert.deepEqual(project(mixed, 0).done, [0]); assert.equal(mixed.gaps.length, 0);
 	assert.deepEqual(relive(boundary, mixed.ledger.slice(version), mixed.workLog), mixed);
 	const initial = position(); initial.announcementsFrom = version;
 	assert.deepEqual(relive(initial, mixed.ledger, mixed.workLog), mixed, "a legacy prefix switches menus only at its recorded boundary");
+	for (const snapshot of compactSnapshots) assert.deepEqual(relive(snapshot.table, JSON.parse(JSON.stringify(mixed.ledger.slice(snapshot.version))),
+		mixed.workLog.slice(snapshot.table.workLog.length)), mixed, "a saved complete-payment decision continues identically");
+	assert.equal(compactSnapshots.length, 1);
+	const historical = position(); main(historical, 0);
+	const legacyOffer = announcementOffers(song, workFrame(historical, 0), "legacy")[0]!;
+	delete legacyOffer.announcement.paymentMode;
+	const oldInitial = structuredClone(historical), oldFrom = historical.ledger.length;
+	beginAnnouncement(historical, legacyOffer.announcement, { picked: legacyOffer.option.id, offered: [legacyOffer.option.id], by: "model", why: "declared" });
+	apply(historical, "announce:x:2", "model", "chosen"); apply(historical, "announce:cost:0", "model", "chosen");
+	assert.ok(!nextDecision(historical)!.options.some(one => one.id.startsWith("announce:payment:") || one.id === "announce:individual"));
+	while (!nextDecision(historical)!.options.some(one => one.id === "announce:confirm"))
+		apply(historical, nextDecision(historical)!.options.find(one => one.id.startsWith("announce:pay:"))!.id, "model", "chosen");
+	apply(historical, "announce:confirm", "model", "chosen");
+	assert.deepEqual(relive(oldInitial, historical.ledger.slice(oldFrom)), historical, "an announcement without the new field retains the original menu and ledger");
 
 	// Graveyard selection follows the selected targets and mana without spending
 	// either. Only its final confirmation performs the accepted operation.
@@ -218,7 +256,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	const evidenceExecution = { plan: evidence.work[0]!.planned!, step: 0 };
 	const before = structuredClone(evidence), from = evidence.ledger.length, use = announcementOffers(procedure, workFrame(evidence, 0), "evidence")[0]!;
 	beginAnnouncement(evidence, use.announcement, { picked: use.option.id, offered: [use.option.id], by: "model", why: "declared", execution: evidenceExecution });
-	apply(evidence, "announce:cost:0", "model", "chosen");
+	apply(evidence, "announce:cost:0", "model", "chosen"); apply(evidence, "announce:individual", "model", "chosen");
 	while (!nextDecision(evidence)!.options.some((one) => one.id === "announce:confirm"))
 		apply(evidence, nextDecision(evidence)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id, "model", "chosen");
 	apply(evidence, "announce:confirm", "model", "chosen");
@@ -261,7 +299,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	take("announce:back"); take("announce:remove-target:0");
 	take(`announce:target:${elves[1]!.id}@${elves[1]!.incarnation}`);
 	assert.ok(!nextDecision(targets)!.options.some((one) => one.id.startsWith("announce:target:")));
-	take("announce:targets-done"); take("announce:cost:0");
+	take("announce:targets-done"); take("announce:cost:0"); take("announce:individual");
 	for (let n = 0; n < 3; n++) take(nextDecision(targets)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id);
 	const complete = nextDecision(targets)!.options.find((one) => one.id === "announce:confirm")!.use!;
 	assert.ok(variants.some((one) => isDeepStrictEqual(one.activation, complete)), "a staged dependent-target use preserves the complete accepted operation");
@@ -282,7 +320,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	const original = structuredClone(permissions), began = permissions.ledger.length;
 	beginAnnouncement(permissions, choices[0]!.announcement, { picked: choices[0]!.option.id, offered: choices.map((one) => one.option.id), by: "model", why: "declared" });
 	apply(permissions, `announce:target:${creature.id}@${creature.incarnation}`, "model", "chosen");
-	apply(permissions, "announce:cost:0", "model", "chosen");
+	apply(permissions, "announce:cost:0", "model", "chosen"); apply(permissions, "announce:individual", "model", "chosen");
 	apply(permissions, nextDecision(permissions)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id, "model", "chosen");
 	const accepted = nextDecision(permissions)!.options.find((one) => one.id === "announce:confirm")!.use!;
 	assert.ok(legacy.some((one) => isDeepStrictEqual(one.activation, accepted)));
@@ -299,7 +337,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	const registered = nextDecision(abilities)!.options.find((one) => one.announcement?.procedure.source.registered === grow.basis)!;
 	assert.ok(registered);
 	const old = structuredClone(abilities), at = abilities.ledger.length;
-	apply(abilities, registered.id, "model", "chosen"); apply(abilities, "announce:cost:0", "model", "chosen");
+	apply(abilities, registered.id, "model", "chosen"); apply(abilities, "announce:cost:0", "model", "chosen"); apply(abilities, "announce:individual", "model", "chosen");
 	for (let n = 0; n < 2; n++) apply(abilities, nextDecision(abilities)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id, "model", "chosen");
 	apply(abilities, "announce:confirm", "model", "chosen");
 	passBoth(abilities); finish(abilities); assert.equal(claw.counters["+1/+1"], 1);

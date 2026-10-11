@@ -175,7 +175,7 @@ export function planState(frame: Frame): PlanState | null {
 		return [{ label: step.label, objects: select(action.objects, frame).filter((one) => one.zone === "battlefield" && one.controller === frame.seat) }];
 	}) : [];
 	if (frame.view.announcement) {
-		const options = (frame.decision?.options ?? []).filter((one) => cancelling ? one.id === "announce:cancel" : !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id) &&
+		const options = (frame.decision?.options ?? []).filter((one) => cancelling ? one.id === "announce:cancel" : !["announce:cancel", "announce:back", "announce:individual", "payment:cancel"].includes(one.id) &&
 			!one.id.startsWith("announce:unpay:") && !one.id.startsWith("announce:remove-target:") && !one.id.startsWith("payment:remove:"));
 		const fit = (at: number, label: string): Fit => ({ at, label, candidates: options });
 		return { revision, plan, seat: frame.seat, preparing: true, ...(amended ? { amended: true as const } : {}), procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,

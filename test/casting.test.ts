@@ -74,6 +74,7 @@ test("casting facts read actual payments and survive resolution only into the re
 		assert.ok(root);
 		beginAnnouncement(table, root.announcement, { picked: root.option.id, offered: [root.option.id], by: "model", why: "declared" });
 		apply(table, "announce:cost:0", "model", "chosen");
+		apply(table, "announce:individual", "model", "chosen");
 		assert.equal(table.announcement!.cost!.price.generic + table.announcement!.cost!.price.colors.length, total, JSON.stringify({ alternative, paid, reduced, root: root.announcement.permission, cost: table.announcement!.cost!.price }));
 		const pending = structuredClone(table), at = table.ledger.length;
 		while (!nextDecision(table)!.options.some(one => one.id === "announce:confirm"))

@@ -135,8 +135,18 @@ for that choice, including its source and window restrictions. The table keeps
 every physical option available and spends nothing until Jev chooses. A plan
 that does not address the pending use leaves its original execution policy.
 
-Payment warnings name each held resource separately. Individual mana choices
-carry those marks, and the final confirmation shows the complete payment.
+The mana step first offers complete payments that confirm the selected use.
+Each names its payment sources and the mana sources and floating mana left
+available. Interchangeable resources use explicitly named representatives;
+holds distinguish a reserved source. Colors, life payments, sacrifice and
+spell properties remain separate choices. Jev chooses even a single payment.
+The menu contains at most sixteen complete payments. If bounded search cannot
+finish that menu, it offers individual-source selection. The seat can also
+choose that route explicitly, retaining every physical identity and mana ability.
+Payment warnings name each held resource separately. Both complete and individual
+choices carry those marks. Opening the individual menu records no plan progress.
+The pilot reads the complete payments directly at this stage; it does not inspect
+the already selected use again before seeing them.
 Historical inspection menus factor shared holds across payment combinations.
 Inspecting an option commits nothing; selecting an announcement part records
 that private choice without moving a card.

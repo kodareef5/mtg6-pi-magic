@@ -494,6 +494,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
   payment-options.ts, payment-search.ts  exact partial mana choices and payment feasibility without enumerating combinations
+  complete-payments.ts bounded complete payment menus, with the individual path retaining every physical choice
   announcement-options.ts, announcing.ts  source, X, targets and payment selected privately before one confirmed operation
   procedures.ts      one offer path for plans and default casts, activation terms
   characteristics.ts the layer walk: what an object is now, never stored
