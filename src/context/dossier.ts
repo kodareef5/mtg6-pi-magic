@@ -13,6 +13,7 @@ import type { Registration } from "../core/language.ts";
 import type { Universe } from "../core/cards.ts";
 import { odds } from "../core/odds.ts";
 import { damageNotes } from "../core/damage.ts";
+import { activationTimingNotes } from "../core/activated.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { blockConflicts } from "../core/combat-facts.ts";
 import { cardDefinition } from "./strategy-position.ts";
@@ -193,7 +194,7 @@ function effects(frame: Frame, name: (seat: SeatId) => string): string {
 	const hand = [...new Set((frame.view.objects ?? []).filter((one) => one.zone === "hand" && one.controller === frame.seat && one.card).map((one) => one.card!))];
 	const later = hand.flatMap((card) => (packages.get(card) ?? []).filter(standing).map((registration) => `- ${card}, in your hand, once on the battlefield: "${registration.basis}"`));
 	return ["## Standing effects", "Accepted terms in force that are not triggers or mana: what enters tapped, permissions, replacements and continuous changes.",
-		now.length ? now.join("\n") : "None on the battlefield.", ...damageNotes(frame.view.notes ?? []), ...(later.length ? [later.join("\n")] : [])].join("\n");
+		now.length ? now.join("\n") : "None on the battlefield.", ...damageNotes(frame.view.notes ?? []), ...activationTimingNotes(frame.view.notes ?? [], name), ...(later.length ? [later.join("\n")] : [])].join("\n");
 }
 
 /** For each opposing creature, which of your creatures could block it on their next turn, by keyword conflicts only. */

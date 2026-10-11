@@ -16,7 +16,7 @@ import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
 import { selectionScoped } from "./inspection.ts";
-import { loyaltyUsed } from "./activated.ts";
+import { instantLoyalty, loyaltyUsed } from "./activated.ts";
 import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
@@ -138,8 +138,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (activation.registered && !traits?.registrations.some((one) => one.kind === "activated" && one.basis === activation.registered))
 		throw new Error("The source no longer has that registered activated ability.");
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
-	if (cost.loyalty !== undefined && (activation.timing !== "stack" || object.zone !== "battlefield" || !main || loyaltyUsed(world, source)))
-		throw new Error("A loyalty ability needs its controller's main phase, an empty stack, and no earlier loyalty activation of this permanent this turn.");
+	if (cost.loyalty !== undefined && (activation.timing !== "stack" || object.zone !== "battlefield" || !(main || instantLoyalty(world, controller, object)) || loyaltyUsed(world, source)))
+		throw new Error("A loyalty ability needs its controller's main phase and an empty stack, or a timing permission, and no earlier loyalty activation of this permanent this turn.");
 	if (cost.loyalty !== undefined && (object.counters.loyalty ?? 0) + cost.loyalty < 0) throw new Error("Not enough loyalty counters to pay.");
 	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !flashed(world, controller, spell) && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
 	if (activation.timing === "spell" && activation.slots.length && traits && targetless(traits.types, traits.subtypes)) throw new Error("A permanent spell other than an Aura has no targets; its abilities target once it is on the battlefield (601.2c).");

@@ -16,11 +16,11 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 12, covering Control, Landfall and Izzet; Azorius has begun play but has no counted finish |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Azorius reached Get Lost's token-controller gap; Control versus Azorius reached Jace's Machinations' temporary loyalty-timing permission |
-| Recent shared mechanics | Token abilities, loyalty costs and starting counters, planeswalker attacks, layer-five color changes and tokens entering attacking |
+| Current runtime work | Both Azorius pairings resumed after token-controller and temporary loyalty-timing support; Get Lost has destroyed a target and given its controller Maps in play |
+| Recent shared mechanics | Token abilities and ownership, loyalty costs and temporary timing, planeswalker attacks, layer-five color changes and tokens entering attacking |
 | Stored card assessments | 228 accepted, 79 refused, five basic lands; Voice of Victory is assessed, leaving one standing blocker in Boros Dragons |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 264 invariant tests pass |
+| Validation | Type check and 266 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

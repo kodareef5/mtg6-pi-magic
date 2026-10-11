@@ -40,8 +40,9 @@ standing assessments.
    invariant test. Native graveyard prices, Harmonize payments and optional
    search groups now have that support. Refuse malformed library scopes during
    preparation and retain the runtime visibility guard.
-4. Widen standing coverage toward the next complete main deck. Entry choices,
-   static casting costs, attacking tokens and copies remain prominent blockers.
+4. Widen standing coverage toward the next complete main deck. Static casting
+   costs and copies remain prominent blockers. Boros Dragons now needs Momo's
+   first qualifying spell reduction after Voice of Victory's Mobilize support.
    Review stored restriction words as well as refusals: accepted prose does
    not execute a missing mechanic.
    Sideboard-only refusals do not delay this alpha.

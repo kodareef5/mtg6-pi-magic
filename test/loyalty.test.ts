@@ -8,11 +8,13 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { characteristics } from "../src/core/characteristics.ts";
 import { activationChanges, checkProcedure, printedCast } from "../src/core/procedures.ts";
-import { activatedUses, loyaltyUsed } from "../src/core/activated.ts";
+import { activatedUses, instantLoyalty, loyaltyUsed } from "../src/core/activated.ts";
 import { tableWorld } from "../src/core/selectors.ts";
 import { workFrame } from "../src/core/work-tools.ts";
 import { relive } from "../src/core/journal.ts";
 import { actions } from "../src/context/plan-edit.ts";
+import { dossier } from "../src/context/dossier.ts";
+import { project } from "../src/core/view.ts";
 import { announce, example, finish, main, offered, passBoth, place, step } from "./play.ts";
 
 test("Empower creates a complete token, waits for the loyalty counter, and shares one activation allowance across abilities", () => {
@@ -60,6 +62,53 @@ test("Empower creates a complete token, waits for the loyalty counter, and share
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 		if (existing) { main(table, 0, 5); assert.ok(offered(table, minusThree.procedure).length, "the next turn restores the allowance"); }
 	}
+});
+
+test("a loyalty timing grant includes later permanents, respects priority and turn allowances, and expires through replay", () => {
+	const table = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: alpha(deck("Dimir Midrange")) }], "loyalty-timing");
+	const kaito = place(table, 1, "hand", "Kaito, Bane of Nightmares")[0]!;
+	commit(table, [{ do: "move", what: kaito.id, to: "battlefield", controller: 0, reason: "game-setup", registers: [] }], "game-setup");
+	main(table, 1); place(table, 1, "hand", "Spyglass Siren"); place(table, 0, "hand", "Jace's Machinations");
+	commit(table, [{ do: "add-mana", who: 1, colors: ["U"] }, { do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
+	const initial = structuredClone(table), from = table.ledger.length;
+	announce(table, printedCast("Spyglass Siren", table.printed["Spyglass Siren"]!)); apply(table, "pass", "model", "chosen");
+	announce(table, example("Cast Jace's Machinations")); passBoth(table); step(table); // Timing permission precedes the token.
+	assert.equal(cardsIn(table, "battlefield").filter((one) => one.token).length, 0);
+	assert.ok(table.notes.some((one) => one.kind === "activation-timing"));
+	const pending = structuredClone(table), at = table.ledger.length;
+	finish(table);
+	const token = cardsIn(table, "battlefield").find((one) => one.token?.name === "Jace")!;
+	assert.equal(token.counters.loyalty, 8); assert.equal(table.cursor.active, 1);
+	assert.equal(cardsIn(table, "stack").length, 1, "the first spell is still waiting underneath Machinations");
+	const world = tableWorld(table), view = workFrame(table, 0);
+	assert.equal(instantLoyalty(world, 0, token), true); assert.equal(instantLoyalty(world, 0, kaito), false);
+	assert.equal(instantLoyalty(world, 1, token), false, "only the granted player receives the timing permission");
+	assert.match(project(table, "spectator").table.join("\n"), /loyalty abilities.*instant speed/);
+	assert.match(dossier({ frame: view }), /loyalty abilities.*instant speed/);
+	const minusThree = activatedUses(view).find((one) => one.procedure.cost?.loyalty === -3)!;
+	assert.ok(!nextDecision(table)!.options.some((one) => one.id.startsWith(minusThree.key)), "the other player still holds priority");
+	apply(table, "pass", "model", "chosen");
+	const offeredUse = offered(table, minusThree.procedure)[0]!; assert.ok(offeredUse);
+	assert.equal(offered(table, { ...minusThree.procedure, speed: "sorcery" }).length, 0, "a separate explicit sorcery restriction still applies");
+	const changed = structuredClone(table);
+	commit(changed, [{ do: "note", note: { kind: "label", by: 0, on: token, until: "end-of-turn", text: "Fixture removes the planeswalker type.",
+		change: { types: { set: ["creature"] }, base: { power: 1, toughness: 1 } } } }], "resolve");
+	assert.equal(offered(changed, minusThree.procedure).length, 0);
+	assert.throws(() => activationChanges(changed, offeredUse.activation), /timing permission/);
+	const before = structuredClone(table); nextDecision(table); offered(table, minusThree.procedure); assert.deepEqual(table, before);
+	announce(table, minusThree.procedure); passBoth(table); finish(table);
+	assert.equal(token.counters.loyalty, 5);
+	apply(table, "pass", "model", "chosen"); // Return priority to the token's controller.
+	assert.equal(offered(table, minusThree.procedure).length, 0);
+	assert.throws(() => activationChanges(table, offeredUse.activation), /earlier loyalty activation/);
+	main(table, 0, 3, "upkeep");
+	assert.equal(table.notes.some((one) => one.kind === "activation-timing"), false);
+	assert.equal(loyaltyUsed(tableWorld(table), token), false);
+	assert.equal(offered(table, minusThree.procedure).length, 0, "cleanup removed the timing permission before the next upkeep");
+	assert.throws(() => activationChanges(table, offeredUse.activation), /timing permission/);
+	main(table, 0, 3); assert.ok(offered(table, minusThree.procedure).length, "normal main-phase timing still works after expiry");
+	assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
+	assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 });
 
 test("printed starting loyalty, zero costs and state-based removal use current types and replayable history", () => {

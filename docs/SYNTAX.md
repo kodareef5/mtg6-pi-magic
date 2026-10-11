@@ -175,6 +175,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `name-card` | `who` chooses an Oracle card name, optionally filtered by printed `types`; remember it as `key` on the current incarnation of `on` |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
+| `activation-timing` | `who`, `ability: "loyalty"`, source selector `of`, and `until`; permits instant-speed loyalty activation, retaining priority, costs and each permanent's turn allowance |
 | `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
 | `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |
 | `perform` | `who` accepts an ordered `instructions` group in the current resolution; `may` offers declining the whole group; `as` binds acceptance independently of any cards selected inside |
@@ -284,8 +285,9 @@ binds success only when every part is paid. See [payment examples](examples/paym
 A loyalty-symbol activation uses `cost.loyalty`, a signed integer: positive
 adds counters, negative removes them, and zero still uses the permanent's one
 loyalty activation for that turn. It requires the controller's main phase and
-an empty stack. That allowance is shared across abilities and players for the
-same incarnation. Combine loyalty adjustments into this one cost; a separate
+an empty stack unless an `activation-timing` permission applies. The turn
+allowance is shared across abilities and players for the same incarnation.
+Combine loyalty adjustments into this one cost; a separate
 `counters` payment does not express loyalty timing. Printed starting loyalty
 and a token's `spec.loyalty` supply entry counters. See [loyalty](examples/loyalty.md).
 

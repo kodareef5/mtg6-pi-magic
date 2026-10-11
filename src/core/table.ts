@@ -255,6 +255,8 @@ export type Note = {
 	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone }
 	/** Restriction words for future matching spells, applied as they are cast. */
 	| { kind: "cast-words"; who: SeatId; words: string[]; of?: Selector; next?: true }
+	/** A rules permission, read against current sources including ones that enter later. */
+	| { kind: "activation-timing"; who: SeatId; ability: "loyalty"; of: Selector }
 	/** A global prevention rule created by a resolving instruction. */
 	| { kind: "damage-rule"; mode: "prevent" | "unpreventable"; combat?: boolean }
 	/**

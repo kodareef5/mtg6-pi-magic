@@ -48,7 +48,8 @@ They may also be granted to a permanent through `change.registers`.
 
 `cost.loyalty` is signed: positive adds counters, negative removes them, and
 zero still uses the loyalty activation for that incarnation this turn. It
-requires the controller's main phase and an empty stack. Another ability or
+requires the controller's main phase and an empty stack unless an accepted
+timing permission overrides that window. Another ability or
 controller does not reset that allowance; a new incarnation does. Payment is
 checked again before commitment. Combine adjustments into that one signed cost.
 Printed `L3` and token `loyalty: 3` supply starting counters on entry; they are
@@ -58,3 +59,71 @@ graveyard at the next state-based check even if indestructible.
 This example covers the paid-mana variant. The other variant uses the same
 instructions with UU and a `show` cost for a Jace; the card's interpreter must
 prepare both. It does not establish that attacks against planeswalkers work.
+
+## Temporary loyalty timing
+
+Jace's Machinations grants a rules permission before Empower creates or grows
+a token. The selector is read when activating, so it includes a Jace that
+enters later that turn. It does not grant another activation to a permanent
+already used that turn, remove a separate sorcery-only restriction, or permit
+activation without priority. The grant expires during cleanup.
+
+```json procedure
+{
+  "claim": "Cast Jace's Machinations",
+  "basis": "Until end of turn, you may activate loyalty abilities of Jace planeswalkers you control on any player's turn any time you could cast an instant.\nEmpower Jace 8. (Put eight loyalty counters on a Jace token you control. If you don't control one, first create a blue Jace planeswalker token with \"[−1]: Surveil 1\" and \"[−3]: Draw a card.\")",
+  "source": {"card": "Jace's Machinations", "zones": ["hand"], "controller": "self"},
+  "timing": "spell",
+  "cost": {"mana": "{2}{U}"},
+  "instructions": [
+    {
+      "do": "activation-timing",
+      "who": "you",
+      "ability": "loyalty",
+      "of": {"controller": "you", "types": ["planeswalker"], "subtypes": ["Jace"]},
+      "until": "end-of-turn"
+    },
+    {
+      "do": "token",
+      "count": 1,
+      "if": {"amount": {"count": {"controller": "you", "types": ["planeswalker"], "subtypes": ["Jace"], "token": true}}, "atMost": 0},
+      "spec": {
+        "name": "Jace",
+        "types": ["planeswalker"],
+        "subtypes": ["Jace"],
+        "colors": ["U"],
+        "loyalty": 0,
+        "registers": [
+          {
+            "kind": "activated",
+            "basis": "[−1]: Surveil 1",
+            "cost": {"loyalty": -1},
+            "effect": {
+              "instructions": [
+                {"do": "look", "who": "you", "what": {"top": 1, "of": "you"}, "as": "looked"},
+                {"do": "choose", "who": "you", "from": {"zones": ["library"], "is": "bound:looked"}, "count": 1, "upTo": true, "as": "binned"},
+                {"do": "move", "what": "bound:binned", "to": "graveyard", "reason": "mill"},
+                {"do": "order", "who": "you", "every": {"zones": ["library"], "is": "bound:looked"}, "position": "top"}
+              ]
+            }
+          },
+          {
+            "kind": "activated",
+            "basis": "[−3]: Draw a card",
+            "cost": {"loyalty": -3},
+            "effect": {"instructions": [{"do": "draw", "who": "you", "count": 1}]}
+          }
+        ]
+      }
+    },
+    {
+      "do": "choose",
+      "who": "you",
+      "from": {"controller": "you", "types": ["planeswalker"], "subtypes": ["Jace"], "token": true},
+      "count": 1,
+      "as": "jace"
+    },
+    {"do": "counters", "on": "bound:jace", "kind": "loyalty", "amount": 8}
+  ]
+}
+```

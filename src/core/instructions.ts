@@ -72,6 +72,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			[{ do: "note", note: { kind: "damage-rule", by: controller, mode: instruction.mode, until: instruction.until as Until,
 				...(instruction.combat !== undefined ? { combat: instruction.combat } : {}), ...(source ? { source } : {}) } }]);
 		case "look": case "order": return inspection(table, scope, instruction, pending);
+		case "activation-timing": return one(`${players(scope, instruction.who).map((who) => seat(table, who).name).join(", ")} may activate matching loyalty abilities at instant speed until ${instruction.until.replaceAll("-", " ")}`,
+			players(scope, instruction.who).map((who): Change => ({ do: "note", note: { kind: "activation-timing", by: controller, who, ability: instruction.ability,
+				of: structuredClone(instruction.of), until: instruction.until as Until, ...(source ? { source } : {}) } })));
 		case "spell-words": return one(`Future ${instruction.next ? "next matching " : "matching "}spells: ${instruction.words.join(", ")}`,
 			players(scope, instruction.who).map((who): Change => ({ do: "note", note: { kind: "cast-words", by: controller, who, words: [...instruction.words],
 				until: instruction.until as Until, ...(source ? { source } : {}), ...(instruction.of ? { of: structuredClone(instruction.of) } : {}), ...(instruction.next ? { next: true } : {}) } })));
