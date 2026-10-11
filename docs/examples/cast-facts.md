@@ -8,6 +8,31 @@ anyone chooses how to pay. These facts do not prepare hybrid payment.
 An identified deferred cast may use these selectors when interpreted. Source
 coverage and syntax acceptance do not certify that the interpretation is legal.
 
+## Characteristics before casting
+
+The proposed spell runs through the same layers as an actual stack object,
+using the caster's projected facts, selected face and announced X. A printed
+keyword needs an explicit stack scope to be read there; an ordinary battlefield
+registration does not grant that word to a spell. The engine does not read
+"Flying" from Oracle text. This partial package supplies only that keyword.
+Twinmaw's entry trigger and its Charring Bite use need separate preparation.
+
+```json package
+{
+  "card": "Twinmaw Stormbrood // Charring Bite",
+  "registers": [{
+    "kind": "continuous", "face": 0, "basis": "Flying",
+    "affects": { "is": "this", "zones": ["stack", "battlefield"] },
+    "change": { "words": ["flying"] }
+  }]
+}
+```
+
+That registration affects the Dragon spell and permanent. It does not give
+flying to the Charring Bite face. Restricted mana, casting conditions and
+casting history can read the Dragon's accepted keyword without assigning any
+identity to an opponent's hidden cards.
+
 ## Actual casting payment
 
 These are Dyadrine's entry and attack terms. Trample and the chosen-X cast remain

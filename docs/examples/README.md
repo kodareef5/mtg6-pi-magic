@@ -15,7 +15,7 @@ schemas, and every `basis` is checked against the card's text.
 | `card-names.md` | choose and retain an Oracle card name, including out-of-format cards and individual faces, then match it in a continuous effect |
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
-| `cast-facts.md` | mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
+| `cast-facts.md` | proposed spell characteristics, mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |

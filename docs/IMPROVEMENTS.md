@@ -26,7 +26,7 @@ Those drive engine and syntax work, ordered by how many decks they block.
 4c Control, Selesnya Landfall, Izzet Spellementals and Azorius Control have
 standing assessments for every main-deck card. They still have thirteen, eight,
 thirteen and fifteen cards with deferred uses respectively. The first three
-have completed source-reviewed games; Azorius has begun its first game.
+and Azorius have completed source-reviewed games.
 [Status](STATUS.md) holds the current count. The other fifteen lists still need
 standing assessments.
 

@@ -10,13 +10,14 @@
  * Past 150 lines because the walk and the type-line reader belong together.
  */
 import { facts, manaValue, type Printed } from "./printed.ts";
-import { activeFaces } from "./faces.ts";
+import { activeFaces, currentFacts } from "./faces.ts";
 import { join } from "node:path";
 import { load as loadRules, rule, type Rules } from "./rules.ts";
 import { type Note, type Table, type Thing } from "./table.ts";
 import type { Mana } from "./table.ts";
 import type { Modification, Registration } from "./language.ts";
-import { amount, holds, matches, tableWorld, type Scope, type Seen } from "./selectors.ts";
+import { amount, holds, matches, tableWorld, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
+import type { SeatView } from "./types.ts";
 
 type Color = Mana["color"];
 export type Traits = {
@@ -73,7 +74,7 @@ export function base(table: Table, object: Thing): Traits | undefined {
 	const active = printedCard ? activeFaces(printedCard, object) : [0];
 	// A self characteristic with an explicit nonbattlefield scope applies there, such as changeling.
 	// Its accepted source terms are journaled equipment until an entry freezes the permanent's registrations.
-	const standing = object.zone !== "battlefield" && object.card ? (table.work[object.owner]?.packages?.find((one) => one.card === object.card)?.registers ?? [])
+	const standing = object.zone !== "battlefield" && object.card ? (table.work[object.zone === "stack" ? object.ability?.controller ?? object.controller : object.owner]?.packages?.find((one) => one.card === object.card)?.registers ?? [])
 		.filter((one) => one.kind === "continuous" && one.affects.is === "this" && one.affects.zones?.includes(object.zone as never) ||
 			one.kind === "permit" && one.cast?.from.includes(object.zone as never)) : [];
 	const own = [...(object.registrations ?? []), ...registered(table, object), ...standing].filter((one) => one.face === undefined || active.includes(one.face));
@@ -116,7 +117,7 @@ export function characteristics(table: Table, object: Thing): Traits | undefined
 	return walk(table, same ? undefined : object).get(object.id);
 }
 
-type Effect = { at: number; change: Modification; source?: Thing; applies: (scope: Scope, object: Seen) => boolean; when?: (scope: Scope) => boolean; ability?: Registration };
+type Effect = { at: number; change: Modification; source?: Seen; applies: (scope: Scope, object: Seen) => boolean; when?: (scope: Scope) => boolean; ability?: Registration };
 
 const cache = new WeakMap<Table, { clock: number; size: number; work: number; traits: Map<string, Traits> }>();
 /** Drop the walk for this revision: `commit` changes the table before the clock moves. */
@@ -130,20 +131,42 @@ export function walk(table: Table, override?: Thing): Map<string, Traits> {
 	const now = new Map(field.flatMap((object) => { const traits = base(table, object); return traits ? [[object.id, traits] as const] : []; }));
 	const world = tableWorld(table, (object: Seen) => now.get(object.id));
 	world.objects = field;
-	const scope = (source?: Thing): Scope => ({ world, controller: source?.controller ?? 0, ...(source ? { source } : {}) });
+	layers(world, now, field);
+	if (!override) cache.set(table, { clock: table.cursor.clock, size: table.things.size, work: table.workLog.length, traits: now });
+	return now;
+}
 
+/** The same layer walk can read a proposed spell using only the caster's projected facts. */
+export function spellCharacteristics(view: SeatView, object: Seen, controller: number, face = 0, x = 0, words: string[] = []): Traits | undefined {
+	const printed = view.printed?.[object.card ?? ""], spell = { ...object, controller, zone: "stack" as const, face: face as 0 | 1 };
+	const chosen = currentFacts(printed, spell);
+	if (!chosen || !object.card) return undefined;
+	const own = (view.work?.packages?.find((one) => one.card === object.card)?.registers ?? []).filter((one) =>
+		(one.face === undefined || one.face === face) && one.kind === "continuous" && one.affects.is === "this" && one.affects.zones?.includes("stack"));
+	const traits = printedTraits(chosen, object.card, own, x); traits.words = [...words];
+	if (printed?.layout === "transform" && face === 1 && !object.copy) traits.manaValue = manaValue({ ...chosen, mana: printed.faces![0]!.mana }, x);
+	const world = viewWorld(view), read = world.read, now = new Map([[spell.id, traits]]);
+	world.objects = world.objects.map((one) => one.id === spell.id ? spell : one);
+	world.read = (one) => now.get(one.id) ?? read(one);
+	layers(world, now, [spell], { id: spell.id, x });
+	return now.get(spell.id);
+}
+
+/** Apply effects to the requested objects. Other sources retain the caller's already-derived reading. */
+function layers(world: World, now: Map<string, Traits>, field: Seen[], announced?: { id: string; x: number }) {
+	const scope = (source?: Seen): Scope => ({ world, controller: source?.controller ?? 0, ...(source ? { source } : {}), ...(announced && announced.id === source?.id ? { x: announced.x } : {}) });
 	const effects: Effect[] = [
-		...field.flatMap((source) => (now.get(source.id)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" &&
+		...world.objects.flatMap((source) => (world.read(source)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" &&
 			(source.zone === "battlefield" || ability.affects.is === "this" && ability.affects.zones?.includes(source.zone as never)) ? [{
 			at: source.transformed ?? source.entered ?? 0, change: ability.change, source, ability,
 			applies: (inner, object) => matches(inner, object, ability.affects), ...(ability.if ? { when: (inner: Scope) => holds(inner, ability.if!) } : {}),
 		}] : [])),
-		...table.notes.flatMap((note: Note): Effect[] => note.kind === "label" && note.change ? [{
+		...world.notes.flatMap((note: Note): Effect[] => note.kind === "label" && note.change ? [{
 			at: note.written, change: note.change, applies: (_inner, object) => object.id === note.on.id && object.incarnation === note.on.incarnation,
 		}] : []),
 	].sort((a, b) => a.at - b.at);
 	// An ability removed earlier in the walk stops making its effect.
-	const present = (effect: Effect) => !effect.source || !effect.ability || (now.get(effect.source.id)?.registrations.includes(effect.ability) ?? false);
+	const present = (effect: Effect) => !effect.source || !effect.ability || (world.read(effect.source)?.registrations.includes(effect.ability) ?? false);
 	const each = (layer: (change: Modification, traits: Traits, inner: Scope) => void) => {
 		for (const effect of effects) {
 			if (!present(effect)) continue;
@@ -208,8 +231,6 @@ export function walk(table: Table, override?: Thing): Map<string, Traits> {
 			if (counter) { traits.power += Number(counter[1]) * count; traits.toughness! += Number(counter[2]) * count; }
 		}
 	}
-	if (!override) cache.set(table, { clock: table.cursor.clock, size: table.things.size, work: table.workLog.length, traits: now });
-	return now;
 }
 
 /** 122.1b. */

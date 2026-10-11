@@ -5,14 +5,15 @@ import { test } from "node:test";
 import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { characteristics } from "../src/core/characteristics.ts";
+import { characteristics, spellCharacteristics } from "../src/core/characteristics.ts";
+import { manaBudget } from "../src/core/budget.ts";
 import { amount, matches, select, tableWorld, viewWorld } from "../src/core/selectors.ts";
 import { eventScope } from "../src/core/triggers.ts";
-import { activationChanges } from "../src/core/procedures.ts";
+import { activationChanges, printedCast } from "../src/core/procedures.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
 import { project } from "../src/core/view.ts";
-import { workFrame } from "../src/core/work-tools.ts";
+import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import type { Procedure } from "../src/core/language.ts";
@@ -108,4 +109,34 @@ test("cast queries preserve mana value, color and old spell facts without exposi
 	const [emptiness] = place(hybrid, 0, "hand", "Emptiness");
 	assert.equal(characteristics(hybrid, emptiness!)!.manaValue, 6);
 	assert.deepEqual(characteristics(hybrid, emptiness!)!.colors.sort(), ["B", "W"], "hybrid symbols supply both colors before payment");
+});
+
+test("a proposed spell uses the same scoped characteristics as its cast face without leaking the hand", () => {
+	const table = start(standard, [{ deck: deck("Boros Dragons") }, { deck: deck("Azorius Control") }], "spell-characteristics");
+	const card = "Twinmaw Stormbrood // Charring Bite", dragon = place(table, 0, "hand", card)[0]!;
+	editWork(table, 0, [{ do: "package.put", package: { card, printedCast: true, registers: [
+		{ kind: "continuous", face: 0, basis: "Flying", affects: { is: "this", zones: ["stack", "battlefield"] }, change: { words: ["flying"] } },
+		{ kind: "watch", face: 0, basis: "When this creature enters, you gain 5 life.", event: { on: "enters", of: { is: "this" } }, effect: { instructions: [{ do: "life", who: "you", amount: 5 }] } },
+	], procedures: [{ face: 1, claim: "Cast Charring Bite", basis: table.printed[card]!.faces![1]!.oracle, source: { card, zones: ["hand"] }, timing: "spell",
+		targets: [{ object: { types: ["creature"], not: { words: ["flying"] } } }], instructions: [{ do: "damage", to: "target:0", amount: 5 }] }] } }], "spell-terms");
+	main(table, 0);
+	commit(table, [{ do: "add-mana", who: 0, colors: ["W", "W", "W", "W", "W", "W"], spendOnly: { zones: ["stack"], words: ["flying"] } }], "game-setup");
+	const initial = structuredClone(table), from = table.ledger.length, frame = workFrame(table, 0), shown = frame.view.objects!.find((one) => one.id === dragon.id)!;
+	const expected = spellCharacteristics(frame.view, shown, 0)!;
+	assert.ok(expected.words.includes("flying")); assert.equal(expected.manaValue, 6);
+	const omen = spellCharacteristics(frame.view, shown, 0, 1)!;
+	assert.equal(omen.words.includes("flying"), false); assert.deepEqual(omen.types, ["sorcery"]); assert.equal(omen.manaValue, 2);
+	assert.ok(offered(table, printedCast(card, table.printed[card]!)).length, "restricted funding reads the future spell's flying");
+	assert.equal(manaBudget(frame, printedCast(card, table.printed[card]!), shown).payableBeforeNewResources, true, "the resource forecast reads that same flying");
+	for (const viewer of [1, "spectator"] as const) assert.ok(!project(table, viewer).objects!.some((one) => one.id === dragon.id));
+	assert.deepEqual(table, initial, "projecting a cast changes neither the card nor the accepted terms");
+	announce(table, printedCast(card, table.printed[card]!));
+	assert.deepEqual(characteristics(table, dragon), expected);
+	const pending = structuredClone(table), at = table.ledger.length;
+	passBoth(table); finish(table);
+	apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); finish(table);
+	assert.equal(table.seats[0]!.life, 25); assert.ok(characteristics(table, dragon)!.words.includes("flying"));
+	assert.equal(amount({ world: tableWorld(table), controller: 0 }, { history: "cast", by: "you", of: { zones: ["stack"], words: ["flying"] } }), 1);
+	assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
+	assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 });

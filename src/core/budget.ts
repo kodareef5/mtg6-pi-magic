@@ -29,7 +29,7 @@ import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, castingPrices, playable, permissionMana } from "./permits.ts";
 import { reached, select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
-import { intrinsic, printedTraits } from "./characteristics.ts";
+import { intrinsic, spellCharacteristics } from "./characteristics.ts";
 import { faceFacts } from "./faces.ts";
 import { permanentSpell } from "./printed.ts";
 import { STEPS, TURN, type Step } from "./steps.ts";
@@ -64,7 +64,7 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof cost?.tap === "object")
 		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
-	const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const, ...(selected ? { traits: printedTraits(selected, source.card!) } : {}) } : source;
+	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
 	const possible = (position: Frame) => fundings(position, mana, reserved, spending).length > 0;
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
@@ -180,7 +180,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const chosen = select(query, hypothetical);
 			let source = fromHand ? offBoard(chosen, select(query, initial)) : chosen[0];
 			const selected = faceFacts(frame.view.printed?.[source?.card ?? ""], procedure.face);
-			if (source && selected && procedure.timing === "spell") source = { ...source, face: procedure.face ?? 0, traits: printedTraits(selected, source.card!) };
+			if (source && selected && procedure.timing === "spell") source = { ...source, face: procedure.face ?? 0, traits: spellCharacteristics(hypothetical.view, source, frame.seat, procedure.face, 0, procedure.words) };
 			const named = procedure.source.card;
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
 			const stated = procedure.timing === "spell" ? source ? castMana(hypothetical, source, procedure.face, procedure.cost?.mana) : procedure.cost?.mana ?? selected?.mana : procedure.cost?.mana ?? "{0}";
@@ -202,7 +202,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		const selected = query ? select(query, hypothetical) : [];
 		let source = timing === "stack" ? selected[0] : offBoard(selected, query ? select(query, initial) : []);
 		const printed = faceFacts(frame.view.printed?.[source?.card ?? ""], offered?.use?.face);
-		if (source && printed && timing === "spell") source = { ...source, face: offered?.use?.face ?? 0, traits: printedTraits(printed, source.card!) };
+		if (source && printed && timing === "spell") source = { ...source, face: offered?.use?.face ?? 0, traits: spellCharacteristics(hypothetical.view, source, frame.seat, offered?.use?.face, offered?.use?.x, offered?.use?.words) };
 		const named = action.objects?.card;
 		if (kind === "land") return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}) };
 		if (offered?.use) {

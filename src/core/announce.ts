@@ -9,7 +9,7 @@
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
 import { doubleFaced, faceFacts } from "./faces.ts";
-import { printedTraits } from "./characteristics.ts";
+import { spellCharacteristics } from "./characteristics.ts";
 import { castWords } from "./cast-words.ts";
 import { enoughExile } from "./cost-selection.ts";
 import { targetless } from "./printed.ts";
@@ -254,7 +254,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		if (procedure.cost?.loyalty !== undefined && (!(mainWindow(frame) || instantLoyalty(world, frame.seat, original)) || original.zone !== "battlefield" || loyaltyUsed(world, original))) continue;
 		if (procedure.timing !== "spell" && procedure.timing !== "land" && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
-		const source = selected ? { ...original, traits: printedTraits(selected, original.card!), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
+		const source = selected ? { ...original, traits: spellCharacteristics(frame.view, original, frame.seat, procedure.face), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
 		const scope: Scope = { world, controller: frame.seat, source };
 		// Timing: a spell's from its type line unless it claims flash; an activation's own restriction.
 		const instant = procedure.timing === "spell" && (source.traits?.types.includes("instant") || procedure.speed === "instant" || flashed(world, frame.seat, source));
@@ -285,8 +285,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
 			// Mana pays for the spell as it will be on the stack, or for the ability.
 			for (const x of xs) {
-				const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const,
-					...(selected ? { traits: printedTraits(selected, source.card!, [], x) } : {}) } : source;
+				const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const,
+					...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, x, procedure.words) } : {}) } : source;
 				const announced = { ...scope, source: spending, x };
 				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
