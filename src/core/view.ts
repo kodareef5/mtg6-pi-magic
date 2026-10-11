@@ -215,7 +215,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(declarationReview ? { declarationReview } : {}),
 		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts } } : {}),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history, castings,
-		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps] } : {}),
+		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps], turnBegan: cursor.began[cursor.active] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),

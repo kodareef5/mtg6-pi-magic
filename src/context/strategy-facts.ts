@@ -107,6 +107,6 @@ export function planningFrame(frame: Frame, scope: "turn" | "response" | "prepar
 	return { ...rest, view: { ...projected.view,
 		window: { kind: "turn", turn: frame.view.window.turn + 1, active: frame.seat, step: "upkeep", phase: "beginning" },
 		remainingSteps: TURN.filter((step) => step !== "untap"),
-		drawnAt: undefined, turnDraw: undefined, landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
+		turnBegan: frame.version, drawnAt: undefined, turnDraw: undefined, landsPlayed: 0, history: [], combat: null, purposes: [], actions: [],
 	} };
 }

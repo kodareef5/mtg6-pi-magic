@@ -98,6 +98,8 @@ export type SeatView = {
 	seats?: { id: SeatId; name: string }[];
 	/** This viewer's most recent turn start, for tap-cost availability. */
 	began?: number;
+	/** Public start of the current turn, distinct from this viewer's last turn. */
+	turnBegan?: number;
 	/** The rules draw in this viewer's current turn, derived from its ledger row. */
 	drawnAt?: number;
 	/** Cards received in that rules draw, with this seat's event-time visibility. */

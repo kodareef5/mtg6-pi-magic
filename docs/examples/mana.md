@@ -111,3 +111,91 @@ ability is not offered as a source.
   ]
 }
 ```
+
+## A source that entered this turn
+
+`enteredThisTurn` reads the current battlefield incarnation against the start
+of the current turn, including an opponent's turn. Returning a card to the
+battlefield supplies a new entry; changing control supplies none. A forecast
+of the next turn cannot carry this turn's entry permission forward. This example
+does not let the mana ability ignore its other costs or restrictions.
+
+```json package
+{
+  "card": "Hidden Lair",
+  "registers": [
+    {
+      "basis": "{T}: Add {C}.",
+      "kind": "mana",
+      "cost": {
+        "tap": true
+      },
+      "colors": [
+        "C"
+      ]
+    },
+    {
+      "basis": "{T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land.",
+      "kind": "mana",
+      "cost": {
+        "tap": true
+      },
+      "colors": [
+        "U"
+      ],
+      "if": {
+        "any": [
+          {
+            "enteredThisTurn": "this"
+          },
+          {
+            "amount": {
+              "count": {
+                "types": [
+                  "land"
+                ],
+                "supertypes": [
+                  "basic"
+                ],
+                "controller": "you"
+              }
+            },
+            "atLeast": 1
+          }
+        ]
+      }
+    },
+    {
+      "basis": "{T}: Add {U} or {B}. Activate only if this land entered this turn or if you control a basic land.",
+      "kind": "mana",
+      "cost": {
+        "tap": true
+      },
+      "colors": [
+        "B"
+      ],
+      "if": {
+        "any": [
+          {
+            "enteredThisTurn": "this"
+          },
+          {
+            "amount": {
+              "count": {
+                "types": [
+                  "land"
+                ],
+                "supertypes": [
+                  "basic"
+                ],
+                "controller": "you"
+              }
+            },
+            "atLeast": 1
+          }
+        ]
+      }
+    }
+  ]
+}
+```

@@ -612,3 +612,6 @@ that reference. The reference may be a bound result or a departed object read
 through last known information. This comparison grants no hidden-zone access.
 A `move` with `as` may add `countFrom: Zone`: its binding retains the moved
 objects and an amount counting those that came from that zone.
+
+`{ "enteredThisTurn": ObjectRef }` holds only for a current battlefield
+incarnation whose entry followed the start of the current turn.

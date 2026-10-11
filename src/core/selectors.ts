@@ -35,7 +35,7 @@ export type World = {
 	lastKnown(ref: ObjectRef): { object: Seen; traits?: Traits } | undefined;
 	casting?(ref: ObjectRef): Casting | undefined;
 	/** Whose turn it is and how many turns each seat has begun, the current one included. Absent before the first turn. */
-	turn?: { active: SeatId; taken: Record<SeatId, number> };
+	turn?: { active: SeatId; taken: Record<SeatId, number>; began?: number };
 };
 
 /** Turns each seat has begun so far, from who started and the turn number: seats alternate from the first. */
@@ -69,7 +69,7 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 		objects: [...table.things.values()], read: reader, printed: table.printed,
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, name: one.name })),
 		notes: table.notes, combat: table.combat,
-		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn) } } : {}),
+		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn), began: table.cursor.began[table.cursor.active] } } : {}),
 		get history() { return (events ??= happened(table)); },
 		casting: (ref) => casting(table, ref),
 		lastKnown(ref) {
@@ -113,7 +113,7 @@ export function viewWorld(view: SeatView): World {
 		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
 		casting: (ref) => view.castings?.[targetKey(ref)],
 		...(view.window.kind === "turn" && view.starting !== undefined ? { turn: { active: view.window.active,
-			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn) } } : {}),
+			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn), began: view.turnBegan } } : {}),
 	};
 }
 
@@ -292,6 +292,13 @@ function history(scope: Scope, value: Extract<Amount, { history: string }>): num
 }
 
 export function holds(scope: Scope, condition: Condition): boolean {
+	if ("enteredThisTurn" in condition) {
+		const began = scope.world.turn?.began;
+		return began !== undefined && objects(scope, condition.enteredThisTurn).some((ref) => {
+			const one = live(scope.world, ref);
+			return one?.zone === "battlefield" && one.entered !== undefined && one.entered > began;
+		});
+	}
 	if ("cast" in condition) {
 		const one = objects(scope, condition.cast)[0], paid = one && scope.world.casting?.(one);
 		return !!paid && (condition.from === undefined || paid.from === condition.from) && (condition.by === undefined || players(scope, condition.by).includes(paid.by));

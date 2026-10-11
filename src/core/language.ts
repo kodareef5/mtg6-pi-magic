@@ -131,6 +131,8 @@ export const Defs = {
 		object({ any: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ not: Type.Ref("Condition") }),
 		object({ cast: ObjectRef, from: Type.Optional(Zone), by: Type.Optional(PlayerRef) }),
+		/** The current battlefield incarnation entered during the current turn. */
+		object({ enteredThisTurn: ObjectRef }),
 		/** Whose turn it is: "if it's not your turn". */
 		object({ turn: one("self", "opponent") }),
 	]),
