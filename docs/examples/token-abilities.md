@@ -4,6 +4,8 @@ A predefined token includes the ability defined by the rules. Naming it does
 not give it that ability. `activated` registrations supply stack procedures;
 mana abilities still use `mana`. A later plan can reference the listed ability
 without inventing its meaning or attaching it to the card that made the token.
+Card colors are W, U, B, R and G. A colorless token uses `colors: []`; C belongs
+only to mana, and a token specification containing it is refused.
 
 ## A Map explores with its target
 

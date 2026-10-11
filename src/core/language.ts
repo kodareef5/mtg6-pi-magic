@@ -217,7 +217,7 @@ export const Defs = {
 
 	TokenSpec: object({
 		name: text, types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
-		supertypes: Type.Optional(Type.Array(one("legendary", "snow"))), colors: Type.Array(Color),
+		supertypes: Type.Optional(Type.Array(one("legendary", "snow"))), colors: Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true }),
 		power: Type.Optional(Type.Integer()), toughness: Type.Optional(Type.Integer()),
 		loyalty: Type.Optional(natural),
 		words: Type.Optional(Type.Array(text)), registers: Type.Optional(Type.Array(Type.Ref("Registration"))),

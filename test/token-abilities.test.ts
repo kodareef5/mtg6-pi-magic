@@ -7,7 +7,7 @@ import { standard } from "../src/core/format.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
-import { printedCast } from "../src/core/procedures.ts";
+import { checkProcedure, printedCast } from "../src/core/procedures.ts";
 import { activatedUses } from "../src/core/activated.ts";
 import { relive } from "../src/core/journal.ts";
 import { describe, project } from "../src/core/view.ts";
@@ -77,6 +77,11 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 });
 
 test("token creation uses the target's last controller, survives failed destruction, and is lost with an illegal target", () => {
+	const badColor = structuredClone(example("Get Lost"));
+	const creation = badColor.instructions.find((one) => one.do === "token")!;
+	if (creation.do !== "token") assert.fail("Get Lost creates Maps");
+	creation.spec.colors = ["C"];
+	assert.throws(() => checkProcedure(badColor), /Procedure/, "colorless tokens have an empty color set, not a sixth color");
 	for (const mode of ["destroyed", "indestructible", "illegal"] as const) {
 		const table = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: alpha(deck("Selesnya Landfall")) }], `get-lost-${mode}`);
 		const victim = place(table, 0, "hand", "The Theorist, Jace Beleren")[0]!;
@@ -103,6 +108,7 @@ test("token creation uses the target's last controller, survives failed destruct
 		finish(table);
 		const maps = cardsIn(table, "battlefield").filter((one) => one.token?.name === "Map");
 		assert.equal(maps.length, 2); assert.ok(maps.every((one) => one.owner === 1 && one.controller === 1));
+		assert.ok(maps.every((one) => one.token!.colors.length === 0));
 		assert.equal(activatedUses(workFrame(table, 0)).filter((one) => maps.some((map) => one.procedure.source.refs?.[0]?.id === map.id)).length, 0);
 		assert.equal(activatedUses(workFrame(table, 1)).filter((one) => maps.some((map) => one.procedure.source.refs?.[0]?.id === map.id)).length, 2);
 		const receipt = table.log.findLast((one) => one.changes.some((change) => change.do === "token"))!;
