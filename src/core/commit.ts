@@ -151,6 +151,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	}
 	// "If it would die, exile it instead" changes the event before it happens (614.1a).
 	for (const change of changes) {
+		const departing = change.do === "move" && change.to !== "stack" ? table.things.get(change.what) : undefined;
+		if (change.do === "move" && departing?.zone === "stack" && departing.ability?.leavesStack) change.to = departing.ability.leavesStack;
 		const dying = change.do === "move" && change.to === "graveyard" ? table.things.get(change.what) : undefined;
 		const instead = dying?.zone === "battlefield" ? characteristics(table, dying)?.registrations.find((one) => one.kind === "replace" && one.on === "dies") : undefined;
 		if (change.do === "move" && instead?.kind === "replace") change.to = instead.to as Zone;

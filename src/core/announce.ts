@@ -16,7 +16,7 @@ import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, type Price } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
-import { allowance, castingPrices, castRestrictions, flashed } from "./permits.ts";
+import { allowance, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
@@ -253,7 +253,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		const prices = procedure.timing === "spell" ? castingPrices(world, frame.seat, original, turn, procedure.face,
 			procedure.cost?.mana !== undefined && procedure.cost.mana !== selected?.mana) : [{}];
 		for (const granted of prices) {
-			const stated = granted.mana ?? procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
+			if (granted.mana === "printed" && !selected?.mana) continue;
+			const stated = permissionMana(granted.mana, selected?.mana) ?? procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
 			const mana = stated === undefined || stated === "" ? { generic: 0, colors: [], x: 0 } : symbols(stated);
 			if (!mana) continue;
 			const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
@@ -283,7 +284,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
 									shows: [
 										`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
-										granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana} instead of the mana cost; normal timing and additional costs still apply.` : "",
+										granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
 										procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
 											`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduce ? ` (reduced by ${reduce})` : ""}. ${extra.shows}${paying}`,
 										procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
@@ -296,6 +297,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 								},
 								activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 									...(granted.permission ? { permission: granted.permission } : {}),
+									...(granted.leavesStack ? { leavesStack: granted.leavesStack } : {}),
 									...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),
 									...(extra.paid.exiled?.some((one) => one.id === source.id) ? { bound: { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } } : {}),
 									...(procedure.speed ? { speed: procedure.speed } : {}),

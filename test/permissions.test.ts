@@ -12,7 +12,70 @@ import { tableWorld, viewWorld } from "../src/core/selectors.ts";
 import { manaBudget } from "../src/core/budget.ts";
 import { project } from "../src/core/view.ts";
 import { workFrame } from "../src/core/work-tools.ts";
+import { faceFacts } from "../src/core/faces.ts";
+import { permissionMana } from "../src/core/permits.ts";
+import type { Procedure } from "../src/core/language.ts";
 import { announce, establish, example, finish, main, offered, pack, passBoth, place } from "./play.ts";
+
+test("a permission carries its printed price and every stack departure through replay", () => {
+	for (const route of ["resolve", "counter", "bounce"] as const) {
+		const table = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Dimir Control") }], `flashback-${route}`);
+		const victim = establish(table, 1, "Aegis Turtle", []);
+		main(table, 0);
+		place(table, 0, "hand", "Flashback", "Jeskai Revelation");
+		const [sheriff] = place(table, 0, "graveyard", "Shoot the Sheriff");
+		place(table, 1, "hand", "Negate");
+		commit(table, [{ do: "add-mana", who: 0, colors: ["R", "B", "C", "C", "C", "C", "C", "U", "R", "W"] },
+			{ do: "add-mana", who: 1, colors: ["U", "C"] }], "game-setup");
+		const initial = structuredClone(table), from = table.ledger.length;
+		announce(table, example("Grant flashback at the target's printed mana cost")); passBoth(table); finish(table);
+		const spell: Procedure = { source: { card: "Shoot the Sheriff", zones: ["graveyard"] }, claim: "Shoot the Sheriff", basis: table.printed["Shoot the Sheriff"]!.oracle,
+			timing: "spell", targets: [{ object: { types: ["creature"], not: { subtypes: ["Assassin", "Mercenary", "Pirate", "Rogue", "Warlock"] } } }],
+			instructions: [{ do: "destroy", what: "target:0" }] };
+		const options = offered(table, spell);
+		assert.ok(options.length); assert.ok(options.every((one) => one.activation.cost.generic === 1 && one.activation.cost.colors.join("") === "B" && one.activation.leavesStack === "exile"));
+		assert.equal(offered(table, { ...spell, cost: { mana: "{0}" } }).length, 0, "another alternative cost cannot replace flashback's price");
+		const frame = workFrame(table, 0), known = frame.view.objects!.find((one) => one.id === sheriff!.id)!;
+		assert.equal(manaBudget(frame, spell, known).cost, "{1}{B}");
+		const expiry = structuredClone(table); main(expiry, 1, 2);
+		assert.equal(playable(tableWorld(expiry), 0, expiry.things.get(sheriff!.id)!, 2, false), false);
+		announce(table, spell, (one) => one.activation.paid.every((id) => ["B", "C"].includes(table.seats[0]!.pool.find((mana) => mana.id === id)!.color)));
+		assert.equal(sheriff!.ability!.leavesStack, "exile");
+		assert.ok(!table.notes.some((one) => one.kind === "permit"), "the permission note leaves, but the spell retains its departure term");
+		const clone = structuredClone(table), at = table.ledger.length;
+		if (route === "counter") {
+			apply(table, "pass", "model", "chosen");
+			announce(table, { source: { card: "Negate", zones: ["hand"] }, claim: "Negate", basis: table.printed.Negate!.oracle, timing: "spell",
+				targets: [{ object: { zones: ["stack"], not: { types: ["creature"] } } }], instructions: [{ do: "counter", what: "target:0" }] });
+		} else if (route === "bounce") {
+			// Isolate Revelation's first instruction; this fixture does not claim complete card coverage.
+			announce(table, { source: { card: "Jeskai Revelation", zones: ["hand"] }, claim: "Revelation's spell return", basis: "Return target spell or permanent to its owner's hand.", timing: "spell",
+				targets: [{ object: { zones: ["stack"], types: ["instant", "sorcery"] } }], instructions: [{ do: "move", what: "target:0", to: "hand", reason: "bounce" }] });
+		}
+		passBoth(table); finish(table);
+		assert.equal(sheriff!.zone, "exile", route);
+		assert.equal(victim.zone, route === "resolve" ? "graveyard" : "battlefield");
+		assert.deepEqual(relive(clone, table.ledger.slice(at)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+		commit(table, [{ do: "move", what: sheriff!.id, to: "graveyard", reason: "resolve" }], "resolve");
+		assert.deepEqual(castingPrices(tableWorld(table), 0, sheriff!, table.cursor.turn), []);
+		commit(table, [{ do: "move", what: sheriff!.id, to: "hand", reason: "resolve" }, { do: "add-mana", who: 0, colors: ["B", "C"] }], "game-setup");
+		if (route === "resolve") establish(table, 1, "Aegis Turtle", []);
+		announce(table, { ...spell, source: { ...spell.source, zones: ["hand"] } });
+		assert.equal(sheriff!.ability!.leavesStack, undefined, "a new ordinary cast does not retain the old departure term");
+		passBoth(table); finish(table); assert.equal(sheriff!.zone, "graveyard");
+	}
+	const faces = start(standard, [{ deck: deck("Izzet Spellementals") }, { deck: deck("Mono-Red Aggro") }], "permitted-spell-faces");
+	const [card] = place(faces, 0, "graveyard", "Hearth Elemental // Stoke Genius");
+	commit(faces, [{ do: "note", note: { kind: "permit", on: { id: card!.id, incarnation: card!.incarnation }, by: 0, who: 0, fromTurn: 0,
+		until: "end-of-turn", mana: "printed", of: { types: ["instant", "sorcery"] }, leavesStack: "exile" } }], "game-setup");
+	for (const world of [tableWorld(faces), viewWorld(project(faces, 0))]) {
+		assert.equal(playable(world, 0, card!, 1, false, 0), false);
+		assert.equal(playable(world, 0, card!, 1, false, 1), true);
+		const price = castingPrices(world, 0, card!, 1, 1)[0]!;
+		assert.equal(permissionMana(price.mana, faceFacts(faces.printed[card!.card!], 1)!.mana), "{1}{R}");
+	}
+});
 
 test("a granted casting price belongs to its player and incarnation, with explicit timing and expiry", () => {
 	const table = start(standard, [{ name: "Bant", deck: deck("Bant Airbending Combo") }, { name: "Red", deck: deck("Mono-Red Aggro") }], "airbend");

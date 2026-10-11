@@ -205,8 +205,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const fromTurn = table.cursor.turn + (instruction.from === "next-turn" ? 1 : 0);
 			const until: Until = typeof instruction.until === "string" ? instruction.until as Until : {
 				endOfNextTurn: players(scope, instruction.until.endOfNextTurn)[0] ?? controller, afterTurn: table.cursor.turn };
-			return one(`${seat(table, who).name} may ${instruction.mana ? `cast for ${instruction.mana}` : "play"} ${cards.map(name).join(", ") || "nothing"}`, cards.map((object): Change => ({ do: "note", note: {
+			return one(`${seat(table, who).name} may ${instruction.mana ? `cast for ${instruction.mana === "printed" ? "its printed mana cost" : instruction.mana}` : "play"} ${cards.map(name).join(", ") || "nothing"}${instruction.leavesStack ? `; put it into ${instruction.leavesStack} whenever it leaves the stack` : ""}`, cards.map((object): Change => ({ do: "note", note: {
 				kind: "permit", by: controller, until, on: ref(object), who, fromTurn, ...(instruction.mana ? { mana: instruction.mana } : {}),
+				...(instruction.of ? { of: structuredClone(instruction.of) } : {}), ...(instruction.leavesStack ? { leavesStack: instruction.leavesStack as Zone } : {}),
 				...(source && until === "while-source" ? { source } : {}) } })));
 		}
 		case "register": {

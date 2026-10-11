@@ -242,7 +242,9 @@ export const Defs = {
 		step({ do: Type.Literal("permit"), what: ObjectRef, who: PlayerRef, from: Type.Optional(one("now", "next-turn")),
 			until: Type.Union([Duration, object({ endOfNextTurn: PlayerRef })]),
 			/** An alternative price grants casting only, not a land play or the printed price. */
-			mana: Type.Optional(ManaCost) }),
+			mana: Type.Optional(Type.Union([ManaCost, Type.Literal("printed")])), of: Type.Optional(Type.Ref("Selector")),
+			/** A cast through this permission replaces every departure from the stack. */
+			leavesStack: Type.Optional(Zone) }, { if: { required: ["leavesStack"] }, then: { required: ["mana"] } }),
 		step({ do: Type.Literal("register"), on: ObjectRef, registration: Type.Ref("Registration") }),
 		/** A delayed trigger (603.7). It fires once unless `until` gives it a span. */
 		step({ do: Type.Literal("delay"), event: Type.Ref("Event"), effect: Type.Ref("Effect"), until: Type.Optional(Duration) }),
@@ -285,8 +287,8 @@ export const Defs = {
 	]),
 };
 
-function step<T extends Parameters<typeof Type.Object>[0]>(fields: T) {
-	return object({ ...fields, if: Type.Optional(Type.Ref("Condition")), as: Type.Optional(name), may: Type.Optional(Type.Literal(true)) });
+function step<T extends Parameters<typeof Type.Object>[0]>(fields: T, options: Parameters<typeof Type.Object>[1] = {}) {
+	return Type.Object({ ...fields, if: Type.Optional(Type.Ref("Condition")), as: Type.Optional(name), may: Type.Optional(Type.Literal(true)) }, { additionalProperties: false, ...options });
 }
 
 const of = <K extends keyof typeof Defs>(ref: K) => Type.Cyclic(Defs, ref);

@@ -9,18 +9,32 @@ import type { Registration, Selector } from "./language.ts";
 import type { SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
 import type { Note } from "./table.ts";
+import { faceFacts } from "./faces.ts";
+import { printedTraits } from "./characteristics.ts";
 
 /** Only the named incarnation and allowed face receive a permission. */
 export const permissions = (world: World, seat: SeatId, object: Seen, turn: number, face?: number) =>
 	world.notes.filter((note): note is Extract<Note, { kind: "permit" }> => note.kind === "permit" && note.who === seat && note.fromTurn <= turn &&
-		note.on.id === object.id && note.on.incarnation === object.incarnation && (!note.faces || note.faces.some((allowed) => allowed === (face ?? 0))));
+		note.on.id === object.id && note.on.incarnation === object.incarnation && (!note.faces || note.faces.some((allowed) => allowed === (face ?? 0))) &&
+		(!note.of || permittedSpell(world, seat, object, face, note.of)));
+
+function permittedSpell(world: World, controller: SeatId, object: Seen, face: number | undefined, selector: Selector): boolean {
+	const printed = faceFacts(world.printed?.[object.card ?? ""], face);
+	const source = { ...object, zone: "stack" as const, face: (face ?? 0) as 0 | 1 };
+	return matches({ world, controller, source }, source, { zones: ["stack"], ...selector }, printed ? printedTraits(printed, object.card!) : world.read(source));
+}
+
+/** A printed-cost permission reads the chosen spell face, including its X symbols. */
+export const permissionMana = (mana: string | undefined, printed: string | undefined) => mana === "printed" ? printed : mana;
+type CastingPrice = { mana?: string; permission?: string; leavesStack?: Zone };
 
 /** A normal route and each distinct granted alternative price. Two alternative costs cannot combine. */
-export function castingPrices(world: World, seat: SeatId, object: Seen, turn: number, face?: number, alternative = false): { mana?: string; permission?: string }[] {
+export function castingPrices(world: World, seat: SeatId, object: Seen, turn: number, face?: number, alternative = false): CastingPrice[] {
 	const permitted = permissions(world, seat, object, turn, face);
 	const normal = object.zone === "hand" && object.owner === seat || !!object.copy && playable(world, seat, object, turn, false, face) || permitted.some((note) => note.mana === undefined);
-	const prices: { mana?: string; permission?: string }[] = normal ? [{}] : [];
-	if (!alternative) for (const note of permitted) if (note.mana !== undefined && !prices.some((price) => price.mana === note.mana)) prices.push({ mana: note.mana, permission: note.id });
+	const prices: CastingPrice[] = normal ? [{}] : [];
+	if (!alternative) for (const note of permitted) if (note.mana !== undefined && !prices.some((price) => price.mana === note.mana && price.leavesStack === note.leavesStack))
+		prices.push({ mana: note.mana, permission: note.id, ...(note.leavesStack ? { leavesStack: note.leavesStack } : {}) });
 	return prices;
 }
 

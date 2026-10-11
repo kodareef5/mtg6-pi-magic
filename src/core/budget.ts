@@ -26,7 +26,7 @@
 import { symbols } from "./announce.ts";
 import { fundings, sick, sources, type Funding, type Price } from "./funding.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
-import { allowance, castingPrices, playable } from "./permits.ts";
+import { allowance, castingPrices, playable, permissionMana } from "./permits.ts";
 import { reached, select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
 import { intrinsic, printedTraits } from "./characteristics.ts";
@@ -44,7 +44,7 @@ function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: strin
 	const printed = faceFacts(frame.view.printed?.[source.card ?? ""], face)?.mana;
 	const turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const prices = castingPrices(viewWorld(frame.view), frame.seat, source, turn, face, stated !== undefined && stated !== printed);
-	return prices.length === 1 ? prices[0]!.mana ?? stated ?? printed : undefined;
+	return prices.length === 1 ? permissionMana(prices[0]!.mana, printed) ?? stated ?? printed : undefined;
 }
 
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */

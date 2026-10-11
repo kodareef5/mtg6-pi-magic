@@ -6,6 +6,32 @@ one incarnation. An alternative `mana` price permits casting, with normal
 timing and additional costs, and gives no land play or printed-price option.
 Another independent permission can supply a different price.
 
+## Printed-price permissions and stack departure
+
+`mana: "printed"` reads the mana cost of the face being cast, including X.
+`of` restricts the resulting spell and does not grant a permanent-face cast.
+`leavesStack` travels with the chosen permission into the announcement, so it
+still applies after that permission expires or its note leaves the table.
+Resolution, countering and returning the spell all use the same replacement.
+
+```json procedure
+{
+  "source": { "card": "Flashback", "zones": ["hand"], "controller": "self" },
+  "claim": "Grant flashback at the target's printed mana cost",
+  "basis": "Target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.)",
+  "timing": "spell",
+  "targets": [{ "object": { "zones": ["graveyard"], "controller": "self", "types": ["instant", "sorcery"] } }],
+  "instructions": [
+    { "do": "permit", "what": "target:0", "who": "you", "mana": "printed",
+      "of": { "types": ["instant", "sorcery"] }, "leavesStack": "exile", "until": "end-of-turn" }
+  ]
+}
+```
+
+This follows the flashback departure rule in the pinned 702.34a. The official
+[Dominaria Remastered notes](https://magic.wizards.com/en/news/feature/dominaria-remastered-release-notes)
+also describe the replacement for every departure from the stack.
+
 ## Airbend
 
 The move binds the new exiled object. Its owner is read from that binding, since

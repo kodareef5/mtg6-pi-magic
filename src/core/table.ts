@@ -111,6 +111,8 @@ export const manaDuration = (mana: Pick<Mana, "until">): string => mana.until
 export type Activation = {
 	/** The permission whose alternative price was chosen, frozen with the announcement. */
 	permission?: string;
+	/** Departure replacement carried by the selected casting permission. */
+	leavesStack?: Zone;
 	face?: 0 | 1;
 	/** Source's last transformation when this ability went on the stack, or its delay was created. */
 	transformAt?: number;
@@ -240,7 +242,7 @@ export type Note = {
 	| { kind: "register"; on: ObjectRef; registration: Registration }
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
 	/** "You may play that card": from a turn, while that card stays where it is. */
-	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string }
+	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone }
 	/** Restriction words for future matching spells, applied as they are cast. */
 	| { kind: "cast-words"; who: SeatId; words: string[]; of?: Selector; next?: true }
 	/**

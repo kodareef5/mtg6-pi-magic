@@ -106,7 +106,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
 	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
 	if (activation.timing === "spell" && !castingPrices(world, controller, object, table.cursor.turn, activation.face)
-		.some((price) => price.permission === activation.permission)) throw new Error("The selected casting permission is no longer available.");
+		.some((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack)) throw new Error("The selected casting permission or its departure replacement is no longer available.");
 	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
