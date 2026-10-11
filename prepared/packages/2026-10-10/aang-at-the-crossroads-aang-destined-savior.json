@@ -1,0 +1,241 @@
+{
+	"card": "Aang, at the Crossroads // Aang, Destined Savior",
+	"generated": "2026-10-10",
+	"source": "ca153d9255fbfba168a173c134c55db36aa2e972b79b6152e726954afd24ba40",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Aang, at the Crossroads // Aang, Destined Savior",
+		"registers": [
+			{
+				"face": 0,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 5,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 4
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"position": "bottom",
+							"random": true
+						}
+					]
+				}
+			},
+			{
+				"face": 0,
+				"basis": "When another creature you control leaves the battlefield, transform Aang at the beginning of the next upkeep.",
+				"kind": "watch",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					},
+					"from": [
+						"battlefield"
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "upkeep",
+								"whose": "any"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "transform",
+										"what": "this"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "Land creatures you control have vigilance.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"all": [
+						{
+							"types": [
+								"land"
+							]
+						},
+						{
+							"types": [
+								"creature"
+							]
+						}
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"face": 1,
+				"basis": "At the beginning of combat on your turn, earthbend 2. (Target land you control becomes a 0/0 creature with haste that's still a land. Put two +1/+1 counters on it. When it dies or is exiled, return it to the battlefield tapped.)",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "begin-combat",
+					"whose": "you"
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"land"
+								],
+								"controller": "you"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "target:0",
+							"until": "indefinite",
+							"change": {
+								"types": {
+									"add": [
+										"creature"
+									]
+								},
+								"base": {
+									"power": 0,
+									"toughness": 0
+								},
+								"words": [
+									"haste"
+								]
+							}
+						},
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "+1/+1",
+							"amount": 2
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "leaves",
+								"of": {
+									"is": "target:0"
+								},
+								"to": [
+									"graveyard",
+									"exile"
+								]
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "move",
+										"what": "event:object",
+										"to": "battlefield",
+										"tapped": true,
+										"controller": "you",
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

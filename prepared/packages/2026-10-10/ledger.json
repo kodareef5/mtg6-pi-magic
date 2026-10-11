@@ -1,20 +1,4 @@
 {
-	"Aang, Swift Savior // Aang and La, Ocean's Fury": {
-		"reason": "Aang, Swift Savior // Aang and La, Ocean's Fury is not ready: Face 0: \"When Aang enters, airbend up to one other target creature or spell. (Exile it. While it's exiled, its owner may cast it for {2} rather than its mana cost.)\" The target schema cannot represent one optional target selected from the union of another battlefield creature and any spell on the stack. A single selector cannot apply the creature restriction only to battlefield objects; two optional target slots would incorrectly allow two targets, and two watches would incorrectly create two triggers.",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
-	"Aang, at the Crossroads // Aang, Destined Savior": {
-		"reason": "Aang, at the Crossroads // Aang, Destined Savior is not ready: Face 0: \"When Aang enters, look at the top five cards of your library. You may put a creature card with mana value 4 or less from among them onto the battlefield. Put the rest on the bottom of your library in a random order.\" Missing operations: privately inspect and bind the top five cards as a bounded set, choose only from that set, and put its remaining cards on the bottom in random order. The available library choose operation searches the library and cannot implement this bounded inspection.; Face 1: \"Land creatures you control have vigilance.\" Missing selector operation: intersection of the land and creature card types. The documented types list matches either listed type, not both; granting vigilance to every land or every creature would broaden the printed effect.",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Ajani Resolute": {
 		"reason": "Ajani Resolute is not ready: \"Whenever you gain life, put a loyalty counter on Ajani.\" — The registration event schema has no life-gain event, so this mandatory standing trigger cannot be registered faithfully.",
 		"decks": [
