@@ -368,6 +368,10 @@ The seat supplies procedures through `package.put`, preserving standing terms
 and clearing the corresponding deferred entries. No action or fallback pass
 can proceed until that work is accepted. The model adapter asks its strategy
 model to interpret the card in a separate call, before Jev's physical choice.
+Its answer names each requested use by index and supplies the executable fields.
+The adapter copies the accepted source, basis, timing and face into each
+procedure; separate requested modes must each be answered even when they quote
+the same source text. The journal stores the resulting complete procedures.
 New games with that role off prepare complete uses in pregame instead.
 
 - The table attaches registrations however the permanent enters: cast, played,

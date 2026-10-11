@@ -98,7 +98,9 @@ test("identified uses are prepared before priority choices, while hidden or unpe
 				// The refusal names every compared field. A writer that casts its own card writes controller "self" against a
 				// deferred "any"; a message about the basis alone sent three models back to re-quote an identical basis.
 				assert.match(tools.submit.check({ procedures: [{ ...procedure, source: { ...procedure.source, controller: "self" } }], unsupported: [] })!, /source\.controller \(any\)/);
-				assert.equal(tools.submit.check({ procedures: [procedure], unsupported: [] }), null); return {};
+				assert.match(tools.submit.check({ procedures: [{ use: 99, instructions: [] }], unsupported: [] })!, /index/);
+				assert.match(tools.submit.check({ procedures: [{ use: 0, source: procedure.source, instructions: [] }], unsupported: [] })!, /inherits/);
+				assert.equal(tools.submit.check({ procedures: [{ use: 0, claim: procedure.claim, targets: procedure.targets, instructions: procedure.instructions }], unsupported: [] }), null); return {};
 			} }, universe),
 		});
 		const answer = await ready.answer(workFrame(table, 1));
@@ -115,6 +117,24 @@ test("identified uses are prepared before priority choices, while hidden or unpe
 			assert.equal(tools.submit.check({ procedures: [], unsupported: ["Fixture cannot express this use."] }), null); return {};
 		} }, universe), /still needs preparation/);
 	}
+
+	// Separate requested variants can quote the same text. One cannot silently cover the other.
+	const variants = matchTable("readiness-variants"); main(variants, 1);
+	place(variants, 1, "hand", "Shock");
+	const two = { ...known, deferred: [use, { ...use, claim: "Cast Shock at a player" }] };
+	editWork(variants, 1, [{ do: "package.put", package: two }], "two-uses");
+	const unchanged = structuredClone(variants);
+	const both = await interpret(workFrame(variants, 1), { work: async (_about, prompt, tools) => {
+		assert.deepEqual(JSON.parse(prompt.user).needed.map((one: { use: number }) => one.use), [0, 1]);
+		const body = { targets: procedure.targets, instructions: procedure.instructions };
+		assert.match(tools.submit.check({ procedures: [procedure], unsupported: [] })!, /use index/);
+		assert.match(tools.submit.check({ procedures: [{ use: 0, ...body }], unsupported: [] })!, /Requested use 1/);
+		assert.equal(tools.submit.check({ procedures: [{ use: 0, ...body }, { use: 1, ...body }], unsupported: [] }), null);
+		return {};
+	} }, universe);
+	assert.deepEqual(variants, unchanged);
+	assert.deepEqual(both.deferred, []);
+	assert.deepEqual(both.procedures!.map(({ source, basis, claim }) => ({ source, basis, claim })), two.deferred.map(({ source, basis, claim }) => ({ source, basis, claim })));
 
 	// An activated ability belongs to the controller, including a card owned by the other seat.
 	const controlled = matchTable("readiness-control"); main(controlled, 0);
