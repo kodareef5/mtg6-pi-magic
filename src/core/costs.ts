@@ -12,6 +12,7 @@ import type { Choice } from "./instructions.ts";
 import { exilePool, exileValue } from "./cost-selection.ts";
 
 export function paymentChoices(table: Table, scope: Scope, cost: Cost, who: SeatId, resolving: string): Choice[] {
+	if (cost.additional) throw new Error("Named additional mana costs belong to a spell announcement, not a resolving payment.");
 	const frame = { seat: who, version: table.cursor.clock, view: project(table, who) };
 	const source = frame.view.objects?.find((one) => one.id === scope.source?.id && one.incarnation === scope.source.incarnation);
 	const context = { ...scope, world: viewWorld(frame.view), controller: who, source };

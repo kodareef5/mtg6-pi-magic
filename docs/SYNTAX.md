@@ -240,12 +240,13 @@ reference). This expires during cleanup of that player's next turn after the
 permission was made. `from: "next-turn"` instead means after the current table
 turn, as warp requires. See [casting permissions](examples/casting-permissions.md).
 
-A permission's `mana` replaces the mana cost, never timing or nonmana additional
+A permission's `mana` replaces the mana cost, never timing or additional
 costs. It gives no land play or printed-price cast. Other permissions keep
 their own choices. A separately priced procedure, such as warp, cannot combine
-its price with a permission's price. Mana costs that already combine kicker
-with a base price need a separate cost representation before combining with
-this permission. `owner:bound:name` reads the owner of an earlier bound object.
+its price with a permission's price. `cost.additional` adds named mana costs
+after that price is chosen, before reductions. Do not fold kicker into
+`cost.mana`: that states an alternative price. `owner:bound:name` reads the
+owner of an earlier bound object.
 
 Mana normally empties at every step end. `until: "end-of-combat"` retains it
 through combat steps and removes it as the end of combat step ends;
@@ -278,8 +279,14 @@ registered flash for it.
 
 Modes, kicker and warp are separate procedures. Abrade's two modes are two
 procedures with different claims and targets. A kicked Burst Lightning is a
-procedure with `cost.mana` "{4}{R}" and 4 damage. "Choose one" is which
+procedure with `cost.additional: [{name: "kicker", mana: "{4}"}]` and 4 damage. "Choose one" is which
 procedure the seat announces, so there is no mode syntax.
+
+Named additional mana payments belong to spell announcements. Each instance
+has a distinct name; `{cast: "this", paid: "offspring"}` reads whether that
+instance was paid for the spell or the permanent it resolved into. Reducing
+the total cost to zero still pays the chosen additional cost. A blink or a
+token copy inherits no casting payment. See [named costs](examples/named-costs.md).
 
 Optional additional costs also use separate procedures. A blighted Requiting
 Hex pays its counter at announcement and includes the life gain in that variant;

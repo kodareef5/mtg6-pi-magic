@@ -289,7 +289,7 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 		for (const granted of prices) {
 			if (granted.mana === "printed" && !selected?.mana) continue;
 			const stated = permissionMana(granted.mana, selected?.mana) ?? procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
-			const mana = stated === undefined || stated === "" ? { generic: 0, colors: [], x: 0 } : symbols(stated);
+			const mana = symbols((stated ?? "") + (procedure.cost?.additional ?? []).map((one) => one.mana).join(""));
 			if (!mana) continue;
 			const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
 			// A safe bound for X; exact chosen taps and payment are checked below for every candidate.
@@ -322,7 +322,8 @@ export function offerCosts(base: OfferBase, frame: Frame) {
 	return extras(procedure, scope, source, frame).map((extra) => {
 		const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
 		const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
-		const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) });
+		const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid),
+			...(procedure.cost?.additional ? { additional: procedure.cost.additional.map((one) => one.name) } : {}) });
 		const extraRefs = extra.uses.filter((id) => id !== source.id).flatMap((id) => {
 			const object = frame.view.objects?.find((one) => one.id === id); return object ? [immutable(ref(object))] : [];
 		});

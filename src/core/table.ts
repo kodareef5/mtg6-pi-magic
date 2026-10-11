@@ -181,6 +181,7 @@ export type Trigger = {
 };
 /** What was paid besides mana. */
 export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tapped?: ObjectRef[]; sacrificed?: ObjectRef[]; returned?: ObjectRef[];
+	additional?: string[];
 	loyalty?: number;
 	exiled?: ObjectRef[]; discarded?: ObjectRef[]; shown?: (ObjectRef & { reveal?: true })[]; life?: number;
 	counters?: { kind: string; count: number; put?: true; on?: ObjectRef[] } };

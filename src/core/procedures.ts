@@ -78,7 +78,12 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
 		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
 		else if (value && typeof value === "object") {
-			const terms = value as { cost?: import("./language.ts").Cost; kind?: string };
+			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
+			for (const cost of [terms.cost, terms.pays]) if (cost?.additional) {
+				if (terms.timing !== "spell") throw new Error("Named additional mana costs belong to a spell announcement, not an activation or resolving payment.");
+				if (new Set(cost.additional.map((one) => one.name)).size !== cost.additional.length)
+					throw new Error("Each additional cost instance needs a distinct name.");
+			}
 			if (terms.cost?.loyalty !== undefined && terms.cost.counters?.kind === "loyalty")
 				throw new Error("Combine all loyalty-symbol adjustments in cost.loyalty, without a second loyalty counter cost.");
 			if (terms.kind === "mana" && terms.cost?.loyalty !== undefined) throw new Error("A loyalty ability cannot be a mana ability.");
@@ -122,6 +127,8 @@ const live = (table: Table, ref: ObjectRef) => { const found = table.things.get(
 /** Paying a stated cost proves neither that the source has the ability nor its legality. */
 export function activationChanges(table: Table, activation: Activation): Change[] {
 	const { controller, source, cost, paid, funding = [] } = activation;
+	if (cost.additional && (activation.timing !== "spell" || new Set(cost.additional).size !== cost.additional.length))
+		throw new Error("Named additional payments require a spell and distinct cost instances.");
 	if (cost.loyalty !== undefined && cost.counters?.kind === "loyalty") throw new Error("Combine loyalty payment in one signed cost.");
 	if (table.outcome || table.resolution || table.cursor.priority !== controller || table.cursor.passes >= table.seats.filter((one) => !one.result).length) throw new Error("A prepared action needs this seat's priority opportunity.");
 	const object = live(table, source);

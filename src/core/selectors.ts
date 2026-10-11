@@ -336,7 +336,8 @@ export function holds(scope: Scope, condition: Condition): boolean {
 	}
 	if ("cast" in condition) {
 		const one = objects(scope, condition.cast)[0], paid = one && scope.world.casting?.(one);
-		return !!paid && (condition.from === undefined || paid.from === condition.from) && (condition.by === undefined || players(scope, condition.by).includes(paid.by));
+		return !!paid && (condition.from === undefined || paid.from === condition.from) && (condition.by === undefined || players(scope, condition.by).includes(paid.by)) &&
+			(condition.paid === undefined || !!paid.additional?.includes(condition.paid));
 	}
 	if ("amount" in condition) {
 		const value = amount(scope, condition.amount);

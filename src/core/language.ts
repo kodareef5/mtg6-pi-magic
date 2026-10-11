@@ -137,7 +137,7 @@ export const Defs = {
 		object({ all: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ any: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ not: Type.Ref("Condition") }),
-		object({ cast: ObjectRef, from: Type.Optional(Zone), by: Type.Optional(PlayerRef) }),
+		object({ cast: ObjectRef, from: Type.Optional(Zone), by: Type.Optional(PlayerRef), paid: Type.Optional(name) }),
 		/** The current battlefield incarnation entered during the current turn. */
 		object({ enteredThisTurn: ObjectRef }),
 		/** Whose turn it is: "if it's not your turn". */
@@ -162,6 +162,8 @@ export const Defs = {
 		loyalty: Type.Optional(Type.Integer()),
 		/** Omitted on a spell: its printed mana cost. */
 		mana: Type.Optional(ManaCost),
+		/** Named additional mana costs chosen for a spell, added after its base or alternative price. */
+		additional: Type.Optional(Type.Array(object({ name, mana: ManaCost }), { minItems: 1 })),
 		/** `true` taps the source. A choice taps other objects, such as crew's creatures with total power N or more. */
 		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive),
 			upTo: Type.Optional(Type.Literal(true)), reduce: Type.Optional(Type.Literal("power")) })])),

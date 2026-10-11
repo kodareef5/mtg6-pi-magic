@@ -21,6 +21,7 @@ schemas, and every `basis` is checked against the card's text.
 | `counter-destinations.md` | No More Lies counters directly into exile unless its controller pays |
 | `cast-facts.md` | proposed spell characteristics, mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
 | `spell-costs.md` | standing generic reductions, first qualifying casts, original-zone filters and ordered payment forecasts |
+| `named-costs.md` | additional mana after an alternative price, reductions, and named payments read from casting history |
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |
 | `return-payments.md` | return an unblocked attacker as a sneak payment, constrain the rules step, and keep token defender choices separate |

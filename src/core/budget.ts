@@ -65,8 +65,8 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 	const cost = procedure.cost;
 	const selected = faceFacts(frame.view.printed?.[source.card ?? ""], procedure.face);
 	const printed = procedure.timing === "spell" ? castMana(frame, source, procedure.face, cost?.mana) : cost?.mana ?? "{0}";
-	const mana = printed === undefined ? undefined : symbols(printed);
-	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof cost?.tap === "object")
+	const mana = printed === undefined ? undefined : symbols(printed + (cost?.additional ?? []).map((one) => one.mana).join(""));
+	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key)) || typeof cost?.tap === "object")
 		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
@@ -194,9 +194,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const named = procedure.source.card;
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
 			const stated = procedure.timing === "spell" ? source ? castMana(hypothetical, source, procedure.face, procedure.cost?.mana) : procedure.cost?.mana ?? selected?.mana : procedure.cost?.mana ?? "{0}";
-			const mana = stated ? symbols(stated) : undefined;
+			const mana = stated ? symbols(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
 			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
-			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key));
+			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key));
 			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: procedure.timing === "spell" && source ? reduced(hypothetical, source, mana) : { generic: mana.generic, colors: mana.colors } } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
