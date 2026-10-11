@@ -1,0 +1,102 @@
+{
+	"card": "Colorstorm Stallion",
+	"generated": "2026-10-10",
+	"source": "39d99ba86896e266bb912f58241d177dc425f64292d3df148d2205a4ce538789",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Colorstorm Stallion",
+		"registers": [
+			{
+				"basis": "Ward {1}, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"ward {1}",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Ward {1}, haste",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"mana": "{1}"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Opus — Whenever you cast an instant or sorcery spell, this creature gets +1/+1 until end of turn. If five or more mana was spent to cast that spell, create a token that's a copy of this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"types": [
+							"instant",
+							"sorcery"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							}
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this",
+							"if": {
+								"amount": {
+									"manaSpent": "event:object"
+								},
+								"atLeast": 5
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

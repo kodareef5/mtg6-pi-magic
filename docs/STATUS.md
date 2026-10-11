@@ -18,7 +18,7 @@ measures whether ordinary games can execute their cards correctly.
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Control versus Azorius is running; Azorius versus Izzet resumes with token-copy support; Boros Dragons versus Red completed in both seat orders |
 | Recent shared mechanics | Token copies with base terms and complete activations, counter-placement thresholds, standing spell reductions, projected spell characteristics, token abilities and ownership, loyalty timing and tokens entering attacking |
-| Stored card assessments | 231 accepted, 76 refused, five basic lands; Boros Tokens now lacks only Belladonna Took's resolution count |
+| Stored card assessments | 232 accepted, 75 refused, five basic lands; Boros Tokens lacks Belladonna Took's resolution count, Izzet Aggro lacks Mockingbird's entry copy |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and 270 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
