@@ -606,3 +606,9 @@ likely addition; no card in the matchup needs it yet.
 - Read ahead and general card or spell copying beyond Prepare's copy.
 - Hybrid and Phyrexian mana symbols. The printed cost reader and a stated cost
   both accept generic, colored and X symbols only.
+
+A selector may use `nameOf: ObjectRef` to match an object sharing a name with
+that reference. The reference may be a bound result or a departed object read
+through last known information. This comparison grants no hidden-zone access.
+A `move` with `as` may add `countFrom: Zone`: its binding retains the moved
+objects and an amount counting those that came from that zone.

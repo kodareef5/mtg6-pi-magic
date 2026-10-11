@@ -198,13 +198,17 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if (selector.all && !selector.all.every((branch) => matches(scope, object, branch, read, zones))) return false;
 	// A card this seat cannot see matches only a selector that asks nothing about what it is.
 	const blind = !read && !object.ability && object.faceDown && !object.card;
-	if (blind && (selector.name || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors)) return false;
+	if (blind && (selector.name || selector.nameOf || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors)) return false;
 	const traits = blind ? FACELESS : read ?? ability(object);
 	if (!traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
 	if (!side(scope, selector.controller, holder) || !side(scope, selector.owner, object.owner)) return false;
 	const subtype = (wanted: string) => traits.subtypes.some((one) => same(one, wanted)) || (!!traits.allCreatureTypes && creatureType(wanted));
 	if (selector.name && !same(traits.name, selector.name)) return false;
+	if (selector.nameOf) {
+		const names = objects(scope, selector.nameOf, true).flatMap((one) => traitsOf(scope, one)?.name.split(" // ").filter(Boolean) ?? []);
+		if (!traits.name.split(" // ").some((name) => names.some((other) => same(name, other)))) return false;
+	}
 	if (selector.types && !selector.types.some((type) => traits.types.includes(type))) return false;
 	if (selector.subtypes && !selector.subtypes.some(subtype)) return false;
 	if (selector.supertypes && !selector.supertypes.some((one) => traits.supertypes.includes(one))) return false;

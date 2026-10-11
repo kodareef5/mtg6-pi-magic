@@ -53,6 +53,8 @@ const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.
 const SelectorFields = {
 	/** A printed name, as cards say "named" and plans name what they mean. */
 	name: Type.Optional(text),
+	/** Shares a name with an object already named or bound by this effect. */
+	nameOf: Type.Optional(ObjectRef),
 	/** Default battlefield. */
 	zones: Type.Optional(Type.Array(Zone, { minItems: 1 })),
 	/** Who controls it on the battlefield or stack, and whose it is anywhere else. */
@@ -215,8 +217,10 @@ export const Defs = {
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
 			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face),
+			/** With as, bind how many moved objects came from this zone, before their incarnations change. */
+			countFrom: Type.Optional(Zone),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), controller: Type.Optional(PlayerRef),
-			reason: Reason, link: Type.Optional(Type.Literal(true)) }),
+			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { if: { required: ["countFrom"] }, then: { required: ["as"] } }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
 		/** A private inspection binds exactly the inspected objects, not the whole hidden zone. */

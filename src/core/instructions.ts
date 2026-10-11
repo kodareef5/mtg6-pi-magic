@@ -101,7 +101,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const moved = (one: ObjectRef) => moving.some((object) => object.id === one.id && object.incarnation === one.incarnation) ? { id: one.id, incarnation: one.incarnation + 1 } : one;
 			const followed = Object.fromEntries(Object.entries(pending.bound).filter(([, value]) => value.objects.some((one) => moved(one) !== one))
 				.map(([key, value]) => [key, { ...value, objects: value.objects.map(moved) }]));
-			const own = bind(instruction, { objects: moving.map((object) => ({ id: object.id, incarnation: object.incarnation + 1 })), players: [] });
+			const own = bind(instruction, { objects: moving.map((object) => ({ id: object.id, incarnation: object.incarnation + 1 })), players: [],
+				...(terms?.countFrom ? { amount: moving.filter((object) => object.zone === terms.countFrom).length } : {}) });
 			return one(`${destroy ? "Destroy" : `Put into ${to}`}: ${moving.map(name).join(", ") || "nothing"}`, changes,
 				{ ...follow, ...(Object.keys(followed).length || own.bind ? { bind: { ...followed, ...own.bind } } : {}) });
 		}

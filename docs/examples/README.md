@@ -23,6 +23,7 @@ schemas, and every `basis` is checked against the card's text.
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |
 | `until-end-of-turn.md` | temporary changes, counters with keywords, doubling power, `if` and `limit`, play permissions |
 | `costs.md` | sacrifice with last known information, discard or exile the card itself, life, reductions |
+| `named-search.md` | private searches by a bound object's name, with counts from original zones |
 | `search.md` | searching as choose, move, shuffle, from a land and from a spell |
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
 | `animation.md` | crew, a land becoming a creature, earthbend, changing creature types and granting a trigger |
