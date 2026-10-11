@@ -15,7 +15,7 @@ import { holds, viewWorld } from "../core/selectors.ts";
 
 const sourceFact = (one: SeenObject) => ({ id: one.id, incarnation: one.incarnation, card: one.card ?? one.token?.name,
 	zone: one.zone, controller: one.controller, tapped: one.tapped,
-	...(one.traits ? { types: one.traits.types, power: one.traits.power, toughness: one.traits.toughness, words: one.traits.words } : {}),
+	...(one.traits ? { types: one.traits.types, colors: one.traits.colors, manaValue: one.traits.manaValue, power: one.traits.power, toughness: one.traits.toughness, words: one.traits.words } : {}),
 	...(one.summoningSick === undefined ? {} : { summoningSick: one.summoningSick }) });
 
 /** Bind a selector to current facts without deciding whether a later prerequisite will change them. */

@@ -232,7 +232,6 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		if (procedure.timing === "spell" && procedure.targets?.length && source.traits && targetless(source.traits.types, source.traits.subtypes)) continue;
 		if (procedure.timing === "land" && (!mainWindow(frame) || (frame.view.landsPlayed ?? 0) >= allowance(world, frame.seat).lands)) continue;
 		if (procedure.timing !== "spell" && procedure.speed === "sorcery" && !mainWindow(frame)) continue;
-		if (procedure.if && !holds(scope, procedure.if)) continue;
 		if (procedure.limit === "once-per-turn" && world.history.some((event) => event.kind === "activated" && event.source.id === source.id &&
 			event.source.incarnation === source.incarnation && event.basis === procedure.basis)) continue;
 		// The mana: stated, or printed for a spell; reduced, never below zero (601.2f).
@@ -242,15 +241,18 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
 		// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
 		const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce - mana.colors.length) + 1 }, (_, at) => at) : [0];
-		const aims = targetings(procedure.targets ?? [], scope);
 		// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
 		const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 			.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
 		// Mana pays for the spell as it will be on the stack, or for the ability.
-		const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const } : source;
 		for (const x of xs) {
+			const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const,
+				...(selected ? { traits: printedTraits(selected, source.card!, [], x) } : {}) } : source;
+			const announced = { ...scope, source: spending, x };
+			if (procedure.if && !holds(announced, procedure.if)) continue;
+			const aims = targetings(procedure.targets ?? [], announced);
 			const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduce), colors: mana.colors };
-			for (const extra of extras(procedure, scope, source, frame)) {
+			for (const extra of extras(procedure, announced, source, frame)) {
 				for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
 					for (const targets of aims) {
 						const aimed = targets.flat();

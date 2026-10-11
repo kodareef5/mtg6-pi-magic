@@ -46,7 +46,7 @@ export function planProblems(frame: Frame, plan: Plan): string[] {
 			found.push(`${where}: top always names a library object, so it cannot match a hand or battlefield selector. Test presence there with {amount: {count: selector}, atLeast: 1}.`);
 		for (const [key, part] of Object.entries(value)) {
 			if (key === "bound") found.push(`${where}: bound ${String(part)} has no binding in a plan condition. Instruction-local choices exist only inside a resolving procedure.`);
-			if (["is", "on", "power", "toughness", "by", "controller", "owner", "attachedTo"].includes(key) && typeof part === "string" && /^(?:(?:controller|owner):)?(?:this$|target:|event:|bound:)/.test(part))
+			if (["is", "on", "power", "toughness", "manaValue", "by", "controller", "owner", "attachedTo"].includes(key) && typeof part === "string" && /^(?:(?:controller|owner):)?(?:this$|target:|event:|bound:)/.test(part))
 				found.push(`${where}: ${part} has no binding in a plan condition. Test visible objects with a count or selector; sources, targets and event references belong inside a procedure.`);
 			condition(part, where);
 		}

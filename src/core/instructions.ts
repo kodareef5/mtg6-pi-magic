@@ -193,7 +193,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const change = captured(scope, instruction.change);
 			const text = instruction.label ?? claim;
 			return one(`${text}: ${affected.map(name).join(", ") || "nothing"}`, affected.map((object): Change => ({ do: "note", note: {
-				kind: "label", by: controller, until: instruction.until as Until, on: ref(object), text, change, ...(source ? { source } : {}) } })));
+				kind: "label", by: controller, until: instruction.until as Until, on: ref(object), text, change, ...(source ? { source } : {}) } })),
+				bind(instruction, { objects: affected.map(ref), players: [] }));
 		}
 		case "permit": {
 			const cards = live(table, objects(scope, instruction.what)), who = players(scope, instruction.who)[0] ?? controller;

@@ -9,7 +9,7 @@
  * needs more. A continuous ability granted by another effect is not applied.
  * Past 150 lines because the walk and the type-line reader belong together.
  */
-import { facts, type Printed } from "./printed.ts";
+import { facts, manaValue, type Printed } from "./printed.ts";
 import { activeFaces } from "./faces.ts";
 import { join } from "node:path";
 import { load as loadRules, rule, type Rules } from "./rules.ts";
@@ -27,6 +27,7 @@ export type Traits = {
 	/** Every creature type at once (Soulstone Sanctuary). */
 	allCreatureTypes?: true;
 	colors: Color[];
+	manaValue?: number;
 	power?: number;
 	toughness?: number;
 	/** Keywords and restriction words. */
@@ -65,22 +66,28 @@ export function base(table: Table, object: Thing): Traits | undefined {
 	if (object.token) {
 		const spec = object.token;
 		return { name: spec.name, supertypes: [...(spec.supertypes ?? [])], types: [...spec.types], subtypes: [...(spec.subtypes ?? [])],
-			colors: [...spec.colors] as Color[], ...(spec.power !== undefined ? { power: spec.power, toughness: spec.toughness ?? 0 } : {}),
+			colors: [...spec.colors] as Color[], manaValue: 0, ...(spec.power !== undefined ? { power: spec.power, toughness: spec.toughness ?? 0 } : {}),
 			words: [...(spec.words ?? [])], registrations: [...(spec.registers ?? []), ...own] };
 	}
 	const printed = facts(table, object);
-	return printed ? printedTraits(printed, object.card!, own) : undefined;
+	if (!printed) return undefined;
+	const traits = printedTraits(printed, object.card!, own, object.zone === "stack" ? object.ability?.x ?? 0 : 0);
+	// 202.3b: a transformed permanent uses its front's cost, unless it is a copy of that back face.
+	if (printedCard?.layout === "transform" && object.face === 1 && !object.copy && ["battlefield", "stack"].includes(object.zone))
+		traits.manaValue = manaValue({ ...printed, mana: printedCard.faces![0]!.mana }, object.zone === "stack" ? object.ability?.x ?? 0 : 0);
+	return traits;
 }
 
 /** The same printed reading is used before announcement and on the stack. */
-export function printedTraits(printed: Printed, name: string, own: Registration[] = []): Traits {
+export function printedTraits(printed: Printed, name: string, own: Registration[] = [], x = 0): Traits {
 	const [left, right = ""] = printed.type.split("—").map((part) => part.trim());
 	const words = left!.split(/\s+/).map((word) => word.toLowerCase());
 	const stats = printed.stats.match(/^(-?\d+)\/(-?\d+)$/);
 	return {
 		name: printed.name ?? name, supertypes: words.filter((word) => SUPERTYPES.has(word)), types: words.filter((word) => !SUPERTYPES.has(word)),
 		subtypes: right ? right.split(/\s+/) : [],
-		colors: printed.colors as Color[] ?? [...new Set(printed.mana.match(/\{([WUBRG])\}/g)?.map((symbol) => symbol[1] as Color) ?? [])],
+		colors: printed.colors as Color[] ?? [...new Set(printed.mana.match(/[WUBRG]/g) as Color[] ?? [])],
+		manaValue: manaValue(printed, x),
 		...(stats ? { power: Number(stats[1]), toughness: Number(stats[2]) } : {}), words: [], registrations: own,
 	};
 }

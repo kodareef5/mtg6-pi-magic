@@ -103,13 +103,14 @@ function sickness(frame: Frame, object: SeenObject, name: (seat: SeatId) => stri
 
 const typeLine = (object: SeenObject) => object.traits
 	? `${[...object.traits.supertypes, ...object.traits.types].map((one) => one[0]!.toUpperCase() + one.slice(1)).join(" ")}${object.traits.subtypes.length ? `, ${object.traits.subtypes.join(" ")}` : ""}` : "unknown";
+const costFacts = (object: SeenObject) => object.traits ? `${object.traits.colors.join("/") || "colorless"}; mana value ${object.traits.manaValue ?? "unknown"}` : "unknown";
 const stats = (object: SeenObject) => object.traits?.power !== undefined ? `${object.traits.power}/${object.traits.toughness}` : "";
 
 function battlefield(frame: Frame, name: (seat: SeatId) => string): string {
 	const field = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield");
 	const side = (seat: SeatId, title: string) => {
 		const mine = field.filter((one) => one.controller === seat).sort((a, b) => Number(!!a.traits?.types.includes("land")) - Number(!!b.traits?.types.includes("land")) || a.id.localeCompare(b.id));
-		return `### ${title} (${mine.length})\n${table(["Id", "Permanent", "Type", "P/T", "Abilities now", "Counters", "State"], mine.map((one) => [ref(one), named(one), typeLine(one), stats(one),
+		return `### ${title} (${mine.length})\n${table(["Id", "Permanent", "Type", "Color and value", "P/T", "Abilities now", "Counters", "State"], mine.map((one) => [ref(one), named(one), typeLine(one), costFacts(one), stats(one),
 			one.traits?.words.join(", ") || "", Object.entries(one.counters).map(([kind, n]) => `${kind} x${n}`).join(", "), state(frame, one, name)]))}`;
 	};
 	const others = [...new Set((frame.view.players ?? []).map((one) => one.id).filter((id) => id !== frame.seat))];
@@ -119,9 +120,9 @@ function battlefield(frame: Frame, name: (seat: SeatId) => string): string {
 
 function hand(frame: Frame): string {
 	const held = (frame.view.objects ?? []).filter((one) => one.zone === "hand" && one.controller === frame.seat);
-	return `## Your hand (${held.length})\nFull text is under card text. Accepted uses are the casts and plays your accepted card terms prepare from hand, with any cost they state; a use still marked deferred is prepared when needed.\n\n${table(["Id", "Card", "Cost", "Type", "P/T", "Accepted uses"], held.map((one) => {
+	return `## Your hand (${held.length})\nFull text is under card text. Accepted uses are the casts and plays your accepted card terms prepare from hand, with any cost they state; a use still marked deferred is prepared when needed.\n\n${table(["Id", "Card", "Cost", "Type", "Color and value", "P/T", "Accepted uses"], held.map((one) => {
 		const printed = one.card ? frame.view.printed?.[one.card] : undefined;
-		return [ref(one), named(one), printed?.mana ?? "", printed?.type ?? typeLine(one), printed?.stats ?? stats(one), one.card ? handUses(frame, one.card).join("; ") : ""];
+		return [ref(one), named(one), printed?.mana ?? "", printed?.type ?? typeLine(one), costFacts(one), printed?.stats ?? stats(one), one.card ? handUses(frame, one.card).join("; ") : ""];
 	}))}`;
 }
 
@@ -137,7 +138,7 @@ function stack(frame: Frame, name: (seat: SeatId) => string): string {
 	const items = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 	const waiting = frame.view.table.filter((line) => line.startsWith("Waiting to go on the stack:"));
 	return ["## Stack", items.length ? `Top first. The top object resolves first once every player passes in a row.\n\n${items.map((one, at) =>
-		`${at + 1}. ${name(one.controller)}: ${named(one)} (${ref(one)})${one.ability && one.ability.claim !== named(one) ? `, ${one.ability.claim}` : ""}${one.ability?.targets?.length ? `, targets ${JSON.stringify(one.ability.targets)}` : ""}`).join("\n")}` : "Empty.",
+		`${at + 1}. ${name(one.controller)}: ${named(one)} (${ref(one)}; ${costFacts(one)})${one.ability && one.ability.claim !== named(one) ? `, ${one.ability.claim}` : ""}${one.ability?.targets?.length ? `, targets ${JSON.stringify(one.ability.targets)}` : ""}`).join("\n")}` : "Empty.",
 		...(waiting.length ? ["### Waiting triggers", "These observed triggers have not reached the stack. A forecast does not predict how they resolve.", ...waiting] : [])].join("\n\n");
 }
 

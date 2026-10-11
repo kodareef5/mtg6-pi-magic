@@ -172,13 +172,13 @@ const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
 /** An ability on the stack is an object (113.1c) but not a card: it has no types, words or abilities to match. */
 const ability = (object: Seen): Traits | undefined => object.ability && !object.card && !object.token
-	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] } : undefined;
+	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], manaValue: 0, words: [], registrations: [] } : undefined;
 
 const FACELESS: Traits = { name: "", supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] };
 export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object)): boolean {
 	// A card this seat cannot see matches only a selector that asks nothing about what it is.
 	const blind = !read && !object.ability && object.faceDown && !object.card;
-	if (blind && (selector.name || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness)) return false;
+	if (blind && (selector.name || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors)) return false;
 	const traits = blind ? FACELESS : read ?? ability(object);
 	if (!(selector.zones ?? ["battlefield"]).includes(object.zone as never) || !traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
@@ -189,12 +189,14 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if (selector.subtypes && !selector.subtypes.some(subtype)) return false;
 	if (selector.supertypes && !selector.supertypes.some((one) => traits.supertypes.includes(one))) return false;
 	if (selector.words && !selector.words.every((word) => traits.words.includes(word))) return false;
+	const colored = (colors: readonly string[]) => colors.length ? colors.some((color) => traits.colors.includes(color as never)) : !traits.colors.some((color) => color !== "C");
+	if (selector.colors && !colored(selector.colors)) return false;
 	const not = selector.not;
 	if (not && (not.types?.some((type) => traits.types.includes(type)) || not.subtypes?.some(subtype) ||
-		not.supertypes?.some((one) => traits.supertypes.includes(one)) || not.words?.some((word) => traits.words.includes(word)))) return false;
-	const within = (value: number | undefined, range?: { atLeast?: number; atMost?: number }) => !range ||
-		(value !== undefined && (range.atLeast === undefined || value >= range.atLeast) && (range.atMost === undefined || value <= range.atMost));
-	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness)) return false;
+		not.supertypes?.some((one) => traits.supertypes.includes(one)) || not.words?.some((word) => traits.words.includes(word)) || not.colors && colored(not.colors))) return false;
+	const within = (value: number | undefined, range?: { atLeast?: Amount; atMost?: Amount }) => !range ||
+		(value !== undefined && (range.atLeast === undefined || value >= amount(scope, range.atLeast)) && (range.atMost === undefined || value <= amount(scope, range.atMost)));
+	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness) || !within(traits.manaValue, selector.manaValue)) return false;
 	if (selector.tapped !== undefined && selector.tapped !== object.tapped) return false;
 	if (selector.token !== undefined && selector.token !== !!object.token) return false;
 	const combat = scope.world.combat;
@@ -222,6 +224,7 @@ export function amount(scope: Scope, value: Amount): number {
 	if ("counters" in value) { const one = objects(scope, value.on)[0]; return one ? one.counters[value.counters] ?? 0 : 0; }
 	if ("power" in value) { const one = objects(scope, value.power)[0]; return (one && traitsOf(scope, one)?.power) ?? 0; }
 	if ("toughness" in value) { const one = objects(scope, value.toughness)[0]; return (one && traitsOf(scope, one)?.toughness) ?? 0; }
+	if ("manaValue" in value) { const one = objects(scope, value.manaValue)[0]; return (one && traitsOf(scope, one)?.manaValue) ?? 0; }
 	if ("bound" in value) { const bound = scope.bound?.[value.bound]; return bound?.amount ?? (bound ? bound.objects.length + bound.players.length : 0); }
 	if ("distinct" in value) return new Set(select(scope, value.among).flatMap((one) => traitsOf(scope, one)?.types ?? [])).size;
 	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.life ?? 0), 0);

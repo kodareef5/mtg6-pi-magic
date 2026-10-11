@@ -46,7 +46,7 @@ export const ObjectRef = Type.Union([
 ]);
 export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source)|owner:(this|attached|target:[0-9]+|event:object))$" });
 const Side = Type.Union([PlayerRef, Type.Literal("any")]);
-const Range = object({ atLeast: Type.Optional(Type.Integer()), atMost: Type.Optional(Type.Integer()) });
+const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.Optional(Type.Ref("Amount")) });
 
 /** Objects that exist and match. Each field narrows; a list field matches any of its members. */
 const SelectorFields = {
@@ -60,10 +60,13 @@ const SelectorFields = {
 	types: Type.Optional(Type.Array(one(...CARD_TYPES), { minItems: 1 })),
 	subtypes: Type.Optional(Type.Array(text, { minItems: 1 })),
 	supertypes: Type.Optional(Type.Array(one("basic", "legendary", "snow"), { minItems: 1 })),
+	/** Any listed color; an empty list means colorless. C is a mana type, not a color. */
+	colors: Type.Optional(Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true })),
 	/** Each word must be present. */
 	words: Type.Optional(Type.Array(text, { minItems: 1 })),
 	power: Type.Optional(Range),
 	toughness: Type.Optional(Range),
+	manaValue: Type.Optional(Range),
 	tapped: Type.Optional(Type.Boolean()),
 	token: Type.Optional(Type.Boolean()),
 	attacking: Type.Optional(Type.Boolean()),
@@ -80,7 +83,7 @@ const SelectorFields = {
 /** The shared definitions every schema built on this syntax refers to, once. */
 export const Defs = {
 	Selector: object({ ...SelectorFields,
-		not: Type.Optional(object({ types: SelectorFields.types, subtypes: SelectorFields.subtypes, supertypes: SelectorFields.supertypes, words: SelectorFields.words })),
+		not: Type.Optional(object({ types: SelectorFields.types, subtypes: SelectorFields.subtypes, supertypes: SelectorFields.supertypes, words: SelectorFields.words, colors: SelectorFields.colors })),
 		/** A stack object whose announced targets include one of these. */
 		targeting: Type.Optional(Type.Ref("Selector")) }),
 
@@ -92,6 +95,7 @@ export const Defs = {
 		/** Captured when the instruction is applied (608.2h, 701.10b). */
 		object({ power: ObjectRef }),
 		object({ toughness: ObjectRef }),
+		object({ manaValue: ObjectRef }),
 		object({ bound: name }),
 		object({ distinct: Type.Literal("card-types"), among: Type.Ref("Selector") }),
 		object({ life: PlayerRef }),

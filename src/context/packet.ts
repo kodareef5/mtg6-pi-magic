@@ -35,6 +35,7 @@ export type PlanSlice = {
 export type Seen = {
 	id: string; incarnation: number; name: string; controller: SeatId; zone: string; position?: number;
 	tapped?: true; summoningSick?: boolean; types?: string[]; subtypes?: string[]; body?: string;
+	colors?: string[]; manaValue?: number;
 	counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[];
 	activeName?: string; face?: 0 | 1; doors?: (0 | 1)[]; prepared?: true; copy?: SeenObject["copy"];
 	targets?: NonNullable<SeenObject["ability"]>["targets"]; source?: NonNullable<SeenObject["ability"]>["source"];
@@ -67,7 +68,8 @@ const seen = (object: SeenObject): Seen => {
 		...(object.zone === "stack" ? { position: object.position } : {}),
 		...(object.tapped ? { tapped: true as const } : {}), ...(traits?.power !== undefined ? { body: `${traits.power}/${traits.toughness}` } : {}),
 		...(Object.keys(object.counters).length ? { counters: { ...object.counters } } : {}), ...(object.damage ? { damage: object.damage } : {}),
-		...(traits?.words.length ? { words: [...traits.words] } : {}), ...(traits ? { types: [...traits.types], subtypes: [...traits.subtypes] } : {}),
+		...(traits?.words.length ? { words: [...traits.words] } : {}), ...(traits ? { types: [...traits.types], subtypes: [...traits.subtypes], colors: [...traits.colors],
+			...(traits.manaValue !== undefined ? { manaValue: traits.manaValue } : {}) } : {}),
 		...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
 		...(object.ability ? { effect: [object.ability.basis, ...object.ability.instructions.map(summary)],
 			targets: structuredClone(object.ability.targets), source: { ...object.ability.source } } : {}) };

@@ -38,6 +38,7 @@ test("a selected face owns casting characteristics, resolution destination and i
 		main(table, 0);
 		const original = structuredClone(table), before = table.ledger.length, cast = spell(table, viper);
 		assert.equal(facts(table, object)!.name, "Scalding Viper");
+		assert.equal(characteristics(table, object)!.manaValue, 2);
 		assert.deepEqual(characteristics(table, object)!.colors, ["R"]);
 		assert.ok(offered(table, cast).every((one) => one.activation.cost.colors.join("") === "U"));
 		assert.ok(offered(table, cast).every((one) => one.option.label.includes("Steam Clean")));
@@ -50,6 +51,7 @@ test("a selected face owns casting characteristics, resolution destination and i
 		assert.equal(object.zone, lost ? "graveyard" : "exile");
 		assert.equal(object.face, undefined);
 		assert.equal(facts(table, object)!.name, "Scalding Viper");
+		assert.equal(characteristics(table, object)!.manaValue, 2);
 		assert.equal(table.notes.some((note) => note.kind === "permit" && note.on.id === object.id), !lost);
 		if (lost) continue;
 		const rebuilt = relive(structuredClone(original), table.ledger.slice(before));
@@ -75,7 +77,9 @@ test("a selected face owns casting characteristics, resolution destination and i
 		const cast = { ...spell(table, dragon), targets: [{ object: { types: ["creature"], not: { words: ["flying"] } } }],
 			instructions: [{ do: "damage" as const, to: "target:0", amount: 5 }] };
 		const original = structuredClone(table), before = table.ledger.length;
+		assert.equal(characteristics(table, object)!.manaValue, 6);
 		announce(table, cast);
+		assert.equal(characteristics(table, object)!.manaValue, 2, "Omen's cost determines the spell's value");
 		if (lost) commit(table, [{ do: "move", what: target.id, to: "graveyard", reason: "destroy" }], "destroy");
 		passBoth(table); finish(table);
 		assert.equal(object.zone, lost ? "graveyard" : "library", "an Omen shuffles only after successful resolution");
@@ -137,6 +141,7 @@ test("unlocking pays as a special action and only the unlocked Room faces supply
 	const table = build("4c Control"), card = "Unholy Annex // Ritual Chamber";
 	const object = place(table, 0, "hand", card)[0]!;
 	const chamber = table.printed[card]!.faces![1]!;
+	assert.equal(characteristics(table, object)!.manaValue, 8, "both Room costs count in hand");
 	const registration = { face: 1 as const, basis: chamber.oracle, kind: "watch" as const, event: { on: "unlocks" as const, face: 1 as const, of: { is: "this" } },
 		effect: { instructions: [{ do: "token" as const, count: 1, spec: { name: "Demon", types: ["creature" as const], subtypes: ["Demon"], colors: ["B" as const], power: 6, toughness: 6, words: ["flying"] } }] } };
 	// An established registration isolates this door's event; it is not a whole-card assessment.
@@ -145,6 +150,7 @@ test("unlocking pays as a special action and only the unlocked Room faces supply
 	const original = structuredClone(table), before = table.ledger.length;
 	announce(table, printedCast(card, table.printed[card]!, 0)); passBoth(table); finish(table);
 	assert.deepEqual(object.doors, [0]);
+	assert.equal(characteristics(table, object)!.manaValue, 3);
 	assert.equal(characteristics(table, object)!.registrations.length, 0);
 	assert.equal(characteristics(table, object)!.name, "Unholy Annex");
 	const decision = nextDecision(table)!;
@@ -154,6 +160,7 @@ test("unlocking pays as a special action and only the unlocked Room faces supply
 	apply(table, unlock.id, "model", "chosen");
 	assert.equal(object.incarnation, incarnation);
 	assert.deepEqual(object.doors, [0, 1]);
+	assert.equal(characteristics(table, object)!.manaValue, 8);
 	assert.deepEqual(focus(workFrame(table, 0), startingIntent(0)).objects.find((one) => one.id === object.id)!.doors, [0, 1]);
 	assert.equal([...table.things.values()].filter((one) => one.zone === "stack").length, 0);
 	assert.equal(table.seats[0]!.pool.length, 0);
@@ -167,6 +174,7 @@ test("unlocking pays as a special action and only the unlocked Room faces supply
 	commit(table, [{ do: "move", what: object.id, to: "exile", reason: "exile" }, { do: "move", what: object.id, to: "battlefield", reason: "resolve", registers: [registration] }], "resolve");
 	assert.deepEqual(object.doors, [], "a Room entering without a cast has no unlocked door");
 	assert.equal(characteristics(table, object)!.name, "");
+	assert.equal(characteristics(table, object)!.manaValue, 0, "locked Rooms have no active mana cost");
 	assert.deepEqual(characteristics(table, object)!.types, ["enchantment"]);
 	assert.deepEqual(characteristics(table, object)!.registrations, []);
 	assert.equal(table.waiting.length, 0);
@@ -218,6 +226,7 @@ test("transforming retains the permanent and crafting follows only the source's 
 		assert.equal(object.zone, "battlefield"); assert.equal(object.face, 1);
 		assert.equal(object.incarnation, incarnation + 2);
 		assert.equal(characteristics(table, object)!.name, "Braided Quipu");
+		assert.equal(characteristics(table, object)!.manaValue, 3, "a transforming back keeps its front mana value");
 		assert.equal(object.counters.net, undefined, "the front face's entry counters do not apply to the crafted back face");
 		assert.equal(material.zone, "exile");
 		assert.deepEqual(relive(structuredClone(initial), table.ledger.slice(before)).things, table.things);
@@ -291,6 +300,7 @@ test("Prepare creates one castable copy, preserves the permanent and expires onl
 	assert.ok(object.prepared);
 	assert.equal(focus(workFrame(table, 0), startingIntent(0)).objects.find((one) => one.id === object.id)!.prepared, true);
 	assert.equal(copy.zone, "exile"); assert.equal(copy.card, card);
+	assert.equal(characteristics(table, copy)!.manaValue, 1, "the Prepare copy has its own spell face cost");
 	assert.equal(facts(table, copy)!.name, "Ancestral Recall");
 	assert.deepEqual(characteristics(table, copy)!.types, ["instant"]);
 	const cast: Procedure = { face: 1, source: { card, zones: ["exile"], controller: "any" }, claim: "Cast Ancestral Recall", basis: table.printed[card]!.faces![1]!.oracle,

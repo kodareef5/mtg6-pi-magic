@@ -51,6 +51,15 @@ export function manaCost(printed?: Printed): { tap: false; generic: number; colo
 	return { tap: false, generic, colors };
 }
 
+/** 202.3: value comes from the cost, never the payment; X is supplied only on the stack. */
+export function manaValue(printed: Printed, x = 0): number | undefined {
+	const symbols = printed.mana.match(/\{[^}]+\}/g) ?? [];
+	if (symbols.join("") !== printed.mana) return undefined;
+	const values = symbols.map((symbol) => Math.max(...symbol.slice(1, -1).split("/").map((part) =>
+		/^\d+$/.test(part) ? Number(part) : part === "X" ? x : /^[WUBRGCS]$/.test(part) ? 1 : part === "P" ? 0 : NaN)));
+	return values.every(Number.isFinite) ? values.reduce((sum, value) => sum + value, 0) : undefined;
+}
+
 const BASIC: Record<string, Mana["color"]> = { Plains: "W", Island: "U", Swamp: "B", Mountain: "R", Forest: "G" };
 /** 305.6: a land with a basic land type taps for that type's color. */
 export function intrinsicMana(printed?: Printed): Mana["color"][] {

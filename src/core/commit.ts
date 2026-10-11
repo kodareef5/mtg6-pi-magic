@@ -165,7 +165,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	for (const change of changes) {
 		if (change.do === "move") {
 			const leaving = table.things.get(change.what);
-			const traits = leaving?.zone === "battlefield" && change.to !== "battlefield" ? characteristics(table, leaving) : undefined;
+			const traits = leaving && ["battlefield", "stack"].includes(leaving.zone) && change.to !== leaving.zone ? characteristics(table, leaving) : undefined;
 			if (traits) known[change.what] = structuredClone(traits);
 		}
 		const id = "what" in change ? change.what : change.do === "damage" && "id" in change.target ? change.target.id : undefined;

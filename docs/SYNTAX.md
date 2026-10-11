@@ -75,8 +75,9 @@ watched. Each field narrows, and a list matches any of its members.
 | `controller`, `owner` | `you` (or `self`), `opponent`, `any`, or a bound player |
 | `types`, `subtypes`, `supertypes` | "basic land card" is `supertypes: ["basic"], types: ["land"]` |
 | `not` | "nonbasic", "noncreature" |
+| `colors` | `["R", "G"]` means red or green; `[]` means colorless; `not.colors` excludes the same set |
 | `words` | "creature with flying" |
-| `power`, `toughness` | "power 2 or less" is `power: {atMost: 2}` |
+| `power`, `toughness`, `manaValue` | `manaValue: {atMost: 3}`; bounds may also be amounts, such as `{atMost: {x: true}}` |
 | `tapped`, `token`, `attacking`, `blocking` | |
 | `other` | "another": not the source |
 | `is` | exactly one ref |
@@ -87,6 +88,11 @@ watched. Each field narrows, and a list matches any of its members.
 On the battlefield a selector reads derived characteristics. Elsewhere it reads
 printed ones. A creature with "all creature types" matches any creature subtype,
 so an animated Soulstone Sanctuary is a Lizard.
+Mana value reads the selected face and includes announced X only on the stack
+(202.3). An additional cost or reduction changes payment, not mana value. A
+transforming back uses its front cost; a Room uses its unlocked doors on the
+battlefield. A hidden card matches no color or mana-value predicate. This adds
+queries, not hybrid payment or a general copy operation.
 
 **Targets** are slots announced with the action (601.2c). A slot takes an
 `object` selector, a `player` side, or both. "Any target" is both:
@@ -103,6 +109,7 @@ An **amount** is worked out when it is read and never stored.
 | `count` of a selector | Smaug's "number of Treasures you control" |
 | `counters` of a kind on a ref | Mossborn Hydra's doubling |
 | `power`, `toughness` of a ref, captured when applied (608.2h) | Mightform Harmonizer's "double the power" |
+| `manaValue` of a ref | Thor's damage from `event:object`; a departed spell keeps its last stack value, including X |
 | `bound` | "that much", "that many" |
 | `distinct: "card-types"` among a selector | Keen-Eyed Curator |
 | `life` of a player | "if you have 10 or less life" |

@@ -102,7 +102,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
 	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
-	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const } : object;
+	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
 	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !flashed(world, controller, spell) && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
@@ -111,7 +111,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (activation.timing !== "spell" && activation.speed === "sorcery" && !main) throw new Error("This ability is activated only as a sorcery.");
 
 	// Targets are checked with every announced target in scope, so a slot can depend on an earlier one.
-	const scope: Scope = { world, controller, source: object, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
+	const scope: Scope = { world, controller, source: spell, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
 	activation.slots.forEach((slot, at) => {
 		for (const chosen of activation.targets[at] ?? []) {
 			const ok = "player" in chosen ? (slot.player === "any" ? table.seats.some((one) => one.id === chosen.player && !one.result) : !!slot.player && players(scope, slot.player).includes(chosen.player))
