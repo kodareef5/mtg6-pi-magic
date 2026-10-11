@@ -12,7 +12,11 @@
 				"basis": "Flying",
 				"kind": "continuous",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
 				},
 				"change": {
 					"words": [
@@ -47,7 +51,7 @@
 		"deferred": [
 			{
 				"face": 1,
-				"claim": "Cast Charring Bite",
+				"claim": "Cast Charring Bite targeting a creature without flying",
 				"basis": "Charring Bite deals 5 damage to target creature without flying. (Then shuffle this card into its owner's library.)",
 				"source": {
 					"card": "Twinmaw Stormbrood // Charring Bite",

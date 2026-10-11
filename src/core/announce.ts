@@ -20,6 +20,7 @@ import type { Instruction, Procedure, Target } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
+import { maximumSpellReduction, spellReduction } from "./cost-reductions.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -279,7 +280,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 			const tapReduction = typeof procedure.cost?.tap === "object" && procedure.cost.tap.reduce ? (frame.view.objects ?? [])
 				.filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).reduce((sum, one) => sum + Math.max(0, one.traits?.power ?? 0), 0) : 0;
 			// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
-			const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction - mana.colors.length) + 1 }, (_, at) => at) : [0];
+			const standingBound = procedure.timing === "spell" ? maximumSpellReduction(world) : 0;
+			const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction + standingBound - mana.colors.length) + 1 }, (_, at) => at) : [0];
 			// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
 			const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 				.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
@@ -292,7 +294,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				if (procedure.if && !holds(announced, procedure.if)) continue;
 				const aims = targetings(procedure.targets ?? [], announced);
 				for (const extra of extras(procedure, announced, source, frame)) {
-					const reduction = reduce + (extra.reduce ?? 0), price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
+					const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
+					const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
 					for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
 						const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
 						for (const targets of aims) {

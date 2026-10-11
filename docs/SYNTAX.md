@@ -314,6 +314,7 @@ checked by the table; the opponent sees both, and objects when they differ.
 |---|---|---|
 | `watch` | a triggered ability: an event, an intervening `if`, an effect, `may`, `limit` | 603 |
 | `continuous` | a static ability: what it affects, the change, an `if` | 604, 611.3 |
+| `cost` | a standing generic spell reduction: `cast` selects the proposed spell, positive `reduce` gives the discount, optional `from` limits its original zone, and `if` tests the source's condition | 118.7a, 118.9d, 601.2f |
 | `enters` | how a permanent enters: tapped, with counters, under a condition; with `affects`, how others enter; `unlessPay: {life}` or `{show: {choose, count}}` asks the controller to pay or decline before any battlefield entry | 614.1c-d |
 | `replace` | "if it would die, exile it instead" | 614 |
 | `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |

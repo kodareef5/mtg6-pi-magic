@@ -11,7 +11,11 @@
 				"basis": "Flying, haste",
 				"kind": "continuous",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
 				},
 				"change": {
 					"words": [
@@ -44,7 +48,8 @@
 						{
 							"do": "damage",
 							"to": "target:0",
-							"amount": 1
+							"amount": 1,
+							"from": "this"
 						}
 					]
 				}
@@ -55,7 +60,7 @@
 		"printedCast": true,
 		"deferred": [
 			{
-				"claim": "Cast Nova Hellkite for its warp cost, with delayed exile and permission to cast it from exile on a later turn",
+				"claim": "Cast Nova Hellkite from hand for its warp cost, creating the next-end-step exile and later-turn casting permission.",
 				"basis": "Warp {2}{R} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
 				"source": {
 					"card": "Nova Hellkite",

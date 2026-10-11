@@ -11,7 +11,11 @@
 				"basis": "Flying, haste",
 				"kind": "continuous",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
 				},
 				"change": {
 					"words": [
@@ -45,8 +49,8 @@
 					"instructions": [
 						{
 							"do": "damage",
-							"to": "target:0",
 							"from": "this",
+							"to": "target:0",
 							"amount": {
 								"count": {
 									"zones": [

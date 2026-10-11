@@ -1,0 +1,114 @@
+{
+	"card": "Momo, Friendly Flier",
+	"generated": "2026-10-10",
+	"source": "a8c8f6ace15acc90c7ca6a03ca0b8ec762565f6b7581a4d8a997d808917820ef",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Momo, Friendly Flier",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "The first non-Lemur creature spell with flying you cast during each of your turns costs {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"creature"
+					],
+					"words": [
+						"flying"
+					],
+					"not": {
+						"subtypes": [
+							"Lemur"
+						]
+					}
+				},
+				"reduce": 1,
+				"if": {
+					"all": [
+						{
+							"turn": "self"
+						},
+						{
+							"amount": {
+								"history": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"types": [
+										"creature"
+									],
+									"words": [
+										"flying"
+									],
+									"not": {
+										"subtypes": [
+											"Lemur"
+										]
+									}
+								}
+							},
+							"atMost": 0
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever another creature you control with flying enters, Momo gets +1/+1 until end of turn.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"words": [
+							"flying"
+						],
+						"other": true
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"change": {
+								"power": 1,
+								"toughness": 1
+							},
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -11,7 +11,11 @@
 				"kind": "continuous",
 				"basis": "Flying",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
 				},
 				"change": {
 					"words": [

@@ -298,15 +298,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Momo, Friendly Flier": {
-		"reason": "Momo, Friendly Flier is not ready: The first non-Lemur creature spell with flying you cast during each of your turns costs {1} less to cast. — Missing operation: a standing static cost reduction of {1} for the first qualifying spell during each of your turns. The registration schema has no cost-modification field; cost.reduce on a procedure cannot register this effect on other spells.",
-		"decks": [
-			"Azorius Momo",
-			"Boros Dragons"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Mutagen Man, Living Ooze": {
 		"reason": "Mutagen Man, Living Ooze is not ready: Activated abilities of artifact tokens you control cost {1} less to activate. — Missing operation: a standing continuous generic-mana activation-cost reduction applying to all artifact tokens you control, including future tokens and their activated abilities. Procedure-local cost.reduce cannot register this global static effect.",
 		"decks": [

@@ -12,15 +12,15 @@ measures whether ordinary games can execute their cards correctly.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 4 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control |
-| Completed source-reviewed alpha games | 13, covering Control, Landfall, Izzet and Azorius |
-| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed |
+| Imported main decks admitted to setup | 5 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons |
+| Completed source-reviewed alpha games | 14, covering Control, Landfall, Izzet and Azorius |
+| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Control versus Azorius and the reversed Landfall versus Azorius pairing are running; source review found an unused Robot color declaration to tighten |
-| Recent shared mechanics | Token abilities and ownership, loyalty costs and temporary timing, planeswalker attacks, layer-five color changes and tokens entering attacking |
-| Stored card assessments | 228 accepted, 79 refused, five basic lands; Voice of Victory is assessed, leaving one standing blocker in Boros Dragons |
+| Current runtime work | Azorius versus Izzet is preparing; Boros Dragons is admitted for its first game; Control versus Azorius needs a corrected Get Lost interpretation before continuation |
+| Recent shared mechanics | Standing spell reductions, projected spell characteristics, token abilities and ownership, loyalty timing and tokens entering attacking |
+| Stored card assessments | 229 accepted, 78 refused, five basic lands; Boros Dragons has complete standing coverage after Momo and its flying creatures were reassessed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 267 invariant tests pass |
+| Validation | Type check and 268 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

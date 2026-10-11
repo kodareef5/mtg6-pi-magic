@@ -36,6 +36,7 @@ import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { manaSurvives, manaDuration } from "./table.ts";
+import { spellReduction } from "./cost-reductions.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
 
@@ -47,9 +48,12 @@ function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: strin
 	return prices.length === 1 ? permissionMana(prices[0]!.mana, printed) ?? stated ?? printed : undefined;
 }
 
+const reduction = (frame: Frame, source: SeenObject) => spellReduction(viewWorld(frame.view), { ...source, controller: frame.seat, zone: "stack" }, source.zone);
+const reduced = (frame: Frame, source: SeenObject, price: Price): Price => ({ ...price, generic: Math.max(0, price.generic - reduction(frame, source)) });
+
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
 export function afterUntap(frame: Frame): Frame {
-	return { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0,
+	return { ...frame, view: { ...frame.view, began: Number.MAX_SAFE_INTEGER, landsPlayed: 0, history: [],
 		objects: (frame.view.objects ?? []).map((object) => object.controller === frame.seat && object.zone === "battlefield"
 			? { ...object, tapped: false, summoningSick: false } : object),
 		pools: (frame.view.pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => manaSurvives(mana, "cleanup")) })) } };
@@ -65,11 +69,12 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
-	const possible = (position: Frame) => fundings(position, mana, reserved, spending).length > 0;
+	const price = (position: Frame) => procedure.timing === "spell" ? reduced(position, { ...spending, zone: source.zone }, mana) : mana;
+	const possible = (position: Frame) => fundings(position, price(position), reserved, spending).length > 0;
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
 		? (frame.view.objects ?? []).filter((one) => one.traits?.types.includes("land") && one.zone !== "battlefield" && playable(world, frame.seat, one, turn, true)) : [];
-	return { cost: stated(mana), payableBeforeNewResources: possible(frame),
+	return { cost: stated(price(frame)), payableBeforeNewResources: possible(frame),
 		afterOneLand: [...new Map(lands.map((one) => [one.card, one])).values()].map((land) => {
 			const registers = frame.view.work?.packages?.find((one) => one.card === land.card)?.registers;
 			const entry = entersTapped(frame, land, registers);
@@ -140,9 +145,13 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			? TURN.slice(TURN.indexOf(at.step as Step), TURN.indexOf(step as Step)) : ["cleanup" as const];
 		return (pools ?? []).map((pool) => ({ ...pool, mana: pool.mana.filter((mana) => endings.every((ended) => manaSurvives(mana, ended))) }));
 	};
-	const initial = now ? frame : afterUntap(frame);
+	const prepared = [...new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack])).values()];
+	const untapped = now ? frame : afterUntap(frame);
+	const initial: Frame = { ...untapped, view: { ...untapped.view,
+		window: now ? at : { ...at, turn, active: frame.seat },
+		work: { ...untapped.view.work, revision: untapped.view.work?.revision ?? 0, packages: prepared } } };
 	let hypothetical = initial;
-	const packages = new Map([...(frame.view.work?.packages ?? []), ...(plan.packages ?? [])].map((pack) => [pack.card, pack.registers]));
+	const packages = new Map(prepared.map((pack) => [pack.card, pack.registers]));
 	// Release conditions use current facts; scheduled windows can advance without
 	// simulating an effect. Unspecified windows retain the forecast's starting step.
 	const scope = { world: viewWorld(hypothetical.view), controller: frame.seat };
@@ -187,7 +196,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const mana = stated ? symbols(stated) : undefined;
 			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key));
-			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: { generic: mana.generic, colors: mana.colors } } : {}),
+			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: procedure.timing === "spell" && source ? reduced(hypothetical, source, mana) : { generic: mana.generic, colors: mana.colors } } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
 		}
@@ -202,11 +211,15 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		const selected = query ? select(query, hypothetical) : [];
 		let source = timing === "stack" ? selected[0] : offBoard(selected, query ? select(query, initial) : []);
 		const printed = faceFacts(frame.view.printed?.[source?.card ?? ""], offered?.use?.face);
-		if (source && printed && timing === "spell") source = { ...source, face: offered?.use?.face ?? 0, traits: spellCharacteristics(hypothetical.view, source, frame.seat, offered?.use?.face, offered?.use?.x, offered?.use?.words) };
+		if (source && printed && kind === "cast" && timing !== "stack") source = { ...source, face: offered?.use?.face ?? 0, traits: spellCharacteristics(hypothetical.view, source, frame.seat, offered?.use?.face, offered?.use?.x, offered?.use?.words) };
 		const named = action.objects?.card;
 		if (kind === "land") return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}) };
 		if (offered?.use) {
 			const { generic, colors, ...extra } = offered.use.cost;
+			// An exact pick quotes today's locked cost. A changed standing discount
+			// needs a fresh offer; adding back a capped discount cannot recover its base.
+			if (timing === "spell" && source && reduction(frame, source) !== reduction(hypothetical, source))
+				return { kind, source, unknown: true, spell: true };
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
 			const additional = !!offered.use.exileSelection || Object.keys(extra).some((key) => key !== "tap");
@@ -219,7 +232,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		}
 		const stated = source?.card ? castMana(hypothetical, source) : undefined;
 		const mana = stated === undefined ? undefined : symbols(stated);
-		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }),
+		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x && source ? { price: reduced(hypothetical, source, mana) } : { unknown: true as const }),
 			...(source?.card && permanentSpell(frame.view.printed?.[source.card]) ? { enters: true } : {}) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
@@ -282,6 +295,10 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		items.push({ at: where, expired, when: step.when, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}),
 			...(act.spell ? { spell: true } : {}), ...(act.tap ? { tap: true } : {}), ...(act.unknown ? { unknown: true as const } : {}), label: step.label });
 		if (!honest) break;
+		// Forecast casts consume first-spell allowances even if their later
+		// resolution changes nothing. History belongs to this projection alone.
+		if (act.spell) hypothetical = { ...hypothetical, view: { ...hypothetical.view, history: [...hypothetical.view.history ?? [],
+			{ kind: "cast", by: frame.seat, spell: { ...act.source, controller: frame.seat, zone: "stack" }, traits: act.source.traits }] } };
 		// A permanent cast now permits more land plays from then on.
 		if (act.spell) for (const one of (act.source.card ? packages.get(act.source.card) : undefined) ?? []) if (one.kind === "permit") plays += one.lands ?? 0;
 		if (act.enters) entry(act.source, where, true, step.when);
@@ -293,7 +310,12 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		const at = `may[${index}] (${branch.label})`;
 		const lineHonest = honest;
 		honest = true;
+		const ownTurn = hypothetical;
+		const opponent = frame.view.players?.find((one) => one.id !== frame.seat)?.id;
+		if (branch.when.active !== "self" && opponent !== undefined && hypothetical.view.window.kind === "turn") hypothetical = { ...hypothetical, view: { ...hypothetical.view,
+			history: [], window: { ...hypothetical.view.window, active: opponent, turn: turn + 1 } } };
 		const act = read(branch);
+		hypothetical = ownTurn;
 		const branchHonest = honest;
 		honest = lineHonest;
 		if (branch.when.active === "self") {

@@ -11,7 +11,11 @@
 				"basis": "Flying",
 				"kind": "continuous",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
 				},
 				"change": {
 					"words": [
@@ -57,26 +61,26 @@
 									"library"
 								],
 								"owner": "controller:target:0",
-								"supertypes": [
-									"basic"
-								],
 								"types": [
 									"land"
+								],
+								"supertypes": [
+									"basic"
 								]
 							},
 							"count": 1,
 							"upTo": true,
-							"as": "land"
+							"as": "basic-land"
 						},
 						{
 							"do": "move",
-							"what": "bound:land",
+							"what": "bound:basic-land",
 							"to": "battlefield",
+							"controller": "controller:target:0",
 							"tapped": true,
 							"counters": {
 								"stun": 1
 							},
-							"controller": "controller:target:0",
 							"reason": "resolve"
 						},
 						{

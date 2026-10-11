@@ -290,6 +290,9 @@ export const Defs = {
 
 	/** A public note on an object, quoting the text it carries out in `basis`. It lives while that object exists, unless `until` ends it sooner. */
 	Registration: Type.Union([
+		/** A battlefield ability reducing generic mana in matching spell costs, including alternative prices. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), cast: Type.Ref("Selector"), reduce: positive,
+			from: Type.Optional(Type.Array(Zone, { minItems: 1, uniqueItems: true })), if: Type.Optional(Type.Ref("Condition")) }),
 		/** Prevent all matching damage, or forbid its prevention. Filters are read at each damage event. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: DamageMode,
 			combat: Type.Optional(Type.Boolean()), from: Type.Optional(Type.Ref("Selector")),
