@@ -124,7 +124,30 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	}
 	assert.equal(repaired.ledger.at(-1)!.execution!.plan, amendedAt, "confirmation completes the repair's matching step");
 	assert.deepEqual(project(repaired, 0).done, [0]);
-	assert.deepEqual(relive(beforeRepair, repaired.ledger.slice(repairFrom), repaired.workLog.slice(beforeRepair.workLog.length)), repaired);
+	assert.deepEqual(relive(structuredClone(beforeRepair), repaired.ledger.slice(repairFrom), repaired.workLog.slice(beforeRepair.workLog.length)), repaired);
+	for (const branch of [false, true]) {
+		const cancelled = structuredClone(beforeRepair);
+		apply(cancelled, nextDecision(cancelled)!.options.find(one => one.id.startsWith("announce:pay:"))!.id, "model", "chosen");
+		const initial = structuredClone(cancelled), from = cancelled.ledger.length, draft = structuredClone(cancelled.announcement);
+		const cancel = { label: "Cancel the pending Rush", when, action: { option: "announce:cancel" }, purpose: "Cancel this selected use; spend nothing." };
+		editWork(cancelled, 0, [{ do: "plan.put", plan: { objective: "Abandon the selected use", guidance: "Return to priority.", throughTurn: 1,
+			steps: branch ? [] : [cancel], ...(branch ? { may: [cancel] } : {}),
+			phases: [{ when, guidance: "Cancel this selected use; spend nothing.", complete: "pass" }] } }], `cancel-replan-${branch}`);
+		const revision = cancelled.work[0]!.planned, frame = workFrame(cancelled, 0), state = planState(frame)!;
+		assert.equal(state.amended, true); assert.equal(state.revision, revision);
+		assert.deepEqual((branch ? state.branches : state.due)[0]!.candidates.map(one => one.id), ["announce:cancel"]);
+		assert.match(JSON.stringify(focus(frame, startingIntent(0)).plan), /Cancel this selected use/);
+		assert.deepEqual(cancelled.announcement, draft, "cancellation guidance changes neither accepted terms nor partial payment");
+		assert.deepEqual([...cancelled.things], [...initial.things]);
+		const wrongSource = structuredClone(frame), option = branch ? wrongSource.view.work!.plan!.may![0]! : wrongSource.view.work!.plan!.steps[0]!;
+		option.action = { option: "announce:cancel", objects: { refs: [{ id: "absent", incarnation: 1 }] } };
+		assert.equal(planState(wrongSource)!.amended, undefined, "cancellation scoped to a different source does not replace this policy");
+		apply(cancelled, "announce:cancel", "model", "chosen", execution(state, "announce:cancel"));
+		assert.equal(cancelled.announcement, undefined); assert.deepEqual([...cancelled.things], [...initial.things]);
+		assert.deepEqual(cancelled.ledger.at(-1)!.execution, { plan: revision, ...(branch ? { branch: 0 } : { step: 0 }) });
+		assert.deepEqual(project(cancelled, 0).done, branch ? [] : [0], "only the explicit cancellation step completes");
+		assert.deepEqual(relive(initial, cancelled.ledger.slice(from), cancelled.workLog.slice(initial.workLog.length)), cancelled);
+	}
 	while (!nextDecision(table)!.options.some((one) => one.id === "announce:confirm")) {
 		pick(nextDecision(table)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id);
 		const state = planState(workFrame(table, 0))!;

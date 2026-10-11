@@ -158,7 +158,12 @@ function take(
 		activate(table, move.activation, { picked: move.option.id, offered: offered(p.moves.map((candidate) => candidate.option.id)), by, why, ...(execution ? { execution } : {}) }, registered);
 		return;
 	}
-	if (table.payment || table.announcement) execution = undefined;
+	if (table.payment || table.announcement) {
+		// A cancellation can complete an explicit cancellation step, never the cast it abandoned.
+		const work = execution && table.work[p.seat], plan = work?.planned === execution?.plan ? work?.plan : undefined;
+		const action = execution?.step !== undefined ? plan?.steps[execution.step]?.action : execution?.branch !== undefined ? plan?.may?.[execution.branch]?.action : undefined;
+		if (move.option.id !== "announce:cancel" || !action || !("option" in action) || action.option !== "announce:cancel") execution = undefined;
+	}
 	const changes = [...move.changes, ...bookkeeping(table, p, move)];
 	const entered = table.entry ? Object.fromEntries(changes.flatMap((change) => change.do === "move" && change.to === "battlefield" && change.registers ? [[change.what, structuredClone(change.registers)]] : [])) : attach(table, changes, registered);
 	// The row goes in first, so every group this decision commits is stamped with

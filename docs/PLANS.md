@@ -121,7 +121,8 @@ New games offer a source and accepted mode before asking for X, targets,
 additional costs and mana sources. Jev answers each part under the selected
 plan's execution policy. Partial choices remain private and spend nothing;
 confirmation performs the accepted cast or activation. Cancelling returns to
-priority without executing a plan step. Each part survives replay and cloning,
+priority without executing the abandoned casting step. An explicit cancellation
+step can complete when Jev chooses that cancellation. Each part survives replay and cloning,
 including a plan revised while a use is pending. Historical games retain their
 complete menus until an explicit announcement boundary.
 
@@ -129,6 +130,9 @@ An explicit replan for the same selected use replaces its payment and target
 guidance, and confirmation completes that revised step. The match includes
 the accepted mode, costs, instructions, source and permission. A different
 use cannot replace the pending terms; it requires cancellation first. A plan
+that explicitly selects `announce:cancel` replaces the old execution policy
+for that choice, including its source and window restrictions. The table keeps
+every physical option available and spends nothing until Jev chooses. A plan
 that does not address the pending use leaves its original execution policy.
 
 Payment warnings name each held resource separately. Individual mana choices

@@ -146,19 +146,22 @@ export function planState(frame: Frame): PlanState | null {
 	const work = frame.view.work, current = currentPlan(frame), draft = frame.view.announcement;
 	let plan = frame.view.announcementPlan ?? current;
 	if (!work || !plan || work.planned === undefined) return null;
-	let revision = draft?.plan ?? work.planned, progress = draft?.execution, amended = false;
+	let revision = draft?.plan ?? work.planned, progress = draft?.execution, amended = false, cancelling = false;
 	const scope: Scope = { world: viewWorld(frame.view), controller: frame.seat };
 	if (draft && current && work.planned !== draft.plan) {
 		// Reuse native/plan matching with the selected use as the only root. A
 		// replan can amend its policy, never replace its accepted card terms.
 		const root: Option = { id: "pending-use", label: draft.procedure.claim, objects: [draft.source], announcement: draft };
 		const pending = { ...frame, decision: { ...frame.decision!, options: [root] } };
+		const cancels = (one: PlanOption) => "option" in one.action && one.action.option === "announce:cancel" &&
+			candidates(one, frame, "cancellation").options.some(option => option.id === "announce:cancel");
 		const fits = (one: PlanOption) => matches(one.when, frame) && (!one.if || condition(scope, one.if)) &&
-			candidates(one, pending, "amendment").options.some((option) => option.id === root.id);
+			(cancels(one) || candidates(one, pending, "amendment").options.some((option) => option.id === root.id));
 		const step = current.steps.findIndex(fits), branch = (current.may ?? []).findIndex(fits);
 		if (step >= 0 || branch >= 0) {
 			plan = current; revision = work.planned; amended = true;
 			progress = { plan: revision, ...(step >= 0 ? { step } : { branch }) };
+			cancelling = cancels(step >= 0 ? current.steps[step]! : current.may![branch]!);
 		}
 	}
 	const done = new Set(amended ? [] : frame.view.done ?? []), at = frame.view.window;
@@ -172,7 +175,7 @@ export function planState(frame: Frame): PlanState | null {
 		return [{ label: step.label, objects: select(action.objects, frame).filter((one) => one.zone === "battlefield" && one.controller === frame.seat) }];
 	}) : [];
 	if (frame.view.announcement) {
-		const options = (frame.decision?.options ?? []).filter((one) => !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id) &&
+		const options = (frame.decision?.options ?? []).filter((one) => cancelling ? one.id === "announce:cancel" : !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id) &&
 			!one.id.startsWith("announce:unpay:") && !one.id.startsWith("announce:remove-target:") && !one.id.startsWith("payment:remove:"));
 		const fit = (at: number, label: string): Fit => ({ at, label, candidates: options });
 		return { revision, plan, seat: frame.seat, preparing: true, ...(amended ? { amended: true as const } : {}), procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
