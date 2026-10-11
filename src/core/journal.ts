@@ -14,6 +14,8 @@
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { journalLines, repairTail } from "./journal-file.ts";
+import { sameMenu } from "./offered.ts";
+import { planState } from "./planning.ts";
 
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Said } from "./say.ts";
@@ -311,17 +313,23 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 			);
 		}
 		observe?.(table, decision, row);
+		const menu = !Array.isArray(row.offered) && row.offered.planned
+			? [...decision.options, ...(planState({ seat: decision.seat, version: table.cursor.clock, view: project(table, decision.seat), decision })?.procedures ?? []).map((one) => one.option)]
+			: decision.options;
+		// New compact rows verify the entire ordered menu, including activations.
+		// Historical declared activations carry their own smaller offered list.
+		if ((!row.activation || !Array.isArray(row.offered)) &&
+			!sameMenu(row.offered, menu.map((one) => one.id), row.situation === "turn-based"))
+			throw new Error(`Record ${row.seq}: offered choices changed during replay.`);
+		if (!Array.isArray(row.offered) && !menu.some((one) => one.id === row.picked))
+			throw new Error(`Record ${row.seq}: the recorded pick was not offered.`);
 		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why,
 			...(row.execution ?? row.preparing ? { execution: row.execution ?? row.preparing } : {}) }, row.registered ?? {});
 		else {
 			apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});
-			// Preserve historical menus, allowing only the appended declaration withdrawals.
-			// Other menu drift still fails replay instead of being hidden by restoring the record.
-			const offered = table.ledger.at(-1)!.offered, extra = offered.slice(row.offered.length);
-			if (JSON.stringify(offered.slice(0, row.offered.length)) !== JSON.stringify(row.offered) ||
-				extra.length && !(row.situation === "turn-based" && row.offered.some((id) => id === "attack:done" || id === "block:done") && extra.every((id) => id.startsWith("unattack:") || id.startsWith("unblock:"))))
-				throw new Error(`Record ${row.seq}: offered choices changed during replay.`);
-			table.ledger.at(-1)!.offered = [...row.offered];
+			// Keep the original representation after validating it, so old prefixes
+			// and compact prefixes both clone with identical ledger rows.
+			table.ledger.at(-1)!.offered = structuredClone(row.offered);
 		}
 	}
 	return table;

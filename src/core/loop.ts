@@ -27,6 +27,7 @@ import { annotate, execution, planReason, planState, type PlanState } from "./pl
 import { editWork, prepareWork, recordWork, workFrame } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
 import { mulligansSettled } from "./pregame.ts";
+import { offered as recordMenu } from "./offered.ts";
 
 export type Watcher = (line: string) => void;
 
@@ -253,7 +254,7 @@ export async function play(
 			case "pick": {
 				const procedure = state?.procedures.find((choice) => choice.option.id === answer.option);
 				const carried = state ? execution(state, answer.option) : undefined;
-				if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: offered.options.map((option) => option.id), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
+				if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
 				else apply(table, answer.option, "model", "chosen", carried);
 				break;
 			}

@@ -331,7 +331,7 @@ export type LedgerRow = {
 	registered?: Record<ObjectId, Registration[]>;
 	situation: Decision["situation"];
 	seat: SeatId;
-	offered: string[];
+	offered: import("./offered.ts").Offered;
 	picked: string;
 	by: "engine" | "model" | "judge";
 	/**

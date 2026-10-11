@@ -94,7 +94,7 @@ test("forced: compulsory actions ask nobody; each seat answers its priority and 
 	assert.ok(voluntary.every((row) => row.why === "chosen"));
 	for (const seat of built.seats) assert.ok(voluntary.some((row) => row.seat === seat.id && row.picked === "pass"));
 	// Every row names what was offered, so a recorded game is a test corpus.
-	for (const row of built.ledger) assert.ok(row.offered.includes(row.picked));
+	for (const row of built.ledger) { assert.ok(Array.isArray(row.offered)); assert.ok(row.offered.includes(row.picked)); }
 
 	// At the mulligan limit, keeping and the last bottom selection are forced too.
 	const limited = table();

@@ -28,6 +28,13 @@ private equipment edits, such as an accepted plan or a revised notebook, are jou
 their accepted basis, costs, payment, instructions and delegation, so replay
 uses those terms without another interpretation call.
 
+Menus of at most 1,024 IDs stay in the ledger verbatim. Larger menus record
+their count and the SHA-256 of the ordered JSON ID array; the exact pick and
+accepted activation still stay in the row. Replay regenerates and checks the
+whole menu, including order. Old rows keep their original array representation.
+Journal reading and torn-tail repair use byte chunks rather than loading the
+whole file into one string.
+
 Cursor-only transitions write no receipt. Replay derives them from the ledger
 through the normal dispatcher. This keeps the log about game events while
 preserving priority and turn progression.

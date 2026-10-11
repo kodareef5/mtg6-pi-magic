@@ -34,6 +34,7 @@ import {
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
 import { cardsIn } from "../src/core/table.ts";
+import { fingerprint, offered, sameMenu } from "../src/core/offered.ts";
 import type { Frame } from "../src/core/types.ts";
 
 const where = () => mkdtempSync(join(tmpdir(), "magic-journal-"));
@@ -141,8 +142,28 @@ test("replay rebuilds the game and refuses data it was not played against", asyn
 	assert.deepEqual(again.table.outcome, table.outcome);
 	assert.equal(again.prepared.length, 2, "a replay carries what was prepared");
 	const drifted = structuredClone(table.ledger);
+	assert.ok(Array.isArray(drifted[0]!.offered));
 	drifted[0]!.offered.push("invented-menu-option");
 	assert.throws(() => relive(dealt(made), drifted), /offered choices changed/, "historical menu restoration must not conceal unrelated drift");
+	const compact = structuredClone(table.ledger);
+	compact[0]!.offered = fingerprint(table.ledger[0]!.offered as string[]);
+	assert.deepEqual(relive(dealt(made), compact).ledger, compact, "compact menus replay without changing their stored form");
+	const changed = structuredClone(compact);
+	changed[0]!.offered = { ...fingerprint(["invented"]), count: (compact[0]!.offered as { count: number }).count };
+	assert.throws(() => relive(dealt(made), changed), /offered choices changed/);
+	const many = Array.from({ length: 10_000 }, (_, at) => `cast:${at}:quote\"\\🦜`), saved = offered(many);
+	assert.ok(!Array.isArray(saved));
+	assert.equal(saved.count, many.length);
+	assert.ok(JSON.stringify(saved).length < 110);
+	assert.ok(sameMenu(saved, many));
+	assert.ok(!sameMenu(saved, many.slice(1)), "counts cannot change");
+	assert.ok(!sameMenu(saved, [...many].reverse()), "the hash preserves canonical order");
+	assert.ok(!sameMenu(fingerprint(["a,b", "c"]), ["a", "b,c"]), "the hash preserves string boundaries");
+	const compactPath = join(dir, "compact.jsonl"), compactJournal = open(compactPath, made);
+	for (const line of linesOf({ ...table, ledger: compact })) append(compactJournal, line);
+	const compactClone = join(dir, "compact-clone.jsonl");
+	fork(compactPath, 1, "compact-clone", compactClone);
+	assert.deepEqual(replay(compactClone, dealt).table.ledger, compact.slice(0, 1));
 
 	// Stopping short is a position, not a different game.
 	const half = Math.floor(table.ledger.length / 2);

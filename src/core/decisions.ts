@@ -32,6 +32,7 @@ import { unlocks } from "./rooms.ts";
 import { completedSaga } from "./sagas.ts";
 import { project } from "./view.ts";
 import { selectingPayment } from "./cost-selection.ts";
+import { offered } from "./offered.ts";
 
 /**
  * The order is fixed by the rules, not by convenience. State based actions and
@@ -146,7 +147,7 @@ function take(
 	registered?: Record<string, Registration[]>,
 ): void {
 	if (move.activation) {
-		activate(table, move.activation, { picked: move.option.id, offered: p.moves.map((candidate) => candidate.option.id), by, why, ...(execution ? { execution } : {}) }, registered);
+		activate(table, move.activation, { picked: move.option.id, offered: offered(p.moves.map((candidate) => candidate.option.id)), by, why, ...(execution ? { execution } : {}) }, registered);
 		return;
 	}
 	if (table.payment) execution = undefined;
@@ -161,7 +162,7 @@ function take(
 		...(execution ? { execution } : {}),
 		situation: p.situation,
 		seat: p.seat,
-		offered: p.moves.map((candidate) => candidate.option.id),
+		offered: offered(p.moves.map((candidate) => candidate.option.id)),
 		picked: move.option.id,
 		by,
 		why,

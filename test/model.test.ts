@@ -156,8 +156,10 @@ test("a model-backed seat plays a whole game and is asked only what is not force
 	assert.equal(calls, chosen.length);
 	assert.deepEqual(picks, chosen.map((row) => row.picked));
 	for (const [at, request] of seen.entries()) {
+		const menu = chosen[at]!.offered;
+		assert.ok(Array.isArray(menu), "this fixture has small menus");
 		assert.ok(request.criteria.includes(chosen[at]!.picked));
-		assert.ok(request.criteria.every((id) => id.startsWith("inspect:") || chosen[at]!.offered.includes(id)), "the menu adds only pure inspection routes");
+		assert.ok(request.criteria.every((id) => id.startsWith("inspect:") || menu.includes(id)), "the menu adds only pure inspection routes");
 	}
 
 	// Compulsory work costs no call; every voluntary window still reaches Jev.
