@@ -19,7 +19,7 @@ import { play } from "../src/core/loop.ts";
 import { scriptedPlayer, type Player } from "../src/core/player.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
-import { deck } from "../src/core/decks.ts";
+import { alpha, deck } from "../src/core/decks.ts";
 import type { Frame } from "../src/core/types.ts";
 import { describe, project, render } from "../src/core/view.ts";
 
@@ -63,6 +63,13 @@ test("the decks are legal before a card moves", () => {
 		/cannot be registered for standard: 5 copies of Gigantosaurus/, "setup refuses a deck the format does not allow");
 	assert.throws(() => start(standard, [{ deck: { ...deck("Green Stompy"), main: { ...deck("Green Stompy").main, "Not A Card": 1 } } }, { deck: deck("Dimir Control") }], "unknown"),
 		/no card named Not A Card/, "every game card comes from the universe");
+	const original = deck("4c Control"), sideboardless = alpha(original);
+	assert.ok(Object.keys(original.sideboard).length, "the tournament list keeps its sideboard");
+	assert.deepEqual(sideboardless.main, original.main);
+	const initial = start(standard, [{ deck: sideboardless }, { deck: alpha(deck("Mono-Red Aggro")) }], "alpha-registration");
+	assert.equal([...initial.things.values()].filter((one) => one.zone === "outside").length, 0);
+	assert.ok(initial.seats.every((one) => !Object.keys(one.deck.sideboard).length), "the actual registered lists have no outside cards");
+	assert.ok(project(initial, "spectator").decks!.every((one) => !Object.keys(one.sideboard).length), "every viewer reads the same registered lists");
 });
 
 test("a game finishes, and somebody decks out", async () => {

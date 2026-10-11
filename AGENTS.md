@@ -469,6 +469,9 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   printed.ts         type line, mana cost and power/toughness from the card file
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
+  entry-payments.ts   the controller's optional entry payment before any battlefield route commits
+  faces.ts, rooms.ts  face characteristics, casting faces and unlocked Room doors
+  sagas.ts            chapter entry, lore on the main-phase boundary and completed Saga sacrifice
   triggers.ts        events read from each group, watches matched, the trigger window
   combat.ts          declaring attackers and blockers, dividing and dealing combat damage
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"

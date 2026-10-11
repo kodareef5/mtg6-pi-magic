@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { dealtTable, matchTable, matchup, universe } from "./matchup-fixture.ts";
 import { start } from "../src/core/commit.ts";
-import { deck } from "../src/core/decks.ts";
+import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { advance, nextDecision } from "../src/core/decisions.ts";
 import { open, save, replay, fork, reopen } from "../src/core/journal.ts";
@@ -27,8 +27,9 @@ const { values } = parseArgs({ options: { seed: { type: "string", default: "real
 	/** A strategy pattern for the seat playing that list alone, so one roster can face another. */
 	green: { type: "string" }, red: { type: "string" },
 	/** Two collection decks by name, comma separated, for a fresh game; the first named is on the play. */
-	decks: { type: "string" } } });
+	decks: { type: "string" }, alpha: { type: "boolean", default: false } } });
 if (values.version && (!values.resume || !/^\d+$/.test(values.version))) throw new Error("--version needs a journal supplied by --resume and a nonnegative decision count.");
+if (values.alpha && (!values.decks || values.resume)) throw new Error("--alpha needs --decks for a new sideboardless game. A resumed journal owns its registered lists.");
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
 const every = { summary: "off", ...(values.pregame ? { pregame: values.pregame } : {}), ...(values.strategy ? { strategy: values.strategy } : {}) };
@@ -44,7 +45,7 @@ const carried = from && replay(from.path, dealtTable, from.version,
 const chosen = values.decks?.split(",").map((one) => one.trim());
 if (chosen && (chosen.length !== 2 || chosen[0] === chosen[1] || from)) throw new Error("--decks names two different collection decks, comma separated, for a fresh game.");
 const label = (name: string, at: number) => { const short = name.replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-|-$/g, "").slice(0, 20); return short || `Seat${at}`; };
-const table = carried ? carried.table : chosen ? start(standard, chosen.map((name, at) => ({ name: label(name, at), deck: deck(name) })), values.seed!, universe) : matchTable(values.seed!);
+const table = carried ? carried.table : chosen ? start(standard, chosen.map((name, at) => ({ name: label(name, at), deck: values.alpha ? alpha(deck(name)) : deck(name) })), values.seed!, universe) : matchTable(values.seed!);
 if (chosen && table.seats[0]!.name === table.seats[1]!.name) throw new Error("The two deck names shorten to the same seat label; rename one deck.");
 // A list's own strategy pattern, when --green or --red names one, resolved for whichever seat plays that list.
 const byList: Record<string, string | undefined> = { Green: values.green, Red: values.red };

@@ -10,7 +10,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import type { Api, Model } from "@earendil-works/pi-ai";
-import { collection } from "../src/core/decks.ts";
+import { alpha, collection } from "../src/core/decks.ts";
 import { printedFacts } from "../src/core/printed.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { assessCard } from "../src/context/assess.ts";
@@ -22,9 +22,9 @@ import { matchup, universe } from "./matchup-fixture.ts";
 import { PACKAGE_SEED, ledgerPath, storedPackages, storePackage, writeRecord } from "../src/core/packages.ts";
 
 const { values } = parseArgs({ options: { deck: { type: "string", multiple: true }, model: { type: "string" }, jobs: { type: "string", default: "4" },
-	retry: { type: "boolean", default: false }, report: { type: "boolean", default: false }, card: { type: "string", multiple: true }, out: { type: "string", default: ".pi/assess" } } });
-const decks = values.deck?.length ? values.deck.map((name) => collection().get(name) ?? (() => { throw new Error(`No deck ${name}`); })())
-	: [...collection().values()].filter((one) => /^https?:/.test(one.source));
+	retry: { type: "boolean", default: false }, report: { type: "boolean", default: false }, alpha: { type: "boolean", default: false }, card: { type: "string", multiple: true }, out: { type: "string", default: ".pi/assess" } } });
+const decks = (values.deck?.length ? values.deck.map((name) => collection().get(name) ?? (() => { throw new Error(`No deck ${name}`); })())
+	: [...collection().values()].filter((one) => /^https?:/.test(one.source))).map((deck) => values.alpha ? alpha(deck) : deck);
 type Ledger = Record<string, { reason: string; decks: string[]; model: string; at: string }>;
 const ledgerFile = ledgerPath(universe.generated);
 const ledger: Ledger = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, "utf8")) as Ledger : {};
@@ -37,7 +37,7 @@ const byCard = new Map<string, string[]>();
 for (const deck of decks) for (const card of Object.keys({ ...deck.main, ...deck.sideboard })) byCard.set(card, [...(byCard.get(card) ?? []), deck.name]);
 const printed = printedFacts(universe, [...byCard.keys()]);
 const todo = [...byCard.keys()].filter((card) => (!values.card?.length || values.card.includes(card)) && printed[card]?.text && !stored.has(card) && (values.retry || !ledger[card]));
-console.log(`${byCard.size} distinct cards in ${decks.length} decks; ${stored.size} stored, ${Object.keys(ledger).length} on the ledger, ${todo.length} to assess.`);
+console.log(`${byCard.size} distinct cards in ${decks.length}${values.alpha ? " sideboardless alpha" : ""} decks; ${stored.size} stored, ${Object.keys(ledger).length} on the ledger, ${todo.length} to assess.`);
 
 const report = () => {
 	for (const deck of decks) {

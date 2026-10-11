@@ -11,7 +11,7 @@ import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parseArgs } from "node:util";
 import type { Api, Model } from "@earendil-works/pi-ai";
-import { collection, deck as loadDeck, listed, type Deck } from "../src/core/decks.ts";
+import { alpha, collection, deck as loadDeck, listed, type Deck } from "../src/core/decks.ts";
 import { load as loadRules } from "../src/core/rules.ts";
 import { lookups } from "../src/context/brief.ts";
 import { guidePath } from "../src/context/guides.ts";
@@ -22,7 +22,7 @@ import { traceInference } from "../src/context/trace.ts";
 import { matchup, universe } from "./matchup-fixture.ts";
 
 const { values } = parseArgs({ options: { deck: { type: "string", multiple: true }, all: { type: "boolean", default: false }, model: { type: "string" },
-	force: { type: "boolean", default: false }, out: { type: "string", default: ".pi/guides" } } });
+	force: { type: "boolean", default: false }, alpha: { type: "boolean", default: false }, out: { type: "string", default: ".pi/guides" } } });
 const wanted = values.all ? [...collection().values()].filter((one) => /^https?:/.test(one.source)).map((one) => one.name) : values.deck ?? [];
 if (!wanted.length) throw new Error("Name decks with --deck, or --all for every web-sourced deck.");
 
@@ -49,6 +49,7 @@ const SYSTEM = [
 	"7. What beats it and how to adapt: the opposing plans and cards that punish the deck, and the adjustments that answer them.",
 	"8. Common mistakes: the misplays a careful player avoids with this list.",
 	"Name cards exactly as printed. Where a count matters, give the arithmetic. Do not invent cards or abilities. Submit the guide as markdown text with those eight numbered headings.",
+	"This guide is strategic advice. It does not certify card interpretations, rules legality or an executable line in a future position.",
 ].join("\n");
 
 const list = (deck: Deck) => {
@@ -67,7 +68,7 @@ const counted = tally();
 for (const name of wanted) {
 	const path = guidePath(name);
 	if (existsSync(path) && !values.force) { console.log(`${name}: guide exists, skipped`); continue; }
-	const deck = loadDeck(name), began = Date.now();
+	const deck = values.alpha ? alpha(loadDeck(name)) : loadDeck(name), began = Date.now();
 	const writer = reasoner({ role: "pregame", stream: inference.stream, model: part.model as Model<Api>, tally: counted, ...(part.thinkingLevel ? { thinking: part.thinkingLevel } : {}) });
 	let guide = "";
 	try {
@@ -79,7 +80,7 @@ for (const name of wanted) {
 		guide = String(answer.guide);
 	} catch (error) { console.log(`${name}: failed: ${String(error).slice(0, 200)}`); continue; }
 	mkdirSync(dirname(path), { recursive: true });
-	writeFileSync(path, [`# ${name}`, "", `Written ${new Date().toISOString().slice(0, 10)} by ${part.pattern} from the list at ${deck.source}, cards generated ${universe.generated}. Advice for the pregame; the board and card text win any disagreement.`, "", guide.trim(), ""].join("\n"));
+	writeFileSync(path, [`# ${name}`, "", `Written ${new Date().toISOString().slice(0, 10)} by ${part.pattern} from the list at ${deck.source}, cards generated ${universe.generated}.${values.alpha ? " Sideboardless alpha: main deck only." : ""} Advice for the pregame; the board and card text win any disagreement.`, "", guide.trim(), ""].join("\n"));
 	console.log(`${name}: ${guide.split(/\s+/).length} words in ${((Date.now() - began) / 1000).toFixed(0)}s -> ${path}`);
 }
 console.log(bill(counted.spent()).join("\n"));

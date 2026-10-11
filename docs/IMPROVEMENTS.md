@@ -11,33 +11,36 @@ and the models cannot yet play. [Plans](PLANS.md) stays the gameplay contract;
 
 Random Standard pairings from a pool of about twenty current meta decks, two
 games at a time, Haiku against Haiku, every game saved. No arm comparisons.
+The initial alpha uses the nineteen imported main decks without sideboards.
+`--alpha` on the assessment, guide, matchup and simulation tools selects that
+scope. A new game registers the sideboardless copy and records it in its journal;
+the tournament files retain their original lists. Main-deck cards remain subject
+to the full standing and runtime-use requirements. Sideboard work is deferred
+until the alpha decks complete ordinary games with replay and clone parity.
 Each finished batch yields a ledger of broken concepts: cards refused as
 unsupported, interpretations that failed, gaps, help requests and rulings.
 Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-The pool report includes every registered sideboard: 213 stored assessments,
-94 refusals, five basic lands and no unassessed cards. Cast and damage event
-queries, alternative casting prices, next-turn permission expiry, mana expiry
-and standing casting restrictions now have replay coverage. Airbender Ascension,
-Jennifer and Roku have stored assessments. All nineteen imported lists remain
-blocked; the closest three lists each lack three assessments.
+4c Control has standing assessments for every main-deck card after Thor's
+selector union was accepted. Thirteen cards still have deferred uses. This
+permits setup; it does not establish that those uses execute. Selesnya Landfall
+has one missing main-deck assessment, Dyadrine. The other seventeen lists have
+between two and nine missing main-deck assessments.
 
-1. Add bounded private look and selection, selection from an earlier binding,
-   and deterministic library ordering, starting with Aang at the Crossroads.
-   Keep earned visibility through the whole sequence.
-2. Extend selectors with unions, intersecting types and object comparisons where
-   accepted terms require them. Aang, Swift Savior needs a creature-or-spell
-   target; Thor needs Equipment-or-instant-or-sorcery in one selector. Appa needs
-   any number of targets and per-object permission ownership.
-3. Add cast-origin and actual mana-spent facts, then token copying where the
-   source requires it. Interdimensional Web Watch needs restricted spending from
-   exile and independent mana-color choices; Colorstorm Stallion needs spent-mana
-   facts and token copying.
+1. Play 4c Control against the supported pinned and practice lists now. Record
+   each failed required interpretation and repair the mechanic it needs.
+2. Prepare the main-deck guides with `tools/guide.ts --all --alpha`.
+3. Add actual mana-spent facts and optional counter payment for Dyadrine, then
+   admit Selesnya Landfall. Add bounded private look and ordering when the live
+   uses require them, including Consult the Star Charts and Stock Up in Control.
+4. Order further shared mechanics by observed game failures and the main decks
+   they unblock. Sideboard-only blockers do not delay this alpha.
 
-Start ordinary-deck games when two lists have complete standing coverage; a
-required deferred use that cannot execute becomes the next recorded blocker.
+One assessed imported list can play an established opponent; it need not wait
+for a second imported list. A required deferred use that cannot execute becomes
+the next recorded blocker.
 Keep Jev, the current roster and two-game concurrency. Each mechanic lands in
 its own commit with invariant tests and the type check passing. Reassessment
 records costs and source-backed refusals; completed games retain their journals,

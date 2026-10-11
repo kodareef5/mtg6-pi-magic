@@ -21,7 +21,7 @@ const { values: a } = parseArgs({ options: {
 	games: { type: "string", default: "20" }, arm: { type: "string", default: "baseline" }, "seed-base": { type: "string" },
 	source: { type: "string", default: ".pi/resume-20261007/scoped-full-game/next-version-gate-20261005-1791339573156.jsonl" },
 	strategy: { type: "string" }, green: { type: "string" }, red: { type: "string" }, jobs: { type: "string", default: "2" },
-	random: { type: "string" }, pool: { type: "string" },
+	random: { type: "string" }, pool: { type: "string" }, alpha: { type: "boolean", default: false },
 	turns: { type: "string", default: "40" }, stall: { type: "string", default: "300" }, out: { type: "string", default: ".pi/sim" },
 	report: { type: "string" }, "seeds-only": { type: "boolean", default: false }, help: { type: "boolean", short: "h" } } });
 if (a.help) {
@@ -36,6 +36,7 @@ if (a.help) {
   --random N       N fresh games on seeded random pairings from the pool instead of carried seeds; each pairing's first-named
                    deck is on the play, and odd games swap. Setup interprets cards and writes briefs live (stored packages first)
   --pool A,B,C     the decks random pairings draw from; default every collection deck with a web source
+  --alpha          register sideboardless copies for fresh --random games; journals retain those exact lists
   --green P        the strategy pattern for whichever seat plays the Green list; --red likewise. One roster facing another:
                    run the arm twice with the patterns swapped and count wins by roster, not by list
   --jobs N         games at once. Two: three games at once hit the strategy provider's rate limit
@@ -93,6 +94,7 @@ function playOne(record: Record_, dir: string, options: { turns: string; stall: 
 	const log = join(dir, `${record.seed}.log`), out = join(dir, record.seed);
 	mkdirSync(out, { recursive: true });
 	const args = ["tools/matchup.ts", ...(record.decks ? ["--decks", record.decks.join(","), "--seed", record.seed] : ["--resume", record.path, "--version", "0"]), "--turns", options.turns, "--out", out,
+		...(a.alpha ? ["--alpha"] : []),
 		...(options.strategy ? ["--strategy", options.strategy] : []), ...(options.green ? ["--green", options.green] : []), ...(options.red ? ["--red", options.red] : [])];
 	return new Promise((resolve) => {
 		const fd = openSync(log, "a"), startedAt = Date.now();
@@ -192,6 +194,7 @@ if (a.report) {
 	process.exit(0);
 }
 
+if (a.alpha && !a.random) throw new Error("--alpha needs --random; a carried journal owns its registered lists.");
 const jobs = Math.max(1, Number(a.jobs)), base = a["seed-base"] ?? `sim-${Date.now()}`;
 const pool = a.pool ? a.pool.split(",").map((one) => one.trim()) : [...collection().values()].filter((one) => /^https?:/.test(one.source)).map((one) => one.name);
 const games = a.random ? Number(a.random) : Number(a.games);

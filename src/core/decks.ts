@@ -18,6 +18,9 @@ import type { Format } from "./format.ts";
 
 export type Deck = { name: string; source: string; main: Record<string, number>; sideboard: Record<string, number> };
 
+/** The alpha plays game one with no outside cards. The registered copy, including its empty sideboard, belongs in the journal. */
+export const alpha = (deck: Deck): Deck => ({ ...structuredClone(deck), sideboard: {} });
+
 /** The card names a list of counts holds, in the order the list gives them. */
 export const listed = (counts: Record<string, number>): string[] => Object.entries(counts).flatMap(([name, count]) => Array<string>(count).fill(name));
 
