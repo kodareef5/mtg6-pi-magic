@@ -1,0 +1,87 @@
+{
+	"card": "Spider Manifestation",
+	"generated": "2026-10-10",
+	"source": "2b4e3077f5db0273c55b12d5267b69c17c67b40662820dab63632af7b0e840d8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider Manifestation",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"R"
+				]
+			},
+			{
+				"basis": "{T}: Add {R} or {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "Whenever you cast a spell with mana value 4 or greater, untap this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"manaValue": {
+							"atLeast": 4
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "untap",
+							"what": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Spider Manifestation at its printed {1}{R/G} cost; hybrid payment remains to be prepared.",
+				"basis": "Reach ... {T}: Add {R} or {G}. ... Whenever you cast a spell with mana value 4 or greater, untap this creature.",
+				"source": {
+					"card": "Spider Manifestation",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

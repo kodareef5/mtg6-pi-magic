@@ -1,0 +1,29 @@
+{
+	"card": "Annul",
+	"generated": "2026-10-10",
+	"source": "0895922efb6b1fc24c21012a6bd6c2b77c3849dc1357faf8a8f1bff97ee47f6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Annul",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Annul to counter target artifact or enchantment spell.",
+				"basis": "Counter target artifact or enchantment spell.",
+				"source": {
+					"card": "Annul",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

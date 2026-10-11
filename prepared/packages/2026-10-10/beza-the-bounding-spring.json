@@ -1,0 +1,173 @@
+{
+	"card": "Beza, the Bounding Spring",
+	"generated": "2026-10-10",
+	"source": "d2d7c33ecdf545ed5bec27df14d9526328eb3ede2321d7af80abbd4d31e9268e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beza, the Bounding Spring",
+		"registers": [
+			{
+				"basis": "When Beza enters, create a Treasure token if an opponent controls more lands than you. You gain 4 life if an opponent has more life than you. Create two 1/1 blue Fish creature tokens if an opponent controls more creatures than you. Draw a card if an opponent has more cards in hand than you.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"amount": {
+									"sum": [
+										{
+											"count": {
+												"types": [
+													"land"
+												],
+												"controller": "opponent"
+											}
+										},
+										{
+											"negate": {
+												"count": {
+													"types": [
+														"land"
+													],
+													"controller": "you"
+												}
+											}
+										}
+									]
+								},
+								"atLeast": 1
+							},
+							"spec": {
+								"name": "Treasure",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"kind": "mana",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						},
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 4,
+							"if": {
+								"amount": {
+									"sum": [
+										{
+											"life": "opponent"
+										},
+										{
+											"negate": {
+												"life": "you"
+											}
+										}
+									]
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "token",
+							"count": 2,
+							"spec": {
+								"name": "Fish",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Fish"
+								],
+								"colors": [
+									"U"
+								],
+								"power": 1,
+								"toughness": 1
+							},
+							"if": {
+								"amount": {
+									"sum": [
+										{
+											"count": {
+												"types": [
+													"creature"
+												],
+												"controller": "opponent"
+											}
+										},
+										{
+											"negate": {
+												"count": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											}
+										}
+									]
+								},
+								"atLeast": 1
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"sum": [
+										{
+											"count": {
+												"zones": [
+													"hand"
+												],
+												"owner": "opponent"
+											}
+										},
+										{
+											"negate": {
+												"count": {
+													"zones": [
+														"hand"
+													],
+													"owner": "you"
+												}
+											}
+										}
+									]
+								},
+								"atLeast": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,121 @@
+{
+	"card": "Hexing Squelcher",
+	"generated": "2026-10-10",
+	"source": "dbbc648c42a54e8fb7f84e723027e327fbef28301790b38105153628a1a7bf6c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hexing Squelcher",
+		"registers": [
+			{
+				"basis": "Ward—Pay 2 life.",
+				"kind": "watch",
+				"event": {
+					"on": "targeted",
+					"of": {
+						"is": "this"
+					},
+					"by": "opponent"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "event:source",
+							"unless": {
+								"who": "event:player",
+								"pays": {
+									"life": 2
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Spells you control can't be countered.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"artifact",
+						"battle",
+						"creature",
+						"enchantment",
+						"instant",
+						"kindred",
+						"planeswalker",
+						"sorcery"
+					]
+				},
+				"change": {
+					"words": [
+						"can't be countered"
+					]
+				}
+			},
+			{
+				"basis": "Other creatures you control have \"Ward—Pay 2 life.\"",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Other creatures you control have \"Ward—Pay 2 life.\"",
+							"kind": "watch",
+							"event": {
+								"on": "targeted",
+								"of": {
+									"is": "this"
+								},
+								"by": "opponent"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "counter",
+										"what": "event:source",
+										"unless": {
+											"who": "event:player",
+											"pays": {
+												"life": 2
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Hexing Squelcher with its can't-be-countered spell property",
+				"basis": "This spell can't be countered.",
+				"source": {
+					"card": "Hexing Squelcher",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

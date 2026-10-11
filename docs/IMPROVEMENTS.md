@@ -17,23 +17,24 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-1. Assess the 55 remaining cards, mostly newly counted sideboard entries, and
-   update the pool report before choosing further engine work.
-2. Extend shared fact queries with mana value and colors, including the selected
-   spell face in cast events. Scalding Viper is a direct blocker; Thor also
-   needs selector unions and permission expiry, and Colorstorm Stallion needs
-   actual mana-spent facts and token copying. Do not count either as unblocked
-   by queries alone. Add intersecting types and object comparisons when their
-   accepted terms require them.
-3. Add damage events with their amount and recipient, then a resolution-use
+The pool report includes every registered sideboard: 208 stored assessments,
+99 refusals, five basic lands and no unassessed cards. Mana-value and color
+queries now read the selected spell face and announced X, and preserve the
+departed spell's facts. All nineteen imported lists remain blocked.
+
+1. Add damage events with their amount and recipient, then a resolution-use
    marker for optional once-per-turn effects. Cecil and Jennifer should use the
    same event data; a declined optional effect must leave the use available.
-4. Give permissions an accepted alternative price and explicit expiry, and give
+2. Give permissions an accepted alternative price and explicit expiry, and give
    generated mana an explicit expiry. Airbend and Roku should use these records
    without granting permission to an unrelated incarnation.
-5. Add bounded private look and selection, selection from an earlier binding,
+3. Add bounded private look and selection, selection from an earlier binding,
    and deterministic library ordering, starting with Aang at the Crossroads.
    Keep earned visibility through the whole sequence.
+4. Extend selectors with unions, intersecting types and object comparisons where
+   accepted terms require them. Thor still needs unions and permission expiry;
+   Colorstorm Stallion needs actual mana-spent facts and token copying. The new
+   queries alone do not unblock either card.
 
 Start ordinary-deck games when two lists have complete standing coverage; a
 required deferred use that cannot execute becomes the next recorded blocker.

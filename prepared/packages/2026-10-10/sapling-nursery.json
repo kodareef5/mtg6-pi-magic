@@ -1,0 +1,81 @@
+{
+	"card": "Sapling Nursery",
+	"generated": "2026-10-10",
+	"source": "8ee5ce5a18da8206f567e3f50e36fb403ee350c6886af8ae16f0815787d1728c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sapling Nursery",
+		"registers": [
+			{
+				"basis": "Landfall — Whenever a land you control enters, create a 3/4 green Treefolk creature token with reach.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Treefolk",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Treefolk"
+								],
+								"colors": [
+									"G"
+								],
+								"power": 3,
+								"toughness": 4,
+								"words": [
+									"reach"
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Sapling Nursery with affinity for Forests",
+				"basis": "Affinity for Forests (This spell costs {1} less to cast for each Forest you control.)",
+				"source": {
+					"card": "Sapling Nursery",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Exile Sapling Nursery to grant Treefolk and Forests you control indestructible until end of turn",
+				"basis": "{1}{G}, Exile this enchantment: Treefolk and Forests you control gain indestructible until end of turn.",
+				"source": {
+					"card": "Sapling Nursery",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Authority of the Consuls",
+	"generated": "2026-10-10",
+	"source": "1342d93bc4cb379e415ce6114a25c6f4af1517349157c13ced4664f447bf1ee0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Authority of the Consuls",
+		"registers": [
+			{
+				"basis": "Creatures your opponents control enter tapped.",
+				"kind": "enters",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "opponent"
+				},
+				"tapped": true
+			},
+			{
+				"basis": "Whenever a creature an opponent controls enters, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "opponent"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

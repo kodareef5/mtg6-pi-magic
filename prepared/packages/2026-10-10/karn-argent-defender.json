@@ -1,0 +1,29 @@
+{
+	"card": "Karn, Argent Defender",
+	"generated": "2026-10-10",
+	"source": "0140002d48a39dc7729055acef427f0e45079b1d0151b5ac7aadebf399d76304",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Karn, Argent Defender",
+		"registers": [
+			{
+				"basis": "Artifacts and creatures entering the battlefield don't cause abilities to trigger.",
+				"kind": "suppress",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact",
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

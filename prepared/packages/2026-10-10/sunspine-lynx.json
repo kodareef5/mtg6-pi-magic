@@ -1,0 +1,81 @@
+{
+	"card": "Sunspine Lynx",
+	"generated": "2026-10-10",
+	"source": "aa9f67ecc74418345d59fb6ce01f5ae47919010247f0a6e26291c241b340738b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sunspine Lynx",
+		"registers": [
+			{
+				"basis": "Players can't gain life.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"players can't gain life"
+					]
+				}
+			},
+			{
+				"basis": "Damage can't be prevented.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"damage can't be prevented"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, it deals damage to each player equal to the number of nonbasic lands that player controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"players": "each-player",
+							"instructions": [
+								{
+									"do": "damage",
+									"to": "bound:player",
+									"from": "this",
+									"amount": {
+										"count": {
+											"zones": [
+												"battlefield"
+											],
+											"types": [
+												"land"
+											],
+											"not": {
+												"supertypes": [
+													"basic"
+												]
+											},
+											"controller": "bound:player"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

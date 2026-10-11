@@ -1,0 +1,43 @@
+{
+	"card": "Qarsi Revenant",
+	"generated": "2026-10-10",
+	"source": "40da2cda523952cd515946b85839b9cf703c118f06194911eb4efff74c78ccf7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Qarsi Revenant",
+		"registers": [
+			{
+				"basis": "Flying, deathtouch, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying",
+						"deathtouch",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Renew: exile this card from your graveyard to put flying, deathtouch, and lifelink counters on target creature; activate only as a sorcery.",
+				"basis": "Renew — {2}{B}, Exile this card from your graveyard: Put a flying counter, a deathtouch counter, and a lifelink counter on target creature. Activate only as a sorcery.",
+				"source": {
+					"card": "Qarsi Revenant",
+					"zones": [
+						"graveyard"
+					],
+					"controller": "any"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -1,0 +1,57 @@
+{
+	"card": "Witherbloom Charm",
+	"generated": "2026-10-10",
+	"source": "3357ff6590d699fb70ca0dceeeacf642d49e447a9e5f5a4292527a353099a087",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Witherbloom Charm",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Witherbloom Charm choosing the optional permanent sacrifice and draw-two mode",
+				"basis": "Choose one — ... • You may sacrifice a permanent. If you do, draw two cards.",
+				"source": {
+					"card": "Witherbloom Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Witherbloom Charm choosing to gain 5 life",
+				"basis": "Choose one — ... • You gain 5 life.",
+				"source": {
+					"card": "Witherbloom Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Witherbloom Charm choosing to destroy target nonland permanent with mana value 2 or less",
+				"basis": "Choose one — ... • Destroy target nonland permanent with mana value 2 or less.",
+				"source": {
+					"card": "Witherbloom Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

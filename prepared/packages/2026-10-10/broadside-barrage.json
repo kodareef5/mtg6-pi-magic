@@ -1,0 +1,29 @@
+{
+	"card": "Broadside Barrage",
+	"generated": "2026-10-10",
+	"source": "1a86c4a155386a7562c5b9d1cf17c03e8e496b45eb7522170b7cfba3d07724d2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Broadside Barrage",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Broadside Barrage to deal 5 damage to target creature or planeswalker, then draw and discard a card.",
+				"basis": "Broadside Barrage deals 5 damage to target creature or planeswalker. Draw a card, then discard a card.",
+				"source": {
+					"card": "Broadside Barrage",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -130,7 +130,7 @@ first pass's refusals by concept, with the decks each blocked:
 | Conditional mana ability (Verges, Hidden Lair) | 18 | 11 | built; ten stored, Hidden Lair needs "entered this turn" |
 | Omen, adventure or split back half | 11 | 14 | shared mechanics built; updated assessment below |
 | Enters tapped unless a condition on the turn | 9 | 2 | built; both stored |
-| Cast trigger filtered by color or type | 8 | 5 | open |
+| Cast trigger filtered by color or type | 8 | 5 | queries built; other operations still block some cards |
 | Copy, control change, face-down | 7 | 9 | open |
 | Mana spent to cast | 5 | 4 | open |
 | Arithmetic: half, X, counts of cards | 5 | 6 | open |
@@ -142,13 +142,14 @@ first pass's refusals by concept, with the decks each blocked:
 The ledger is `prepared/packages/2026-10-10/ledger.json`; the grouping script
 is `.pi/phase2/ledger-concepts.py`.
 
-## Takeover audit, October 10
+## Current breadth coverage, October 10
 
 The main-deck-only counts above are historical. Setup registers sideboards too.
-The corrected report covers 312 distinct cards across all nineteen imported
-lists: 166 have compatible stored standing assessments, 86 have refusal records,
-55 still need assessment, and five are basic lands. Every imported list remains
-blocked. No new whole-deck game was started or counted as complete.
+The report now covers all 312 distinct cards across nineteen imported lists:
+208 have compatible stored standing assessments, 99 have refusal records, five
+are basic lands, and none remains unassessed. Every imported list is blocked.
+The closest are 4c Control, Izzet Aggro and Selesnya Landfall, each missing three
+assessments. No new whole-deck game was started or counted as complete.
 
 Preparation storage now checks source fingerprints and the interpreter contract,
 excludes the ledger from packages, writes records atomically, and serves the
@@ -160,45 +161,60 @@ shipped seed. Existing journals keep their accepted equipment. Life-cost
 mana, conditional mana at payment, and optional entry payments have conservation
 and replay coverage.
 
-The shared face mechanics cover alternate casts, Adventure exile permission,
+Shared face mechanics cover alternate casts, Adventure exile permission,
 Omen shuffling, paid Room unlocks, transformation, craft's paid source binding,
 Saga lore and chapter completion, finality counters, and Prepare's copy lifetime.
 The unchanged card TSV has a source-hashed face companion. New journals pin it;
 old journals retain the prior single-face representation.
 
-Sol 6.1 high reassessed all seventeen multi-face cards from main decks and
-sideboards. Eleven accepted standing assessments and inventories, six refusals,
-41 calls, 945,904 input tokens including 761,344 cached, 10,090 output tokens,
-3,071 reported reasoning tokens, $0.5462 at catalog prices. Summed call time was
-5m43s; active call time was 1m36s. No provider failures or truncations were recorded.
-The private trace is `.pi/assess/takeover-faces/assess-1791675685232.calls.jsonl`.
+Mana-value and color queries derive facts from structured costs and faces.
+They read announced X on the stack, computed selector bounds and the previous
+incarnation after a spell leaves. Payment does not change mana value. The pilot
+and strategy receive these facts only through the seat's projection. A modify
+instruction binds its affected objects for a later instruction, so Day of Black
+Sun can destroy exactly the creatures whose abilities it removed.
 
-Accepted: Braided Net, Bramble Familiar, Disruptive Stormbrood, Elusive Otter,
-Emeritus of Ideation, Esper Origins, Gandalf, Hearth Elemental, Spring-Loaded
-Sawblades, Twinmaw Stormbrood and Unholy Annex, each with its registered back
-face. Ten retain deferred uses; Unholy Annex needs none. These are accepted
-source claims, not evidence that every deferred use can execute. In particular,
-Otter's distribution, Gandalf's private exile, Braided Quipu's library position,
-and Esper's surveil and flashback still need runtime interpretation and may stop.
-Otter's stored power-based blocking restriction is an unhandled word in the
-current block-conflict reader and needs a structured comparison.
+The completed assessment passes used Sol 6.1 high. The runtime check used the
+selected strategy role, Haiku 5.5 medium. Costs include every request, including
+retries; input totals include cached tokens.
 
-The six current refusals are in the [source-backed ledger](../prepared/packages/2026-10-10/ledger.json):
+| Pass | Cards | Accepted / refused | Calls | Input / cached | Output / thinking | Summed / active time | Cost |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Face mechanics | 17 | 11 / 6 | 41 | 945,904 / 761,344 | 10,090 / 3,071 | 5m43s / 1m36s | $0.5462 |
+| Remaining main and sideboard cards | 55 | 36 / 19 | 111 | 2,427,792 / 2,211,840 | 21,351 / 6,777 | 13m48s / 3m41s | $0.8666 |
+| Query-related reassessment | 18 | 6 / 12 | 47 | 1,100,239 / 894,336 | 9,801 / 3,002 | 5m49s / 1m35s | $0.5992 |
+| Deferred counterspell interpretation | 2 | 2 / 0 | 3 | 91,998 / 91,988 | 2,118 / 1,498 | 18.3s / 10.4s | $0.0091 |
+
+No provider failures or truncations were recorded in these passes. The private
+traces are under `.pi/assess/takeover-faces/`, `.pi/assess/sideboards-20261010/`,
+`.pi/assess/cast-facts-20261010/` and `.pi/assess/cast-facts-runtime/`.
+Query reassessment accepted Scalding Viper, Starfield Shepherd, Spider
+Manifestation, Moseo, Enlightened Confidant and Carnage. These are accepted source
+claims and inventories, not proof that all their deferred uses can execute or
+that every registered keyword has a handler. Otter's power-based blocking word,
+for example, still needs a structured comparison.
+
+The [source-backed ledger](../prepared/packages/2026-10-10/ledger.json) records
+every refusal. The next shared operations include:
 
 | Card | Remaining operation |
 | --- | --- |
 | Aang, Swift Savior | Airbend permission carrying its alternative casting price |
-| Aang, at the Crossroads | Private bounded look, mana-value filter, random bottom order, intersecting card types |
+| Aang, at the Crossroads | Private bounded look, random bottom order, intersecting card types |
 | Cecil, Dark Knight | General damage event and amount; comparison with half starting life |
 | Jennifer Walters | Damage received and amount; optional once-per-turn use at resolution |
-| Scalding Viper | Mana-value filter on a cast event |
 | The Legend of Roku | Permission through the next turn; mana lasting until combat ends |
+| Thor, God of Thunder | Selector unions and permission through the next turn |
+| Colorstorm Stallion | Actual mana spent on a cast and token copying |
 
-Offline checks cover the mechanics using registered collection cards. An Omen
-dealt from its deck clones on the stack and resolves to identical card state,
-log and shuffled library. All twenty-six collection decks also loaded their
-compatible cached equipment, 578 seat packages, without inference. This checks
-cache integration; their missing assessments still stop full setup.
+All 223 invariant tests and the type check pass. The fixtures cover announced X,
+hybrid colors, alternate faces, hidden-card filtering, replay and cloning with a
+pending trigger after its spell was countered. Haiku's two live interpretations,
+Flashfreeze and Disdainful Stroke, selected the expected targets, countered them
+and replayed exactly in a registered-deck fixture. This establishes those uses,
+not a completed deck game. All twenty-six collection decks loaded 750 seat
+packages without inference or notices. This checks seed integration; missing
+standing assessments still stop full setup.
 
 ## How a breadth change is judged
 

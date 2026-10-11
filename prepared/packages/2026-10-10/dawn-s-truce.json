@@ -1,0 +1,43 @@
+{
+	"card": "Dawn's Truce",
+	"generated": "2026-10-10",
+	"source": "5d81123e62a0334c9cfe954e5dfb1b58a4ca2d609b3fb8c030f789b3b13d5134",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dawn's Truce",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Dawn's Truce without promising a gift.",
+				"basis": "Gift a card (You may promise an opponent a gift as you cast this spell. If you do, they draw a card before its other effects.)\nYou and permanents you control gain hexproof until end of turn. If the gift was promised, permanents you control also gain indestructible until end of turn.",
+				"source": {
+					"card": "Dawn's Truce",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Dawn's Truce promising an opponent a card: that opponent draws before the other effects, and your permanents also gain indestructible until end of turn.",
+				"basis": "Gift a card (You may promise an opponent a gift as you cast this spell. If you do, they draw a card before its other effects.)\nYou and permanents you control gain hexproof until end of turn. If the gift was promised, permanents you control also gain indestructible until end of turn.",
+				"source": {
+					"card": "Dawn's Truce",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

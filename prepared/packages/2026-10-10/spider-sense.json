@@ -1,0 +1,43 @@
+{
+	"card": "Spider-Sense",
+	"generated": "2026-10-10",
+	"source": "52894c0f73a98fb9ea2b89e6e5f80288a980c6192080cd109b541748d3841088",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spider-Sense",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Spider-Sense at its printed mana cost to counter an instant spell, sorcery spell, or triggered ability.",
+				"basis": "Counter target instant spell, sorcery spell, or triggered ability.",
+				"source": {
+					"card": "Spider-Sense",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Spider-Sense for its web-slinging alternative cost, paying {U} and returning a tapped creature you control to its owner's hand, to counter an instant spell, sorcery spell, or triggered ability.",
+				"basis": "Web-slinging {U} (You may cast this spell for {U} if you also return a tapped creature you control to its owner's hand.) ... Counter target instant spell, sorcery spell, or triggered ability.",
+				"source": {
+					"card": "Spider-Sense",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"card": "Bilbo's Gambit",
+	"generated": "2026-10-10",
+	"source": "84945c56d8a5f6ef109ed6d0399a5ae9905092c3ceef0dd68d95be4b2a8c05cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bilbo's Gambit",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Bilbo's Gambit without promising the gift",
+				"basis": "Gift a Treasure (You may promise an opponent a gift as you cast this spell. If you do, they create a Treasure token before its other effects. It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\") ... Return target spell to its owner's hand. If the gift was promised, players can't cast spells this turn.",
+				"source": {
+					"card": "Bilbo's Gambit",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Bilbo's Gambit promising a Treasure gift; the opponent creates the Treasure before returning the targeted spell, then players can't cast spells for the rest of the turn",
+				"basis": "Gift a Treasure (You may promise an opponent a gift as you cast this spell. If you do, they create a Treasure token before its other effects. It's an artifact with \"{T}, Sacrifice this token: Add one mana of any color.\") ... Return target spell to its owner's hand. If the gift was promised, players can't cast spells this turn.",
+				"source": {
+					"card": "Bilbo's Gambit",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"card": "Pyrrhic Strike",
+	"generated": "2026-10-10",
+	"source": "e77d53c769d563e855b867a97c846e1f7516a610e2ed52c5f359cb34a166c846",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pyrrhic Strike",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Pyrrhic Strike: choose to destroy a target artifact or enchantment, or a target creature with mana value 3 or greater; optionally pay blight 2 as an additional cost to choose both modes instead.",
+				"basis": "As an additional cost to cast this spell, you may blight 2. (You may put two -1/-1 counters on a creature you control.)\nChoose one. If this spell's additional cost was paid, choose both instead.\n• Destroy target artifact or enchantment.\n• Destroy target creature with mana value 3 or greater.",
+				"source": {
+					"card": "Pyrrhic Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

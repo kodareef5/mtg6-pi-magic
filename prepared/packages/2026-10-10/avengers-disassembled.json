@@ -1,0 +1,58 @@
+{
+	"card": "Avengers Disassembled",
+	"generated": "2026-10-10",
+	"source": "f30c25fbbff96e07fa34f521bc1fa3a7ec1bda58168fbe987cf072efbdd98951",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Avengers Disassembled",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Avengers Disassembled choosing only the damage mode: deal 3 damage to each creature.",
+				"basis": "Choose one or both —\n• Avengers Disassembled deals 3 damage to each creature.\n• Destroy target land. Its controller may search their library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"source": {
+					"card": "Avengers Disassembled",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Avengers Disassembled choosing only the land-destruction mode: destroy target land; its controller may search for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"basis": "Choose one or both —\n• Avengers Disassembled deals 3 damage to each creature.\n• Destroy target land. Its controller may search their library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"source": {
+					"card": "Avengers Disassembled",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Avengers Disassembled choosing both modes, resolving damage to each creature before the targeted land destruction and its controller's optional basic-land search.",
+				"basis": "Choose one or both —\n• Avengers Disassembled deals 3 damage to each creature.\n• Destroy target land. Its controller may search their library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+				"source": {
+					"card": "Avengers Disassembled",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

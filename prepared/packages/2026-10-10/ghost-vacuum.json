@@ -1,0 +1,40 @@
+{
+	"card": "Ghost Vacuum",
+	"generated": "2026-10-10",
+	"source": "5a82960548757301a54b36c753b6f6c10dc34982954e30daeea4c942bbd95d62",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghost Vacuum",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Exile a target card from a graveyard.",
+				"basis": "{T}: Exile target card from a graveyard.",
+				"source": {
+					"card": "Ghost Vacuum",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Return each linked exiled creature card under your control with a flying counter, as a 1/1 Spirit in addition to its other types; activate only as a sorcery.",
+				"basis": "{6}, {T}, Sacrifice this artifact: Put each creature card exiled with this artifact onto the battlefield under your control with a flying counter on it. Each of them is a 1/1 Spirit in addition to its other types. Activate only as a sorcery.",
+				"source": {
+					"card": "Ghost Vacuum",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

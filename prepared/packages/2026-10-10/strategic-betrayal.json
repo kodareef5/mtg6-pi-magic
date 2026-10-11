@@ -1,0 +1,29 @@
+{
+	"card": "Strategic Betrayal",
+	"generated": "2026-10-10",
+	"source": "c86a622d49cdf184f0d1ff4f6f52c732d2731399da17dcb10784f10f90c3c912",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Strategic Betrayal",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Strategic Betrayal to have target opponent exile a creature they control and their graveyard.",
+				"basis": "Target opponent exiles a creature they control and their graveyard.",
+				"source": {
+					"card": "Strategic Betrayal",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

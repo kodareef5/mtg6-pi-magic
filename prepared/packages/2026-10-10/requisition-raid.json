@@ -1,0 +1,113 @@
+{
+	"card": "Requisition Raid",
+	"generated": "2026-10-10",
+	"source": "9b1ec624f76bf9ea341b6ccb2511daae1aed471c4adb08fb1709016ff87097bc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Requisition Raid",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Requisition Raid choosing only artifact destruction; pay {1} in addition to {W}.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Destroy target artifact.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requisition Raid choosing only enchantment destruction; pay {1} in addition to {W}.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Destroy target enchantment.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requisition Raid choosing only counters on each creature target player controls; pay {1} in addition to {W}.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Put a +1/+1 counter on each creature target player controls.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requisition Raid choosing artifact and enchantment destruction; pay {2} in addition to {W}, resolving modes in printed order.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Destroy target artifact. ... + {1} — Destroy target enchantment.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requisition Raid choosing artifact destruction and counters on each creature target player controls; pay {2} in addition to {W}, resolving modes in printed order.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Destroy target artifact. ... + {1} — Put a +1/+1 counter on each creature target player controls.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requisition Raid choosing enchantment destruction and counters on each creature target player controls; pay {2} in addition to {W}, resolving modes in printed order.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Destroy target enchantment. ... + {1} — Put a +1/+1 counter on each creature target player controls.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Requisition Raid choosing all three modes; pay {3} in addition to {W}, resolving modes in printed order. Each mode is chosen once.",
+				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Destroy target artifact. ... + {1} — Destroy target enchantment. ... + {1} — Put a +1/+1 counter on each creature target player controls.",
+				"source": {
+					"card": "Requisition Raid",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

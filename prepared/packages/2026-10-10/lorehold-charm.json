@@ -1,0 +1,57 @@
+{
+	"card": "Lorehold Charm",
+	"generated": "2026-10-10",
+	"source": "6c91b7ab7d42b44e1cc72a613da468d7a2d327439c210705f6945e74a6e5bbe2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lorehold Charm",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Lorehold Charm choosing each opponent sacrifices a nontoken artifact of their choice",
+				"basis": "Choose one — ... • Each opponent sacrifices a nontoken artifact of their choice.",
+				"source": {
+					"card": "Lorehold Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Lorehold Charm choosing to return target artifact or creature card with mana value 2 or less from your graveyard to the battlefield",
+				"basis": "Choose one — ... • Return target artifact or creature card with mana value 2 or less from your graveyard to the battlefield.",
+				"source": {
+					"card": "Lorehold Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Lorehold Charm choosing creatures you control get +1/+1 and gain trample until end of turn",
+				"basis": "Choose one — ... • Creatures you control get +1/+1 and gain trample until end of turn.",
+				"source": {
+					"card": "Lorehold Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

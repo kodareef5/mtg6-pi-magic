@@ -1,0 +1,58 @@
+{
+	"card": "Scalding Viper // Steam Clean",
+	"generated": "2026-10-10",
+	"source": "56ea2598535cc06b3fea791ee7644cfd884f37da68eeb3884622bad83549e3c6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scalding Viper // Steam Clean",
+		"registers": [
+			{
+				"face": 0,
+				"kind": "watch",
+				"basis": "Whenever an opponent casts a spell with mana value 3 or less, this creature deals 1 damage to that player.",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"manaValue": {
+							"atMost": 3
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "event:player",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"face": 1,
+				"claim": "Cast Steam Clean to return target nonland permanent to its owner's hand",
+				"basis": "Return target nonland permanent to its owner's hand. (Then exile this card. You may cast the creature later from exile.)",
+				"source": {
+					"card": "Scalding Viper // Steam Clean",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

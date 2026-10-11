@@ -1,0 +1,29 @@
+{
+	"card": "Desolation of Smaug",
+	"generated": "2026-10-10",
+	"source": "504dffc0effee548214309ccd6a1b00da562734f5b288100016eb097de4653df",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Desolation of Smaug",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Desolation of Smaug: deal 3 damage to each non-Dragon creature, then add four mana in any combination of colors, spendable only to cast Dragon spells.",
+				"basis": "Desolation of Smaug deals 3 damage to each non-Dragon creature. ... Add four mana in any combination of colors. Spend this mana only to cast Dragon spells.",
+				"source": {
+					"card": "Desolation of Smaug",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"card": "Essence Burn",
+	"generated": "2026-10-10",
+	"source": "58e018422e3cb6e4a4d54b28a62b9860381a85a6f85b2585ba55dd9a1a8008c8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Essence Burn",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Essence Burn",
+				"basis": "Essence Burn deals 5 damage to target black or green creature or planeswalker. If that permanent would die this turn, exile it instead.",
+				"source": {
+					"card": "Essence Burn",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

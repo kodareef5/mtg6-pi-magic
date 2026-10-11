@@ -1,0 +1,64 @@
+{
+	"card": "Professor Dellian Fel",
+	"generated": "2026-10-10",
+	"source": "dbd9ffbca488df815ceb98989363904df8838d0dd6543377f2195ce91fed6a75",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Professor Dellian Fel",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate +2 loyalty ability to gain 3 life",
+				"basis": "+2: You gain 3 life.",
+				"source": {
+					"card": "Professor Dellian Fel",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate 0 loyalty ability to draw a card and lose 1 life",
+				"basis": "0: You draw a card and lose 1 life.",
+				"source": {
+					"card": "Professor Dellian Fel",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate −3 loyalty ability to destroy target creature",
+				"basis": "−3: Destroy target creature.",
+				"source": {
+					"card": "Professor Dellian Fel",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate −6 loyalty ability to create the life-gain emblem",
+				"basis": "−6: You get an emblem with \"Whenever you gain life, target opponent loses that much life.\"",
+				"source": {
+					"card": "Professor Dellian Fel",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

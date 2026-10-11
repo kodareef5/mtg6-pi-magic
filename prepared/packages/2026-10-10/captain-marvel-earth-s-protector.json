@@ -1,0 +1,67 @@
+{
+	"card": "Captain Marvel, Earth's Protector",
+	"generated": "2026-10-10",
+	"source": "5b6e7eb9b73d2f05ac8cf9e1cc0a075e29a9f2139813d1b0477edea02cdc4c05",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Captain Marvel, Earth's Protector",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Flying, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Captain Marvel, Earth's Protector with flash at her printed mana cost.",
+				"basis": "Flash",
+				"source": {
+					"card": "Captain Marvel, Earth's Protector",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Activate power-up only once for this permanent: put a +1/+1 counter and an indestructible counter on it, reducing the activation cost by its mana cost if it entered this turn.",
+				"basis": "Power-up — {5}{W}{W}: Put a +1/+1 counter and an indestructible counter on Captain Marvel. (Activate each power-up ability only once. Reduce the cost by her mana cost if she entered this turn.)",
+				"source": {
+					"card": "Captain Marvel, Earth's Protector",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

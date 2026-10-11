@@ -1,0 +1,67 @@
+{
+	"card": "Spectacular Spider-Man",
+	"generated": "2026-10-10",
+	"source": "1e8f8f1c2e6935e8b45f3bc512c67b9d15a817408be19fd6bd053061df062509",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spectacular Spider-Man",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Spectacular Spider-Man with flash",
+				"basis": "Flash",
+				"source": {
+					"card": "Spectacular Spider-Man",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Spectacular Spider-Man gains flying until end of turn",
+				"basis": "{1}: Spectacular Spider-Man gains flying until end of turn.",
+				"source": {
+					"card": "Spectacular Spider-Man",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Sacrifice Spectacular Spider-Man to grant your creatures hexproof and indestructible until end of turn",
+				"basis": "{1}, Sacrifice Spectacular Spider-Man: Creatures you control gain hexproof and indestructible until end of turn.",
+				"source": {
+					"card": "Spectacular Spider-Man",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"card": "Bovine Intervention",
+	"generated": "2026-10-10",
+	"source": "1d8aa47311009e4caa9257f92dacb2647096b93c32eb68c528417096756be542",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bovine Intervention",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Bovine Intervention to destroy target artifact or creature and have its controller create a 2/2 white Ox creature token.",
+				"basis": "Destroy target artifact or creature. Its controller creates a 2/2 white Ox creature token.",
+				"source": {
+					"card": "Bovine Intervention",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

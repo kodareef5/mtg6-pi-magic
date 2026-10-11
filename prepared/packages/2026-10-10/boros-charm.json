@@ -1,0 +1,57 @@
+{
+	"card": "Boros Charm",
+	"generated": "2026-10-10",
+	"source": "42101cdc2a3f499b1b7e99985c73a5378899a821df3404366e371bff8b04d3e7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boros Charm",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Boros Charm choosing 4 damage to target player or planeswalker",
+				"basis": "Choose one — ... • Boros Charm deals 4 damage to target player or planeswalker.",
+				"source": {
+					"card": "Boros Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Boros Charm choosing indestructible for permanents you control until end of turn",
+				"basis": "Choose one — ... • Permanents you control gain indestructible until end of turn.",
+				"source": {
+					"card": "Boros Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Boros Charm choosing double strike for target creature until end of turn",
+				"basis": "Choose one — ... • Target creature gains double strike until end of turn.",
+				"source": {
+					"card": "Boros Charm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

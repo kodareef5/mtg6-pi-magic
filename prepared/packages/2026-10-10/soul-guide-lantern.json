@@ -1,0 +1,70 @@
+{
+	"card": "Soul-Guide Lantern",
+	"generated": "2026-10-10",
+	"source": "c15b013bdc48f967e1c147d295a871c4d80172c64176e31cbf945b1a08c84c52",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Soul-Guide Lantern",
+		"registers": [
+			{
+				"basis": "When this artifact enters, exile target card from a graveyard.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Exile each opponent's graveyard",
+				"basis": "{T}, Sacrifice this artifact: Exile each opponent's graveyard.",
+				"source": {
+					"card": "Soul-Guide Lantern",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Draw a card",
+				"basis": "{1}, {T}, Sacrifice this artifact: Draw a card.",
+				"source": {
+					"card": "Soul-Guide Lantern",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

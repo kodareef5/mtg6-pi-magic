@@ -1,0 +1,129 @@
+{
+	"card": "Moseo, Vein's New Dean",
+	"generated": "2026-10-10",
+	"source": "42fae4d939dab77cbf7a4e30f3ea12784438330d47ff1a4754c587c4d6308f68",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Moseo, Vein's New Dean",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When Moseo enters, create a 1/1 black and green Pest creature token with \"Whenever this token attacks, you gain 1 life.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Pest",
+								"types": [
+									"creature"
+								],
+								"subtypes": [
+									"Pest"
+								],
+								"colors": [
+									"B",
+									"G"
+								],
+								"power": 1,
+								"toughness": 1,
+								"registers": [
+									{
+										"basis": "When Moseo enters, create a 1/1 black and green Pest creature token with \"Whenever this token attacks, you gain 1 life.\"",
+										"kind": "watch",
+										"event": {
+											"on": "attacks",
+											"of": {
+												"is": "this"
+											}
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "life",
+													"who": "you",
+													"amount": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Infusion — At the beginning of your end step, if you gained life this turn, return up to one target creature card with mana value X or less from your graveyard to the battlefield, where X is the amount of life you gained this turn.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "life-gained",
+						"by": "you"
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": {
+										"history": "life-gained",
+										"by": "you"
+									}
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

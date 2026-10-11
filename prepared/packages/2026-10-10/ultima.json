@@ -1,0 +1,29 @@
+{
+	"card": "Ultima",
+	"generated": "2026-10-10",
+	"source": "184ecbc2dad3e57e796f5eb628be262519a3abbc1786ce18eaad62189c0e9b0b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ultima",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Ultima to destroy all artifacts and creatures, then end the turn.",
+				"basis": "Destroy all artifacts and creatures. End the turn. (Exile all spells and abilities from the stack, including this card. The player whose turn it is discards down to their maximum hand size. Damage wears off, and \"this turn\" and \"until end of turn\" effects end.)",
+				"source": {
+					"card": "Ultima",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

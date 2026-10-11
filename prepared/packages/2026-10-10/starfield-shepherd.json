@@ -1,0 +1,122 @@
+{
+	"card": "Starfield Shepherd",
+	"generated": "2026-10-10",
+	"source": "775fdb6a1fcdd3b85e637ab2ba4102b07e86167074b5bf3aef66bd49b1069a00",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Starfield Shepherd",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, search your library for a basic Plains card or a creature card with mana value 1 or less, reveal it, put it into your hand, then shuffle.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"supertypes": [
+									"basic"
+								],
+								"subtypes": [
+									"Plains"
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "plains"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 1
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"reveal": true,
+							"as": "creature",
+							"if": {
+								"not": {
+									"bound": "plains"
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:plains",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "plains"
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:creature",
+							"to": "hand",
+							"reason": "resolve",
+							"if": {
+								"bound": "creature"
+							}
+						},
+						{
+							"do": "shuffle",
+							"who": "you"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Starfield Shepherd for its warp cost, creating its delayed exile and later-turn casting permission.",
+				"basis": "Warp {1}{W} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+				"source": {
+					"card": "Starfield Shepherd",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

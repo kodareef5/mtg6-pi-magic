@@ -1,0 +1,29 @@
+{
+	"card": "Terminal Criticism",
+	"generated": "2026-10-10",
+	"source": "f4a9f896909e158cb75eb2a8430860fab2848dace82ea8e23763ddfc2e35377b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Terminal Criticism",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Terminal Criticism to destroy a blue or red creature or planeswalker and gain 1 life.",
+				"basis": "Destroy target creature or planeswalker that's blue or red. You gain 1 life.",
+				"source": {
+					"card": "Terminal Criticism",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

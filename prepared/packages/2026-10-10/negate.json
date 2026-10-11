@@ -1,0 +1,29 @@
+{
+	"card": "Negate",
+	"generated": "2026-10-10",
+	"source": "727a3599981b25aa9476ec132252e16474dae0c984a8411c20153d675cc2108a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Negate",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Negate to counter target noncreature spell.",
+				"basis": "Counter target noncreature spell.",
+				"source": {
+					"card": "Negate",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

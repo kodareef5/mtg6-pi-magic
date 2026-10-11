@@ -1,0 +1,43 @@
+{
+	"card": "Abrade",
+	"generated": "2026-10-10",
+	"source": "7ecc7205a6bb23f66ee917f672bd11085a8c36af9846650c72815608981321f0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abrade",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Abrade to deal 3 damage to target creature",
+				"basis": "Choose one —\n• Abrade deals 3 damage to target creature.\n• Destroy target artifact.",
+				"source": {
+					"card": "Abrade",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Abrade to destroy target artifact",
+				"basis": "Choose one —\n• Abrade deals 3 damage to target creature.\n• Destroy target artifact.",
+				"source": {
+					"card": "Abrade",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

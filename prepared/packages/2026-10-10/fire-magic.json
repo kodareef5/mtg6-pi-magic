@@ -1,0 +1,57 @@
+{
+	"card": "Fire Magic",
+	"generated": "2026-10-10",
+	"source": "e69ab04649c2c48d1103281fce48ad8db8a48e28e1e48a8f4283151646666256",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fire Magic",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Fire Magic choosing Fire, paying the required {0} additional cost, to deal 1 damage to each creature.",
+				"basis": "Tiered (Choose one additional cost.) ... • Fire — {0} — Fire Magic deals 1 damage to each creature.",
+				"source": {
+					"card": "Fire Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Fire Magic choosing Fira, paying the required {2} additional cost, to deal 2 damage to each creature.",
+				"basis": "Tiered (Choose one additional cost.) ... • Fira — {2} — Fire Magic deals 2 damage to each creature.",
+				"source": {
+					"card": "Fire Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			},
+			{
+				"claim": "Cast Fire Magic choosing Firaga, paying the required {5} additional cost, to deal 3 damage to each creature.",
+				"basis": "Tiered (Choose one additional cost.) ... • Firaga — {5} — Fire Magic deals 3 damage to each creature.",
+				"source": {
+					"card": "Fire Magic",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

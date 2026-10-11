@@ -1,0 +1,29 @@
+{
+	"card": "Disdainful Stroke",
+	"generated": "2026-10-10",
+	"source": "c0d37e3c910c895490a263e079724a9bf8292afae4f6ea4dcab821c8c4da6491",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Disdainful Stroke",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Disdainful Stroke to counter a spell with mana value 4 or greater.",
+				"basis": "Counter target spell with mana value 4 or greater.",
+				"source": {
+					"card": "Disdainful Stroke",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

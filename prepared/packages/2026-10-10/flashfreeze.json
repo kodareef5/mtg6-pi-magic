@@ -1,0 +1,29 @@
+{
+	"card": "Flashfreeze",
+	"generated": "2026-10-10",
+	"source": "b7d2b28d6a652f966c4b0a1146e3bfcea524c96be7bd2e74f9f9528a53bdd00e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flashfreeze",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Flashfreeze to counter target red or green spell.",
+				"basis": "Counter target red or green spell.",
+				"source": {
+					"card": "Flashfreeze",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
