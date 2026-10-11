@@ -48,7 +48,7 @@ test("turns taken count from who started, and the turn condition reads whose tur
 	const table = matchup("turns");
 	main(table, 0, 3);
 	const world = tableWorld(table);
-	assert.deepEqual(world.turn, { active: 0, taken: { 0: 2, 1: 1 }, began: table.cursor.began[0] });
+	assert.deepEqual(world.turn, { active: 0, taken: { 0: 2, 1: 1 }, began: table.cursor.began[0], step: "precombat-main", stepDone: true });
 	assert.equal(amount({ world, controller: 0 }, { turns: "self" }), 2);
 	assert.equal(amount({ world, controller: 1 }, { turns: "self" }), 1);
 	assert.equal(amount({ world, controller: 1 }, { turns: "opponent" }), 2);

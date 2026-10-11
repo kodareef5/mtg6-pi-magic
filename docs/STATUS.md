@@ -16,11 +16,11 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 17, covering five admitted decks; Boros Tokens and Izzet Aggro still need completed games |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Control versus Azorius continues through large payment menus; Boros Tokens stopped at its first runtime interpretation, which needs a return-to-hand sneak payment |
-| Recent shared mechanics | Entry copies preserve base characteristics and copied entry choices; token copies carry complete activations; counters can send spells directly to exile |
+| Current runtime work | Control versus Azorius continues through large payment menus; Boros Tokens resumed past its sneak interpretation blocker using the saved pregame |
+| Recent shared mechanics | Return-to-hand payments and unblocked-attacker selection; entry copies with copied entry choices; complete token activations and direct counter destinations |
 | Stored card assessments | 234 accepted, 73 refused, five basic lands; Izzet Aggro's Mockingbird entry copy is source-reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 273 invariant tests pass |
+| Validation | Type check and 274 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

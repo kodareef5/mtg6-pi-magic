@@ -15,6 +15,7 @@ import type { ObjectRef, SeatId, SeatView } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { casting, type Casting } from "./casting.ts";
 import { resolutionNumber } from "./resolution-counts.ts";
+import type { Step } from "./steps.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
 	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "copied" | "choices" | "registrations">> & { card?: string };
@@ -37,7 +38,7 @@ export type World = {
 	lastKnown(ref: ObjectRef): { object: Seen; traits?: Traits } | undefined;
 	casting?(ref: ObjectRef): Casting | undefined;
 	/** Whose turn it is and how many turns each seat has begun, the current one included. Absent before the first turn. */
-	turn?: { active: SeatId; taken: Record<SeatId, number>; began?: number };
+	turn?: { active: SeatId; taken: Record<SeatId, number>; began?: number; step?: Step; stepDone?: boolean };
 };
 
 /** Turns each seat has begun so far, from who started and the turn number: seats alternate from the first. */
@@ -73,7 +74,7 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 		objects: [...table.things.values()], read: reader, printed: table.printed,
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, name: one.name })),
 		notes: table.notes, combat: table.combat,
-		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn), began: table.cursor.began[table.cursor.active] } } : {}),
+		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn), began: table.cursor.began[table.cursor.active], step: table.cursor.steps[0], stepDone: table.cursor.stepDone } } : {}),
 		get history() { return (events ??= happened(table)); },
 		casting: (ref) => casting(table, ref),
 		lastKnown(ref) {
@@ -117,7 +118,7 @@ export function viewWorld(view: SeatView): World {
 		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
 		casting: (ref) => view.castings?.[targetKey(ref)],
 		...(view.window.kind === "turn" && view.starting !== undefined ? { turn: { active: view.window.active,
-			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn), began: view.turnBegan } } : {}),
+			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn), began: view.turnBegan, step: view.window.step, stepDone: view.stepDone } } : {}),
 	};
 }
 
@@ -252,6 +253,13 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	const combat = scope.world.combat;
 	if (selector.attacking !== undefined && selector.attacking !== !!combat?.attackers.some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
 	if (selector.blocking !== undefined && selector.blocking !== !!combat?.blockers.some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
+	if (selector.blocked !== undefined) {
+		const turn = scope.world.turn;
+		const declared = turn?.step === "declare-blockers" ? turn.stepDone : turn?.step === "combat-damage" || turn?.step === "end-of-combat";
+		if (!declared || object.zone !== "battlefield" || !traits.types.includes("creature") ||
+			!combat?.attackers.some(one => one.id === object.id && one.incarnation === object.incarnation) ||
+			selector.blocked !== combat.blocked.some(one => one.id === object.id && one.incarnation === object.incarnation)) return false;
+	}
 	if (selector.other && object.id === scope.source?.id) return false;
 	if (selector.is && !objects(scope, selector.is).some((one) => one.id === object.id && one.incarnation === object.incarnation)) return false;
 	if (selector.attachedTo && !objects(scope, selector.attachedTo).some((one) => object.attached?.id === one.id && object.attached.incarnation === one.incarnation)) return false;
@@ -318,6 +326,7 @@ function history(scope: Scope, value: Extract<Amount, { history: string }>): num
 }
 
 export function holds(scope: Scope, condition: Condition): boolean {
+	if ("step" in condition) return scope.world.turn?.step === condition.step;
 	if ("enteredThisTurn" in condition) {
 		const began = scope.world.turn?.began;
 		return began !== undefined && objects(scope, condition.enteredThisTurn).some((ref) => {

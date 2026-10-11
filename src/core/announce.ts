@@ -214,12 +214,15 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 			...(crew.reduce ? { reduce: Math.max(0, set.reduce((sum, one) => sum + (one.traits?.power ?? 0), 0)) } : {}),
 			shows: set.length ? `Tap ${set.map(name).join(", ")}. ` : "Tap no permanents. " })));
 	}
-	const sacrifice = cost.sacrifice;
-	if (sacrifice) {
-		const chosen = typeof sacrifice === "object" && "choose" in sacrifice ? sacrifice : undefined;
+	for (const kind of ["sacrifice", "return"] as const) {
+		const payment = cost[kind];
+		if (!payment) continue;
+		const chosen = typeof payment === "object" && "choose" in payment ? payment : undefined;
 		const pool = chosen ? query({ zones: ["battlefield"], controller: "self" }, frame).filter((one) => matches(scope, one, chosen.choose))
-			: objects(scope, sacrifice as Exclude<typeof sacrifice, { choose: unknown }>).filter((one) => one.zone === "battlefield" && one.controller === frame.seat);
-		add(subsets(pool, chosen?.count ?? 1).map((set) => ({ paid: { sacrificed: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Sacrifice ${set.map(name).join(", ")}. ` })));
+			: objects(scope, payment as Exclude<typeof payment, { choose: unknown }>).filter((one) => one.zone === "battlefield" && one.controller === frame.seat);
+		add(subsets(pool, chosen?.count ?? 1).map((set) => ({ paid: kind === "sacrifice" ? { sacrificed: set.map(ref) } : { returned: set.map(ref) },
+			uses: set.map((one) => one.id), consumes: set.map((one) => one.id),
+			shows: kind === "sacrifice" ? `Sacrifice ${set.map(name).join(", ")}. ` : `Return ${set.map(name).join(", ")} to ${set.length === 1 ? "its owner's hand" : "their owners' hands"}. ` })));
 	}
 	if (typeof cost.exile === "object" && "graveyard" in cost.exile) {
 		if (!enoughExile(scope, cost.exile)) return [];

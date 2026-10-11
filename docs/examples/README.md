@@ -23,6 +23,7 @@ schemas, and every `basis` is checked against the card's text.
 | `spell-costs.md` | standing generic reductions, first qualifying casts, original-zone filters and ordered payment forecasts |
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |
+| `return-payments.md` | return an unblocked attacker as a sneak payment, constrain the rules step, and keep token defender choices separate |
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
 | `reveal-hand.md` | publicly reveal a whole hand before its opponent chooses an eligible discard |
 | `loyalty.md` | abilities carried by tokens, signed loyalty payment, starting counters, Empower Jace's ordered creation and choice, and temporary loyalty timing |

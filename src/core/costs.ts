@@ -49,6 +49,7 @@ export function costChanges(cost: Omit<Paid, "generic" | "colors">, source: Obje
 		...(cost.tapped ?? []).map((ref) => ({ do: "tap" as const, what: ref.id })),
 		...(cost.shown ?? []).filter((ref) => ref.reveal).map((ref) => ({ do: "reveal" as const, what: ref.id })),
 		...(cost.sacrificed ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "sacrifice" as const })),
+		...(cost.returned ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "hand" as const, reason: "cost-payment" as const })),
 		...(cost.exiled ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "exile" as const, reason: "cost-payment" as const })),
 		...(cost.discarded ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "discard" as const })),
 		...(cost.life ? [{ do: "change-life" as const, who: controller, amount: -cost.life, reason: "cost-payment" as const }] : []),

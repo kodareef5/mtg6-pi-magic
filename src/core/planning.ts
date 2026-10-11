@@ -55,7 +55,7 @@ function spent(option: Option) {
 	const cost = use.cost;
 	return [...(use.timing === "spell" || use.timing === "land" || cost.tap || cost.counters && !cost.counters.on ? [use.source] : []), ...(cost.counters?.on ?? []), ...(cost.shown ?? []),
 		...(use.funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.sacrificed ?? []),
-		...(cost.exiled ?? []), ...(cost.discarded ?? [])];
+		...(cost.exiled ?? []), ...(cost.discarded ?? []), ...(cost.returned ?? [])];
 }
 
 /** A coarse payment index. Equal terms share a key regardless of object-key order;
@@ -65,7 +65,7 @@ function activationKey(use: Activation): string {
 	return JSON.stringify([targetKey(use.source), use.controller, use.timing, use.claim, use.x,
 		use.targets.map((set) => set.map(targetKey)), use.paid,
 		use.funding?.map((tap) => [targetKey(tap.source), tap.colors]), cost.generic, cost.colors,
-		[cost.tapped, cost.sacrificed, cost.exiled, cost.discarded, cost.shown, cost.counters?.on].map((refs) => refs?.map(targetKey))]);
+		[cost.tapped, cost.sacrificed, cost.exiled, cost.discarded, cost.shown, cost.counters?.on, cost.returned].map((refs) => refs?.map(targetKey))]);
 }
 
 function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[] } {

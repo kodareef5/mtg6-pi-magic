@@ -77,6 +77,8 @@ const SelectorFields = {
 	token: Type.Optional(Type.Boolean()),
 	attacking: Type.Optional(Type.Boolean()),
 	blocking: Type.Optional(Type.Boolean()),
+	/** Only attackers after blockers are declared: false means an unblocked attacker. */
+	blocked: Type.Optional(Type.Boolean()),
 	/** "Another": excludes the source. */
 	other: Type.Optional(Type.Literal(true)),
 	/** Exactly that object. */
@@ -140,6 +142,7 @@ export const Defs = {
 		object({ enteredThisTurn: ObjectRef }),
 		/** Whose turn it is: "if it's not your turn". */
 		object({ turn: one("self", "opponent") }),
+		object({ step: Step }),
 	]),
 
 	/** One target slot. An object, a player, or either ("any target" names both). */
@@ -163,6 +166,8 @@ export const Defs = {
 		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive),
 			upTo: Type.Optional(Type.Literal(true)), reduce: Type.Optional(Type.Literal("power")) })])),
 		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
+		/** Return controlled permanents to their owners' hands as payment. */
+		return: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
 		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) }),
 			/** Select any number of own graveyard cards meeting this total; do not enumerate their subsets. */
 			object({ graveyard: Type.Ref("Selector"), totalManaValue: positive })])),

@@ -113,6 +113,8 @@ export type SeatView = {
 	window: Window;
 	/** Current and remaining steps in this turn, including inserted or repeated steps. */
 	remainingSteps?: Step[];
+	/** Whether the current step's compulsory operation or declaration is complete. */
+	stepDone?: boolean;
 	/** Public facts, one line each, same order every time so two frames diff. */
 	table: string[];
 	/** What only this seat knows. */

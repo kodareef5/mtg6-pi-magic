@@ -198,7 +198,8 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		const named = (ref: { id: string; incarnation: number }) => { const object = view.objects?.find((candidate) => candidate.id === ref.id && candidate.incarnation === ref.incarnation); return `${object?.card ?? object?.token?.name ?? ref.id} (${ref.id}@${ref.incarnation})`; };
 		const cost = payment.cost, source = one.use ? data.uses[one.use]?.source : undefined;
 		const other = [...(cost.tap && source ? [`tap ${named(source)}`] : []), ...(cost.tapped ?? []).map((ref) => `tap ${named(ref)}`), ...(cost.sacrificed ?? []).map((ref) => `sacrifice ${named(ref)}`),
-			...(cost.exiled ?? []).map((ref) => `exile ${named(ref)}`), ...(cost.discarded ?? []).map((ref) => `discard ${named(ref)}`), ...(cost.life ? [`pay ${cost.life} life`] : []),
+			...(cost.exiled ?? []).map((ref) => `exile ${named(ref)}`), ...(cost.discarded ?? []).map((ref) => `discard ${named(ref)}`),
+			...(cost.returned ?? []).map((ref) => `return ${named(ref)} to its owner's hand`), ...(cost.life ? [`pay ${cost.life} life`] : []),
 			...(cost.counters ? [`remove ${cost.counters.count} ${cost.counters.kind} counters`] : [])];
 		return { ...one, label: `${one.label}; mana payment: ${mana.join("; ") || "none"}${other.length ? `; other costs: ${other.join("; ")}` : ""}` };
 	});

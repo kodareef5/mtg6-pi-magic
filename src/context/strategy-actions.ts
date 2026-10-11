@@ -154,7 +154,7 @@ export function planningChoices(frame: Frame) {
 		const use = uses.get(key) ?? { terms, bindings: new Map(), notes, payments: 0, minimum: Infinity, maximum: -Infinity };
 		use.bindings.set(JSON.stringify(targets), targets);
 		const spent = new Set([...(funding ?? []).map((tap) => tap.source.id), ...(terms.cost.tap ? [terms.source.id] : []),
-			...[...(terms.cost.tapped ?? []), ...(terms.cost.sacrificed ?? []), ...(terms.cost.exiled ?? [])].map((ref) => ref.id)]);
+			...[...(terms.cost.tapped ?? []), ...(terms.cost.sacrificed ?? []), ...(terms.cost.exiled ?? []), ...(terms.cost.returned ?? [])].map((ref) => ref.id)]);
 		const left = manaSources.filter(({ object }) => !spent.has(object.id)).length;
 		use.minimum = Math.min(use.minimum, left); use.maximum = Math.max(use.maximum, left);
 		use.payments += 1;

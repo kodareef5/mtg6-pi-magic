@@ -88,6 +88,7 @@ watched. Each field narrows, and a list matches any of its members.
 | `hasAdventure` | whether the visible object has Adventure characteristics, including when its normal face is active (715.2a) |
 | `subtypes.chosen` | read the source's named entry choice; a missing choice matches nothing; mana freezes it when produced |
 | `tapped`, `token`, `attacking`, `blocking` | |
+| `blocked` | true selects blocked attackers; false selects unblocked attackers, after the blocker declaration; a departed blocker does not change that status |
 | `other` | "another": not the source |
 | `is`, `not.is` | include or exclude the objects a ref names, including a bound set |
 | `attachedTo` | "Equipment attached to that creature" |
@@ -118,6 +119,9 @@ to two targets happens in one committed group. Separate slots can name the same
 object when the card has separate occurrences of "target" (115.3).
 
 ## Numbers and conditions
+
+The condition `{ "step": "declare-blockers" }` reads the current rules step.
+Combine it with `{ "turn": "self" }` for a restriction to your own step.
 
 An **amount** is worked out when it is read and never stored.
 
@@ -261,7 +265,7 @@ A **procedure** is one announced action, the unit a plan prepares.
 | `basis` | the card text it carries out, quoted |
 | `timing` | `spell`, `land`, `stack` (an activated ability) or `mana` |
 | `speed` | an activation's "only as a sorcery", or `instant` on a spell to claim its flash |
-| `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `exile`, `life`, `discard`, `counters`, signed `loyalty`, `show`, and a computed `reduce` |
+| `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `return` to owners' hands, `exile`, `life`, `discard`, `counters`, signed `loyalty`, `show`, and a computed `reduce` |
 | `if`, `limit` | when the seat may announce it, and "once each turn" |
 | `targets` | its target slots |
 | `instructions` | what happens when it resolves |
