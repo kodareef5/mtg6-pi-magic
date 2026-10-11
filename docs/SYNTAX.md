@@ -170,11 +170,12 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
-| `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone; another hand needs an earlier explicit look, and a library selection declares a search |
+| `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone; another hand needs an earlier explicit look, and a library search must name its owner or controller, or a bound inspected subset |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
 | `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
 | `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |
+| `perform` | `who` accepts an ordered `instructions` group in the current resolution; `may` offers declining the whole group; `as` binds acceptance independently of any cards selected inside |
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
@@ -194,6 +195,9 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `each` | repeat for each player, with `bound:player` |
 
 Searching a library is `choose` from the library, then `move`, then `shuffle`.
+Name the library's owner or controller explicitly. Put an optional search's
+whole sequence inside `perform` with `may`, so accepting and finding nothing
+still shuffles but declining does not. See [optional search](examples/optional-search.md).
 Beholding is `choose` from the battlefield or hand with `reveal`. There is no
 search or behold instruction, because hands do neither: they look, pick, move.
 

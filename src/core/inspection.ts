@@ -8,13 +8,18 @@ import type { ObjectRef } from "./types.ts";
 import { project } from "./view.ts";
 
 /** A selector's identity predicates cannot establish permission to read hidden cards.
- * Library selection is the existing declared search operation. Other private
+ * Library selection declares a search of an explicitly scoped library. Other private
  * selections require an earlier look, even when their hidden cards would not match. */
 export function selectionBlock(table: Table, scope: Scope, from: Selector, who: number): string | undefined {
 	const visible = new Set((project(table, who).objects ?? []).filter((one) => !one.faceDown).map((one) => `${one.id}@${one.incarnation}`));
 	const extent = (selector: Selector): Selector => ({ zones: selector.zones, controller: selector.controller, owner: selector.owner, is: selector.is,
 		...(selector.any ? { any: selector.any.map(extent) } : {}), ...(selector.all ? { all: selector.all.map(extent) } : {}) });
 	const range = extent(from);
+	const scoped = (selector: Selector): boolean => !!(selector.owner || selector.controller || selector.is ||
+		selector.all?.some(scoped) || selector.any?.length && selector.any.every(scoped));
+	if (!scoped(from) && scope.world.objects.some((one) => one.zone === "library" &&
+		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined)))
+		return "Selection reaches unseen cards without naming whose library to search or an inspected binding. State owner, controller or is explicitly; no card identities were shown.";
 	return scope.world.objects.some((one) => (one.zone !== "library" || one.faceDown) && !visible.has(`${one.id}@${one.incarnation}`) &&
 		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined))
 		? "Selection reaches unseen cards. Look at the other hand or hidden cards explicitly before selecting them; no card identities were shown." : undefined;

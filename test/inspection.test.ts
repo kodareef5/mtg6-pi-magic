@@ -87,7 +87,8 @@ test("private inspection exposes only its bounded window and orders it without c
 });
 
 test("private selection cannot expose another hand through a malformed selector or an unearned library order", async () => {
-	for (const from of [{ zones: ["hand"] }, { zones: ["hand"], types: ["creature"] }, { zones: ["hand"], name: "Forest" }]) {
+	for (const from of [{ zones: ["hand"] }, { zones: ["hand"], types: ["creature"] }, { zones: ["hand"], name: "Forest" },
+		{ zones: ["library"] }, { zones: ["library"], any: [{ owner: "you" }, { types: ["land"] }] }]) {
 		const table = start(standard, [{ deck: deck("Izzet Spellementals") }, { deck: deck("4c Control") }], "unseen-choice");
 		main(table, 0); place(table, 0, "hand", "Winternight Stories");
 		commit(table, [{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");

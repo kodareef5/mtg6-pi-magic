@@ -15,6 +15,7 @@ import { paymentChoices } from "./costs.ts";
 import { manaTerms } from "./funding.ts";
 import { inspection, selectionBlock } from "./inspection.ts";
 import { project } from "./view.ts";
+import { summary } from "./announce.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
@@ -276,6 +277,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const payer = players(scope, unless.who)[0] ?? controller;
 			const pay = paymentChoices(table, scope, unless.pays, payer, pending.object);
 			return { actor: payer, question: `${claim}: pay, or apply the counter instruction.`, choices: [...respect, ...pay, { id: "decline", label: `Do not pay; it is countered${warning}`, changes: counter }] };
+		}
+		case "perform": {
+			const actor = players(scope, instruction.who)[0] ?? controller, player = pending.program[0]?.player;
+			const label = `Carry out: ${instruction.instructions.map(summary).join(" ")}`;
+			return { actor, question: label, choices: [{ id: "do", label, changes: [],
+				expand: instruction.instructions.map((inner) => ({ instruction: inner, ...(player !== undefined ? { player } : {}) })),
+				...bind(instruction, { objects: [], players: [], amount: 1 }) }] };
 		}
 		case "each": {
 			const who = instruction.players === "each-player" ? scope.world.players.map((one) => one.id) : players(scope, "opponent");

@@ -274,6 +274,8 @@ export const Defs = {
 		step({ do: Type.Literal("reflect"), check: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect") }),
 		step({ do: Type.Literal("attach"), what: ObjectRef, to: ObjectRef }),
 		step({ do: Type.Literal("counter"), what: ObjectRef, unless: Type.Optional(object({ who: PlayerRef, pays: Type.Ref("Cost") })) }),
+		/** One player accepts or declines an optional ordered group; each inner instruction keeps its own actor. */
+		step({ do: Type.Literal("perform"), who: PlayerRef, instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) }),
 		step({ do: Type.Literal("each"), players: one("each-player", "opponent"), instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) }),
 	]),
 
