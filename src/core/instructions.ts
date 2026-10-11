@@ -192,8 +192,11 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "permit": {
 			const cards = live(table, objects(scope, instruction.what)), who = players(scope, instruction.who)[0] ?? controller;
 			const fromTurn = table.cursor.turn + (instruction.from === "next-turn" ? 1 : 0);
-			return one(`${seat(table, who).name} may play ${cards.map(name).join(", ") || "nothing"}`, cards.map((object): Change => ({ do: "note", note: {
-				kind: "permit", by: controller, until: instruction.until as Until, on: ref(object), who, fromTurn } })));
+			const until: Until = typeof instruction.until === "string" ? instruction.until as Until : {
+				endOfNextTurn: players(scope, instruction.until.endOfNextTurn)[0] ?? controller, afterTurn: table.cursor.turn };
+			return one(`${seat(table, who).name} may ${instruction.mana ? `cast for ${instruction.mana}` : "play"} ${cards.map(name).join(", ") || "nothing"}`, cards.map((object): Change => ({ do: "note", note: {
+				kind: "permit", by: controller, until, on: ref(object), who, fromTurn, ...(instruction.mana ? { mana: instruction.mana } : {}),
+				...(source && until === "while-source" ? { source } : {}) } })));
 		}
 		case "register": {
 			const on = live(table, objects(scope, instruction.on));

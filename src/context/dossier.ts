@@ -152,8 +152,9 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 	const list = (zone: "graveyard" | "exile", seat: SeatId) => {
 		const here = (frame.view.objects ?? []).filter((one) => one.zone === zone && one.owner === seat);
 		return here.length ? here.map((one) => {
-			const permit = permits.find((note) => note.kind === "permit" && note.on.id === one.id && note.on.incarnation === one.incarnation);
-			return `${named(one)} (${ref(one)})${permit && permit.kind === "permit" ? `, ${permit.who === frame.seat ? "you" : name(permit.who)} may cast or play it from turn ${permit.fromTurn} at its normal timing` : lands.has(ref(one)) ? ", you may play it as your land" : ""}`;
+			const granted = permits.flatMap((note) => note.kind === "permit" && note.on.id === one.id && note.on.incarnation === one.incarnation ? [
+				`${note.who === frame.seat ? "you" : name(note.who)} may ${note.mana ? `cast it for ${note.mana} instead of its mana cost` : "cast or play it"} from turn ${note.fromTurn} at its normal timing; ${typeof note.until === "object" ? `until the end of ${name(note.until.endOfNextTurn)}'s next turn after turn ${note.until.afterTurn}` : `duration ${note.until}`}`] : []);
+			return `${named(one)} (${ref(one)})${granted.length ? `, ${granted.join("; ")}` : lands.has(ref(one)) ? ", you may play it as your land" : ""}`;
 		}).join("; ") : "empty";
 	};
 	return ["## Graveyards and exile", ...seats.flatMap((seat) => [`- ${seat === frame.seat ? "Your" : `${name(seat)}'s`} graveyard: ${list("graveyard", seat)}.`,

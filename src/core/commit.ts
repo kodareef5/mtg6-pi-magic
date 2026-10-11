@@ -558,7 +558,8 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 			// before checking for state-based actions or waiting triggers.
 			if (cursor.steps[0] === "cleanup" && cursor.stepDone) {
 				for (const thing of table.things.values()) { thing.damage = 0; delete thing.deathtouched; }
-				table.notes = table.notes.filter((note) => note.until !== "end-of-turn");
+				table.notes = table.notes.filter((note) => note.until !== "end-of-turn" && !(typeof note.until === "object" &&
+					note.until.endOfNextTurn === cursor.active && cursor.turn > note.until.afterTurn));
 			}
 			return;
 		case "priority":

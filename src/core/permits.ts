@@ -8,6 +8,21 @@ import { matches, type Seen, type World } from "./selectors.ts";
 import type { Registration, Selector } from "./language.ts";
 import type { SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
+import type { Note } from "./table.ts";
+
+/** Only the named incarnation and allowed face receive a permission. */
+export const permissions = (world: World, seat: SeatId, object: Seen, turn: number, face?: number) =>
+	world.notes.filter((note): note is Extract<Note, { kind: "permit" }> => note.kind === "permit" && note.who === seat && note.fromTurn <= turn &&
+		note.on.id === object.id && note.on.incarnation === object.incarnation && (!note.faces || note.faces.some((allowed) => allowed === (face ?? 0))));
+
+/** A normal route and each distinct granted alternative price. Two alternative costs cannot combine. */
+export function castingPrices(world: World, seat: SeatId, object: Seen, turn: number, face?: number, alternative = false): { mana?: string; permission?: string }[] {
+	const permitted = permissions(world, seat, object, turn, face);
+	const normal = object.zone === "hand" && object.owner === seat || !!object.copy && playable(world, seat, object, turn, false, face) || permitted.some((note) => note.mana === undefined);
+	const prices: { mana?: string; permission?: string }[] = normal ? [{}] : [];
+	if (!alternative) for (const note of permitted) if (note.mana !== undefined && !prices.some((price) => price.mana === note.mana)) prices.push({ mana: note.mana, permission: note.id });
+	return prices;
+}
 
 /** What this seat's permanents permit it. Additional assumed registrations
  * support labelled forecasts, without adding an object or resolving a spell. */
@@ -35,8 +50,7 @@ export function playable(world: World, seat: SeatId, object: Seen, turn: number,
 	}
 	if (object.zone === "hand") return object.owner === seat;
 	if (land && object.owner === seat && allowance(world, seat).landsFrom.includes(object.zone)) return true;
-	return world.notes.some((note) => note.kind === "permit" && note.who === seat && note.fromTurn <= turn &&
-		note.on.id === object.id && note.on.incarnation === object.incarnation && (!note.faces || note.faces.some((allowed) => allowed === (face ?? 0))));
+	return permissions(world, seat, object, turn, face).some((note) => !land || note.mana === undefined);
 }
 
 /** A spell this seat may cast as though it had flash, read as it will be on the stack, where a flash selector looks unless it says otherwise. */

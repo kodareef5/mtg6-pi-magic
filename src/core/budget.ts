@@ -26,7 +26,7 @@
 import { symbols } from "./announce.ts";
 import { fundings, sick, sources, type Funding, type Price } from "./funding.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
-import { allowance, playable } from "./permits.ts";
+import { allowance, castingPrices, playable } from "./permits.ts";
 import { reached, select } from "./query.ts";
 import { holds as condition, matches, viewWorld } from "./selectors.ts";
 import { intrinsic, printedTraits } from "./characteristics.ts";
@@ -37,6 +37,14 @@ import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
+
+/** A unique current price can be forecast. Multiple prices need an exact offered pick. */
+function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: string): string | undefined {
+	const printed = faceFacts(frame.view.printed?.[source.card ?? ""], face)?.mana;
+	const turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
+	const prices = castingPrices(viewWorld(frame.view), frame.seat, source, turn, face, stated !== undefined && stated !== printed);
+	return prices.length === 1 ? prices[0]!.mana ?? stated ?? printed : undefined;
+}
 
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
 export function afterUntap(frame: Frame): Frame {
@@ -50,10 +58,10 @@ export function afterUntap(frame: Frame): Frame {
 export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObject) {
 	const cost = procedure.cost;
 	const selected = faceFacts(frame.view.printed?.[source.card ?? ""], procedure.face);
-	const printed = cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : "{0}");
+	const printed = procedure.timing === "spell" ? castMana(frame, source, procedure.face, cost?.mana) : cost?.mana ?? "{0}";
 	const mana = printed === undefined ? undefined : symbols(printed);
 	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap"].includes(key)) || typeof cost?.tap === "object")
-		return { scope: "Not priced: variable mana or additional costs require the offered payment." };
+		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, zone: "stack" as const, ...(selected ? { traits: printedTraits(selected, source.card!) } : {}) } : source;
 	const possible = (position: Frame) => fundings(position, mana, reserved, spending).length > 0;
@@ -169,7 +177,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			if (source && selected && procedure.timing === "spell") source = { ...source, face: procedure.face ?? 0, traits: printedTraits(selected, source.card!) };
 			const named = procedure.source.card;
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
-			const stated = procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : "{0}");
+			const stated = procedure.timing === "spell" ? source ? castMana(hypothetical, source, procedure.face, procedure.cost?.mana) : procedure.cost?.mana ?? selected?.mana : procedure.cost?.mana ?? "{0}";
 			const mana = stated ? symbols(stated) : undefined;
 			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap"].includes(key));
@@ -203,7 +211,8 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				...(timing === "spell" && permanentSpell(printed) && !offered.use.instructions.length ? { enters: true } : {}),
 				fixed: { paid: offered.use.paid, taps: offered.use.funding ?? [] } };
 		}
-		const mana = source?.card ? symbols(frame.view.printed?.[source.card]?.mana ?? "") : undefined;
+		const stated = source?.card ? castMana(hypothetical, source) : undefined;
+		const mana = stated === undefined ? undefined : symbols(stated);
 		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x ? { price: { generic: mana.generic, colors: mana.colors } } : { unknown: true as const }),
 			...(source?.card && permanentSpell(frame.view.printed?.[source.card]) ? { enters: true } : {}) };
 	};

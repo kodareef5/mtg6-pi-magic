@@ -154,7 +154,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, words, registrations |
 | `modify` | change characteristics `until` a duration, written as a public label |
-| `permit` | a player may play a card, `from` now or next turn, `until` a duration |
+| `permit` | a player may play a card, `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only |
 | `register` | add a registration to an object |
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
 | `reflect` | "when you do": a reflexive trigger with its intervening `check` (603.12) |
@@ -176,6 +176,17 @@ time.
 
 Durations are `end-of-turn`, `end-of-combat`, `while-source` (as long as the
 source stays), and `indefinite` (until the affected object leaves).
+Permissions also accept `until: {endOfNextTurn: "you"}` (or another player
+reference). This expires during cleanup of that player's next turn after the
+permission was made. `from: "next-turn"` instead means after the current table
+turn, as warp requires. See [casting permissions](examples/casting-permissions.md).
+
+A permission's `mana` replaces the mana cost, never timing or nonmana additional
+costs. It gives no land play or printed-price cast. Other permissions keep
+their own choices. A separately priced procedure, such as warp, cannot combine
+its price with a permission's price. Mana costs that already combine kicker
+with a base price need a separate cost representation before combining with
+this permission. `owner:bound:name` reads the owner of an earlier bound object.
 
 ## Announcing
 

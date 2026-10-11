@@ -99,6 +99,8 @@ export type Mana = {
 
 /** One accepted announcement, frozen at execution so replay never infers its meaning again. */
 export type Activation = {
+	/** The permission whose alternative price was chosen, frozen with the announcement. */
+	permission?: string;
 	face?: 0 | 1;
 	/** Source's last transformation when this ability went on the stack, or its delay was created. */
 	transformAt?: number;
@@ -215,7 +217,7 @@ export type Note = {
 	id: string;
 	/** Who wrote it. */
 	by: SeatId;
-	until: "end-of-turn" | "end-of-combat" | "while-source" | "indefinite";
+	until: "end-of-turn" | "end-of-combat" | "while-source" | "indefinite" | { endOfNextTurn: SeatId; afterTurn: number };
 	/** For `while-source`, and the exiling object of a link. */
 	source?: ObjectRef;
 	/** Rises with the clock, because "which of these two is newer" must have an answer (613.7). */
@@ -225,7 +227,7 @@ export type Note = {
 	| { kind: "register"; on: ObjectRef; registration: Registration }
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
 	/** "You may play that card": from a turn, while that card stays where it is. */
-	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[] }
+	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string }
 	/**
 	 * A delayed trigger (603.7). It belongs to the table, not its source, and its
 	 * refs other than the event's were fixed when it was created.

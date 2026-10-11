@@ -14,7 +14,7 @@ import { beforeEntry } from "./entry-payments.ts";
 import { covers, paying, produces } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, holds, matches, players, tableWorld, type Scope } from "./selectors.ts";
-import { allowance, flashed, playable } from "./permits.ts";
+import { allowance, castingPrices, flashed, playable } from "./permits.ts";
 import { cardsIn, seat, type Activation, type LedgerRow, type Mana, type Table } from "./table.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { Change } from "./syntax.ts";
@@ -102,6 +102,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
 	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
+	if (activation.timing === "spell" && !castingPrices(world, controller, object, table.cursor.turn, activation.face)
+		.some((price) => price.permission === activation.permission)) throw new Error("The selected casting permission is no longer available.");
 	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;

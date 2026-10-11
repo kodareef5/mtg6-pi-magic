@@ -44,7 +44,7 @@ export const ObjectRef = Type.Union([
 	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
 	object({ top: positive, of: Type.String({ pattern: "^(you|self|opponent|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
 ]);
-export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source)|owner:(this|attached|target:[0-9]+|event:object))$" });
+export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source|bound:[a-z][a-z0-9-]*)|owner:(this|attached|target:[0-9]+|event:object|bound:[a-z][a-z0-9-]*))$" });
 const Side = Type.Union([PlayerRef, Type.Literal("any")]);
 const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.Optional(Type.Ref("Amount")) });
 
@@ -217,7 +217,10 @@ export const Defs = {
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
 		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */
-		step({ do: Type.Literal("permit"), what: ObjectRef, who: PlayerRef, from: Type.Optional(one("now", "next-turn")), until: Duration }),
+		step({ do: Type.Literal("permit"), what: ObjectRef, who: PlayerRef, from: Type.Optional(one("now", "next-turn")),
+			until: Type.Union([Duration, object({ endOfNextTurn: PlayerRef })]),
+			/** An alternative price grants casting only, not a land play or the printed price. */
+			mana: Type.Optional(ManaCost) }),
 		step({ do: Type.Literal("register"), on: ObjectRef, registration: Type.Ref("Registration") }),
 		/** A delayed trigger (603.7). It fires once unless `until` gives it a span. */
 		step({ do: Type.Literal("delay"), event: Type.Ref("Event"), effect: Type.Ref("Effect"), until: Type.Optional(Duration) }),
