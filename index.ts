@@ -193,7 +193,7 @@ export default function (pi: ExtensionAPI) {
 		}).catch((error) => {
 			const result = preparationFailure(opened, error, began, { journal: journal.path });
 			const path = join(GAMES, `${header.id}-${began}.result.json`);
-			const paths = saveReport(path, result);
+			const paths = saveReport(path, result, opened);
 			ctx.ui.notify([...report(result), ...paths].join("\n"), "warning");
 			throw error;
 		});
@@ -332,7 +332,7 @@ export default function (pi: ExtensionAPI) {
 				); } catch (error) { failure = error; } finally { running = false; }
 				const result = gameResult(opened, seated!, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
 				const resultPath = join(GAMES, `${playSeed}-${seated!.timing.startedAt}.result.json`);
-				const paths = saveReport(resultPath, result);
+				const paths = saveReport(resultPath, result, opened);
 				ctx.ui.notify(
 					`${verb === "resume" ? "Resumed" : "Seed"} ${playSeed}.\n` +
 						[...report(result), ...paths].join("\n"),

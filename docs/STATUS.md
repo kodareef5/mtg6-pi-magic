@@ -16,17 +16,20 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 7, covering all three admitted lists |
 | Imported lists facing each other | Selesnya beat Control; both Izzet versus Control seat orders reached a recorded blocker |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime blocker | Impractical Joke's prevention prohibition is implemented; both saved Izzet versus Control games are ready to continue |
+| Current runtime blocker | Impractical Joke's prevention prohibition is implemented; both saved Izzet versus Control games have continued past it |
 | Recent shared mechanics | Adventure counts, chosen creature types, spent-mana spell properties, exile-until returns, collected-evidence payment and private inspection |
 | Stored card assessments | 229 accepted, 78 refused, five basic lands; these totals include deferred sideboard work |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 247 invariant tests pass |
+| Validation | Type check and 248 invariant tests pass |
 | Rejected evidence | Public inspection substitutes, reordered printed instructions and incorrect library incarnation changes remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
 
 Standing coverage admits setup; it does not prove that every deferred use or
 interaction works. A new runtime interpretation must fit its source, and a
 finished game must pass source review as well as gap, replay and clone checks.
+Each report writes a private `.source-review.md` with changed meanings, unused
+preparation and announced programs beside pinned card text. It assists this
+review without certifying play.
 The [refusal ledger](../prepared/packages/2026-10-10/ledger.json) names remaining
 standing blockers. Sideboard-only refusals do not delay this alpha.
 

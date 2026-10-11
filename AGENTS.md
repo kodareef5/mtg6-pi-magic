@@ -533,6 +533,7 @@ tools/benchmark.ts     saved-position probes: offline checks, live arms, continu
 tools/pregame.ts, tools/ability-fixture.ts  a pregame alone; a frozen ability position
 tools/stats.ts, tools/timeline.ts  read a saved result; render its timeline
 tools/game-report.ts   compact reports and saved results for each run
+tools/source-review.ts, tools/review-game.ts  private card-meaning evidence beside pinned sources
 tools/game-timeline.ts offline timeline rendering; HTML and script beside it
 cards/unsupported.txt  legal cards the engine cannot play; a deck with one is refused
 docs/SYNTAX.md         the syntax, the table's line, and execution semantics

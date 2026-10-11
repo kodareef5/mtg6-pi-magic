@@ -50,7 +50,8 @@ Or install the package with `pi install npm:pi-magic`. It needs Pi 1.0 or newer.
 ## Game reports and timelines
 
 `matchup`, `smoke` and `/magic play` save a `.result.json` and an interactive
-`.timeline.html` beside the journal. Resuming a game writes a new report for that
+`.timeline.html` beside the journal. A private `.source-review.md` lists new
+card meanings and announced programs beside their pinned source text. Resuming a game writes a new report for that
 run. The console prints their paths. Preparation failures also keep their bill.
 
 The report groups calls by role, actual provider/model and thinking level. It
@@ -72,7 +73,13 @@ npm run stats -- path/to/game.result.json
 npm run stats -- --details path/to/game.result.json
 npm run stats -- --json path/to/game.result.json
 npm run timeline -- path/to/game.result.json
+node tools/review-game.ts path/to/game.jsonl
 ```
+
+The source review retains changed and unused preparations, including corrected
+versions, from the whole retained game. It may name cards that never became
+public. Review printed order, targets, costs and instruction meanings there; an
+announcement alone does not prove that its instructions resolved.
 
 Open the HTML in a browser. Scroll to zoom, drag to pan, choose a turn, or click
 a bar for its call details. Separate rows show concurrent requests within one

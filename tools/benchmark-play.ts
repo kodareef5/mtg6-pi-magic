@@ -71,7 +71,7 @@ export async function playProposal(input: { journal: string; version: number; se
 	seated.timing.finishedAt = Date.now();
 	const result = gameResult(table, seated, { replayMatches: isDeepStrictEqual(same(compared), same(rebuilt)), journal: path, trace,
 		...(failure ? { error: String(failure) } : {}) });
-	const paths = saveReport(join(options.out, "game.result.json"), result);
+	const paths = saveReport(join(options.out, "game.result.json"), result, table);
 	// Read the journal so a replacement later rolled back still counts as work
 	// done after the initial plan. A later win may have required that repair.
 	const replacementPlans = read(path).lines.slice(beganLines).flatMap((line) => "work" in line && line.work.seat === input.seat && line.work.tools?.some((tool) => tool.do === "plan.put")

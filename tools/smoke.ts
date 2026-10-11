@@ -145,7 +145,7 @@ const seated = await seatTable(
 	},
 ).catch((error) => {
 	const result = preparationFailure(table, error, began, { journal: journal.path, trace: tracePath });
-	const paths = saveReport(resultPath, result);
+	const paths = saveReport(resultPath, result, table);
 	console.error([...report(result), ...paths].join("\n"));
 	process.exit(1);
 });
@@ -162,7 +162,7 @@ const outcome = await run(
 ).catch((error) => { failure = error; return null; });
 
 const result = gameResult(table, seated, { journal: journal.path, trace: tracePath, ...(failure ? { error: String(failure) } : {}) });
-const paths = saveReport(resultPath, result);
+const paths = saveReport(resultPath, result, table);
 console.log(`\n${report(result).join("\n")}`);
 console.log(paths.join("\n"));
 console.log(`journal   ${journal.path}`);

@@ -7,6 +7,7 @@ import type { Seated } from "../src/context/sit.ts";
 import type { Spend, RunTiming } from "../src/context/spend.ts";
 import { bill, duration, usageReport } from "../src/context/metrics.ts";
 import { timeline } from "./game-timeline.ts";
+import { saveSourceReview } from "./source-review.ts";
 
 export type GameResult = {
 	/** Absent on older matchup results, which remain readable. */
@@ -17,6 +18,7 @@ export type GameResult = {
 	seats?: { id: number; name: string }[];
 	timing?: RunTiming; fromVersion?: number; version?: number;
 	replayMatches?: boolean; journal?: string; trace?: string; error?: string;
+	sourceReview?: string;
 	reasons?: Record<string, number>;
 	interruptions?: { stops: number; essential: number; help: number; rulings: number; unruled?: number; upheld: number };
 	judged?: { cases: number; failed: number };
@@ -26,12 +28,14 @@ export type GameResult = {
 };
 
 /** Keep the compact report's measurements and its interactive view beside the journal. */
-export function saveReport(path: string, result: GameResult): string[] {
-	writeFileSync(path, JSON.stringify(result, null, 2) + "\n");
-	if (!result.calls.some((call) => call.at !== undefined)) return [`result    ${path}`];
+export function saveReport(path: string, result: GameResult, table?: Table): string[] {
+	const review = table && saveSourceReview(path.replace(/(?:\.result)?\.json$/, "") + ".source-review.md", table, result.fromVersion);
+	writeFileSync(path, JSON.stringify({ ...result, ...(review ? { sourceReview: review } : {}) }, null, 2) + "\n");
+	const paths = [`result    ${path}`, ...(review ? [`review    ${review} (private)`] : [])];
+	if (!result.calls.some((call) => call.at !== undefined)) return paths;
 	const html = path.replace(/(?:\.result)?\.json$/, "") + ".timeline.html";
 	writeFileSync(html, timeline(result));
-	return [`result    ${path}`, `timeline  ${html}`];
+	return [...paths, `timeline  ${html}`];
 }
 
 /** Calls and timings belong to this run. Decisions and rulings describe the retained game prefix. */

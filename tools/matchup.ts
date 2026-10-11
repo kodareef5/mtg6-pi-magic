@@ -70,7 +70,7 @@ const began = Date.now();
 console.log(`${values.prepare ? "Preparing" : "Playing"} ${id}; journal ${path}`);
 const seated = await seatTable(table, async (seat) => partsFor(seat), observed, universe, { format: "standard", reusePackages: !carried, journal, rules: loadRules(matchup.rules.path), ...(carried ? { prepared: carried.prepared } : {}) }).catch((error) => {
 	const result = preparationFailure(table, error, began, { journal: path, trace: calls });
-	const paths = saveReport(join(values.out!, `${id}.result.json`), result);
+	const paths = saveReport(join(values.out!, `${id}.result.json`), result, table);
 	console.error([...report(result), ...paths].join("\n"));
 	process.exit(1);
 });
@@ -98,6 +98,6 @@ const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log:
 const replayMatches = state(replay(path, dealtTable).table) === state(table);
 seated.timing.finishedAt = Date.now();
 const result = gameResult(table, seated, { replayMatches, journal: path, trace: calls, ...(failure ? { error: String(failure) } : {}) });
-const paths = saveReport(join(values.out!, `${id}.result.json`), result);
+const paths = saveReport(join(values.out!, `${id}.result.json`), result, table);
 console.log([...report(result), ...paths].join("\n"));
 process.exit(result.replayMatches && !table.gaps.length && !failure ? 0 : 1);
