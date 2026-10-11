@@ -146,6 +146,8 @@ export const Defs = {
 		player: Type.Optional(Side),
 		/** Default 1. */
 		count: Type.Optional(positive),
+		/** A positive minimum below count, such as one or two targets. Omit with upTo. */
+		atLeast: Type.Optional(positive),
 		/** "Up to": zero is legal (115.6). */
 		upTo: Type.Optional(Type.Literal(true)),
 	}),

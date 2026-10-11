@@ -110,7 +110,12 @@ queries, not hybrid payment or a general copy operation.
 **Targets** are slots announced with the action (601.2c). A slot takes an
 `object` selector, a `player` side, or both. "Any target" is both:
 `{object: {types: ["creature", "planeswalker", "battle"]}, player: "any"}`.
-`count` defaults to one and `upTo` allows zero (115.6).
+`count` defaults to one and `upTo` allows zero (115.6). `count: 2, atLeast: 1`
+means one or two distinct targets in one slot. A positive `atLeast` cannot
+exceed `count` or combine with `upTo`. `target:0` names every member of slot
+zero. Apply a single printed instruction to that whole slot: damage or movement
+to two targets happens in one committed group. Separate slots can name the same
+object when the card has separate occurrences of "target" (115.3).
 
 ## Numbers and conditions
 

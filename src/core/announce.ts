@@ -165,7 +165,7 @@ function candidates(slot: Target, scope: Scope): Chosen[] {
 
 /** Every way to fill the slots, each chosen with the earlier slots in scope: "Equipment attached to that creature". */
 export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots.reduce<Chosen[][][]>((sets, slot) => sets.flatMap((set) =>
-	subsets(candidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.upTo ? 0 : slot.count ?? 1).map((option) => [...set, option])), [[]]);
+	subsets(candidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1)).map((option) => [...set, option])), [[]]);
 
 /** The extra costs a procedure states, as each way they can be paid. */
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; exileSelection?: Activation["exileSelection"] };

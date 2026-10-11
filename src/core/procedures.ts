@@ -10,7 +10,7 @@ import { checkExile, enoughExile } from "./cost-selection.ts";
 import { isDeepStrictEqual } from "node:util";
 import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
-import { check, ProcedureSchema, type Instruction, type Procedure, type Selector } from "./language.ts";
+import { check, ProcedureSchema, type Instruction, type Procedure, type Selector, type Target } from "./language.ts";
 import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
@@ -65,6 +65,10 @@ export function checkProcedure(value: unknown): Procedure {
 		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
 		else if (value && typeof value === "object") {
 			for (const [key, one] of Object.entries(value)) {
+				if (key === "targets" && Array.isArray(one)) for (const slot of one as Target[]) {
+					if (slot.atLeast !== undefined && (slot.upTo || slot.atLeast > (slot.count ?? 1)))
+						throw new Error("A target minimum cannot exceed its count or combine with upTo.");
+				}
 				if (key === "registers" || key === "registration") refs(one, 0, new Set());
 				else if (key === "effect") {
 					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
@@ -82,6 +86,7 @@ export function checkProcedure(value: unknown): Procedure {
 		}
 	};
 	const exilesSource = procedure.cost?.exile === "this" || (typeof procedure.cost?.exile === "object" && "choose" in procedure.cost.exile && procedure.cost.exile.source);
+	refs({ targets: procedure.targets }, procedure.targets?.length ?? 0, new Set());
 	visit(procedure.instructions, procedure.targets?.length ?? 0, new Set(exilesSource ? ["cost-source"] : []));
 	return procedure;
 }
@@ -121,12 +126,15 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const scope: Scope = { world, controller, source: spell, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
 	if (activation.exileSelection) checkExile(scope, activation.exileSelection, cost.exiled ?? []);
 	activation.slots.forEach((slot, at) => {
+		const chosen = activation.targets[at] ?? [], minimum = slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1);
+		if (chosen.length < minimum || chosen.length > (slot.count ?? 1)) throw new Error("A target slot has the wrong number of targets.");
+		if (new Set(chosen.map((one) => "player" in one ? `player:${one.player}` : `${one.id}@${one.incarnation}`)).size !== chosen.length)
+			throw new Error("One target slot cannot name the same target twice.");
 		for (const chosen of activation.targets[at] ?? []) {
 			const ok = "player" in chosen ? (slot.player === "any" ? table.seats.some((one) => one.id === chosen.player && !one.result) : !!slot.player && players(scope, slot.player).includes(chosen.player))
 				: !!slot.object && !!live(table, chosen) && matches(scope, live(table, chosen)!, slot.object);
 			if (!ok) throw new Error("An announced target is unavailable.");
 		}
-		if ((activation.targets[at]?.length ?? 0) < (slot.upTo ? 0 : slot.count ?? 1)) throw new Error("A target slot is not filled.");
 	});
 
 	// Costs other than mana: each object must still be there to pay with.
