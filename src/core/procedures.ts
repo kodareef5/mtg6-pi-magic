@@ -80,6 +80,8 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
 		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
 		else if (value && typeof value === "object") {
+			if ("bound" in value && typeof value.bound === "string" && !bound.has(value.bound))
+				throw new Error(`bound:${value.bound} is used before an instruction binds it with "as".`);
 			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
 			for (const cost of [terms.cost, terms.pays]) if (cost?.additional) {
 				if (terms.timing !== "spell") throw new Error("Named additional mana costs belong to a spell announcement, not an activation or resolving payment.");

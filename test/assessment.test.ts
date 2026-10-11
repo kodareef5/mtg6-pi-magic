@@ -93,6 +93,17 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	if (granting.do !== "modify" || granting.change.registers?.[0]?.kind !== "watch" || "modes" in granting.change.registers[0].effect) assert.fail("Expected the nonmodal granted watch");
 	granting.change.registers[0].effect.instructions.shift();
 	assert.throws(() => checkProcedure(unbound), /bound:card is used before/, "the nested trigger is checked within its own scope");
+	for (const instruction of [
+		{ do: "life", who: "you", amount: { bound: "missing" } },
+		{ do: "life", who: "you", amount: 1, if: { bound: "missing" } },
+	] as const) {
+		assert.throws(() => checkProcedure({ ...kellan, instructions: [instruction] }), /bound:missing is used before/,
+			"numeric reads and conditions require bindings just as object references do");
+		const broken = structuredClone(pack), watcher = broken.registers[1]!;
+		if (watcher.kind !== "watch" || "modes" in watcher.effect) assert.fail("Expected a nonmodal watch");
+		watcher.effect.instructions = [instruction];
+		assert.match(assessmentProblems(printed, broken).join("; "), /bound:missing is used before/);
+	}
 	const abrade = table.printed.Abrade!;
 	const modes: Package = { card: "Abrade", registers: [], procedures: [
 		{ ...normal("Abrade", "Choose one — ... Abrade deals 3 damage to target creature."), targets: [{ object: { types: ["creature"] } }], instructions: [{ do: "damage", to: "target:0", amount: 3 }] },
