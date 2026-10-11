@@ -152,7 +152,13 @@ export const Defs = {
 		life: Type.Optional(positive),
 		/** A number of cards from hand, or this card ("Discard this card"). */
 		discard: Type.Optional(Type.Union([positive, ObjectRef])),
-		counters: Type.Optional(object({ kind: text, count: positive })),
+		counters: Type.Optional(object({ kind: text, count: positive,
+			/** Omitted removes counters; true puts them as payment, such as blight. */
+			put: Type.Optional(Type.Literal(true)),
+			/** Default source; otherwise pay on each distinct selected permanent. */
+			on: Type.Optional(object({ choose: Type.Ref("Selector"), count: positive })) })),
+		/** Choose public permanents or reveal hand cards as payment, such as behold. */
+		show: Type.Optional(object({ choose: Type.Ref("Selector"), count: positive })),
 		/** Generic mana this cost is reduced by, worked out as it is locked (601.2f). */
 		reduce: Type.Optional(Type.Ref("Amount")),
 	}),
@@ -210,6 +216,8 @@ export const Defs = {
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
+		/** Bind success only when every part of the stated cost is paid together. */
+		step({ do: Type.Literal("pay"), who: PlayerRef, cost: Type.Ref("Cost") }),
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),
 		step({ do: Type.Literal("draw"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),

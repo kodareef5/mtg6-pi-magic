@@ -11,9 +11,7 @@
 import { amount, holds, objects, players, select, type Bound, type Scope, type Seen } from "./selectors.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
-import { fundings, paying } from "./funding.ts";
-import { symbols } from "./announce.ts";
-import { project } from "./view.ts";
+import { paymentChoices } from "./costs.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
@@ -48,6 +46,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "pay": {
+			const who = players(scope, instruction.who)[0] ?? controller;
+			const choices = paymentChoices(table, scope, instruction.cost, who, pending.object).map((choice) => ({ ...choice,
+				...bind(instruction, { objects: [], players: [], amount: 1 }) }));
+			if (!choices.length) choices.push({ id: "unpaid", label: "The full cost cannot be paid", changes: [], ...bind(instruction, { objects: [], players: [], amount: 0 }) });
+			return { actor: who, question: `${claim}: pay the full cost.`, choices };
+		}
 		case "damage": {
 			const dealt = amount(scope, instruction.amount);
 			const source = objects(scope, instruction.from ?? "this")[0];
@@ -236,13 +241,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const unless = instruction.unless;
 			if (!unless) return one(`Counter ${stacked.map(name).join(", ") || "nothing"}`, counter);
 			const payer = players(scope, unless.who)[0] ?? controller;
-			const life = unless.pays.life ?? 0, mana = unless.pays.mana ? symbols(unless.pays.mana) : undefined;
-			const ways = mana ? fundings({ seat: payer, version: table.cursor.clock, view: project(table, payer) }, { generic: mana.generic, colors: mana.colors, life }) : [{ funding: { paid: [], taps: [] }, shows: "" }];
-			const pay = seat(table, payer).life >= life ? ways.map(({ funding, shows }, at): Choice => {
-				const changes = paying(funding, payer, table.cursor.clock, 0);
-				if (life) changes.push({ do: "change-life", who: payer, amount: -life, reason: "cost-payment" });
-				return { id: `pay-${at}`, label: `Pay${life ? ` ${life} life` : ""}${mana ? ` ${unless.pays.mana}` : ""}. ${shows}`, changes };
-			}) : [];
+			const pay = paymentChoices(table, scope, unless.pays, payer, pending.object);
 			return { actor: payer, question: `${claim}: pay, or it is countered.`, choices: [...pay, { id: "decline", label: "Do not pay; it is countered", changes: counter }] };
 		}
 		case "each": {

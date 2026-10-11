@@ -167,7 +167,7 @@ export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots
 
 /** The extra costs a procedure states, as each way they can be paid. */
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string };
-function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
+export function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
 	const cost = procedure.cost ?? {};
 	let ways: Way[] = [{ paid: {}, uses: [], consumes: [], shows: "" }];
 	// One object pays one part. The source alone may be tapped and also leave once:
@@ -210,7 +210,19 @@ function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: F
 		const sets = typeof cost.discard === "number" ? subsets(hand, cost.discard) : [objects(scope, cost.discard).filter((one) => one.zone === "hand")];
 		add(sets.filter((set) => set.length).map((set) => ({ paid: { discarded: set.map(ref) }, uses: set.map((one) => one.id), consumes: set.map((one) => one.id), shows: `Discard ${set.map(name).join(", ")}. ` })));
 	}
-	if (cost.counters) add((source.counters[cost.counters.kind] ?? 0) >= cost.counters.count ? [{ paid: { counters: cost.counters }, uses: [], shows: `Remove ${cost.counters.count} ${cost.counters.kind}. ` }] : []);
+	if (cost.counters) {
+		const { kind, count, on, put } = cost.counters;
+		const pool = on ? query({ zones: ["battlefield"], controller: "self" }, frame).filter((one) => matches(scope, one, on.choose))
+			: source.zone === "battlefield" ? [source] : [];
+		const sets = subsets(pool.filter((one) => put || (one.counters[kind] ?? 0) >= count), on?.count ?? 1);
+		add(sets.map((set) => ({ paid: { counters: { kind, count, ...(put ? { put } : {}), ...(on ? { on: set.map(ref) } : {}) } }, uses: [],
+			shows: `${put ? "Put" : "Remove"} ${count} ${kind} ${put ? "on" : "from"} each of ${set.map(name).join(", ")}. ` })));
+	}
+	if (cost.show) {
+		const pool = query({ zones: ["hand", "battlefield"], controller: "self" }, frame).filter((one) => matches(scope, one, cost.show!.choose));
+		add(subsets(pool, cost.show.count).map((set) => ({ paid: { shown: set.map((one) => ({ ...ref(one), ...(one.zone === "hand" ? { reveal: true as const } : {}) })) }, uses: [],
+			shows: `${set.map((one) => `${one.zone === "hand" ? "Reveal" : "Show"} ${name(one)} (${one.zone})`).join("; ")}. ` })));
+	}
 	return ways;
 }
 
@@ -263,7 +275,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 							const aimed = targets.flat();
 							offered.push({
 								option: {
-									id: `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}`), ...extra.uses].join(",") || "free"}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
+									id: `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
 									// The label names its targets, so an option says what it hits without a cross-reference.
 									label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
 									notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
@@ -278,7 +290,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									].filter(Boolean).join(" "),
 									objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...extra.uses.filter((id) => id !== source.id).flatMap((id) => {
 										const object = frame.view.objects?.find((one) => one.id === id); return object ? [ref(object)] : [];
-									}), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
+									}), ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? []), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 								},
 								activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 									...(granted.permission ? { permission: granted.permission } : {}),

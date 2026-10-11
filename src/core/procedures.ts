@@ -4,6 +4,7 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
+import { costChanges } from "./costs.ts";
 import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
 import { check, ProcedureSchema, type Amount, type Instruction, type Procedure, type Selector } from "./language.ts";
@@ -136,7 +137,15 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const consumed = [...(cost.sacrificed ?? []), ...(cost.exiled ?? []), ...(cost.discarded ?? []), ...funding.filter((tap) => tap.sacrifice).map((tap) => tap.source)].map((ref) => ref.id);
 	if (new Set(consumed).size !== consumed.length || (cost.tapped ?? []).some((ref) => consumed.includes(ref.id))) throw new Error("One object cannot pay two parts of a cost.");
 	if (seat(table, controller).life < (cost.life ?? 0) + funding.reduce((sum, tap) => sum + (tap.life ?? 0), 0)) throw new Error("Not enough life to pay.");
-	if (cost.counters && (object.counters[cost.counters.kind] ?? 0) < cost.counters.count) throw new Error("Not enough counters to remove.");
+	if (cost.counters) {
+		const on = cost.counters.on ?? [source];
+		if (!on.length || new Set(on.map((one) => one.id)).size !== on.length || on.some((ref) => {
+			const permanent = own(ref, "battlefield");
+			return !cost.counters!.put && (permanent.counters[cost.counters!.kind] ?? 0) < cost.counters!.count;
+		}))
+			throw new Error("Not enough distinct objects with counters to remove.");
+	}
+	for (const shown of cost.shown ?? []) own(shown, shown.reveal ? "hand" : "battlefield");
 
 	const pool = seat(table, controller).pool;
 	const payment = paid.map((id) => pool.find((mana) => mana.id === id));
@@ -164,13 +173,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		// Whoever casts or plays it controls it, though another seat may own it (110.2, 305.2).
 		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const, controller, ...(activation.face !== undefined ? { face: activation.face } : {}) }] : []),
 		...(activation.timing === "land" ? [{ do: "move" as const, what: source.id, to: "battlefield" as const, reason: "play-land" as const, controller }] : []),
-		...(cost.tap ? [{ do: "tap" as const, what: source.id }] : []),
-		...(cost.tapped ?? []).map((ref) => ({ do: "tap" as const, what: ref.id })),
-		...(cost.sacrificed ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "sacrifice" as const })),
-		...(cost.exiled ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "exile" as const, reason: "cost-payment" as const })),
-		...(cost.discarded ?? []).map((ref) => ({ do: "move" as const, what: ref.id, to: "graveyard" as const, reason: "discard" as const })),
-		...(cost.life ? [{ do: "change-life" as const, who: controller, amount: -cost.life, reason: "cost-payment" as const }] : []),
-		...(cost.counters ? [{ do: "counters" as const, what: source.id, kind: cost.counters.kind, amount: -cost.counters.count }] : []),
+		...costChanges(cost, source, controller),
 	];
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));

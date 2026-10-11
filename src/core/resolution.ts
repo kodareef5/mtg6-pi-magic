@@ -92,7 +92,8 @@ export function resolving(table: Table): Pending | null {
 	const skipped = instruction.if && !holds(scope, instruction.if);
 	const step = skipped ? { actor: ability.controller, question: "Its condition is false.", choices: [{ id: "skip", label: "Skip: its condition is false", changes: [] as Change[] }] }
 		: instructionStep(table, scope, instruction, pending, ability.claim);
-	if (!skipped && instruction.may && instruction.do !== "choose") step.choices.push({ id: "decline", label: "Decline: it is optional", changes: [] });
+	if (!skipped && instruction.may && instruction.do !== "choose") step.choices.push({ id: "decline", label: "Decline: it is optional", changes: [],
+		...(instruction.as ? { bind: { [instruction.as]: { objects: [], players: [], amount: 0 } } } : {}) });
 	const last = pending.program.length === 1;
 	const moves: Move[] = step.choices.map((choice) => ({
 		option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },

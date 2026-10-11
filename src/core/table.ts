@@ -170,7 +170,8 @@ export type Trigger = {
 };
 /** What was paid besides mana. */
 export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tapped?: ObjectRef[]; sacrificed?: ObjectRef[];
-	exiled?: ObjectRef[]; discarded?: ObjectRef[]; life?: number; counters?: { kind: string; count: number } };
+	exiled?: ObjectRef[]; discarded?: ObjectRef[]; shown?: (ObjectRef & { reveal?: true })[]; life?: number;
+	counters?: { kind: string; count: number; put?: true; on?: ObjectRef[] } };
 /**
  * A resolution in progress. Its remaining program, what it has bound, and the
  * target slots that were illegal as it began (608.2b) are table state, so a

@@ -157,6 +157,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone |
+| `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
@@ -219,7 +220,7 @@ A **procedure** is one announced action, the unit a plan prepares.
 | `basis` | the card text it carries out, quoted |
 | `timing` | `spell`, `land`, `stack` (an activated ability) or `mana` |
 | `speed` | an activation's "only as a sorcery", or `instant` on a spell to claim its flash |
-| `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `exile`, `life`, `discard`, `counters`, and a computed `reduce` |
+| `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `exile`, `life`, `discard`, `counters`, `show`, and a computed `reduce` |
 | `if`, `limit` | when the seat may announce it, and "once each turn" |
 | `targets` | its target slots |
 | `instructions` | what happens when it resolves |
@@ -234,6 +235,17 @@ Modes, kicker and warp are separate procedures. Abrade's two modes are two
 procedures with different claims and targets. A kicked Burst Lightning is a
 procedure with `cost.mana` "{4}{R}" and 4 damage. "Choose one" is which
 procedure the seat announces, so there is no mode syntax.
+
+Optional additional costs also use separate procedures. A blighted Requiting
+Hex pays its counter at announcement and includes the life gain in that variant;
+the unpaid variant does neither. `cost.counters` removes `count` of `kind` from
+the source by default. `on: {choose, count}` instead selects distinct controlled
+permanents, and `put: true` puts counters as payment, such as blight.
+`cost.show: {choose, count}` selects controlled battlefield objects or cards in
+the payer's hand; only the hand cards are revealed. A behold variant selects
+Dragons in those two zones and fixes its stronger effect when announced.
+Neither cost waits for resolution. A resolving `pay` uses these same costs and
+binds success only when every part is paid. See [payment examples](examples/payments.md).
 
 Instructions on a permanent spell run after it enters, and `this` is then the
 permanent. That is where warp's delayed exile and an Aura's `attach` go.

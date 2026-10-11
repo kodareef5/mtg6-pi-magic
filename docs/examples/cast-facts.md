@@ -10,7 +10,7 @@ coverage and syntax acceptance do not certify that the interpretation is legal.
 
 ## Actual casting payment
 
-This is Dyadrine's entry term only. The attack trigger and chosen-X cast remain
+These are Dyadrine's entry and attack terms. Trample and the chosen-X cast remain
 separate preparation. Mana spent comes from the recorded payment, including
 floating mana and abilities used while paying. Casting it with X equal to two
 normally supplies four counters; a reduction of two supplies two. Putting it
@@ -23,6 +23,17 @@ onto the battlefield without casting it supplies none.
     "kind": "enters",
     "basis": "Dyadrine enters with a number of +1/+1 counters on it equal to the amount of mana spent to cast it.",
     "counters": { "+1/+1": { "manaSpent": "this" } }
+  }, {
+    "kind": "watch",
+    "basis": "Whenever you attack, you may remove a +1/+1 counter from each of two creatures you control. If you do, draw a card and create a 2/2 colorless Robot artifact creature token.",
+    "event": { "on": "attacked-with", "by": "you" },
+    "effect": { "instructions": [
+      { "do": "pay", "who": "you", "may": true, "as": "paid", "cost": { "counters": {
+        "kind": "+1/+1", "count": 1, "on": { "choose": { "types": ["creature"], "controller": "you" }, "count": 2 }
+      } } },
+      { "do": "draw", "who": "you", "count": 1, "if": { "bound": "paid" } },
+      { "do": "token", "count": 1, "spec": { "name": "Robot", "types": ["artifact", "creature"], "subtypes": ["Robot"], "colors": [], "power": 2, "toughness": 2 }, "if": { "bound": "paid" } }
+    ] }
   }]
 }
 ```
