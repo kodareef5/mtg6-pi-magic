@@ -160,6 +160,9 @@ refusals, plus five basic lands requiring no assessment.
 | Second Landfall game, seats reversed | Mono-Red won on turn 9; 379 decisions, 348 chosen, 31 forced, no fallbacks or gaps |
 | Second Landfall replay and clone continuation | Matched; decisions 0, 189 and 378 continued to the same outcome and state |
 | Second Landfall run cost and time | $1.0232 reported, 17m29s wall; two calls lack usage and cost |
+| Third Landfall game, against Mono-Green | Selesnya won on turn 11; 452 decisions, 411 chosen, 41 forced, no fallbacks or gaps |
+| Third Landfall replay and clone continuation | Matched; decisions 0, 226 and 451 continued to the same outcome and state |
+| Third Landfall run cost and time | $1.4633 reported, 31m00s wall; 522 requests, two calls lack usage and cost |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 |
 | Control runtime failures found | Additional blight and behold costs, metadata copying, private inspection, next-cast properties, collected evidence, flashback departure |
 | Rejected Control branches | Stock Up used public exile for inspection; a completed run reordered Inevitable Defeat's instructions |
@@ -172,12 +175,21 @@ Landfall's completed game is seed `alpha-landfall-20261011-r0`, journal
 15 pregame, 40 strategy and 371 Jev calls. The raw journal, bill, trace and
 clone checks are under `.pi/alpha-20261011/`. The reversed-seat game is seed
 `alpha-landfall-20261011-r1`, journal `alpha-landfall-20261011-r1-1791720692391.jsonl`.
-These games do not establish coverage of every deferred use.
+The third game is seed `alpha-landfall-20261011-r2`, journal
+`alpha-landfall-20261011-r2-1791722699065.jsonl`. Its used procedures passed
+source review, including Fabled Passage's conditional untap and Dyadrine's
+actual mana-spent entry count. These games do not establish coverage of every
+deferred use.
 
 Izzet seed `alpha-spellementals-20261011-r0` resumed after the shared greatest-value
 amount supported Sunderflock's reduction. The completed journal is
 `alpha-spellementals-20261011-r0-1791722682103.jsonl`. Source review checked the
 used runtime procedures as well as replay and clone continuation.
+
+The reversed-seat Izzet run reached a Red win on turn 7, but Opt exposed a
+same-library move that incorrectly changed incarnation. That branch is
+excluded. A continuation from decision 152, before the faulty arrangement,
+uses the corrected physical operation and retains the original preparation.
 
 Control seed `alpha-control-20261011-r1` reached a win on turn 19: 541 decisions,
 496 chosen, 45 forced, no gaps or fallbacks. Replay matched, as did continuation

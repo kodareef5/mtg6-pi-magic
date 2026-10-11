@@ -25,7 +25,7 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 4c Control, Selesnya Landfall and Izzet Spellementals have standing assessments
 for every main-deck card. They still have thirteen, eight and thirteen cards
-with deferred uses respectively. Selesnya completed two ordinary alpha games,
+with deferred uses respectively. Selesnya completed three ordinary alpha games,
 with replay and continuation from three saved prefixes checked for each.
 Izzet completed one source-audited game with matching replay and clone
 continuation. Control games are finding missing runtime operations and incorrect
