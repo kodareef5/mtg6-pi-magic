@@ -34,7 +34,7 @@ assessments.
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Izzet Prowess needs plot and additional triggers; Azorius
+   stopped games. Izzet Prowess needs plot, additional triggers and relative-power blocking; Azorius
    Momo needs combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.

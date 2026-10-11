@@ -3,6 +3,8 @@
 import { characteristics } from "./characteristics.ts";
 import { cardsIn, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Registration } from "./language.ts";
+import { additionalTriggers } from "./triggers.ts";
+import { tableWorld } from "./selectors.ts";
 
 export function chapters(table: Table, object: Thing): Extract<Registration, { kind: "chapter" }>[] {
 	const traits = characteristics(table, object);
@@ -20,7 +22,8 @@ export function chapterTriggers(table: Table, before: Record<string, Thing>, bor
 		if (current <= prior) continue;
 		for (const registration of chapters(table, object)) for (const chapter of registration.numbers) {
 			if (chapter <= prior || chapter > current) continue;
-			found.push({ id: `chapter-${table.cursor.clock + 1}-${found.length}`, chapter, controller: object.controller,
+			const count = 1 + additionalTriggers(tableWorld(table), object);
+			for (let at = 0; at < count; at++) found.push({ id: `chapter-${table.cursor.clock + 1}-${found.length}`, chapter, controller: object.controller,
 				source: { id: object.id, incarnation: object.incarnation }, basis: registration.basis,
 				effect: structuredClone(registration.effect), event: { object: { id: object.id, incarnation: object.incarnation } }, turn: table.cursor.turn });
 		}

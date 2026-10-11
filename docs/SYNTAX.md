@@ -395,6 +395,12 @@ An `is`/`matches` condition normally requires a live incarnation. Add
 left, such as Azog's conditional draw after destruction. This does not make
 it movable or restore targets illegal at resolution. See [amass](examples/amass.md).
 
+A `trigger-rule` registration adds `additional` instances of abilities that
+a permanent matching `affects` has, including granted watches and chapters.
+Counts add once; delayed and reflexive triggers receive none. Each instance
+chooses its own mode and targets. Event-specific trigger restrictions are not
+supported by this form. See [additional triggers](examples/additional-triggers.md).
+
 A watch's `limit: "once-per-turn"` counts triggers. An optional watch with
 `may: true` and `limit: "once-per-turn-use"` instead records acceptance during
 resolution (603.2h). Declining and losing all targets spend nothing. The chosen

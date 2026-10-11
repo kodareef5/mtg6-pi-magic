@@ -32,6 +32,7 @@ schemas, and every `basis` is checked against the card's text.
 | `token-abilities.md` | complete Map and Clue abilities, another player creating tokens, sorcery timing and explore's revealed branches |
 | `token-copies.md` | copiable base terms, retained mana cost and complete activations, entry behavior, combined Spree modes and offspring's fixed power/toughness exception |
 | `damage-additions.md` | fixed damage increases, prevention ordering, affected-player choices and simultaneous results |
+| `additional-triggers.md` | additive trigger instances, equipped abilities and independent targets |
 | `modal-triggers.md` | one mode chosen before responses, per-mode targets, and numbered spell-cast events |
 | `attacking-tokens.md` | choose each entering token's defender, create the group together, and sacrifice only those tokens at the next end step |
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |

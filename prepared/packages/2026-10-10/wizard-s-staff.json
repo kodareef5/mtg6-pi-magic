@@ -1,0 +1,97 @@
+{
+	"card": "Wizard's Staff",
+	"generated": "2026-10-10",
+	"source": "04a29dd924976a3c0a3eca365636a4291d6b78259fecded3a47e2ce4db8dd716",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wizard's Staff",
+		"registers": [
+			{
+				"basis": "Equipped creature has prowess. (Whenever its controller casts a noncreature spell, that creature gets +1/+1 until end of turn.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"registers": [
+						{
+							"basis": "Equipped creature has prowess. (Whenever its controller casts a noncreature spell, that creature gets +1/+1 until end of turn.)",
+							"kind": "watch",
+							"event": {
+								"on": "cast",
+								"by": "you",
+								"of": {
+									"zones": [
+										"stack"
+									],
+									"not": {
+										"types": [
+											"creature"
+										]
+									}
+								}
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "this",
+										"until": "end-of-turn",
+										"change": {
+											"power": 1,
+											"toughness": 1
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "If a triggered ability of equipped creature triggers, that ability triggers an additional time.",
+				"kind": "trigger-rule",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"additional": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Equip Wizard for {1}",
+				"basis": "Equip Wizard {1}",
+				"source": {
+					"card": "Wizard's Staff",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Equip for {3}",
+				"basis": "Equip {3}",
+				"source": {
+					"card": "Wizard's Staff",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

@@ -320,6 +320,8 @@ export const Defs = {
 			{ additionalProperties: false, if: { properties: { mode: { const: "add" } }, required: ["mode"] }, then: { required: ["amount"] }, else: { not: { required: ["amount"] } } }),
 		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
+		/** Extra instances of abilities the matching permanent has, never delayed or reflexive triggers (603.2d). */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("trigger-rule"), affects: Type.Ref("Selector"), additional: positive }),
 		/** A triggered ability. `if` is its intervening if (603.4). */
 		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("TriggerEffect"),
 			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Union([Type.Literal("once-per-turn"), Type.Literal("once-per-turn-use")])) },

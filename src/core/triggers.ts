@@ -266,6 +266,13 @@ function watches(world: World, objects: Seen[]): Watch[] {
 		.map((registration) => ({ object, controller: object.controller, registration, world })));
 }
 
+/** Read extra instances from the same side of the event as the triggering ability. */
+export function additionalTriggers(world: World, object: Seen): number {
+	return world.objects.filter(source => source.zone === "battlefield").reduce((sum, source) => sum +
+		(world.read(source)?.registrations ?? []).reduce((count, rule) => count + (rule.kind === "trigger-rule" &&
+			matches({ world, source, controller: source.controller }, object, rule.affects) ? rule.additional : 0), 0), 0);
+}
+
 /** Registered watches on visible permanents now. A card in hand supplies none; this predicts no future event. */
 export function activeWatches(frame: Frame) {
 	const world = viewWorld(frame.view);
@@ -298,7 +305,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 	const waiting: Trigger[] = [], spent: string[] = [];
 	const stamp = () => `trigger-${table.cursor.clock + 1}-${waiting.length}`;
 
-	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x" | "transformAt">, once = false): boolean => {
+	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x" | "transformAt">, once = false, additional = 0): boolean => {
 		const matched = live.filter((occurrence) => !!occurrence.lookBack === (scope.world !== after)).flatMap((occurrence) => fits(scope, event, occurrence) ?? []);
 		if (!matched.length) return false;
 		// Each occurrence is its own trigger (603.2c), unless the card says "one or more"; a once-only delayed trigger fires for the first alone (603.7b).
@@ -311,6 +318,9 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			if (made.limit === "once-per-turn" && triggeredThisTurn(table, source, basis, waiting)) continue;
 			if (made.limit === "once-per-turn-use" && usedThisTurn(table, source, basis, controller)) continue;
 			waiting.push(made);
+			// 603.2d adds independent instances once, not recursive multiplication.
+			// A once-per-turn trigger's restriction still allows only one instance.
+			if (made.limit !== "once-per-turn") for (let at = 0; at < additional; at++) waiting.push({ ...structuredClone(made), id: stamp() });
 			if (once) break;
 		}
 		return true;
@@ -321,7 +331,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 		if (registration.kind !== "watch") continue;
 		raise(scopeOf(watch), watch.controller, ref(watch.object), registration.basis, registration.event, {
 			effect: registration.effect, ...(registration.if ? { check: registration.if } : {}), ...(registration.may ? { may: true } : {}),
-			...(registration.limit ? { limit: registration.limit } : {}) });
+			...(registration.limit ? { limit: registration.limit } : {}) }, false, additionalTriggers(watch.world, watch.object));
 	}
 	// Delayed triggers belong to the table and fire even after their source is gone (603.7c).
 	for (const world of prior ? [prior, after] : [after]) {

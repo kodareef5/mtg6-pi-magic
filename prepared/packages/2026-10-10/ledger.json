@@ -507,14 +507,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Wizard's Staff": {
-		"reason": "Wizard's Staff is not ready: \"If a triggered ability of equipped creature triggers, that ability triggers an additional time.\" — The syntax does not support making every triggered ability of the equipped creature trigger an additional time.",
-		"decks": [
-			"Izzet Prowess"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Wolverine, Fierce Fighter": {
 		"reason": "Wolverine, Fierce Fighter is not ready: If damage would be dealt to Wolverine, instead that damage is dealt, but all other damage already dealt to him is healed. — Unsupported damage replacement: heal previously marked damage while retaining the incoming damage. The available damage-rule and replacement operations cannot express this.",
 		"decks": [
