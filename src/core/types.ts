@@ -140,7 +140,7 @@ export type SeatView = {
 	/** This seat's own plan steps and branches carried out this game, the latest ten distinct, with their syntax: what worked, to reuse. */
 	worked?: { label: string; action: PlanOption["action"] }[];
 	/** Life, and how many cards each hand and library holds: public, though the cards are not (402.3, 401.2). */
-	players?: { id: SeatId; life: number; hand?: number; library?: number }[];
+	players?: { id: SeatId; life: number; startingLife?: number; hand?: number; library?: number }[];
 	/** The public notepad: labels, registrations added after entry, links, permissions. */
 	notes?: Note[];
 	combat?: Combat | null;

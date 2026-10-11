@@ -25,7 +25,7 @@ export type Happened =
 export type World = {
 	objects: Seen[];
 	read(object: Seen): Traits | undefined;
-	players: { id: SeatId; life: number; name?: string }[];
+	players: { id: SeatId; life: number; startingLife?: number; name?: string }[];
 	notes: Note[];
 	combat: Combat | null;
 	history: Happened[];
@@ -54,7 +54,7 @@ export type Scope = {
 	/** Targets that were illegal as resolution began (608.2b), by `targetKey`: they name nothing. */
 	illegal?: string[];
 	bound?: Record<string, Bound>;
-	event?: { object?: Seen; objects?: Seen[]; player?: SeatId; source?: Seen };
+	event?: { object?: Seen; objects?: Seen[]; player?: SeatId; source?: Seen; recipient?: Seen; amount?: number };
 	x?: number;
 };
 
@@ -64,7 +64,7 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 	let events: Happened[] | undefined;
 	return {
 		objects: [...table.things.values()], read: reader,
-		players: playing(table).map((one) => ({ id: one.id, life: one.life, name: one.name })),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, name: one.name })),
 		notes: table.notes, combat: table.combat,
 		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn) } } : {}),
 		get history() { return (events ??= happened(table)); },
@@ -78,6 +78,12 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 			return undefined;
 		},
 	};
+}
+
+/** A damage source may have left since its ability triggered. Legacy changes name its current id. */
+export function damageSource(table: Table, source: string | ObjectRef) {
+	const ref = typeof source === "string" ? table.things.get(source) : source;
+	return ref ? tableWorld(table).lastKnown(ref) : undefined;
 }
 
 /**
@@ -145,7 +151,11 @@ export function objects(scope: Scope, ref: string | { top: number; of: string })
 		case "attached": { const at = scope.source?.attached && live(scope.world, scope.source.attached); return at ? [at] : []; }
 		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "id" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? live(scope.world, chosen) ?? [] : []);
 		case "bound": return (scope.bound?.[rest]?.objects ?? []).flatMap((one) => live(scope.world, one) ?? []);
-		case "event": return rest === "object" ? (scope.event?.object ? [scope.event.object] : []) : rest === "objects" ? scope.event?.objects ?? [] : scope.event?.source ? [scope.event.source] : [];
+		case "event": {
+			if (rest === "objects") return scope.event?.objects ?? [];
+			const object = scope.event?.[rest as "object" | "source" | "recipient"];
+			return object ? [object] : [];
+		}
 		default: return [];
 	}
 }
@@ -228,6 +238,9 @@ export function amount(scope: Scope, value: Amount): number {
 	if ("bound" in value) { const bound = scope.bound?.[value.bound]; return bound?.amount ?? (bound ? bound.objects.length + bound.players.length : 0); }
 	if ("distinct" in value) return new Set(select(scope, value.among).flatMap((one) => traitsOf(scope, one)?.types ?? [])).size;
 	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.life ?? 0), 0);
+	if ("startingLife" in value) return players(scope, value.startingLife).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.startingLife ?? 0), 0);
+	if ("event" in value) return scope.event?.amount ?? 0;
+	if ("half" in value) return Math[value.round === "up" ? "ceil" : "floor"](amount(scope, value.half) / 2);
 	if ("history" in value) return history(scope, value);
 	if ("x" in value) return scope.x ?? 0;
 	if ("sum" in value) return value.sum.reduce((total: number, part) => total + amount(scope, part), 0);
@@ -253,7 +266,7 @@ function history(scope: Scope, value: Extract<Amount, { history: string }>): num
 export function holds(scope: Scope, condition: Condition): boolean {
 	if ("amount" in condition) {
 		const value = amount(scope, condition.amount);
-		return (condition.atLeast === undefined || value >= condition.atLeast) && (condition.atMost === undefined || value <= condition.atMost);
+		return (condition.atLeast === undefined || value >= amount(scope, condition.atLeast)) && (condition.atMost === undefined || value <= amount(scope, condition.atMost));
 	}
 	if ("bound" in condition) { const bound = scope.bound?.[condition.bound]; return !!bound && (bound.objects.length > 0 || bound.players.length > 0 || (bound.amount ?? 0) > 0); }
 	if ("is" in condition) return objects(scope, condition.is).some((one) => matches(scope, one, condition.matches));

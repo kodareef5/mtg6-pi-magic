@@ -24,7 +24,7 @@ import { before as lookBack, detect } from "./triggers.ts";
 import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
-import { targetKey } from "./selectors.ts";
+import { damageSource, targetKey } from "./selectors.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Activation,
@@ -155,6 +155,18 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		if (change.do === "move" && instead?.kind === "replace") change.to = instead.to as Zone;
 		if (change.do === "move" && dying?.zone === "battlefield" && (dying.counters.finality ?? 0) > 0) change.to = "exile";
 	}
+	// Read the damage sources and recipients before any result changes the group.
+	const damage = new Map(changes.flatMap((change) => {
+		if (change.do !== "damage") return [];
+		if (!Number.isInteger(change.amount) || change.amount < 0) throw new Error("Damage must be a nonnegative integer.");
+		const source = damageSource(table, change.source), target = "id" in change.target ? table.things.get(change.target.id) : undefined;
+		if ("id" in change.target && (!target || target.incarnation !== change.target.incarnation || target.zone !== "battlefield"))
+			throw new Error("The damage recipient is no longer that permanent.");
+		return [[change, { source, target: target ? characteristics(table, target) : undefined }] as const];
+	}));
+	// 120.3f: lifelink is a result of damage in this same group, not a triggered ability.
+	changes = [...changes, ...[...damage].flatMap(([change, facts]): Change[] => change.amount > 0 && facts.source && has(facts.source.traits, "lifelink")
+		? [{ do: "change-life", who: facts.source.object.controller, amount: change.amount, reason }] : [])];
 	// A fixture's setup is not a game event, and triggers nothing.
 	const detecting = reason !== "game-setup";
 	const prior = detecting ? lookBack(table, changes) : undefined;
@@ -163,6 +175,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// receipt no trigger can read.
 	const before: Receipt["before"] = {}, known: Record<string, Traits> = {};
 	for (const change of changes) {
+		if (change.do === "damage") {
+			const source = damage.get(change)?.source;
+			if (source) { before[source.object.id] = structuredClone(source.object) as Thing; if (source.traits) known[source.object.id] = structuredClone(source.traits); }
+		}
 		if (change.do === "move") {
 			const leaving = table.things.get(change.what);
 			const traits = leaving && ["battlefield", "stack"].includes(leaving.zone) && change.to !== leaving.zone ? characteristics(table, leaving) : undefined;
@@ -265,15 +281,22 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "spend-mana":
 				seat(table, change.who).pool = seat(table, change.who).pool.filter((mana) => !change.ids.includes(mana.id));
 				break;
-			case "damage":
+			case "damage": {
+				if (!change.amount) break;
 				if ("player" in change.target) seat(table, change.target.player).life -= change.amount;
 				else {
 					const hurt = thing(table, change.target.id);
-					hurt.damage += change.amount;
+					const types = damage.get(change)?.target?.types ?? [];
+					if (types.includes("creature")) hurt.damage += change.amount;
+					for (const [type, counter] of [["planeswalker", "loyalty"], ["battle", "defense"]]) if (types.includes(type!)) {
+						const left = Math.max(0, (hurt.counters[counter!] ?? 0) - change.amount);
+						if (left) hurt.counters[counter!] = left; else delete hurt.counters[counter!];
+					}
 					// 704.5h reads this at the next check; cleanup clears it with the damage.
-					if (deathtouch(table, change.source)) hurt.deathtouched = true;
+					if (types.includes("creature") && has(damage.get(change)?.source?.traits, "deathtouch")) hurt.deathtouched = true;
 				}
 				break;
+			}
 			case "activate":
 				if (change.ability.timing === "spell") {
 					const card = thing(table, change.what);
@@ -506,7 +529,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
  * writer. It is the logging that stops, not the discipline.
  */
 const control = (changes: Change[]): boolean =>
-	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution" || (change.do === "combat" && change.action !== "strike"));
+	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution" && !(change.action === "next" && change.use) || (change.do === "combat" && change.action !== "strike"));
 
 /**
  * Who may act next, and where the turn is. A transition shares the commit door
@@ -609,10 +632,4 @@ export function random(table: Table, bound: number, stream = "play"): number {
 	const digest = createHash("sha256").update(`${table.rng.seed}:${stream}:${n}`).digest();
 	table.rng.calls[stream] = n + 1;
 	return digest.readUInt32BE(0) % bound;
-}
-
-/** A source with deathtouch, read as it is now or, gone, as it last was on the battlefield. */
-function deathtouch(table: Table, source: string): boolean {
-	const now = table.things.get(source);
-	return !!now && has(characteristics(table, now), "deathtouch");
 }

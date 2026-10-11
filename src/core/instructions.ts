@@ -50,20 +50,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	switch (instruction.do) {
 		case "damage": {
 			const dealt = amount(scope, instruction.amount);
-			const from = objects(scope, instruction.from ?? "this")[0]?.id ?? pending.object;
+			const source = objects(scope, instruction.from ?? "this")[0];
+			const from = source ? ref(source) : pending.object;
 			const hit = [...(instruction.to ? live(table, objects(scope, instruction.to)) : []), ...(instruction.every ? many(table, scope, { every: instruction.every }) : [])]
 				.filter((object) => object.zone === "battlefield");
 			const people = typeof instruction.to === "string" ? players(scope, instruction.to) : [];
 			const changes: Change[] = dealt <= 0 ? [] : [
-				...hit.flatMap((object): Change[] => {
-					const traits = characteristics(table, object as never);
-					return [
-						...(traits?.types.includes("creature") ? [{ do: "damage" as const, source: from, target: ref(object), amount: dealt }] : []),
-						// 120.3c, 120.3h.
-						...(traits?.types.includes("planeswalker") ? [{ do: "counters" as const, what: object.id, kind: "loyalty", amount: -dealt }] : []),
-						...(traits?.types.includes("battle") ? [{ do: "counters" as const, what: object.id, kind: "defense", amount: -dealt }] : []),
-					];
-				}),
+				...hit.map((object): Change => ({ do: "damage", source: from, target: ref(object), amount: dealt })),
 				...people.map((player): Change => ({ do: "damage", source: from, target: { player }, amount: dealt })),
 			];
 			return one(`Deal ${dealt} damage to ${[...hit.map(name), ...people.map((id) => seat(table, id).name)].join(", ") || "nothing"}`, changes,
@@ -76,8 +69,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			if (fighters.length < 2) return one("Neither creature fights", []);
 			const power = (object: Seen) => Math.max(0, characteristics(table, object as never)?.power ?? 0);
 			return one(`${name(a)} and ${name(b)} fight`, [
-				...(power(a!) ? [{ do: "damage" as const, source: a!.id, target: ref(b!), amount: power(a!) }] : []),
-				...(power(b!) ? [{ do: "damage" as const, source: b!.id, target: ref(a!), amount: power(b!) }] : []),
+				...(power(a!) ? [{ do: "damage" as const, source: ref(a!), target: ref(b!), amount: power(a!) }] : []),
+				...(power(b!) ? [{ do: "damage" as const, source: ref(b!), target: ref(a!), amount: power(b!) }] : []),
 			]);
 		}
 		case "move": case "destroy": {
@@ -224,7 +217,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const trigger: Trigger = { id: `trigger-${table.cursor.clock + 1}-reflexive`, controller, source, basis: `When you do (${claim})`,
 				effect: structuredClone(instruction.effect), ...(instruction.check ? { check: structuredClone(instruction.check) } : {}), bound: structuredClone(pending.bound),
 				event: { ...(event?.object ? { object: ref(event.object) } : {}), ...(event?.objects ? { objects: event.objects.map(ref) } : {}),
-					...(event?.player !== undefined ? { player: event.player } : {}), ...(event?.source ? { source: ref(event.source) } : {}) },
+					...(event?.player !== undefined ? { player: event.player } : {}), ...(event?.source ? { source: ref(event.source) } : {}),
+					...(event?.recipient ? { recipient: ref(event.recipient) } : {}), ...(event?.amount !== undefined ? { amount: event.amount } : {}) },
 				...(scope.x !== undefined ? { x: scope.x } : {}) };
 			return one("It triggers: when you do", [{ do: "trigger", action: "wait", trigger }]);
 		}

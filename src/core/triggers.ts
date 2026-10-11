@@ -13,7 +13,7 @@
 import { characteristics, walk, type Traits } from "./characteristics.ts";
 import { doubleFaced } from "./faces.ts";
 import { aiming, summary, targetings } from "./announce.ts";
-import { holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
+import { damageSource, holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
 import { playing, type Activation, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { GameEvent, Registration } from "./language.ts";
@@ -37,6 +37,10 @@ type Occurrence = {
 	dealt?: SeatId;
 	/** The targeting spell or ability, or the damage source. */
 	source?: Seen;
+	recipient?: Seen;
+	recipientTraits?: Traits;
+	amount?: number;
+	combat?: boolean;
 	from?: Zone;
 	to?: Zone;
 	step?: Step;
@@ -130,10 +134,17 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				}
 				break;
 			case "damage": {
-				const source = now(change.source);
-				if (!change.combat || !source) break;
-				found.push({ on: "combat-damage", object: source, traits: characteristics(table, source), found: ref(source), source, player: source.controller,
-					...("player" in change.target ? { dealt: change.target.player, toPlayer: true as const } : {}) });
+				if (change.amount <= 0) break;
+				const id = typeof change.source === "string" ? change.source : change.source.id;
+				const saved = receipt.before[id], prior = saved && (typeof change.source === "string" || saved.incarnation === change.source.incarnation) ? saved : undefined;
+				const source = prior ?? damageSource(table, change.source)?.object;
+				const recipient = "id" in change.target ? receipt.before[change.target.id] : undefined;
+				const occurrence: Occurrence = { on: "damage", ...(source ? { object: source, traits: receipt.known[id] ?? characteristics(table, source as Thing), found: ref(source), source, player: source.controller } : {}),
+					...(recipient ? { recipient, recipientTraits: receipt.known[recipient.id] ?? characteristics(table, recipient) } : {}), amount: change.amount, combat: !!change.combat,
+					...("player" in change.target ? { dealt: change.target.player, toPlayer: true as const } : {}) };
+				found.push(occurrence);
+				// Existing accepted watches retain their combat-only spelling.
+				if (change.combat) found.push({ ...occurrence, on: "combat-damage" });
 				break;
 			}
 			case "turn":
@@ -147,6 +158,8 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
+	if (event.combat !== undefined && event.combat !== occurrence.combat) return null;
+	if (event.received) occurrence = { ...occurrence, object: occurrence.recipient, traits: occurrence.recipientTraits, found: occurrence.recipient ? ref(occurrence.recipient) : undefined };
 	if (event.face !== undefined && event.face !== occurrence.face || event.fully && !occurrence.fully) return null;
 	const side = (ref: string | undefined, seat?: SeatId) => ref === undefined || ref === "any" || (seat !== undefined && players(scope, ref).includes(seat));
 	if (!side(event.by, occurrence.player) || !side(event.whose, occurrence.whose)) return null;
@@ -154,6 +167,7 @@ function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrenc
 	if (event.from && !(occurrence.from && event.from.includes(occurrence.from as never))) return null;
 	if (event.to && !(occurrence.to && event.to.includes(occurrence.to as never))) return null;
 	if (event.player && !occurrence.toPlayer) return null;
+	if (typeof event.player === "string" && !side(event.player, occurrence.dealt)) return null;
 	if (occurrence.objects) {
 		const matching = occurrence.objects.filter((one) => !event.of || matches(scope, one.object, event.of, one.traits));
 		return matching.length ? { ...occurrence, objects: matching } : null;
@@ -165,9 +179,36 @@ function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrenc
 /** The event refs a trigger keeps: what it happened to, who did it, and what did it. */
 function eventOf(occurrences: Occurrence[]): Trigger["event"] {
 	const first = occurrences[0]!;
-	const objects = occurrences.flatMap((one) => one.objects ? one.objects.map((each) => ref(each.object)) : one.found ? [one.found] : []);
-	return { ...(first.found ? { object: first.found } : objects[0] ? { object: objects[0] } : {}), ...(objects.length ? { objects } : {}),
-		...((first.dealt ?? first.player) !== undefined ? { player: (first.dealt ?? first.player)! } : {}), ...(first.source ? { source: ref(first.source) } : {}) };
+	const objects = [...new Map(occurrences.flatMap((one) => one.objects ? one.objects.map((each) => ref(each.object)) : one.found ? [one.found] : [])
+		.map((one) => [targetKey(one), one])).values()];
+	const common = (key: "source" | "recipient") => first[key] && occurrences.every((one) => one[key]?.id === first[key]!.id && one[key]?.incarnation === first[key]!.incarnation) ? ref(first[key]!) : undefined;
+	const source = common("source"), recipient = common("recipient");
+	const player = first.amount !== undefined ? first.dealt : first.dealt ?? first.player;
+	const object = first.amount !== undefined ? objects.length === 1 ? objects[0] : undefined : first.found ?? objects[0];
+	return { ...(object ? { object } : {}), ...(objects.length ? { objects } : {}),
+		...(player !== undefined && occurrences.every((one) => (one.amount !== undefined ? one.dealt : one.dealt ?? one.player) === player) ? { player } : {}), ...(source ? { source } : {}), ...(recipient ? { recipient } : {}),
+		...(first.amount !== undefined ? { amount: occurrences.reduce((sum, one) => sum + (one.amount ?? 0), 0) } : {}) };
+}
+
+/** A damage event has one occurrence per source, or per recipient when the watch reads damage received. */
+function groups(event: GameEvent, matched: Occurrence[]): Occurrence[][] {
+	if (event.batch) return [matched];
+	if (event.on !== "damage") return matched.map((one) => [one]);
+	const groups = new Map<string, Occurrence[]>();
+	for (const one of matched) {
+		const object = event.received ? one.recipient : one.source;
+		const key = object ? targetKey(ref(object)) : `seat-${one.dealt}`;
+		groups.set(key, [...(groups.get(key) ?? []), one]);
+	}
+	return [...groups.values()];
+}
+
+/** 603.2h: declining or losing targets does not use the effect; a use persists even after its source leaves. */
+export function usedThisTurn(table: Table, source: ObjectRef, basis: string, by: SeatId): boolean {
+	return table.log.some((receipt) => receipt.turn === table.cursor.turn && receipt.changes.some((change) => {
+		const use = change.do === "resolution" && change.action === "next" ? change.use : undefined;
+		return use?.source.id === source.id && use.source.incarnation === source.incarnation && use.basis === basis && use.by === by;
+	}));
 }
 
 /** Whether this ability already triggered this turn, for "only once each turn". */
@@ -226,12 +267,14 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 		const matched = live.filter((occurrence) => !!occurrence.lookBack === (scope.world !== after)).flatMap((occurrence) => fits(scope, event, occurrence) ?? []);
 		if (!matched.length) return false;
 		// Each occurrence is its own trigger (603.2c), unless the card says "one or more"; a once-only delayed trigger fires for the first alone (603.7b).
-		for (const group of event.batch ? [matched] : matched.map((one) => [one])) {
+		for (const group of groups(event, matched)) {
 			const made: Trigger = { id: stamp(), controller, source, basis, ...structuredClone(rest), event: eventOf(group), turn: table.cursor.turn };
-			const eventScope = { ...scope, event: { ...(group[0]!.object ? { object: group[0]!.object } : {}), ...(made.event.player !== undefined ? { player: made.event.player } : {}),
-				...(group[0]!.source ? { source: group[0]!.source } : {}) } };
+			const eventScope = { ...scope, event: { ...(made.event.object && group[0]!.object ? { object: group[0]!.object } : {}), ...(made.event.player !== undefined ? { player: made.event.player } : {}),
+				...(made.event.source && group[0]!.source ? { source: group[0]!.source } : {}), ...(made.event.recipient && group[0]!.recipient ? { recipient: group[0]!.recipient } : {}),
+				...(made.event.amount !== undefined ? { amount: made.event.amount } : {}) } };
 			if (made.check && !holds(eventScope, made.check)) continue;
-			if (made.limit && triggeredThisTurn(table, source, basis, waiting)) continue;
+			if (made.limit === "once-per-turn" && triggeredThisTurn(table, source, basis, waiting)) continue;
+			if (made.limit === "once-per-turn-use" && usedThisTurn(table, source, basis, controller)) continue;
 			waiting.push(made);
 			if (once) break;
 		}
@@ -268,7 +311,8 @@ export function eventScope(world: World, event: Trigger["event"] | undefined): S
 	if (!event) return undefined;
 	const seen = (one?: ObjectRef) => one ? world.lastKnown(one)?.object : undefined;
 	return { ...(seen(event.object) ? { object: seen(event.object)! } : {}), ...(event.objects ? { objects: event.objects.flatMap((one) => seen(one) ?? []) } : {}),
-		...(event.player !== undefined ? { player: event.player } : {}), ...(seen(event.source) ? { source: seen(event.source)! } : {}) };
+		...(event.player !== undefined ? { player: event.player } : {}), ...(seen(event.source) ? { source: seen(event.source)! } : {}),
+		...(seen(event.recipient) ? { recipient: seen(event.recipient)! } : {}), ...(event.amount !== undefined ? { amount: event.amount } : {}) };
 }
 
 /**
@@ -306,11 +350,15 @@ export function triggerWindow(table: Table): Pending | null {
 				...(doubleFaced(table.printed[source?.card ?? ""]) ? { transformAt: trigger.transformAt ?? source?.transformed ?? 0 } : {}),
 				cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(trigger.effect.instructions),
 				trigger: { event: structuredClone(trigger.event), ...(trigger.chapter !== undefined ? { chapter: trigger.chapter } : {}), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
+					...(trigger.limit === "once-per-turn-use" ? { limit: trigger.limit } : {}),
 					...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
+			const recipient = trigger.event.recipient && world.lastKnown(trigger.event.recipient)?.object;
+			const recipientName = recipient && !recipient.faceDown && PUBLIC.has(recipient.zone) ? recipient.card ?? recipient.token?.name ?? recipient.id : "an unknown permanent";
+			const damage = trigger.event.amount === undefined ? [] : [`Damage in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
 			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
 				label: [`Put on the stack: ${name}: ${trigger.basis}`, ...aimed].join(" "),
-				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
+				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...damage, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 				trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: trigger.basis, targets: structuredClone(targets.flat()) } },
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };

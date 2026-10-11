@@ -41,7 +41,7 @@ const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
  * other than `event:*` are fixed when that trigger is created.
  */
 export const ObjectRef = Type.Union([
-	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
+	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
 	object({ top: positive, of: Type.String({ pattern: "^(you|self|opponent|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
 ]);
 export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source)|owner:(this|attached|target:[0-9]+|event:object))$" });
@@ -99,6 +99,9 @@ export const Defs = {
 		object({ bound: name }),
 		object({ distinct: Type.Literal("card-types"), among: Type.Ref("Selector") }),
 		object({ life: PlayerRef }),
+		object({ startingLife: PlayerRef }),
+		object({ event: Type.Literal("amount") }),
+		object({ half: Type.Ref("Amount"), round: one("up", "down") }),
 		/** This turn so far, read from what was recorded. */
 		object({ history: one("cast", "attacked", "life-lost", "life-gained"), of: Type.Optional(Type.Ref("Selector")), by: Type.Optional(Side) }),
 		/** The X announced for this spell or ability; a permanent remembers the X it was cast with (107.3m). */
@@ -110,7 +113,7 @@ export const Defs = {
 	]),
 
 	Condition: Type.Union([
-		object({ amount: Type.Ref("Amount"), atLeast: Type.Optional(Type.Integer()), atMost: Type.Optional(Type.Integer()) }),
+		object({ amount: Type.Ref("Amount"), ...Range.properties }),
 		/** The binding holds at least one object, or the optional instruction that made it was done. */
 		object({ bound: name }),
 		object({ is: ObjectRef, matches: Type.Ref("Selector") }),
@@ -161,7 +164,7 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "step", "transforms", "unlocks"),
+		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks"),
 		face: Type.Optional(Face), fully: Type.Optional(Type.Literal(true)),
 		of: Type.Optional(Type.Ref("Selector")),
 		/** Who cast, attacked, or controls the targeting spell or ability. */
@@ -170,8 +173,12 @@ export const Defs = {
 		to: Type.Optional(Type.Array(Zone)),
 		step: Type.Optional(Step),
 		whose: Type.Optional(Side),
-		/** Combat damage to a player, rather than to anything. */
-		player: Type.Optional(Type.Literal(true)),
+		/** Damage to any player, or to the named side. */
+		player: Type.Optional(Type.Union([Type.Literal(true), Side])),
+		/** With damage, of names the recipient instead of the source. Each recipient is one occurrence. */
+		received: Type.Optional(Type.Literal(true)),
+		/** Omitted watches both combat and noncombat damage. */
+		combat: Type.Optional(Type.Boolean()),
 		/** "One or more": one trigger for the whole group. */
 		batch: Type.Optional(Type.Literal(true)),
 	}),
@@ -226,8 +233,9 @@ export const Defs = {
 		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** A triggered ability. `if` is its intervening if (603.4). */
-		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect"),
-			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Literal("once-per-turn")) }),
+		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect"),
+			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Union([Type.Literal("once-per-turn"), Type.Literal("once-per-turn-use")])) },
+			{ additionalProperties: false, if: { properties: { limit: { const: "once-per-turn-use" } }, required: ["limit"] }, then: { required: ["may"] } }),
 		/** A static ability. Applies while `if` holds, to whatever matches `affects` at each reading. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("continuous"), affects: Type.Ref("Selector"), change: Type.Ref("Modification"), if: Type.Optional(Type.Ref("Condition")) }),
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */

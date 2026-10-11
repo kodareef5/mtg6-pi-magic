@@ -124,7 +124,7 @@ export type Activation = {
 	words?: string[];
 	x?: number;
 	/** Set when a triggered ability was put on the stack: what it needs to resolve. */
-	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound" | "chapter">;
+	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound" | "chapter" | "limit">;
 };
 /**
  * A triggered ability waiting to be put on the stack (603.3). It belongs to the
@@ -144,10 +144,10 @@ export type Trigger = {
 	check?: Condition;
 	/** "You may": asked as it resolves. */
 	may?: true;
-	/** "Only once each turn": counted from what triggered this turn. */
-	limit?: "once-per-turn";
+	/** Trigger count, or "do this only once": counted from accepted uses (603.2h). */
+	limit?: "once-per-turn" | "once-per-turn-use";
 	/** What the event happened to, who caused it, and the spell or ability that did. */
-	event: { object?: ObjectRef; objects?: ObjectRef[]; player?: SeatId; source?: ObjectRef };
+	event: { object?: ObjectRef; objects?: ObjectRef[]; player?: SeatId; source?: ObjectRef; recipient?: ObjectRef; amount?: number };
 	/** A delayed or reflexive trigger's refs, fixed when it was created (603.7c). */
 	bound?: Record<string, Bound>;
 	/** The turn it triggered in, which "only once each turn" counts by. */

@@ -12,6 +12,7 @@ schemas, and every `basis` is checked against the card's text.
 | `entering.md` | entering tapped under a condition, a shock land's optional life payment, a Town's own-turn count, entering with counters, how other permanents enter, 305.7 |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `cast-facts.md` | mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
+| `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |
 | `statics.md` | lords, conditional statics, linked exile, Auras and `attached`, fight |
 | `until-end-of-turn.md` | temporary changes, counters with keywords, doubling power, `if` and `limit`, play permissions |
 | `costs.md` | sacrifice with last known information, discard or exile the card itself, life, reductions |

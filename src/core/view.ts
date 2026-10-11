@@ -191,7 +191,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
 		...(viewer !== "spectator" ? { purposes: purposes(table, viewer) } : {}),
 		seats: table.seats.map((one) => ({ id: one.id, name: one.name })),
-		players: playing(table).map((one) => ({ id: one.id, life: one.life, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		...(declarationReview ? { declarationReview } : {}),
 		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts } } : {}),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history: happened(table),
@@ -277,9 +277,11 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			case "untap":
 				parts.push(`${change.do}ped ${publicName(receipt.before[change.what])}`);
 				break;
-			case "damage":
-				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount}${change.combat ? " combat" : ""} damage from ${publicName(receipt.before[change.source] ?? table.things.get(change.source))}`);
+			case "damage": {
+				const source = typeof change.source === "string" ? change.source : change.source.id;
+				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount}${change.combat ? " combat" : ""} damage from ${publicName(receipt.before[source])}`);
 				break;
+			}
 			case "activate":
 				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : change.ability.timing === "spell" ? "spell on the stack" : "on the stack"})`);
 				break;

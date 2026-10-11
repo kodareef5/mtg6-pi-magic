@@ -57,6 +57,7 @@ any. Any other lowercase word is recorded for the players and the judge.
 | `bound:name` | what an earlier instruction bound with `as` ("that land", "that much") |
 | `event:object`, `event:objects` | what the triggering event happened to ("that land", "those creatures") |
 | `event:player`, `event:source` | who caused the event, and the spell or ability that did ("that player", ward's "that spell") |
+| `event:recipient` | the permanent dealt damage, when the matched event has one shared recipient |
 | `{top: 1, of: "you"}` | the top card of a library |
 | `you` (or `self`), `opponent`, `each-player` | players relative to the source's controller |
 | `controller:target:0`, `owner:this` | a player read off an object |
@@ -113,6 +114,9 @@ An **amount** is worked out when it is read and never stored.
 | `bound` | "that much", "that many" |
 | `distinct: "card-types"` among a selector | Keen-Eyed Curator |
 | `life` of a player | "if you have 10 or less life" |
+| `startingLife` of a player | the format's starting life total, independent of current life |
+| `{event: "amount"}` | damage dealt in the matched event, including simultaneous sources or recipients |
+| `half` of an amount, with `round: "up"` or `"down"` | Cecil's comparison with half starting life |
 | `history` this turn: `cast`, `attacked`, `life-lost`, `life-gained`, with `of` and `by` | Witchstalker Frenzy, Magebane Lizard, Hired Claw |
 | `x` | the X announced for this spell or ability; a permanent remembers its X (107.3m) |
 | `sum` | amounts added together: Calamitous Cave-In's Caves plus Cave cards |
@@ -233,10 +237,21 @@ Keywords are `continuous` registrations with `words` on the object itself.
 
 **Events** are what the table records: `enters`, `leaves`, `dies`, `attacks`,
 `attacked-with` (a player attacked with one or more), `blocks`, `cast`,
-`targeted`, `combat-damage`, and `step` beginnings. `of` selects what it
+`targeted`, `damage`, `combat-damage`, and `step` beginnings. `of` selects what it
 happened to, `by` who did it, `from` and `to` the zones, `step` and `whose` the
 step, `player` combat damage to a player, and `batch` one trigger for "one or
-more".
+more". Damage watches optionally filter `combat: true` or `false`. They group
+by source, or by recipient with `received: true`; `of` selects that object and
+`{event: "amount"}` sums its matched damage. `player` can also name a side.
+See [damage](examples/damage.md) for simultaneous events and last known sources.
+
+A watch's `limit: "once-per-turn"` counts triggers. An optional watch with
+`may: true` and `limit: "once-per-turn-use"` instead records acceptance during
+resolution (603.2h). Declining and losing all targets spend nothing. The chosen
+use stops pending copies and new triggers that turn; it survives source removal
+and journal replay. This limits the whole effect, not an optional instruction
+inside a larger effect. Condition bounds can read amounts too, including half
+the controller's starting life.
 
 **Packages.** Before play, the model assesses each registered card with rules
 text. A package holds `card`, `registers`, reusable `procedures`, optional

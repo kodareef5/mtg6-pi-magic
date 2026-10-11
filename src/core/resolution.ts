@@ -8,7 +8,7 @@ import { characteristics } from "./characteristics.ts";
 import { facts } from "./printed.ts";
 import { instructionStep } from "./instructions.ts";
 import { holds, matches, players, tableWorld, targetKey, type Scope } from "./selectors.ts";
-import { eventScope } from "./triggers.ts";
+import { eventScope, usedThisTurn } from "./triggers.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { Table, Thing } from "./table.ts";
 import type { Change } from "./syntax.ts";
@@ -31,8 +31,9 @@ export function begin(table: Table, object: Thing): Change {
 		return !now || now.incarnation !== chosen.incarnation || !slot.object || !matches(scope, now, slot.object);
 	}).map(targetKey));
 	const chosen = ability.targets.flat();
+	const spent = trigger?.limit === "once-per-turn-use" && usedThisTurn(table, ability.source, ability.basis, ability.controller);
 	// An intervening "if" that no longer holds: it does nothing (603.4).
-	const lost = (chosen.length > 0 && illegal.length === chosen.length) || (!!trigger?.check && !holds(scope, trigger.check));
+	const lost = spent || (chosen.length > 0 && illegal.length === chosen.length) || (!!trigger?.check && !holds(scope, trigger.check));
 	const permanent = ability.timing === "spell" && !!characteristics(table, object)?.types.some((type) => PERMANENT.includes(type));
 	return { do: "resolution", action: "begin", what: object.id, source: ability.timing === "spell" ? { id: object.id, incarnation: object.incarnation } : ability.source,
 		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const, controller: "you" as const } }] : []),
@@ -49,6 +50,18 @@ export function resolving(table: Table): Pending | null {
 		event: eventScope(world, ability.trigger?.event),
 		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;
+	const checked = (moves: Move[]): Move[] => {
+		const conflicts = pending.targetsChecked ? [] : targetConflicts(ability.targets.flat(), world, ability.controller)
+			.filter((one) => !pending.illegal.includes(targetKey(one.target)));
+		if (!conflicts.length) return moves;
+		const ignored = [...new Set([...pending.illegal, ...conflicts.map((one) => targetKey(one.target))])];
+		const warning = conflicts.map((one) => one.reason).join(" ");
+		for (const move of moves) move.option.shows = `${move.option.shows ?? ""} ${warning} This continues with those targets.`.trim();
+		moves.unshift({ option: { id: `${prefix}:targets`, label: "Apply target restrictions before resolving (608.2b).",
+			shows: `${warning} Ignore those targets; if no legal target remains, none of this use resolves.` },
+			changes: [{ do: "resolution", action: "targets", what: object.id, illegal: ignored }], reason: "resolve" });
+		return moves;
+	};
 	// An instant or sorcery still on the stack goes to the graveyard as the last part (608.2n).
 	const finish = (changes: Change[]): Change[] => {
 		if (ability.timing !== "spell" || object.zone !== "stack" || changes.some((change) => change.do === "move" && change.what === object.id)) return [];
@@ -65,14 +78,16 @@ export function resolving(table: Table): Pending | null {
 	if (pending.lost || !item) {
 		const targeted = ability.targets.flat().length;
 		const label = !pending.lost ? `Finish resolving ${ability.claim}.` : targeted && pending.illegal.length === targeted ? "Every target is illegal; it does not resolve (608.2b)."
+			: ability.trigger?.limit === "once-per-turn-use" && usedThisTurn(table, ability.source, ability.basis, ability.controller) ? "This effect was already used this turn; it does nothing (603.2h)."
 			: "Its condition no longer holds; it does nothing (603.4).";
 		return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}.`,
 			moves: [{ option: { id: prefix, label }, changes: [...finish([]), { do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" }] };
 	}
-	if (pending.optional) return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}. It is optional.`, moves: [
-		{ option: { id: `${prefix}:use`, label: "Use it" }, changes: [{ do: "resolution", action: "next", what: object.id, accept: true }], reason: "resolve" },
+	if (pending.optional) return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}. It is optional.${ability.trigger?.event.amount !== undefined ? ` Damage in the triggering event: ${ability.trigger.event.amount}.` : ""}`, moves: checked([
+		{ option: { id: `${prefix}:use`, label: "Use it" }, changes: [{ do: "resolution", action: "next", what: object.id, accept: true,
+			...(ability.trigger?.limit === "once-per-turn-use" ? { use: { source: ability.source, basis: ability.basis, by: ability.controller } } : {}) }], reason: "resolve" },
 		{ option: { id: `${prefix}:decline`, label: "Decline: it is optional" }, changes: [{ do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" },
-	] };
+	]) };
 	const instruction = item.instruction;
 	const skipped = instruction.if && !holds(scope, instruction.if);
 	const step = skipped ? { actor: ability.controller, question: "Its condition is false.", choices: [{ id: "skip", label: "Skip: its condition is false", changes: [] as Change[] }] }
@@ -86,17 +101,5 @@ export function resolving(table: Table): Pending | null {
 				...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
 		reason: "resolve",
 	}));
-	const conflicts = pending.targetsChecked ? [] : targetConflicts(ability.targets.flat(), world, ability.controller)
-		.filter((one) => !pending.illegal.includes(targetKey(one.target)));
-	if (conflicts.length) {
-		const ignored = [...new Set([...pending.illegal, ...conflicts.map((one) => targetKey(one.target))])];
-		const warning = conflicts.map((one) => one.reason).join(" ");
-		for (const move of moves) {
-			move.option.shows = `${move.option.shows ?? ""} ${warning} This continues with those targets.`.trim();
-		}
-		moves.unshift({ option: { id: `${prefix}:targets`, label: "Apply target restrictions before resolving (608.2b).",
-			shows: `${warning} Ignore those targets; if no legal target remains, none of this use resolves.` },
-			changes: [{ do: "resolution", action: "targets", what: object.id, illegal: ignored }], reason: "resolve" });
-	}
-	return { situation: "resolution", seat: step.actor, question: `Resolve: ${ability.claim}. ${step.question}`, moves };
+	return { situation: "resolution", seat: step.actor, question: `Resolve: ${ability.claim}. ${step.question}`, moves: checked(moves) };
 }

@@ -83,7 +83,7 @@ export type Change =
 	| { do: "prepare"; what: string; prepared: boolean }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
-	| { do: "damage"; source: string; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }
+	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true }
 	| { do: "activate"; what: string; id: string; ability: Activation }
 	| { do: "resolution"; action: "begin"; what: string; source: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean;
 		bound?: Resolution["bound"]; optional?: true }
@@ -96,7 +96,9 @@ export type Change =
 	 * puts an `each` in its place; `follow` is the permanent a spell became.
 	 */
 	| { do: "resolution"; action: "next"; what: string; pick?: ObjectRef; bind?: Record<string, Bound>;
-		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true }
+		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true;
+		/** A chosen limited effect, journaled even when this group moves no object. */
+		use?: { source: ObjectRef; basis: string; by: SeatId } }
 	/** A reflexive trigger made during resolution waits for the next priority (603.12). */
 	| { do: "trigger"; action: "wait"; trigger: Trigger }
 	/**
