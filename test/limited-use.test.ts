@@ -32,13 +32,13 @@ test("optional once-per-turn effects count acceptance, retain unused triggers an
 		const put = (target: string) => {
 			const decision = nextDecision(table)!;
 			assert.equal(decision.situation, "trigger-order");
-			assert.ok(decision.options.every((one) => one.shows?.includes("Damage in this event:")), "Jev sees each trigger's amount before choosing its order");
+			assert.ok(decision.options.every((one) => one.shows?.includes("Amount in this event:")), "Jev sees each trigger's amount before choosing its order");
 			apply(table, decision.options.find((one) => one.id.endsWith(`:t0=${target}`))!.id, "model", "chosen");
 		};
 		put("seat-1"); put("seat-1");
 		passBoth(table);
 		assert.ok(nextDecision(table)!.options.some((one) => one.label === "Use it"));
-		assert.ok(nextDecision(table)!.question.includes("Damage in the triggering event:"));
+		assert.ok(nextDecision(table)!.question.includes("Amount in the triggering event:"));
 		const untouched = structuredClone(table); nextDecision(table); assert.deepEqual(table, untouched);
 		step(table, (label) => label.startsWith(decline ? "Decline" : "Use it"));
 		assert.equal(usedThisTurn(table, source, basis, 0), !decline);

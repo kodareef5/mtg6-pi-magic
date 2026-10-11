@@ -26,7 +26,7 @@ Those drive engine and syntax work, ordered by how many decks they block.
 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control and Boros
 Dragons have standing assessments for every main-deck card. They still have
 thirteen, eight, thirteen, fifteen and five cards with deferred uses respectively.
-The first four have completed source-reviewed games.
+All five have completed source-reviewed games.
 [Status](STATUS.md) holds the current count. The other fourteen lists still need
 standing assessments.
 

@@ -354,14 +354,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Political Triumph": {
-		"reason": "Political Triumph is not ready: When the fourth plan counter is put on this enchantment, sacrifice it, draw a card, and put a +1/+1 counter on each creature you control. — Missing event support for putting the fourth counter on this object, including counters placed by other effects; a creature-entry watch or a counter-count condition cannot faithfully replace this trigger.",
-		"decks": [
-			"Boros Tokens"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Preacher of the Schism": {
 		"reason": "Preacher of the Schism is not ready: Whenever this creature attacks the player with the most life or tied for most life, create a 1/1 white Vampire creature token with lifelink. — Missing an attack-event filter identifying the attacked player (excluding attacks against planeswalkers or battles) and checking that player's life ranking when attackers are declared. The documented event.player filter concerns combat damage, not the recipient of an attack.",
 		"decks": [

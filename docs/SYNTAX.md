@@ -296,6 +296,10 @@ permanent. That is where warp's delayed exile and an Aura's `attach` go.
 
 ## Registering
 
+Counter watches use `on: "counters"`, optional `counter` for the kind and
+`reaches` for crossing an Nth-counter threshold, including entry counters.
+See [counter watches](examples/counter-watches.md) for batching and actor limits.
+
 A **registration** is a public note on an object. It lives while that object
 exists, or until its own end. Every registration quotes the text it carries out
 in `basis`, so another seat or a judge can check it. Registrations are how a

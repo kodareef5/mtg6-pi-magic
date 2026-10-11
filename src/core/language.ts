@@ -194,7 +194,9 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks"),
+		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters"),
+		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
+		counter: Type.Optional(text), reaches: Type.Optional(positive),
 		face: Type.Optional(Face), fully: Type.Optional(Type.Literal(true)),
 		of: Type.Optional(Type.Ref("Selector")),
 		/** Who cast, attacked, or controls the targeting spell or ability. */

@@ -50,6 +50,9 @@ type Occurrence = {
 	lookBack?: true;
 	face?: 0 | 1;
 	fully?: true;
+	counter?: string;
+	beforeCount?: number;
+	afterCount?: number;
 };
 
 const ref = (object: Pick<Seen, "id" | "incarnation">): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -74,6 +77,18 @@ export function before(table: Table, changes: Change[]): World | undefined {
 function occurrences(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }): Occurrence[] {
 	const found: Occurrence[] = [];
 	const now = (id: string) => table.things.get(id);
+	const counts = new Map<string, Record<string, number>>();
+	const counters = (id: string, changes: Record<string, number>, entering = false) => {
+		const object = now(id);
+		const previous = entering ? {} : counts.get(id) ?? { ...receipt.before[id]?.counters };
+		counts.set(id, previous);
+		for (const [counter, added] of Object.entries(changes)) {
+			const beforeCount = previous[counter] ?? 0, afterCount = Math.max(0, beforeCount + added);
+			previous[counter] = afterCount;
+			if (added > 0 && object?.zone === "battlefield") found.push({ on: "counters", object, traits: characteristics(table, object), found: ref(object),
+				counter, beforeCount, afterCount, amount: added });
+		}
+	};
 	for (const change of changes) {
 		switch (change.do) {
 			case "move": {
@@ -81,6 +96,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				if (!was || !is || was.incarnation === is.incarnation) break;
 				if (change.to === "battlefield") {
 					found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), from: was.zone, to: "battlefield" });
+					counters(is.id, change.counters ?? {}, true);
 					for (const face of is.doors ?? []) found.push({ on: "unlocks", object: is, traits: characteristics(table, is), found: ref(is), face, player: is.controller });
 				}
 				if (was.zone === "battlefield" && is.zone !== "battlefield") {
@@ -106,8 +122,12 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "token": {
 				const is = now(change.id);
 				if (is) found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), to: "battlefield" });
+				counters(change.id, change.counters ?? {}, true);
 				break;
 			}
+			case "counters":
+				counters(change.what, { [change.kind]: change.amount });
+				break;
 			case "activate": case "trigger": {
 				const ability = change.do === "activate" ? change.ability : change.action === "put" ? change.ability : undefined;
 				const id = change.do === "activate" ? (ability?.timing === "spell" ? change.what : change.id) : change.action === "put" ? change.id : undefined;
@@ -159,6 +179,8 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
+	if (event.counter !== undefined && event.counter !== occurrence.counter) return null;
+	if (event.reaches !== undefined && !(occurrence.beforeCount !== undefined && occurrence.beforeCount < event.reaches && occurrence.afterCount! >= event.reaches)) return null;
 	if (event.combat !== undefined && event.combat !== occurrence.combat) return null;
 	if (event.received) occurrence = { ...occurrence, object: occurrence.recipient, traits: occurrence.recipientTraits, found: occurrence.recipient ? ref(occurrence.recipient) : undefined };
 	if (event.face !== undefined && event.face !== occurrence.face || event.fully && !occurrence.fully) return null;
@@ -194,6 +216,8 @@ function eventOf(occurrences: Occurrence[]): Trigger["event"] {
 /** A damage event has one occurrence per source, or per recipient when the watch reads damage received. */
 function groups(event: GameEvent, matched: Occurrence[]): Occurrence[][] {
 	if (event.batch) return [matched];
+	// A counter watch fires for each counter; an Nth-counter watch fires once on crossing (122.7).
+	if (event.on === "counters") return matched.flatMap((one) => Array.from({ length: event.reaches === undefined ? one.amount! : 1 }, () => [{ ...one, amount: event.reaches === undefined ? 1 : one.amount }]));
 	if (event.on !== "damage") return matched.map((one) => [one]);
 	const groups = new Map<string, Occurrence[]>();
 	for (const one of matched) {
@@ -359,10 +383,10 @@ export function triggerWindow(table: Table): Pending | null {
 			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
 			const recipient = trigger.event.recipient && world.lastKnown(trigger.event.recipient)?.object;
 			const recipientName = recipient && !recipient.faceDown && PUBLIC.has(recipient.zone) ? recipient.card ?? recipient.token?.name ?? recipient.id : "an unknown permanent";
-			const damage = trigger.event.amount === undefined ? [] : [`Damage in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
+			const eventAmount = trigger.event.amount === undefined ? [] : [`Amount in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
 			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
 				label: [`Put on the stack: ${name}: ${trigger.basis}`, ...aimed].join(" "),
-				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...damage, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
+				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...eventAmount, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
 				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 				trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: trigger.basis, targets: structuredClone(targets.flat()) } },
 				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };

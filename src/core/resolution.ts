@@ -83,7 +83,7 @@ export function resolving(table: Table): Pending | null {
 		return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}.`,
 			moves: [{ option: { id: prefix, label }, changes: [...finish([]), { do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" }] };
 	}
-	if (pending.optional) return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}. It is optional.${ability.trigger?.event.amount !== undefined ? ` Damage in the triggering event: ${ability.trigger.event.amount}.` : ""}`, moves: checked([
+	if (pending.optional) return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}. It is optional.${ability.trigger?.event.amount !== undefined ? ` Amount in the triggering event: ${ability.trigger.event.amount}.` : ""}`, moves: checked([
 		{ option: { id: `${prefix}:use`, label: "Use it" }, changes: [{ do: "resolution", action: "next", what: object.id, accept: true,
 			...(ability.trigger?.limit === "once-per-turn-use" ? { use: { source: ability.source, basis: ability.basis, by: ability.controller } } : {}) }], reason: "resolve" },
 		{ option: { id: `${prefix}:decline`, label: "Decline: it is optional" }, changes: [{ do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" },
