@@ -16,7 +16,7 @@ import type { SeenObject } from "./work.ts";
 import { casting, type Casting } from "./casting.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "choices">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }

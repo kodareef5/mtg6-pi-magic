@@ -167,7 +167,7 @@ export const Defs = {
 	Modification: object({
 		types: Type.Optional(object({ set: Type.Optional(Type.Array(one(...CARD_TYPES))), add: Type.Optional(Type.Array(one(...CARD_TYPES))) })),
 		/** `of` names whose subtypes are set; setting a land's subtypes removes its other land abilities (305.7). */
-		subtypes: Type.Optional(object({ set: Type.Optional(Type.Array(text)), add: Type.Optional(Type.Array(text)), of: Type.Optional(one("creature", "land", "artifact", "enchantment")), allCreatureTypes: Type.Optional(Type.Literal(true)) })),
+		subtypes: Type.Optional(object({ set: Type.Optional(Type.Union([Type.Array(text), object({ chosen: text })])), add: Type.Optional(Type.Array(text)), of: Type.Optional(one("creature", "land", "artifact", "enchantment")), allCreatureTypes: Type.Optional(Type.Literal(true)) })),
 		base: Type.Optional(object({ power: Type.Ref("Amount"), toughness: Type.Ref("Amount") })),
 		power: Type.Optional(Type.Ref("Amount")),
 		toughness: Type.Optional(Type.Ref("Amount")),
@@ -266,6 +266,7 @@ export const Defs = {
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			prepared: Type.Optional(Type.Literal(true)),
+			choose: Type.Optional(object({ as: text, from: Type.Literal("basic-land-type") })),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
 			/** "You may pay 2 life. If you don't, it enters tapped": the generic entry decision asks its controller before the group commits. */
 			unlessPay: Type.Optional(object({ life: positive })) }),

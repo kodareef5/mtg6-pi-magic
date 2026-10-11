@@ -224,6 +224,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				delete moving.face; delete moving.doors;
 				delete moving.transformed;
 				delete moving.prepared;
+				delete moving.choices;
+				if (change.to === "battlefield" && change.choices) moving.choices = structuredClone(change.choices);
 				if ((change.to === "stack" || change.to === "battlefield") && change.face !== undefined) moving.face = change.face;
 				else if (change.to === "battlefield" && from === "stack" && previousFace !== undefined) moving.face = previousFace;
 				if (change.to === "battlefield" && room(moving.card ? table.printed[moving.card] : undefined)) {

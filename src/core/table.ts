@@ -50,6 +50,8 @@ export type ObjectId = string;
  * deck, and the engine is none the wiser.
  */
 export type Thing = {
+	/** Named entry choices belong to this incarnation. Characteristics are derived from them. */
+	choices?: Record<string, string>;
 	/** Selected spell or battlefield face, and Room unlocked designations. */
 	face?: 0 | 1;
 	/** Last transformation's clock, for 701.27f and effect timestamps. */

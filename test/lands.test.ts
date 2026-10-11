@@ -10,7 +10,9 @@ import { check, PackageSchema, type Package, type Registration } from "../src/co
 import { fundings, produces } from "../src/core/funding.ts";
 import { amount, holds, tableWorld, turnsTaken } from "../src/core/selectors.ts";
 import { seat } from "../src/core/table.ts";
-import { main, matchup, place, establish } from "./play.ts";
+import { main, matchup, place, establish, pack } from "./play.ts";
+import { characteristics, intrinsic } from "../src/core/characteristics.ts";
+import { project } from "../src/core/view.ts";
 import { start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { beforeEntry } from "../src/core/entry-payments.ts";
@@ -144,4 +146,39 @@ test("entry payments wait for every controller and preserve the simultaneous gro
 		assert.deepEqual(relive(prefix, played.ledger.slice(from)), played);
 	}
 
+});
+
+test("entry choices precede payment and derive types for only the entering incarnation", () => {
+	for (const pay of [false, true]) {
+		const table = pool(`chosen-type-${pay}`); main(table, 0);
+		const registers = pack("Multiversal Passage");
+		editWork(table, 0, [{ do: "package.put", package: { card: "Multiversal Passage", assessed: true, registers } }], "passage-package");
+		const [land] = place(table, 0, "hand", "Multiversal Passage");
+		const initial = structuredClone(table), from = table.ledger.length;
+		apply(table, `land:${land!.id}`, "model", "chosen");
+		const choosing = structuredClone(table);
+		assert.equal(nextDecision(table)!.options.length, 5);
+		assert.deepEqual(table, choosing, "listing types moves nothing");
+		apply(table, "entry:0:choose:landType:Island", "model", "chosen");
+		assert.equal(land!.zone, "hand"); assert.equal(land!.choices, undefined);
+		assert.equal(seat(table, 0).life, 20); assert.equal(seat(table, 0).landsPlayed, 0);
+		const clone = structuredClone(table), at = table.ledger.length;
+		apply(table, `entry:0:${pay ? "pay" : "decline"}`, "model", "chosen");
+		assert.equal(land!.tapped, !pay); assert.equal(seat(table, 0).life, pay ? 18 : 20);
+		assert.deepEqual(land!.choices, { landType: "Island" });
+		const traits = characteristics(table, land!)!;
+		assert.deepEqual(traits.subtypes, ["Island"]); assert.deepEqual(intrinsic(traits), ["U"]);
+		assert.ok(!traits.supertypes.includes("basic")); assert.equal(traits.registrations.length, 0);
+		assert.ok(project(table, "spectator").table.some((line) => line.includes("landType: Island")));
+		assert.deepEqual(relive(clone, table.ledger.slice(at)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+		commit(table, [{ do: "move", what: land!.id, to: "graveyard", reason: "destroy" }], "destroy");
+		assert.equal(land!.choices, undefined);
+		assert.deepEqual(characteristics(table, land!)!.subtypes, []);
+		// A fetched or returned land takes the same path, including an independent tapped instruction.
+		commit(table, beforeEntry(table, [{ do: "move", what: land!.id, to: "battlefield", reason: "resolve", registers, tapped: true }], "resolve"), "resolve");
+		apply(table, "entry:0:choose:landType:Forest", "model", "chosen");
+		apply(table, "entry:0:pay", "model", "chosen");
+		assert.equal(land!.tapped, true); assert.deepEqual(intrinsic(characteristics(table, land!)), ["G"]);
+	}
 });

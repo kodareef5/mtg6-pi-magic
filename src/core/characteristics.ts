@@ -54,6 +54,7 @@ export function subtypesOf(kind: "artifact" | "enchantment" | "land" | "planeswa
 export const creatureType = (subtype: string) => !(["artifact", "enchantment", "land", "planeswalker", "spell"] as const).some((kind) => subtypesOf(kind).has(subtype.toLowerCase()));
 
 const BASIC: Record<string, Color> = { plains: "W", island: "U", swamp: "B", mountain: "R", forest: "G" };
+export const basicLandTypes = Object.keys(BASIC).map((name) => name[0]!.toUpperCase() + name.slice(1));
 /** 305.6: a land with a basic land type taps for that type's color. */
 export const intrinsic = (traits?: Traits): Color[] => traits?.types.includes("land")
 	? traits.subtypes.flatMap((subtype) => BASIC[subtype.toLowerCase()] ? [BASIC[subtype.toLowerCase()]!] : []) : [];
@@ -147,15 +148,18 @@ export function walk(table: Table, override?: Thing): Map<string, Traits> {
 	};
 
 	// Layer 4: types. Setting a land's subtypes removes the abilities its own text gave it (305.7).
-	each((change, traits) => {
+	each((change, traits, inner) => {
 		if (change.types?.set) traits.types = [...change.types.set];
 		if (change.types?.add) traits.types = [...new Set([...traits.types, ...change.types.add])];
 		const subtypes = change.subtypes;
 		if (!subtypes) return;
 		if (subtypes.set) {
+			const chosen = !Array.isArray(subtypes.set) && inner.source?.choices?.[subtypes.set.chosen];
+			const set = Array.isArray(subtypes.set) ? subtypes.set : chosen ? [chosen] : undefined;
+			if (!set) return;
 			const of = subtypes.of;
 			const keep = (subtype: string) => of === "creature" ? !creatureType(subtype) : of ? !subtypesOf(of as "artifact" | "enchantment" | "land").has(subtype.toLowerCase()) : false;
-			traits.subtypes = [...traits.subtypes.filter(keep), ...subtypes.set];
+			traits.subtypes = [...traits.subtypes.filter(keep), ...set];
 			if (of === "land") traits.registrations = [];
 			if (of === "creature") delete traits.allCreatureTypes;
 		}

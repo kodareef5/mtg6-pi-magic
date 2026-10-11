@@ -101,6 +101,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			!permanent.faceDown && permanent.face !== undefined ? `face ${permanent.face}` : null,
 			!permanent.faceDown && permanent.doors ? `unlocked doors: ${permanent.doors.join(", ") || "none"}` : null,
 			!permanent.faceDown && permanent.prepared ? "prepared" : null,
+			...(!permanent.faceDown ? Object.entries(permanent.choices ?? {}).map(([key, value]) => `${key}: ${value}`) : []),
 			permanent.tapped ? "tapped" : null,
 			permanent.damage ? `${permanent.damage} damage marked` : null,
 			...Object.entries(permanent.counters).map(([kind, n]) => `${n} ${kind}`),
@@ -288,7 +289,8 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				// A seat knows the cards that reach its own hand, such as its draws.
 				const known = viewer !== "spectator" && change.to === "hand" && moved.owner === viewer && !moved.faceDown && !!moved.card;
 				const name = known ? moved.card : visible(moved) ? moved.card : publicName(was);
-				const terms = change.to === "battlefield" ? [change.tapped ? "tapped" : "", ...Object.entries(change.counters ?? {}).map(([kind, n]) => `${n} ${kind}`)].filter(Boolean) : [];
+				const terms = change.to === "battlefield" ? [change.tapped ? "tapped" : "", ...Object.entries(change.counters ?? {}).map(([kind, n]) => `${n} ${kind}`),
+					...Object.entries(change.choices ?? {}).map(([key, value]) => `${key}: ${value}`)].filter(Boolean) : [];
 				parts.push(`${who} put ${name} into ${change.to} (${change.reason})${terms.length ? `, ${terms.join(", ")}` : ""}`);
 				break;
 			}
