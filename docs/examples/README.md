@@ -36,7 +36,7 @@ schemas, and every `basis` is checked against the card's text.
 | `search.md` | searching as choose, move, shuffle, from a land and from a spell |
 | `optional-search.md` | another player's optional search after destruction; declining versus searching and finding nothing |
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
-| `animation.md` | crew, a land becoming a creature, earthbend, changing creature types and granting a trigger |
+| `animation.md` | crew, a land becoming a creature, layer 5 color changes, earthbend, changing creature types and granting a trigger |
 | `x-costs.md` | X in a cost, a permanent remembering X, counted X, `sum`, damage to each |
 | `stack-and-replacements.md` | countering, ward, a replacement placed by a spell, rules words, `each`, suppression |
 | `baseline-overrides.md` | the baseline rules, and the cards that change them: extra lands, haste, flash |

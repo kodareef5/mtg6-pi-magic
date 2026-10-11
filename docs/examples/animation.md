@@ -56,6 +56,31 @@ The table treats a permanent that becomes a creature this turn by the clock it
 entered, not by when it became a creature: a land you controlled since your turn
 began can attack the turn it animates.
 
+## A land that changes color while animated
+
+Restless Anchorage keeps its land type and mana abilities. Its color change is
+layer 5, before flying is granted in layer 6 and base power and toughness are
+set in layer 7b. `colors.set` replaces colors; `colors.add` preserves existing
+colors, and `colors.set: []` makes the object colorless. Colorless is not a
+sixth color.
+
+```json procedure
+{
+  "source": { "zones": ["battlefield"], "controller": "self", "card": "Restless Anchorage" },
+  "claim": "Animate Restless Anchorage",
+  "basis": "{1}{W}{U}: Until end of turn, this land becomes a 2/3 white and blue Bird creature with flying. It's still a land.",
+  "timing": "stack",
+  "cost": { "mana": "{1}{W}{U}" },
+  "instructions": [{ "do": "modify", "what": "this", "until": "end-of-turn", "change": {
+    "types": { "add": ["creature"] }, "subtypes": { "set": ["Bird"], "of": "creature" },
+    "colors": { "set": ["W", "U"] }, "base": { "power": 2, "toughness": 3 }, "words": ["flying"]
+  } }]
+}
+```
+
+This is the animation use. The land's entry, mana abilities and attack trigger
+belong to its standing package, including the Map token's complete ability.
+
 ## Earthbend
 
 Earthbend N is three motions: make the land a 0/0 creature with haste, put N

@@ -175,6 +175,11 @@ export function walk(table: Table, override?: Thing): Map<string, Traits> {
 		if (subtypes.add) traits.subtypes = [...new Set([...traits.subtypes, ...subtypes.add])];
 		if (subtypes.allCreatureTypes) traits.allCreatureTypes = true;
 	});
+	// Layer 5: setting replaces the color set; adding preserves the colors already applied (613.1e).
+	each((change, traits) => {
+		if (change.colors?.set) traits.colors = [...change.colors.set] as Color[];
+		if (change.colors?.add) traits.colors = [...new Set([...traits.colors, ...change.colors.add])] as Color[];
+	});
 	// Layer 6: abilities. Keyword counters are keywords too (122.1b).
 	each((change, traits) => {
 		if (change.loseAbilities) { traits.registrations = []; traits.words = []; }

@@ -215,7 +215,8 @@ types remain unsupported.
 
 **Modifications** change characteristics and are applied by the layer walk
 (613). `types` and `subtypes` are set or added, and `of` says whose subtypes are
-set. `base` sets P/T (7b), `power` and `toughness` add to it (7c), `words` adds
+set. `colors.set` replaces colors and `colors.add` adds them in layer 5;
+`colors.set: []` makes an object colorless. `base` sets P/T (7b), `power` and `toughness` add to it (7c), `words` adds
 keywords and restriction words, `registers` grants abilities, `loseAbilities`
 removes them. A modification from a resolving effect locks the set it affects
 when it begins (611.2c). A continuous registration re-reads its selector every

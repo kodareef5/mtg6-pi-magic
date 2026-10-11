@@ -181,6 +181,7 @@ export const Defs = {
 	/** Characteristics an effect changes, applied in the layer walk (613). */
 	Modification: object({
 		types: Type.Optional(object({ set: Type.Optional(Type.Array(one(...CARD_TYPES))), add: Type.Optional(Type.Array(one(...CARD_TYPES))) })),
+		colors: Type.Optional(object({ set: Type.Optional(Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true })), add: Type.Optional(Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true })) })),
 		/** `of` names whose subtypes are set; setting a land's subtypes removes its other land abilities (305.7). */
 		subtypes: Type.Optional(object({ set: Type.Optional(Type.Union([Type.Array(text), object({ chosen: text })])), add: Type.Optional(Type.Array(text)), of: Type.Optional(one("creature", "land", "artifact", "enchantment")), allCreatureTypes: Type.Optional(Type.Literal(true)) })),
 		base: Type.Optional(object({ power: Type.Ref("Amount"), toughness: Type.Ref("Amount") })),

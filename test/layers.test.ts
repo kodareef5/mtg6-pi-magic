@@ -7,13 +7,16 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { commit, start } from "../src/core/commit.ts";
-import { deck } from "../src/core/decks.ts";
+import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { characteristics, intrinsic, sick } from "../src/core/characteristics.ts";
 import { matches, tableWorld } from "../src/core/selectors.ts";
 import { nextDecision, advance, apply } from "../src/core/decisions.ts";
 import type { Registration } from "../src/core/language.ts";
+import { relive } from "../src/core/journal.ts";
+import { project } from "../src/core/view.ts";
+import { announce, example, finish, main, passBoth, place } from "./play.ts";
 
 /** The pinned matchup, with Green Stompy's Archdruid for a lord. */
 const deal = (green = "Mono-Green Landfall") => start(standard, [{ name: "Green", deck: deck(green) }, { name: "Red", deck: deck("Mono-Red Aggro") }], "layers");
@@ -81,6 +84,39 @@ test("characteristics apply by layer and timestamp, and nothing derived is store
 		else apply(table, decision.situation === "pregame" ? "keep" : decision.options[0]!.id, "engine", "forced");
 	}
 	assert.equal(characteristics(table, hydra)!.power, 3, "the doubled power ended with the turn; the counters stay");
+
+	// Color is read between types and abilities, even when the color-dependent effect is older.
+	const colors = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: alpha(deck("Selesnya Landfall")) }], "color-layers");
+	const [land] = place(colors, 0, "battlefield", "Restless Anchorage"), [source] = place(colors, 0, "battlefield", "Fountainport");
+	commit(colors, [{ do: "note", note: { kind: "register", on: source!, by: 0, until: "indefinite", registration: {
+		kind: "continuous", basis: "Fixture grants blue creatures lifelink and +1/+1.", affects: { types: ["creature"], colors: ["U"] },
+		change: { words: ["lifelink"], power: 1, toughness: 1 } } } }], "game-setup");
+	main(colors, 0); commit(colors, [{ do: "add-mana", who: 0, colors: ["C", "W", "U"] }], "game-setup");
+	const initial = structuredClone(colors), from = colors.ledger.length;
+	announce(colors, example("Animate Restless Anchorage")); passBoth(colors); finish(colors);
+	const animatedLand = characteristics(colors, land!)!;
+	assert.deepEqual(animatedLand.colors, ["W", "U"]);
+	assert.deepEqual([animatedLand.power, animatedLand.toughness], [3, 4]);
+	assert.ok(animatedLand.types.includes("land") && animatedLand.types.includes("creature"));
+	assert.ok(animatedLand.words.includes("flying") && animatedLand.words.includes("lifelink"));
+	assert.equal("colors" in land!, false, "current color is never stored on the permanent");
+	const snapshot = structuredClone(colors);
+	for (const seat of [0, 1] as const) assert.deepEqual(project(colors, seat).objects!.find((one) => one.id === land!.id)!.traits!.colors, ["W", "U"]);
+	assert.deepEqual(colors, snapshot, "both projected color readings are pure");
+	assert.deepEqual(relive(initial, colors.ledger.slice(from)), colors);
+	for (const [change, expected] of [
+		[{ set: ["R"] }, ["R"]], [{ add: ["G"] }, ["R", "G"]], [{ set: [] }, []],
+	] as const) {
+		commit(colors, [{ do: "note", note: { kind: "label", on: land!, by: 0, until: "end-of-turn", text: "Fixture changes color",
+			change: { colors: { ...("set" in change ? { set: [...change.set] } : { add: [...change.add] }) } } } }], "resolve");
+		const read = characteristics(colors, land!)!;
+		assert.deepEqual(read.colors, [...expected]); assert.equal(read.power, 2); assert.ok(!read.words.includes("lifelink"));
+	}
+	const prefix = structuredClone(colors), at = colors.ledger.length;
+	main(colors, 1, 2);
+	assert.deepEqual(characteristics(colors, land!)!.colors, []);
+	assert.deepEqual(characteristics(colors, land!)!.types, ["land"]);
+	assert.deepEqual(relive(prefix, colors.ledger.slice(at)), colors);
 });
 
 test("state-based actions read characteristics, and the legend rule asks which to keep", () => {
