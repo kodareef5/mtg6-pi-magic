@@ -1,0 +1,76 @@
+{
+	"card": "Doomsday Excruciator",
+	"generated": "2026-10-10",
+	"source": "5a1151cbe9a98f4105c17192646657c58573bfbdd0b4d31a7151d837c8c67120",
+	"contract": 1,
+	"package": {
+		"card": "Doomsday Excruciator",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, if it was cast, each player exiles all but the bottom six cards of their library face down.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"exceptBottom": 6,
+								"of": "each-player"
+							},
+							"to": "exile",
+							"faceDown": true,
+							"reason": "exile"
+						}
+					]
+				}
+			},
+			{
+				"basis": "At the beginning of your upkeep, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "step",
+					"step": "upkeep",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -112,14 +112,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Doomsday Excruciator": {
-		"reason": "Doomsday Excruciator is not ready: When this creature enters, if it was cast, each player exiles all but the bottom six cards of their library face down. — Face-down exile is unsupported; this triggered ability cannot be faithfully prepared.",
-		"decks": [
-			"Dimir Excruciator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Elegy Acolyte": {
 		"reason": "Elegy Acolyte is not ready: Void — At the beginning of your end step, if a nonland permanent left the battlefield this turn or a spell was warped this turn, create a 2/2 colorless Robot artifact creature token. — Cannot express the intervening condition: the available history operations cannot test nonland permanents leaving the battlefield this turn or spells being cast for their warp cost this turn, including events before Elegy Acolyte entered.",
 		"decks": [

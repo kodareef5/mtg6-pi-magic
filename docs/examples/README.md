@@ -7,6 +7,7 @@ schemas, and every `basis` is checked against the card's text.
 
 | File | Shows |
 |---|---|
+| `library-windows.md` | Simultaneous top or all-but-bottom windows across separate libraries |
 | `face-down-exile.md` | Private face-down exile and play while a live condition holds |
 | `spells.md` | targets, any target, destroy, modes as separate procedures, kicker, a token's activated ability |
 | `target-counts.md` | one or two distinct targets, mixed players and permanents, simultaneous damage and returns |

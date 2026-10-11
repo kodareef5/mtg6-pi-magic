@@ -58,7 +58,8 @@ any. Any other lowercase word is recorded for the players and the judge.
 | `event:object`, `event:objects` | what the triggering event happened to ("that land", "those creatures") |
 | `event:player`, `event:source` | who caused the event, and the spell or ability that did ("that player", ward's "that spell") |
 | `event:recipient` | the permanent dealt damage, when the matched event has one shared recipient |
-| `{top: 1, of: "you"}` | the top card of a library; `top` accepts any computed amount |
+| `{top: 1, of: "you"}` | the top card of each named library; `top` accepts a computed amount and `of` may name each-player |
+| `{exceptBottom: 6, of: "each-player"}` | all but the bottom six of each library, combined before simultaneous motion; it grants no look |
 | `you` (or `self`), `opponent`, `each-player` | players relative to the source's controller |
 | `controller:target:0`, `owner:this` | a player read off an object |
 

@@ -154,9 +154,11 @@ const traitsOf = (scope: Scope, object: Seen) =>
 	live(scope.world, object) ? scope.world.read(object) : scope.world.lastKnown(object)?.traits ?? scope.world.read(object);
 
 /** Motion needs live objects. Information can read a departed target or binding as it last existed (608.2h). */
-export function objects(scope: Scope, ref: string | { top: Amount; of: string }, information = false): Seen[] {
-	if (typeof ref !== "string") return players(scope, ref.of).flatMap((owner) => scope.world.objects.filter((one) => one.zone === "library" && one.owner === owner)
-		.sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).slice(0, Math.max(0, amount(scope, ref.top))));
+export function objects(scope: Scope, ref: string | { top: Amount; of: string } | { exceptBottom: Amount; of: string }, information = false): Seen[] {
+	if (typeof ref !== "string") return players(scope, ref.of).flatMap((owner) => {
+		const library = scope.world.objects.filter((one) => one.zone === "library" && one.owner === owner).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+		return library.slice(0, "top" in ref ? Math.max(0, amount(scope, ref.top)) : Math.max(0, library.length - Math.max(0, amount(scope, ref.exceptBottom))));
+	});
 	const [head, rest] = [ref.split(":")[0], ref.slice(ref.indexOf(":") + 1)];
 	const read = (one: ObjectRef) => live(scope.world, one) ?? (information ? scope.world.lastKnown(one)?.object : undefined);
 	switch (head) {
