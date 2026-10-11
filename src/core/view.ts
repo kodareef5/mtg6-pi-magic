@@ -162,9 +162,9 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		});
 	if (table.combat) {
 		const combat = table.combat, named = (one: { id: string }) => publicName(table.things.get(one.id));
-		for (const one of combat.attackers) lines.push(`Attacking ${seat(table, one.defending).name}: ${named(one)}${combat.blocked.some((aimed) => aimed.id === one.id) ? ", blocked" : ""}`);
+		for (const one of combat.attackers) lines.push(`Attacking ${one.to ? one.removedDefender ? "nothing (the planeswalker left combat)" : named(one.to) : seat(table, one.defending).name}: ${named(one)}${combat.blocked.some((aimed) => aimed.id === one.id) ? ", blocked" : ""}`);
 		for (const one of combat.blockers) lines.push(`Blocking: ${named(one)} blocks ${one.blocking.map(named).join(", ")}`);
-		for (const pick of combat.choosing) lines.push("blocker" in pick ? `Declaring a block: ${named(pick.blocker)} on ${named(pick.attacker)}` : `Declaring an attacker: ${named(pick.attacker)}`);
+		for (const pick of combat.choosing) lines.push("blocker" in pick ? `Declaring a block: ${named(pick.blocker)} on ${named(pick.attacker)}` : `Declaring an attacker: ${named(pick.attacker)}${pick.to ? ` at ${named(pick.to)}` : ""}`);
 	}
 	for (const trigger of table.waiting) {
 		const source = table.things.get(trigger.source.id);
@@ -375,7 +375,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				parts.push(`${publicName(receipt.before[change.what])} ceased to exist`);
 				break;
 			case "attack":
-				parts.push(change.attackers.length ? `attacking: ${change.attackers.map((one) => publicName(receipt.before[one.id] ?? table.things.get(one.id))).join(", ")}` : "no attackers");
+				parts.push(change.attackers.length ? `attacking: ${change.attackers.map((one) => `${publicName(receipt.before[one.id] ?? table.things.get(one.id))}${one.to ? ` at ${publicName(receipt.before[one.to.id] ?? table.things.get(one.to.id))}` : ""}`).join(", ")}` : "no attackers");
 				break;
 			case "block":
 				parts.push(change.blockers.length ? `blocking: ${change.blockers.map((one) => `${publicName(table.things.get(one.id))} blocks ${one.blocking.map((aimed) => publicName(table.things.get(aimed.id))).join(", ")}`).join("; ")}` : "no blockers");

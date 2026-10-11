@@ -8,7 +8,10 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
-import { commit } from "../src/core/commit.ts";
+import { commit, start } from "../src/core/commit.ts";
+import { alpha, deck } from "../src/core/decks.ts";
+import { standard } from "../src/core/format.ts";
+import { relive } from "../src/core/journal.ts";
 import { project } from "../src/core/view.ts";
 import { matches, tableWorld } from "../src/core/selectors.ts";
 import type { Table, Thing } from "../src/core/table.ts";
@@ -203,6 +206,67 @@ test("trample assigns lethal to the blocker before the player, counting marked d
 	reach(marked, "declare-blockers", 3); pick(marked, `block:${wall.id}:${trampler.id}`); pick(marked, "block:done");
 	const divisions = reach(marked, "combat-damage", 3);
 	assert.ok(divisions.options.some((one) => one.id === `assign:${trampler.id}:0-1`), "deathtouch does not demand one more damage when marked damage is already lethal");
+});
+
+test("planeswalker attacks retain their chosen recipient through blocks, removal, strike steps and replay", () => {
+	for (const mode of ["open", "blocked", "gone", "returned", "type-restored", "blocked-gone", "double"] as const) {
+		const table = start(standard, [{ deck: alpha(deck("Dimir Midrange")) }, { deck: alpha(deck("Selesnya Landfall")) }], `walker-${mode}`);
+		const walker = establish(table, 0, "Kaito, Bane of Nightmares", []), wall = establish(table, 0, "Tishana's Tidebinder", []);
+		const hydra = establish(table, 1, "Mossborn Hydra"), elves = establish(table, 1, "Llanowar Elves", []);
+		commit(table, [{ do: "counters", what: hydra.id, kind: "+1/+1", amount: 3 }], "game-setup");
+		reach(table, "declare-attackers", 2);
+		if (mode === "double") label(table, hydra, "Fixture grants double strike.", ["double strike"]);
+		const before = structuredClone(table), from = table.ledger.length, to = { id: walker.id, incarnation: walker.incarnation };
+		const attack = `attack:${hydra.id}:to:${walker.id}@${walker.incarnation}`;
+		assert.ok(option(table, `attack:${hydra.id}`)); assert.match(option(table, attack)!.label, /Kaito.*4 loyalty/);
+		assert.deepEqual(table, before, "listing player and planeswalker choices is pure");
+		pick(table, attack); const withdrawn = table.ledger.at(-1)!.seq;
+		assert.match(dossier({ frame: workFrame(table, 1) }), /attacker Mossborn Hydra .* at Kaito/);
+		pick(table, `un${attack}`); assert.ok(withdrawnChoices(table.ledger).has(withdrawn));
+		assert.equal(hydra.tapped, false);
+		pick(table, attack); pick(table, `attack:${elves.id}`);
+		const pending = structuredClone(table), at = table.ledger.length;
+		pick(table, "attack:done"); finish(table);
+		assert.deepEqual(table.combat!.attackers.find((one) => one.id === hydra.id)!.to, to);
+		assert.equal(table.combat!.attackers.find((one) => one.id === elves.id)!.to, undefined, "one group can attack both recipients");
+		assert.match(project(table, 0).table.join("\n"), /Attacking Kaito/);
+		assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
+		assert.deepEqual(relive(before, table.ledger.slice(from)), table);
+		if (["gone", "returned", "blocked-gone"].includes(mode)) {
+			commit(table, [{ do: "move", what: walker.id, to: "hand", reason: "bounce" }], "resolve");
+			if (mode === "returned") commit(table, [{ do: "move", what: walker.id, to: "battlefield", reason: "resolve" }], "resolve");
+		} else if (mode === "type-restored") {
+			commit(table, [{ do: "note", note: { kind: "label", on: to, by: 0, until: "indefinite", text: "Fixture removes planeswalker type", change: { types: { set: ["enchantment"] } } } }], "resolve");
+			assert.equal(table.combat!.attackers[0]!.removedDefender, true);
+			commit(table, [{ do: "note", note: { kind: "label", on: to, by: 0, until: "indefinite", text: "Fixture restores planeswalker type", change: { types: { add: ["planeswalker"] } } } }], "resolve");
+		}
+		const continuation = structuredClone(table), resumedAt = table.ledger.length;
+		reach(table, "declare-blockers", 2);
+		assert.equal(nextDecision(table)!.seat, 0);
+		const blocked = mode.startsWith("blocked");
+		if (blocked) {
+			assert.match(option(table, `block:${wall.id}:${hydra.id}`)!.shows!, /to Kaito/);
+			pick(table, `block:${wall.id}:${hydra.id}`);
+		}
+		pick(table, "block:done");
+		const read = JSON.parse(combatLookup(workFrame(table, 1)).answer({ attacker: hydra.id, ...(blocked ? { blocker: wall.id } : {}) })).exchange;
+		assert.equal(read.toPlayer, 0);
+		assert.equal(read.toPlaneswalker, mode === "blocked" ? 2 : mode === "open" || mode === "double" ? 4 : 0);
+		reach(table, "combat-damage", 2);
+		if (mode === "blocked") {
+			assert.ok(nextDecision(table)!.options.every((one) => !one.label.includes("seat 0")), "ordinary trample cannot spill past the planeswalker to its controller");
+			pick(table, `assign:${hydra.id}:2-2`);
+		}
+		pick(table, "damage"); finish(table);
+		if (mode === "double") { reach(table, "combat-damage", 2); pick(table, "damage"); finish(table); }
+		assert.equal(table.seats[0]!.life, 19, "only the Elf attacked the player");
+		const current = table.things.get(walker.id)!;
+		if (mode === "open" || mode === "double") assert.equal(current.zone, "graveyard");
+		else if (mode === "blocked") assert.equal(current.counters.loyalty, 2);
+		else if (mode === "returned" || mode === "type-restored") assert.equal(current.counters.loyalty, 4, "a restored permanent does not become attacked again");
+		else assert.equal(current.zone, "hand");
+		assert.deepEqual(relive(continuation, table.ledger.slice(resumedAt)), table);
+	}
 });
 
 test("double strike deals damage in both steps, and a creature killed by first strike deals none", () => {

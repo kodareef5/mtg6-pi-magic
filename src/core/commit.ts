@@ -186,6 +186,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// receipt no trigger can read.
 	const before: Receipt["before"] = {}, known: Record<string, Traits> = {};
 	for (const change of changes) {
+		if (change.do === "attack") for (const one of change.attackers) if (one.to) {
+			const target = table.things.get(one.to.id); if (target) before[target.id] = structuredClone(target);
+		}
 		if (change.do === "order") for (const ref of change.cards) {
 			const was = table.things.get(ref.id); if (was) before[was.id] = structuredClone(was);
 		}
@@ -466,6 +469,16 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				results: Object.fromEntries(table.seats.map((s) => [s.id, s.result!])),
 				gaps: table.gaps,
 			};
+		}
+	}
+
+	// 506.4: a removed planeswalker does not resume being attacked if its type or controller returns.
+	if (table.combat?.attackers.some((one) => one.to && !one.removedDefender)) {
+		forget(table);
+		for (const one of table.combat.attackers) if (one.to && !one.removedDefender) {
+			const target = table.things.get(one.to.id);
+			if (!target || target.incarnation !== one.to.incarnation || target.zone !== "battlefield" || target.controller !== one.defending ||
+				!characteristics(table, target)?.types.includes("planeswalker")) one.removedDefender = true;
 		}
 	}
 

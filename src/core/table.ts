@@ -213,12 +213,13 @@ export type Resolution = {
  * is a new object, so it is out of combat without anything being erased.
  */
 export type Combat = {
-	attackers: { id: ObjectId; incarnation: number; defending: SeatId }[];
+	/** to is an attacked planeswalker; absent means the defending player. Removal persists for this combat. */
+	attackers: { id: ObjectId; incarnation: number; defending: SeatId; to?: ObjectRef; removedDefender?: true }[];
 	blockers: { id: ObjectId; incarnation: number; blocking: ObjectRef[] }[];
 	/** Attackers that became blocked (509.1h). They stay blocked when their blockers are gone. */
 	blocked: ObjectRef[];
 	/** Picks toward a declaration not yet finished. Nothing has moved, and nothing has triggered. */
-	choosing: ({ attacker: ObjectRef } | { blocker: ObjectRef; attacker: ObjectRef })[];
+	choosing: ({ attacker: ObjectRef; to?: ObjectRef } | { blocker: ObjectRef; attacker: ObjectRef })[];
 	/** The creatures with first or double strike as the first of two damage steps began (510.4). */
 	first?: ObjectRef[];
 	/** Damage divided so far in this damage step, before it is all dealt at once (510.1-2). */

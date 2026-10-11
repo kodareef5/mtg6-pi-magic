@@ -74,10 +74,10 @@ function situation({ frame, forecast }: DossierInput, name: (seat: SeatId) => st
 	if (combat && (combat.attackers.length || combat.choosing.length)) {
 		const object = (one: { id: string; incarnation: number }) => frame.view.objects?.find((candidate) => candidate.id === one.id && candidate.incarnation === one.incarnation);
 		const described = (one: { id: string; incarnation: number }) => `${object(one) ? named(object(one)!) : one.id} (${ref(one)})`;
-		lines.push(`- Committed combat: attacking ${combat.attackers.map(described).join(", ") || "nothing yet"}; ` +
+		lines.push(`- Committed combat: attacking ${combat.attackers.map((one) => `${described(one)}${one.to ? ` at ${one.removedDefender ? "nothing (planeswalker removed from combat)" : described(one.to)}` : ` at ${name(one.defending)}`}`).join(", ") || "nothing yet"}; ` +
 			`blocking ${combat.blockers.map((one) => `${described(one)} blocks ${one.blocking.map(described).join(" and ")}`).join("; ") || "nothing yet"}.`);
 		if (combat.choosing.length) lines.push(`- Declaration in progress, not finalized: ${combat.choosing.map((one) => "blocker" in one
-			? `${described(one.blocker)} blocks ${described(one.attacker)}` : `attacker ${described(one.attacker)}`).join("; ")}.`);
+			? `${described(one.blocker)} blocks ${described(one.attacker)}` : `attacker ${described(one.attacker)}${one.to ? ` at ${described(one.to)}` : ""}`).join("; ")}.`);
 	}
 	return ["## Situation", ...lines].join("\n");
 }

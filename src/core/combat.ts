@@ -10,7 +10,7 @@
  * and the judge enforce the words.
  *
  * Damage is divided as the controller chooses (510.1c-d); trample has to assign
- * lethal damage to every blocker before any reaches the player (702.19b). All of
+ * lethal damage to every blocker before any reaches the attacked recipient (702.19b). All of
  * it is dealt at once (510.2). First and double strike add a damage step (510.4).
  * Past 150 lines to keep declarations, their displayed arithmetic and the
  * actual damage assignments under the same combat rules.
@@ -20,7 +20,7 @@ import { cardsIn, playing, type LedgerRow, type Table, type Thing } from "./tabl
 import type { Change } from "./syntax.ts";
 import type { Chosen } from "./selectors.ts";
 import type { Move, Pending } from "./moves.ts";
-import type { ObjectRef, SeatId } from "./types.ts";
+import type { ObjectRef } from "./types.ts";
 import { attackConflicts, blockConflicts, combatExchange, lethalDamage } from "./combat-facts.ts";
 
 const ref = (object: Pick<Thing, "id" | "incarnation">): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -28,12 +28,19 @@ const same = (a: ObjectRef, b: ObjectRef) => a.id === b.id && a.incarnation === 
 const name = (object: Thing) => object.card ?? object.token?.name ?? object.id;
 const body = (traits?: Traits) => `${traits?.power ?? "?"}/${traits?.toughness ?? "?"}`;
 const words = (traits?: Traits) => traits?.words.length ? `, ${traits.words.join(", ")}` : "";
+const destination = (to?: ObjectRef) => to ? `:to:${to.id}@${to.incarnation}` : "";
+const defenderFacts = (table: Table, attacker: ObjectRef) => {
+	const attack = table.combat?.attackers.find((one) => same(one, attacker));
+	if (!attack?.to) return undefined;
+	const target = table.things.get(attack.to.id);
+	return { name: target ? name(target) : attack.to.id, loyalty: attack.removedDefender ? 0 : target?.counters.loyalty ?? 0 };
+};
 
 /** Provisional choices can be withdrawn until done. These ids never match attack:/block: selectors. */
 function withdrawals(table: Table): Move[] {
 	return (table.combat?.choosing ?? []).map((pick): Move => {
 		const attacker = table.things.get(pick.attacker.id)!, blocker = "blocker" in pick && table.things.get(pick.blocker.id)!;
-		return { option: { id: blocker ? `unblock:${blocker.id}:${attacker.id}` : `unattack:${attacker.id}`,
+		return { option: { id: blocker ? `unblock:${blocker.id}:${attacker.id}` : `unattack:${attacker.id}${destination("to" in pick ? pick.to : undefined)}`,
 			label: blocker ? `Withdraw ${name(blocker)} blocking ${name(attacker)}` : `Withdraw ${name(attacker)} from the pending attack`,
 			objects: blocker ? [ref(blocker), ref(attacker)] : [ref(attacker)],
 			shows: "Withdraws this pending choice without finishing the declaration. No card moves or taps; it can be selected again." },
@@ -71,32 +78,39 @@ const lethal = (table: Table, source: Thing, target: Thing) => lethalDamage(trai
 export function declareAttackers(table: Table): Pending {
 	const active = table.cursor.active;
 	const defending = playing(table).find((one) => one.id !== active)!.id;
-	const chosen = (table.combat?.choosing ?? []).flatMap((pick) => "blocker" in pick ? [] : [pick.attacker]);
+	const picks = (table.combat?.choosing ?? []).flatMap((pick) => "blocker" in pick ? [] : [pick]);
+	const chosen = picks.map((pick) => pick.attacker);
+	const walkers = cardsIn(table, "battlefield").filter((one) => one.controller === defending && traitsOf(table, one)?.types.includes("planeswalker"))
+		.sort((a, b) => a.id.localeCompare(b.id));
 	const able = cardsIn(table, "battlefield").filter((object) => {
 		const traits = traitsOf(table, object);
 		return object.controller === active && !object.tapped && !!traits?.types.includes("creature") && !traits.types.includes("battle") &&
 			!sick(table, object) && !chosen.some((one) => same(one, object));
 	}).sort((a, b) => a.id.localeCompare(b.id));
 	const attackers = chosen.flatMap((one) => present(table, one) ?? []);
-	const moves: Move[] = able.map((object) => {
+	const moves: Move[] = able.flatMap((object) => [undefined, ...walkers].map((target): Move => {
 		const traits = traitsOf(table, object);
+		const to = target ? ref(target) : undefined;
 		const marks = [has(traits, "vigilance") ? "Remains untapped after the declaration (vigilance)." : "Taps when the declaration finishes.",
 			...attackConflicts({ ...object, traits })];
-		return { option: { id: `attack:${object.id}`, label: `Attack with ${name(object)} (${body(traits)}${words(traits)})`, objects: [ref(object)],
+		return { option: { id: `attack:${object.id}${destination(to)}`, label: `Attack${target ? ` ${name(target)} (${target.counters.loyalty ?? 0} loyalty)` : walkers.length ? ` seat ${defending}` : ""} with ${name(object)} (${body(traits)}${words(traits)})`, objects: [ref(object), ...(to ? [to] : [])],
 			spends: has(traits, "vigilance") ? [] : [ref(object)],
 			...(marks.length ? { shows: marks.join(" ") } : {}) },
-			changes: [{ do: "combat", action: "choose", pick: { attacker: ref(object) } }], reason: "combat" };
-	});
-	moves.push({ option: { id: "attack:done", label: attackers.length ? `Finish: attack with ${attackers.map(name).join(", ")}` : "Attack with nothing",
+			changes: [{ do: "combat", action: "choose", pick: { attacker: ref(object), ...(to ? { to } : {}) } }], reason: "combat" };
+	}));
+	const description = (object: Thing) => { const to = picks.find((one) => same(one.attacker, object))?.to;
+		return `${name(object)}${to ? ` at ${name(table.things.get(to.id)!)}` : walkers.length ? ` at seat ${defending}` : ""}`; };
+	moves.push({ option: { id: "attack:done", label: attackers.length ? `Finish: attack with ${attackers.map(description).join(", ")}` : "Attack with nothing",
 		spends: attackers.filter((object) => !has(traitsOf(table, object), "vigilance")).map(ref),
 		...(attackers.length ? { objects: attackers.map(ref) } : {}) },
 		changes: [
 			// 508.1f, 702.20b: attacking taps, unless the creature has vigilance.
 			...attackers.filter((object) => !has(traitsOf(table, object), "vigilance")).map((object): Change => ({ do: "tap", what: object.id })),
-			{ do: "attack", attackers: attackers.map((object) => ({ ...ref(object), defending })) },
+			{ do: "attack", attackers: attackers.map((object) => { const to = picks.find((one) => same(one.attacker, object))?.to;
+				return { ...ref(object), defending, ...(to ? { to } : {}) }; }) },
 		], reason: "combat" });
 	moves.push(...withdrawals(table));
-	return { situation: "turn-based", seat: active, question: chosen.length ? `Declare attackers: ${attackers.map(name).join(", ")} so far. Add another, withdraw a pending choice, or finish.` : "Declare attackers, one at a time, then finish.", moves };
+	return { situation: "turn-based", seat: active, question: chosen.length ? `Declare attackers: ${attackers.map(description).join(", ")} so far. Add another, withdraw a pending choice, or finish.` : "Declare attackers, one at a time, then finish.", moves };
 }
 
 /** 509.1: the defending player picks blocks one at a time, then finishes. */
@@ -114,7 +128,7 @@ export function declareBlockers(table: Table): Pending {
 	const moves: Move[] = able.flatMap((blocker) => attackers.map((attacker): Move => {
 		const attack = { ...attacker, traits: traitsOf(table, attacker) }, block = { ...blocker, traits: traitsOf(table, blocker) };
 		const marks = blockConflicts(attack, block, blocking(attacker));
-		const calculation = blocking(attacker) ? "" : combatExchange(attack, block)?.summary ?? "";
+		const calculation = blocking(attacker) ? "" : combatExchange(attack, block, defenderFacts(table, attacker))?.summary ?? "";
 		const shows = [...marks, ...(calculation ? [calculation] : [])].join(" ");
 		return { option: { id: `block:${blocker.id}:${attacker.id}`, label: `Block ${name(attacker)} (${body(traitsOf(table, attacker))}${words(traitsOf(table, attacker))}) with ${name(blocker)} (${body(traitsOf(table, blocker))}${words(traitsOf(table, blocker))})`,
 			objects: [ref(blocker), ref(attacker)],
@@ -152,7 +166,8 @@ function divisions(total: number, parts: number): number[][] {
 export function combatDamage(table: Table): Pending | null {
 	const combat = table.combat;
 	if (!combat) return null;
-	const attackers = combat.attackers.flatMap((one) => { const object = present(table, one); return object ? [{ object, defending: one.defending }] : []; });
+	const attackers = combat.attackers.flatMap((one) => { const object = present(table, one);
+		return object ? [{ object, to: one.to ? one.removedDefender ? undefined : one.to : { player: one.defending } }] : []; });
 	const blockers = combat.blockers.flatMap((one) => { const object = present(table, one); return object ? [{ object, blocking: one.blocking }] : []; });
 	const striking = (object: Thing) => has(traitsOf(table, object), "first strike") || has(traitsOf(table, object), "double strike");
 	const fighting = [...attackers.map((one) => one.object), ...blockers.map((one) => one.object)];
@@ -163,17 +178,17 @@ export function combatDamage(table: Table): Pending | null {
 	const power = (object: Thing) => Math.max(0, traitsOf(table, object)?.power ?? 0);
 
 	const dealt: { source: Thing; to: Chosen; amount: number }[] = [];
-	for (const { object: attacker, defending } of attackers) {
+	for (const { object: attacker, to } of attackers) {
 		if (!deals(attacker) || !power(attacker)) continue;
 		const total = power(attacker), trample = has(traitsOf(table, attacker), "trample");
 		const walls = blockers.filter((one) => one.blocking.some((aimed) => same(aimed, attacker))).map((one) => one.object);
 		const blocked = combat.blocked.some((one) => same(one, attacker));
-		if (!blocked || (!walls.length && trample)) { dealt.push({ source: attacker, to: { player: defending }, amount: total }); continue; }
+		if (!blocked || (!walls.length && trample)) { if (to) dealt.push({ source: attacker, to, amount: total }); continue; }
 		if (!walls.length) continue;
-		if (walls.length === 1 && !trample) { dealt.push({ source: attacker, to: ref(walls[0]!), amount: total }); continue; }
+		if (walls.length === 1 && (!trample || !to)) { dealt.push({ source: attacker, to: ref(walls[0]!), amount: total }); continue; }
 		const chosen = combat.assigned.filter((one) => same(one.source, attacker));
 		if (chosen.length) { dealt.push(...chosen.map((one) => ({ source: attacker, to: one.to, amount: one.amount }))); continue; }
-		return assign(table, attacker, walls, defending, total, trample);
+		return assign(table, attacker, walls, to, total, trample && !!to);
 	}
 	// A blocker blocks one attacker here, so its damage needs no division (510.1d).
 	for (const { object: blocker, blocking } of blockers) {
@@ -191,9 +206,9 @@ export function combatDamage(table: Table): Pending | null {
 			changes, reason: "combat" }] };
 }
 
-/** One attacker's divisions among its blockers and, with trample, the player it attacks. */
-function assign(table: Table, attacker: Thing, walls: Thing[], defending: SeatId, total: number, trample: boolean): Pending {
-	const recipients: Chosen[] = [...walls.map(ref), ...(trample ? [{ player: defending }] : [])];
+/** One attacker's divisions among its blockers and, with trample, the recipient it attacks. */
+function assign(table: Table, attacker: Thing, walls: Thing[], to: Chosen | undefined, total: number, trample: boolean): Pending {
+	const recipients: Chosen[] = [...walls.map(ref), ...(trample && to ? [to] : [])];
 	const legal = divisions(total, recipients.length).filter((parts) => !trample || parts.at(-1) === 0 || walls.every((wall, at) => parts[at]! >= lethal(table, attacker, wall)));
 	const describe = (to: Chosen) => "player" in to ? `seat ${to.player}` : name(table.things.get(to.id)!);
 	const moves: Move[] = legal.map((parts) => ({
@@ -203,5 +218,5 @@ function assign(table: Table, attacker: Thing, walls: Thing[], defending: SeatId
 		changes: [{ do: "combat", action: "assign", source: ref(attacker), division: recipients.map((to, at) => ({ to, amount: parts[at]! })).filter((part) => part.amount > 0) }],
 		reason: "combat",
 	}));
-	return { situation: "turn-based", seat: attacker.controller, question: `Divide ${name(attacker)}'s ${total} combat damage${trample ? "; with trample, the player only after every blocker has lethal damage" : ""} (510.1c).`, moves };
+	return { situation: "turn-based", seat: attacker.controller, question: `Divide ${name(attacker)}'s ${total} combat damage${trample ? `; with trample, ${to && "id" in to ? name(table.things.get(to.id)!) : "the player"} only after every blocker has lethal damage` : ""} (510.1c).`, moves };
 }

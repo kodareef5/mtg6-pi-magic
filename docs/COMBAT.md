@@ -66,6 +66,19 @@ triggers nothing. It cannot change a finished declaration. Both the selection
 and withdrawal remain recorded decisions; no automatic correction or finish
 occurs. Rule conflicts remain marked choices.
 
+Each attacker can attack the opposing player or a planeswalker that player
+controls (508.1b). The provisional choice, completed declaration, projected
+position and damage calculation name that recipient. The defending player
+can block either attack. Ordinary trample assigns excess damage to the
+planeswalker being attacked, never to its controller (702.19f).
+
+A planeswalker that leaves the battlefield, changes controller or loses its
+planeswalker type leaves combat. Its attackers can still be blocked but
+assign no damage to that former recipient. Restoring the type or returning the
+card does not resume the attack (506.4c). Double strike checks the recipient
+again after first-strike damage and state-based actions. Battle protectors
+and trample over planeswalkers remain unsupported.
+
 ### Damage assignment, 510.1
 
 A turn-based action with real decisions in it. The active player announces how
@@ -137,8 +150,9 @@ state-based destruction check after damage. It does not impose blocker order.
 
 **Tokens**, 111.7-8. A token that leaves the battlefield reaches its destination;
 zone-change triggers can see that move. It cannot move again or return, and
-ceases to exist at the next state-based check. Token lifecycle and those
-triggers remain unfinished.
+ceases to exist at the next state-based check.
+Ceasing and departure triggers work; preventing a departed token from moving
+again before that check remains unfinished.
 
 **Copies**, 707. A copy takes the copiable values, which means printed values
 plus other copy effects, and not the current ones. A creature that is 5/5
@@ -152,10 +166,10 @@ derived set on both sides, at the moment it asks.
 
 ## What the engine does without asking
 
-The table owns the turn. Untapping, drawing for the turn, state-based actions,
-emptying mana pools at every step boundary, and a priority window with nothing
-in it but a pass all happen with nobody asked. That is `forced`, and it is most
-of the decisions in a game.
+The table owns the turn. Untapping, drawing for the turn, state-based actions
+and expiring mana at its recorded boundary happen without a voluntary choice.
+The seat chooses priority passes and combat declarations, including when
+passing or finishing an empty declaration is its only listed option.
 
 A card's instruction belongs to the seat resolving it, and a damage assignment
 with more than one legal division belongs to the player assigning it. A seat

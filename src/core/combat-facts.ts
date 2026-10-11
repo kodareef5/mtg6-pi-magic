@@ -24,7 +24,7 @@ export function blockConflicts(attacker: Fighter, blocker: Fighter, others = 0):
 }
 
 /** The arithmetic assumes the block exists; keyword conflicts are reported separately. */
-export function combatExchange(attacker: Fighter, blocker?: Fighter) {
+export function combatExchange(attacker: Fighter, blocker?: Fighter, defender?: { name: string; loyalty: number }) {
 	const fighter = (one: Fighter) => one.traits?.power === undefined || one.traits.toughness === undefined ? undefined : {
 		name: named(one), power: Math.max(0, one.traits.power), toughness: one.traits.toughness,
 		words: one.traits.words, marked: one.damage, destroyed: false,
@@ -34,6 +34,7 @@ export function combatExchange(attacker: Fighter, blocker?: Fighter) {
 	const has = (one: NonNullable<typeof attack>, word: string) => one.words.includes(word);
 	const early = (one: NonNullable<typeof attack>) => has(one, "first strike") || has(one, "double strike");
 	const first = early(attack) || !!block && early(block);
+	let loyalty = defender?.loyalty ?? 0;
 	const steps = (first ? ["first", "normal"] as const : ["normal"] as const).map((step) => {
 		const deals = (one: NonNullable<typeof attack>) => !one.destroyed && (step === "first" ? early(one) : !early(one) || has(one, "double strike"));
 		let toBlocker = 0, toPlayer = 0, toAttacker = 0;
@@ -51,12 +52,15 @@ export function combatExchange(attacker: Fighter, blocker?: Fighter) {
 		};
 		// Both assignments use the creatures alive before this damage step.
 		if (block) { damage(attack, block, toAttacker); damage(block, attack, toBlocker); }
-		return { step, toBlocker, toAttacker, toPlayer };
+		const toPlaneswalker = defender && loyalty > 0 ? toPlayer : 0;
+		if (defender) { toPlayer = 0; loyalty = Math.max(0, loyalty - toPlaneswalker); }
+		return { step, toBlocker, toAttacker, toPlayer, ...(defender ? { toPlaneswalker } : {}) };
 	});
 	const total = (key: "toBlocker" | "toAttacker" | "toPlayer") => steps.reduce((n, one) => n + one[key], 0);
 	const result = (one: NonNullable<typeof attack>) => `${one.name} ${one.destroyed ? "would be destroyed by this damage" : "survives this damage"}`;
 	const scope = "Damage only with unchanged characteristics; responses, triggers, prevention, replacements and life gain are not predicted. Trample assigns minimum lethal to the sole blocker. This does not choose an attack or predict a block.";
-	return { steps, toPlayer: total("toPlayer"), attackerDestroyed: attack.destroyed, blockerDestroyed: block?.destroyed,
-		summary: `${first ? "Across first-strike and normal damage steps" : "In normal combat damage"}: ${attack.name} deals ${total("toBlocker")} to ${block?.name ?? "blockers"} and ${total("toPlayer")} to the defending player` +
+	const toPlaneswalker = steps.reduce((n, one) => n + (one.toPlaneswalker ?? 0), 0);
+	return { steps, toPlayer: total("toPlayer"), ...(defender ? { toPlaneswalker, loyaltyAfter: loyalty } : {}), attackerDestroyed: attack.destroyed, blockerDestroyed: block?.destroyed,
+		summary: `${first ? "Across first-strike and normal damage steps" : "In normal combat damage"}: ${attack.name} deals ${total("toBlocker")} to ${block?.name ?? "blockers"} and ${defender ? `${toPlaneswalker} to ${defender.name}; ${loyalty} loyalty remains` : `${total("toPlayer")} to the defending player`}` +
 			`${block ? `; ${block.name} deals ${total("toAttacker")} back. ${result(attack)}; ${result(block)}` : ""}. ${scope}`, scope };
 }
