@@ -46,6 +46,8 @@ export type PlanState = {
 	/** The announcements due steps and branches offer, beside the table's own options. */
 	procedures: ProcedureOption[];
 	announcements?: AnnouncementOffer[];
+	/** This question selects one part of the already chosen use. */
+	preparing?: true;
 };
 
 /** Ledger rows record which step or branch an action carried out. */
@@ -155,9 +157,10 @@ export function planState(frame: Frame): PlanState | null {
 	}) : [];
 	if (frame.view.announcement) {
 		const draft = frame.view.announcement, progress = draft.execution;
-		const options = (frame.decision?.options ?? []).filter((one) => !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id));
+		const options = (frame.decision?.options ?? []).filter((one) => !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id) &&
+			!one.id.startsWith("announce:unpay:") && !one.id.startsWith("announce:remove-target:") && !one.id.startsWith("payment:remove:"));
 		const fit = (at: number, label: string): Fit => ({ at, label, candidates: options });
-		return { revision, plan, seat: frame.seat, procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
+		return { revision, plan, seat: frame.seat, preparing: true, procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
 			due: progress?.step !== undefined && plan.steps[progress.step] ? [fit(progress.step, plan.steps[progress.step]!.label)] : [],
 			branches: progress?.branch !== undefined && plan.may?.[progress.branch] ? [fit(progress.branch, plan.may[progress.branch]!.label)] : [],
 			held };
@@ -279,7 +282,8 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 	// Index once: scanning each candidate list for each offered payment is quadratic.
 	const due = new Map<string, string>(), waiting = new Map<string, string>(), branches = new Map<string, string[]>();
 	for (const step of state.due) {
-		const mark = `Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`;
+		const mark = state.preparing ? `Selects a part of plan step ${step.at + 1}; its target and payment policy is in the plan.` :
+			`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`;
 		for (const option of step.candidates) if (!due.has(option.id)) due.set(option.id, mark);
 	}
 	for (const step of state.waiting) {
@@ -287,7 +291,8 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		for (const option of step.candidates) if (!waiting.has(option.id)) waiting.set(option.id, mark);
 	}
 	for (const branch of state.branches) {
-		const mark = `Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`;
+		const mark = state.preparing ? `Selects a part of plan branch ${branch.at + 1}; its target and payment policy is in the plan.` :
+			`Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`;
 		for (const id of new Set(branch.candidates.map(one => one.id))) {
 			const marks = branches.get(id); if (marks) marks.push(mark); else branches.set(id, [mark]);
 		}

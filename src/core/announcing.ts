@@ -31,14 +31,17 @@ export function announcing(table: Table): Pending | null {
 	const choose = (id: string, label: string, announcement: Announcement | undefined, shows?: string) => moves.push({
 		option: { id, label, objects: [draft.source], ...(shows ? { shows } : {}) }, changes: [{ do: "announcement", ...(announcement ? { announcement } : {}) }], reason: "announcement" });
 	const bases = [...announcementBases(frame, draft)], base = bases[0];
+	let preparing: NonNullable<Pending["preparing"]> = { stage: "cost" };
 	let question = `Prepare ${draft.procedure.claim}. Nothing has been spent or cast.`;
 	if (base?.mana.x && draft.x !== undefined) question += ` X = ${draft.x}.`;
 	if (base && draft.targets.length) question += ` ${aiming(draft.targets, base.world, frame.seat).join(" ")}`;
 	if (!base) question += " Its source or permission is no longer available. Cancel to return to priority.";
 	else if (draft.x === undefined) {
+		preparing = { stage: "X" };
 		question += " Choose X.";
 		for (const one of bases) if (canAnnounce(one, frame)) choose(`announce:x:${one.x}`, `Choose X = ${one.x}`, { ...draft, x: one.x });
 	} else if (draft.targets.length < base.slots.length) {
+		preparing = { stage: "targets" };
 		const at = draft.targets.length, slot = base.slots[at]!, count = slot.count ?? 1, minimum = slot.atLeast ?? (slot.upTo ? 0 : count);
 		question += ` Choose target group ${at + 1}: ${minimum === count ? count : `${minimum} to ${count}`} targets. Selected ${draft.selecting.length}.`;
 		const pool = targetCandidates(slot, { ...base.scope, targets: draft.targets });
@@ -68,13 +71,14 @@ export function announcing(table: Table): Pending | null {
 		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined });
 	} else {
 		const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending);
-		question += ` Pay ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${menu.chosen.map((one) => one.label).join("; ") || "none"}.`;
+		preparing = { stage: "mana", selected: menu.chosen.map((one) => one.label), remainingMana: menu.remainingMana, missingColors: menu.missingColors, ready: menu.complete };
+		question += ` Select mana sources one at a time for ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${preparing.selected!.join("; ") || "none"}. Still needs ${menu.remainingMana} mana${menu.missingColors.length ? `, including ${menu.missingColors.map((color) => `{${color}}`).join("")}` : ""}.`;
 		for (const part of menu.next) {
-			choose(`announce:pay:${part.id}`, `Select: ${part.label}`, { ...draft, payment: [...draft.payment, part.id] }, "This selection spends nothing until confirmation.");
+			choose(`announce:pay:${part.id}`, `Add to payment: ${part.label}`, { ...draft, payment: [...draft.payment, part.id] }, `Keeps every source already selected and adds ${part.colors.length} mana. Nothing is spent yet.`);
 			moves.at(-1)!.option.spends = part.funding.taps.map((one) => one.source);
 			moves.at(-1)!.option.objects!.push(...part.funding.taps.map((one) => one.source));
 		}
-		for (const part of menu.chosen) choose(`announce:unpay:${part.id}`, `Remove: ${part.label}`, { ...draft, payment: draft.payment.filter((id) => id !== part.id) });
+		for (const part of menu.chosen) choose(`announce:unpay:${part.id}`, `Undo selection: ${part.label}`, { ...draft, payment: draft.payment.filter((id) => id !== part.id) }, `Removes ${part.colors.length} mana from the pending payment; it will need ${menu.remainingMana + part.colors.length} mana again.`);
 		const activation = announcedActivation(frame, draft);
 		if (activation) moves.push({ option: { id: "announce:confirm", label: `Confirm ${draft.procedure.claim} and pay`, use: activation,
 			objects: [draft.source, ...draft.targets.flat().flatMap((one) => "id" in one ? [one] : [])],
@@ -82,5 +86,5 @@ export function announcing(table: Table): Pending | null {
 		choose("announce:back", "Return to choosing additional costs", { ...draft, cost: undefined, payment: [] });
 	}
 	choose("announce:cancel", "Cancel this use and return to priority; spend nothing", undefined);
-	return { situation: "priority", seat: draft.controller, question, moves };
+	return { situation: "priority", seat: draft.controller, question, preparing, moves };
 }

@@ -29,8 +29,10 @@ export function paymentOptions(frame: Frame, cost: Price, selected: readonly str
 	const colors = chosen.flatMap((one) => one.colors), paidLife = chosen.reduce((sum, one) => sum + one.life, 0);
 	const life = frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0;
 	const possible = canPay(remaining, cost, life, { colors, life: paidLife });
+	const missingColors = [...new Set(cost.colors)].flatMap((color) => Array(Math.max(0,
+		cost.colors.filter((one) => one === color).length - colors.filter((one) => one === color).length)).fill(color) as Mana["color"][]);
 	const next = possible ? parts.filter((one) => !spent.has(one.resource) && canPay(remaining.filter((unit) => unit.id !== one.resource), cost, life,
 		{ colors: [...colors, ...one.colors], life: paidLife + one.life })) : [];
-	return { chosen, next, possible, complete: possible && covers(colors, cost),
+	return { chosen, next, possible, complete: possible && covers(colors, cost), remainingMana: cost.generic + cost.colors.length - colors.length, missingColors,
 		funding: { paid: chosen.flatMap((one) => one.funding.paid), taps: chosen.flatMap((one) => one.funding.taps) } };
 }

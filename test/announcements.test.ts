@@ -18,6 +18,7 @@ import { execution, planState } from "../src/core/planning.ts";
 import { activationChanges, activate } from "../src/core/procedures.ts";
 import { fork, open, replay, save, relive, type Header } from "../src/core/journal.ts";
 import { focus } from "../src/context/packet.ts";
+import { question } from "../src/context/seat.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
@@ -67,6 +68,9 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	pick("announce:x:2"); checkpoint(); pick("announce:cost:0");
 	const pay = () => nextDecision(table)!.options.find((one) => one.id.startsWith("announce:pay:") && one.label.includes("Mountain"))!;
 	pick(pay().id); checkpoint();
+	const partial = focus(workFrame(table, 0), startingIntent(0));
+	assert.deepEqual(partial.preparing, { stage: "mana", selected: [nextDecision(table)!.options.find((one) => one.id.startsWith("announce:unpay:"))!.label.replace("Undo selection: ", "")], remainingMana: 2, missingColors: [], ready: false });
+	assert.match(question(partial, false).instructions, /Add to payment keeps those sources and selects one more/);
 	assert.deepEqual([...table.things], physical, "partial mana selection has not tapped a land or moved the spell");
 	assert.ok(!nextDecision(table)!.options.some((one) => one.id === "announce:confirm"));
 	pick("announce:cancel");
@@ -98,7 +102,13 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	assert.match(JSON.stringify(focus(workFrame(table, 0), startingIntent(0)).plan), /Target Voice of Victory/, "the selected use retains its original execution policy");
 	pick(`announce:target:${voice.id}@${voice.incarnation}`); checkpoint();
 	pick("announce:cost:0");
-	while (!nextDecision(table)!.options.some((one) => one.id === "announce:confirm")) pick(nextDecision(table)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id);
+	while (!nextDecision(table)!.options.some((one) => one.id === "announce:confirm")) {
+		pick(nextDecision(table)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id);
+		const state = planState(workFrame(table, 0))!;
+		assert.ok(state.due[0]!.candidates.every((one) => !one.id.startsWith("announce:unpay:")), "undoing a partial choice is not forward execution of the step");
+		const packet = focus(workFrame(table, 0), startingIntent(0));
+		assert.ok(packet.options.every((one) => !(one.notes ?? []).some((note) => note.includes("Target Voice of Victory"))), "the shared execution policy stays in the plan instead of repeating on every mana source");
+	}
 	pick("announce:confirm");
 	assert.equal(table.ledger.at(-1)!.execution!.plan, revision);
 	assert.equal(table.ledger.at(-1)!.execution!.step, 0);

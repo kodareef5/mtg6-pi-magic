@@ -46,5 +46,6 @@ export function selectingPayment(table: Table): Pending | null {
 	}
 	moves.push({ option: { id: "payment:cancel", label: "Cancel this announcement; spend nothing" }, changes: [{ do: "payment" }, ...(table.announcement ? [{ do: "announcement" as const }] : [])], reason: "cost-payment" });
 	return { situation: "priority", seat: activation.controller,
+		...(table.announcement ? { preparing: { stage: "graveyard" as const, selected: chosen.map(named), ready: total >= selection.totalManaValue } } : {}),
 		question: `Prepare payment for ${activation.claim}. Exile own graveyard cards with total mana value at least ${selection.totalManaValue}. Selected ${total}: ${chosen.map(named).join(", ") || "none"}. Nothing is spent until payment is confirmed.`, moves };
 }

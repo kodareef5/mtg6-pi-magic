@@ -43,6 +43,7 @@ export type Seen = {
 };
 export type Packet = {
 	actor: SeatId; window: Window; version: number; obligation: string;
+	preparing?: NonNullable<Frame["decision"]>["preparing"];
 	kind: string;
 	opening?: NonNullable<SeatView["opening"]> & { play: string; landOdds?: string; hand: ReturnType<typeof openingHand>; retained?: { option: string; hand: ReturnType<typeof openingHand> }[] };
 	retained?: { option: string; hand: ReturnType<typeof openingHand> }[];
@@ -210,6 +211,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		hand: openingHand({ ...view, objects: view.objects?.filter((one) => !option.objects?.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation)) }, seat) })) : undefined;
 	return {
 		actor: seat, window: structuredClone(view.window), version, obligation: decision.question,
+		...(decision.preparing ? { preparing: structuredClone(decision.preparing) } : {}),
 		kind: view.resolution ? "resolution" : view.window.kind === "opening" ? `opening:${view.window.action}` : decision.situation,
 		...(view.opening ? { opening: { ...view.opening, ...openingFacts(frame), hand: openingHand(view, seat), ...(retained ? { retained } : {}) } } : retained ? { retained } : {}),
 		...(plan ? { plan } : {}), ...(itemList.length ? { checklist: itemList.map(({ options, ...item }) => {

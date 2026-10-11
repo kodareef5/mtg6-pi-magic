@@ -258,6 +258,8 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 		...(packet.kind === "trigger-order" && packet.plan ? ["Choose targets as your plan gives them."] : []),
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...orientation(packet),
+		...(packet.preparing ? [`You are selecting one part of an already chosen use.${packet.plan ? " Its target and payment policy is in state.plan." : ""} The complete use is confirmed after its parts are selected.`,
+			...(packet.preparing.stage === "mana" ? ["state.preparing shows the selected sources and unpaid mana. Add to payment keeps those sources and selects one more. Undo selection removes a source. Confirm spends the complete payment; no source is spent during selection."] : [])] : []),
 		...(packet.window.kind === "turn" && !packet.resolving && packet.kind !== "trigger-order" ? [stacked
 			? "The stack is not empty, so lands and sorcery-speed actions wait until it is; their absence now is no reason to ask for help. An object on the stack has not resolved yet; using its card again starts another use."
 			: "The stack is empty."] : []),
