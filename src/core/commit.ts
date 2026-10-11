@@ -352,7 +352,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				// swapped so the library stays a list the engine fully knows.
 				const library = cardsIn(table, "library", change.whose);
 				const ids = new Set(library.map((one) => one.id));
-				for (const [who, seen] of Object.entries(table.resolution?.seen ?? {})) table.resolution!.seen![Number(who)] = seen.filter((one) => !ids.has(one.id));
+				if (table.resolution?.seen) table.resolution.seen = Object.fromEntries(Object.entries(table.resolution.seen).map(([who, seen]) => [who, (seen ?? []).filter((one) => !ids.has(one.id))]));
 				for (let i = library.length - 1; i > 0; i--) {
 					const j = random(table, i + 1);
 					const a = library[i]!;
@@ -381,8 +381,15 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				enter(table, token, change, before, born);
 				break;
 			}
-			case "reveal":
+			case "reveal": {
+				if (!table.resolution) break;
+				const object = thing(table, change.what);
+				for (const who of [...table.seats.map((one) => one.id), "spectator"] as const) {
+					const seen = (table.resolution.seen ??= {})[who] ??= [];
+					if (!seen.some((one) => one.id === object.id && one.incarnation === object.incarnation)) seen.push({ id: object.id, incarnation: object.incarnation });
+				}
 				break;
+			}
 			case "look": {
 				const pending = table.resolution;
 				if (!pending) throw new Error("A private inspection needs a resolving instruction.");
@@ -515,8 +522,8 @@ function order(table: Table, change: Omit<Extract<Change, { do: "order" }>, "do"
 	const ids = new Set(picked.map((one) => one.id));
 	const rest = cardsIn(table, "library", change.whose).filter((one) => !ids.has(one.id));
 	(change.position === "top" ? [...picked, ...rest] : [...rest, ...picked]).forEach((one, at) => { one.position = at; });
-	for (const [who, seen] of Object.entries(table.resolution?.seen ?? {})) if (change.random || Number(who) !== change.who)
-		table.resolution!.seen![Number(who)] = seen.filter((one) => !ids.has(one.id));
+	if (table.resolution?.seen) table.resolution.seen = Object.fromEntries(Object.entries(table.resolution.seen).map(([who, seen]) =>
+		[who, change.random || who !== String(change.who) ? (seen ?? []).filter((one) => !ids.has(one.id)) : seen]));
 }
 
 /** An ability or trigger goes on top of the stack as its own object. */

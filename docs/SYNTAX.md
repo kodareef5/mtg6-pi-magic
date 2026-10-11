@@ -171,6 +171,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone; another hand needs an earlier explicit look, and a library search must name its owner or controller, or a bound inspected subset |
+| `reveal` | publicly reveal `what` or `every` without moving it; optional `as` binds the revealed cards for a later selection; confirmation contains no hidden names |
 | `name-card` | `who` chooses an Oracle card name, optionally filtered by printed `types`; remember it as `key` on the current incarnation of `on` |
 | `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
 | `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |

@@ -134,3 +134,36 @@ test("private selection cannot expose another hand through a malformed selector 
 	passBoth(order);
 	assert.match(nextDecision(order)!.blocked!, /unseen library/); assert.deepEqual(nextDecision(order)!.options, []);
 });
+
+test("a whole-hand reveal becomes public only on resolution, then permits the caster's eligible selection", () => {
+	for (const eligible of [false, true]) {
+		const table = start(standard, [{ deck: alpha(deck("Dimir Excruciator")) }, { deck: alpha(deck("Mono-Red Aggro")) }], `public-hand-${eligible}`);
+		main(table, 0); place(table, 0, "hand", "Duress");
+		commit(table, cardsIn(table, "hand", 1).map((one) => ({ do: "move", what: one.id, to: "library", reason: "game-setup" })), "game-setup");
+		const targets = place(table, 1, "hand", "Mountain", "Hired Claw", ...(eligible ? ["Burst Lightning"] : []));
+		commit(table, [{ do: "add-mana", who: 0, colors: ["B"] }], "game-setup");
+		const old = table.log.find((receipt) => receipt.changes.some((change) => change.do === "move" && change.what === targets[0]!.id && change.to === "hand"))!;
+		const initial = structuredClone(table), at = table.ledger.length;
+		announce(table, example("Cast Duress to reveal an opponent's hand and choose a discard")); passBoth(table);
+		const pending = structuredClone(table), before = table.ledger.length, reveal = nextDecision(table)!;
+		assert.deepEqual(table, pending, "listing the reveal is pure");
+		assert.ok(reveal.options.every((one) => !one.objects?.length && !one.cards?.length));
+		assert.ok(targets.every((card) => !JSON.stringify(reveal).includes(card.card!)), "the confirmation names no hidden cards");
+		assert.ok(!project(table, 0).objects!.some((one) => one.zone === "hand" && one.owner === 1));
+		step(table);
+		for (const viewer of [0, 1, "spectator"] as const)
+			assert.deepEqual(project(table, viewer).objects!.filter((one) => one.zone === "hand" && one.owner === 1).map((one) => one.card).sort(), targets.map((one) => one.card).sort());
+		const shown = structuredClone(table), after = table.ledger.length, choose = nextDecision(table)!;
+		assert.equal(choose.seat, 0); assert.equal(choose.blocked, undefined);
+		assert.equal(choose.options.length, 1);
+		if (eligible) assert.deepEqual(choose.options[0]!.cards, ["Burst Lightning"]);
+		else assert.match(choose.options[0]!.id, /:done$/);
+		step(table); finish(table);
+		assert.equal(targets.at(-1)!.zone, eligible ? "graveyard" : "hand");
+		assert.ok(targets.slice(0, 2).every((one) => one.zone === "hand"));
+		assert.ok(!describe(table, old, "spectator").includes("Mountain"), "earlier receipts retain their event-time visibility");
+		assert.deepEqual(relive(shown, table.ledger.slice(after)), table);
+		assert.deepEqual(relive(pending, table.ledger.slice(before)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
+	}
+});

@@ -19,6 +19,7 @@ schemas, and every `basis` is checked against the card's text.
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
+| `reveal-hand.md` | publicly reveal a whole hand before its opponent chooses an eligible discard |
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |
 | `last-known.md` | exile before life changes, using a departed target's former controller |
 | `entry-choices.md` | basic land and creature-type choices; restricted mana that grants spell properties when spent |

@@ -1,0 +1,29 @@
+{
+	"card": "Duress",
+	"generated": "2026-10-10",
+	"source": "3aa74637eecabb9a37056053d3e47478edac4ad20912f5272694373ebf1c7109",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Duress",
+		"registers": [],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Duress to have target opponent reveal their hand, choose a noncreature, nonland card from it, and have that opponent discard that card.",
+				"basis": "Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card.",
+				"source": {
+					"card": "Duress",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

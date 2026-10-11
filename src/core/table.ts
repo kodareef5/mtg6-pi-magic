@@ -22,7 +22,7 @@ import type { Tap } from "./funding.ts";
 import type { Said } from "./say.ts";
 import type { Step } from "./steps.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
-import type { Decision, Outcome, SeatId } from "./types.ts";
+import type { Decision, Outcome, SeatId, Viewer } from "./types.ts";
 import type { Workspace, WorkEntry } from "./work.ts";
 import type { Ruled } from "./judge.ts";
 import type { Cost, Instruction, Procedure, Target } from "./language.ts";
@@ -198,8 +198,8 @@ export type Resolution = {
 	lost?: boolean;
 	/** Picks so far in the current `choose`. */
 	picked: ObjectRef[];
-	/** Private inspection entitlements while this effect resolves. The receipts preserve what was seen. */
-	seen?: Record<SeatId, ObjectRef[]>;
+	/** Inspection entitlements while this effect resolves; public reveals also grant them to the spectator. Receipts preserve the disclosure afterward. */
+	seen?: Partial<Record<Viewer, ObjectRef[]>>;
 	/** A "you may" trigger whose controller has not yet said whether to use it. */
 	optional?: true;
 };

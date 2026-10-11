@@ -242,6 +242,7 @@ export const Defs = {
 		step({ do: Type.Literal("name-card"), who: PlayerRef, on: ObjectRef, key: name, types: Type.Optional(Type.Array(one(...CARD_TYPES), { minItems: 1 })) }),
 		/** A private inspection binds exactly the inspected objects, not the whole hidden zone. */
 		step({ do: Type.Literal("look"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
+		step({ do: Type.Literal("reveal"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		/** Reorder a named library subset without changing its zone or incarnation. */
 		step({ do: Type.Literal("order"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), position: one("top", "bottom"), random: Type.Optional(Type.Literal(true)) }),
 		/** Apply restriction words during announcement, before any player can respond. */

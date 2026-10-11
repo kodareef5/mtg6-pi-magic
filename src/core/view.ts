@@ -138,8 +138,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
-	const inspected = viewer === "spectator" ? [] : table.resolution?.seen?.[viewer] ?? [];
-	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && (item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation));
+	const inspected = table.resolution?.seen?.[viewer] ?? [];
+	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation);
 	const visibleRefs = new Set([...table.things.values()].filter((one) => entitled(one) && !one.faceDown).map((one) => `${one.id}@${one.incarnation}`));
 	const bound = (values: NonNullable<Table["resolution"]>["bound"]) => Object.fromEntries(Object.entries(values).map(([key, value]) => [key,
 		{ ...value, objects: value.objects.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`)) }]));
@@ -147,7 +147,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	if (resolution) {
 		resolution.bound = bound(resolution.bound);
 		resolution.picked = resolution.picked.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`));
-		if (resolution.seen) resolution.seen = viewer === "spectator" ? {} : { [viewer]: structuredClone(inspected) };
+		if (resolution.seen) resolution.seen = viewer === "spectator" && !inspected.length ? {} : { [viewer]: structuredClone(inspected) };
 	}
 	const objects: NonNullable<SeatView["objects"]> = [...table.things.values()]
 		.filter(entitled)

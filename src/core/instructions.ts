@@ -52,6 +52,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "reveal": {
+			const revealing = many(table, scope, instruction);
+			if (revealing.some((one) => one.faceDown)) return { actor: controller, question: "Reveal the selected face-down objects.", choices: [], blocked: "Revealing face-down objects requires identity visibility that this operation does not yet provide." };
+			// The confirmation precedes disclosure; no private names belong in this option.
+			return one(`Reveal ${revealing.length} card${revealing.length === 1 ? "" : "s"} publicly`,
+				revealing.map((object) => ({ do: "reveal", what: object.id })), bind(instruction, { objects: revealing.map(ref), players: [] }));
+		}
 		case "name-card": {
 			const actor = players(scope, instruction.who)[0] ?? controller, on = live(table, objects(scope, instruction.on));
 			if (!table.cardNames) return { actor, question: "Choose an Oracle card name.", choices: [], blocked: "No pinned Oracle name catalog; the name choice remains pending." };
