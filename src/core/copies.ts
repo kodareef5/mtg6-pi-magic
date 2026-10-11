@@ -9,8 +9,14 @@ import type { Seen } from "./selectors.ts";
 import type { Procedure, TokenSpec } from "./language.ts";
 
 /** Unsupported copy shapes leave resolution pending, without creating a partial token. */
-export function tokenCopy(table: Table, source: Seen): { spec: TokenSpec } | { blocked: string } {
-	return copiable(table, source, "token");
+export function tokenCopy(table: Table, source: Seen, except?: { power: number; toughness: number }): { spec: TokenSpec } | { blocked: string } {
+	const copied = copiable(table, source, "token");
+	if (!except || "blocked" in copied) return copied;
+	// 707.9d omits characteristic-defining abilities for replaced values. Our
+	// registrations do not yet distinguish those from other base-setting abilities.
+	if (copied.spec.registers?.some(one => one.kind === "continuous" && one.change.base))
+		return { blocked: "A power/toughness copy exception needs characteristic-defining abilities distinguished from other base-setting abilities." };
+	return { spec: { ...copied.spec, ...except } };
 }
 
 /** A single-faced permanent copies the current face; creating a double-faced

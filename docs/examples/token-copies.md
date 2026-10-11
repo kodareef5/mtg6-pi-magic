@@ -14,7 +14,7 @@ not battlefield activations. Copied entry terms apply before the token enters,
 and its entry triggers wait until the current resolution finishes.
 
 The first operation supports face-up, single-face permanents and ordinary
-tokens. Multiple-face token copies, face-down copies, token copy exceptions and
+tokens. Multiple-face token copies, face-down copies and
 making an existing battlefield object become a copy remain unsupported.
 [Entry copies](entry-copies.md) support a separate replacement choice and
 additive exceptions; copying that resulting permanent retains its exceptions.
@@ -33,7 +33,7 @@ This variant pays only the copy mode: the base U plus its additional 3.
   "source": { "card": "Three Steps Ahead", "zones": ["hand", "graveyard", "exile"], "controller": "any" },
   "claim": "Three Steps Ahead with only the copy mode",
   "basis": "Spree (Choose one or more additional costs.) ... + {3} — Create a token that's a copy of target artifact or creature you control.",
-  "timing": "spell", "cost": { "mana": "{3}{U}" },
+  "timing": "spell", "cost": { "additional": [{ "name": "spree-copy", "mana": "{3}" }] },
   "targets": [{ "object": { "types": ["artifact", "creature"], "controller": "you" } }],
   "instructions": [{ "do": "token", "count": 1, "copy": "target:0" }]
 }
@@ -48,7 +48,11 @@ illegal while the counter target stayed legal.
   "source": { "card": "Three Steps Ahead", "zones": ["hand", "graveyard", "exile"], "controller": "any" },
   "claim": "Three Steps Ahead with all three modes",
   "basis": "Spree (Choose one or more additional costs.) ... + {1}{U} — Counter target spell. ... + {3} — Create a token that's a copy of target artifact or creature you control. ... + {2} — Draw two cards, then discard a card.",
-  "timing": "spell", "cost": { "mana": "{6}{U}{U}" },
+  "timing": "spell", "cost": { "additional": [
+    { "name": "spree-counter", "mana": "{1}{U}" },
+    { "name": "spree-copy", "mana": "{3}" },
+    { "name": "spree-draw", "mana": "{2}" }
+  ] },
   "targets": [
     { "object": { "zones": ["stack"], "types": ["artifact", "battle", "creature", "enchantment", "instant", "planeswalker", "sorcery"] } },
     { "object": { "types": ["artifact", "creature"], "controller": "you" } }
@@ -65,3 +69,50 @@ illegal while the counter target stayed legal.
 
 Preparing one mode does not cover the other six combinations. Syntax acceptance
 does not certify any mode's source interpretation.
+
+## Offspring and fixed power/toughness exceptions
+
+`token.except` replaces the copy's base power and toughness with fixed integers.
+Those values are themselves copiable (707.9b); counters and later layer effects
+still apply normally. The exception requires `copy`, not `spec`. It does not
+support other characteristic exceptions. Sources with a continuous base-setting
+ability remain unsupported until the syntax distinguishes characteristic-defining
+abilities, which 707.9d omits when their defined values are replaced.
+
+Iridescent Vinelasher's offspring trigger checks its named additional payment
+both on entry and on resolution (702.175a). The token was not cast and cannot
+inherit that payment, so its own offspring ability does not trigger. It retains
+the original mana cost, color, creature types and landfall ability.
+
+```json package
+{
+  "card": "Iridescent Vinelasher",
+  "printedCast": true,
+  "registers": [
+    {
+      "basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+      "kind": "watch", "event": { "on": "enters", "of": { "is": "this" } },
+      "if": { "cast": "this", "paid": "offspring" },
+      "effect": { "instructions": [{ "do": "token", "count": 1, "copy": "this", "except": { "power": 1, "toughness": 1 } }] }
+    },
+    {
+      "basis": "Landfall — Whenever a land you control enters, this creature deals 1 damage to target opponent.",
+      "kind": "watch", "event": { "on": "enters", "of": { "types": ["land"], "controller": "you" } },
+      "effect": { "targets": [{ "player": "opponent" }], "instructions": [{ "do": "damage", "to": "target:0", "amount": 1 }] }
+    }
+  ]
+}
+```
+
+The shared printed cast supplies the unpaid variant. A separate procedure pays
+offspring; neither variant creates the token during the spell's resolution.
+
+```json procedure
+{
+  "source": { "card": "Iridescent Vinelasher", "zones": ["hand", "graveyard", "exile"], "controller": "any" },
+  "claim": "Cast Iridescent Vinelasher with offspring",
+  "basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+  "timing": "spell", "cost": { "additional": [{ "name": "offspring", "mana": "{2}" }] },
+  "instructions": []
+}
+```

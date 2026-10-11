@@ -239,7 +239,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const originals = instruction.copy && count && creators.length ? objects(scope, instruction.copy, true) : [];
 			if (originals.length > 1) return { actor: controller, question: "Create the requested token copy.", choices: [], blocked: "A token copy needs one source; choose one before copying." };
 			const original = originals[0];
-			const copied = original && count && creators.length ? tokenCopy(table, original) : undefined;
+			const copied = original && count && creators.length ? tokenCopy(table, original, instruction.except) : undefined;
 			if (copied && "blocked" in copied) return { actor: controller, question: "Create the requested token copy.", choices: [], blocked: copied.blocked };
 			const spec = instruction.spec ?? (copied && "spec" in copied ? copied.spec : undefined);
 			if (!spec) return one("No token is created: the copy source is unavailable.", [], bind(instruction, { objects: [], players: [] }));

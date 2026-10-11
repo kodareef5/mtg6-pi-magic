@@ -17,8 +17,8 @@ measures whether ordinary games can execute their cards correctly.
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Control versus Azorius finished through staged casting; priority selects a use before X, targets, extra costs and mana payment |
-| Recent shared mechanics | Staged announcements and matching replans; named additional mana costs; damage bindings read actual recipients after prevention |
-| Stored card assessments | 238 accepted, 70 refused, five basic lands; seven reviewed runtime packages retained with explicit corrections |
+| Recent shared mechanics | Staged announcements and matching replans; named additional mana costs and offspring token copies; damage bindings read actual recipients after prevention |
+| Stored card assessments | 239 accepted, 69 refused, five basic lands; Iridescent Vinelasher accepted after offspring support |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and 276 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |

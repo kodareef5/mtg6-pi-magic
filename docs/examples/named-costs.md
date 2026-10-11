@@ -27,5 +27,6 @@ variant omits `additional` and deals two damage.
 receipt, including when the permanent is entering. Use separate names for
 separate instances (702.175b). No payment is stored on the permanent; leaving
 and returning breaks the association. This field supports additional mana
-only. Nonmana costs retain their existing cost fields. Token-copy exceptions
-and copied spell choices require their own support.
+only. Nonmana costs retain their existing cost fields. Offspring's fixed
+power/toughness exception uses [token copies](token-copies.md); copying spell
+payment choices remains unsupported.

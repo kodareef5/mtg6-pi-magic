@@ -1,0 +1,86 @@
+{
+	"card": "Iridescent Vinelasher",
+	"generated": "2026-10-10",
+	"source": "e12e132f12955608962b2947cb2837f7ab8cec3d320a49074d803fbf4668ddda",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iridescent Vinelasher",
+		"registers": [
+			{
+				"basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "offspring"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this",
+							"except": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Landfall — Whenever a land you control enters, this creature deals 1 damage to target opponent.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"land"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 1,
+							"from": "this"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Iridescent Vinelasher with offspring",
+				"basis": "Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"source": {
+					"card": "Iridescent Vinelasher",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

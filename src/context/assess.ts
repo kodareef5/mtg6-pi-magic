@@ -33,6 +33,7 @@ const SYSTEM = [
 	exampleIndex,
 	"The complete package schema is checked locally; the tool uses a shallow schema to avoid recursive expansion by providers.",
 	JSON.stringify(PackageSchema),
+	"Offspring combines an optional named additional mana cost with an intervening-if entry trigger. The trigger uses cast.paid for its distinct cost instance and token.copy with except power/toughness 1/1. Read token-copies.md and named-costs.md. Fixed copy exceptions refuse sources with continuous base-setting abilities until characteristic-defining abilities are distinguished; do not approximate them with a later modify instruction.",
 ].join("\n\n");
 
 export async function assessCard(card: string, printed: Printed, writer: Pick<Reasoner, "work">, universe: Universe, rules?: Rules, preparation: "standing" | "complete" = "standing"): Promise<Package> {

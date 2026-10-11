@@ -315,7 +315,10 @@ permanent. That is where warp's delayed exile and an Aura's `attach` go.
 
 Token creation accepts either `spec` or `copy`, never both. `copy` freezes a
 single permanent's copiable base terms and complete battlefield activations;
-it does not copy current counters or temporary changes. See
+it does not copy current counters or temporary changes. With `copy`, an optional
+`except: {power: 1, toughness: 1}` replaces those copiable base values. Sources
+with continuous base-setting abilities remain unsupported for that exception.
+See
 [token copies](examples/token-copies.md) for supported sources and entry behavior.
 
 Counter watches use `on: "counters"`, optional `counter` for the kind and

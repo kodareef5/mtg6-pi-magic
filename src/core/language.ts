@@ -279,8 +279,9 @@ export const Defs = {
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("door"), what: ObjectRef, action: one("unlock", "lock"), face: Type.Optional(Face) }),
 		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
-		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Optional(Type.Ref("TokenSpec")), copy: Type.Optional(ObjectRef), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
-			{ oneOf: [{ required: ["spec"], not: { required: ["copy"] } }, { required: ["copy"], not: { required: ["spec"] } }] }),
+		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Optional(Type.Ref("TokenSpec")), copy: Type.Optional(ObjectRef),
+			except: Type.Optional(object({ power: Type.Integer(), toughness: Type.Integer() })), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
+			{ oneOf: [{ required: ["spec"], not: { anyOf: [{ required: ["copy"] }, { required: ["except"] }] } }, { required: ["copy"], not: { required: ["spec"] } }] }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
 		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */

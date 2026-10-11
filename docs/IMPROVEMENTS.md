@@ -33,10 +33,9 @@ assessments.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
-2. Widen standing coverage. Iridescent
-   Vinelasher blocks both Rakdos Lizards and Mono-Black Aggro; its additional
-   cost is supported and token-copy exceptions are next. Valley Flamecaller's damage
-   replacement is the other Rakdos blocker. Keep replacement-order choices
+2. Widen standing coverage. Iridescent Vinelasher's offspring is assessed.
+   Valley Flamecaller's damage replacement is the remaining Rakdos blocker.
+   Keep replacement-order choices
    explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete

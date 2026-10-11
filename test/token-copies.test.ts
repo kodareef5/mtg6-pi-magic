@@ -1,4 +1,5 @@
-/** Copies retain base meaning, not the original's current layer results. */
+/** Copies retain base meaning, not the original's current layer results.
+ * Past 150 lines to keep entry, payment and copied-value positions in one invariant. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { start, commit } from "../src/core/commit.ts";
@@ -8,6 +9,7 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { characteristics } from "../src/core/characteristics.ts";
 import { tokenCopy } from "../src/core/copies.ts";
+import { checkProcedure } from "../src/core/procedures.ts";
 import { beforeEntry } from "../src/core/entry-payments.ts";
 import { activatedUses } from "../src/core/activated.ts";
 import { printedCast } from "../src/core/procedures.ts";
@@ -113,4 +115,56 @@ test("a copy freezes printed values and complete abilities, applies entry terms,
 	apply(entry, choice.options.find(one => one.label.includes("(hand)"))!.id, "model", "chosen");
 	assert.equal(entry.things.get("copied-sanctum")!.tapped, false);
 	assert.deepEqual(relive(waiting, entry.ledger.slice(after)), entry);
+
+	for (const paid of [false, true]) for (const departed of [false, true]) {
+		const game = start(standard, [{ deck: alpha(deck("Rakdos Lizards")) }, { deck: deck("Mono-Green Landfall") }], `offspring-${paid}-${departed}`);
+		const [lizard] = place(game, 0, "hand", "Iridescent Vinelasher");
+		place(game, 0, "hand", "Mountain"); main(game, 0);
+		prepare(game, lizard!.card!);
+		commit(game, [{ do: "add-mana", who: 0, colors: ["B", "C", "C"] }], "game-setup");
+		const initial = structuredClone(game), from = game.ledger.length;
+		announce(game, paid ? example("Cast Iridescent Vinelasher with offspring") : printedCast(lizard!.card!, game.printed[lizard!.card!]!));
+		passBoth(game); finish(game);
+		assert.equal(game.waiting.length, paid ? 1 : 0);
+		assert.deepEqual(relive(initial, game.ledger.slice(from)), game);
+		if (!paid) continue;
+		const trigger = nextDecision(game)!; assert.equal(trigger.situation, "trigger-order");
+		apply(game, trigger.options[0]!.id, "model", "chosen");
+		// A boost and counters are deliberately not copiable, even through last known information.
+		commit(game, [{ do: "counters", what: lizard!.id, kind: "+1/+1", amount: 3 },
+			{ do: "note", note: { kind: "label", on: { id: lizard!.id, incarnation: lizard!.incarnation }, by: 0, until: "end-of-turn", text: "Temporary boost", change: { power: 5, toughness: 5 } } },
+			...(departed ? [{ do: "move" as const, what: lizard!.id, to: "graveyard" as const, reason: "destroy" as const }] : [])], "resolve");
+		const pending = structuredClone(game), at = game.ledger.length;
+		passBoth(game);
+		const pure = structuredClone(game); nextDecision(game); assert.deepEqual(game, pure);
+		step(game); finish(game);
+		const child = cardsIn(game, "battlefield").find(one => one.token?.name === lizard!.card)!;
+		assert.ok(child, "offspring reads the paid cast even when its source has left");
+		const base = characteristics(game, child)!;
+		assert.equal(base.power, 1); assert.equal(base.toughness, 1); assert.equal(base.manaValue, 1);
+		assert.deepEqual(base.colors, ["B"]); assert.deepEqual(base.subtypes, ["Lizard", "Assassin"]);
+		assert.equal(game.waiting.length, 0, "a token was not cast and cannot inherit the offspring payment");
+		assert.deepEqual(relive(structuredClone(pending), game.ledger.slice(at)), game, "a pending offspring trigger survives a saved continuation");
+		const copyAgain = tokenCopy(game, child); assert.ok("spec" in copyAgain);
+		assert.equal(copyAgain.spec.power, 1); assert.equal(copyAgain.spec.toughness, 1, "a copy of a copy retains the exception");
+		const land = nextDecision(game)!.options.find(one => one.id.startsWith("land:") && one.label.includes("Mountain")); assert.ok(land);
+		apply(game, land.id, "model", "chosen");
+		assert.equal(game.waiting.length, departed ? 1 : 2, "each surviving copy retains landfall");
+		while (nextDecision(game)?.situation === "trigger-order") apply(game, nextDecision(game)!.options[0]!.id, "model", "chosen");
+		const life = game.seats[1]!.life;
+		for (let left = departed ? 1 : 2; left; left--) { passBoth(game); step(game); finish(game); }
+		assert.equal(game.seats[1]!.life, life - (departed ? 1 : 2));
+		// The direct fixture changes above are recorded in the clone prefix; replay the physical picks from there.
+		assert.deepEqual(relive(pending, game.ledger.slice(at)), game);
+		commit(game, [{ do: "counters", what: child.id, kind: "+1/+1", amount: 2 }], "resolve");
+		assert.equal(characteristics(game, child)!.power, 3, "later layers apply to the fixed copiable base");
+		assert.deepEqual(tokenCopy(game, child), copyAgain, "later counters do not become copiable");
+	}
+	// Refuse unclassified base-setting terms rather than guessing which ability 707.9d removes.
+	const ambiguous = structuredClone(copy);
+	ambiguous.token!.registers!.push({ kind: "continuous", basis: "Unclassified base-setting ability", affects: { is: "this" }, change: { base: { power: 2, toughness: 2 } } });
+	assert.match((tokenCopy(table, ambiguous, { power: 1, toughness: 1 }) as { blocked: string }).blocked, /characteristic-defining/);
+	const invalid = example("Three Steps Ahead with only the copy mode");
+	invalid.instructions = [{ do: "token", count: 1, spec: { name: "Fish", types: ["creature"], colors: [], power: 1, toughness: 1 }, except: { power: 1, toughness: 1 } }];
+	assert.throws(() => checkProcedure(invalid), /./, "copy exceptions cannot alter an explicit token specification");
 });

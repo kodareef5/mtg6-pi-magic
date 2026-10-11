@@ -224,15 +224,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Iridescent Vinelasher": {
-		"reason": "Iridescent Vinelasher is not ready: Offspring {2} (You may pay an additional {2} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — Missing operations: recording whether offspring was paid for the permanent's conditional enters trigger, and creating a token copy of that permanent with base power and toughness 1/1. A fixed TokenSpec cannot implement copying its copiable characteristics.",
-		"decks": [
-			"Mono-Black Aggro",
-			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Laughing Jasper Flint": {
 		"reason": "Laughing Jasper Flint is not ready: At the beginning of your upkeep, exile the top X cards of target opponent's library, where X is the number of outlaws you control. Until end of turn, you may cast spells from among those cards, and mana of any type can be spent to cast those spells. — Missing operations: select and exile a variable-sized top-of-library group (X counts controlled permanents with Assassin, Mercenary, Pirate, Rogue, or Warlock subtype, each once); grant casting-only permission for that group until end of turn without permitting land plays; allow mana of any type to pay for those spells. The provided top reference accepts only a fixed integer, and permit has neither a casting-only restriction nor a mana-type override. Choosing arbitrary library cards or granting unrestricted play permission would change the ability.",
 		"decks": [
