@@ -437,9 +437,9 @@ function stack(table: Table, id: string, ability: Activation): void {
 }
 
 /** Entering terms apply as part of the motion, and the recorded change says so. */
-function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number>; paid?: boolean }, before: Receipt["before"], born: ReadonlySet<string>): void {
+function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number>; entry?: "paid" | "declined" }, before: Receipt["before"], born: ReadonlySet<string>): void {
 	forget(table);
-	const entering = terms(table, object, before, born, change.paid);
+	const entering = terms(table, object, before, born, change.entry);
 	if (entering.tapped) object.tapped = change.tapped = true;
 	if (entering.prepared) prepare(table, object);
 	for (const [kind, count] of Object.entries(entering.counters)) if (count > 0) object.counters[kind] = (object.counters[kind] ?? 0) + count;

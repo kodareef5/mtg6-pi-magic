@@ -55,25 +55,6 @@ test("turns taken count from who started, and the turn condition reads whose tur
 	assert.equal(holds({ world, controller: 1 }, { turn: "opponent" }), true);
 });
 
-test("a shock land offers a paid play that enters untapped and a free play that enters tapped", () => {
-	const table = pool("shock");
-	main(table, 0, 3);
-	editWork(table, 0, [{ do: "package.put", package: shock }], "shock-package");
-	const [vents] = place(table, 0, "hand", "Steam Vents");
-	const options = nextDecision(table)!.options.map((one) => one.id);
-	assert.ok(options.includes(`land:${vents!.id}:pay`), "the paid play is offered");
-	assert.ok(options.includes(`land:${vents!.id}`), "the unpaid play is offered");
-	const life = seat(table, 0).life;
-	const paid = structuredClone(table);
-	apply(paid, `land:${vents!.id}:pay`, "model", "chosen");
-	assert.equal(paid.things.get(vents!.id)!.zone, "battlefield");
-	assert.equal(paid.things.get(vents!.id)!.tapped, false, "paid, it enters untapped");
-	assert.equal(seat(paid, 0).life, life - 2, "the payment is two life");
-	apply(table, `land:${vents!.id}`, "model", "chosen");
-	assert.equal(table.things.get(vents!.id)!.tapped, true, "unpaid, it enters tapped");
-	assert.equal(seat(table, 0).life, life, "no life changes");
-});
-
 test("a Town enters untapped through its controller's third turn and tapped from the fourth", () => {
 	// Seat 1 is on the draw: its third turn is the game's sixth, its fourth the eighth.
 	for (const [turn, tapped] of [[6, false], [8, true]] as const) {
@@ -89,7 +70,6 @@ test("a Town enters untapped through its controller's third turn and tapped from
 test("a conditional mana ability produces only while its condition holds", () => {
 	assert.deepEqual(produces(verge, () => 1, () => false), []);
 	assert.equal(produces(verge, () => 1, () => true).length, 1);
-	assert.equal(produces(verge, () => 1).length, 0, "without condition facts, the ability is unavailable");
 });
 
 
@@ -148,4 +128,20 @@ test("entry payments wait for every controller and preserve the simultaneous gro
 	assert.equal(seat(table, 0).life, 18); assert.equal(seat(table, 1).life, 18);
 	assert.equal(table.entry, undefined);
 	assert.deepEqual(relive(pending, table.ledger.slice(version)), table, "a clone in the pending payment replays the same group");
+
+	for (const [answer, life, tapped] of [["pay", 18, false], ["decline", 20, true]] as const) {
+		const played = pool(`played-entry-${answer}`); main(played, 0);
+		editWork(played, 0, [{ do: "package.put", package: shock }], "shock-package");
+		const [land] = place(played, 0, "hand", "Steam Vents");
+		assert.equal(nextDecision(played)!.options.filter((one) => one.id.startsWith(`land:${land!.id}`)).length, 1);
+		const prefix = structuredClone(played), from = played.ledger.length;
+		apply(played, `land:${land!.id}`, "model", "chosen");
+		assert.equal(land!.zone, "hand", "the land play waits for the generic entry choice");
+		assert.equal(seat(played, 0).landsPlayed, 0, "bookkeeping stays with the physical group");
+		apply(played, `entry:0:${answer}`, "model", "chosen");
+		assert.equal(land!.zone, "battlefield"); assert.equal(land!.tapped, tapped);
+		assert.equal(seat(played, 0).life, life); assert.equal(seat(played, 0).landsPlayed, 1);
+		assert.deepEqual(relive(prefix, played.ledger.slice(from)), played);
+	}
+
 });

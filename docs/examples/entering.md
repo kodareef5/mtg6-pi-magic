@@ -33,9 +33,11 @@ Ba Sing Se's earthbend ability is announced, not registered; see
 `animation.md`.
 
 A shock land asks its controller a question as it enters: pay 2 life, or
-arrive tapped. Register `tapped` with `unlessPay`, and the land play offers two
-options, one that pays and enters untapped and one that does not. The mana
-ability is intrinsic to the basic land types, so nothing registers it.
+arrive tapped. Register `tapped` with `unlessPay`. Playing, fetching or resolving
+the land pauses its entry group for the same payment decision. Paying removes
+that term's tapped restriction; a separate instruction to enter tapped still
+applies. The mana ability is intrinsic to the basic land types, so nothing
+registers it.
 
 ```json package
 {

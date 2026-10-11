@@ -230,7 +230,7 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			prepared: Type.Optional(Type.Literal(true)),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
-			/** "You may pay 2 life. If you don't, it enters tapped": tapped unless its controller pays this as it enters. The land play offers both. */
+			/** "You may pay 2 life. If you don't, it enters tapped": the generic entry decision asks its controller before the group commits. */
 			unlessPay: Type.Optional(object({ life: positive })) }),
 		/** "If it would die, exile it instead." */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),

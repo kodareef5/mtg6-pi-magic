@@ -40,7 +40,7 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
  * What a registered mana ability produces when its cost is tapping, or tapping
  * and sacrificing the source. `count` works out "for each Elf you control".
  */
-export function produces(registration: Registration, count: (amount: Amount) => number, holding: (condition: Condition) => boolean = () => false): Yield[] {
+export function produces(registration: Registration, count: (amount: Amount) => number, holding: (condition: Condition) => boolean): Yield[] {
 	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
 	if (registration.if && !holding(registration.if)) return [];
 	const { tap: _, sacrifice, life, ...other } = registration.cost;

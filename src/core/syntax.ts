@@ -71,8 +71,8 @@ export type Change =
 	 */
 	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[];
 		tapped?: true; counters?: Record<string, number>; controller?: SeatId;
-		/** Its controller paid the entry's optional cost, recorded with the life change just before this move. */
-		paid?: boolean; face?: 0 | 1 }
+		/** The controller's answer to the optional entry cost. Absent until that choice is settled. */
+		entry?: "paid" | "declined"; face?: 0 | 1 }
 	/** A token made on the battlefield (111.1). */
 	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true }
 	/** Shown to every seat. Nothing moves. */
