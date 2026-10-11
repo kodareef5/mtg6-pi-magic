@@ -23,10 +23,11 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-4c Control, Selesnya Landfall and Izzet Spellementals have standing assessments
-for every main-deck card. They still have thirteen, eight and thirteen cards
-with deferred uses respectively. All three have completed source-reviewed games;
-[Status](STATUS.md) holds the current count. The other sixteen lists still need
+4c Control, Selesnya Landfall, Izzet Spellementals and Azorius Control have
+standing assessments for every main-deck card. They still have thirteen, eight,
+thirteen and fifteen cards with deferred uses respectively. The first three
+have completed source-reviewed games; Azorius has begun its first game.
+[Status](STATUS.md) holds the current count. The other fifteen lists still need
 standing assessments.
 
 1. Continue saved games from their reviewed repair points, then run fresh
@@ -37,9 +38,12 @@ standing assessments.
    branches and repair before the first affected action.
 3. Resolve the next observed runtime failure with a shared mechanic and an
    invariant test. Native graveyard prices, Harmonize payments and optional
-   search groups now have that support.
+   search groups now have that support. Refuse malformed library scopes during
+   preparation and retain the runtime visibility guard.
 4. Widen standing coverage toward the next complete main deck. Entry choices,
    static casting costs, attacking tokens and copies remain prominent blockers.
+   Review stored restriction words as well as refusals: accepted prose does
+   not execute a missing mechanic.
    Sideboard-only refusals do not delay this alpha.
 
 One assessed imported list can play an established opponent; it need not wait

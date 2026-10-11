@@ -12,15 +12,15 @@ measures whether ordinary games can execute their cards correctly.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 3 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals |
-| Completed source-reviewed alpha games | 8, covering all three admitted lists; retrospective review withdrew three older results |
+| Imported main decks admitted to setup | 4 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control |
+| Completed source-reviewed alpha games | 10, covering Control, Landfall and Izzet; Azorius has begun its first game |
 | Imported lists facing each other | Selesnya versus Control and Izzet versus Control completed in both seat orders |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Native graveyard permissions and optional searches are implemented; saved Erode and Esper Origins branches are continuing |
-| Recent shared mechanics | Native casting prices, optional tap reductions, bounded target groups, damage-prevention restrictions and guarded private selections |
-| Stored card assessments | 228 accepted, 79 refused, five basic lands; these totals include deferred sideboard work |
+| Current runtime work | The Izzet versus Landfall pairing is underway in both seat orders; its forward game awaits a corrected fetch continuation |
+| Recent shared mechanics | Oracle name choices, activation restrictions, behold entry payments, optional search groups and early library-scope validation |
+| Stored card assessments | 226 accepted, 81 refused, five basic lands; source review retired four inert restriction assessments, including sideboard cards |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 253 invariant tests pass |
+| Validation | Type check and 258 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
