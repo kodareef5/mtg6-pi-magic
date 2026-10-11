@@ -175,7 +175,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 
 | Instruction | What it does |
 |---|---|
-| `damage` | `to` an object or player, `amount`, `from` (default the source) |
+| `damage` | `to` an object or player, `amount`, `from` (default the source); `as` binds recipients dealt positive damage and their total after prevention |
 | `damage-rule` | global all-damage prevention or prohibition (`mode: "prevent"` or `"unpreventable"`), optionally `combat`, lasting until `until`; no bounded shield or additional prevention effects |
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |

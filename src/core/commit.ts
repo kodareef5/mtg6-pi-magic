@@ -29,7 +29,7 @@ import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
 import { damageSource, tableWorld, targetKey } from "./selectors.ts";
-import { prevented } from "./damage.ts";
+import { damageResult } from "./damage.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Activation,
@@ -174,7 +174,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const source = damageSource(table, change.source), target = "id" in change.target ? table.things.get(change.target.id) : undefined;
 		if ("id" in change.target && (!target || target.incarnation !== change.target.incarnation || target.zone !== "battlefield"))
 			throw new Error("The damage recipient is no longer that permanent.");
-		const applied = change.amount && prevented(world!, change, source) ? { ...change, amount: 0, prevented: change.amount } : change;
+		const applied = damageResult(world!, change, source);
 		damage.set(applied, { source, target: target ? characteristics(table, target) : undefined });
 		return applied;
 	});

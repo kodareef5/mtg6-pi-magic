@@ -91,4 +91,38 @@ test("prevention precedes damage results, yields to prohibitions, expires and re
 	commit(standing, [{ do: "move", what: lynx.id, to: "hand", reason: "bounce" }], "bounce");
 	commit(standing, [ping], "resolve"); assert.equal(protectedCreature.damage, 1, "standing prohibition ends when its source leaves");
 
+	for (const prevention of [false, true]) for (const prohibited of [false, true]) {
+		const game = build("Boros Tokens"), { victim } = defend(game);
+		main(game, 0); const [torch] = place(game, 0, "hand", "Torch the Tower");
+		if (!prevention) commit(game, [{ do: "move", what: [...game.things.values()].find(one => one.card === "Crystal Barricade" && one.zone === "battlefield")!.id, to: "hand", reason: "bounce" }], "game-setup");
+		if (prohibited) commit(game, [{ do: "note", note: { kind: "damage-rule", by: 0, until: "end-of-turn", mode: "unpreventable" } }], "game-setup");
+		commit(game, [{ do: "add-mana", who: 0, colors: ["R"] }], "game-setup");
+		const initial = structuredClone(game), at = game.ledger.length;
+		announce(game, example("Cast Torch the Tower without bargain"), choice => choice.activation.source.id === torch!.id && choice.activation.targets[0]!.some(one => "id" in one && one.id === victim.id));
+		passBoth(game);
+		const unchanged = structuredClone(game); nextDecision(game); assert.deepEqual(game, unchanged);
+		step(game);
+		const dealt = !prevention || prohibited;
+		assert.deepEqual(game.resolution!.bound.damaged, { objects: dealt ? [ref(victim)] : [], players: [], amount: dealt ? 2 : 0 });
+		const middle = structuredClone(game), from = game.ledger.length;
+		finish(game);
+		assert.equal(game.notes.some(note => note.kind === "register" && note.on.id === victim.id && note.registration.kind === "replace"), dealt);
+		assert.deepEqual(relive(initial, game.ledger.slice(at)), game);
+		assert.deepEqual(relive(middle, game.ledger.slice(from)), game, "a saved damage binding retains the exact damaged incarnation");
+		commit(game, [{ do: "move", what: victim.id, to: "graveyard", reason: "destroy" }], "resolve");
+		assert.equal(victim.zone, dealt ? "exile" : "graveyard", "preventing Torch's damage prevents its later exile replacement");
+	}
+	const mixed = build("Izzet Spellementals"), { victim: protectedTarget } = defend(mixed);
+	main(mixed, 0); place(mixed, 0, "hand", "Prismari Charm");
+	commit(mixed, [{ do: "add-mana", who: 0, colors: ["U", "R"] }], "game-setup");
+	const charm = example("Prismari Charm deals 1 to each of one or two targets");
+	charm.instructions[0]!.as = "dealt";
+	announce(mixed, charm, choice => choice.activation.targets[0]!.length === 2 &&
+		choice.activation.targets[0]!.some(one => "player" in one && one.player === 0) &&
+		choice.activation.targets[0]!.some(one => "id" in one && one.id === protectedTarget.id));
+	passBoth(mixed); step(mixed);
+	const resolved = mixed.log.at(-1)!.changes.find(change => change.do === "resolution" && change.action === "next");
+	assert.ok(resolved?.do === "resolution" && resolved.action === "next");
+	assert.deepEqual(resolved.bind!.dealt, { objects: [], players: [0], amount: 1 }, "a partially prevented group binds only the damaged recipient");
+
 });

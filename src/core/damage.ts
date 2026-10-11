@@ -5,6 +5,11 @@ import { holds, matches, players, type World } from "./selectors.ts";
 import type { Change } from "./syntax.ts";
 import type { Note } from "./table.ts";
 
+/** The committed damage and its instruction binding share the same prevention result. */
+export function damageResult(world: World, damage: Extract<Change, { do: "damage" }>, source: ReturnType<World["lastKnown"]>) {
+	return damage.amount && prevented(world, damage, source) ? { ...damage, amount: 0, prevented: damage.amount } : damage;
+}
+
 /** Global rules remain visible after the spell that created them has left the stack. */
 export const damageNotes = (notes: readonly Note[]): string[] => notes.flatMap((note) => note.kind === "damage-rule" ? [
 	`${note.combat === undefined ? "All" : note.combat ? "Combat" : "Noncombat"} damage ${note.mode === "prevent" ? "is prevented" : "can't be prevented"} (${typeof note.until === "string" ? note.until.replaceAll("-", " ") : `until the end of seat ${note.until.endOfNextTurn}'s next turn after turn ${note.until.afterTurn}`}).`,

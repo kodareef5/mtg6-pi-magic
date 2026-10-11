@@ -4,6 +4,35 @@ Damage watches read what the group dealt, not marked damage or a later life
 total. These examples prepare standing terms; they do not certify the card's
 interpretation or supply every casting and activation procedure.
 
+## Effects on a damaged permanent
+
+Torch the Tower's unbargained variant binds the recipients of actual damage.
+If all damage is prevented, the binding is empty and no permanent receives
+the exile replacement (615.6). The binding's amount is the total dealt to
+its recipients, rather than the announced amount before prevention. This
+does not implement redirection or bounded prevention shields.
+
+```json procedure
+{
+  "source": {"card": "Torch the Tower", "zones": ["hand", "graveyard", "exile"], "controller": "any"},
+  "claim": "Cast Torch the Tower without bargain",
+  "basis": "Torch the Tower deals 2 damage to target creature or planeswalker. If this spell was bargained, instead it deals 3 damage to that permanent and you scry 1. ... If a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
+  "timing": "spell",
+  "targets": [{"object": {"types": ["creature", "planeswalker"]}}],
+  "instructions": [
+    {"do": "damage", "to": "target:0", "amount": 2, "as": "damaged"},
+    {"do": "register", "on": "bound:damaged", "registration": {
+      "kind": "replace", "basis": "If a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
+      "on": "dies", "to": "exile", "until": "end-of-turn"
+    }}
+  ]
+}
+```
+
+The bargained variant uses the same binding after three damage and retains
+its sacrifice payment and private scry. It must not skip scry when damage is
+prevented.
+
 `on: "damage"` watches combat and noncombat damage. `combat: true` or `false`
 narrows it. By default `of` selects the source, with one trigger per source in
 the group and the sum of its damage. With `received: true`, `of` selects the

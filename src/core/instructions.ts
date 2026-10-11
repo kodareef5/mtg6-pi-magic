@@ -8,7 +8,8 @@
  * so "that much" and "its power" mean what they mean now (608.2h).
  * Past 150 lines because each instruction is a short case of one switch.
  */
-import { amount, holds, objects, players, select, targetKey, type Bound, type Chosen, type Scope, type Seen } from "./selectors.ts";
+import { amount, damageSource, holds, objects, players, select, tableWorld, targetKey, type Bound, type Chosen, type Scope, type Seen } from "./selectors.ts";
+import { damageResult } from "./damage.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
@@ -93,12 +94,15 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const hit = [...(instruction.to ? live(table, objects(scope, instruction.to)) : []), ...(instruction.every ? many(table, scope, { every: instruction.every }) : [])]
 				.filter((object) => object.zone === "battlefield");
 			const people = typeof instruction.to === "string" ? players(scope, instruction.to) : [];
-			const changes: Change[] = dealt <= 0 ? [] : [
-				...hit.map((object): Change => ({ do: "damage", source: from, target: ref(object), amount: dealt })),
-				...people.map((player): Change => ({ do: "damage", source: from, target: { player }, amount: dealt })),
+			const changes: Extract<Change, { do: "damage" }>[] = dealt <= 0 ? [] : [
+				...hit.map((object): Extract<Change, { do: "damage" }> => ({ do: "damage", source: from, target: ref(object), amount: dealt })),
+				...people.map((player): Extract<Change, { do: "damage" }> => ({ do: "damage", source: from, target: { player }, amount: dealt })),
 			];
+			const world = instruction.as ? tableWorld(table) : undefined;
+			const delivered = instruction.as ? changes.map(change => damageResult(world!, change, damageSource(table, from))).filter(change => change.amount > 0) : [];
 			return one(`Deal ${dealt} damage to ${[...hit.map(name), ...people.map((id) => seat(table, id).name)].join(", ") || "nothing"}`, changes,
-				bind(instruction, { objects: [], players: [], amount: dealt }));
+				bind(instruction, { objects: delivered.flatMap(change => "id" in change.target ? [change.target] : []),
+					players: delivered.flatMap(change => "player" in change.target ? [change.target.player] : []), amount: delivered.reduce((sum, change) => sum + change.amount, 0) }));
 		}
 		case "fight": {
 			const [a] = live(table, objects(scope, instruction.a)), [b] = live(table, objects(scope, instruction.b));
