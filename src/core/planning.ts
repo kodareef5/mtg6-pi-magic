@@ -68,6 +68,25 @@ function activationKey(use: Activation): string {
 		[cost.tapped, cost.sacrificed, cost.exiled, cost.discarded, cost.shown, cost.counters?.on, cost.returned].map((refs) => refs?.map(targetKey))]);
 }
 
+/** Payments share immutable instruction, target and cost trees. Compare each
+ * pair once within this matching pass, while still checking every root field. */
+function activationEquality() {
+	const pairs = new WeakMap<object, WeakMap<object, boolean>>();
+	const equal = (a: unknown, b: unknown): boolean => {
+		if (Object.is(a, b)) return true;
+		if (!a || !b || typeof a !== "object" || typeof b !== "object" || !Object.isFrozen(a) || !Object.isFrozen(b)) return isDeepStrictEqual(a, b);
+		let answers = pairs.get(a);
+		if (!answers) { answers = new WeakMap(); pairs.set(a, answers); }
+		const previous = answers.get(b);
+		if (previous !== undefined) return previous;
+		const answer = isDeepStrictEqual(a, b); answers.set(b, answer); return answer;
+	};
+	return (a: Activation, b: Activation) => {
+		const keys = Object.keys(a) as (keyof Activation)[];
+		return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && equal(a[key], b[key]));
+	};
+}
+
 function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[] } {
 	const { action } = option;
 	if ("procedure" in action) {
@@ -79,12 +98,13 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 		// so one physical action is offered once.
 		const listed = (frame.decision?.options ?? []).filter((one) => one.use);
 		const indexed = new Map<string, Option[]>(), matched = new Set<Option>(), procedures: ProcedureOption[] = [];
+		const equal = activationEquality();
 		for (const one of listed) {
 			const key = activationKey(one.use!), bucket = indexed.get(key);
 			if (bucket) bucket.push(one); else indexed.set(key, [one]);
 		}
 		for (const choice of offered) {
-			const same = (indexed.get(activationKey(choice.activation)) ?? []).filter((one) => isDeepStrictEqual(one.use, choice.activation));
+			const same = (indexed.get(activationKey(choice.activation)) ?? []).filter((one) => equal(one.use!, choice.activation));
 			if (same.length) for (const one of same) matched.add(one); else procedures.push(choice);
 		}
 		const equivalent = listed.filter((one) => matched.has(one));

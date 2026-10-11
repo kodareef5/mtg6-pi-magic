@@ -1485,6 +1485,11 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.deepEqual(execution(indexedState, reordered.id), { plan: sameState.revision, step: 0 }, "object key order does not split equal announcements into different payment buckets");
 	assert.equal(execution(indexedState, collision.id), undefined, "a matching payment key never substitutes for complete instruction equality");
 	assert.deepEqual(indexedState.due[0]!.candidates.map((one) => one.id), sameState.due[0]!.candidates.map((one) => one.id), "indexing retains candidate order and every equivalent payment");
+	const freeze = (value: unknown): void => { if (value && typeof value === "object" && !Object.isFrozen(value)) { Object.values(value).forEach(freeze); Object.freeze(value); } };
+	indexed.decision!.options.push({ ...collision, id: "shared-different-meaning", use: collision.use });
+	indexed.decision!.options.forEach(one => freeze(one.use));
+	const sharedState = planState(indexed)!;
+	assert.deepEqual(sharedState.due[0]!.candidates.map(one => one.id), indexedState.due[0]!.candidates.map(one => one.id), "shared immutable terms preserve both positive matches and repeated refusals");
 	assert.deepEqual(checklist(indexed, indexedState), checklist(indexed), "a caller can reuse this frame's plan state without changing its checklist");
 	apply(equivalent, ordinaryWarp.id, "model", "chosen", execution(sameState, ordinaryWarp.id));
 	assert.deepEqual(workFrame(equivalent, 1).view.done, [0], "progress is journaled on the actual chosen row, without a second plan edit");
