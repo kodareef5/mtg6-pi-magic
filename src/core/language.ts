@@ -84,7 +84,10 @@ const SelectorFields = {
 /** The shared definitions every schema built on this syntax refers to, once. */
 export const Defs = {
 	Selector: object({ ...SelectorFields,
-		not: Type.Optional(object({ types: SelectorFields.types, subtypes: SelectorFields.subtypes, supertypes: SelectorFields.supertypes, words: SelectorFields.words, colors: SelectorFields.colors })),
+		/** Branches inherit the outer zone, or default to battlefield when it is omitted. Other fields still narrow. */
+		any: Type.Optional(Type.Array(Type.Ref("Selector"), { minItems: 1 })),
+		all: Type.Optional(Type.Array(Type.Ref("Selector"), { minItems: 1 })),
+		not: Type.Optional(object({ types: SelectorFields.types, subtypes: SelectorFields.subtypes, supertypes: SelectorFields.supertypes, words: SelectorFields.words, colors: SelectorFields.colors, is: SelectorFields.is })),
 		/** A stack object whose announced targets include one of these. */
 		targeting: Type.Optional(Type.Ref("Selector")) }),
 

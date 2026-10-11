@@ -185,12 +185,16 @@ const ability = (object: Seen): Traits | undefined => object.ability && !object.
 	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], manaValue: 0, words: [], registrations: [] } : undefined;
 
 const FACELESS: Traits = { name: "", supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] };
-export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object)): boolean {
+export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object), inherited: readonly string[] = ["battlefield"]): boolean {
+	const zones = selector.zones ?? inherited;
+	if ((selector.zones || !selector.any && !selector.all) && !zones.includes(object.zone)) return false;
+	if (selector.any && !selector.any.some((branch) => matches(scope, object, branch, read, zones))) return false;
+	if (selector.all && !selector.all.every((branch) => matches(scope, object, branch, read, zones))) return false;
 	// A card this seat cannot see matches only a selector that asks nothing about what it is.
 	const blind = !read && !object.ability && object.faceDown && !object.card;
 	if (blind && (selector.name || selector.types || selector.subtypes || selector.supertypes || selector.words || selector.not || selector.power || selector.toughness || selector.manaValue || selector.colors)) return false;
 	const traits = blind ? FACELESS : read ?? ability(object);
-	if (!(selector.zones ?? ["battlefield"]).includes(object.zone as never) || !traits) return false;
+	if (!traits) return false;
 	const holder = object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner;
 	if (!side(scope, selector.controller, holder) || !side(scope, selector.owner, object.owner)) return false;
 	const subtype = (wanted: string) => traits.subtypes.some((one) => same(one, wanted)) || (!!traits.allCreatureTypes && creatureType(wanted));
@@ -203,7 +207,8 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if (selector.colors && !colored(selector.colors)) return false;
 	const not = selector.not;
 	if (not && (not.types?.some((type) => traits.types.includes(type)) || not.subtypes?.some(subtype) ||
-		not.supertypes?.some((one) => traits.supertypes.includes(one)) || not.words?.some((word) => traits.words.includes(word)) || not.colors && colored(not.colors))) return false;
+		not.supertypes?.some((one) => traits.supertypes.includes(one)) || not.words?.some((word) => traits.words.includes(word)) || not.colors && colored(not.colors) ||
+		not.is && objects(scope, not.is).some((one) => one.id === object.id && one.incarnation === object.incarnation))) return false;
 	const within = (value: number | undefined, range?: { atLeast?: Amount; atMost?: Amount }) => !range ||
 		(value !== undefined && (range.atLeast === undefined || value >= amount(scope, range.atLeast)) && (range.atMost === undefined || value <= amount(scope, range.atMost)));
 	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness) || !within(traits.manaValue, selector.manaValue)) return false;

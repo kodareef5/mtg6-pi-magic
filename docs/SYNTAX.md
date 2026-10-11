@@ -76,12 +76,13 @@ watched. Each field narrows, and a list matches any of its members.
 | `controller`, `owner` | `you` (or `self`), `opponent`, `any`, or a bound player |
 | `types`, `subtypes`, `supertypes` | "basic land card" is `supertypes: ["basic"], types: ["land"]` |
 | `not` | "nonbasic", "noncreature" |
+| `any`, `all` | match any branch or every branch; other fields still narrow, and branches inherit an outer `zones` |
 | `colors` | `["R", "G"]` means red or green; `[]` means colorless; `not.colors` excludes the same set |
 | `words` | "creature with flying" |
 | `power`, `toughness`, `manaValue` | `manaValue: {atMost: 3}`; bounds may also be amounts, such as `{atMost: {x: true}}` |
 | `tapped`, `token`, `attacking`, `blocking` | |
 | `other` | "another": not the source |
-| `is` | exactly one ref |
+| `is`, `not.is` | include or exclude the objects a ref names, including a bound set |
 | `attachedTo` | "Equipment attached to that creature" |
 | `linked` | "exiled with this" |
 | `targeting` | a spell on the stack whose targets match: "a spell that targets a creature you control" |
@@ -89,6 +90,10 @@ watched. Each field narrows, and a list matches any of its members.
 On the battlefield a selector reads derived characteristics. Elsewhere it reads
 printed ones. A creature with "all creature types" matches any creature subtype,
 so an animated Soulstone Sanctuary is a Lizard.
+An `any` can join different zones, such as another battlefield creature or a
+spell on the stack. Without an outer `zones`, each branch defaults to battlefield
+unless it states its own zone. An `all` of land and creature predicates matches
+only objects with both types. A union returns each object once.
 Mana value reads the selected face and includes announced X only on the stack
 (202.3). An additional cost or reduction changes payment, not mana value. A
 transforming back uses its front cost; a Room uses its unlocked doors on the

@@ -1,0 +1,121 @@
+{
+	"card": "Thor, God of Thunder",
+	"generated": "2026-10-10",
+	"source": "99c3016faba3f2ec08f6dda57aa0a3a476199607220d5bca9dd5a15e4c223e2c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Thor, God of Thunder",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "When Thor enters, exile target Equipment, instant, or sorcery card from your graveyard. Until the end of your next turn, you may play that card.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"any": [
+									{
+										"subtypes": [
+											"Equipment"
+										]
+									},
+									{
+										"types": [
+											"instant",
+											"sorcery"
+										]
+									}
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, Thor deals damage equal to that spell's mana value to any target.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": {
+								"manaValue": "event:object"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}
