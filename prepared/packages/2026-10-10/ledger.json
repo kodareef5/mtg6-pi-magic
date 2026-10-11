@@ -71,14 +71,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Candy Trail": {
-		"reason": "Candy Trail is not ready: When this artifact enters, scry 2. — The triggered effect requires looking at only the top two cards of your library, putting any number on the bottom, and ordering the remaining cards on top. The available instructions and selectors cannot express this restricted inspection and ordering.",
-		"decks": [
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Casey Jones, Vigilante": {
 		"reason": "Casey Jones, Vigilante is not ready: When Casey Jones enters, draw three cards. At the beginning of your next upkeep, discard three cards at random. — The entry trigger must draw three cards and create a one-shot delayed trigger for its controller's next upkeep, even if Casey Jones leaves. The syntax supports drawing and delayed triggers but lacks random selection from a hand for the required discard; player-chosen cards would not implement this ability.",
 		"decks": [
