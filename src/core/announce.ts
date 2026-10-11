@@ -28,6 +28,16 @@ import type { SeenObject } from "./work.ts";
 export type ProcedureOption = { option: Option; activation: Activation };
 type Color = Mana["color"];
 
+/** Offer terms can be shared across payments, but never changed through another
+ * option. Callers' equipment is cloned before it enters these snapshots. */
+function immutable<T>(value: T): T {
+	if (value && typeof value === "object" && !Object.isFrozen(value)) {
+		for (const part of Object.values(value)) immutable(part);
+		Object.freeze(value);
+	}
+	return value;
+}
+
 /** Generic, colored and X symbols. Hybrid and Phyrexian symbols are not read. */
 export function symbols(text: string): { generic: number; colors: Color[]; x: number } | undefined {
 	const parts = text.match(/\{[^}]+\}/g) ?? [];
@@ -243,8 +253,11 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 	return ways;
 }
 
-/** Every source, X, cost, payment and target this seat could announce for one procedure now. */
+/** Every source, X, cost, payment and target this seat could announce now.
+ * Activation terms are immutable snapshots; activation copies the selected terms. */
 export function offers(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
+	procedure = immutable(structuredClone(procedure));
+	const slots = procedure.targets ?? immutable([]), effects = procedure.instructions.map(summary);
 	const world = viewWorld(frame.view), printed = frame.view.printed ?? {};
 	if (procedure.timing === "spell" && castRestrictions(world, frame.seat).length) return [];
 	const seen = new Set<string>();
@@ -292,11 +305,14 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				const announced = { ...scope, source: spending, x };
 				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
-				const aims = targetings(procedure.targets ?? [], announced);
+				const aims = immutable(targetings(slots, announced));
+				if (!aims.length) continue;
 				for (const extra of extras(procedure, announced, source, frame)) {
 					const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
 					const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
+					const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) });
 					for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
+						const payment = immutable(structuredClone(funding));
 						const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
 						for (const targets of aims) {
 							const aimed = targets.flat();
@@ -314,8 +330,8 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 										procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
 										spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
 										(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
-										...aiming(targets, world, frame.seat), ...procedure.instructions.map(summary), `Claimed basis: ${procedure.basis}`,
-									].filter(Boolean).join(" "),
+										...aiming(targets, world, frame.seat), ...effects, `Claimed basis: ${procedure.basis}`,
+									].filter(Boolean).reduce((text, part) => text ? `${text} ${part}` : part, ""),
 									objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...extra.uses.filter((id) => id !== source.id).flatMap((id) => {
 										const object = frame.view.objects?.find((one) => one.id === id); return object ? [ref(object)] : [];
 									}), ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? []), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
@@ -328,9 +344,9 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),
 									...(extra.paid.exiled?.some((one) => one.id === source.id) ? { bound: { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } } : {}),
 									...(procedure.speed ? { speed: procedure.speed } : {}),
-									cost: { generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) }, paid: funding.paid,
-									...(funding.taps.length ? { funding: structuredClone(funding.taps) } : {}),
-									targets, slots: structuredClone(procedure.targets ?? []), instructions: structuredClone(procedure.instructions),
+									cost, paid: payment.paid,
+									...(payment.taps.length ? { funding: payment.taps } : {}),
+									targets, slots, instructions: procedure.instructions,
 									...(spellWords.length ? { words: spellWords } : {}), ...(mana.x ? { x } : {}) },
 							});
 						}
@@ -339,5 +355,6 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 			}
 		}
 	}
-	return offered.map(({ option, activation }) => ({ option: { ...option, use: structuredClone(activation) }, activation }));
+	for (const one of offered) one.option.use = immutable(one.activation);
+	return offered;
 }

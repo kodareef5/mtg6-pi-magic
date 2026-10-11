@@ -129,7 +129,7 @@ export async function play(
 		}
 
 		// Strategy maintains the plan. The player executes its voluntary actions.
-		const current = table.work[decision.seat] ? workFrame(table, decision.seat) : undefined;
+		const current = table.work[decision.seat] ? { seat: decision.seat, version: table.cursor.clock, view: project(table, decision.seat), decision } : undefined;
 		const attention = !!current && planReason(current) !== undefined;
 		const state = current && !attention ? planState(current) : null;
 		if (state && raiseStop(table, decision, state)) continue;

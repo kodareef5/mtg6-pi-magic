@@ -162,7 +162,8 @@ test("a prepared activation spends existing resources once and refuses a bad pay
 test("responses resolve newest first and a pending choice closes priority without revealing a hidden card", () => {
 	const table = position();
 	fire(table, manaProcedure("Island", "U"));
-	const accepted = fire(table, lootProcedure());
+	const choice = proposed(table, lootProcedure()), accepted = structuredClone(choice.activation);
+	activate(table, accepted, { picked: choice.option.id, offered: [choice.option.id], by: "model", why: "declared" });
 	accepted.instructions.length = 0;
 	const a = cardsIn(table, "stack")[0]!;
 	assert.equal(a.ability!.instructions.length, 3, "accepted meaning is not a reference to editable preparation");

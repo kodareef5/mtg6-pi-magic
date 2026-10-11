@@ -302,8 +302,15 @@ test("inspection preserves every complete choice within provider capacity and ne
 	editWork(held, 0, [{ do: "plan.put", plan: { objective: "Reserve a response", guidance: "Compare the stated payments", steps: [],
 		holds: [{ objects: { zones: ["battlefield"], controller: "self", card: "Forest" }, purpose: "Keep mana for the response." }] } }], "held-payments");
 	const heldFrame = workFrame(held, 0), heldBefore = structuredClone(held);
-	const payments = offered(held, printedCast("Mossborn Hydra", heldFrame.view.printed!["Mossborn Hydra"]!));
+	const casting = printedCast("Mossborn Hydra", heldFrame.view.printed!["Mossborn Hydra"]!);
+	const payments = offered(held, casting);
 	assert.ok(payments.length > forests.length * 4);
+	assert.throws(() => payments[0]!.option.use!.instructions.push({ do: "draw", who: "you", count: 1 }), TypeError,
+		"public offer terms cannot alter another payment's accepted program");
+	assert.throws(() => payments[0]!.option.use!.funding![0]!.colors.push("R"), TypeError,
+		"public payment terms cannot change the internal activation");
+	casting.instructions.push({ do: "draw", who: "you", count: 1 });
+	assert.ok(payments.every(one => one.activation.instructions.length === 0), "offers retain detached terms when their input procedure changes");
 	const marked = annotate([...payments.map((one) => one.option), { id: "pass", label: "Pass" }], planState(heldFrame)!);
 	for (const option of marked) {
 		const warnings = option.notes?.filter((one) => one.startsWith("Spends ")) ?? [];
