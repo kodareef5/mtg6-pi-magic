@@ -315,6 +315,8 @@ export const Defs = {
 		/** How a permanent enters (614.1c, 614.1d). `affects` omitted means the registering object itself. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			prepared: Type.Optional(Type.Literal(true)),
+			copy: Type.Optional(object({ of: Type.Ref("Selector"), may: Type.Optional(Type.Literal(true)),
+				add: Type.Optional(object({ creatureTypes: Type.Optional(Type.Array(text)), words: Type.Optional(Type.Array(text)) })) })),
 			choose: Type.Optional(object({ as: text, from: one("basic-land-type", "creature-type") })),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
 			/** Optional entry payments: life or choosing public permanents/revealing hand cards. Other entry costs remain unsupported. */

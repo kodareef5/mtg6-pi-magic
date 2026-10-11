@@ -14,8 +14,11 @@ not battlefield activations. Copied entry terms apply before the token enters,
 and its entry triggers wait until the current resolution finishes.
 
 The first operation supports face-up, single-face permanents and ordinary
-tokens. Multiple-face copies, face-down copies, copy exceptions and making an
-existing object become a copy remain unsupported. An unsupported source leaves
+tokens. Multiple-face token copies, face-down copies, token copy exceptions and
+making an existing battlefield object become a copy remain unsupported.
+[Entry copies](entry-copies.md) support a separate replacement choice and
+additive exceptions; copying that resulting permanent retains its exceptions.
+An unsupported source leaves
 resolution pending with a named gap; it never becomes a token with missing text.
 Copies of a departed source can read its last battlefield existence. An illegal
 target supplies no copy, even if another target lets the spell resolve.

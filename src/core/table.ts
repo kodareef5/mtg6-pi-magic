@@ -60,6 +60,8 @@ export type Thing = {
 	prepared?: true;
 	/** A castable Prepare copy names its printed face and the permanent that sustains it. */
 	copy?: { face: 0 | 1; source: ObjectRef };
+	/** An entry copy effect freezes copiable terms, not the current layer result. */
+	copied?: { source: ObjectRef; spec: TokenSpec };
 	id: ObjectId;
 	incarnation: number;
 	/** Cards have a name. Spells and noncard stack objects hold accepted instructions. */

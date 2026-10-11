@@ -248,6 +248,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				delete moving.transformed;
 				delete moving.prepared;
 				delete moving.choices;
+				delete moving.copied;
+				if (change.to === "battlefield" && change.copied) moving.copied = structuredClone(change.copied);
 				if (change.to === "battlefield" && change.choices) moving.choices = structuredClone(change.choices);
 				if ((change.to === "stack" || change.to === "battlefield") && change.face !== undefined) moving.face = change.face;
 				else if (change.to === "battlefield" && from === "stack" && previousFace !== undefined) moving.face = previousFace;
@@ -563,7 +565,7 @@ function enter(table: Table, object: Thing, change: { tapped?: true; counters?: 
 	forget(table);
 	const entering = terms(table, object, before, born, change.entry);
 	// Printed starting loyalty is a structured characteristic, not an Oracle interpretation (306.5b).
-	const loyalty = object.token?.loyalty ?? Number(facts(table, object)?.stats.match(/^L(\d+)$/)?.[1] ?? 0);
+	const loyalty = object.copied ? object.copied.spec.loyalty ?? 0 : object.token?.loyalty ?? Number(facts(table, object)?.stats.match(/^L(\d+)$/)?.[1] ?? 0);
 	if (loyalty && characteristics(table, object)?.types.includes("planeswalker")) entering.counters.loyalty = (entering.counters.loyalty ?? 0) + loyalty;
 	if (entering.tapped) object.tapped = change.tapped = true;
 	if (entering.prepared) prepare(table, object);

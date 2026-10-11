@@ -12,6 +12,7 @@ schemas, and every `basis` is checked against the card's text.
 | `mana.md` | mana abilities in a package, "or", counted mana, spend restrictions, a token's mana ability, a Verge's conditional ability |
 | `entering.md` | entering tapped under a condition, a shock land's optional life payment, a Town's own-turn count, entering with counters, how other permanents enter, 305.7 |
 | `entry-behold.md` | choose a controlled permanent or reveal an owned hand card before a simultaneous entry group commits |
+| `entry-copies.md` | Mockingbird's targetless entry copy, actual mana spent, copied entry terms and additive copy exceptions |
 | `card-names.md` | choose and retain an Oracle card name, including out-of-format cards and individual faces, then match it in a continuous effect |
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |

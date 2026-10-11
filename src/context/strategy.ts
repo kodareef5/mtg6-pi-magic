@@ -83,6 +83,8 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 	};
 	const visit = (registrations: Registration[], card: string) => {
 		for (const one of registrations) {
+			if (one.kind === "enters" && one.copy && (one.affects || one.copy.of.zones?.some(zone => zone !== "battlefield")))
+				found.push(`package ${card}: an entry copy affects only its own permanent and chooses a battlefield source.`);
 			if (one.kind !== "mana" && /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/.test(one.basis))
 				found.push(`package ${card}: ${JSON.stringify(one.basis)} is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.`);
 			if (one.kind === "continuous" && one.change.registers) visit(one.change.registers, card);

@@ -9,21 +9,24 @@ import { activeFaces } from "./faces.ts";
 import { basicLandTypes, creatureTypeChoices } from "./characteristics.ts";
 import { paymentChoices } from "./costs.ts";
 import { tokenObject } from "./entry.ts";
+import { entryCopy } from "./entry-copies.ts";
 
 export type Entry = { changes: Change[]; reason: Reason; clock: number; choices: Record<number, "paid" | "declined">;
-	values?: Record<number, Record<string, string>>; reveals?: Record<number, string[]> };
+	values?: Record<number, Record<string, string>>; reveals?: Record<number, string[]>;
+	copies?: Record<number, string[]>; blocked?: { who: number; reason: string } };
 
 function requirements(table: Table, changes: Change[]) {
 	return changes.flatMap((change, index) => {
 		if (change.do !== "token" && (change.do !== "move" || change.to !== "battlefield")) return [];
 		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
-		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.do === "move" ? change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) : 0 as const };
+		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.do === "move" ? change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) : 0 as const,
+			...(change.do === "move" && change.copied ? { copied: change.copied } : {}) };
 		const printed = object.card ? table.printed[object.card] : undefined;
 		const active = printed ? activeFaces(printed, source) : [0];
 		const world = tableWorld(table);
 		world.objects = [...world.objects.filter(one => one.id !== object.id), source];
-		const terms = (change.do === "token" ? change.spec.registers ?? [] : change.registers ?? []).filter((one) => one.kind === "enters" && !one.affects &&
+		const terms = (change.do === "token" ? change.spec.registers ?? [] : change.copied?.spec.registers ?? change.registers ?? []).filter((one) => one.kind === "enters" && !one.affects &&
 			(one.face === undefined || active.includes(one.face)) && (!one.if || holds({ world, controller: who, source }, one.if)));
 		const choose = terms.flatMap((one) => one.kind === "enters" && one.choose && change.choices?.[one.choose.as] === undefined ? [one.choose] : []);
 		const payment = terms.find((one) => one.kind === "enters" && one.unlessPay && change.entry === undefined);
@@ -38,7 +41,8 @@ const pending = (entry: Entry, one: Requirement) => unanswered(entry, one) || (o
 
 /** An accepted instruction waits without splitting its physical event. */
 export function beforeEntry(table: Table, changes: Change[], reason: Reason): Change[] {
-	return requirements(table, changes).length ? [{ do: "entry", entry: { changes, reason, clock: table.cursor.clock, choices: {} } }] : changes;
+	const entry: Entry = { changes, reason, clock: table.cursor.clock, choices: {} };
+	return requirements(table, changes).length || entryCopy(table, entry) ? [{ do: "entry", entry }] : changes;
 }
 
 function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
@@ -66,7 +70,11 @@ function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
 export function entryPayment(table: Table): Pending | null {
 	const entry = table.entry;
 	if (!entry) return null;
-	const all = requirements(table, entry.changes), next = all.find((one) => pending(entry, one))!;
+	const copying = entryCopy(table, entry);
+	if (copying) return copying;
+	const all = requirements(table, entry.changes), next = all.find((one) => pending(entry, one));
+	if (!next) return { situation: "replacement-order", seat: table.cursor.active, question: "Apply the prepared entry group.",
+		moves: [{ option: { id: "entry:finish", label: "Complete the entry group" }, changes: answered(table, entry, all), reason: entry.reason }] };
 	const choice = unanswered(entry, next), cards = next.object.card ? [next.object.card] : [], name = next.object.card ?? next.object.token!.name;
 	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${name} enters, choose a ${choice.from.replaceAll("-", " ")} for ${choice.as}.`,
 		moves: (choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${name}`, cards },

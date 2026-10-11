@@ -17,7 +17,7 @@ import { casting, type Casting } from "./casting.ts";
 import { resolutionNumber } from "./resolution-counts.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "choices" | "registrations">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "copied" | "choices" | "registrations">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }

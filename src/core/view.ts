@@ -154,12 +154,12 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const objects: NonNullable<SeatView["objects"]> = [...table.things.values()]
 		.filter(entitled)
 		.map((item) => {
-			const { card, ...seen } = structuredClone(item);
+			const { card, copied, ...seen } = structuredClone(item);
 			if (seen.ability?.bound) seen.ability.bound = bound(seen.ability.bound);
 			if (seen.ability?.trigger?.bound) seen.ability.trigger.bound = bound(seen.ability.trigger.bound);
 			// Read through the layers on every projection, never stored on the object.
 			const traits = characteristics(table, item);
-			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}),
+			return item.faceDown ? seen : { ...seen, card, ...(copied ? { copied } : {}), ...(traits ? { traits: structuredClone(traits) } : {}),
 				...(item.zone === "battlefield" && traits?.types.includes("creature") ? { summoningSick: sick(table, item, traits) } : {}) };
 		});
 	if (table.combat) {

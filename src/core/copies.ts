@@ -3,22 +3,36 @@
  * creation specification is its base, so a later copy keeps these same terms. */
 import { printedTraits } from "./characteristics.ts";
 import { facts } from "./printed.ts";
+import { activeFaces, doubleFaced } from "./faces.ts";
 import type { Table } from "./table.ts";
 import type { Seen } from "./selectors.ts";
 import type { Procedure, TokenSpec } from "./language.ts";
 
 /** Unsupported copy shapes leave resolution pending, without creating a partial token. */
 export function tokenCopy(table: Table, source: Seen): { spec: TokenSpec } | { blocked: string } {
+	return copiable(table, source, "token");
+}
+
+/** A single-faced permanent copies the current face; creating a double-faced
+ * token also needs the other face and remains a separate unsupported shape. */
+export function copiable(table: Table, source: Seen, form: "token" | "permanent"): { spec: TokenSpec } | { blocked: string } {
 	if (source.faceDown) return { blocked: "Copying a face-down permanent needs its face-down copiable characteristics." };
 	if (source.zone !== "battlefield") return { blocked: "This copy operation needs a permanent or its last battlefield existence." };
+	if (source.copied) return form === "token" && source.card && doubleFaced(table.printed[source.card])
+		? { blocked: "Copying a double-faced permanent into a token needs both physical faces, including any copy effects." }
+		: { spec: structuredClone(source.copied.spec) };
 	if (source.token) return { spec: structuredClone(source.token) };
 	const printed = source.card && table.printed[source.card];
 	if (!printed) return { blocked: "The copy source has no pinned printed characteristics." };
-	if (printed.faces) return { blocked: "Copying a permanent with multiple faces needs its copiable face structure and entry behavior." };
-	const own = structuredClone(source.registrations ?? []);
+	if (printed.faces && (form === "token" || !doubleFaced(printed) && printed.layout !== "adventure"))
+		return { blocked: "Copying a permanent with multiple faces needs its copiable face structure and entry behavior." };
+	const active = activeFaces(printed, source);
+	const own = structuredClone(source.registrations ?? []).filter(one => !printed.faces || one.face === undefined || active.includes(one.face));
+	if (printed.faces) for (const one of own) delete one.face;
 	const pack = table.work[source.controller]?.packages?.find(one => one.card === source.card);
 	if (printed.text && !pack) return { blocked: `Copying ${source.card} needs its source-backed use inventory.` };
-	const onField = (one: Pick<Procedure, "timing" | "source">) => one.timing === "stack" && (one.source.zones ?? ["battlefield"]).includes("battlefield");
+	const onField = (one: Pick<Procedure, "timing" | "source" | "face">) => one.timing === "stack" && (one.source.zones ?? ["battlefield"]).includes("battlefield") &&
+		(!printed.faces || (one.source.face ?? one.face) === undefined || active.includes((one.source.face ?? one.face)!));
 	if (pack?.deferred?.some(onField)) return { blocked: `Copying ${source.card} needs its identified battlefield activations prepared first.` };
 	// Accepted uses are an ability's terms; cast procedures and later grants are not copied.
 	const carried = new Set(own.filter(one => one.kind === "activated").map(one => one.basis));
