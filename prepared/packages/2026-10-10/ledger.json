@@ -464,14 +464,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Stadium Headliner": {
-		"reason": "Stadium Headliner is not ready: Mobilize 1 (Whenever this creature attacks, create a tapped and attacking 1/1 red Warrior creature token. Sacrifice it at the beginning of the next end step.) — The token instruction supports entering tapped but has no operation for entering attacking, including choosing what the token attacks. This standing triggered ability cannot be faithfully prepared with the supplied syntax.",
-		"decks": [
-			"Boros Tokens"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Starscape Cleric": {
 		"reason": "Starscape Cleric is not ready: Offspring {2}{B} (You may pay an additional {2}{B} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — Missing standing entry-trigger support for checking whether the offspring cost was paid, and an operation to create a token copy of the permanent with base power and toughness 1/1.; Whenever you gain life, each opponent loses 1 life. — Missing a life-gain event for a watch registration, triggering once per source causing its controller to gain positive life.",
 		"decks": [

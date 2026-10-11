@@ -16,9 +16,9 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 14, covering Control, Landfall, Izzet and Azorius |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Azorius versus Izzet is preparing; Boros Dragons is admitted for its first game; Control versus Azorius needs a corrected Get Lost interpretation before continuation |
+| Current runtime work | Azorius versus Izzet and Boros Dragons versus Mono-Red are running; Control versus Azorius has a reviewed repair point before Get Lost |
 | Recent shared mechanics | Standing spell reductions, projected spell characteristics, token abilities and ownership, loyalty timing and tokens entering attacking |
-| Stored card assessments | 229 accepted, 78 refused, five basic lands; Boros Dragons has complete standing coverage after Momo and its flying creatures were reassessed |
+| Stored card assessments | 230 accepted, 77 refused, five basic lands; Stadium Headliner uses Mobilize, leaving two standing blockers in Boros Tokens |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and 268 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
