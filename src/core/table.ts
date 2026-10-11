@@ -127,6 +127,8 @@ export type Activation = {
 	claim: string;
 	basis: string;
 	timing: Procedure["timing"];
+	/** An ability offered from current registrations must still be present when announced. */
+	registered?: string;
 	/** An activation's "only as a sorcery", or a spell's claimed flash. */
 	speed?: Procedure["speed"];
 	/** The cost as it was locked and paid (601.2f-h). */
@@ -177,6 +179,7 @@ export type Trigger = {
 };
 /** What was paid besides mana. */
 export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tapped?: ObjectRef[]; sacrificed?: ObjectRef[];
+	loyalty?: number;
 	exiled?: ObjectRef[]; discarded?: ObjectRef[]; shown?: (ObjectRef & { reveal?: true })[]; life?: number;
 	counters?: { kind: string; count: number; put?: true; on?: ObjectRef[] } };
 /**

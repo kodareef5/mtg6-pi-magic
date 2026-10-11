@@ -44,6 +44,7 @@ export function paymentChoices(table: Table, scope: Scope, cost: Cost, who: Seat
 /** One physical payment, shared by announcement and a resolving pay instruction. */
 export function costChanges(cost: Omit<Paid, "generic" | "colors">, source: ObjectRef, controller: SeatId): Change[] {
 	return [
+		...(cost.loyalty ? [{ do: "counters" as const, what: source.id, kind: "loyalty", amount: cost.loyalty }] : []),
 		...(cost.tap ? [{ do: "tap" as const, what: source.id }] : []),
 		...(cost.tapped ?? []).map((ref) => ({ do: "tap" as const, what: ref.id })),
 		...(cost.shown ?? []).filter((ref) => ref.reveal).map((ref) => ({ do: "reveal" as const, what: ref.id })),

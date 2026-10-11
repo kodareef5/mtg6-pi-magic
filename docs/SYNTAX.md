@@ -186,7 +186,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
-| `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, words, registrations |
+| `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations |
 | `modify` | change characteristics `until` a duration, written as a public label |
 | `permit` | a player may play a card, `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only |
 | `register` | add a registration to an object |
@@ -248,12 +248,12 @@ A **procedure** is one announced action, the unit a plan prepares.
 
 | Field | Meaning |
 |---|---|
-| `source` | the card or permanent, by name and zone, or by ref |
+| `source` | the card or permanent, by name and zone, or by ref; `registered` requires the exact basis of a currently active `activated` registration |
 | `claim` | what the seat says it is doing |
 | `basis` | the card text it carries out, quoted |
 | `timing` | `spell`, `land`, `stack` (an activated ability) or `mana` |
 | `speed` | an activation's "only as a sorcery", or `instant` on a spell to claim its flash |
-| `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `exile`, `life`, `discard`, `counters`, `show`, and a computed `reduce` |
+| `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `exile`, `life`, `discard`, `counters`, signed `loyalty`, `show`, and a computed `reduce` |
 | `if`, `limit` | when the seat may announce it, and "once each turn" |
 | `targets` | its target slots |
 | `instructions` | what happens when it resolves |
@@ -279,6 +279,14 @@ the payer's hand; only the hand cards are revealed. A behold variant selects
 Dragons in those two zones and fixes its stronger effect when announced.
 Neither cost waits for resolution. A resolving `pay` uses these same costs and
 binds success only when every part is paid. See [payment examples](examples/payments.md).
+
+A loyalty-symbol activation uses `cost.loyalty`, a signed integer: positive
+adds counters, negative removes them, and zero still uses the permanent's one
+loyalty activation for that turn. It requires the controller's main phase and
+an empty stack. That allowance is shared across abilities and players for the
+same incarnation. Combine loyalty adjustments into this one cost; a separate
+`counters` payment does not express loyalty timing. Printed starting loyalty
+and a token's `spec.loyalty` supply entry counters. See [loyalty](examples/loyalty.md).
 
 Instructions on a permanent spell run after it enters, and `this` is then the
 permanent. That is where warp's delayed exile and an Aura's `attach` go.
@@ -306,6 +314,7 @@ checked by the table; the opponent sees both, and objects when they differ.
 | `enters` | how a permanent enters: tapped, with counters, under a condition; with `affects`, how others enter; `unlessPay: {life}` or `{show: {choose, count}}` asks the controller to pay or decline before any battlefield entry | 614.1c-d |
 | `replace` | "if it would die, exile it instead" | 614 |
 | `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |
+| `activated` | a complete ability carried by a permanent: `cost`, `effect`, optional `speed: "sorcery"`, `if` and `limit`; offered through normal stack procedures while the registration remains active | 602, 606 |
 | `permit` | an extra land play, lands from another zone, flash; `cast: {from, mana, leavesStack?}` grants this card's owner an alternative cast from the named zones | 305.2, 702.180 |
 | `prohibit` | `cast` names players who cannot cast, with optional `during`; alternatively, `activate` selects sources whose abilities cannot be activated, with optional `exceptMana: true`; either shape accepts `if` | 101.2 |
 | `suppress` | events that don't cause triggers | Torpor Orb |

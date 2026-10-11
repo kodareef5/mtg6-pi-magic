@@ -17,7 +17,7 @@ import { chapterTriggers } from "./sagas.ts";
 import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
-import { printedFacts, shipped } from "./printed.ts";
+import { facts, printedFacts, shipped } from "./printed.ts";
 import { characteristics, forget, has, type Traits } from "./characteristics.ts";
 import { attach, terms } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
@@ -537,6 +537,9 @@ function stack(table: Table, id: string, ability: Activation): void {
 function enter(table: Table, object: Thing, change: { tapped?: true; counters?: Record<string, number>; entry?: "paid" | "declined" }, before: Receipt["before"], born: ReadonlySet<string>): void {
 	forget(table);
 	const entering = terms(table, object, before, born, change.entry);
+	// Printed starting loyalty is a structured characteristic, not an Oracle interpretation (306.5b).
+	const loyalty = object.token?.loyalty ?? Number(facts(table, object)?.stats.match(/^L(\d+)$/)?.[1] ?? 0);
+	if (loyalty && characteristics(table, object)?.types.includes("planeswalker")) entering.counters.loyalty = (entering.counters.loyalty ?? 0) + loyalty;
 	if (entering.tapped) object.tapped = change.tapped = true;
 	if (entering.prepared) prepare(table, object);
 	for (const [kind, count] of Object.entries(entering.counters)) if (count > 0) object.counters[kind] = (object.counters[kind] ?? 0) + count;

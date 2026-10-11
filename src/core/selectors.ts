@@ -20,7 +20,7 @@ export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "contro
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
-	| { kind: "activated"; by: SeatId; source: ObjectRef; basis: string }
+	| { kind: "activated"; by: SeatId; source: ObjectRef; basis: string; loyalty?: true }
 	| { kind: "attacked"; by: SeatId; attackers: { object: Seen; traits?: Traits }[] }
 	| { kind: "life"; who: SeatId; amount: number };
 export type World = {
@@ -123,7 +123,8 @@ export function happened(table: Table): Happened[] {
 	for (const receipt of table.log) {
 		if ((receipt.clock ?? 0) <= began) continue;
 		for (const change of receipt.changes) {
-			if (change.do === "activate" && change.ability.timing !== "spell") events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis });
+			if (change.do === "activate" && change.ability.timing !== "spell") events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis,
+				...(change.ability.cost.loyalty !== undefined ? { loyalty: true } : {}) });
 			if (change.do === "activate" && change.ability.timing === "spell") {
 				const spell = receipt.after[change.what] ?? receipt.before[change.what];
 				const traits = spell && characteristics(table, spell);

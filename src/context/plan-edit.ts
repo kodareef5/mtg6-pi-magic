@@ -5,6 +5,7 @@ import { PlanDefs, PlanSchema, QuerySchema, WhenSchema, lifted, problems, type C
 import type { Frame } from "../core/types.ts";
 import type { Lookup } from "./reason.ts";
 import { printedCast } from "../core/procedures.ts";
+import { activatedUses } from "../core/activated.ts";
 import { currentPlan, matches } from "../core/query.ts";
 import { movementActions } from "./strategy-actions.ts";
 import { permissionForecasts } from "./strategy-permissions.ts";
@@ -144,6 +145,7 @@ export function actions(frame: Frame, prepared?: Plan, turn?: number): Record<st
 		...(frame.view.objects ?? []).flatMap((one) => one.controller === frame.seat && one.card ? [one.card] : [])]);
 	const mine = (card: string) => !list || own.has(card);
 	return Object.fromEntries([
+		...activatedUses(frame).map(({ key, procedure }) => [`${key} ${procedure.claim}`, { label: procedure.claim, action: { procedure } }]),
 		...Object.entries(movementActions(frame, turn)),
 		...(plan?.steps ?? []).map((one, at) => [`step:${at} ${one.label}`, { label: one.label, action: one.action }]),
 		...(plan?.may ?? []).map((one, at) => [`may:${at} ${one.label}`, { label: one.label, action: one.action }]),

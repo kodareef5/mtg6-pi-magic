@@ -10,6 +10,7 @@ import { allowance, playable } from "./permits.ts";
 import type { Frame, SeatId } from "./types.ts";
 import { STEPS } from "./steps.ts";
 import { isPrintedCast, printedCast } from "./procedures.ts";
+import { activatedUses } from "./activated.ts";
 
 /** Situation 1. The table knows all of this without reading a card. */
 export function priorityMoves(table: Table, holder: SeatId): Move[] {
@@ -102,6 +103,10 @@ export function preparedMoves(table: Table, frame: Frame): Move[] {
 		});
 	}));
 }
+
+/** Abilities carried by current permanents are offered without card-specific player code. */
+export const registeredMoves = (frame: Frame): Move[] => activatedUses(frame).flatMap(({ key, procedure }) =>
+	offers(procedure, frame, key).map(({ option, activation }) => ({ option, activation, changes: [], reason: "activate" })));
 
 /**
  * A move is offered only when every one of these holds. This is the whole

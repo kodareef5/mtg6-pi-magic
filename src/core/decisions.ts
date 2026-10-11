@@ -12,7 +12,7 @@
  */
 
 import { applyDeclared, begin, nextOpening, mulligansSettled } from "./pregame.ts";
-import { priorityMoves, defaultCasts, legal, preparedMoves } from "./priority.ts";
+import { priorityMoves, defaultCasts, legal, preparedMoves, registeredMoves } from "./priority.ts";
 import { advanceTurn, turnBased } from "./turn.ts";
 import type { Change } from "./syntax.ts";
 import type { Move, Pending } from "./moves.ts";
@@ -93,7 +93,7 @@ function pending(table: Table): Pending | null {
 			seat: holder,
 			question: "You have priority.",
 			...(needed.length ? { preparation: needed } : { fallback: "pass" }),
-			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, frame), ...preparedMoves(table, frame), ...unlocks(table, frame)],
+			moves: [...priorityMoves(table, holder).filter((move) => legal(table, move)), ...defaultCasts(table, frame), ...preparedMoves(table, frame), ...registeredMoves(frame), ...unlocks(table, frame)],
 		};
 	}
 
@@ -207,6 +207,7 @@ function stateBased(table: Table): Pending | null {
 	const leave = (object: Thing, reason: "state-based-action" | "destroy") => { gone.add(object.id); changes.push({ do: "move", what: object.id, to: "graveyard", reason }); };
 	for (const object of field) {
 		const traits = characteristics(table, object);
+		if (traits?.types.includes("planeswalker") && (object.counters.loyalty ?? 0) <= 0) { leave(object, "state-based-action"); continue; }
 		if (!traits?.types.includes("creature") || traits.toughness === undefined) continue;
 		// 704.5f, then 704.5g and 704.5h, which indestructible ignores.
 		if (traits.toughness <= 0) leave(object, "state-based-action");

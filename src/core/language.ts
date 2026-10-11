@@ -153,6 +153,8 @@ export const Defs = {
 	}),
 
 	Cost: object({
+		/** A signed loyalty-symbol cost, with the shared timing and once-per-permanent rule (606). */
+		loyalty: Type.Optional(Type.Integer()),
 		/** Omitted on a spell: its printed mana cost. */
 		mana: Type.Optional(ManaCost),
 		/** `true` taps the source. A choice taps other objects, such as crew's creatures with total power N or more. */
@@ -216,6 +218,7 @@ export const Defs = {
 		name: text, types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
 		supertypes: Type.Optional(Type.Array(one("legendary", "snow"))), colors: Type.Array(Color),
 		power: Type.Optional(Type.Integer()), toughness: Type.Optional(Type.Integer()),
+		loyalty: Type.Optional(natural),
 		words: Type.Optional(Type.Array(text)), registers: Type.Optional(Type.Array(Type.Ref("Registration"))),
 	}),
 
@@ -310,6 +313,9 @@ export const Defs = {
 			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })),
 			/** "Activate only if you control an Island or a Swamp": the ability is usable while this holds. */
 			if: Type.Optional(Type.Ref("Condition")) }),
+		/** An ability carried by a permanent, including a token or a granted ability. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("activated"), cost: Type.Ref("Cost"), effect: Type.Ref("Effect"),
+			speed: Type.Optional(Type.Literal("sorcery")), if: Type.Optional(Type.Ref("Condition")), limit: Type.Optional(Type.Literal("once-per-turn")) }),
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")),
 			/** This card's owner may cast it from the named zones at this alternative mana price. */
@@ -345,6 +351,7 @@ const seatSide = one("self", "opponent", "any");
 export const QuerySchema = object({
 	zones: Type.Optional(Type.Array(one("hand", "battlefield", "stack", "graveyard", "exile", "command", "dungeon"))),
 	face: Type.Optional(Face), controller: Type.Optional(seatSide), card: Type.Optional(text), tapped: Type.Optional(Type.Boolean()),
+	registered: Type.Optional({ ...text, description: "Requires an active activated registration with this exact basis; losing that ability removes this source." }),
 	types: Type.Optional(Type.Array(one(...CARD_TYPES), { description: "Matches any listed current card type on a projected object. Other query fields still narrow the selection." })),
 	refs: Type.Optional(Type.Array(RefSchema)),
 	ids: Type.Optional(Type.Array(text)),

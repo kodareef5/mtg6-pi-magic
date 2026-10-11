@@ -19,6 +19,7 @@ import { amount, holds, matches, objects, players, targetKey, viewWorld, type Ch
 import type { Instruction, Procedure, Target } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
+import { loyaltyUsed } from "./activated.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -171,6 +172,7 @@ export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; reduce?: number; exileSelection?: Activation["exileSelection"] };
 export function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
 	const cost = procedure.cost ?? {};
+	if (cost.loyalty !== undefined && cost.counters?.kind === "loyalty") return [];
 	let ways: Way[] = [{ paid: {}, uses: [], consumes: [], shows: "" }];
 	// One object pays one part. The source alone may be tapped and also leave once:
 	// "{T}, Sacrifice this" is one object paying two parts; sacrificing and exiling it is not.
@@ -182,6 +184,10 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 				...(option.reduce || way.reduce ? { reduce: (option.reduce ?? 0) + (way.reduce ?? 0) } : {}),
 				shows: `${way.shows}${option.shows}` })));
 	};
+	if (cost.loyalty !== undefined) {
+		if (source.zone !== "battlefield" || (source.counters.loyalty ?? 0) + cost.loyalty < 0) return [];
+		add([{ paid: { loyalty: cost.loyalty }, uses: [], shows: `${cost.loyalty >= 0 ? "+" : ""}${cost.loyalty} loyalty. ` }]);
+	}
 	if (cost.tap === true) {
 		if (source.zone !== "battlefield" || source.tapped || sick(frame, source)) return [];
 		add([{ paid: { tap: true }, uses: [source.id], shows: "Tap the source. " }]);
@@ -245,6 +251,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	const offered: ProcedureOption[] = [];
 	for (const original of sources) {
+		if (procedure.cost?.loyalty !== undefined && (!mainWindow(frame) || original.zone !== "battlefield" || loyaltyUsed(world, original))) continue;
 		if (procedure.timing !== "spell" && procedure.timing !== "land" && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
 		const source = selected ? { ...original, traits: printedTraits(selected, original.card!), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
@@ -311,6 +318,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									}), ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? []), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
 								},
 								activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+									...(procedure.source.registered ? { registered: procedure.source.registered } : {}),
 									...(extra.exileSelection ? { exileSelection: structuredClone(extra.exileSelection) } : {}),
 									...(granted.permission ? { permission: granted.permission } : {}),
 									...(granted.leavesStack ? { leavesStack: granted.leavesStack } : {}),

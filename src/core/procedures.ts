@@ -16,6 +16,7 @@ import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
 import { selectionScoped } from "./inspection.ts";
+import { loyaltyUsed } from "./activated.ts";
 import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
@@ -51,6 +52,7 @@ export function isPrintedCast(procedure: Procedure, card: string, printed: Print
 /** Shape, then the structure the schema cannot say: refs that point somewhere, timing that fits. */
 export function checkProcedure(value: unknown): Procedure {
 	const procedure = check(ProcedureSchema, value, "Procedure");
+	if (procedure.cost?.loyalty !== undefined && procedure.timing !== "stack") throw new Error("A loyalty-symbol cost belongs to a stack activation, never a spell, land play or mana ability.");
 	if (typeof procedure.cost?.tap === "object" && procedure.cost.tap.upTo && procedure.cost.tap.totalPower !== undefined)
 		throw new Error("An optional bounded tap cost cannot also require a total power.");
 	if (procedure.timing === "land" && (procedure.cost || procedure.targets?.length || procedure.instructions.length)) throw new Error("Playing a land has no cost, targets or instructions; what it registers is its package.");
@@ -74,6 +76,10 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
 		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
 		else if (value && typeof value === "object") {
+			const terms = value as { cost?: import("./language.ts").Cost; kind?: string };
+			if (terms.cost?.loyalty !== undefined && terms.cost.counters?.kind === "loyalty")
+				throw new Error("Combine all loyalty-symbol adjustments in cost.loyalty, without a second loyalty counter cost.");
+			if (terms.kind === "mana" && terms.cost?.loyalty !== undefined) throw new Error("A loyalty ability cannot be a mana ability.");
 			for (const [key, one] of Object.entries(value)) {
 				if (key === "targets" && Array.isArray(one)) for (const slot of one as Target[]) {
 					if (slot.atLeast !== undefined && (slot.upTo || slot.atLeast > (slot.count ?? 1)))
@@ -112,6 +118,7 @@ const live = (table: Table, ref: ObjectRef) => { const found = table.things.get(
 /** Paying a stated cost proves neither that the source has the ability nor its legality. */
 export function activationChanges(table: Table, activation: Activation): Change[] {
 	const { controller, source, cost, paid, funding = [] } = activation;
+	if (cost.loyalty !== undefined && cost.counters?.kind === "loyalty") throw new Error("Combine loyalty payment in one signed cost.");
 	if (table.outcome || table.resolution || table.cursor.priority !== controller || table.cursor.passes >= table.seats.filter((one) => !one.result).length) throw new Error("A prepared action needs this seat's priority opportunity.");
 	const object = live(table, source);
 	const fromHand = activation.timing === "spell" || activation.timing === "land";
@@ -128,7 +135,12 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		.some((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack)) throw new Error("The selected casting permission or its departure replacement is no longer available.");
 	const spell = activation.timing === "spell" ? { ...object, zone: "stack" as const, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
+	if (activation.registered && !traits?.registrations.some((one) => one.kind === "activated" && one.basis === activation.registered))
+		throw new Error("The source no longer has that registered activated ability.");
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
+	if (cost.loyalty !== undefined && (activation.timing !== "stack" || object.zone !== "battlefield" || !main || loyaltyUsed(world, source)))
+		throw new Error("A loyalty ability needs its controller's main phase, an empty stack, and no earlier loyalty activation of this permanent this turn.");
+	if (cost.loyalty !== undefined && (object.counters.loyalty ?? 0) + cost.loyalty < 0) throw new Error("Not enough loyalty counters to pay.");
 	if (activation.timing === "spell" && !traits?.types.includes("instant") && activation.speed !== "instant" && !flashed(world, controller, spell) && !main) throw new Error("This spell needs this seat's main phase and an empty stack.");
 	if (activation.timing === "spell" && activation.slots.length && traits && targetless(traits.types, traits.subtypes)) throw new Error("A permanent spell other than an Aura has no targets; its abilities target once it is on the battlefield (601.2c).");
 	if (activation.timing === "land" && (!main || seat(table, controller).landsPlayed >= allowance(world, controller).lands)) throw new Error("A land play needs this seat's main phase, an empty stack and an unused land play.");

@@ -477,6 +477,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   durations.ts       immediate returns when an exile-until duration ends
   entry-payments.ts   named choices and optional entry payment before a battlefield route commits
   casting.ts         casting provenance and actual mana spent, read from recorded events
+  activated.ts       abilities carried by permanents and the shared loyalty activation allowance
   costs.ts           shared physical payments for announcements and resolving instructions
   cost-selection.ts  staged graveyard payments by total mana value, before any resource is spent
   inspection.ts      bounded private looks and chosen or random library ordering

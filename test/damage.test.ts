@@ -20,8 +20,8 @@ test("damage groups retain amounts, sources and recipients through transformatio
 		const source = establish(table, 0, cecil), victim = establish(table, 1, "Appa, Steadfast Guardian", []);
 		const walker = establish(table, 0, "Kaito, Bane of Nightmares", []);
 		main(table, 0);
-		commit(table, [{ do: "change-life", who: 0, amount: -8, reason: "game-setup" }, { do: "tap", what: source.id },
-			{ do: "counters", what: walker.id, kind: "loyalty", amount: 4 }], "game-setup");
+		assert.equal(walker.counters.loyalty, 4, "the printed starting loyalty is applied on entry");
+		commit(table, [{ do: "change-life", who: 0, amount: -8, reason: "game-setup" }, { do: "tap", what: source.id }], "game-setup");
 		const event = commit(table, [{ do: "damage", source: ref(source), target: ref(victim), amount: 1, ...(combat ? { combat: true } : {}) },
 			{ do: "damage", source: ref(source), target: { player: 1 }, amount: 2, ...(combat ? { combat: true } : {}) }], "resolve");
 		assert.equal(table.waiting.length, 1, "Cecil dealt damage once, across two recipients");
