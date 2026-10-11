@@ -20,7 +20,7 @@ import { createHash } from "node:crypto";
 import { firstMulliganFree, type Format } from "./format.ts";
 import { facts, printedFacts, shipped } from "./printed.ts";
 import { characteristics, forget, has, type Traits } from "./characteristics.ts";
-import { attach, terms } from "./entry.ts";
+import { attach, terms, tokenObject } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
 import { returns } from "./durations.ts";
 import { before as lookBack, detect } from "./triggers.ts";
@@ -382,8 +382,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else delete thing(table, change.what).attached;
 				break;
 			case "token": {
-				const token: Thing = { id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
-					tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered: table.cursor.clock + 1, token: structuredClone(change.spec) };
+				const token = tokenObject(change, table.cursor.clock + 1);
 				table.things.set(change.id, token);
 				enter(table, token, change, before, born);
 				if (change.attacking && change.controller === table.cursor.active && STEPS[table.cursor.steps[0]!]?.phase === "combat") {
@@ -498,7 +497,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	if (detecting) {
 		forget(table);
 		const found = detect(table, changes, { before, known }, prior);
-		table.waiting.push(...[...found.waiting, ...chapterTriggers(table, before)].map((trigger) => round ? { ...trigger, round } : trigger));
+		table.waiting.push(...[...found.waiting, ...chapterTriggers(table, before, born)].map((trigger) => round ? { ...trigger, round } : trigger));
 		if (found.spent.length) table.notes = table.notes.filter((note) => !found.spent.includes(note.id));
 	}
 

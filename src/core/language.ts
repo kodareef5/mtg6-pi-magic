@@ -219,6 +219,8 @@ export const Defs = {
 
 	TokenSpec: object({
 		name: text, types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
+		/** A copied token keeps the original's mana cost; ordinary created tokens omit it. */
+		mana: Type.Optional(ManaCost),
 		supertypes: Type.Optional(Type.Array(one("legendary", "snow"))), colors: Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true }),
 		power: Type.Optional(Type.Integer()), toughness: Type.Optional(Type.Integer()),
 		loyalty: Type.Optional(natural),
@@ -268,7 +270,8 @@ export const Defs = {
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("door"), what: ObjectRef, action: one("unlock", "lock"), face: Type.Optional(Face) }),
 		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
-		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Ref("TokenSpec"), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) }),
+		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Optional(Type.Ref("TokenSpec")), copy: Type.Optional(ObjectRef), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
+			{ oneOf: [{ required: ["spec"], not: { required: ["copy"] } }, { required: ["copy"], not: { required: ["spec"] } }] }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
 		/** "You may play that card": `from` "next-turn" for warp's "after the current turn has ended". */

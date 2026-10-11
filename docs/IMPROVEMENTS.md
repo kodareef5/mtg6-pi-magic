@@ -38,12 +38,14 @@ standing assessments.
    branches and repair before the first affected action.
 3. Resolve the next observed runtime failure with a shared mechanic and an
    invariant test. Native graveyard prices, Harmonize payments and optional
-   search groups now have that support. Refuse malformed library scopes during
+   search groups now have that support. Three Steps Ahead now has a token-copy
+   operation for single-face permanents and ordinary tokens; multiple-face
+   copies and copy exceptions remain explicit gaps. Refuse malformed library scopes during
    preparation and retain the runtime visibility guard.
-4. Widen standing coverage toward the next complete main deck. Copies, damage
-   replacements, counter thresholds and ability-resolution counts remain
-   blockers. Momo's standing spell reduction admits Boros Dragons; its first
-   ordinary games must exercise the new meaning.
+4. Widen standing coverage toward the next complete main deck. Entry and spell copies, damage
+   replacements and ability-resolution counts remain blockers. Belladonna Took
+   is the last standing blocker in Boros Tokens. Boros Dragons completed its
+   first ordinary pairing in both seat orders.
    Review stored restriction words as well as refusals: accepted prose does
    not execute a missing mechanic.
    Sideboard-only refusals do not delay this alpha.

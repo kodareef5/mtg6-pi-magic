@@ -13,14 +13,14 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 5 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons |
-| Completed source-reviewed alpha games | 15, covering all five admitted decks |
+| Completed source-reviewed alpha games | 16, covering all five admitted decks |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Control versus Azorius and reversed Red versus Boros Dragons are running; Azorius versus Izzet waits for permanent-copy support |
-| Recent shared mechanics | Counter-placement thresholds, standing spell reductions, projected spell characteristics, token abilities and ownership, loyalty timing and tokens entering attacking |
+| Current runtime work | Control versus Azorius is running; Azorius versus Izzet resumes with token-copy support; Boros Dragons versus Red completed in both seat orders |
+| Recent shared mechanics | Token copies with base terms and complete activations, counter-placement thresholds, standing spell reductions, projected spell characteristics, token abilities and ownership, loyalty timing and tokens entering attacking |
 | Stored card assessments | 231 accepted, 76 refused, five basic lands; Boros Tokens now lacks only Belladonna Took's resolution count |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 269 invariant tests pass |
+| Validation | Type check and 270 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

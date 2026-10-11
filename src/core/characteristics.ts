@@ -81,7 +81,8 @@ export function base(table: Table, object: Thing): Traits | undefined {
 	if (object.token) {
 		const spec = object.token;
 		return { name: spec.name, supertypes: [...(spec.supertypes ?? [])], types: [...spec.types], subtypes: [...(spec.subtypes ?? [])],
-			colors: [...spec.colors] as Color[], manaValue: 0, ...(spec.power !== undefined ? { power: spec.power, toughness: spec.toughness ?? 0 } : {}),
+			colors: [...spec.colors] as Color[], manaValue: spec.mana ? manaValue({ type: "", stats: "", text: false, oracle: "", mana: spec.mana }) : 0,
+			...(spec.power !== undefined ? { power: spec.power, toughness: spec.toughness ?? 0 } : {}),
 			words: [...(spec.words ?? [])], registrations: [...(spec.registers ?? []), ...own] };
 	}
 	const printed = facts(table, object);

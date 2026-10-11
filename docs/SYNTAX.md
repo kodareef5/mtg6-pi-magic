@@ -296,6 +296,11 @@ permanent. That is where warp's delayed exile and an Aura's `attach` go.
 
 ## Registering
 
+Token creation accepts either `spec` or `copy`, never both. `copy` freezes a
+single permanent's copiable base terms and complete battlefield activations;
+it does not copy current counters or temporary changes. See
+[token copies](examples/token-copies.md) for supported sources and entry behavior.
+
 Counter watches use `on: "counters"`, optional `counter` for the kind and
 `reaches` for crossing an Nth-counter threshold, including entry counters.
 See [counter watches](examples/counter-watches.md) for batching and actor limits.

@@ -18,6 +18,7 @@ import { project } from "./view.ts";
 import { summary } from "./announce.ts";
 import { cardNameChoices } from "./card-names.ts";
 import { defenders } from "./combat.ts";
+import { tokenCopy } from "./copies.ts";
 import { STEPS } from "./steps.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
@@ -230,22 +231,29 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			return one(`${instruction.do === "tap" ? "Tap" : "Untap"} ${which.map(name).join(", ") || "nothing"}`, which.map((object) => ({ do: instruction.do, what: object.id })));
 		}
 		case "token": {
-			const count = amount(scope, instruction.count), creators = [...new Set(players(scope, instruction.controller ?? "you"))];
+			const count = Math.max(0, amount(scope, instruction.count)), creators = [...new Set(players(scope, instruction.controller ?? "you"))];
+			const originals = instruction.copy && count && creators.length ? objects(scope, instruction.copy, true) : [];
+			if (originals.length > 1) return { actor: controller, question: "Create the requested token copy.", choices: [], blocked: "A token copy needs one source; choose one before copying." };
+			const original = originals[0];
+			const copied = original && count && creators.length ? tokenCopy(table, original) : undefined;
+			if (copied && "blocked" in copied) return { actor: controller, question: "Create the requested token copy.", choices: [], blocked: copied.blocked };
+			const spec = instruction.spec ?? (copied && "spec" in copied ? copied.spec : undefined);
+			if (!spec) return one("No token is created: the copy source is unavailable.", [], bind(instruction, { objects: [], players: [] }));
 			const tokens = creators.flatMap((who) => Array.from({ length: count }, () => ({ controller: who })))
 				.map((token, at) => ({ ...token, id: `token-${table.cursor.clock + 1}-${at}` }));
 			const attacking = instruction.attacking && STEPS[table.cursor.steps[0]!]?.phase === "combat" ? tokens.filter((one) => one.controller === table.cursor.active) : [];
 			const options = attacking.length ? defenders(table, table.cursor.active) : [];
-			const create = (chosen: Chosen[]): Choice => ({ id: "do", label: tokens.length ? `${creators.map((who) => seat(table, who).name).join(", ")} create ${count} ${instruction.spec.name}${instruction.tapped ? " tapped" : ""}${options.length ? "; the active player's tokens enter attacking" : ""}` : "No player creates a token",
+			const create = (chosen: Chosen[]): Choice => ({ id: "do", label: tokens.length ? `${creators.map((who) => seat(table, who).name).join(", ")} create ${count} ${spec.name}${instruction.tapped ? " tapped" : ""}${options.length ? "; the active player's tokens enter attacking" : ""}` : "No player creates a token",
 				changes: tokens.map((token) => { const pick = chosen[attacking.findIndex((one) => one.id === token.id)];
 					const defender = pick && options.find((one) => targetKey(one.chosen) === targetKey(pick));
-					return { do: "token", ...token, spec: structuredClone(instruction.spec), ...(instruction.tapped ? { tapped: true as const } : {}),
+					return { do: "token", ...token, spec: structuredClone(spec), ...(instruction.tapped ? { tapped: true as const } : {}),
 						...(defender ? { attacking: { defending: defender.defending, ...("id" in defender.chosen ? { to: defender.chosen } : {}) } } : {}) }; }),
 				...bind(instruction, { objects: tokens.map(({ id }) => ({ id, incarnation: 0 })), players: [] }) });
-			if (!options.length) return { actor: controller, question: `Create ${instruction.spec.name} tokens.`, choices: [create([])] };
+			if (!options.length) return { actor: controller, question: `Create ${spec.name} tokens.`, choices: [create([])] };
 			const previous = pending.picked.map((pick, at) => `token ${at + 1} at ${options.find((one) => targetKey(one.chosen) === targetKey(pick))?.label ?? "the former defender"}`);
-			return { actor: table.cursor.active, question: `Choose what ${instruction.spec.name} token ${pending.picked.length + 1} of ${attacking.length} enters attacking.${previous.length ? ` Chosen: ${previous.join(", ")}.` : ""}`,
+			return { actor: table.cursor.active, question: `Choose what ${spec.name} token ${pending.picked.length + 1} of ${attacking.length} enters attacking.${previous.length ? ` Chosen: ${previous.join(", ")}.` : ""}`,
 				choices: options.map((defender) => ({ ...(pending.picked.length + 1 === attacking.length ? create([...pending.picked, defender.chosen]) : { changes: [], pick: defender.chosen }),
-					id: `attack-${targetKey(defender.chosen)}`, label: `${instruction.spec.name} token ${pending.picked.length + 1} attacks ${defender.label}`,
+					id: `attack-${targetKey(defender.chosen)}`, label: `${spec.name} token ${pending.picked.length + 1} attacks ${defender.label}`,
 					...("id" in defender.chosen ? { objects: [defender.chosen] } : {}) })) };
 		}
 		case "modify": {

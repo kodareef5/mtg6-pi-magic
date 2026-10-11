@@ -6,6 +6,12 @@ import type { Registration } from "./language.ts";
 import type { Change } from "./syntax.ts";
 import type { SeatId } from "./types.ts";
 
+/** The proposed token is also what its controller reads while answering entry choices. */
+export const tokenObject = (change: Extract<Change, { do: "token" }>, entered: number): Thing => ({
+	id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
+	tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered, token: structuredClone(change.spec),
+	...(change.choices ? { choices: structuredClone(change.choices) } : {}) });
+
 /**
  * Attach packages to the moves onto the battlefield in one group. Live, they come
  * from the controller's work; on replay, from what the ledger row froze, and a

@@ -83,7 +83,7 @@ test("token creation uses the target's last controller, survives failed destruct
 	const badColor = structuredClone(example("Get Lost"));
 	const creation = badColor.instructions.find((one) => one.do === "token")!;
 	if (creation.do !== "token") assert.fail("Get Lost creates Maps");
-	creation.spec.colors = ["C"];
+	assert.ok(creation.spec); creation.spec.colors = ["C"];
 	assert.throws(() => checkProcedure(badColor), /Procedure/, "colorless tokens have an empty color set, not a sixth color");
 	for (const mode of ["destroyed", "indestructible", "illegal"] as const) {
 		const table = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: alpha(deck("Selesnya Landfall")) }], `get-lost-${mode}`);

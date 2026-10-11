@@ -23,6 +23,7 @@ test("Empower creates a complete token, waits for the loyalty counter, and share
 		const counter = example("Cast Countersculpt, paying the additional mana, then empower Jace");
 		const creation = counter.instructions.find((one) => one.do === "token")!;
 		if (creation.do !== "token") assert.fail("Expected the Empower token");
+		assert.ok(creation.spec);
 		main(table, 1); place(table, 1, "hand", "Llanowar Elves"); place(table, 0, "hand", "Countersculpt");
 		commit(table, [{ do: "add-mana", who: 1, colors: ["G"] }, { do: "add-mana", who: 0, colors: ["C", "U", "U"] },
 			...(existing ? [{ do: "token" as const, id: "existing-jace", controller: 0, spec: { ...creation.spec, loyalty: 3 } }] : [])], "game-setup");

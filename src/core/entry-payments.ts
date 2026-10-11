@@ -8,21 +8,22 @@ import { holds, tableWorld } from "./selectors.ts";
 import { activeFaces } from "./faces.ts";
 import { basicLandTypes, creatureTypeChoices } from "./characteristics.ts";
 import { paymentChoices } from "./costs.ts";
+import { tokenObject } from "./entry.ts";
 
 export type Entry = { changes: Change[]; reason: Reason; clock: number; choices: Record<number, "paid" | "declined">;
 	values?: Record<number, Record<string, string>>; reveals?: Record<number, string[]> };
 
 function requirements(table: Table, changes: Change[]) {
 	return changes.flatMap((change, index) => {
-		if (change.do !== "move" || change.to !== "battlefield") return [];
-		const object = table.things.get(change.what)!;
+		if (change.do !== "token" && (change.do !== "move" || change.to !== "battlefield")) return [];
+		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
-		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) };
+		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.do === "move" ? change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) : 0 as const };
 		const printed = object.card ? table.printed[object.card] : undefined;
 		const active = printed ? activeFaces(printed, source) : [0];
 		const world = tableWorld(table);
-		world.objects = world.objects.map((one) => one.id === object.id ? source : one);
-		const terms = (change.registers ?? []).filter((one) => one.kind === "enters" && !one.affects &&
+		world.objects = [...world.objects.filter(one => one.id !== object.id), source];
+		const terms = (change.do === "token" ? change.spec.registers ?? [] : change.registers ?? []).filter((one) => one.kind === "enters" && !one.affects &&
 			(one.face === undefined || active.includes(one.face)) && (!one.if || holds({ world, controller: who, source }, one.if)));
 		const choose = terms.flatMap((one) => one.kind === "enters" && one.choose && change.choices?.[one.choose.as] === undefined ? [one.choose] : []);
 		const payment = terms.find((one) => one.kind === "enters" && one.unlessPay && change.entry === undefined);
@@ -45,7 +46,7 @@ function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
 	const changes = structuredClone(entry.changes);
 	for (const one of all) {
 		const move = changes[one.index]!;
-		if (move.do !== "move") continue;
+		if (move.do !== "move" && move.do !== "token") continue;
 		if (entry.values?.[one.index]) move.choices = { ...move.choices, ...entry.values[one.index] };
 		if (one.life === undefined && !one.show) continue;
 		move.entry = entry.choices[one.index]!;
@@ -66,17 +67,17 @@ export function entryPayment(table: Table): Pending | null {
 	const entry = table.entry;
 	if (!entry) return null;
 	const all = requirements(table, entry.changes), next = all.find((one) => pending(entry, one))!;
-	const choice = unanswered(entry, next), cards = next.object.card ? [next.object.card] : [];
-	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, choose a ${choice.from.replaceAll("-", " ")} for ${choice.as}.`,
-		moves: (choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${next.object.card}`, cards },
+	const choice = unanswered(entry, next), cards = next.object.card ? [next.object.card] : [], name = next.object.card ?? next.object.token!.name;
+	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${name} enters, choose a ${choice.from.replaceAll("-", " ")} for ${choice.as}.`,
+		moves: (choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${name}`, cards },
 			changes: answered(table, { ...entry, values: { ...entry.values, [next.index]: { ...entry.values?.[next.index], [choice.as]: value } } }, all), reason: entry.reason })) };
 	if (next.show) {
 		const ways = paymentChoices(table, { world: tableWorld(table), controller: next.who, source: next.object }, { show: next.show }, next.who, next.object.id);
-		return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, choose or reveal cards for its entry term, or decline.`, moves: [
+		return { situation: "replacement-order", seat: next.who, question: `As ${name} enters, choose or reveal cards for its entry term, or decline.`, moves: [
 			...ways.map((way) => ({ option: { id: `entry:${next.index}:${way.id}`, label: way.label, cards },
 				changes: answered(table, { ...entry, choices: { ...entry.choices, [next.index]: "paid" }, reveals: { ...entry.reveals,
 					[next.index]: way.changes.flatMap((change) => change.do === "reveal" ? [change.what] : []) } }, all), reason: entry.reason })),
-			{ option: { id: `entry:${next.index}:decline`, label: `Do not pay for ${next.object.card}'s entry term`, cards },
+			{ option: { id: `entry:${next.index}:decline`, label: `Do not pay for ${name}'s entry term`, cards },
 				changes: answered(table, { ...entry, choices: { ...entry.choices, [next.index]: "declined" } }, all), reason: entry.reason },
 		] };
 	}
@@ -84,7 +85,7 @@ export function entryPayment(table: Table): Pending | null {
 	const spent = all.filter((one) => one.who === next.who && entry.choices[one.index] === "paid").reduce((sum, one) => sum + one.life!, 0);
 	const paidInGroup = entry.changes.reduce((sum, change) => sum + (change.do === "change-life" && change.who === next.who && change.reason === "cost-payment" ? -change.amount : 0), 0);
 	const choices = seat(table, next.who).life - spent - paidInGroup >= life ? [false, true] : [false];
-	return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, pay ${life} life or let its entry term tap it.`,
-		moves: choices.map((pay) => ({ option: { id: `entry:${next.index}:${pay ? "pay" : "decline"}`, label: pay ? `Pay ${life} life for ${next.object.card}'s entry term` : `Do not pay for ${next.object.card}'s entry term`, cards },
+	return { situation: "replacement-order", seat: next.who, question: `As ${name} enters, pay ${life} life or let its entry term tap it.`,
+		moves: choices.map((pay) => ({ option: { id: `entry:${next.index}:${pay ? "pay" : "decline"}`, label: pay ? `Pay ${life} life for ${name}'s entry term` : `Do not pay for ${name}'s entry term`, cards },
 			changes: answered(table, { ...entry, choices: { ...entry.choices, [next.index]: pay ? "paid" : "declined" } }, all), reason: entry.reason })) };
 }

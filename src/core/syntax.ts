@@ -75,7 +75,8 @@ export type Change =
 		/** The controller's answer to the optional entry cost. Absent until that choice is settled. */
 		entry?: "paid" | "declined"; face?: 0 | 1 }
 	/** A token made on the battlefield (111.1). */
-	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true; counters?: Record<string, number>; attacking?: { defending: SeatId; to?: ObjectRef } }
+	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true; counters?: Record<string, number>;
+		choices?: Record<string, string>; entry?: "paid" | "declined"; attacking?: { defending: SeatId; to?: ObjectRef } }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
 	/** A chosen name belongs to this permanent's incarnation, as entry choices do. */

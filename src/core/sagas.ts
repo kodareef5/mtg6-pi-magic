@@ -10,12 +10,12 @@ export function chapters(table: Table, object: Thing): Extract<Registration, { k
 }
 
 /** One trigger for each crossed number, including counters placed during entry. */
-export function chapterTriggers(table: Table, before: Record<string, Thing>): Trigger[] {
+export function chapterTriggers(table: Table, before: Record<string, Thing>, born: ReadonlySet<string> = new Set()): Trigger[] {
 	const found: Trigger[] = [];
-	for (const was of Object.values(before)) {
-		const object = table.things.get(was.id);
+	for (const id of new Set([...Object.keys(before), ...born])) {
+		const was = before[id], object = table.things.get(id);
 		if (!object || object.zone !== "battlefield") continue;
-		const prior = was.zone === "battlefield" && was.incarnation === object.incarnation ? was.counters.lore ?? 0 : 0;
+		const prior = was?.zone === "battlefield" && was.incarnation === object.incarnation ? was.counters.lore ?? 0 : 0;
 		const current = object.counters.lore ?? 0;
 		if (current <= prior) continue;
 		for (const registration of chapters(table, object)) for (const chapter of registration.numbers) {

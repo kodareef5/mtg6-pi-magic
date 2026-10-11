@@ -288,6 +288,11 @@ test("Saga chapters cross lore thresholds, wait through resolution and sacrifice
 	assert.equal(back.face, 1, "a Saga cannot transform into its sorcery front (712.10)");
 	commit(table, [{ do: "counters", what: back.id, kind: "lore", amount: 2 }], "resolve");
 	assert.deepEqual(table.waiting.map((trigger) => trigger.chapter), [1, 2, 3], "a jump across chapters raises every crossed number");
+	const tokens = build("Selesnya Landfall");
+	commit(tokens, [{ do: "token", id: "saga-token", controller: 0, spec: { name: "Summon: Esper Maduin", types: ["enchantment", "creature"],
+		subtypes: ["Saga", "Elemental"], colors: ["G"], power: 4, toughness: 4, registers: registers.map(({ face, ...term }) => term) } }], "resolve");
+	assert.equal(tokens.things.get("saga-token")!.counters.lore, 1);
+	assert.deepEqual(tokens.waiting.map(one => one.chapter), [1], "a newly created token has no before object, but its entry counter triggers its chapter");
 });
 
 test("Prepare creates one castable copy, preserves the permanent and expires only the unused copy", () => {
