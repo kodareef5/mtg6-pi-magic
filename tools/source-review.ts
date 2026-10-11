@@ -7,7 +7,7 @@ import type { Printed } from "../src/core/printed.ts";
 const terms = (pack: Package) => ({ registers: pack.registers, ...(pack.printedCast ? { printedCast: true } : {}),
 	...(pack.printedFaces ? { printedFaces: pack.printedFaces } : {}), procedures: pack.procedures ?? [], deferred: pack.deferred ?? [] });
 type Terms = ReturnType<typeof terms>;
-type Program = Pick<Activation, "claim" | "basis" | "timing" | "face" | "speed" | "cost" | "slots" | "instructions" | "words" | "x" | "leavesStack">;
+type Program = Pick<Activation, "claim" | "basis" | "timing" | "special" | "face" | "speed" | "cost" | "slots" | "instructions" | "words" | "x" | "leavesStack">;
 const canonical = (value: unknown) => JSON.stringify(value, (_key, one) => one && typeof one === "object" && !Array.isArray(one)
 	? Object.fromEntries(Object.entries(one).sort(([a], [b]) => a.localeCompare(b))) : one);
 export type CardReview = {
@@ -34,11 +34,11 @@ export function sourceReview(table: Table, fromVersion = 0) {
 		get(work.seat, pack.card).prepared.push({ decision: work.at, clock: work.clock, note: work.note, terms: meaning });
 	}
 	for (const row of table.ledger) if (row.activation) {
-		const { source, claim, basis, timing, face, speed, cost, slots, instructions, words, x, leavesStack } = row.activation;
+		const { source, claim, basis, timing, special, face, speed, cost, slots, instructions, words, x, leavesStack } = row.activation;
 		// Cards keep their names across incarnations. A ceased token may need the event-time snapshot.
 		const object = table.things.get(source.id) ?? table.log.findLast((receipt) => receipt.before[source.id]?.incarnation === source.incarnation)?.before[source.id];
 		const card = object?.card ?? object?.token?.name ?? `Unknown source ${source.id}@${source.incarnation}`;
-		const review = get(row.seat, card), program = { claim, basis, timing, face, speed, cost, slots, instructions, words, x, leavesStack };
+		const review = get(row.seat, card), program = { claim, basis, timing, special, face, speed, cost, slots, instructions, words, x, leavesStack };
 		const same = review.announced.find((one) => canonical(one.program) === canonical(program));
 		if (same) same.rows.push(row.seq); else review.announced.push({ rows: [row.seq], program });
 	}

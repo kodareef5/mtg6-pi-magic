@@ -23,7 +23,7 @@ function waitsForStack(option: PlanOption, frame: Frame): boolean {
 	const action = option.action, world = viewWorld(frame.view);
 	if (!(frame.view.objects ?? []).some((one) => one.zone === "stack")) return false;
 	if ("procedure" in action) {
-		if (action.procedure.timing === "land" || action.procedure.speed === "sorcery") return true;
+		if (action.procedure.timing === "land" || action.procedure.timing === "special" || action.procedure.speed === "sorcery") return true;
 		if (action.procedure.timing !== "spell" || action.procedure.speed === "instant") return false;
 	} else {
 		if ((action.prefix ?? action.option ?? "").startsWith("land:")) return true;

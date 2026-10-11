@@ -320,7 +320,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			}
 			case "activate":
-				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "mana" ? "immediate mana" : change.ability.timing === "spell" ? "spell on the stack" : "on the stack"})`);
+				parts.push(`${seat(table, change.ability.controller).name} announced: ${change.ability.claim} (${change.ability.timing === "special" ? "special action, no stack" : change.ability.timing === "mana" ? "immediate mana" : change.ability.timing === "spell" ? "spell on the stack" : "on the stack"})`);
 				break;
 			case "trigger":
 				if (change.action === "wait") parts.push(`triggered: ${change.trigger.basis}`);

@@ -129,6 +129,7 @@ export type Activation = {
 	claim: string;
 	basis: string;
 	timing: Procedure["timing"];
+	special?: Procedure["special"];
 	/** An ability offered from current registrations must still be present when announced. */
 	registered?: string;
 	/** An activation's "only as a sorcery", or a spell's claimed flash. */
@@ -255,7 +256,7 @@ export type Note = {
 	/** A second one-shot effect under 610.3, not a leaves trigger. */
 	| { kind: "return"; on: ObjectRef; source: ObjectRef; to: Zone }
 	/** "You may play that card": from a turn, while that card stays where it is. */
-	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone }
+	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone; speed?: "sorcery"; plotted?: true }
 	/** Restriction words for future matching spells, applied as they are cast. */
 	| { kind: "cast-words"; who: SeatId; words: string[]; of?: Selector; next?: true }
 	/** A rules permission, read against current sources including ones that enter later. */

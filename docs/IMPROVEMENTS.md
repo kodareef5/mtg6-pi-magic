@@ -23,19 +23,20 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Eight imported main decks have complete standing coverage and completed
-source-reviewed games.
-[Status](STATUS.md) holds the current evidence. Eleven lists still need standing
+Nine imported main decks have complete standing coverage; seven retain completed
+source-reviewed games after the stun-counter audit.
+[Status](STATUS.md) holds the current evidence. Ten lists still need standing
 assessments.
 
-1. Complete Rakdos Lizards' reversed pairing, then run fresh
-   imported pairings in both seat orders. Reuse compatible matchup briefs.
+1. Correct stun-counter untaps and replay affected Dragons games from before
+   their first wrong untap. Complete Izzet Prowess' first game and validate complete-payment menus
+   across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Izzet Prowess needs plot; Azorius
-   Momo needs combined tap payments, draw replacement and spell copies.
+   stopped games. Azorius Momo needs
+   combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete
@@ -43,7 +44,8 @@ assessments.
    Syntax and source-quote checks alone do not establish correct interpretation.
 
 Staged announcements are live. Priority chooses a use; X, targets, additional
-costs and mana payment follow as recorded decisions. Large historical menus
+costs and complete mana payments follow as recorded decisions, with individual
+source selection available when needed. Large historical menus
 use ordered hashes and counts in the journal. The Control versus Azorius
 continuation finished and matched replay and three clone continuations.
 Pregame requests have a fifteen-minute timeout independent of effort scaling.

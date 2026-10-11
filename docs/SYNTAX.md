@@ -264,7 +264,8 @@ A **procedure** is one announced action, the unit a plan prepares.
 | `source` | the card or permanent, by name and zone, or by ref; `registered` requires the exact basis of a currently active `activated` registration |
 | `claim` | what the seat says it is doing |
 | `basis` | the card text it carries out, quoted |
-| `timing` | `spell`, `land`, `stack` (an activated ability) or `mana` |
+| `timing` | `spell`, `land`, `stack` (an activated ability), `mana` or `special` |
+| `special` | `plot`: pay a fixed mana cost from hand and exile the source, without using the stack |
 | `speed` | an activation's "only as a sorcery", or `instant` on a spell to claim its flash |
 | `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `return` to owners' hands, `exile`, `life`, `discard`, `counters`, signed `loyalty`, `show`, and a computed `reduce` |
 | `if`, `limit` | when the seat may announce it, and "once each turn" |
@@ -276,6 +277,14 @@ A spell with no `cost.mana` pays its printed cost. Its timing comes from its
 printed type line: a non-instant spell waits for a main phase and an empty
 stack, unless its procedure claims flash with `speed: "instant"` or a permanent
 registered flash for it.
+
+Plot uses `timing: "special"`, `special: "plot"`, a hand source and fixed
+`cost.mana`, with empty instructions. Its staged payment exiles the card and
+records its owner's later-turn casting permission. The later cast costs {0},
+retains additional costs and requires the owner's main phase with an empty
+stack even with flash. The permission belongs to that exiled incarnation;
+plotting is neither a cast nor an activated ability. Other plotting zones,
+nonmana costs and plot-cost reductions remain unsupported. See [Plot](examples/plot.md).
 
 Modes, kicker and warp are separate procedures. Abrade's two modes are two
 procedures with different claims and targets. A kicked Burst Lightning is a

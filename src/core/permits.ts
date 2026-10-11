@@ -30,7 +30,7 @@ function permittedSpell(world: World, controller: SeatId, object: Seen, face: nu
 
 /** A printed-cost permission reads the chosen spell face, including its X symbols. */
 export const permissionMana = (mana: string | undefined, printed: string | undefined) => mana === "printed" ? printed : mana;
-type CastingPrice = { mana?: string; permission?: string; leavesStack?: Zone };
+type CastingPrice = { mana?: string; permission?: string; leavesStack?: Zone; speed?: "sorcery" };
 
 /** A normal route and each distinct granted alternative price. Two alternative costs cannot combine. */
 export function castingPrices(world: World, seat: SeatId, object: Seen, turn: number, face?: number, alternative?: string): CastingPrice[] {
@@ -38,8 +38,8 @@ export function castingPrices(world: World, seat: SeatId, object: Seen, turn: nu
 	const normal = object.zone === "hand" && object.owner === seat || !!object.copy && playable(world, seat, object, turn, false, face) || permitted.some((note) => note.mana === undefined);
 	const prices: CastingPrice[] = normal ? [{}] : [];
 	for (const note of permitted) if (note.mana !== undefined && (!alternative || alternative === permissionMana(note.mana, faceFacts(world.printed?.[object.card ?? ""], face)?.mana)) &&
-		!prices.some((price) => price.mana === note.mana && price.leavesStack === note.leavesStack))
-		prices.push({ mana: note.mana, permission: note.id, ...(note.leavesStack ? { leavesStack: note.leavesStack } : {}) });
+		!prices.some((price) => price.mana === note.mana && price.leavesStack === note.leavesStack && price.speed === ("speed" in note ? note.speed : undefined)))
+		prices.push({ mana: note.mana, permission: note.id, ...(note.leavesStack ? { leavesStack: note.leavesStack } : {}), ...("speed" in note && note.speed ? { speed: note.speed } : {}) });
 	return prices;
 }
 

@@ -98,7 +98,7 @@ export function actionFacts(frame: Frame, available: ReturnType<typeof actions>,
 		if (!bound.length && !prior && (procedure.timing !== "stack" || !visible.length)) return undefined;
 		const mana = cost?.mana ?? (procedure.timing === "spell" && card ? faceFacts(frame.view.printed?.[card], procedure.face)?.mana : undefined);
 		return [key, { ...procedure, sourcesNow: bound.map((one) => ({ id: one.id, incarnation: one.incarnation, zone: one.zone })),
-			...(procedure.timing !== "spell" && procedure.timing !== "land" ? { activationRestrictions: bound.map((source) => ({ source: sourceFact(source),
+			...(procedure.timing === "stack" || procedure.timing === "mana" ? { activationRestrictions: bound.map((source) => ({ source: sourceFact(source),
 				restrictions: activationRestrictions(viewWorld(resources.view), source, procedure.timing === "mana") })) } : {}),
 			...(procedure.timing === "spell" ? { castingRestrictions: castRestrictions(viewWorld(resources.view), frame.seat),
 				castingPrices: bound.map((source) => ({ source: { id: source.id, incarnation: source.incarnation }, prices: castingPrices(viewWorld(resources.view), frame.seat, source,

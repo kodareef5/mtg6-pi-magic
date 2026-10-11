@@ -129,7 +129,7 @@ export function happened(table: Table): Happened[] {
 		if ((receipt.clock ?? 0) <= began) continue;
 		for (const change of receipt.changes) {
 			if (change.do === "resolution" && change.action === "next" && change.resolved) events.push({ kind: "resolved", ...change.resolved });
-			if (change.do === "activate" && change.ability.timing !== "spell") events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis,
+			if (change.do === "activate" && (change.ability.timing === "stack" || change.ability.timing === "mana")) events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis,
 				...(change.ability.cost.loyalty !== undefined ? { loyalty: true } : {}) });
 			if (change.do === "activate" && change.ability.timing === "spell") {
 				const spell = receipt.after[change.what] ?? receipt.before[change.what];

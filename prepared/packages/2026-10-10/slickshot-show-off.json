@@ -1,0 +1,82 @@
+{
+	"card": "Slickshot Show-Off",
+	"generated": "2026-10-10",
+	"source": "8cca5befb794a20050ccc309a3be86783f392c3720406755503d85d57aa198ed",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Slickshot Show-Off",
+		"registers": [
+			{
+				"basis": "Flying, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "Whenever you cast a noncreature spell, this creature gets +2/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "cast",
+					"by": "you",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"not": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"what": "this",
+							"until": "end-of-turn",
+							"change": {
+								"power": 2,
+								"toughness": 0
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Slickshot Show-Off",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Plot Slickshot Show-Off",
+				"basis": "Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.)",
+				"timing": "special",
+				"special": "plot",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"instructions": []
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

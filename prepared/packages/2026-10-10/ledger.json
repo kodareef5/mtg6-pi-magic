@@ -350,14 +350,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Slickshot Show-Off": {
-		"reason": "Slickshot Show-Off is not ready: Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.) — Plotting requires a hand-zone special action that pays {1}{R}, exiles the card and establishes its plotted designation and later-turn casting permission. The available syntax cannot express this non-stack special action; a stack activation would not implement plot.",
-		"decks": [
-			"Izzet Prowess"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Sphinx of False Conclusions": {
 		"reason": "Sphinx of False Conclusions is not ready: When this creature dies, if it isn't a token, create a token that's a copy of it. — Creating a token copy using the dying creature's last-known copiable characteristics is not expressible: token instructions require a fixed TokenSpec and provide no copy operation.",
 		"decks": [

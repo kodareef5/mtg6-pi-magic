@@ -185,7 +185,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const procedure = action.procedure;
 			if (procedure.timing === "mana" || procedure.instructions.some((instruction) => instruction.do === "mana")) honest = false;
 			if (procedure.timing !== "land" && procedure.timing !== "spell" && !Object.keys(procedure.cost ?? {}).length) return undefined;
-			const fromHand = procedure.timing === "land" || procedure.timing === "spell";
+			const fromHand = procedure.timing === "land" || procedure.timing === "spell" || procedure.timing === "special";
 			const query = { ...procedure.source, zones: procedure.source.zones ?? [fromHand ? "hand" as const : "battlefield" as const] };
 			const chosen = select(query, hypothetical);
 			let source = fromHand ? offBoard(chosen, select(query, initial)) : chosen[0];
@@ -196,7 +196,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const stated = procedure.timing === "spell" ? source ? castMana(hypothetical, source, procedure.face, procedure.cost?.mana) : procedure.cost?.mana ?? selected?.mana : procedure.cost?.mana ?? "{0}";
 			const mana = stated ? symbols(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
 			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
-			const unknown = variable || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key));
+			const unknown = variable || procedure.timing === "special" || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key));
 			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: procedure.timing === "spell" && source ? reduced(hypothetical, source, mana) : { generic: mana.generic, colors: mana.colors } } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
@@ -205,14 +205,14 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		const offered = action.option ? frame.decision?.options.find((option) => option.id === action.option) : undefined;
 		const timing = offered?.use?.timing;
 		const kind = timing === "land" || id.startsWith("land:") ? "land"
-			: timing === "spell" || timing === "stack" || id.startsWith("cast:") || id.startsWith("play:") ? "cast" : undefined;
+			: timing === "spell" || timing === "stack" || timing === "special" || id.startsWith("cast:") || id.startsWith("play:") ? "cast" : undefined;
 		if (!kind) return undefined;
 		const refs = offered?.use ? [offered.use.source] : offered?.objects;
 		const query = refs ? { refs } : action.objects;
 		const selected = query ? select(query, hypothetical) : [];
 		let source = timing === "stack" ? selected[0] : offBoard(selected, query ? select(query, initial) : []);
 		const printed = faceFacts(frame.view.printed?.[source?.card ?? ""], offered?.use?.face);
-		if (source && printed && kind === "cast" && timing !== "stack") source = { ...source, face: offered?.use?.face ?? 0, traits: spellCharacteristics(hypothetical.view, source, frame.seat, offered?.use?.face, offered?.use?.x, offered?.use?.words) };
+		if (source && printed && kind === "cast" && timing !== "stack" && timing !== "special") source = { ...source, face: offered?.use?.face ?? 0, traits: spellCharacteristics(hypothetical.view, source, frame.seat, offered?.use?.face, offered?.use?.x, offered?.use?.words) };
 		const named = action.objects?.card;
 		if (kind === "land") return { kind, ...(source ? { source } : {}), ...(named ? { named } : {}) };
 		if (offered?.use) {
@@ -223,7 +223,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				return { kind, source, unknown: true, spell: true };
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
-			const additional = !!offered.use.exileSelection || Object.keys(extra).some((key) => key !== "tap");
+			const additional = timing === "special" || !!offered.use.exileSelection || Object.keys(extra).some((key) => key !== "tap");
 			if (additional || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
 			return { kind, ...(source ? { source } : {}), price: { generic, colors },
 				...(additional ? { unknown: true as const } : {}),

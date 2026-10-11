@@ -268,7 +268,8 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
 	for (const original of sources) {
 		if (procedure.cost?.loyalty !== undefined && (!(mainWindow(frame) || instantLoyalty(world, frame.seat, original)) || original.zone !== "battlefield" || loyaltyUsed(world, original))) continue;
-		if (procedure.timing !== "spell" && procedure.timing !== "land" && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
+		if ((procedure.timing === "stack" || procedure.timing === "mana") && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
+		if (procedure.timing === "special" && (!mainWindow(frame) || original.zone !== "hand" || original.owner !== frame.seat)) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
 		const source = selected ? { ...original, traits: spellCharacteristics(frame.view, original, frame.seat, procedure.face), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
 		const sourceRef = immutable(ref(source));
@@ -287,6 +288,7 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 		const prices = procedure.timing === "spell" ? castingPrices(world, frame.seat, original, turn, procedure.face,
 			procedure.cost?.mana !== selected?.mana ? procedure.cost?.mana : undefined) : [{}];
 		for (const granted of prices) {
+			if (granted.speed === "sorcery" && !mainWindow(frame)) continue;
 			if (granted.mana === "printed" && !selected?.mana) continue;
 			const stated = permissionMana(granted.mana, selected?.mana) ?? procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
 			const mana = symbols((stated ?? "") + (procedure.cost?.additional ?? []).map((one) => one.mana).join(""));
@@ -338,6 +340,7 @@ export function paidActivation(base: OfferBase, frame: Frame, way: OfferCost, fu
 	const payment = immutable(structuredClone(funding));
 	const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
 	return { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+		...(procedure.special ? { special: procedure.special } : {}),
 		...(procedure.source.registered ? { registered: procedure.source.registered } : {}),
 		...(extra.exileSelection ? { exileSelection: structuredClone(extra.exileSelection) } : {}),
 		...(granted.permission ? { permission: granted.permission } : {}),

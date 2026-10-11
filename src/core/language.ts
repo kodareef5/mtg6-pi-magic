@@ -406,7 +406,9 @@ export const ProcedureDef = object({
 	source: QuerySchema, face: Type.Optional(Face), claim: text,
 	/** The card text this procedure carries out, quoted. */
 	basis: text,
-	timing: one("spell", "land", "stack", "mana"),
+	timing: one("spell", "land", "stack", "mana", "special"),
+	/** A shared special action, paid through the same staged announcement. */
+	special: Type.Optional(Type.Literal("plot")),
 	/** An activation's "only as a sorcery", or `instant` on a spell to claim flash. Otherwise a spell's timing comes from its type line. */
 	speed: Type.Optional(one("instant", "sorcery")),
 	cost: Type.Optional(Type.Ref("Cost")),

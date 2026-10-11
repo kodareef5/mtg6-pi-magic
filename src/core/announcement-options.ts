@@ -65,6 +65,7 @@ export function announcementOffers(procedure: Procedure, frame: Frame, prefix: s
 		const option: Option = { id: `${prefix}:begin${procedure.face ? `:f${procedure.face}` : ""}:${key}`,
 			label: `${procedure.claim} (${base.selected?.name ?? base.source.card ?? base.source.id})`, objects: [base.sourceRef],
 			shows: [base.granted.mana ? `Permission ${base.granted.permission}: cast for ${base.granted.mana === "printed" ? `the printed ${base.selected?.mana}` : `${base.granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${base.granted.leavesStack ? ` Put it into ${base.granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
+				procedure.special === "plot" ? "Exile this hand card as a special action, without using the stack. Its owner may cast it for no mana on a later turn, only in their main phase with an empty stack; additional costs still apply." : "",
 				`Choose this use, then ${base.mana.x ? "X, " : ""}targets and payment. Nothing is spent until confirmed.`,
 				`Mana before reductions: ${base.mana.generic} generic${base.mana.colors.map((color) => ` + {${color}}`).join("")}${base.mana.x ? ` + ${base.mana.x} times X` : ""}.`,
 				...base.effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" "),

@@ -12,17 +12,17 @@ measures whether ordinary games can execute their cards correctly.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 8 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards |
-| Completed source-reviewed alpha games | 27, covering all eight admitted decks |
+| Imported main decks admitted to setup | 9 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess |
+| Completed source-reviewed alpha games | 25, covering seven decks; Boros Dragons needs corrected replay and Izzet Prowess awaits its first finish |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Complete-payment menus in fresh Dragons versus Izzet Aggro and Rakdos versus Landfall games; Izzet Prowess still needs plot before setup |
-| Recent shared mechanics | Complete payments with explicit remaining resources; staged announcements and amended plans; offspring copies; damage increases; additional triggers; relative-power blocking restrictions |
-| Stored card assessments | 246 accepted, 62 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
+| Current runtime work | Correct stun-counter untaps found in Dragons review; Izzet Prowess versus Rakdos and Azorius versus Control are running |
+| Recent shared mechanics | Complete payments with explicit remaining resources; plot with later-turn casting; offspring copies; damage increases; additional triggers; relative-power blocking restrictions |
+| Stored card assessments | 247 accepted, 61 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 278 invariant tests pass |
+| Validation | Type check and 279 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
-| Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded; unused bad terms found in the latest reviews were corrected for future games |
+| Rejected evidence | Stun-counter review withdrew three earlier counted Dragons games; the newest Dragons finish is also excluded. Earlier visibility, binding, permission and instruction-order failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
 
 Standing coverage admits setup; it does not prove that every deferred use or

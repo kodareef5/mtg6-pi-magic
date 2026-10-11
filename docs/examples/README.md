@@ -58,6 +58,7 @@ schemas, and every `basis` is checked against the card's text.
 | `faces.md` | alternate casts, Adventure and Omen continuations, Room doors, transform, craft, Saga chapters and Prepare copies |
 | `turn-plan.md` | a whole turn as a plan, with a reaction, asks, phase guidance and packages |
 | `reactions.md` | plans for the opponent's turn |
+| `plot.md` | plot from hand through staged payment; later-turn free cast with strict timing |
 | `block-restrictions.md` | attacker/blocker selectors, current relative power and explicit conflict marks |
 | `combat.md` | attack and block plans, marked options, damage |
 | `asking.md` | when the plan asks for a new one: stops, their windows, the budget |

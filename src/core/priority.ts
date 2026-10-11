@@ -16,7 +16,7 @@ import { activatedUses } from "./activated.ts";
 
 /** The journal contract selects a menu shape, while both use the same terms. */
 function useMoves(procedure: Procedure, frame: Frame, prefix: string): Move[] {
-	const choices = frame.view.stagedAnnouncements ? announcementOffers(procedure, frame, prefix) : offers(procedure, frame, prefix);
+	const choices = frame.view.stagedAnnouncements || procedure.timing === "special" ? announcementOffers(procedure, frame, prefix) : offers(procedure, frame, prefix);
 	return choices.map((one) => ({ ...one, changes: [], reason: "cast" }));
 }
 

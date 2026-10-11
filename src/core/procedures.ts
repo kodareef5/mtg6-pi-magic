@@ -7,6 +7,7 @@
 import { costChanges } from "./costs.ts";
 import { announcedActivation, announcementPayments } from "./announcement-options.ts";
 import { project } from "./view.ts";
+import { checkSpecial, specialChanges } from "./special.ts";
 import { castWords } from "./cast-words.ts";
 import { checkExile, enoughExile } from "./cost-selection.ts";
 import { isDeepStrictEqual } from "node:util";
@@ -54,6 +55,7 @@ export function isPrintedCast(procedure: Procedure, card: string, printed: Print
 /** Shape, then the structure the schema cannot say: refs that point somewhere, timing that fits. */
 export function checkProcedure(value: unknown): Procedure {
 	const procedure = check(ProcedureSchema, value, "Procedure");
+	checkSpecial(procedure);
 	if (procedure.cost?.loyalty !== undefined && procedure.timing !== "stack") throw new Error("A loyalty-symbol cost belongs to a stack activation, never a spell, land play or mana ability.");
 	if (typeof procedure.cost?.tap === "object" && procedure.cost.tap.upTo && procedure.cost.tap.totalPower !== undefined)
 		throw new Error("An optional bounded tap cost cannot also require a total power.");
@@ -141,16 +143,18 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (!object || (fromHand ? !playable(world, controller, object, table.cursor.turn, activation.timing === "land", activation.face) :
 		(object.zone === "battlefield" || object.zone === "stack" ? object.controller : object.owner) !== controller))
 		throw new Error("The prepared source is no longer available in this seat's expected zone.");
-	if (!fromHand && activationRestrictions(world, object, activation.timing === "mana").length)
+	if ((activation.timing === "stack" || activation.timing === "mana") && activationRestrictions(world, object, activation.timing === "mana").length)
 		throw new Error(`Activation is prohibited: ${activationRestrictions(world, object, activation.timing === "mana").join("; ")}`);
 	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
-	if (activation.timing === "spell" && !castingPrices(world, controller, object, table.cursor.turn, activation.face)
-		.some((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack)) throw new Error("The selected casting permission or its departure replacement is no longer available.");
+	const price = activation.timing === "spell" ? castingPrices(world, controller, object, table.cursor.turn, activation.face)
+		.find((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack) : undefined;
+	if (activation.timing === "spell" && !price) throw new Error("The selected casting permission or its departure replacement is no longer available.");
 	const spell = activation.timing === "spell" ? { ...object, controller, zone: "stack" as const, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
 	if (activation.registered && !traits?.registrations.some((one) => one.kind === "activated" && one.basis === activation.registered))
 		throw new Error("The source no longer has that registered activated ability.");
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
+	if ((activation.timing === "special" || price?.speed === "sorcery") && !main) throw new Error("This special action or casting permission needs this seat's main phase and an empty stack, regardless of flash.");
 	if (cost.loyalty !== undefined && (activation.timing !== "stack" || object.zone !== "battlefield" || !(main || instantLoyalty(world, controller, object)) || loyaltyUsed(world, source)))
 		throw new Error("A loyalty ability needs its controller's main phase and an empty stack, or a timing permission, and no earlier loyalty activation of this permanent this turn.");
 	if (cost.loyalty !== undefined && (object.counters.loyalty ?? 0) + cost.loyalty < 0) throw new Error("Not enough loyalty counters to pay.");
@@ -228,6 +232,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	];
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));
+	if (activation.timing === "special") changes.push(...specialChanges(table, activation));
 	if (activation.timing === "spell" && object.copy) changes.push({ do: "prepare", what: object.copy.source.id, prepared: false });
 	const future = activation.timing === "spell" ? castWords(scope, spell, traits) : [];
 	const prepared = structuredClone(activation);
@@ -277,7 +282,7 @@ export function activate(table: Table, activation: Activation, choice: Pick<Ledg
 	const entered = attach(table, changes, registered);
 	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: activation.controller,
 		...structuredClone(choice), activation: structuredClone(activation), ...(Object.keys(entered).length ? { registered: entered } : {}) });
-	const reason = activation.timing === "spell" ? "cast" : activation.timing === "land" ? "play-land" : "activate";
+	const reason = activation.timing === "spell" ? "cast" : activation.timing === "land" ? "play-land" : activation.timing === "special" ? "cost-payment" : "activate";
 	commit(table, beforeEntry(table, changes, reason), reason);
 }
 

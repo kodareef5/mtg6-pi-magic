@@ -60,7 +60,7 @@ function spent(option: Option) {
 	const use = option.use;
 	if (!use) return option.spends ?? [];
 	const cost = use.cost;
-	return [...(use.timing === "spell" || use.timing === "land" || cost.tap || cost.counters && !cost.counters.on ? [use.source] : []), ...(cost.counters?.on ?? []), ...(cost.shown ?? []),
+	return [...(use.timing === "spell" || use.timing === "land" || use.timing === "special" || cost.tap || cost.counters && !cost.counters.on ? [use.source] : []), ...(cost.counters?.on ?? []), ...(cost.shown ?? []),
 		...(use.funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.sacrificed ?? []),
 		...(cost.exiled ?? []), ...(cost.discarded ?? []), ...(cost.returned ?? [])];
 }

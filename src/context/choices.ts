@@ -6,7 +6,7 @@ import { CHOICE_LIMIT } from "./model.ts";
 import { inspectSpace, type Filter } from "./choice-space.ts";
 
 export type Choice = Pick<Option, "id" | "label" | "shows" | "notes" | "cards" | "objects" | "spends" | "parameters"> & { use?: string; payment?: string; targets?: Activation["targets"]; x?: number };
-export type Use = Pick<Activation, "source" | "claim" | "basis" | "timing" | "speed" | "slots" | "words"> & { effects: string[]; notes?: string[] };
+export type Use = Pick<Activation, "source" | "claim" | "basis" | "timing" | "special" | "speed" | "slots" | "words"> & { effects: string[]; notes?: string[] };
 export type Funding = NonNullable<Activation["funding"]>[number];
 export type Payment = Pick<Activation, "cost" | "paid"> & { funding?: string[] };
 
@@ -22,9 +22,9 @@ export function choices(options: readonly Option[], completePayments = false) {
 	const listed: Choice[] = options.map((option) => {
 		// The trigger fact groups target choices for the seat's order questions; the label already says it.
 		if (!option.use) { const { use: _, trigger: __, announcement: ___, ...plain } = option; return structuredClone(plain); }
-		const { source, claim, basis, timing, speed, slots, words, instructions, cost, paid, funding: taps, targets, x } = option.use;
+		const { source, claim, basis, timing, special, speed, slots, words, instructions, cost, paid, funding: taps, targets, x } = option.use;
 		return { id: option.id, label: option.label, ...(option.shows ? { shows: option.shows } : {}),
-			use: intern(() => ({ source, claim, basis, timing, ...(speed ? { speed } : {}), slots, ...(words ? { words } : {}), effects: instructions.map(summary) }), useKeys, uses, "use:", { source, claim, basis, timing, speed, slots, words, instructions }),
+			use: intern(() => ({ source, claim, basis, timing, ...(special ? { special } : {}), ...(speed ? { speed } : {}), slots, ...(words ? { words } : {}), effects: instructions.map(summary) }), useKeys, uses, "use:", { source, claim, basis, timing, special, speed, slots, words, instructions }),
 			payment: intern({ cost, paid, ...(taps ? { funding: taps.map((tap) => intern(tap, fundingKeys, funding, "funding:")) } : {}) }, paymentKeys, payments, "payment:"),
 			targets: structuredClone(targets), ...(x === undefined ? {} : { x }), ...(option.notes?.length ? { notes: [...option.notes] } : {}) };
 	});
