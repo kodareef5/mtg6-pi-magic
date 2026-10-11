@@ -1,0 +1,63 @@
+{
+	"card": "Pinnacle Starcage",
+	"generated": "2026-10-10",
+	"source": "0a7f1d1dbfa2fba3a03d605b8be725c5c62d42b96767535aa9299f7d7b61dabb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pinnacle Starcage",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters, exile all artifacts and creatures with mana value 2 or less until this artifact leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"every": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 2
+								}
+							},
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate to put all cards exiled with this artifact into their owners' graveyards, create one 2/2 colorless Robot artifact creature token per card put into a graveyard this way, then sacrifice this artifact.",
+				"basis": "{6}{W}{W}: Put each card exiled with this artifact into its owner's graveyard, then create a 2/2 colorless Robot artifact creature token for each card put into a graveyard this way. Sacrifice this artifact.",
+				"source": {
+					"card": "Pinnacle Starcage",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

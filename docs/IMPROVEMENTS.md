@@ -27,16 +27,17 @@ Those drive engine and syntax work, ordered by how many decks they block.
 for every main-deck card. They still have thirteen, eight and thirteen cards
 with deferred uses respectively. Selesnya completed three ordinary alpha games,
 with replay and continuation from three saved prefixes checked for each.
-Izzet completed one source-audited game with matching replay and clone
-continuation. Control games are finding missing runtime operations and incorrect
-interpretations. The other sixteen lists still need standing assessments.
+Izzet completed two source-audited games and Control completed one, each with
+matching replay and clone continuation. Matchups among these three imported
+lists are now running. The other sixteen lists still need standing assessments.
 
 1. Continue the admitted lists against supported opponents on fresh seeds.
    Review accepted runtime procedures against their source as well as checking
    gaps and replay. A publicly exiled substitute for a private look disqualifies
    a game even when its journal replays.
-2. Resume Control with the shared flashback, collected-evidence payment and
-   named-card search operations. Its accepted uses still require source review.
+2. Continue widening shared standing support. Exile-until returns now admit
+   Seam Rip, Deep-Cavern Bat and Pinnacle Starcage assessments. Chosen creature
+   types and restricted mana remain a frequent main-deck blocker.
 3. Audit completed games against source instructions. A Control run completed
    with no gaps but reordered Inevitable Defeat's exile and life changes; it
    remains excluded from coverage. Last-known information now supports the

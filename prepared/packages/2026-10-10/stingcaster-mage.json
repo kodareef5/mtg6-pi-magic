@@ -1,0 +1,70 @@
+{
+	"card": "Stingcaster Mage",
+	"generated": "2026-10-10",
+	"source": "ee5a1185362b0eff8a6090c14de75f13337686205dd5c9d80e6c83da3bdb9ba1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stingcaster Mage",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"basis": "When this creature enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.)",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "permit",
+							"what": "target:0",
+							"who": "you",
+							"mana": "printed",
+							"of": {
+								"types": [
+									"instant",
+									"sorcery"
+								]
+							},
+							"leavesStack": "exile",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

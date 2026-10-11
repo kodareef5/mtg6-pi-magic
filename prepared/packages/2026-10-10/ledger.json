@@ -148,14 +148,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Deep-Cavern Bat": {
-		"reason": "Deep-Cavern Bat is not ready: When this creature enters, look at target opponent's hand. You may exile a nonland card from it until this creature leaves the battlefield. — Missing operations: privately look at the target opponent's entire hand; exile a chosen card with an immediate, nontriggered return to its owner's hand when this creature leaves, and do not exile it if this creature has already left before the ability resolves. A delayed leaves trigger would not implement this duration correctly.",
-		"decks": [
-			"Lifegain"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Doc Aurlock, Grizzled Genius": {
 		"reason": "Doc Aurlock, Grizzled Genius is not ready: Spells you cast from your graveyard or from exile cost {2} less to cast. — Missing operation: an ongoing static reduction of generic casting costs for your spells cast from either specified zone. The syntax supports cost.reduce on an individual procedure, but no standing cost-reduction registration or cast-origin selector.; Plotting cards from your hand costs {2} less. — Missing operation: an ongoing static reduction of generic plotting costs for cards plotted from your hand; plotting is a special action, not casting or activating an ability.",
 		"decks": [
@@ -384,15 +376,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Pinnacle Starcage": {
-		"reason": "Pinnacle Starcage is not ready: When this artifact enters, exile all artifacts and creatures with mana value 2 or less until this artifact leaves the battlefield. — The syntax lacks the zone-change-until operation (610.3): linked exile followed by an immediate, non-stack return under owners' control when this artifact leaves, with no exile if it already left after the ability triggered. A delayed triggered ability would incorrectly use the stack.",
-		"decks": [
-			"Azorius Control",
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Political Triumph": {
 		"reason": "Political Triumph is not ready: When the fourth plan counter is put on this enchantment, sacrifice it, draw a card, and put a +1/+1 counter on each creature you control. — Missing event support for putting the fourth counter on this object, including counters placed by other effects; a creature-entry watch or a counter-count condition cannot faithfully replace this trigger.",
 		"decks": [
@@ -463,20 +446,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Seam Rip": {
-		"reason": "Seam Rip is not ready: When this enchantment enters, exile target nonland permanent an opponent controls with mana value 2 or less until this enchantment leaves the battlefield. — Missing operation: exile-until under rule 610.3, including the immediate, nontriggered return under its owner's control when this enchantment leaves and no exile if it already left after the ability triggered. A delayed leaves trigger does not implement this operation.",
-		"decks": [
-			"Azorius Control",
-			"Azorius Momo",
-			"Bant Airbending Combo",
-			"Boros Dragons",
-			"Boros Tokens",
-			"Lifegain",
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Sheltered by Ghosts": {
 		"reason": "Sheltered by Ghosts is not ready: When this Aura enters, exile target nonland permanent an opponent controls until this Aura leaves the battlefield. — Missing operation: exile until a specified event with the immediate, nontriggered return required by rule 610.3, returning the exiled object under its owner's control. If this Aura has already left before the enters trigger resolves, the target must not move (610.3b). A delayed leaves trigger is not equivalent.",
 		"decks": [
@@ -529,14 +498,6 @@
 		"reason": "Starscape Cleric is not ready: Offspring {2}{B} (You may pay an additional {2}{B} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.) — Missing standing entry-trigger support for checking whether the offspring cost was paid, and an operation to create a token copy of the permanent with base power and toughness 1/1.; Whenever you gain life, each opponent loses 1 life. — Missing a life-gain event for a watch registration, triggering once per source causing its controller to gain positive life.",
 		"decks": [
 			"Lifegain"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Stingcaster Mage": {
-		"reason": "Stingcaster Mage is not ready: When this creature enters, target instant or sorcery card in your graveyard gains flashback until end of turn. The flashback cost is equal to its mana cost. (You may cast that card from your graveyard for its flashback cost. Then exile it.) — Missing operation: granting flashback with its mana-cost-based alternative casting permission and a replacement that exiles the spell instead of putting it anywhere else whenever it would leave the stack if its flashback cost was paid (702.34a). The available replacement registration supports only dying, not leaving the stac",
-		"decks": [
-			"Izzet Aggro"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"

@@ -147,13 +147,13 @@ is `.pi/phase2/ledger-concepts.py`.
 The alpha registers main-deck copies of the nineteen imported legal lists.
 The original tournament files keep their sideboards. No main-deck requirement
 is waived. The pool contains 255 distinct main-deck cards. The complete store,
-including sideboard cards, has 223 source-pinned assessments and 84 recorded
+including sideboard cards, has 227 source-pinned assessments and 80 recorded
 refusals, plus five basic lands requiring no assessment.
 
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 3 of 19: 4c Control, Selesnya Landfall and Izzet Spellementals |
-| Imported lists with a completed alpha game | 2: Selesnya Landfall and Izzet Spellementals |
+| Imported lists with a completed alpha game | 3: Selesnya Landfall, Izzet Spellementals and 4c Control |
 | First Landfall game | Mono-Red won on turn 12; 400 decisions, 359 chosen, 41 forced, no fallbacks or gaps |
 | Replay and clone continuation | Matched; clones at decisions 0, 200 and 399 continued to the same outcome, cards, cursor, log and equipment |
 | First Landfall run cost and time | $1.0158 reported, 19m31s wall; one failed call lacks usage and cost |
@@ -163,6 +163,12 @@ refusals, plus five basic lands requiring no assessment.
 | Third Landfall game, against Mono-Green | Selesnya won on turn 11; 452 decisions, 411 chosen, 41 forced, no fallbacks or gaps |
 | Third Landfall replay and clone continuation | Matched; decisions 0, 226 and 451 continued to the same outcome and state |
 | Third Landfall run cost and time | $1.4633 reported, 31m00s wall; 522 requests, two calls lack usage and cost |
+| First source-audited Control game | Mono-Red won on turn 13; 378 decisions, 345 chosen, 33 forced, no fallbacks or gaps |
+| Control replay and clone continuation | Matched; decisions 0, 189 and 377 continued to the same outcome and state |
+| Control preparation and continuations | $1.0880 reported across 447 requests; final continuation 11m04s; three calls lack usage and cost |
+| Corrected second Izzet game | Mono-Red won on turn 7; 229 decisions, 210 chosen, 19 forced, no fallbacks or gaps |
+| Corrected Izzet replay and clone continuation | Matched; decisions 0, 114 and 228 continued to the same outcome and state |
+| Second Izzet run including rejected branch | $0.9502 reported across 333 requests, 15m49s of run wall time; one call lacks usage and cost |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 |
 | Control runtime failures found | Additional blight and behold costs, metadata copying, private inspection, next-cast properties, collected evidence, flashback departure |
 | Rejected Control branches | Stock Up used public exile for inspection; a completed run reordered Inevitable Defeat's instructions |
@@ -189,7 +195,9 @@ used runtime procedures as well as replay and clone continuation.
 The reversed-seat Izzet run reached a Red win on turn 7, but Opt exposed a
 same-library move that incorrectly changed incarnation. That branch is
 excluded. A continuation from decision 152, before the faulty arrangement,
-uses the corrected physical operation and retains the original preparation.
+used the corrected physical operation and retained the original preparation.
+Its completed journal is `alpha-spellementals-20261011-r1-1791724607357.jsonl`.
+Source review includes Winternight Stories' creature-or-two-card discard.
 
 Control seed `alpha-control-20261011-r1` reached a win on turn 19: 541 decisions,
 496 chosen, 45 forced, no gaps or fallbacks. Replay matched, as did continuation
@@ -198,6 +206,14 @@ preceding exile, so the run does not count as legal gameplay coverage. Its five
 preparation and continuation runs reported $1.1610 across 652 requests and
 24m56s of run wall time; three calls lack usage and cost. The retained final
 journal is `alpha-control-20261011-r1-1791720729937.jsonl`.
+
+Control seed `alpha-control-20261011-r2` subsequently completed with the corrected
+Inevitable Defeat order, flashback departure and private Stock Up window. Its
+source-audited final journal is `alpha-control-20261011-r2-1791724163632.jsonl`.
+The bill includes its original preparation and all three continuations. The
+original preparation process was interrupted after saving its briefs and has
+no final wall-time report; its request trace is retained. Deadly Cover-Up was
+prepared successfully but not cast in this completed game.
 
 Control's ordinary games produced the payment and inspection fixes. They use
 the same saved preparation when resuming a valid prefix. An interpretation
@@ -214,6 +230,9 @@ inventories, not complete deck execution. Multiversal Passage's entry choice
 passed reassessment in two calls for $0.0560, admitting Izzet Spellementals.
 Candy Trail's scry standing trigger also passed reassessment with the bounded
 inspection operations: two calls, $0.0597.
+Exile-until reassessment accepted Seam Rip, Deep-Cavern Bat and Pinnacle
+Starcage in six calls for $0.1802. Stingcaster Mage now fits the shared flashback
+permission: two calls, $0.0113.
 The [refusal ledger](../prepared/packages/2026-10-10/ledger.json) retains the
 remaining concepts, including sideboard work deferred from this alpha.
 

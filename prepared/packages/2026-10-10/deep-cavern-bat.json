@@ -1,0 +1,85 @@
+{
+	"card": "Deep-Cavern Bat",
+	"generated": "2026-10-10",
+	"source": "1126b1b6562fb91451b6ff1489ca1e35317e3a7a913d71b0d9bfa057530cf34e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deep-Cavern Bat",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying, lifelink",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"flying",
+						"lifelink"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, look at target opponent's hand. You may exile a nonland card from it until this creature leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							}
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "chosen"
+						},
+						{
+							"do": "move",
+							"what": "bound:chosen",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}
