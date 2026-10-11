@@ -269,6 +269,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		if (procedure.timing !== "spell" && procedure.timing !== "land" && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
 		const source = selected ? { ...original, traits: spellCharacteristics(frame.view, original, frame.seat, procedure.face), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
+		const sourceRef = immutable(ref(source));
 		const scope: Scope = { world, controller: frame.seat, source };
 		// Timing: a spell's from its type line unless it claims flash; an activation's own restriction.
 		const instant = procedure.timing === "spell" && (source.traits?.types.includes("instant") || procedure.speed === "instant" || flashed(world, frame.seat, source));
@@ -305,38 +306,45 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				const announced = { ...scope, source: spending, x };
 				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
-				const aims = immutable(targetings(slots, announced));
+				const aims = immutable(targetings(slots, announced)).map((targets) => {
+					const aimed = targets.flat(), text = aiming(targets, world, frame.seat);
+					return { targets, refs: aimed.flatMap((chosen) => "id" in chosen ? [chosen] : []),
+						id: targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join(""),
+						label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${text.slice(0, targets.length).join(" ")}` : ""}`,
+						notes: immutable(targetConflicts(aimed, world, frame.seat).map((one) => one.reason)),
+						shows: [...text, ...effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" ") };
+				});
 				if (!aims.length) continue;
 				for (const extra of extras(procedure, announced, source, frame)) {
 					const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
 					const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
 					const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) });
+					const extraRefs = extra.uses.filter((id) => id !== source.id).flatMap((id) => {
+						const object = frame.view.objects?.find((one) => one.id === id); return object ? [immutable(ref(object))] : [];
+					});
 					for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
 						const payment = immutable(structuredClone(funding));
 						const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
-						for (const targets of aims) {
-							const aimed = targets.flat();
-							offered.push({
-								option: {
-									id: `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}${targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join("")}`,
-									// The label names its targets, so an option says what it hits without a cross-reference.
-									label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${aiming(targets, world, frame.seat).slice(0, targets.length).join(" ")}` : ""}`,
-									notes: targetConflicts(aimed, world, frame.seat).map((one) => one.reason),
-									shows: [
-										`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
-										granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
-										procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
-											`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduction ? ` (reduced by ${reduction})` : ""}. ${extra.shows}${paying}`,
-										procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
-										spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
-										(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
-										...aiming(targets, world, frame.seat), ...effects, `Claimed basis: ${procedure.basis}`,
-									].filter(Boolean).reduce((text, part) => text ? `${text} ${part}` : part, ""),
-									objects: [ref(source), ...funding.taps.map((tap) => tap.source), ...extra.uses.filter((id) => id !== source.id).flatMap((id) => {
-										const object = frame.view.objects?.find((one) => one.id === id); return object ? [ref(object)] : [];
-									}), ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? []), ...aimed.flatMap((chosen) => "id" in chosen ? [chosen] : [])],
-								},
-								activation: { source: ref(source), ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+						const id = `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}`;
+						const shows = [
+							`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
+							granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
+							procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
+								`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduction ? ` (reduced by ${reduction})` : ""}. ${extra.shows}${paying}`,
+							procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
+							spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
+							(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
+						].filter(Boolean).join(" ");
+						const spent = [sourceRef, ...payment.taps.map((tap) => tap.source), ...extraRefs, ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? [])];
+						for (const aim of aims) {
+								offered.push({
+									option: {
+										id: `${id}${aim.id}`,
+										// The label names its targets, so an option says what it hits without a cross-reference.
+										label: aim.label, notes: aim.notes, shows: `${shows} ${aim.shows}`,
+										objects: [...spent, ...aim.refs],
+									},
+									activation: { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 									...(procedure.source.registered ? { registered: procedure.source.registered } : {}),
 									...(extra.exileSelection ? { exileSelection: structuredClone(extra.exileSelection) } : {}),
 									...(granted.permission ? { permission: granted.permission } : {}),
@@ -346,7 +354,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 									...(procedure.speed ? { speed: procedure.speed } : {}),
 									cost, paid: payment.paid,
 									...(payment.taps.length ? { funding: payment.taps } : {}),
-									targets, slots, instructions: procedure.instructions,
+										targets: aim.targets, slots, instructions: procedure.instructions,
 									...(spellWords.length ? { words: spellWords } : {}), ...(mana.x ? { x } : {}) },
 							});
 						}

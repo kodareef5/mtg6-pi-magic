@@ -309,6 +309,10 @@ test("inspection preserves every complete choice within provider capacity and ne
 		"public offer terms cannot alter another payment's accepted program");
 	assert.throws(() => payments[0]!.option.use!.funding![0]!.colors.push("R"), TypeError,
 		"public payment terms cannot change the internal activation");
+	assert.throws(() => payments[0]!.option.notes!.push("Changed through another payment"), TypeError,
+		"shared target notes cannot be changed through one option");
+	assert.throws(() => { payments[0]!.option.objects![0]!.id = "changed"; }, TypeError,
+		"a shared source reference cannot change another payment's source");
 	casting.instructions.push({ do: "draw", who: "you", count: 1 });
 	assert.ok(payments.every(one => one.activation.instructions.length === 0), "offers retain detached terms when their input procedure changes");
 	const marked = annotate([...payments.map((one) => one.option), { id: "pass", label: "Pass" }], planState(heldFrame)!);

@@ -322,7 +322,8 @@ export function aiSeat(options: AiSeatOptions): Player {
 	let asked = 0;
 	let accepted: Frame | undefined;
 	const remember = (frame: Frame) => {
-		if (frame.version === frame.view.work?.accepted) accepted = frame;
+		// Later amendments compare the witnessed position, not its obsolete payment menu.
+		if (frame.version === frame.view.work?.accepted) accepted = { seat: frame.seat, version: frame.version, view: frame.view };
 	};
 	let closed = false;
 	// A preparation installed at upkeep without review, and the frame it was prepared from.
