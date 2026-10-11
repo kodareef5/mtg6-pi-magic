@@ -25,6 +25,7 @@
  */
 import { symbols } from "./announce.ts";
 import { fundings, sick, sources, type Funding, type Price } from "./funding.ts";
+import { payable } from "./payment-options.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, castingPrices, playable, permissionMana } from "./permits.ts";
 import { reached, select } from "./query.ts";
@@ -70,7 +71,7 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
 	const price = (position: Frame) => procedure.timing === "spell" ? reduced(position, { ...spending, zone: source.zone }, mana) : mana;
-	const possible = (position: Frame) => fundings(position, price(position), reserved, spending).length > 0;
+	const possible = (position: Frame) => payable(position, price(position), reserved, spending);
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
 		? (frame.view.objects ?? []).filter((one) => one.traits?.types.includes("land") && one.zone !== "battlefield" && playable(world, frame.seat, one, turn, true)) : [];
