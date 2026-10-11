@@ -8,8 +8,8 @@
 		"card": "Callous Inspector",
 		"registers": [
 			{
-				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
 				"kind": "continuous",
+				"basis": "Menace (This creature can't be blocked except by two or more creatures.)",
 				"affects": {
 					"is": "this"
 				},
@@ -20,8 +20,8 @@
 				}
 			},
 			{
-				"basis": "When this creature dies, it deals 1 damage to you. Create a Clue token. (It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
 				"kind": "watch",
+				"basis": "When this creature dies, it deals 1 damage to you. Create a Clue token. (It's an artifact with \"{2}, Sacrifice this token: Draw a card.\")",
 				"event": {
 					"on": "dies",
 					"of": {
@@ -47,7 +47,26 @@
 								"subtypes": [
 									"Clue"
 								],
-								"colors": []
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, Sacrifice this token: Draw a card.",
+										"cost": {
+											"mana": "{2}",
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "draw",
+													"who": "you",
+													"count": 1
+												}
+											]
+										}
+									}
+								]
 							}
 						}
 					]

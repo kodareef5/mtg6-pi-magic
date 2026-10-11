@@ -8,8 +8,8 @@
 		"card": "Spyglass Siren",
 		"registers": [
 			{
-				"basis": "Flying",
 				"kind": "continuous",
+				"basis": "Flying",
 				"affects": {
 					"is": "this"
 				},
@@ -20,8 +20,8 @@
 				}
 			},
 			{
-				"basis": "When this creature enters, create a Map token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
 				"kind": "watch",
+				"basis": "When this creature enters, create a Map token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
 				"event": {
 					"on": "enters",
 					"of": {
@@ -41,7 +41,98 @@
 								"subtypes": [
 									"Map"
 								],
-								"colors": []
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.",
+										"cost": {
+											"mana": "{1}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"speed": "sorcery",
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"types": [
+															"creature"
+														],
+														"controller": "you"
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "reveal",
+													"what": {
+														"top": 1,
+														"of": "you"
+													},
+													"as": "top"
+												},
+												{
+													"do": "choose",
+													"who": "controller:target:0",
+													"from": {
+														"zones": [
+															"library"
+														],
+														"is": "bound:top",
+														"types": [
+															"land"
+														]
+													},
+													"count": 1,
+													"as": "land"
+												},
+												{
+													"do": "move",
+													"what": "bound:land",
+													"to": "hand",
+													"reason": "resolve"
+												},
+												{
+													"do": "counters",
+													"on": "target:0",
+													"kind": "+1/+1",
+													"amount": 1,
+													"if": {
+														"not": {
+															"bound": "land"
+														}
+													}
+												},
+												{
+													"do": "perform",
+													"who": "controller:target:0",
+													"may": true,
+													"if": {
+														"all": [
+															{
+																"bound": "top"
+															},
+															{
+																"not": {
+																	"bound": "land"
+																}
+															}
+														]
+													},
+													"instructions": [
+														{
+															"do": "move",
+															"what": "bound:top",
+															"to": "graveyard",
+															"reason": "resolve"
+														}
+													]
+												}
+											]
+										}
+									}
+								]
 							}
 						}
 					]
@@ -51,19 +142,6 @@
 		"procedures": [],
 		"assessed": true,
 		"printedCast": true,
-		"deferred": [
-			{
-				"claim": "Activate a Map token: target creature you control explores; activate only as a sorcery",
-				"basis": "When this creature enters, create a Map token. (It's an artifact with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
-				"source": {
-					"card": "Spyglass Siren",
-					"zones": [
-						"battlefield"
-					],
-					"controller": "self"
-				},
-				"timing": "stack"
-			}
-		]
+		"deferred": []
 	}
 }

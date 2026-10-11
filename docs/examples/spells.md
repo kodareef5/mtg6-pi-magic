@@ -73,11 +73,9 @@ Quote both pieces of text the variant relies on, joined by ` ... `.
 
 ## Activated abilities on tokens are procedures too
 
-A Food's "{2}, {T}, Sacrifice this token: You gain 3 life" is not something the
-token watches for. It is something its controller announces, so it belongs in a
-plan as a procedure, not in the token's registrations. Tokens register only what
-happens without being announced: mana abilities, triggers and statics. Bake
-into a Pie destroys and makes a Food with no registrations:
+A Food carries its complete activated ability in its token spec. Core offers
+that registration as a source-bound stack procedure; the seat chooses whether
+to activate it. Bake into a Pie destroys the target and creates that Food:
 
 ```json procedure
 {
@@ -88,16 +86,21 @@ into a Pie destroys and makes a Food with no registrations:
   "targets": [{ "object": { "types": ["creature"] } }],
   "instructions": [
     { "do": "destroy", "what": "target:0" },
-    { "do": "token", "count": 1, "spec": { "name": "Food", "types": ["artifact"], "subtypes": ["Food"], "colors": [] } }
+    { "do": "token", "count": 1, "spec": { "name": "Food", "types": ["artifact"], "subtypes": ["Food"], "colors": [],
+      "registers": [{ "kind": "activated", "basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+        "cost": { "mana": "{2}", "tap": true, "sacrifice": "this" },
+        "effect": { "instructions": [{ "do": "life", "who": "you", "amount": 3 }] }
+      }]
+    } }
   ]
 }
 ```
 
-and the plan that wants the life later announces:
+The equivalent explicit procedure is:
 
 ```json procedure
 {
-  "source": { "zones": ["battlefield"], "controller": "self", "card": "Food" },
+  "source": { "zones": ["battlefield"], "controller": "self", "card": "Food", "registered": "{2}, {T}, Sacrifice this token: You gain 3 life." },
   "claim": "Sacrifice a Food for 3 life",
   "basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
   "timing": "stack",
