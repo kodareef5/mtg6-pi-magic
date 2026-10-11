@@ -1,0 +1,73 @@
+{
+	"card": "Belladonna Took",
+	"generated": "2026-10-10",
+	"source": "ea3a9be18cc6a02bb3733283d93d6b3dbf48599e7d5f6589cac93ea75f311318",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Belladonna Took",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever a token you control enters, you gain 1 life if this is the first time this ability has resolved this turn. If it's the second time, draw a card. If it's the third time, put a +1/+1 counter on each creature you control.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"token": true,
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 1,
+								"atMost": 1
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 2,
+								"atMost": 2
+							}
+						},
+						{
+							"do": "counters",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"kind": "+1/+1",
+							"amount": 1,
+							"if": {
+								"amount": {
+									"resolution": true
+								},
+								"atLeast": 3,
+								"atMost": 3
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

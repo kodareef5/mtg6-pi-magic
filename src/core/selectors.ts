@@ -14,6 +14,7 @@ import { characteristics, creatureType, type Traits } from "./characteristics.ts
 import type { ObjectRef, SeatId, SeatView } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { casting, type Casting } from "./casting.ts";
+import { resolutionNumber } from "./resolution-counts.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
 	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "copy" | "choices" | "registrations">> & { card?: string };
@@ -21,6 +22,7 @@ export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "contro
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
 	| { kind: "activated"; by: SeatId; source: ObjectRef; basis: string; loyalty?: true }
+	| { kind: "resolved"; by: SeatId; source: ObjectRef; basis: string }
 	| { kind: "attacked"; by: SeatId; attackers: { object: Seen; traits?: Traits }[] }
 	| { kind: "life"; who: SeatId; amount: number };
 export type World = {
@@ -59,6 +61,8 @@ export type Scope = {
 	bound?: Record<string, Bound>;
 	event?: { object?: Seen; objects?: Seen[]; player?: SeatId; source?: Seen; recipient?: Seen; amount?: number };
 	x?: number;
+	/** The ability currently resolving, independent of whether its source still exists. */
+	resolving?: { source: ObjectRef; basis: string };
 };
 
 /** The table's own world. `read` overrides characteristics during the layer walk. */
@@ -123,6 +127,7 @@ export function happened(table: Table): Happened[] {
 	for (const receipt of table.log) {
 		if ((receipt.clock ?? 0) <= began) continue;
 		for (const change of receipt.changes) {
+			if (change.do === "resolution" && change.action === "next" && change.resolved) events.push({ kind: "resolved", ...change.resolved });
 			if (change.do === "activate" && change.ability.timing !== "spell") events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis,
 				...(change.ability.cost.loyalty !== undefined ? { loyalty: true } : {}) });
 			if (change.do === "activate" && change.ability.timing === "spell") {
@@ -288,6 +293,7 @@ export function amount(scope: Scope, value: Amount): number {
 	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.life ?? 0), 0);
 	if ("startingLife" in value) return players(scope, value.startingLife).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.startingLife ?? 0), 0);
 	if ("event" in value) return scope.event?.amount ?? 0;
+	if ("resolution" in value) return resolutionNumber(scope);
 	if ("half" in value) return Math[value.round === "up" ? "ceil" : "floor"](amount(scope, value.half) / 2);
 	if ("history" in value) return history(scope, value);
 	if ("x" in value) return scope.x ?? (scope.source && scope.world.casting?.(scope.source)?.x) ?? 0;

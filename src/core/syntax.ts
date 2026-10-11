@@ -105,6 +105,8 @@ export type Change =
 	 */
 	| { do: "resolution"; action: "next"; what: string; pick?: Chosen; bind?: Record<string, Bound>;
 		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true;
+		/** Filled by commit after a counted ability completes, including an optional decline. */
+		resolved?: { source: ObjectRef; basis: string; by: SeatId };
 		/** A chosen limited effect, journaled even when this group moves no object. */
 		use?: { source: ObjectRef; basis: string; by: SeatId } }
 	/** A reflexive trigger made during resolution waits for the next priority (603.12). */

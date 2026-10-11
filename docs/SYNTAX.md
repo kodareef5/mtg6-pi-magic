@@ -136,6 +136,7 @@ An **amount** is worked out when it is read and never stored.
 | `life` of a player | "if you have 10 or less life" |
 | `startingLife` of a player | the format's starting life total, independent of current life |
 | `{event: "amount"}` | damage dealt in the matched event, including simultaneous sources or recipients |
+| `{resolution: true}` | this ability's current resolution number this turn, starting at one; Belladonna Took's first, second and third effects |
 | `half` of an amount, with `round: "up"` or `"down"` | Cecil's comparison with half starting life |
 | `history` this turn: `cast`, `attacked`, `life-lost`, `life-gained`, with `of` and `by` | Witchstalker Frenzy, Magebane Lizard, Hired Claw |
 | `x` | the X announced for this spell or ability; a permanent remembers its X (107.3m) |
@@ -144,6 +145,11 @@ An **amount** is worked out when it is read and never stored.
 | `turns` of `self` or `opponent` | how many turns that side has begun, the current one included: Starting Town's "your first, second, or third turn" |
 
 `history` reads what the table recorded since the turn began.
+`resolution` reads completed resolutions of the same source incarnation and
+source quotation, plus the current one. It stays constant across that program's
+instructions. Countered abilities and abilities that fail their target or
+intervening-if check do not count. Outside an ability's resolution it is zero.
+See [resolution counts](examples/resolution-counts.md) for the accepted scope.
 
 A **condition** is an amount against `atLeast` or `atMost`, a `bound` name that
 holds something, `is` a ref matching a selector, `turn` naming whose turn it is

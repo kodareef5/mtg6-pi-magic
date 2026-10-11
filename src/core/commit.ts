@@ -14,6 +14,7 @@
 
 import { room, transformable } from "./faces.ts";
 import { chapterTriggers } from "./sagas.ts";
+import { countsResolutions } from "./resolution-counts.ts";
 import { STEPS } from "./steps.ts";
 import { createHash } from "node:crypto";
 
@@ -606,6 +607,9 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	if (change.expand) pending.program.unshift(...structuredClone(change.expand));
 	if (pending.program.length && !change.abort && !pending.lost) return;
 	const object = table.things.get(change.what);
+	const ability = object?.ability;
+	if (!pending.lost && ability?.timing === "stack" && countsResolutions(ability.instructions))
+		change.resolved = { source: structuredClone(ability.source), basis: ability.basis, by: ability.controller };
 	if (object?.card) delete object.ability;
 	else if (object) {
 		table.things.delete(object.id);
@@ -630,7 +634,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
  * writer. It is the logging that stops, not the discipline.
  */
 const control = (changes: Change[]): boolean =>
-	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution" && !(change.action === "next" && change.use) || (change.do === "combat" && change.action !== "strike"));
+	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution" && !(change.action === "next" && (change.use || change.resolved)) || (change.do === "combat" && change.action !== "strike"));
 
 /**
  * Who may act next, and where the turn is. A transition shares the commit door

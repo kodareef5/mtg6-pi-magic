@@ -116,6 +116,7 @@ function happened(event: NonNullable<SeatView["history"]>[number], view: SeatVie
 		case "activated": { const source = view.objects?.find((one) => one.id === event.source.id && one.incarnation === event.source.incarnation) ?? view.objects?.find((one) => one.id === event.source.id);
 			return `${who(event.by)} activated ${source?.card ?? source?.token?.name ?? "an ability"} (${event.source.id}@${event.source.incarnation}): ${event.basis}`; }
 		case "attacked": return `${who(event.by)} attacked with ${event.attackers.map((one) => thing(one.object)).join(", ")}.`;
+		case "resolved": return `${who(event.by)} finished resolving the counted ability of ${event.source.id}@${event.source.incarnation}: ${event.basis}`;
 		case "life": return `${who(event.who)} ${event.amount < 0 ? "lost" : "gained"} ${Math.abs(event.amount)} life.`;
 	}
 }

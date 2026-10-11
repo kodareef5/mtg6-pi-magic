@@ -47,6 +47,7 @@ export function resolving(table: Table): Pending | null {
 	const object = table.things.get(pending.object)!, ability = object.ability!;
 	const world = tableWorld(table), item = pending.program[0];
 	const scope: Scope = { world, controller: ability.controller, source: world.lastKnown(pending.source)?.object, targets: ability.targets, illegal: pending.illegal,
+		...(ability.timing === "stack" ? { resolving: { source: ability.source, basis: ability.basis } } : {}),
 		event: eventScope(world, ability.trigger?.event),
 		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;

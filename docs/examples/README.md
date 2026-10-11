@@ -16,6 +16,7 @@ schemas, and every `basis` is checked against the card's text.
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `counter-watches.md` | counter placements, entry counters and crossing an Nth-counter threshold |
+| `resolution-counts.md` | Belladonna Took's first, second and third completed ability resolutions in a turn |
 | `cast-facts.md` | proposed spell characteristics, mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
 | `spell-costs.md` | standing generic reductions, first qualifying casts, original-zone filters and ordered payment forecasts |
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |

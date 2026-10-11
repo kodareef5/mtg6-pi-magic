@@ -114,6 +114,8 @@ export const Defs = {
 		object({ life: PlayerRef }),
 		object({ startingLife: PlayerRef }),
 		object({ event: Type.Literal("amount") }),
+		/** This source-backed ability's current resolution number within the turn, starting at one. */
+		object({ resolution: Type.Literal(true) }),
 		object({ half: Type.Ref("Amount"), round: one("up", "down") }),
 		/** This turn so far, read from what was recorded. */
 		object({ history: one("cast", "attacked", "life-lost", "life-gained"), of: Type.Optional(Type.Ref("Selector")), by: Type.Optional(Side) }),

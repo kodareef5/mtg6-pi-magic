@@ -47,14 +47,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Belladonna Took": {
-		"reason": "Belladonna Took is not ready: Whenever a token you control enters, you gain 1 life if this is the first time this ability has resolved this turn. If it's the second time, draw a card. If it's the third time, put a +1/+1 counter on each creature you control. — Unsupported operation: track how many times this specific triggered ability has resolved this turn and condition its effects on the first, second, or third resolution. The available history operations do not track ability resolutions; a once-per-turn limit would not implement this ability.",
-		"decks": [
-			"Boros Tokens"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Biotech Specialist": {
 		"reason": "Biotech Specialist is not ready: Whenever you sacrifice an artifact, this creature deals 2 damage to target opponent. — Missing operation: a sacrifice-specific watch event (or a sacrifice-reason filter on a leaves event). The available events cannot distinguish sacrificing an artifact from other ways it leaves the battlefield, including sacrifices whose graveyard destination is replaced. This needs a standing trigger with a target opponent and 2 damage from this creature.",
 		"decks": [
