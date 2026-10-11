@@ -176,6 +176,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// receipt no trigger can read.
 	const before: Receipt["before"] = {}, known: Record<string, Traits> = {};
 	for (const change of changes) {
+		if (change.do === "order") for (const ref of change.cards) {
+			const was = table.things.get(ref.id); if (was) before[was.id] = structuredClone(was);
+		}
 		if (change.do === "damage") {
 			const source = damage.get(change)?.source;
 			if (source) { before[source.object.id] = structuredClone(source.object) as Thing; if (source.traits) known[source.object.id] = structuredClone(source.traits); }
@@ -322,6 +325,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				// The shuffle is the only randomness in the game. Positions are
 				// swapped so the library stays a list the engine fully knows.
 				const library = cardsIn(table, "library", change.whose);
+				const ids = new Set(library.map((one) => one.id));
+				for (const [who, seen] of Object.entries(table.resolution?.seen ?? {})) table.resolution!.seen![Number(who)] = seen.filter((one) => !ids.has(one.id));
 				for (let i = library.length - 1; i > 0; i--) {
 					const j = random(table, i + 1);
 					const a = library[i]!;
@@ -352,6 +357,27 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			}
 			case "reveal":
 				break;
+			case "look": {
+				const pending = table.resolution;
+				if (!pending) throw new Error("A private inspection needs a resolving instruction.");
+				const object = thing(table, change.what), seen = (pending.seen ??= {})[change.who] ??= [];
+				if (!seen.some((one) => one.id === object.id && one.incarnation === object.incarnation)) seen.push({ id: object.id, incarnation: object.incarnation });
+				break;
+			}
+			case "order": {
+				const picked = change.cards.map((ref) => thing(table, ref.id));
+				if (new Set(picked.map((one) => one.id)).size !== picked.length || picked.some((one, at) => one.zone !== "library" || one.owner !== change.whose || one.incarnation !== change.cards[at]!.incarnation))
+					throw new Error("Reordering needs distinct current cards from one library.");
+				if (change.random) for (let i = picked.length - 1; i > 0; i--) {
+					const j = random(table, i + 1); [picked[i], picked[j]] = [picked[j]!, picked[i]!];
+				}
+				const ids = new Set(picked.map((one) => one.id));
+				const rest = cardsIn(table, "library", change.whose).filter((one) => !ids.has(one.id));
+				(change.position === "top" ? [...picked, ...rest] : [...rest, ...picked]).forEach((one, at) => { one.position = at; });
+				for (const [who, seen] of Object.entries(table.resolution?.seen ?? {})) if (change.random || Number(who) !== change.who)
+					table.resolution!.seen![Number(who)] = seen.filter((one) => !ids.has(one.id));
+				break;
+			}
 			case "note":
 				table.notes.push({ ...structuredClone(change.note), id: `note-${table.cursor.clock + 1}-${index}`, written: table.cursor.clock + 1 } as Note);
 				break;

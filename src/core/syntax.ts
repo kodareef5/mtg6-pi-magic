@@ -77,6 +77,10 @@ export type Change =
 	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
+	/** A private inspection during resolution. Nothing moves. */
+	| { do: "look"; who: SeatId; what: string }
+	/** A library subset placed in the stated order, or shuffled before placement. */
+	| { do: "order"; who: SeatId; whose: SeatId; cards: ObjectRef[]; position: "top" | "bottom"; random?: true }
 	| { do: "tap" | "untap"; what: string }
 	| { do: "transform"; what: string; since?: number }
 	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }

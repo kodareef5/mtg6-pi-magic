@@ -43,7 +43,7 @@ const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
  */
 export const ObjectRef = Type.Union([
 	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
-	object({ top: positive, of: Type.String({ pattern: "^(you|self|opponent|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
+	object({ top: Type.Ref("Amount"), of: Type.String({ pattern: "^(you|self|opponent|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
 ]);
 export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source|bound:[a-z][a-z0-9-]*)|owner:(this|attached|target:[0-9]+|event:object|bound:[a-z][a-z0-9-]*))$" });
 const Side = Type.Union([PlayerRef, Type.Literal("any")]);
@@ -216,6 +216,10 @@ export const Defs = {
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
+		/** A private inspection binds exactly the inspected objects, not the whole hidden zone. */
+		step({ do: Type.Literal("look"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
+		/** Reorder a named library subset without changing its zone or incarnation. */
+		step({ do: Type.Literal("order"), who: PlayerRef, what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), position: one("top", "bottom"), random: Type.Optional(Type.Literal(true)) }),
 		/** Bind success only when every part of the stated cost is paid together. */
 		step({ do: Type.Literal("pay"), who: PlayerRef, cost: Type.Ref("Cost") }),
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),

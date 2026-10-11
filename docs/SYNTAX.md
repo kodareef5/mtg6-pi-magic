@@ -58,7 +58,7 @@ any. Any other lowercase word is recorded for the players and the judge.
 | `event:object`, `event:objects` | what the triggering event happened to ("that land", "those creatures") |
 | `event:player`, `event:source` | who caused the event, and the spell or ability that did ("that player", ward's "that spell") |
 | `event:recipient` | the permanent dealt damage, when the matched event has one shared recipient |
-| `{top: 1, of: "you"}` | the top card of a library |
+| `{top: 1, of: "you"}` | the top card of a library; `top` accepts any computed amount |
 | `you` (or `self`), `opponent`, `each-player` | players relative to the source's controller |
 | `controller:target:0`, `owner:this` | a player read off an object |
 
@@ -157,6 +157,8 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone |
+| `look` | `who` privately inspects `what` or `every`; `as` binds exactly that window for later selection |
+| `order` | `who` places a library subset (`what` or `every`) at `position` (`top` or `bottom`), choosing its order unless `random: true` |
 | `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |

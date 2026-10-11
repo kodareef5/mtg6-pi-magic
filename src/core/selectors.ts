@@ -146,9 +146,9 @@ const traitsOf = (scope: Scope, object: Seen) =>
 	live(scope.world, object) ? scope.world.read(object) : scope.world.lastKnown(object)?.traits ?? scope.world.read(object);
 
 /** The objects a ref names, as they are now. A target or binding that changed zones names nothing. */
-export function objects(scope: Scope, ref: string | { top: number; of: string }): Seen[] {
+export function objects(scope: Scope, ref: string | { top: Amount; of: string }): Seen[] {
 	if (typeof ref !== "string") return players(scope, ref.of).flatMap((owner) => scope.world.objects.filter((one) => one.zone === "library" && one.owner === owner)
-		.sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).slice(0, ref.top));
+		.sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).slice(0, Math.max(0, amount(scope, ref.top))));
 	const [head, rest] = [ref.split(":")[0], ref.slice(ref.indexOf(":") + 1)];
 	switch (head) {
 		case "this": return scope.source ? [scope.source] : [];

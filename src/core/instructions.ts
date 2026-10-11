@@ -12,6 +12,7 @@ import { amount, holds, objects, players, select, type Bound, type Scope, type S
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
+import { inspection } from "./inspection.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
@@ -46,6 +47,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "look": case "order": return inspection(table, scope, instruction, pending);
 		case "pay": {
 			const who = players(scope, instruction.who)[0] ?? controller;
 			const choices = paymentChoices(table, scope, instruction.cost, who, pending.object).map((choice) => ({ ...choice,

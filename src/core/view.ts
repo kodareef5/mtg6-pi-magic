@@ -135,10 +135,23 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
+	const inspected = viewer === "spectator" ? [] : table.resolution?.seen?.[viewer] ?? [];
+	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && (item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation));
+	const visibleRefs = new Set([...table.things.values()].filter((one) => entitled(one) && !one.faceDown).map((one) => `${one.id}@${one.incarnation}`));
+	const bound = (values: NonNullable<Table["resolution"]>["bound"]) => Object.fromEntries(Object.entries(values).map(([key, value]) => [key,
+		{ ...value, objects: value.objects.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`)) }]));
+	const resolution = table.resolution ? structuredClone(table.resolution) : undefined;
+	if (resolution) {
+		resolution.bound = bound(resolution.bound);
+		resolution.picked = resolution.picked.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`));
+		if (resolution.seen) resolution.seen = viewer === "spectator" ? {} : { [viewer]: structuredClone(inspected) };
+	}
 	const objects: NonNullable<SeatView["objects"]> = [...table.things.values()]
-		.filter((item) => PUBLIC.has(item.zone) || (viewer !== "spectator" && item.zone === "hand" && item.owner === viewer))
+		.filter(entitled)
 		.map((item) => {
 			const { card, ...seen } = structuredClone(item);
+			if (seen.ability?.bound) seen.ability.bound = bound(seen.ability.bound);
+			if (seen.ability?.trigger?.bound) seen.ability.trigger.bound = bound(seen.ability.trigger.bound);
 			// Read through the layers on every projection, never stored on the object.
 			const traits = characteristics(table, item);
 			return item.faceDown ? seen : { ...seen, card, ...(traits ? { traits: structuredClone(traits) } : {}),
@@ -194,7 +207,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			cards: Object.fromEntries(Object.entries(deck.main).sort(([a], [b]) => a.localeCompare(b))),
 			sideboard: Object.fromEntries(Object.entries(deck.sideboard).sort(([a], [b]) => a.localeCompare(b))),
 		})) } : {}),
-		...(table.resolution ? { resolution: structuredClone(table.resolution) } : {}),
+		...(resolution ? { resolution } : {}),
 		...(viewer !== "spectator" ? { purposes: purposes(table, viewer) } : {}),
 		seats: table.seats.map((one) => ({ id: one.id, name: one.name })),
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
@@ -205,7 +218,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
-		since: table.log.slice(since).map((r) => describe(table, r)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table, viewer) } : {}) };
+		since: table.log.slice(since).map((r) => describe(table, r, viewer)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table, viewer) } : {}) };
 }
 
 /** The last five turns by each receipt's recorded turn, read backwards from now and never to the start of the game. */
@@ -322,6 +335,14 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				if (shown) parts.push(`${seat(table, shown.owner).name} revealed ${shown.card ?? shown.token?.name ?? "a card"} from ${shown.zone}`);
 				break;
 			}
+			case "look": {
+				const seen = receipt.before[change.what];
+				parts.push(`${seat(table, change.who).name} looked at ${viewer === change.who ? seen?.card ?? "a card" : "a card"} privately`);
+				break;
+			}
+			case "order":
+				parts.push(`${seat(table, change.who).name} put ${change.cards.length} cards on the ${change.position} of ${seat(table, change.whose).name}'s library${change.random ? " in random order" : " in their chosen order"}${viewer === change.who && !change.random ? `: ${change.cards.map((one) => receipt.before[one.id]?.card ?? "a card").join(", ")} (topmost first)` : ""}`);
+				break;
 			case "counters":
 				parts.push(`${change.amount < 0 ? "removed" : "put"} ${Math.abs(change.amount)} ${change.kind} ${change.amount < 0 ? "from" : "on"} ${publicName(receipt.before[change.what])}`);
 				break;

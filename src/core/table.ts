@@ -191,6 +191,8 @@ export type Resolution = {
 	lost?: boolean;
 	/** Picks so far in the current `choose`. */
 	picked: ObjectRef[];
+	/** Private inspection entitlements while this effect resolves. The receipts preserve what was seen. */
+	seen?: Record<SeatId, ObjectRef[]>;
 	/** A "you may" trigger whose controller has not yet said whether to use it. */
 	optional?: true;
 };
