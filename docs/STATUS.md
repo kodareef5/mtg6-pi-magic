@@ -12,13 +12,13 @@ measures whether ordinary games can execute their cards correctly.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 7 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro |
-| Completed source-reviewed alpha games | 20, covering six admitted decks; Izzet Aggro's first game is running |
+| Imported main decks admitted to setup | 8 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards |
+| Completed source-reviewed alpha games | 22, covering seven admitted decks; Rakdos Lizards' first game is preparing |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Control versus Azorius finished through staged casting; priority selects a use before X, targets, extra costs and mana payment |
-| Recent shared mechanics | Staged announcements and matching replans; named additional mana costs and offspring token copies; damage bindings read actual recipients after prevention |
-| Stored card assessments | 239 accepted, 69 refused, five basic lands; Iridescent Vinelasher accepted after offspring support |
+| Recent shared mechanics | Staged announcements and matching replans; named additional mana costs and offspring token copies; fixed damage increases with affected-player replacement ordering |
+| Stored card assessments | 240 accepted, 68 refused, five basic lands; Iridescent Vinelasher and Valley Flamecaller accepted |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and 276 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |

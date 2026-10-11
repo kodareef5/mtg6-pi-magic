@@ -308,10 +308,11 @@ export const Defs = {
 		/** A battlefield ability reducing generic mana in matching spell costs, including alternative prices. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), cast: Type.Ref("Selector"), reduce: positive,
 			from: Type.Optional(Type.Array(Zone, { minItems: 1, uniqueItems: true })), if: Type.Optional(Type.Ref("Condition")) }),
-		/** Prevent all matching damage, or forbid its prevention. Filters are read at each damage event. */
-		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: DamageMode,
+		/** Prevent matching damage, forbid prevention or add a fixed positive amount. */
+		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: Type.Union([DamageMode, Type.Literal("add")]), amount: Type.Optional(positive),
 			combat: Type.Optional(Type.Boolean()), from: Type.Optional(Type.Ref("Selector")),
-			to: Type.Optional(Type.Union([object({ object: Type.Ref("Selector") }), object({ player: PlayerRef })])), if: Type.Optional(Type.Ref("Condition")) }),
+			to: Type.Optional(Type.Union([object({ object: Type.Ref("Selector") }), object({ player: PlayerRef })])), if: Type.Optional(Type.Ref("Condition")) },
+			{ additionalProperties: false, if: { properties: { mode: { const: "add" } }, required: ["mode"] }, then: { required: ["amount"] }, else: { not: { required: ["amount"] } } }),
 		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** A triggered ability. `if` is its intervening if (603.4). */

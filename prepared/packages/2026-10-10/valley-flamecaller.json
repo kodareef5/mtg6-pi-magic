@@ -1,0 +1,31 @@
+{
+	"card": "Valley Flamecaller",
+	"generated": "2026-10-10",
+	"source": "419cb656e21dba67f293f56def4942e5a11eacd06c1f2e798d6f0d0d40d7788f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Valley Flamecaller",
+		"registers": [
+			{
+				"basis": "If a Lizard, Mouse, Otter, or Raccoon you control would deal damage to a permanent or player, it deals that much damage plus 1 instead.",
+				"kind": "damage-rule",
+				"mode": "add",
+				"amount": 1,
+				"from": {
+					"controller": "you",
+					"subtypes": [
+						"Lizard",
+						"Mouse",
+						"Otter",
+						"Raccoon"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

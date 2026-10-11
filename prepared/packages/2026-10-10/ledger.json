@@ -507,14 +507,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Valley Flamecaller": {
-		"reason": "Valley Flamecaller is not ready: If a Lizard, Mouse, Otter, or Raccoon you control would deal damage to a permanent or player, it deals that much damage plus 1 instead. — Unsupported operation: a standing damage replacement that adds 1 to damage dealt to each permanent or player by a source you control with any of these subtypes. The replacement schema supports only replacing death with a zone move, not modifying damage events.",
-		"decks": [
-			"Rakdos Lizards"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Vengeful Tracker": {
 		"reason": "Vengeful Tracker is not ready: Whenever an opponent sacrifices an artifact, this creature deals 2 damage to them. — Cannot register faithfully: the available event schema has no sacrifice event or sacrifice-reason filter. A leaves or dies watch would also trigger for nonsacrifice events and would not correctly handle sacrifices whose graveyard destination is replaced.",
 		"decks": [

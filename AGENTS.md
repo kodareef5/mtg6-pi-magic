@@ -474,6 +474,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   card-names.ts      source-pinned Oracle names and printed types, independent of deck legality
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
+  damage.ts, damage-order.ts  damage modifiers and affected-player ordering before simultaneous results
   copies.ts          copiable base terms and complete copied activations
   entry-copies.ts     targetless entry copy choices and copiable exceptions
   durations.ts       immediate returns when an exile-until duration ends

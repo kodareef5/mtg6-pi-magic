@@ -1,12 +1,14 @@
-/** Prevention is one event filter for every damage route. The fixtures isolate its standing terms. */
+/** Prevention is one event filter for every damage route. The fixtures isolate its standing terms.
+ * Past 150 lines to keep ordering, simultaneous results and bindings in this invariant. */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { commit, start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { nextDecision } from "../src/core/decisions.ts";
+import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
 import { prevented } from "../src/core/damage.ts";
+import { beforeDamage } from "../src/core/damage-order.ts";
 import { damageSource, tableWorld, viewWorld } from "../src/core/selectors.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { focus } from "../src/context/packet.ts";
@@ -14,7 +16,7 @@ import { dossier } from "../src/context/dossier.ts";
 import { describe, project } from "../src/core/view.ts";
 import type { Table } from "../src/core/table.ts";
 import type { Change } from "../src/core/syntax.ts";
-import { announce, establish, example, finish, main, passBoth, place, step } from "./play.ts";
+import { announce, establish, example, finish, main, pack, passBoth, place, step } from "./play.ts";
 
 const ref = (one: { id: string; incarnation: number }) => ({ id: one.id, incarnation: one.incarnation });
 const build = (deckName: string) => start(standard, [{ deck: deck(deckName) }, { deck: deck("Jeskai Artifacts") }], `prevention-${deckName}`);
@@ -124,5 +126,66 @@ test("prevention precedes damage results, yields to prohibitions, expires and re
 	const resolved = mixed.log.at(-1)!.changes.find(change => change.do === "resolution" && change.action === "next");
 	assert.ok(resolved?.do === "resolution" && resolved.action === "next");
 	assert.deepEqual(resolved.bind!.dealt, { objects: [], players: [0], amount: 1 }, "a partially prevented group binds only the damaged recipient");
+
+	for (const first of ["prevent", "add"] as const) for (const unpreventable of [false, true]) {
+		const game = build("Rakdos Lizards"), { victim } = defend(game);
+		const lizard = establish(game, 0, "Hired Claw", []);
+		establish(game, 0, "Valley Flamecaller"); establish(game, 0, "Valley Flamecaller"); main(game, 0);
+		if (unpreventable) commit(game, [{ do: "note", note: { kind: "damage-rule", by: 0, until: "end-of-turn", mode: "unpreventable" } }], "resolve");
+		const group: Change[] = [{ do: "damage", source: ref(lizard), target: ref(victim), amount: 1 },
+			{ do: "damage", source: ref(lizard), target: { player: 0 }, amount: 1 }];
+		const untouched = structuredClone(game);
+		assert.throws(() => commit(game, [{ do: "tap", what: lizard.id }, ...group], "resolve"), /replacement-order/);
+		assert.deepEqual(game, untouched, "an unordered group cannot partly commit");
+		commit(game, beforeDamage(game, group, "resolve"), "resolve");
+		const initial = structuredClone(game), at = game.ledger.length;
+		assert.equal(nextDecision(game)!.seat, 0, "the active affected player chooses before the nonactive player");
+		const pure = structuredClone(game); nextDecision(game); assert.deepEqual(game, pure);
+		assert.equal(game.seats[0]!.life, 20); assert.equal(victim.damage, 0);
+		apply(game, nextDecision(game)!.options[0]!.id, "model", "chosen");
+		assert.equal(nextDecision(game)!.seat, 1, "the damaged permanent's controller chooses its order");
+		const middle = structuredClone(game), from = game.ledger.length;
+		assert.equal(game.seats[0]!.life, 20, "another recipient's settled damage still waits for the group");
+		while (game.damageOrder) {
+			const next = nextDecision(game)!, wanted = next.options.find(one => first === "prevent" ? one.label.includes("Crystal Barricade") : one.label.includes("Valley Flamecaller"));
+			apply(game, (wanted ?? next.options[0]!).id, "model", "chosen");
+		}
+		assert.equal(game.seats[0]!.life, 17); assert.equal(victim.damage, unpreventable ? 3 : 0);
+		const hit = game.log.at(-1)!.changes.find(one => one.do === "damage" && "id" in one.target)!;
+		assert.ok(hit.do === "damage"); assert.equal(hit.prevented, unpreventable ? undefined : first === "prevent" ? 1 : 3);
+		assert.equal(new Set(hit.replacements).size, hit.replacements!.length, "each effect applies once");
+		assert.deepEqual(relive(initial, game.ledger.slice(at)), game);
+		assert.deepEqual(relive(middle, game.ledger.slice(from)), game);
+	}
+	// A real landfall instruction reaches ordering through the serial resolution dispatcher.
+	const game = build("Rakdos Lizards"); main(game, 0);
+	const terms = pack("Iridescent Vinelasher");
+	for (const term of terms) if (term.kind === "watch") for (const instruction of term.effect.instructions) if (instruction.do === "damage") instruction.as = "dealt";
+	const lizard = establish(game, 0, "Iridescent Vinelasher", terms);
+	establish(game, 0, "Valley Flamecaller"); establish(game, 0, "Valley Flamecaller");
+	place(game, 0, "hand", "Mountain");
+	const initial = structuredClone(game), at = game.ledger.length;
+	apply(game, nextDecision(game)!.options.find(one => one.id.startsWith("land:") && one.label.includes("Mountain"))!.id, "model", "chosen");
+	apply(game, nextDecision(game)!.options[0]!.id, "model", "chosen"); passBoth(game); step(game);
+	assert.ok(game.damageOrder); assert.equal(game.seats[1]!.life, 20);
+	apply(game, nextDecision(game)!.options[0]!.id, "model", "chosen"); finish(game);
+	assert.equal(game.seats[1]!.life, 17); assert.deepEqual(relive(initial, game.ledger.slice(at)), game);
+	const bound = game.log.flatMap(receipt => receipt.changes).findLast(one => one.do === "resolution" && one.action === "next" && one.bind?.dealt);
+	assert.ok(bound?.do === "resolution" && bound.action === "next");
+	assert.deepEqual(bound.bind!.dealt, { objects: [], players: [1], amount: 3 }, "a damage binding includes replacement increases");
+	commit(game, [{ do: "damage", source: ref(lizard), target: { player: 1 }, amount: 0 }], "resolve");
+	assert.equal(game.seats[1]!.life, 17, "zero damage does not become a new event through increases");
+
+	const single = build("Rakdos Lizards"), caller = establish(single, 0, "Valley Flamecaller"), sourceClaw = establish(single, 0, "Hired Claw", []);
+	const enemy = establish(single, 1, "Crystal Barricade"), last = ref(sourceClaw);
+	const increased: Change = { do: "damage", source: last, target: { player: 1 }, amount: 1 };
+	commit(single, [{ do: "note", note: { kind: "label", by: 0, on: last, until: "indefinite", text: "Granted lifelink", change: { words: ["lifelink"] } } }], "game-setup");
+	commit(single, [increased], "resolve"); assert.equal(single.seats[0]!.life, 22); assert.equal(single.seats[1]!.life, 18);
+	commit(single, [{ ...increased, source: ref(enemy) }], "resolve"); assert.equal(single.seats[1]!.life, 17, "an opponent's unmatched source gets no increase");
+	commit(single, [{ do: "move", what: sourceClaw.id, to: "graveyard", reason: "destroy" }], "resolve");
+	commit(single, [increased], "resolve"); assert.equal(single.seats[1]!.life, 15); assert.equal(single.seats[0]!.life, 24, "last known source traits control increases and lifelink");
+	commit(single, [{ do: "move", what: caller.id, to: "hand", reason: "bounce" }, increased], "resolve");
+	assert.equal(single.seats[1]!.life, 13, "a simultaneous departure still supplies its replacement");
+	commit(single, [increased], "resolve"); assert.equal(single.seats[1]!.life, 12, "the following event no longer has the replacement");
 
 });

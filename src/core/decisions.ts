@@ -22,6 +22,7 @@ import type { Decision } from "./types.ts";
 import { begin as beginResolving, resolving } from "./resolution.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry, entryPayment } from "./entry-payments.ts";
+import { beforeDamage, orderingDamage } from "./damage-order.ts";
 import type { Registration } from "./language.ts";
 import { activate } from "./procedures.ts";
 import { characteristics, has } from "./characteristics.ts";
@@ -50,6 +51,7 @@ function pending(table: Table): Pending | null {
 	if (table.payment) return selectingPayment(table);
 	if (table.announcement) return announcing(table);
 	if (table.entry) return entryPayment(table);
+	if (table.damageOrder) return orderingDamage(table);
 
 	// 2. Pregame: mulligan, then the opening actions a card permits. Situation 7.
 	//    Null before the hands are dealt and between rounds: advance deals and
@@ -174,7 +176,7 @@ function take(
 		why,
 		...(Object.keys(entered).length ? { registered: entered } : {}),
 	});
-	commit(table, table.entry ? changes : beforeEntry(table, changes, move.reason), move.reason);
+	commit(table, beforeDamage(table, table.entry ? changes : beforeEntry(table, changes, move.reason), move.reason), move.reason);
 }
 
 /** A listed action and its bookkeeping are one committed event. */

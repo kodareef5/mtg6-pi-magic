@@ -23,20 +23,19 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Seven imported main decks have complete standing coverage. Six have completed
-source-reviewed games; Izzet Aggro is admitted and still needs its first game.
-[Status](STATUS.md) holds the current evidence. Twelve lists still need standing
+Eight imported main decks have complete standing coverage. Seven have completed
+source-reviewed games; Rakdos Lizards is admitted and still needs its first game.
+[Status](STATUS.md) holds the current evidence. Eleven lists still need standing
 assessments.
 
-1. Complete Izzet Aggro's first game, then run fresh
+1. Complete Rakdos Lizards' first game, then run fresh
    imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
-2. Widen standing coverage. Iridescent Vinelasher's offspring is assessed.
-   Valley Flamecaller's damage replacement is the remaining Rakdos blocker.
-   Keep replacement-order choices
-   explicit. Review accepted restriction words as well as refusals.
+2. Reassess remaining main-deck refusals against the current shared operations,
+   then prioritize mechanics by the resulting deck blockers and stopped games.
+   Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete
    abilities, target scope, instruction order and additional casting costs.

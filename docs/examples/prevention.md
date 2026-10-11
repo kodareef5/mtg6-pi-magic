@@ -7,6 +7,10 @@ rule. `from` selects the damage source in any zone, including its last known
 characteristics; `to` holds an `object` selector or a `player` reference.
 Omitted filters apply to every source and recipient.
 
+Fixed damage increases use the same registration with `mode: "add"` and
+`amount`. See [damage additions](damage-additions.md) for the affected player's
+replacement-order choices and the supported limits.
+
 The instruction writes a global rule lasting until `until`. It does not capture
 targets or a finite shield. Neither form represents limited amounts, additional
 effects attached to prevention, or triggers on prevented damage. Those uses

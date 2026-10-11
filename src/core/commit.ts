@@ -29,7 +29,7 @@ import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
 import { damageSource, tableWorld, targetKey } from "./selectors.ts";
-import { damageResult } from "./damage.ts";
+import { orderedDamage } from "./damage.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Activation,
@@ -174,7 +174,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const source = damageSource(table, change.source), target = "id" in change.target ? table.things.get(change.target.id) : undefined;
 		if ("id" in change.target && (!target || target.incarnation !== change.target.incarnation || target.zone !== "battlefield"))
 			throw new Error("The damage recipient is no longer that permanent.");
-		const applied = damageResult(world!, change, source);
+		const result = orderedDamage(world!, change, source);
+		if (result.choices.length) throw new Error("Damage needs its affected player's replacement-order choice before committing.");
+		const applied = result.damage;
 		damage.set(applied, { source, target: target ? characteristics(table, target) : undefined });
 		return applied;
 	});
@@ -353,6 +355,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "entry":
 				if (change.entry) table.entry = structuredClone(change.entry);
 				else delete table.entry;
+				break;
+			case "damage-order":
+				if (change.pending) table.damageOrder = structuredClone(change.pending);
+				else delete table.damageOrder;
 				break;
 			case "payment":
 				if (change.payment) table.payment = structuredClone(change.payment);
@@ -533,7 +539,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	table.cursor.clock += 1;
 	if (control(changes)) return receipt;
 	table.log.push(receipt);
-	if (!table.entry) {
+	if (!table.entry && !table.damageOrder) {
 		const returning = returns(table);
 		if (returning.length) {
 			attach(table, returning);
