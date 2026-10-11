@@ -30,6 +30,7 @@ const Color = one("W", "U", "B", "R", "G", "C");
 /** "{2}{G}", "{X}{R}". Generic, colored and X symbols; the table parses them the way it parses a printed cost. */
 const ManaCost = Type.String({ pattern: "^(\\{([0-9]+|[WUBRGCX])\\})+$" });
 const Duration = one("end-of-turn", "end-of-combat", "while-source", "indefinite");
+const DamageMode = Type.Union([Type.Literal("prevent"), Type.Literal("unpreventable")]);
 const ManaDuration = one("end-of-combat", "end-of-turn");
 const Reason = one("resolve", "destroy", "sacrifice", "discard", "mill", "exile", "bounce", "counter");
 const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
@@ -218,6 +219,8 @@ export const Defs = {
 	/** One step of resolution. `if` gates it, `as` binds its result, `may` makes it optional for its actor. */
 	Instruction: Type.Union([
 		step({ do: Type.Literal("damage"), to: Type.Optional(Type.Union([ObjectRef, PlayerRef])), every: Type.Optional(Type.Ref("Selector")), amount: Type.Ref("Amount"), from: Type.Optional(ObjectRef) }),
+		/** A global prevention rule. Bounded shields and prevention with additional effects are not represented. */
+		step({ do: Type.Literal("damage-rule"), mode: DamageMode, combat: Type.Optional(Type.Boolean()), until: Duration }),
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
 			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face),
@@ -273,6 +276,10 @@ export const Defs = {
 
 	/** A public note on an object, quoting the text it carries out in `basis`. It lives while that object exists, unless `until` ends it sooner. */
 	Registration: Type.Union([
+		/** Prevent all matching damage, or forbid its prevention. Filters are read at each damage event. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: DamageMode,
+			combat: Type.Optional(Type.Boolean()), from: Type.Optional(Type.Ref("Selector")),
+			to: Type.Optional(Type.Union([object({ object: Type.Ref("Selector") }), object({ player: PlayerRef })])), if: Type.Optional(Type.Ref("Condition")) }),
 		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** A triggered ability. `if` is its intervening if (603.4). */

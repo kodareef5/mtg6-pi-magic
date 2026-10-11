@@ -26,7 +26,8 @@ import { before as lookBack, detect } from "./triggers.ts";
 import type { Universe } from "./cards.ts";
 import { listed, register, type Deck } from "./decks.ts";
 import { claim } from "./names.ts";
-import { damageSource, targetKey } from "./selectors.ts";
+import { damageSource, tableWorld, targetKey } from "./selectors.ts";
+import { prevented } from "./damage.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
 	type Activation,
@@ -161,14 +162,18 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		if (change.do === "move" && dying?.zone === "battlefield" && (dying.counters.finality ?? 0) > 0) change.to = "exile";
 	}
 	// Read the damage sources and recipients before any result changes the group.
-	const damage = new Map(changes.flatMap((change) => {
-		if (change.do !== "damage") return [];
+	const damage = new Map<Extract<Change, { do: "damage" }>, { source: ReturnType<typeof damageSource>; target?: Traits }>();
+	const world = changes.some((change) => change.do === "damage") ? tableWorld(table) : undefined;
+	changes = changes.map((change) => {
+		if (change.do !== "damage") return change;
 		if (!Number.isInteger(change.amount) || change.amount < 0) throw new Error("Damage must be a nonnegative integer.");
 		const source = damageSource(table, change.source), target = "id" in change.target ? table.things.get(change.target.id) : undefined;
 		if ("id" in change.target && (!target || target.incarnation !== change.target.incarnation || target.zone !== "battlefield"))
 			throw new Error("The damage recipient is no longer that permanent.");
-		return [[change, { source, target: target ? characteristics(table, target) : undefined }] as const];
-	}));
+		const applied = change.amount && prevented(world!, change, source) ? { ...change, amount: 0, prevented: change.amount } : change;
+		damage.set(applied, { source, target: target ? characteristics(table, target) : undefined });
+		return applied;
+	});
 	// 120.3f: lifelink is a result of damage in this same group, not a triggered ability.
 	changes = [...changes, ...[...damage].flatMap(([change, facts]): Change[] => change.amount > 0 && facts.source && has(facts.source.traits, "lifelink")
 		? [{ do: "change-life", who: facts.source.object.controller, amount: change.amount, reason }] : [])];

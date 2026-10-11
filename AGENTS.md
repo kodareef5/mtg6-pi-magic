@@ -484,6 +484,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   sagas.ts            chapter entry, lore on the main-phase boundary and completed Saga sacrifice
   triggers.ts        events read from each group, watches matched, the trigger window
   combat.ts          declaring attackers and blockers, dividing and dealing combat damage
+  damage.ts          all-damage prevention and prohibition before damage results
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
   procedures.ts      one offer path for plans and default casts, activation terms

@@ -161,6 +161,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | Instruction | What it does |
 |---|---|
 | `damage` | `to` an object or player, `amount`, `from` (default the source) |
+| `damage-rule` | global all-damage prevention or prohibition (`mode: "prevent"` or `"unpreventable"`), optionally `combat`, lasting until `until`; no bounded shield or additional prevention effects |
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
 | `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
 | `destroy` | moves to the graveyard; indestructible refuses it |
@@ -622,3 +623,10 @@ An exile `move` may use `until: { leaves: ObjectRef }`. It does nothing if that
 battlefield incarnation already left. Otherwise the exiled card returns to its
 original zone immediately after that source leaves, without a triggered ability.
 This tracks only the exiled incarnation and also makes it `linked` to the source.
+
+Standing `damage-rule` registrations accept the same `mode` and optional
+`combat`, plus `from` (a source selector), `to` (`{object: selector}` or
+`{player: reference}`), and `if`. Filters read current characteristics at each
+event; departed damage sources use their last known characteristics. Source
+selectors default to any zone. See [prevention](examples/prevention.md) for
+limits and a spell that prohibits prevention before dealing its damage.

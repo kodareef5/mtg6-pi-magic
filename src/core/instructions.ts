@@ -48,6 +48,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "damage-rule": return one(`${instruction.combat === undefined ? "All" : instruction.combat ? "Combat" : "Noncombat"} damage ${instruction.mode === "prevent" ? "is prevented" : "can't be prevented"} until ${instruction.until.replaceAll("-", " ")}`,
+			[{ do: "note", note: { kind: "damage-rule", by: controller, mode: instruction.mode, until: instruction.until as Until,
+				...(instruction.combat !== undefined ? { combat: instruction.combat } : {}), ...(source ? { source } : {}) } }]);
 		case "look": case "order": return inspection(table, scope, instruction, pending);
 		case "spell-words": return one(`Future ${instruction.next ? "next matching " : "matching "}spells: ${instruction.words.join(", ")}`,
 			players(scope, instruction.who).map((who): Change => ({ do: "note", note: { kind: "cast-words", by: controller, who, words: [...instruction.words],

@@ -17,6 +17,7 @@ import { checklist, type ReviewItem } from "../core/review.ts";
 import { summary } from "../core/announce.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
+import { damageNotes } from "../core/damage.ts";
 import { sources } from "../core/funding.ts";
 import { openingHand } from "../core/pregame.ts";
 import { odds, within } from "../core/odds.ts";
@@ -226,7 +227,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 			...(view.window.active === seat ? [`Land plays left: ${Math.max(0, allowance(viewWorld(view), seat).lands - (view.landsPlayed ?? 0))}. A resolving effect putting a land onto the battlefield does not use a land play.`] : []),
 			`Mana sources usable now: ${available.join("; ") || "none"}.`] : [])],
 		known: [...(view.players ?? []).map((one) => `Seat ${one.id} (${[view.seats?.find((seat) => seat.id === one.id)?.name, one.id === seat ? "you" : "opponent"].filter(Boolean).join(", ")}): ${one.life} life, ${one.hand ?? "unknown"} cards in hand, ${one.library ?? "unknown"} in library.`), ...view.since,
-			...(decision.situation === "trigger-order" ? view.table : [])],
+			...damageNotes(view.notes ?? []), ...(decision.situation === "trigger-order" ? view.table : [])],
 		objects: scoped.objects.map(seen).sort((a, b) => a.zone === "stack" && b.zone === "stack" ? (a.position ?? 0) - (b.position ?? 0) : 0),
 		// One line per watch and per event: who, what and its text, without selector syntax.
 		watches: (view.resolution ? watches.filter((one) => names.has(one.source.name)) : watches)

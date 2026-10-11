@@ -16,11 +16,11 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 7, covering all three admitted lists |
 | Imported lists facing each other | Selesnya beat Control; both Izzet versus Control seat orders reached a recorded blocker |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime blocker | Impractical Joke needs a turn-wide ban on damage prevention |
+| Current runtime blocker | Impractical Joke's prevention prohibition is implemented; both saved Izzet versus Control games are ready to continue |
 | Recent shared mechanics | Adventure counts, chosen creature types, spent-mana spell properties, exile-until returns, collected-evidence payment and private inspection |
 | Stored card assessments | 229 accepted, 78 refused, five basic lands; these totals include deferred sideboard work |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 246 invariant tests pass |
+| Validation | Type check and 247 invariant tests pass |
 | Rejected evidence | Public inspection substitutes, reordered printed instructions and incorrect library incarnation changes remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
 

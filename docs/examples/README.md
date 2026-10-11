@@ -18,6 +18,7 @@ schemas, and every `basis` is checked against the card's text.
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |
 | `last-known.md` | exile before life changes, using a departed target's former controller |
 | `entry-choices.md` | basic land and creature-type choices; restricted mana that grants spell properties when spent |
+| `prevention.md` | all-damage prevention, standing source and recipient filters, turn-wide prohibition and printed instruction order |
 | `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |
 | `casting-permissions.md` | alternative and printed prices, spell filters, stack departure replacements, exiled ownership, permission through the next turn and firebending mana |
 | `exile-until.md` | immediate nontriggered returns, source incarnation, private hand exile and simultaneous durations |

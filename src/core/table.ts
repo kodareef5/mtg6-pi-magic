@@ -251,6 +251,8 @@ export type Note = {
 	| { kind: "permit"; on: ObjectRef; who: SeatId; fromTurn: number; faces?: (0 | 1)[]; mana?: string; of?: Selector; leavesStack?: Zone }
 	/** Restriction words for future matching spells, applied as they are cast. */
 	| { kind: "cast-words"; who: SeatId; words: string[]; of?: Selector; next?: true }
+	/** A global prevention rule created by a resolving instruction. */
+	| { kind: "damage-rule"; mode: "prevent" | "unpreventable"; combat?: boolean }
 	/**
 	 * A delayed trigger (603.7). It belongs to the table, not its source, and its
 	 * refs other than the event's were fixed when it was created.

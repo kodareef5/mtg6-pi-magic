@@ -12,6 +12,7 @@ import type { SeenObject } from "../core/work.ts";
 import type { Registration } from "../core/language.ts";
 import type { Universe } from "../core/cards.ts";
 import { odds } from "../core/odds.ts";
+import { damageNotes } from "../core/damage.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { blockConflicts } from "../core/combat-facts.ts";
 import { cardDefinition } from "./strategy-position.ts";
@@ -183,14 +184,14 @@ function triggers(frame: Frame, name: (seat: SeatId) => string): string {
 
 /** Accepted terms other than triggers and mana that are in force now, and those your hand cards bring once on the battlefield. */
 function effects(frame: Frame, name: (seat: SeatId) => string): string {
-	const standing = (registration: Registration) => ["continuous", "replace", "permit", "suppress"].includes(registration.kind) || registration.kind === "enters" && !!registration.affects;
-	const now = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield").flatMap((one) => (one.registrations ?? []).filter(standing)
+	const standing = (registration: Registration) => ["continuous", "replace", "permit", "suppress", "prohibit", "damage-rule"].includes(registration.kind) || registration.kind === "enters" && !!registration.affects;
+	const now = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield").flatMap((one) => (one.traits?.registrations ?? []).filter(standing)
 		.map((registration) => `- ${one.card ?? one.token?.name ?? one.id} (${ref(one)}, ${one.controller === frame.seat ? "yours" : name(one.controller)}): "${registration.basis}"`));
 	const packages = new Map((frame.view.work?.packages ?? []).map((pack) => [pack.card, pack.registers]));
 	const hand = [...new Set((frame.view.objects ?? []).filter((one) => one.zone === "hand" && one.controller === frame.seat && one.card).map((one) => one.card!))];
 	const later = hand.flatMap((card) => (packages.get(card) ?? []).filter(standing).map((registration) => `- ${card}, in your hand, once on the battlefield: "${registration.basis}"`));
 	return ["## Standing effects", "Accepted terms in force that are not triggers or mana: what enters tapped, permissions, replacements and continuous changes.",
-		now.length ? now.join("\n") : "None on the battlefield.", ...(later.length ? [later.join("\n")] : [])].join("\n");
+		now.length ? now.join("\n") : "None on the battlefield.", ...damageNotes(frame.view.notes ?? []), ...(later.length ? [later.join("\n")] : [])].join("\n");
 }
 
 /** For each opposing creature, which of your creatures could block it on their next turn, by keyword conflicts only. */
