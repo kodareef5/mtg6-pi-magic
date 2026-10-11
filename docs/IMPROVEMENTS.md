@@ -23,20 +23,24 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-4c Control and Selesnya Landfall have standing assessments for every main-deck
-card. They still have thirteen and eight cards with deferred uses respectively.
-Selesnya completed its first ordinary alpha game, with replay and continuation
-from three saved prefixes checked. Control games are finding missing runtime
-operations and incorrect interpretations. The other seventeen lists still have
-missing standing assessments; Izzet Spellementals needs only Multiversal Passage.
+4c Control, Selesnya Landfall and Izzet Spellementals have standing assessments
+for every main-deck card. They still have thirteen, eight and thirteen cards
+with deferred uses respectively. Selesnya completed two ordinary alpha games,
+with replay and continuation from three saved prefixes checked for each.
+Control and Izzet games are finding missing runtime operations and incorrect
+interpretations. The other sixteen lists still need standing assessments.
 
-1. Continue the two admitted lists against supported opponents on fresh seeds.
+1. Continue the admitted lists against supported opponents on fresh seeds.
    Review accepted runtime procedures against their source as well as checking
    gaps and replay. A publicly exiled substitute for a private look disqualifies
    a game even when its journal replays.
-2. Repair Control's observed blockers: next-cast spell properties and collected
-   evidence costs, followed by the named-card search those costs enable.
-3. Add entry type choices for Multiversal Passage to admit Izzet Spellementals.
+2. Repair observed blockers: Control's flashback departure replacement and
+   collected-evidence costs with named-card search; Izzet's greatest-value
+   reduction for Sunderflock.
+3. Audit completed games against source instructions. A Control run completed
+   with no gaps but reordered Inevitable Defeat's exile and life changes; it
+   remains excluded from coverage. Last-known information now supports the
+   printed order.
 4. Order further shared mechanics by observed game failures and the main decks
    they unblock. Sideboard-only blockers do not delay this alpha.
 

@@ -469,7 +469,11 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   printed.ts         type line, mana cost and power/toughness from the card file
   decks.ts           a deck, its registration for a game, and the kept collection
   entry.ts           what a permanent registers as it enters, and how it enters
-  entry-payments.ts   the controller's optional entry payment before any battlefield route commits
+  entry-payments.ts   named choices and optional entry payment before a battlefield route commits
+  casting.ts         casting provenance and actual mana spent, read from recorded events
+  costs.ts           shared physical payments for announcements and resolving instructions
+  inspection.ts      bounded private looks and chosen or random library ordering
+  cast-words.ts      properties applied to matching spells during announcement
   faces.ts, rooms.ts  face characteristics, casting faces and unlocked Room doors
   sagas.ts            chapter entry, lore on the main-phase boundary and completed Saga sacrifice
   triggers.ts        events read from each group, watches matched, the trigger window

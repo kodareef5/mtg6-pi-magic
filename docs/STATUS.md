@@ -147,25 +147,38 @@ is `.pi/phase2/ledger-concepts.py`.
 The alpha registers main-deck copies of the nineteen imported legal lists.
 The original tournament files keep their sideboards. No main-deck requirement
 is waived. The pool contains 255 distinct main-deck cards. The complete store,
-including sideboard cards, has 219 source-pinned assessments and 88 recorded
+including sideboard cards, has 220 source-pinned assessments and 87 recorded
 refusals, plus five basic lands requiring no assessment.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 2 of 19: 4c Control and Selesnya Landfall |
+| Imported main decks admitted to setup | 3 of 19: 4c Control, Selesnya Landfall and Izzet Spellementals |
 | Imported lists with a completed alpha game | 1: Selesnya Landfall |
 | First Landfall game | Mono-Red won on turn 12; 400 decisions, 359 chosen, 41 forced, no fallbacks or gaps |
 | Replay and clone continuation | Matched; clones at decisions 0, 200 and 399 continued to the same outcome, cards, cursor, log and equipment |
 | First Landfall run cost and time | $1.0158 reported, 19m31s wall; one failed call lacks usage and cost |
+| Second Landfall game, seats reversed | Mono-Red won on turn 9; 379 decisions, 348 chosen, 31 forced, no fallbacks or gaps |
+| Second Landfall replay and clone continuation | Matched; decisions 0, 189 and 378 continued to the same outcome and state |
+| Second Landfall run cost and time | $1.0232 reported, 17m29s wall; two calls lack usage and cost |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 |
-| Control runtime failures found | Additional blight and behold costs, metadata copying, private inspection, next-cast properties, collected evidence |
-| Rejected Control branch | Stock Up moved inspected cards into public exile; replay parity does not make that interpretation legal |
+| Control runtime failures found | Additional blight and behold costs, metadata copying, private inspection, next-cast properties, collected evidence, flashback departure |
+| Rejected Control branches | Stock Up used public exile for inspection; a completed run reordered Inevitable Defeat's instructions |
+| First Izzet game | Stopped at Sunderflock's greatest-mana-value reduction; the prefix remains saved |
 
 Landfall's completed game is seed `alpha-landfall-20261011-r0`, journal
 `alpha-landfall-20261011-r0-1791719352675.jsonl`. Its 426 requests comprised
 15 pregame, 40 strategy and 371 Jev calls. The raw journal, bill, trace and
-clone checks are under `.pi/alpha-20261011/`. A second seed reverses the seats.
-This first game does not establish coverage of every deferred use.
+clone checks are under `.pi/alpha-20261011/`. The reversed-seat game is seed
+`alpha-landfall-20261011-r1`, journal `alpha-landfall-20261011-r1-1791720692391.jsonl`.
+Neither completed game establishes coverage of every deferred use.
+
+Control seed `alpha-control-20261011-r1` reached a win on turn 19: 541 decisions,
+496 chosen, 45 forced, no gaps or fallbacks. Replay matched, as did continuation
+from decisions 0, 270 and 540. Source review found Inevitable Defeat's life changes
+preceding exile, so the run does not count as legal gameplay coverage. Its five
+preparation and continuation runs reported $1.1610 across 652 requests and
+24m56s of run wall time; three calls lack usage and cost. The retained final
+journal is `alpha-control-20261011-r1-1791720729937.jsonl`.
 
 Control's ordinary games produced the payment and inspection fixes. They use
 the same saved preparation when resuming a valid prefix. An interpretation
@@ -178,8 +191,8 @@ and the live game has resolved its computed private window and random bottom.
 
 Standing reassessment retained Thor, Dyadrine, Sunderflock, Awaken the Honored
 Dead and both Aang cards. This establishes source-backed terms and use
-inventories, not complete deck execution. Izzet Spellementals is one assessment
-away from setup: Multiversal Passage needs an entry choice of basic land type.
+inventories, not complete deck execution. Multiversal Passage's entry choice
+passed reassessment in two calls for $0.0560, admitting Izzet Spellementals.
 The [refusal ledger](../prepared/packages/2026-10-10/ledger.json) retains the
 remaining concepts, including sideboard work deferred from this alpha.
 
