@@ -25,28 +25,22 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 4c Control, Selesnya Landfall and Izzet Spellementals have standing assessments
 for every main-deck card. They still have thirteen, eight and thirteen cards
-with deferred uses respectively. Selesnya completed four ordinary alpha games,
-with replay and continuation from three saved prefixes checked for each.
-Izzet completed two source-audited games and Control completed two, each with
-matching replay and clone continuation. The first matchup between imported
-lists finished with Selesnya beating Control. Both Izzet versus Control seat
-orders reached Impractical Joke's missing prevention restriction. The other
-sixteen lists still need standing assessments.
+with deferred uses respectively. All three have completed source-reviewed games;
+[Status](STATUS.md) holds the current count. The other sixteen lists still need
+standing assessments.
 
-1. Continue the admitted lists against supported opponents on fresh seeds.
-   Review accepted runtime procedures against their source as well as checking
-   gaps and replay. A publicly exiled substitute for a private look disqualifies
-   a game even when its journal replays.
-2. Add damage prevention and its prohibition, then continue both stopped Izzet
-   games. Hearth Elemental's Adventure count and Cavern's chosen creature type,
-   restricted mana and spent-mana spell protection now have shared mechanics.
-   Exile-until returns also admit Dusk Rose Reliquary's standing assessment.
-3. Audit completed games against source instructions. A Control run completed
-   with no gaps but reordered Inevitable Defeat's exile and life changes; it
-   remains excluded from coverage. Last-known information now supports the
-   printed order.
-4. Order further shared mechanics by observed game failures and the main decks
-   they unblock. Sideboard-only blockers do not delay this alpha.
+1. Continue saved games from their reviewed repair points, then run fresh
+   imported pairings in both seat orders. Reuse compatible matchup briefs.
+2. Review accepted runtime procedures and exercised standing terms against
+   their source, including casting opportunities the engine failed to offer.
+   A gap-free replay does not establish correct card meaning. Keep rejected
+   branches and repair before the first affected action.
+3. Resolve the next observed runtime failure with a shared mechanic and an
+   invariant test. Native graveyard prices, Harmonize payments and optional
+   search groups now have that support.
+4. Widen standing coverage toward the next complete main deck. Entry choices,
+   static casting costs, attacking tokens and copies remain prominent blockers.
+   Sideboard-only refusals do not delay this alpha.
 
 One assessed imported list can play an established opponent; it need not wait
 for a second imported list. A required deferred use that cannot execute becomes
