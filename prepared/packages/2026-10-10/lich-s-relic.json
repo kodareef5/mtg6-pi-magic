@@ -1,0 +1,92 @@
+{
+	"card": "Lich's Relic",
+	"generated": "2026-10-10",
+	"source": "2e332ef112656a5ee2d51c7b5f8deddb327a218a8404db7d1d0388dd4f31a36e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lich's Relic",
+		"registers": [
+			{
+				"basis": "When this Equipment enters, you may pay {2}. When you do, for each opponent, destroy up to one target creature or planeswalker that player controls.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{2}"
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "paid"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"types": [
+												"creature",
+												"planeswalker"
+											],
+											"controller": "opponent"
+										},
+										"upTo": true
+									}
+								],
+								"instructions": [
+									{
+										"do": "destroy",
+										"what": "target:0"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Equipped creature gets +2/+1.",
+				"kind": "continuous",
+				"affects": {
+					"is": "attached",
+					"types": [
+						"creature"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Equip Lich's Relic to target creature you control for {2}, only as a sorcery.",
+				"basis": "Equip {2}",
+				"source": {
+					"card": "Lich's Relic",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

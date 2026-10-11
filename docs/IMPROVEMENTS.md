@@ -33,8 +33,9 @@ assessments.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
-2. Reassess remaining main-deck refusals against the current shared operations,
-   then prioritize mechanics by the resulting deck blockers and stopped games.
+2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
+   stopped games. Izzet Prowess needs plot and additional triggers; Azorius
+   Momo needs combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete

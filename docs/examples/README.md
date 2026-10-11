@@ -28,6 +28,7 @@ schemas, and every `basis` is checked against the card's text.
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
 | `reveal-hand.md` | publicly reveal a whole hand before its opponent chooses an eligible discard |
 | `loyalty.md` | abilities carried by tokens, signed loyalty payment, starting counters, Empower Jace's ordered creation and choice, and temporary loyalty timing |
+| `amass.md` | ordered destruction and amass; a departed target's controller, power and conditional draw |
 | `token-abilities.md` | complete Map and Clue abilities, another player creating tokens, sorcery timing and explore's revealed branches |
 | `token-copies.md` | copiable base terms, retained mana cost and complete activations, entry behavior, combined Spree modes and offspring's fixed power/toughness exception |
 | `damage-additions.md` | fixed damage increases, prevention ordering, affected-player choices and simultaneous results |

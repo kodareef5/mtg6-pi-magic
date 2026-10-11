@@ -344,7 +344,7 @@ export function holds(scope: Scope, condition: Condition): boolean {
 		return (condition.atLeast === undefined || value >= amount(scope, condition.atLeast)) && (condition.atMost === undefined || value <= amount(scope, condition.atMost));
 	}
 	if ("bound" in condition) { const bound = scope.bound?.[condition.bound]; return !!bound && (bound.objects.length > 0 || bound.players.length > 0 || (bound.amount ?? 0) > 0); }
-	if ("is" in condition) return objects(scope, condition.is).some((one) => matches(scope, one, condition.matches));
+	if ("is" in condition) return objects(scope, condition.is, condition.lastKnown).some((one) => matches(scope, one, condition.matches));
 	if ("all" in condition) return condition.all.every((part) => holds(scope, part));
 	if ("any" in condition) return condition.any.some((part) => holds(scope, part));
 	if ("turn" in condition) { const turn = scope.world.turn; return !!turn && (condition.turn === "self" ? turn.active === scope.controller : turn.active !== scope.controller); }

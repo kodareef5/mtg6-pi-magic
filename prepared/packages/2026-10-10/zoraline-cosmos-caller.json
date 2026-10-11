@@ -1,0 +1,199 @@
+{
+	"card": "Zoraline, Cosmos Caller",
+	"generated": "2026-10-10",
+	"source": "307bd6d7ee1ba19852d2c6bea2a4118b62b4d0ba01ad75e4292e393bae31ee21",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Zoraline, Cosmos Caller",
+		"registers": [
+			{
+				"basis": "Flying, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Whenever a Bat you control attacks, you gain 1 life.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"subtypes": [
+							"Bat"
+						],
+						"controller": "you"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "you",
+							"amount": 1
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Zoraline enters or attacks, you may pay {W}{B} and 2 life. When you do, return target nonland permanent card with mana value 3 or less from your graveyard to the battlefield with a finality counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{W}{B}",
+								"life": 2
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "paid"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"planeswalker"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											},
+											"manaValue": {
+												"atMost": 3
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "battlefield",
+										"controller": "you",
+										"counters": {
+											"finality": 1
+										},
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever Zoraline enters or attacks, you may pay {W}{B} and 2 life. When you do, return target nonland permanent card with mana value 3 or less from your graveyard to the battlefield with a finality counter on it.",
+				"kind": "watch",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"mana": "{W}{B}",
+								"life": 2
+							},
+							"may": true,
+							"as": "paid"
+						},
+						{
+							"do": "reflect",
+							"if": {
+								"bound": "paid"
+							},
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"zones": [
+												"graveyard"
+											],
+											"owner": "you",
+											"types": [
+												"artifact",
+												"battle",
+												"creature",
+												"enchantment",
+												"planeswalker"
+											],
+											"not": {
+												"types": [
+													"land"
+												]
+											},
+											"manaValue": {
+												"atMost": 3
+											}
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "move",
+										"what": "target:0",
+										"to": "battlefield",
+										"controller": "you",
+										"counters": {
+											"finality": 1
+										},
+										"reason": "resolve"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

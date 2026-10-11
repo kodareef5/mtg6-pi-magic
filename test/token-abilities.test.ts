@@ -10,6 +10,7 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { checkProcedure, printedCast } from "../src/core/procedures.ts";
 import { activatedUses } from "../src/core/activated.ts";
 import { relive } from "../src/core/journal.ts";
+import { holds, objects, tableWorld } from "../src/core/selectors.ts";
 import { describe, project } from "../src/core/view.ts";
 import { announce, establish, example, finish, main, offered, pack, passBoth, place, step } from "./play.ts";
 
@@ -118,5 +119,49 @@ test("token creation uses the target's last controller, survives failed destruct
 		assert.ok(describe(table, receipt).startsWith(`${table.seats[1]!.name} created Map (x2)`));
 		assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+	}
+	for (const mode of ["own", "opponent", "indestructible", "existing", "illegal", "none"] as const) {
+		const table = start(standard, [{ deck: alpha(deck("Jund Sacrifice")) }, { deck: alpha(deck("Selesnya Landfall")) }], `azog-${mode}`);
+		const card = "Azog, Moria's Ruin", [azog] = place(table, 0, "hand", card);
+		main(table, 0); const [victim] = place(table, 1, "graveyard", "Llanowar Elves");
+		const controller = mode === "opponent" ? 1 : 0;
+		commit(table, [{ do: "move", what: victim!.id, to: "battlefield", controller, reason: "game-setup", registers: [] },
+			{ do: "counters", what: victim!.id, kind: "+1/+1", amount: 2 }], "game-setup");
+		if (mode === "indestructible") commit(table, [{ do: "note", note: { kind: "label", by: 0, on: { id: victim!.id, incarnation: victim!.incarnation },
+			until: "indefinite", text: "Fixture protects the target", change: { words: ["indestructible"] } } }], "game-setup");
+		if (mode === "existing") commit(table, [{ do: "token", id: "previous-army", controller, spec: { name: "Goblin Army", types: ["creature"],
+			subtypes: ["Goblin", "Army"], colors: ["B"], power: 0, toughness: 0 } },
+			{ do: "counters", what: "previous-army", kind: "+1/+1", amount: 1 }], "game-setup");
+		const registers = pack(card);
+		editWork(table, 0, [{ do: "package.put", package: { card, registers } }], "azog-source");
+		commit(table, [{ do: "move", what: azog!.id, to: "battlefield", reason: "resolve", registers }], "resolve");
+		const decision = nextDecision(table)!, before = structuredClone(table);
+		assert.deepEqual(nextDecision(table), decision); assert.deepEqual(table, before);
+		const choice = decision.options.find(one => mode === "none" ? !one.trigger!.targets.length : one.trigger!.targets.some(ref => "id" in ref && ref.id === victim!.id))!;
+		assert.ok(choice); apply(table, choice.id, "model", "chosen");
+		const target = { id: victim!.id, incarnation: victim!.incarnation };
+		if (mode === "illegal") commit(table, [{ do: "move", what: victim!.id, to: "hand", reason: "bounce" }], "bounce");
+		const initial = structuredClone(table), at = table.ledger.length, hand = cardsIn(table, "hand", 0).length;
+		passBoth(table);
+		if (mode === "none" || mode === "illegal") {
+			finish(table); assert.equal(cardsIn(table, "battlefield").filter(one => one.token).length, 0);
+			assert.equal(cardsIn(table, "hand", 0).length, hand); continue;
+		}
+		step(table); step(table); // Accept the group, then destroy before amassing.
+		const scope = { world: tableWorld(table), controller, targets: [[target]] };
+		assert.equal(holds(scope, { is: "target:0", matches: { controller: "you" } }), mode === "indestructible");
+		assert.equal(holds(scope, { is: "target:0", matches: { controller: "you" }, lastKnown: true }), true);
+		assert.equal(objects(scope, "target:0").length, mode === "indestructible" ? 1 : 0, "the information check never makes an old target movable");
+		assert.equal(holds({ ...scope, illegal: [`${target.id}@${target.incarnation}`] }, { is: "target:0", matches: { controller: "you" }, lastKnown: true }), false);
+		const destroyed = structuredClone(table), from = table.ledger.length;
+		step(table); // Create an Army only if needed.
+		assert.equal(nextDecision(table)!.seat, controller, "the target's last controller chooses the Army");
+		finish(table);
+		const armies = cardsIn(table, "battlefield").filter(one => one.token?.name === "Goblin Army");
+		assert.equal(armies.length, 1); assert.equal(armies[0]!.controller, controller);
+		assert.equal(armies[0]!.counters["+1/+1"], mode === "existing" ? 4 : 3, "amass reads layered power before destruction");
+		assert.equal(cardsIn(table, "hand", 0).length, hand + (mode === "opponent" ? 0 : 1));
+		assert.deepEqual(relive(destroyed, table.ledger.slice(from)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
 	}
 });

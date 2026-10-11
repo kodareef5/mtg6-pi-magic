@@ -390,6 +390,11 @@ by source, or by recipient with `received: true`; `of` selects that object and
 `{event: "amount"}` sums its matched damage. `player` can also name a side.
 See [damage](examples/damage.md) for simultaneous events and last known sources.
 
+An `is`/`matches` condition normally requires a live incarnation. Add
+`lastKnown: true` for an information check about that incarnation after it
+left, such as Azog's conditional draw after destruction. This does not make
+it movable or restore targets illegal at resolution. See [amass](examples/amass.md).
+
 A watch's `limit: "once-per-turn"` counts triggers. An optional watch with
 `may: true` and `limit: "once-per-turn-use"` instead records acceptance during
 resolution (603.2h). Declining and losing all targets spend nothing. The chosen

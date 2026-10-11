@@ -133,7 +133,8 @@ export const Defs = {
 		object({ amount: Type.Ref("Amount"), ...Range.properties }),
 		/** The binding holds at least one object, or the optional instruction that made it was done. */
 		object({ bound: name }),
-		object({ is: ObjectRef, matches: Type.Ref("Selector") }),
+		/** An information check may read a departed incarnation; motion still requires a live object. */
+		object({ is: ObjectRef, matches: Type.Ref("Selector"), lastKnown: Type.Optional(Type.Literal(true)) }),
 		object({ all: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ any: Type.Array(Type.Ref("Condition"), { minItems: 1 }) }),
 		object({ not: Type.Ref("Condition") }),
