@@ -183,6 +183,7 @@ export default function (pi: ExtensionAPI) {
 		seated = await seatTable(opened, (at) => roster(ctx, at), inference(ctx), cards, {
 			format: standard.name,
 			reusePackages: !resuming,
+			packageNotice: (message) => ctx.ui.notify(message, "warning"),
 			journal,
 			// The rules are already loaded for the replay check, so the dialer costs
 			// nothing to switch on: a seat may look a rule up mid decision.

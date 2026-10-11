@@ -152,7 +152,11 @@ blocked. No new whole-deck game was started or counted as complete.
 
 Preparation storage now checks source fingerprints and the interpreter contract,
 excludes the ledger from packages, writes records atomically, and serves the
-shared seating path. Existing journals keep their accepted equipment. Life-cost
+shared seating path. Seating reads `prepared/packages` as a shipped seed and
+writes new assessments to `~/.pi/agent/magic/packages/<date>/`, respecting
+`PI_CODING_AGENT_DIR`. A bad record or cache write emits a notice and leaves the
+game's accepted equipment intact. `tools/assess.ts` explicitly maintains the
+shipped seed. Existing journals keep their accepted equipment. Life-cost
 mana, conditional mana at payment, and optional entry payments have conservation
 and replay coverage.
 

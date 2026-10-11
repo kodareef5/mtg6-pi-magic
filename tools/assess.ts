@@ -19,7 +19,7 @@ import { cast, rosterFor } from "../src/context/roles.ts";
 import { bill, tally } from "../src/context/spend.ts";
 import { traceInference } from "../src/context/trace.ts";
 import { matchup, universe } from "./matchup-fixture.ts";
-import { ledgerPath, storedPackages, storePackage, writeRecord } from "../src/core/packages.ts";
+import { PACKAGE_SEED, ledgerPath, storedPackages, storePackage, writeRecord } from "../src/core/packages.ts";
 
 const { values } = parseArgs({ options: { deck: { type: "string", multiple: true }, model: { type: "string" }, jobs: { type: "string", default: "4" },
 	retry: { type: "boolean", default: false }, report: { type: "boolean", default: false }, card: { type: "string", multiple: true }, out: { type: "string", default: ".pi/assess" } } });
@@ -28,7 +28,9 @@ const decks = values.deck?.length ? values.deck.map((name) => collection().get(n
 type Ledger = Record<string, { reason: string; decks: string[]; model: string; at: string }>;
 const ledgerFile = ledgerPath(universe.generated);
 const ledger: Ledger = existsSync(ledgerFile) ? JSON.parse(readFileSync(ledgerFile, "utf8")) as Ledger : {};
-const stored = storedPackages(universe);
+// This explicit maintenance command updates the shipped seed. Ordinary seating writes only to Pi's cache.
+const store = { cache: PACKAGE_SEED };
+const stored = storedPackages(universe, store);
 
 // Setup registers the main deck and sideboard; both need source-backed equipment.
 const byCard = new Map<string, string[]>();
@@ -69,7 +71,8 @@ await Promise.all(Array.from({ length: jobs }, async () => {
 		const writer = reasoner({ role: "pregame", stream: inference.stream, model: part.model as Model<Api>, tally: counted, ...(part.thinkingLevel ? { thinking: part.thinkingLevel } : {}), patience: 1000 });
 		try {
 			const pack = await assessCard(card, printed[card]!, writer, universe, rules, "standing");
-			storePackage(universe, pack, part.pattern); stored.set(card, storedPackages(universe).get(card)!); delete ledger[card]; ok++;
+			if (!storePackage(universe, pack, part.pattern, store)) throw new Error("Accepted assessment could not be saved; see the preparation-store notice.");
+			stored.set(card, storedPackages(universe, store).get(card)!); delete ledger[card]; ok++;
 			console.log(`ok    ${card}`);
 		} catch (error) {
 			const reason = String(error instanceof Error ? error.message : error).replace(/^Error: /, "");
