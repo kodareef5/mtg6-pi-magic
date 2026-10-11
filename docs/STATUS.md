@@ -146,7 +146,7 @@ is `.pi/phase2/ledger-concepts.py`.
 
 The main-deck-only counts above are historical. Setup registers sideboards too.
 The report now covers all 312 distinct cards across nineteen imported lists:
-208 have compatible stored standing assessments, 99 have refusal records, five
+210 have compatible stored standing assessments, 97 have refusal records, five
 are basic lands, and none remains unassessed. Every imported list is blocked.
 The closest are 4c Control, Izzet Aggro and Selesnya Landfall, each missing three
 assessments. No new whole-deck game was started or counted as complete.
@@ -184,15 +184,32 @@ retries; input totals include cached tokens.
 | Remaining main and sideboard cards | 55 | 36 / 19 | 111 | 2,427,792 / 2,211,840 | 21,351 / 6,777 | 13m48s / 3m41s | $0.8666 |
 | Query-related reassessment | 18 | 6 / 12 | 47 | 1,100,239 / 894,336 | 9,801 / 3,002 | 5m49s / 1m35s | $0.5992 |
 | Deferred counterspell interpretation | 2 | 2 / 0 | 3 | 91,998 / 91,988 | 2,118 / 1,498 | 18.3s / 10.4s | $0.0091 |
+| Damage reassessment, after source review | 3 | 2 / 1 | 6 | 139,735 / 106,112 | 1,177 / 190 | 40.6s / 16.5s | $0.0896 |
 
 No provider failures or truncations were recorded in these passes. The private
 traces are under `.pi/assess/takeover-faces/`, `.pi/assess/sideboards-20261010/`,
-`.pi/assess/cast-facts-20261010/` and `.pi/assess/cast-facts-runtime/`.
+`.pi/assess/cast-facts-20261010/`, `.pi/assess/cast-facts-runtime/` and
+`.pi/assess/damage-20261010/`.
 Query reassessment accepted Scalding Viper, Starfield Shepherd, Spider
 Manifestation, Moseo, Enlightened Confidant and Carnage. These are accepted source
 claims and inventories, not proof that all their deferred uses can execute or
 that every registered keyword has a handler. Otter's power-based blocking word,
 for example, still needs a structured comparison.
+
+Damage events now carry amounts, source incarnations and recipients. They
+distinguish damage dealt from damage received, sum simultaneous occurrences,
+and filter combat or noncombat damage. Lifelink applies in the damage group,
+including a source that left before its ability resolved. A watch can record
+an optional use during resolution; declining, countering or losing all targets
+spends nothing. The pilot sees the amount before ordering or accepting a trigger.
+
+The model accepted Cecil, Jennifer and Master of Barbs. Source review retained
+Cecil and Master of Barbs: their model-written standing terms match the tested
+terms, and paid casts registered those terms and replayed exactly. Jennifer's
+damage trigger fits, but her opponent casting restriction was encoded as a word
+with no handler. Her model response remains in the private audit, and the
+refusal ledger names that remaining operation. No card became whole-game
+coverage merely because its damage trigger passed.
 
 The [source-backed ledger](../prepared/packages/2026-10-10/ledger.json) records
 every refusal. The next shared operations include:
@@ -201,18 +218,20 @@ every refusal. The next shared operations include:
 | --- | --- |
 | Aang, Swift Savior | Airbend permission carrying its alternative casting price |
 | Aang, at the Crossroads | Private bounded look, random bottom order, intersecting card types |
-| Cecil, Dark Knight | General damage event and amount; comparison with half starting life |
-| Jennifer Walters | Damage received and amount; optional once-per-turn use at resolution |
+| Jennifer Walters | Structured opponent casting restriction during its controller's turn |
 | The Legend of Roku | Permission through the next turn; mana lasting until combat ends |
 | Thor, God of Thunder | Selector unions and permission through the next turn |
 | Colorstorm Stallion | Actual mana spent on a cast and token copying |
 
-All 223 invariant tests and the type check pass. The fixtures cover announced X,
+All 225 invariant tests and the type check pass. The fixtures cover announced X,
 hybrid colors, alternate faces, hidden-card filtering, replay and cloning with a
 pending trigger after its spell was countered. Haiku's two live interpretations,
 Flashfreeze and Disdainful Stroke, selected the expected targets, countered them
 and replayed exactly in a registered-deck fixture. This establishes those uses,
-not a completed deck game. All twenty-six collection decks loaded 750 seat
+not a completed deck game. Damage fixtures also cover Cecil's transformation,
+Jennifer's unused and spent triggers, illegal targets before acceptance, source
+removal and reincarnation, and replay and clones on both sides of a use.
+All twenty-six collection decks loaded 756 seat
 packages without inference or notices. This checks seed integration; missing
 standing assessments still stop full setup.
 

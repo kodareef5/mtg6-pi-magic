@@ -1,0 +1,55 @@
+{
+	"card": "Master of Barbs",
+	"generated": "2026-10-10",
+	"source": "6ce403fba2406ad492fbc8b79aea8f0af5210bb63f9908be81489f76a6db82e2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Master of Barbs",
+		"registers": [
+			{
+				"basis": "Menace",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"menace"
+					]
+				}
+			},
+			{
+				"basis": "Whenever one or more opponents are dealt noncombat damage, creatures you control get +1/+0 until end of turn.",
+				"kind": "watch",
+				"event": {
+					"on": "damage",
+					"combat": false,
+					"player": "opponent",
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "modify",
+							"every": {
+								"types": [
+									"creature"
+								],
+								"controller": "you"
+							},
+							"until": "end-of-turn",
+							"change": {
+								"power": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

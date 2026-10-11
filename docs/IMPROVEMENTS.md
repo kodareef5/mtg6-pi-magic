@@ -17,21 +17,23 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-The pool report includes every registered sideboard: 208 stored assessments,
-99 refusals, five basic lands and no unassessed cards. Mana-value and color
+The pool report includes every registered sideboard: 210 stored assessments,
+97 refusals, five basic lands and no unassessed cards. Mana-value and color
 queries now read the selected spell face and announced X, and preserve the
-departed spell's facts. All nineteen imported lists remain blocked.
+departed spell's facts. Damage events carry amounts and recipients, and optional
+effects can count a use during resolution. Cecil and Master of Barbs have stored
+assessments; Jennifer still needs a structured casting restriction. All nineteen
+imported lists remain blocked.
 
-1. Add damage events with their amount and recipient, then a resolution-use
-   marker for optional once-per-turn effects. Cecil and Jennifer should use the
-   same event data; a declined optional effect must leave the use available.
-2. Give permissions an accepted alternative price and explicit expiry, and give
+1. Give permissions an accepted alternative price and explicit expiry, and give
    generated mana an explicit expiry. Airbend and Roku should use these records
-   without granting permission to an unrelated incarnation.
-3. Add bounded private look and selection, selection from an earlier binding,
+   without granting permission to an unrelated incarnation. Add structured cast
+   restrictions for Jennifer before counting her as standing-ready; a continuous
+   word with no handler cannot supply the restriction.
+2. Add bounded private look and selection, selection from an earlier binding,
    and deterministic library ordering, starting with Aang at the Crossroads.
    Keep earned visibility through the whole sequence.
-4. Extend selectors with unions, intersecting types and object comparisons where
+3. Extend selectors with unions, intersecting types and object comparisons where
    accepted terms require them. Thor still needs unions and permission expiry;
    Colorstorm Stallion needs actual mana-spent facts and token copying. The new
    queries alone do not unblock either card.

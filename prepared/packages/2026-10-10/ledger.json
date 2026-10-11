@@ -131,15 +131,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Cecil, Dark Knight // Cecil, Redeemed Paladin": {
-		"reason": "Cecil, Dark Knight // Cecil, Redeemed Paladin is not ready: Face 0: \"Darkness — Whenever Cecil deals damage, you lose that much life. Then if your life total is less than or equal to half your starting life total, untap Cecil and transform it.\" Cannot prepare this standing trigger: the supplied Event schema lacks a general damage-dealt event (combat-damage would omit noncombat damage), Amount lacks the triggering damage amount, and conditions cannot read half the controller's starting life total. The life loss must precede the resolution-only life-total check, followed by untapping and transforming if that check holds.",
-		"decks": [
-			"Dimir Midrange",
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Colorstorm Stallion": {
 		"reason": "Colorstorm Stallion is not ready: Opus — Whenever you cast an instant or sorcery spell, this creature gets +1/+1 until end of turn. If five or more mana was spent to cast that spell, create a token that's a copy of this creature. — Cannot prepare this complete standing trigger: the syntax lacks a test for actual mana spent to cast the triggering spell and an operation creating a token copy of this creature.",
 		"decks": [
@@ -351,7 +342,7 @@
 		"at": "2026-10-10"
 	},
 	"Jennifer Walters // The Sensational She-Hulk": {
-		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: Face 1: \"Whenever a creature you control is dealt damage, you may have The Sensational She-Hulk deal that much damage to any target. Do this only once each turn.\" The available Event schema cannot watch a creature being dealt damage, including noncombat damage, and provides no recorded damage amount for \"that much.\" The optional effect also requires a once-per-turn resolution-use limit, not a once-per-turn triggering limit. These operations cannot be faithfully prepared with the supplied syntax.",
+		"reason": "Jennifer Walters // The Sensational She-Hulk is not ready: the damage-received event, amount and optional once-per-turn use are implemented. Source review still refuses \"Your opponents can't cast spells during your turn.\" on both faces. The model encoded it as a continuous word, but no cast-restriction handler reads that word. A structured restriction and its offer/execution checks are required; the accepted assessment is retained with the private audit trace.",
 		"decks": [
 			"Bant Airbending Combo"
 		],
@@ -386,14 +377,6 @@
 		"reason": "Marauding Mako is not ready: Whenever you discard one or more cards, put that many +1/+1 counters on this creature. — Missing operation: a discard-event watch, batched for one or more cards discarded by you, with the number of cards discarded in that event available as the counter amount. A hand-to-graveyard leaves watch would also match nondiscard moves and miss discards redirected to another zone.",
 		"decks": [
 			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
-	"Master of Barbs": {
-		"reason": "Master of Barbs is not ready: Whenever one or more opponents are dealt noncombat damage, creatures you control get +1/+0 until end of turn. — Missing event operation: watch noncombat damage dealt to opponents, once per damage event for one or more opponents. The Event schema only supports combat-damage, not noncombat damage. The resolving effect would modify all creatures you control with power +1 until end-of-turn.",
-		"decks": [
-			"Rakdos Lizards"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
