@@ -102,10 +102,11 @@ const dealt = (saved: Header) =>
 const carried = a.from
 	? replay(join(a.out!, `${a.from}.jsonl`), dealt, undefined, { cards, rules })
 	: null;
-const table = carried?.table ?? start(standard, decks.map((one) => ({ deck: one })), seed, cards);
+const table = carried?.table ?? start(standard, decks.map((one) => ({ deck: one })), seed, cards, { announcementsFrom: 0 });
 const journal = carried
 	? reopen(join(a.out!, `${a.from}.jsonl`), carried.header, carried.table)
 	: open(join(a.out!, `${seed}.jsonl`), {
+			announcementsFrom: 0,
 			id: seed,
 			format: standard.name,
 			seed,

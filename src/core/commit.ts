@@ -59,7 +59,7 @@ export type Entrant = {
  * library and its sideboard outside the game. Printed facts come from the
  * pinned card file, the shipped Standard file by default.
  */
-export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped()): Table {
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number } = {}): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -69,6 +69,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 
 	const table: Table = {
 		format,
+		...(options.announcementsFrom !== undefined ? { announcementsFrom: options.announcementsFrom } : {}),
 		...(universe.names ? { cardNames: { ...universe.names } } : {}),
 		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
@@ -181,7 +182,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	changes = [...changes, ...[...damage].flatMap(([change, facts]): Change[] => change.amount > 0 && facts.source && has(facts.source.traits, "lifelink")
 		? [{ do: "change-life", who: facts.source.object.controller, amount: change.amount, reason }] : [])];
 	// A fixture's setup is not a game event, and triggers nothing.
-	const detecting = reason !== "game-setup";
+	const detecting = reason !== "game-setup" && !changes.every((change) => change.do === "announcement");
 	const prior = detecting ? lookBack(table, changes) : undefined;
 	// Read what a watcher may need before anything moves. After the group it
 	// is gone, and a receipt that cannot say what a thing looked like is a
@@ -356,6 +357,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			case "payment":
 				if (change.payment) table.payment = structuredClone(change.payment);
 				else delete table.payment;
+				break;
+			case "announcement":
+				if (change.announcement) table.announcement = structuredClone(change.announcement);
+				else delete table.announcement;
 				break;
 			case "shuffle": {
 				// The shuffle is the only randomness in the game. Positions are
@@ -636,7 +641,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
  * writer. It is the logging that stops, not the discipline.
  */
 const control = (changes: Change[]): boolean =>
-	changes.length > 0 && changes.every((change) => change.do === "turn" || change.do === "resolution" && !(change.action === "next" && (change.use || change.resolved)) || (change.do === "combat" && change.action !== "strike"));
+	changes.length > 0 && changes.every((change) => change.do === "announcement" || change.do === "turn" || change.do === "resolution" && !(change.action === "next" && (change.use || change.resolved)) || (change.do === "combat" && change.action !== "strike"));
 
 /**
  * Who may act next, and where the turn is. A transition shares the commit door

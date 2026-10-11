@@ -21,7 +21,7 @@ export function choices(options: readonly Option[]) {
 	};
 	const listed: Choice[] = options.map((option) => {
 		// The trigger fact groups target choices for the seat's order questions; the label already says it.
-		if (!option.use) { const { use: _, trigger: __, ...plain } = option; return structuredClone(plain); }
+		if (!option.use) { const { use: _, trigger: __, announcement: ___, ...plain } = option; return structuredClone(plain); }
 		const { source, claim, basis, timing, speed, slots, words, instructions, cost, paid, funding: taps, targets, x } = option.use;
 		return { id: option.id, label: option.label,
 			use: intern(() => ({ source, claim, basis, timing, ...(speed ? { speed } : {}), slots, ...(words ? { words } : {}), effects: instructions.map(summary) }), useKeys, uses, "use:", { source, claim, basis, timing, speed, slots, words, instructions }),

@@ -16,6 +16,7 @@ import { dirname } from "node:path";
 import { journalLines, repairTail } from "./journal-file.ts";
 import { sameMenu } from "./offered.ts";
 import { planState } from "./planning.ts";
+import { beginAnnouncement } from "./announcing.ts";
 
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Said } from "./say.ts";
@@ -28,6 +29,8 @@ import type { Deck } from "./decks.ts";
 import type { Ruled, Case, Ruling } from "./judge.ts";
 
 export type Header = {
+	/** Missing on historical flat-menu journals. A later version preserves the old prefix. */
+	announcementsFrom?: number;
 	/** The game id. Also the directory a published game lives in. */
 	id: string;
 	format: string;
@@ -313,17 +316,21 @@ export function relive(table: Table, rows: LedgerRow[], work: readonly WorkEntry
 			);
 		}
 		observe?.(table, decision, row);
-		const menu = !Array.isArray(row.offered) && row.offered.planned
-			? [...decision.options, ...(planState({ seat: decision.seat, version: table.cursor.clock, view: project(table, decision.seat), decision })?.procedures ?? []).map((one) => one.option)]
+		const planned = !Array.isArray(row.offered) && row.offered.planned
+			? planState({ seat: decision.seat, version: table.cursor.clock, view: project(table, decision.seat), decision }) : null;
+		const menu = planned
+			? [...decision.options, ...planned.procedures.map((one) => one.option), ...(planned.announcements ?? []).map((one) => one.option)]
 			: decision.options;
 		// New compact rows verify the entire ordered menu, including activations.
 		// Historical declared activations carry their own smaller offered list.
-		if ((!row.activation || !Array.isArray(row.offered)) &&
+		if ((!row.activation && !row.announcement || !Array.isArray(row.offered)) &&
 			!sameMenu(row.offered, menu.map((one) => one.id), row.situation === "turn-based"))
 			throw new Error(`Record ${row.seq}: offered choices changed during replay.`);
 		if (!Array.isArray(row.offered) && !menu.some((one) => one.id === row.picked))
 			throw new Error(`Record ${row.seq}: the recorded pick was not offered.`);
-		if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why,
+		if (row.announcement) beginAnnouncement(table, row.announcement, { picked: row.picked, offered: row.offered, by: row.by, why: row.why,
+			...(row.preparing ? { execution: row.preparing } : {}) });
+		else if (row.activation) activate(table, row.activation, { picked: row.picked, offered: row.offered, by: row.by, why: row.why,
 			...(row.execution ?? row.preparing ? { execution: row.execution ?? row.preparing } : {}) }, row.registered ?? {});
 		else {
 			apply(table, row.picked, row.by, row.why, row.execution, row.registered ?? {});
@@ -404,6 +411,8 @@ export function replay(
 	}
 	const work = lines.flatMap((line) => "work" in line && (upTo === undefined || line.v <= upTo) ? [line.work] : []);
 	const initial = start(header);
+	if (header.announcementsFrom !== undefined) initial.announcementsFrom = header.announcementsFrom;
+	else delete initial.announcementsFrom;
 	// A catalog cannot change the options of a journal that never pinned it.
 	if (!header.cards.names) delete initial.cardNames;
 	else if (initial.cardNames?.sha256 !== header.cards.names.sha256) throw new Error(`${path} cannot be replayed here: Oracle name data differs from the game's pinned source`);

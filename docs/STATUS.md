@@ -20,7 +20,7 @@ measures whether ordinary games can execute their cards correctly.
 | Recent shared mechanics | Return-to-hand payments and unblocked-attacker selection; entry copies with copied entry choices; complete token activations and direct counter destinations |
 | Stored card assessments | 237 accepted, 70 refused, five basic lands; Fire Crystal, Simulacrum Synthesizer and Bringer of the Last Gift are source-reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 274 invariant tests pass |
+| Validation | Type check and 276 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

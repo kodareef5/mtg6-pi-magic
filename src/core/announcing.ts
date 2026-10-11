@@ -1,0 +1,86 @@
+/** Recorded parameter choices for an unconfirmed announcement. No priority,
+ * trigger placement or resource spending occurs between these decisions. */
+import { commit } from "./commit.ts";
+import { project } from "./view.ts";
+import { aiming, targetCandidates } from "./announce.ts";
+import { affordableCosts, announcedActivation, announcementBases, canAnnounce, type Announcement } from "./announcement-options.ts";
+import { paymentOptions } from "./payment-options.ts";
+import { targetKey } from "./selectors.ts";
+import type { LedgerRow, Table } from "./table.ts";
+import type { Frame } from "./types.ts";
+import type { Move, Pending } from "./moves.ts";
+
+export function beginAnnouncement(table: Table, draft: Announcement, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">): void {
+	if (table.announcement || table.payment || table.entry || table.resolution || table.cursor.priority !== draft.controller)
+		throw new Error("Finish the pending operation before choosing another use.");
+	const frame: Frame = { seat: draft.controller, version: table.cursor.clock, view: project(table, draft.controller) };
+	if (![...announcementBases(frame, draft)].some((base) => canAnnounce(base, frame))) throw new Error("This use has no available announcement.");
+	const { execution, ...answer } = choice;
+	const plan = execution?.plan ?? table.work[draft.controller]?.planned;
+	const selected = { ...structuredClone(draft), ...(execution ? { execution: structuredClone(execution) } : {}), ...(plan !== undefined ? { plan } : {}) };
+	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: draft.controller,
+		...structuredClone(answer), announcement: selected, ...(execution ? { preparing: structuredClone(execution) } : {}) });
+	commit(table, [{ do: "announcement", announcement: selected }], "announcement");
+}
+
+export function announcing(table: Table): Pending | null {
+	const draft = table.announcement;
+	if (!draft) return null;
+	const frame: Frame = { seat: draft.controller, version: table.cursor.clock, view: project(table, draft.controller) };
+	const moves: Move[] = [];
+	const choose = (id: string, label: string, announcement: Announcement | undefined, shows?: string) => moves.push({
+		option: { id, label, objects: [draft.source], ...(shows ? { shows } : {}) }, changes: [{ do: "announcement", ...(announcement ? { announcement } : {}) }], reason: "announcement" });
+	const bases = [...announcementBases(frame, draft)], base = bases[0];
+	let question = `Prepare ${draft.procedure.claim}. Nothing has been spent or cast.`;
+	if (base?.mana.x && draft.x !== undefined) question += ` X = ${draft.x}.`;
+	if (base && draft.targets.length) question += ` ${aiming(draft.targets, base.world, frame.seat).join(" ")}`;
+	if (!base) question += " Its source or permission is no longer available. Cancel to return to priority.";
+	else if (draft.x === undefined) {
+		question += " Choose X.";
+		for (const one of bases) if (canAnnounce(one, frame)) choose(`announce:x:${one.x}`, `Choose X = ${one.x}`, { ...draft, x: one.x });
+	} else if (draft.targets.length < base.slots.length) {
+		const at = draft.targets.length, slot = base.slots[at]!, count = slot.count ?? 1, minimum = slot.atLeast ?? (slot.upTo ? 0 : count);
+		question += ` Choose target group ${at + 1}: ${minimum === count ? count : `${minimum} to ${count}`} targets. Selected ${draft.selecting.length}.`;
+		const pool = targetCandidates(slot, { ...base.scope, targets: draft.targets });
+		for (const target of pool) {
+			if (draft.selecting.some((one) => targetKey(one) === targetKey(target))) continue;
+			const selected = [...draft.selecting, target];
+			if (!canAnnounce(base, frame, draft.targets, selected)) continue;
+			const next = selected.length === count ? { ...draft, targets: [...draft.targets, selected], selecting: [] } : { ...draft, selecting: selected };
+			const text = aiming([...draft.targets, [target]], base.world, frame.seat);
+			choose(`announce:target:${targetKey(target)}`, text[at]!, next, text.slice(draft.targets.length + 1).join(" "));
+			if ("id" in target) moves.at(-1)!.option.objects!.push(target);
+		}
+		for (const [at, target] of draft.selecting.entries()) choose(`announce:remove-target:${at}`, `Remove ${aiming([[target]], base.world, frame.seat)[0]}`,
+			{ ...draft, selecting: draft.selecting.filter((_, index) => at !== index) });
+		if (draft.selecting.length >= minimum && canAnnounce(base, frame, [...draft.targets, draft.selecting]))
+			choose("announce:targets-done", "Finish this target group", { ...draft, targets: [...draft.targets, draft.selecting], selecting: [] });
+		if (draft.targets.length) choose("announce:back", "Return to the previous target group", { ...draft, targets: draft.targets.slice(0, -1), selecting: draft.targets.at(-1)! });
+		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined, selecting: [] });
+	} else if (!draft.cost) {
+		question += " Choose the additional resources and lock the cost.";
+		for (const [at, cost] of affordableCosts(base, frame, draft.targets).entries()) {
+			choose(`announce:cost:${at}`, `Lock cost: ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. ${cost.extra.shows || "No additional resources."}`, { ...draft, cost });
+			moves.at(-1)!.option.objects!.push(...cost.extraRefs);
+			moves.at(-1)!.option.spends = [...cost.extraRefs, ...(cost.cost.tap ? [draft.source] : []), ...(cost.cost.counters?.on ?? []), ...(cost.cost.shown ?? [])];
+		}
+		if (draft.targets.length) choose("announce:back", "Return to the last target group", { ...draft, targets: draft.targets.slice(0, -1), selecting: draft.targets.at(-1)! });
+		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined });
+	} else {
+		const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending);
+		question += ` Pay ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${menu.chosen.map((one) => one.label).join("; ") || "none"}.`;
+		for (const part of menu.next) {
+			choose(`announce:pay:${part.id}`, `Select: ${part.label}`, { ...draft, payment: [...draft.payment, part.id] }, "This selection spends nothing until confirmation.");
+			moves.at(-1)!.option.spends = part.funding.taps.map((one) => one.source);
+			moves.at(-1)!.option.objects!.push(...part.funding.taps.map((one) => one.source));
+		}
+		for (const part of menu.chosen) choose(`announce:unpay:${part.id}`, `Remove: ${part.label}`, { ...draft, payment: draft.payment.filter((id) => id !== part.id) });
+		const activation = announcedActivation(frame, draft);
+		if (activation) moves.push({ option: { id: "announce:confirm", label: `Confirm ${draft.procedure.claim} and pay`, use: activation,
+			objects: [draft.source, ...draft.targets.flat().flatMap((one) => "id" in one ? [one] : [])],
+			shows: [...aiming(draft.targets, base.world, frame.seat), cost.extra.shows, ...menu.chosen.map((one) => one.label)].join(" ") }, activation, changes: [], reason: "announcement" });
+		choose("announce:back", "Return to choosing additional costs", { ...draft, cost: undefined, payment: [] });
+	}
+	choose("announce:cancel", "Cancel this use and return to priority; spend nothing", undefined);
+	return { situation: "priority", seat: draft.controller, question, moves };
+}

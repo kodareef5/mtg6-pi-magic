@@ -309,7 +309,7 @@ export function judgeFor(table: Table, seated: Seated, journal?: Journal): Judge
 		seated.judged.cases++;
 		try { return await rule(now, open, judging.reasoner, judging); }
 		catch (error) { seated.judged.failed++; throw error; }
-	}, restart: () => start(table.format, entrants, table.rng.seed, judging.universe),
+	}, restart: () => start(table.format, entrants, table.rng.seed, judging.universe, { announcementsFrom: table.announcementsFrom }),
 		flush: () => { if (journal) save(journal, table); } };
 }
 

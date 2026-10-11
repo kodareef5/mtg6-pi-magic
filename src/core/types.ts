@@ -61,6 +61,8 @@ export type Option = {
 	cards?: string[];
 	/** Accepted announcement facts built from this seat's view, never executable changes. */
 	use?: Activation;
+	/** A use whose parameters and payment have not yet been chosen. */
+	announcement?: import("./announcement-options.ts").Announcement;
 	/** Restrictions, entry facts and plan annotations, independent of the rendered description. */
 	notes?: string[];
 	/** Public components of a compound choice. Inspecting one does not commit it. */
@@ -131,6 +133,12 @@ export type SeatView = {
 	visit?: number;
 	/** Only this seat's equipment. A spectator receives none. */
 	work?: Workspace;
+	/** The announcement menu contract of this journal position. */
+	stagedAnnouncements?: true;
+	/** Only its owner sees the unconfirmed use and parameter selections. */
+	announcement?: import("./announcement-options.ts").Announcement;
+	/** The owner's accepted plan at the start of that unfinished use. */
+	announcementPlan?: import("./language.ts").Plan;
 	/** The steps of this seat's current plan its actions have carried out, read from the ledger. */
 	done?: number[];
 	/** Mana is public. Stable ids distinguish individual units in a payment. */

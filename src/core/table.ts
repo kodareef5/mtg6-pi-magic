@@ -320,6 +320,8 @@ export type Receipt = {
 /** Every decision and its pick. design-ref/archive/CIRCUITRY.md section 11. */
 export type LedgerRow = {
 	seq: number;
+	/** Accepted use selected before its parameters and payment. */
+	announcement?: import("./announcement-options.ts").Announcement;
 	clock?: number;
 	/** The plan step or standing branch this action carried out, by the plan's equipment revision. Plan progress is read from these. */
 	execution?: { plan: number; step?: number; branch?: number };
@@ -386,6 +388,9 @@ export type Table = {
 	/** A proposed group awaiting optional entry payments. */
 	entry?: import("./entry-payments.ts").Entry;
 	payment?: import("./cost-selection.ts").Payment;
+	announcement?: import("./announcement-options.ts").Announcement;
+	/** Journal decision version at which staged announcements replace flat menus. */
+	announcementsFrom?: number;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

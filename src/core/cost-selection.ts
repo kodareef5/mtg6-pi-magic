@@ -44,7 +44,7 @@ export function selectingPayment(table: Table): Pending | null {
 		moves.push({ option: { id: "payment:done", label: `Pay by exiling ${chosen.map(named).join(", ")} and complete: ${activation.claim}`, use: complete,
 			objects: [activation.source, ...picked], ...(cards ? { cards: [cards] } : {}) }, activation: complete, changes: [], reason: "cost-payment" });
 	}
-	moves.push({ option: { id: "payment:cancel", label: "Cancel this announcement; spend nothing" }, changes: [{ do: "payment" }], reason: "cost-payment" });
+	moves.push({ option: { id: "payment:cancel", label: "Cancel this announcement; spend nothing" }, changes: [{ do: "payment" }, ...(table.announcement ? [{ do: "announcement" as const }] : [])], reason: "cost-payment" });
 	return { situation: "priority", seat: activation.controller,
 		question: `Prepare payment for ${activation.claim}. Exile own graveyard cards with total mana value at least ${selection.totalManaValue}. Selected ${total}: ${chosen.map(named).join(", ") || "none"}. Nothing is spent until payment is confirmed.`, moves };
 }

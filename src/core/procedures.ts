@@ -5,6 +5,8 @@
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
 import { costChanges } from "./costs.ts";
+import { announcedActivation } from "./announcement-options.ts";
+import { project } from "./view.ts";
 import { castWords } from "./cast-words.ts";
 import { checkExile, enoughExile } from "./cost-selection.ts";
 import { isDeepStrictEqual } from "node:util";
@@ -235,6 +237,12 @@ export function activationChanges(table: Table, activation: Activation): Change[
 /** One announced activation is one recorded decision, including its accepted meaning. */
 export function activate(table: Table, activation: Activation, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">,
 	registered?: LedgerRow["registered"]): void {
+	if (table.announcement && !table.payment) {
+		const draft = table.announcement;
+		const expected = announcedActivation({ seat: draft.controller, version: table.cursor.clock, view: project(table, draft.controller) }, draft);
+		if (!expected || !isDeepStrictEqual(activation, expected)) throw new Error("Finish or cancel the selected announcement before performing another action.");
+		choice = { ...choice, execution: draft.execution };
+	}
 	if (table.payment) {
 		const expected = { ...table.payment.activation, cost: { ...table.payment.activation.cost, exiled: table.payment.picked } };
 		if (!isDeepStrictEqual(activation, expected)) throw new Error("Finish or cancel the pending payment before announcing another action.");
@@ -253,6 +261,7 @@ export function activate(table: Table, activation: Activation, choice: Pick<Ledg
 		return;
 	}
 	const changes = activationChanges(table, activation);
+	if (table.announcement) changes.push({ do: "announcement" });
 	if (table.payment) changes.push({ do: "payment" });
 	const entered = attach(table, changes, registered);
 	table.ledger.push({ seq: table.ledger.length, clock: table.cursor.clock + 1, situation: "priority", seat: activation.controller,

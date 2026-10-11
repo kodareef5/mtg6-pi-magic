@@ -205,6 +205,10 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	}));
 	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		starting: table.seats[0]!.id,
+		...(table.announcementsFrom !== undefined && table.ledger.length >= table.announcementsFrom ? { stagedAnnouncements: true as const } : {}),
+		...(viewer !== "spectator" && table.announcement?.controller === viewer ? { announcement: structuredClone(table.announcement) } : {}),
+		...(viewer !== "spectator" && table.announcement?.controller === viewer && table.announcement.plan !== undefined
+			? { announcementPlan: structuredClone(table.workLog.findLast((one) => one.seat === viewer && one.workspace.planned === table.announcement!.plan)?.workspace.plan) } : {}),
 		...(at.kind === "opening" && viewer !== "spectator" ? { opening: { starting: table.seats[0]!.id, mulligans: table.opening?.taken[viewer] ?? 0,
 			bottom: at.action === "bottom" ? table.opening?.owed[viewer] ?? 0 : table.format.mulliganBottom === "on-keep" ? owedFor(table, viewer) : 0 } } : {}),
 		printed: Object.fromEntries(names.flatMap((name) => table.printed[name] ? [[name, table.printed[name]]] : [])), window: at, table: lines, yours, objects, pools: table.seats.map((seat) => ({ seat: seat.id, mana: structuredClone(seat.pool) })),
@@ -221,7 +225,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history, castings,
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps], stepDone: cursor.stepDone, turnBegan: cursor.began[cursor.active] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
-			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === table.work[viewer]!.planned && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
+			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === (table.announcement?.controller === viewer ? table.announcement.plan : table.work[viewer]!.planned) && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r, viewer)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table, viewer) } : {}) };
 }

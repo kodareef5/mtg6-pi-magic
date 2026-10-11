@@ -42,6 +42,7 @@ function waitsForStack(option: PlanOption, frame: Frame): boolean {
 /** The checklist comes from projected facts and unfinished plans, never hidden cards or Oracle interpretation. */
 export function checklist(frame: Frame, state?: PlanState | null): ReviewItem[] {
 	const { view, decision } = frame;
+	if (view.announcement) return [];
 	if (view.window.kind !== "turn" || !decision || !view.work ||
 		!(decision.situation === "priority" || decision.options.some((one) => ["attack:done", "block:done"].includes(one.id)))) return [];
 	if (state === undefined) state = planState(frame);

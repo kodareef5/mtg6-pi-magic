@@ -50,6 +50,7 @@ export type Reason =
 	| "cleanup-discard"
 	| "state-based-action"
 	| "cost-payment"
+	| "announcement"
 	| "combat"
 	| "game-setup";
 
@@ -58,6 +59,7 @@ export type Reason =
  * them. A motion arrives here when a milestone needs it, never in advance.
  */
 export type Change =
+	| { do: "announcement"; announcement?: import("./announcement-options.ts").Announcement }
 	| { do: "payment"; payment?: import("./cost-selection.ts").Payment }
 	| { do: "entry"; entry?: import("./entry-payments.ts").Entry }
 	/** Control transitions are recorded too: a pass changes who can answer next. */

@@ -34,7 +34,11 @@ export function decisionFacts(frame: Frame, options: readonly Option[], attentio
 	};
 	if (!opening) {
 		dependencies(frame.view.resolution);
-		for (const option of options) dependencies(option.use, all.find((one) => one.id === option.use?.source.id));
+		dependencies(frame.view.announcement, all.find((one) => one.id === frame.view.announcement?.source.id));
+		for (const option of options) {
+			dependencies(option.use, all.find((one) => one.id === option.use?.source.id));
+			dependencies(option.announcement, all.find((one) => one.id === option.announcement?.source.id));
+		}
 		// Standing effects can alter a use before it happens. Include their source
 		// and dependencies, even when that source is not an offered target.
 		for (const one of all.filter((one) => one.zone === "battlefield")) {

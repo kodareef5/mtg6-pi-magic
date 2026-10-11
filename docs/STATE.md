@@ -39,6 +39,25 @@ Cursor-only transitions write no receipt. Replay derives them from the ledger
 through the normal dispatcher. This keeps the log about game events while
 preserving priority and turn progression.
 
+New games record `announcementsFrom: 0` in their header. Priority offers each
+source, accepted mode and permission once. The seat then chooses X, targets,
+additional costs and individual mana sources. Each answer is a ledger row;
+the private pending announcement survives replay and cloning. No card moves,
+mana is spent, trigger fires or opponent receives priority during selection.
+Confirmation commits the accepted operation and its payment together. A
+graveyard payment, when required, continues into its own selection before that
+commit. Cancellation clears the pending choices and spends nothing.
+
+The selected use retains its accepted terms and plan revision. Only the final
+operation records plan execution. Pending-choice changes write no public
+receipt, and projection gives the draft only to its controller. Acceptance
+checks the stated resources and structured terms; it does not certify that
+the card permits the interpretation.
+
+Headers without `announcementsFrom` retain complete historical menus. A later
+boundary preserves that many historical decisions before staging subsequent
+announcements. A clone keeps the boundary, even when its prefix ends earlier.
+
 Card assessments are private equipment at version zero, alongside the briefs.
 Replay restores equipment at each original decision boundary, before listing
 payments or actions. Frozen entry registrations and announced instructions keep
@@ -53,8 +72,8 @@ the next write would turn the fragment into a corrupt middle line.
 
 | Number | Counts | Purpose |
 |---|---|---|
-| Frame version | physical table revisions | refuse stale answers |
-| Journal `v` | answered physical decisions | select a clone point |
+| Frame version | table revisions, including pending choices | refuse stale answers |
+| Journal `v` | answered table decisions | select a clone point |
 | Equipment revision | one seat's accepted private edits | validate preparation |
 | Receipt index | committed event groups with receipts | select an explicit event-history slice |
 

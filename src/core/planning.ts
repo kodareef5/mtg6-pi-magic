@@ -16,6 +16,8 @@ import type { Frame, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import type { Activation, LedgerRow } from "./table.ts";
 import { isDeepStrictEqual } from "node:util";
+import { announcementOffers, type Announcement, type AnnouncementOffer } from "./announcement-options.ts";
+import { faceFacts } from "./faces.ts";
 
 /** A step or branch that applies now, and the listed options that fit it. */
 export type Fit = { at: number; label: string; candidates: Option[]; waiting?: true };
@@ -43,6 +45,7 @@ export type PlanState = {
 	attacks: { label: string; objects: SeenObject[] }[];
 	/** The announcements due steps and branches offer, beside the table's own options. */
 	procedures: ProcedureOption[];
+	announcements?: AnnouncementOffer[];
 };
 
 /** Ledger rows record which step or branch an action carried out. */
@@ -87,9 +90,25 @@ function activationEquality() {
 	};
 }
 
-function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[] } {
+function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[]; announcements?: AnnouncementOffer[] } {
 	const { action } = option;
 	if ("procedure" in action) {
+		if (frame.view.stagedAnnouncements) {
+			if (frame.decision?.situation !== "priority") return { options: [], procedures: [] };
+			const starts = announcementOffers(action.procedure, frame, prefix), listed = frame.decision.options.filter((one) => one.announcement);
+			const terms = (draft: Announcement) => {
+				const { source, if: _if, limit: _limit, cost, ...procedure } = draft.procedure;
+				const card = frame.view.objects?.find((one) => one.id === draft.source.id)?.card;
+				const mana = cost?.mana ?? (procedure.timing === "spell" && card ? faceFacts(frame.view.printed?.[card], procedure.face)?.mana : undefined);
+				return { ...procedure, cost: { ...cost, ...(mana ? { mana } : {}) }, source: draft.source, permission: draft.permission, registered: source.registered };
+			};
+			const matched = new Set<Option>(), announcements: AnnouncementOffer[] = [];
+			for (const start of starts) {
+				const same = listed.filter((one) => isDeepStrictEqual(terms(one.announcement!), terms(start.announcement)));
+				if (same.length) same.forEach((one) => matched.add(one)); else announcements.push(start);
+			}
+			return { options: [...announcements.map((one) => one.option), ...listed.filter((one) => matched.has(one))], procedures: [], announcements };
+		}
 		const offered = procedureOptions(action.procedure as Procedure, frame, prefix);
 		// Ordinary equipment can offer the same announcement under another id.
 		// That listed option carries out the step when all accepted terms, targets
@@ -120,15 +139,32 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 
 /** The seat's plan as it stands at this frame, or null without one. */
 export function planState(frame: Frame): PlanState | null {
-	const work = frame.view.work, plan = currentPlan(frame);
+	const work = frame.view.work, plan = frame.view.announcementPlan ?? currentPlan(frame);
 	if (!work || !plan || work.planned === undefined) return null;
-	const revision = work.planned;
+	const revision = frame.view.announcement?.plan ?? work.planned;
 	const scope: Scope = { world: viewWorld(frame.view), controller: frame.seat };
-	const done = new Set(frame.view.done ?? []);
-	const open = (option: PlanOption) => matches(option.when, frame) && (!option.if || condition(scope, option.if));
-	const procedures: ProcedureOption[] = [];
+	const done = new Set(frame.view.done ?? []), at = frame.view.window;
 	const held = (plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, frame)))
 		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
+	const combat = at.kind === "turn" && at.active === frame.seat && (at.step === "declare-attackers" || frame.view.remainingSteps?.includes("declare-attackers"))
+		? { ...frame, view: { ...frame.view, window: { ...at, step: "declare-attackers", phase: "combat" } } } as Frame : undefined;
+	const attacks = combat ? plan.steps.flatMap((step, index) => {
+		const action = step.action;
+		if (done.has(index) || !matches(step.when, combat) || "procedure" in action || action.prefix !== "attack:" || !action.objects || step.if && !condition(scope, step.if)) return [];
+		return [{ label: step.label, objects: select(action.objects, frame).filter((one) => one.zone === "battlefield" && one.controller === frame.seat) }];
+	}) : [];
+	if (frame.view.announcement) {
+		const draft = frame.view.announcement, progress = draft.execution;
+		const options = (frame.decision?.options ?? []).filter((one) => !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id));
+		const fit = (at: number, label: string): Fit => ({ at, label, candidates: options });
+		return { revision, plan, seat: frame.seat, procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
+			due: progress?.step !== undefined && plan.steps[progress.step] ? [fit(progress.step, plan.steps[progress.step]!.label)] : [],
+			branches: progress?.branch !== undefined && plan.may?.[progress.branch] ? [fit(progress.branch, plan.may[progress.branch]!.label)] : [],
+			held };
+	}
+	const open = (option: PlanOption) => matches(option.when, frame) && (!option.if || condition(scope, option.if));
+	const procedures: ProcedureOption[] = [];
+	const announcements: AnnouncementOffer[] = [];
 	const opponent = frame.view.players?.find((one) => one.id !== frame.seat)?.id;
 	const triggers = (plan.triggers ?? []).filter((one) => !one.when || matches(one.when, frame))
 		.map((one) => ({ sources: one.resolve.map((query) => select(query, frame)),
@@ -139,6 +175,7 @@ export function planState(frame: Frame): PlanState | null {
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
 		for (const procedure of found.procedures) procedures.push(procedure);
+		for (const announcement of found.announcements ?? []) announcements.push(announcement);
 		// Holds warn about spending; they cannot change which action was carried out.
 		return { at, label: option.label, candidates: found.options,
 			...(option.waitFor === "empty-stack" && frame.view.objects?.some((one) => one.zone === "stack") ? { waiting: true as const } : {}) };
@@ -152,7 +189,6 @@ export function planState(frame: Frame): PlanState | null {
 	const branches = (plan.may ?? []).flatMap((branch, at) => open(branch) ? [fit(branch, at, "b")] : []).filter((one) => one.candidates.length || one.waiting);
 	// An essential step with nothing listed for it, at a priority where it belongs: in its own step, or with no step named in a main phase.
 	// Only with an empty stack: while a spell waits to resolve, passing so it can is the procedure, not a failed line.
-	const at = frame.view.window;
 	// Attacks and blocks are taken only in their declaration, never at a priority, so a priority cannot find one missing.
 	const declares = (step: PlanOption) => !("procedure" in step.action) && /^(attack|block):/.test(step.action.prefix ?? step.action.option ?? "");
 	const belongs = (step: PlanOption) => frame.decision?.situation === "priority" && at.kind === "turn" && !(frame.view.objects ?? []).some((object) => object.zone === "stack") && !declares(step) &&
@@ -161,15 +197,8 @@ export function planState(frame: Frame): PlanState | null {
 	const next = due.find((one) => one.candidates.length);
 	const unmet = due.find((one) => plan.steps[one.at]!.essential && !one.candidates.length && (!next || one.at < next.at) && belongs(plan.steps[one.at]!));
 	const blocked = unmet ? [`Step ${unmet.at + 1} cannot be taken now: ${unmet.label}`] : [];
-	const combat = at.kind === "turn" && at.active === frame.seat && (at.step === "declare-attackers" || frame.view.remainingSteps?.includes("declare-attackers"))
-		? { ...frame, view: { ...frame.view, window: { ...at, step: "declare-attackers", phase: "combat" } } } as Frame : undefined;
-	const attacks = combat ? plan.steps.flatMap((step, index) => {
-		const action = step.action;
-		if (done.has(index) || !matches(step.when, combat) || "procedure" in action || action.prefix !== "attack:" || !action.objects || step.if && !condition(scope, step.if)) return [];
-		return [{ label: step.label, objects: select(action.objects, frame).filter((one) => one.zone === "battlefield" && one.controller === frame.seat) }];
-	}) : [];
 	return {
-		revision, seat: frame.seat, plan, due, waiting, branches, procedures, ...(unmet ? { unmet: unmet.at } : {}),
+		revision, seat: frame.seat, plan, due, waiting, branches, procedures, ...(announcements.length ? { announcements } : {}), ...(unmet ? { unmet: unmet.at } : {}),
 		stops: [...(plan.askWhen ?? []).filter((stop) => !work.unarmed?.includes(stop.label) && (!stop.when || matches(stop.when, frame)) && condition(scope, stop.if)).map((stop) => stop.label), ...blocked],
 		arming: (plan.askWhen ?? []).filter((stop) => work.unarmed?.includes(stop.label) && ((stop.when && !matches(stop.when, frame)) || !condition(scope, stop.if))).map((stop) => stop.label),
 		held, triggers, attacks,
@@ -263,7 +292,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 			const marks = branches.get(id); if (marks) marks.push(mark); else branches.set(id, [mark]);
 		}
 	}
-	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
+	return [...options, ...state.procedures.map((choice) => choice.option), ...(state.announcements ?? []).map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
 		// Stated in placement order: the trigger named first is the one that goes on now.
 		if (order && option.trigger && order.now.includes(option.trigger.id) && order.aimed(option))
@@ -302,6 +331,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 /** Scoped work is accepted before upkeep choices, then reviewed after the draw.
  * Opening and unscoped legacy work retain their first post-draw priority deadline. */
 export function planDue(frame: Frame): boolean {
+	if (frame.view.announcement) return false;
 	const work = frame.view.work, at = frame.view.window;
 	if (!work?.eachTurn || at.kind !== "turn" || at.active !== frame.seat || at.step === "untap") return false;
 	const decision = frame.decision;

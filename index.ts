@@ -167,8 +167,9 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(`Resumed past a torn last line. Dropped: ${journal.repaired.slice(0, 80)}`, "warning");
 			}
 		} else {
-			opened = start(standard, (from.decks ?? PLAY).map((name) => ({ deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards);
+			opened = start(standard, (from.decks ?? PLAY).map((name) => ({ deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards, { announcementsFrom: 0 });
 			header = {
+				announcementsFrom: 0,
 				id: from.seed,
 				format: standard.name,
 				seed: from.seed,

@@ -4,5 +4,5 @@ import type { Decision, Option } from "./types.ts";
 import type { Activation } from "./table.ts";
 
 /** A move with an activation commits through `activate`, so replay and play share one path. */
-export type Move = { option: Option; changes: Change[]; reason: Reason; activation?: Activation };
+export type Move = { option: Option; changes: Change[]; reason: Reason; activation?: Activation; announcement?: import("./announcement-options.ts").Announcement };
 export type Pending = Omit<Decision, "options"> & { moves: Move[] };

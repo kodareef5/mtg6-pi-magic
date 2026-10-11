@@ -28,6 +28,7 @@ import { editWork, prepareWork, recordWork, workFrame } from "./work-tools.ts";
 import { activate } from "./procedures.ts";
 import { mulligansSettled } from "./pregame.ts";
 import { offered as recordMenu } from "./offered.ts";
+import { beginAnnouncement } from "./announcing.ts";
 
 export type Watcher = (line: string) => void;
 
@@ -135,7 +136,7 @@ export async function play(
 		const state = current && !attention ? planState(current) : null;
 		if (state && raiseStop(table, decision, state)) continue;
 		// Planning and announcements must remain available beside compulsory work.
-		const why = attention || state?.procedures.length ? null : automatic(decision, intents[decision.seat]);
+		const why = attention || state?.procedures.length || state?.announcements?.length ? null : automatic(decision, intents[decision.seat]);
 		if (why) {
 			// A forced move can still be the step the plan named; the row says so.
 			apply(table, decision.options[0]!.id, "engine", why, state ? execution(state, decision.options[0]!.id) : undefined);
@@ -169,7 +170,7 @@ export async function play(
 		const step = `${table.cursor.turn}:${table.cursor.active}:${table.cursor.steps[0] ?? ""}`;
 		if (positions?.step !== step) positions = { step, seen: new Map() };
 		const key = createHash("sha256").update(JSON.stringify([decision.seat, decision.situation, decision.question, decision.options.map((one) => one.id).sort(),
-			[...table.things], table.combat ?? null, table.waiting.map((one) => one.id), table.resolution ?? null, table.work[decision.seat]?.revision ?? 0])).digest("hex");
+			[...table.things], table.combat ?? null, table.waiting.map((one) => one.id), table.resolution ?? null, table.announcement ?? null, table.work[decision.seat]?.revision ?? 0])).digest("hex");
 		const repeated = (positions.seen.get(key) ?? 0) + 1;
 		positions.seen.set(key, repeated);
 		if (repeated >= LOOP) {
@@ -252,9 +253,11 @@ export async function play(
 				editWork(table, decision.seat, answer.tools, answer.actionId, answer.revision);
 				break;
 			case "pick": {
+				const announcement = state?.announcements?.find((choice) => choice.option.id === answer.option);
 				const procedure = state?.procedures.find((choice) => choice.option.id === answer.option);
 				const carried = state ? execution(state, answer.option) : undefined;
-				if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
+				if (announcement) beginAnnouncement(table, announcement.announcement, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
+				else if (procedure) activate(table, procedure.activation, { picked: answer.option, offered: recordMenu(offered.options.map((option) => option.id), true), by: "model", why: "chosen", ...(carried ? { execution: carried } : {}) });
 				else apply(table, answer.option, "model", "chosen", carried);
 				break;
 			}

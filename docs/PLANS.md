@@ -117,10 +117,19 @@ remain audit rationale. A phase may end with `complete: "ask"`, which the pilot
 reads on its help option. Nothing in the plan grants or withholds a pass, and no
 code passes for the seat; the pass option says what passing does now.
 
-Payment warnings name each held resource separately. A use's inspection menu
-counts how many variants spend each resource; its payment menu retains the
-exact warnings for each complete payment. The shared menu does not repeat the
-same hold for every combination of lands, and inspection commits nothing.
+New games offer a source and accepted mode before asking for X, targets,
+additional costs and mana sources. Jev answers each part under the selected
+plan's execution policy. Partial choices remain private and spend nothing;
+confirmation performs the accepted cast or activation. Cancelling returns to
+priority without executing a plan step. Each part survives replay and cloning,
+including a plan revised while a use is pending. Historical games retain their
+complete menus until an explicit announcement boundary.
+
+Payment warnings name each held resource separately. Individual mana choices
+carry those marks, and the final confirmation shows the complete payment.
+Historical inspection menus factor shared holds across payment combinations.
+Inspecting an option commits nothing; selecting an announcement part records
+that private choice without moving a card.
 
 Execution policies name the target's kind and identity. A player target names
 the player and seat number; a creature target names the creature and its current

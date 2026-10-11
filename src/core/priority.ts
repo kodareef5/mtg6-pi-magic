@@ -4,6 +4,8 @@ import type { Move } from "./moves.ts";
 import { cardsIn, seat, type Table, type Thing } from "./table.ts";
 import { facts, isLand, permanentSpell } from "./printed.ts";
 import { offers } from "./announce.ts";
+import { announcementOffers } from "./announcement-options.ts";
+import type { Procedure } from "./language.ts";
 import { entering } from "./entry.ts";
 import { tableWorld } from "./selectors.ts";
 import { allowance, playable } from "./permits.ts";
@@ -11,6 +13,12 @@ import type { Frame, SeatId } from "./types.ts";
 import { STEPS } from "./steps.ts";
 import { isPrintedCast, printedCast } from "./procedures.ts";
 import { activatedUses } from "./activated.ts";
+
+/** The journal contract selects a menu shape, while both use the same terms. */
+function useMoves(procedure: Procedure, frame: Frame, prefix: string): Move[] {
+	const choices = frame.view.stagedAnnouncements ? announcementOffers(procedure, frame, prefix) : offers(procedure, frame, prefix);
+	return choices.map((one) => ({ ...one, changes: [], reason: "cast" }));
+}
 
 /** Situation 1. The table knows all of this without reading a card. */
 export function priorityMoves(table: Table, holder: SeatId): Move[] {
@@ -84,11 +92,11 @@ export function defaultCasts(table: Table, frame: Frame): Move[] {
 	return sources.flatMap((key) => {
 		const [zone, name, index] = key.split("|") as ["hand" | "exile" | "graveyard", string, string];
 		const face = Number(index) as 0 | 1, printed = table.printed[name]!;
-		return offers({ ...printedCast(name, printed, printed.faces ? face : undefined),
+		return useMoves({ ...printedCast(name, printed, printed.faces ? face : undefined),
 			source: { zones: [zone], controller: zone === "hand" ? "self" : "any", card: name },
-			claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost` }, frame, zone === "hand" ? "cast" : "play").map(({ option, activation }) => {
+			claim: zone === "hand" ? "Cast for its printed cost" : `Cast from ${zone} for its printed cost` }, frame, zone === "hand" ? "cast" : "play").map((move) => {
 			const note = entering(table, holder, name);
-			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
+			return { ...move, option: { ...move.option, ...(note ? { shows: `${move.option.shows} ${note}`, notes: [...(move.option.notes ?? []), note] } : {}) } };
 		});
 	});
 }
@@ -97,16 +105,16 @@ export function defaultCasts(table: Table, frame: Frame): Move[] {
 export function preparedMoves(table: Table, frame: Frame): Move[] {
 	return (table.work[frame.seat]?.packages ?? []).flatMap((pack, card) => !pack.assessed ? [] : (pack.procedures ?? []).flatMap((procedure, at) => {
 		const prefix = procedure.timing === "spell" ? "cast" : "use";
-		return offers(procedure, frame, `${prefix}:${card}:${at}`).map(({ option, activation }) => {
+		return useMoves(procedure, frame, `${prefix}:${card}:${at}`).map((move) => {
 			const note = procedure.timing === "spell" && permanentSpell(faceFacts(table.printed[pack.card], procedure.face)) ? entering(table, frame.seat, pack.card) : "";
-			return { option: { ...option, ...(note ? { shows: `${option.shows} ${note}`, notes: [...(option.notes ?? []), note] } : {}) }, activation, changes: [], reason: "cast" as const };
+			return { ...move, option: { ...move.option, ...(note ? { shows: `${move.option.shows} ${note}`, notes: [...(move.option.notes ?? []), note] } : {}) } };
 		});
 	}));
 }
 
 /** Abilities carried by current permanents are offered without card-specific player code. */
 export const registeredMoves = (frame: Frame): Move[] => activatedUses(frame).flatMap(({ key, procedure }) =>
-	offers(procedure, frame, key).map(({ option, activation }) => ({ option, activation, changes: [], reason: "activate" })));
+	useMoves(procedure, frame, key).map((move) => ({ ...move, reason: "activate" })));
 
 /**
  * A move is offered only when every one of these holds. This is the whole
