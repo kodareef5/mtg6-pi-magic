@@ -7,9 +7,10 @@ import type { Pending } from "./moves.ts";
 import { holds, tableWorld } from "./selectors.ts";
 import { activeFaces } from "./faces.ts";
 import { basicLandTypes, creatureTypeChoices } from "./characteristics.ts";
+import { paymentChoices } from "./costs.ts";
 
 export type Entry = { changes: Change[]; reason: Reason; clock: number; choices: Record<number, "paid" | "declined">;
-	values?: Record<number, Record<string, string>> };
+	values?: Record<number, Record<string, string>>; reveals?: Record<number, string[]> };
 
 function requirements(table: Table, changes: Change[]) {
 	return changes.flatMap((change, index) => {
@@ -25,13 +26,14 @@ function requirements(table: Table, changes: Change[]) {
 			(one.face === undefined || active.includes(one.face)) && (!one.if || holds({ world, controller: who, source }, one.if)));
 		const choose = terms.flatMap((one) => one.kind === "enters" && one.choose && change.choices?.[one.choose.as] === undefined ? [one.choose] : []);
 		const payment = terms.find((one) => one.kind === "enters" && one.unlessPay && change.entry === undefined);
-		const life = payment?.kind === "enters" ? payment.unlessPay?.life : undefined;
-		return choose.length || life !== undefined ? [{ index, who, object, choose, life, tapped: payment?.kind === "enters" && payment.tapped }] : [];
+		const cost = payment?.kind === "enters" ? payment.unlessPay : undefined;
+		const life = cost && "life" in cost ? cost.life : undefined, show = cost && "show" in cost ? cost.show : undefined;
+		return choose.length || cost ? [{ index, who, object, choose, life, show, tapped: payment?.kind === "enters" && payment.tapped }] : [];
 	});
 }
 type Requirement = ReturnType<typeof requirements>[number];
 const unanswered = (entry: Entry, one: Requirement) => one.choose.find((choice) => entry.values?.[one.index]?.[choice.as] === undefined);
-const pending = (entry: Entry, one: Requirement) => unanswered(entry, one) || one.life !== undefined && entry.choices[one.index] === undefined;
+const pending = (entry: Entry, one: Requirement) => unanswered(entry, one) || (one.life !== undefined || one.show) && entry.choices[one.index] === undefined;
 
 /** An accepted instruction waits without splitting its physical event. */
 export function beforeEntry(table: Table, changes: Change[], reason: Reason): Change[] {
@@ -45,18 +47,19 @@ function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
 		const move = changes[one.index]!;
 		if (move.do !== "move") continue;
 		if (entry.values?.[one.index]) move.choices = { ...move.choices, ...entry.values[one.index] };
-		if (one.life === undefined) continue;
+		if (one.life === undefined && !one.show) continue;
 		move.entry = entry.choices[one.index]!;
-		if (move.entry === "paid") changes.push({ do: "change-life", who: one.who, amount: -one.life, reason: "cost-payment" });
+		if (move.entry === "paid" && one.life !== undefined) changes.push({ do: "change-life", who: one.who, amount: -one.life, reason: "cost-payment" });
 		// The entry replacement already applies. Choosing a basic type can remove its printed ability (305.7).
-		else if (one.tapped) move.tapped = true;
+		else if (move.entry === "declined" && one.tapped) move.tapped = true;
 	}
+	const reveals: Change[] = [...new Set(Object.values(entry.reveals ?? {}).flat())].map((what) => ({ do: "reveal", what }));
 	// Mana generated with the proposed group uses the clock of its eventual commit.
 	const mana = new Map(changes.flatMap((change, index) => change.do === "add-mana" ? change.colors.map((_, unit) =>
-		[`mana-${entry.clock + 1}-${index}-${unit}`, `mana-${table.cursor.clock + 1}-${index}-${unit}`]) : []));
+		[`mana-${entry.clock + 1}-${index}-${unit}`, `mana-${table.cursor.clock + 1}-${index + reveals.length}-${unit}`]) : []));
 	for (const change of changes) if (change.do === "spend-mana") change.ids = change.ids.map((id) => mana.get(id) ?? id);
 	changes.push({ do: "entry" });
-	return changes;
+	return [...reveals, ...changes];
 }
 
 export function entryPayment(table: Table): Pending | null {
@@ -67,6 +70,16 @@ export function entryPayment(table: Table): Pending | null {
 	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, choose a ${choice.from.replaceAll("-", " ")} for ${choice.as}.`,
 		moves: (choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${next.object.card}`, cards },
 			changes: answered(table, { ...entry, values: { ...entry.values, [next.index]: { ...entry.values?.[next.index], [choice.as]: value } } }, all), reason: entry.reason })) };
+	if (next.show) {
+		const ways = paymentChoices(table, { world: tableWorld(table), controller: next.who, source: next.object }, { show: next.show }, next.who, next.object.id);
+		return { situation: "replacement-order", seat: next.who, question: `As ${next.object.card} enters, choose or reveal cards for its entry term, or decline.`, moves: [
+			...ways.map((way) => ({ option: { id: `entry:${next.index}:${way.id}`, label: way.label, cards },
+				changes: answered(table, { ...entry, choices: { ...entry.choices, [next.index]: "paid" }, reveals: { ...entry.reveals,
+					[next.index]: way.changes.flatMap((change) => change.do === "reveal" ? [change.what] : []) } }, all), reason: entry.reason })),
+			{ option: { id: `entry:${next.index}:decline`, label: `Do not pay for ${next.object.card}'s entry term`, cards },
+				changes: answered(table, { ...entry, choices: { ...entry.choices, [next.index]: "declined" } }, all), reason: entry.reason },
+		] };
+	}
 	const life = next.life!;
 	const spent = all.filter((one) => one.who === next.who && entry.choices[one.index] === "paid").reduce((sum, one) => sum + one.life!, 0);
 	const paidInGroup = entry.changes.reduce((sum, change) => sum + (change.do === "change-life" && change.who === next.who && change.reason === "cost-payment" ? -change.amount : 0), 0);

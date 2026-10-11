@@ -549,14 +549,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Theorist's Sanctum": {
-		"reason": "Theorist's Sanctum is not ready: As this land enters, you may behold a Jace. If you don't, this land enters tapped. (To behold a Jace, choose a Jace you control or reveal a Jace card from your hand.) — Missing operation: an optional choice of a Jace permanent you control or revelation of a Jace card from your hand during the entering replacement, with tapped entry if you decline. The enters registration supports optional life payment, but not a behold choice or revelation.",
-		"decks": [
-			"Azorius Control"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Thought-Stalker Warlock": {
 		"reason": "Thought-Stalker Warlock is not ready: When this creature enters, choose target opponent. If they lost life this turn, they reveal their hand, you choose a nonland card from it, and they discard that card. Otherwise, they discard a card. — Unsupported operation: revealing an opponent's entire hand for another player to choose a nonland card from. The spells.md example explicitly identifies this operation as not expressible in the syntax. This standing triggered ability cannot be deferred or faithfully registered.",
 		"decks": [

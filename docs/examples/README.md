@@ -11,6 +11,7 @@ schemas, and every `basis` is checked against the card's text.
 | `target-counts.md` | one or two distinct targets, mixed players and permanents, simultaneous damage and returns |
 | `mana.md` | mana abilities in a package, "or", counted mana, spend restrictions, a token's mana ability, a Verge's conditional ability |
 | `entering.md` | entering tapped under a condition, a shock land's optional life payment, a Town's own-turn count, entering with counters, how other permanents enter, 305.7 |
+| `entry-behold.md` | choose a controlled permanent or reveal an owned hand card before a simultaneous entry group commits |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `cast-facts.md` | mana-value and color selectors, computed bounds, cast triggers and last known spell facts |
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |

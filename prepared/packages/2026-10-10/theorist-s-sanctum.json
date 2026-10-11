@@ -1,0 +1,48 @@
+{
+	"card": "Theorist's Sanctum",
+	"generated": "2026-10-10",
+	"source": "bbea6c7d68395c54b04d16ffae3599be2430f7061d78d9a25b833808c17747af",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Theorist's Sanctum",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "As this land enters, you may behold a Jace. If you don't, this land enters tapped. (To behold a Jace, choose a Jace you control or reveal a Jace card from your hand.)",
+				"tapped": true,
+				"unlessPay": {
+					"show": {
+						"choose": {
+							"zones": [
+								"hand",
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Jace"
+							]
+						},
+						"count": 1
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Activate Empower Jace 2.",
+				"basis": "{2}{U}, {T}: Empower Jace 2.",
+				"source": {
+					"card": "Theorist's Sanctum",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

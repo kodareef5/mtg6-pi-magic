@@ -12,7 +12,7 @@ import { amount, holds, tableWorld, turnsTaken } from "../src/core/selectors.ts"
 import { seat } from "../src/core/table.ts";
 import { main, matchup, place, establish, pack } from "./play.ts";
 import { characteristics, intrinsic } from "../src/core/characteristics.ts";
-import { project } from "../src/core/view.ts";
+import { describe, project } from "../src/core/view.ts";
 import { start } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { beforeEntry } from "../src/core/entry-payments.ts";
@@ -182,5 +182,47 @@ test("entry choices precede payment and derive types for only the entering incar
 		apply(table, "entry:0:choose:landType:Forest", "model", "chosen");
 		apply(table, "entry:0:pay", "model", "chosen");
 		assert.equal(land!.tapped, true); assert.deepEqual(intrinsic(characteristics(table, land!)), ["G"]);
+	}
+});
+
+test("beholding for entry reveals only a chosen hand card and waits for the entire group", () => {
+	for (const location of ["hand", "battlefield", "decline", "unavailable"] as const) {
+		const table = start(standard, [{ deck: deck("Azorius Control") }, { deck: deck("Azorius Control") }], `entry-behold-${location}`);
+		main(table, 0);
+		const registers = pack("Theorist's Sanctum"), jace = "The Theorist, Jace Beleren";
+		const [own] = place(table, 0, location === "battlefield" ? "battlefield" : "hand", jace);
+		place(table, 1, "hand", jace); place(table, 1, "battlefield", jace);
+		if (location === "unavailable") commit(table, [...table.things.values()].filter((one) => one.owner === 0 && one.card === jace)
+			.map((one) => ({ do: "move", what: one.id, to: "outside", reason: "game-setup" })), "game-setup");
+		const lands = [...table.things.values()].filter((one) => one.owner === 0 && one.card === "Theorist's Sanctum").slice(0, 2);
+		const clock = table.cursor.clock;
+		commit(table, beforeEntry(table, [
+			...lands.map((one, index) => ({ do: "move" as const, what: one.id, to: "battlefield" as const, reason: "resolve" as const, registers, ...(index ? { tapped: true as const } : {}) })),
+			{ do: "add-mana", who: 0, colors: ["U"] },
+			{ do: "spend-mana", who: 0, ids: [`mana-${clock + 1}-2-0`] },
+		], "resolve"), "resolve");
+		const initial = structuredClone(table), from = table.ledger.length, decision = nextDecision(table)!;
+		assert.deepEqual(table, initial, "listing entry payments reveals and spends nothing");
+		assert.equal(decision.seat, 0);
+		if (location === "unavailable") assert.equal(decision.options.length, 1, "another seat's Jace cannot pay");
+		const choosing = location === "hand" || location === "battlefield";
+		const pick = (index: number) => {
+			const options = nextDecision(table)!.options;
+			const option = options.find((one) => choosing ? one.label.includes(jace) && one.label.includes(`(${location})`) : one.id === `entry:${index}:decline`)!;
+			assert.ok(option); apply(table, option.id, "model", "chosen");
+		};
+		pick(0);
+		assert.ok(lands.every((one) => one.zone !== "battlefield"), "neither land enters until the second choice");
+		if (location !== "battlefield") assert.ok(!project(table, 1).objects!.some((one) => one.id === own!.id), "a pending reveal is still private");
+		const partial = structuredClone(table), at = table.ledger.length;
+		pick(1);
+		assert.ok(lands.every((one) => one.zone === "battlefield"));
+		assert.equal(lands[0]!.tapped, !choosing); assert.equal(lands[1]!.tapped, true, "another tapped entry instruction still applies");
+		assert.equal(seat(table, 0).pool.length, 0, "inserting a reveal keeps same-group mana ids aligned");
+		const reveal = table.log.at(-1)!.changes.filter((one) => one.do === "reveal");
+		assert.equal(reveal.length, location === "hand" ? 1 : 0, "the same card may be beheld twice without being spent");
+		if (location === "hand") assert.match(describe(table, table.log.at(-1)!, 1), /revealed The Theorist, Jace Beleren from hand/);
+		assert.deepEqual(relive(partial, table.ledger.slice(at)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 	}
 });

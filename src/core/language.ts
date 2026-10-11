@@ -298,8 +298,8 @@ export const Defs = {
 			prepared: Type.Optional(Type.Literal(true)),
 			choose: Type.Optional(object({ as: text, from: one("basic-land-type", "creature-type") })),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
-			/** "You may pay 2 life. If you don't, it enters tapped": the generic entry decision asks its controller before the group commits. */
-			unlessPay: Type.Optional(object({ life: positive })) }),
+			/** Optional entry payments: life or choosing public permanents/revealing hand cards. Other entry costs remain unsupported. */
+			unlessPay: Type.Optional(Type.Union([object({ life: positive }), object({ show: object({ choose: Type.Ref("Selector"), count: positive }) })])) }),
 		/** "If it would die, exile it instead." */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),
 		/** A mana ability, used while paying (605, 601.2g): `colors` once each, or `any` mana of one chosen color; `times` repeats it ("{G} for each Elf"). */
