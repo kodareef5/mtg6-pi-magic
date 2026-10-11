@@ -202,10 +202,12 @@ export const Defs = {
 	}),
 
 	/** Something that happened, as the table recorded it. */
-	Event: object({
+	Event: Type.Object({
 		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters"),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
+		/** Ordinal among all spells cast by that caster this turn, not only those matching of. */
+		ordinal: Type.Optional(positive),
 		face: Type.Optional(Face), fully: Type.Optional(Type.Literal(true)),
 		of: Type.Optional(Type.Ref("Selector")),
 		/** Who cast, attacked, or controls the targeting spell or ability. */
@@ -222,9 +224,11 @@ export const Defs = {
 		combat: Type.Optional(Type.Boolean()),
 		/** "One or more": one trigger for the whole group. */
 		batch: Type.Optional(Type.Literal(true)),
-	}),
+	}, { additionalProperties: false, if: { required: ["ordinal"] }, then: { properties: { on: { const: "cast" } } } }),
 
 	Effect: object({ targets: Type.Optional(Type.Array(Type.Ref("Target"))), instructions: Type.Array(Type.Ref("Instruction")) }),
+	/** A standing modal trigger chooses exactly one complete effect as it is put on the stack. */
+	TriggerEffect: Type.Union([Type.Ref("Effect"), object({ modes: Type.Array(Type.Ref("Effect"), { minItems: 2 }) })]),
 
 	TokenSpec: object({
 		name: text, types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
@@ -316,7 +320,7 @@ export const Defs = {
 		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** A triggered ability. `if` is its intervening if (603.4). */
-		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("Effect"),
+		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("TriggerEffect"),
 			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Union([Type.Literal("once-per-turn"), Type.Literal("once-per-turn-use")])) },
 			{ additionalProperties: false, if: { properties: { limit: { const: "once-per-turn-use" } }, required: ["limit"] }, then: { required: ["may"] } }),
 		/** A static ability. Applies while `if` holds, to whatever matches `affects` at each reading. */

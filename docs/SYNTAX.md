@@ -325,6 +325,11 @@ Counter watches use `on: "counters"`, optional `counter` for the kind and
 `reaches` for crossing an Nth-counter threshold, including entry counters.
 See [counter watches](examples/counter-watches.md) for batching and actor limits.
 
+A standing watch's `effect.modes` offers one mode before its controller puts the
+trigger on the stack. `event.ordinal` selects a numbered spell cast by that
+caster this turn, independently of a later resolution-time condition. See
+[modal triggers](examples/modal-triggers.md) for target scope and limits.
+
 A **registration** is a public note on an object. It lives while that object
 exists, or until its own end. Every registration quotes the text it carries out
 in `basis`, so another seat or a judge can check it. Registrations are how a

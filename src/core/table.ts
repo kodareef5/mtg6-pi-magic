@@ -161,7 +161,7 @@ export type Trigger = {
 	/** "This": the object whose ability triggered, as it was when it triggered. */
 	source: ObjectRef;
 	basis: string;
-	effect: Effect;
+	effect: Effect | { modes: Effect[] };
 	/** The intervening "if", checked as it triggers and again as it resolves (603.4). */
 	check?: Condition;
 	/** "You may": asked as it resolves. */

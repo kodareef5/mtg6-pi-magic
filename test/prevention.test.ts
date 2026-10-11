@@ -160,7 +160,7 @@ test("prevention precedes damage results, yields to prohibitions, expires and re
 	// A real landfall instruction reaches ordering through the serial resolution dispatcher.
 	const game = build("Rakdos Lizards"); main(game, 0);
 	const terms = pack("Iridescent Vinelasher");
-	for (const term of terms) if (term.kind === "watch") for (const instruction of term.effect.instructions) if (instruction.do === "damage") instruction.as = "dealt";
+	for (const term of terms) if (term.kind === "watch" && "instructions" in term.effect) for (const instruction of term.effect.instructions) if (instruction.do === "damage") instruction.as = "dealt";
 	const lizard = establish(game, 0, "Iridescent Vinelasher", terms);
 	establish(game, 0, "Valley Flamecaller"); establish(game, 0, "Valley Flamecaller");
 	place(game, 0, "hand", "Mountain");

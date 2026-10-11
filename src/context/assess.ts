@@ -33,6 +33,7 @@ const SYSTEM = [
 	exampleIndex,
 	"The complete package schema is checked locally; the tool uses a shallow schema to avoid recursive expansion by providers.",
 	JSON.stringify(PackageSchema),
+	"A standing choose-one trigger uses effect.modes with complete effects. Its controller chooses the mode and that mode's targets when putting the single trigger on the stack. event.ordinal matches the caster's numbered spell of this turn without a resolution-time recheck. Read modal-triggers.md. Multiple chosen modes, another chooser and remembered prior modes remain unsupported; watch.if is an intervening condition and cannot substitute for ordinal.",
 	"A fixed damage increase uses damage-rule mode add with a positive integer amount and the printed source or recipient filters. Core asks affected players to order multiple matching increases and prevention effects. Read damage-additions.md. Multipliers, reductions, redirection, finite shields and extra effects on prevention remain unsupported; do not approximate them with extra damage instructions.",
 	"Offspring combines an optional named additional mana cost with an intervening-if entry trigger. The trigger uses cast.paid for its distinct cost instance and token.copy with except power/toughness 1/1. Read token-copies.md and named-costs.md. Fixed copy exceptions refuse sources with continuous base-setting abilities until characteristic-defining abilities are distinguished; do not approximate them with a later modify instruction.",
 ].join("\n\n");

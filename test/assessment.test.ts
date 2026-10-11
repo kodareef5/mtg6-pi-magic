@@ -67,12 +67,12 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	assert.throws(() => checkProcedure(incompleteUnion), /every branch/);
 	assert.doesNotThrow(() => checkProcedure(search));
 	const standingSearch = structuredClone(pack), searchWatch = standingSearch.registers[1]!;
-	if (searchWatch.kind !== "watch") assert.fail("Expected a standing watch");
+	if (searchWatch.kind !== "watch" || "modes" in searchWatch.effect) assert.fail("Expected a nonmodal standing watch");
 	searchWatch.effect.instructions = [{ do: "perform", who: "you", may: true, instructions: unscopedSearch.instructions }];
 	assert.match(assessmentProblems(printed, standingSearch).join("; "), /library selection needs an explicit owner/,
 		"nested standing effects reject an unscoped library before a trigger can expose it");
 	const brokenStanding = structuredClone(pack), watch = brokenStanding.registers[1]!;
-	if (watch.kind !== "watch") assert.fail("Expected a standing watch");
+	if (watch.kind !== "watch" || "modes" in watch.effect) assert.fail("Expected a nonmodal standing watch");
 	watch.effect.instructions.push({ do: "damage", to: "target:1", amount: 1 });
 	assert.match(assessmentProblems(printed, brokenStanding).join("; "), /target:1 names a target slot/,
 		"a standing effect checks target slots before its first trigger, just as a procedure does");
@@ -90,7 +90,7 @@ test("assessment covers the whole card before play, and accepted terms supply en
 		"a future trigger's local binding does not escape into the granting ability");
 	const unbound = structuredClone(kellan);
 	const granting = unbound.instructions[0]!;
-	if (granting.do !== "modify" || granting.change.registers?.[0]?.kind !== "watch") assert.fail("Expected the granted watch");
+	if (granting.do !== "modify" || granting.change.registers?.[0]?.kind !== "watch" || "modes" in granting.change.registers[0].effect) assert.fail("Expected the nonmodal granted watch");
 	granting.change.registers[0].effect.instructions.shift();
 	assert.throws(() => checkProcedure(unbound), /bound:card is used before/, "the nested trigger is checked within its own scope");
 	const abrade = table.printed.Abrade!;

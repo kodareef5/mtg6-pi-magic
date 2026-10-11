@@ -97,6 +97,8 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
 					const ownSlots = effect.targets?.length || ((value as { do?: string }).do === "delay" ? slots : 0);
 					refs(effect, ownSlots, new Set(bound));
+				} else if (key === "modes" && Array.isArray(one)) {
+					for (const mode of one as { targets?: unknown[] }[]) refs(mode, mode.targets?.length ?? 0, new Set(bound));
 				} else if (key !== "instructions") refs(one, slots, bound);
 			}
 			if ("instructions" in value && Array.isArray(value.instructions))

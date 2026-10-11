@@ -13,7 +13,7 @@
 import { characteristics, walk, type Traits } from "./characteristics.ts";
 import { doubleFaced } from "./faces.ts";
 import { aiming, summary, targetings } from "./announce.ts";
-import { damageSource, holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
+import { damageSource, happened, holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
 import { playing, type Activation, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { GameEvent, Registration } from "./language.ts";
@@ -25,6 +25,7 @@ import { casting } from "./casting.ts";
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
 	on: GameEvent["on"];
+	ordinal?: number;
 	/** What it happened to, as it was then. */
 	object?: Seen;
 	traits?: Traits;
@@ -76,6 +77,11 @@ export function before(table: Table, changes: Change[]): World | undefined {
 /** What one group did that a watch can see. */
 function occurrences(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }): Occurrence[] {
 	const found: Occurrence[] = [];
+	const castCounts = new Map<SeatId, number>();
+	const castOrdinal = (who: SeatId) => {
+		const next = (castCounts.get(who) ?? happened(table).filter(one => one.kind === "cast" && one.by === who).length) + 1;
+		castCounts.set(who, next); return next;
+	};
 	const now = (id: string) => table.things.get(id);
 	const counts = new Map<string, Record<string, number>>();
 	const counters = (id: string, changes: Record<string, number>, entering = false) => {
@@ -135,7 +141,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				if (!ability || !spell || ability.timing === "mana") break;
 				// Cast from the zone the card was in before the group moved it to the stack (601.2a).
 				const from = receipt.before[spell.id]?.zone;
-				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", object: spell, traits: characteristics(table, spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
+				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", ordinal: castOrdinal(ability.controller), object: spell, traits: characteristics(table, spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
 				for (const chosen of ability.targets.flat()) {
 					const aimed = "id" in chosen ? now(chosen.id) : undefined;
 					if (aimed && "id" in chosen && aimed.incarnation === chosen.incarnation) found.push({ on: "targeted", object: aimed, traits: characteristics(table, aimed), found: ref(aimed), player: ability.controller, source: spell });
@@ -179,6 +185,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
+	if (event.ordinal !== undefined && event.ordinal !== occurrence.ordinal) return null;
 	if (event.counter !== undefined && event.counter !== occurrence.counter) return null;
 	if (event.reaches !== undefined && !(occurrence.beforeCount !== undefined && occurrence.beforeCount < event.reaches && occurrence.afterCount! >= event.reaches)) return null;
 	if (event.combat !== undefined && event.combat !== occurrence.combat) return null;
@@ -366,31 +373,36 @@ export function triggerWindow(table: Table): Pending | null {
 	const moves: Move[] = mine.flatMap((trigger): Move[] => {
 		const source = world.lastKnown(trigger.source)?.object;
 		const name = source?.card ?? source?.token?.name ?? trigger.source.id;
-		const slots = trigger.effect.targets ?? [];
 		const scope: Scope = { world, controller: trigger.controller, ...(source ? { source } : {}), event: eventScope(world, trigger.event),
 			...(trigger.bound ? { bound: trigger.bound } : {}), ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
-		const aims = slots.length ? targetings(slots, scope) : [trigger.targets ?? []];
-		if (!aims.length) return [{ option: { id: `trigger:${trigger.id}:removed`, label: `${name}: ${trigger.basis}`, shows: "No legal targets: it is removed from the stack (603.3d)." },
-			changes: [{ do: "trigger", action: "put", trigger: trigger.id, was: triggered(trigger) }], reason: "resolve" }];
-		return aims.map((targets): Move => {
-			const id = `ability-${table.cursor.clock + 1}`;
-			const ability: Activation = { source: trigger.source, controller: trigger.controller, claim: `${name}: ${trigger.basis}`, basis: trigger.basis, timing: "stack",
-				...(doubleFaced(table.printed[source?.card ?? ""]) ? { transformAt: trigger.transformAt ?? source?.transformed ?? 0 } : {}),
-				cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(trigger.effect.instructions),
-				trigger: { event: structuredClone(trigger.event), ...(trigger.chapter !== undefined ? { chapter: trigger.chapter } : {}), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
-					...(trigger.limit === "once-per-turn-use" ? { limit: trigger.limit } : {}),
-					...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
-			const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
-			const recipient = trigger.event.recipient && world.lastKnown(trigger.event.recipient)?.object;
-			const recipientName = recipient && !recipient.faceDown && PUBLIC.has(recipient.zone) ? recipient.card ?? recipient.token?.name ?? recipient.id : "an unknown permanent";
-			const eventAmount = trigger.event.amount === undefined ? [] : [`Amount in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
-			return { option: { id: `trigger:${trigger.id}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
-				label: [`Put on the stack: ${name}: ${trigger.basis}`, ...aimed].join(" "),
-				shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...eventAmount, ...aimed, ...trigger.effect.instructions.map(summary), after(trigger)].join(" "),
-				objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
-				trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: trigger.basis, targets: structuredClone(targets.flat()) } },
-				changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
+		const modal = "modes" in trigger.effect;
+		const effects = "modes" in trigger.effect ? trigger.effect.modes : [trigger.effect];
+		const choices = effects.flatMap((effect, mode): Move[] => {
+			const slots = effect.targets ?? [], modeName = modal ? ` Mode ${mode + 1}: ${effect.instructions.map(summary).join(" ")}` : "";
+			const aims = slots.length ? targetings(slots, scope) : [trigger.targets ?? []];
+			return aims.map((targets): Move => {
+				const id = `ability-${table.cursor.clock + 1}`;
+				const ability: Activation = { source: trigger.source, controller: trigger.controller, claim: `${name}: ${trigger.basis}${modeName}`, basis: trigger.basis, timing: "stack",
+					...(doubleFaced(table.printed[source?.card ?? ""]) ? { transformAt: trigger.transformAt ?? source?.transformed ?? 0 } : {}),
+					cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(effect.instructions),
+					trigger: { event: structuredClone(trigger.event), ...(trigger.chapter !== undefined ? { chapter: trigger.chapter } : {}), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
+						...(trigger.limit === "once-per-turn-use" ? { limit: trigger.limit } : {}),
+						...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
+				const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
+				const recipient = trigger.event.recipient && world.lastKnown(trigger.event.recipient)?.object;
+				const recipientName = recipient && !recipient.faceDown && PUBLIC.has(recipient.zone) ? recipient.card ?? recipient.token?.name ?? recipient.id : "an unknown permanent";
+				const eventAmount = trigger.event.amount === undefined ? [] : [`Amount in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
+				return { option: { id: `trigger:${trigger.id}${modal ? `:mode:${mode}` : ""}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
+					label: [`Put on the stack: ${name}: ${trigger.basis}${modeName}`, ...aimed].join(" "),
+					shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...eventAmount, ...aimed, ...effect.instructions.map(summary), after(trigger)].join(" "),
+					objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
+					trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: `${trigger.basis}${modeName}`, targets: structuredClone(targets.flat()) } },
+					changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
+			});
 		});
+		return choices.length ? choices : [{ option: { id: `trigger:${trigger.id}:removed`, label: `${name}: ${trigger.basis}`,
+			shows: modal ? "No mode has legal targets: remove the ability (603.3c)." : "No legal targets: it is removed from the stack (603.3d)." },
+			changes: [{ do: "trigger", action: "put", trigger: trigger.id, was: triggered(trigger) }], reason: "resolve" }];
 	});
 	return { situation: "trigger-order", seat: seat.id, question: "Choose one waiting trigger and its targets to put on the stack. Triggers put on later resolve first (603.3b).", moves };
 }
