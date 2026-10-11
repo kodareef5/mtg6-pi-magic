@@ -196,7 +196,9 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `each` | repeat for each player, with `bound:player` |
 
 Searching a library is `choose` from the library, then `move`, then `shuffle`.
-Name the library's owner or controller explicitly. Put an optional search's
+Name the library's owner or controller explicitly. Equipment validation refuses
+an explicit library selection without that scope or an inspected binding;
+resolution also checks visibility before showing any options. Put an optional search's
 whole sequence inside `perform` with `may`, so accepting and finding nothing
 still shuffles but declining does not. See [optional search](examples/optional-search.md).
 Beholding is `choose` from the battlefield or hand with `reveal`. There is no

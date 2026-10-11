@@ -15,6 +15,7 @@ import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
+import { selectionScoped } from "./inspection.ts";
 import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
@@ -91,6 +92,8 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "choose" && instruction.from.zones?.includes("library") && !selectionScoped(instruction.from))
+				throw new Error("A library selection needs an explicit owner, controller or inspected binding in every branch; card characteristics do not grant a search.");
 			refs(instruction, slots, bound);
 			if (instruction.as) bound.add(instruction.as);
 		}

@@ -57,6 +57,20 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	const modal = table.printed["Origin of Metalbending"]!;
 	assert.equal(quotes(modal, modal.oracle), true, "a full multiline quotation keeps every printed bullet line");
 	assert.deepEqual(assessmentProblems(printed, pack), []);
+	const search = example("Crack Fabled Passage for a basic land"), unscopedSearch = structuredClone(search);
+	const selection = unscopedSearch.instructions[0]!;
+	if (selection.do !== "choose") assert.fail("Expected a search selection");
+	delete selection.from.owner;
+	assert.throws(() => checkProcedure(unscopedSearch), /library selection needs an explicit owner/);
+	const incompleteUnion = structuredClone(unscopedSearch);
+	if (incompleteUnion.instructions[0]!.do === "choose") incompleteUnion.instructions[0]!.from.any = [{ owner: "you" }, { types: ["land"] }];
+	assert.throws(() => checkProcedure(incompleteUnion), /every branch/);
+	assert.doesNotThrow(() => checkProcedure(search));
+	const standingSearch = structuredClone(pack), searchWatch = standingSearch.registers[1]!;
+	if (searchWatch.kind !== "watch") assert.fail("Expected a standing watch");
+	searchWatch.effect.instructions = [{ do: "perform", who: "you", may: true, instructions: unscopedSearch.instructions }];
+	assert.match(assessmentProblems(printed, standingSearch).join("; "), /library selection needs an explicit owner/,
+		"nested standing effects reject an unscoped library before a trigger can expose it");
 	const brokenStanding = structuredClone(pack), watch = brokenStanding.registers[1]!;
 	if (watch.kind !== "watch") assert.fail("Expected a standing watch");
 	watch.effect.instructions.push({ do: "damage", to: "target:1", amount: 1 });
