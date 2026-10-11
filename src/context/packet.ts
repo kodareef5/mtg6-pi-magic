@@ -161,7 +161,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	const factored = choices(all), menu = context.inspection ? inspect(factored, context.inspection, context.capacity) : undefined;
 	const inspected = menu?.scope && new Set(menu.scope);
 	const offered = inspected ? all.filter((one) => inspected.has(one.id)) : all, data = factored;
-	const itemList = checklist(frame);
+	const itemList = checklist(frame, state);
 	const bindingsHere = here || state?.plan.may?.some((one) => matches(one.when, frame));
 	const attention = context.inspection?.use ? [] : itemList.filter((one) => ["unavailable", "waiting"].includes(one.status));
 	const scoped = decisionFacts(frame, offered, attention), names = new Set(scoped.objects.flatMap((one) => one.card ? [one.card] : []));

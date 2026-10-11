@@ -1,6 +1,6 @@
 /** A seat's checklist at one decision. Assessing an item neither takes it nor ends the window. */
 import type { Frame, Option } from "./types.ts";
-import { laterStep, planState } from "./planning.ts";
+import { laterStep, planState, type PlanState } from "./planning.ts";
 import { matches } from "./query.ts";
 import { select } from "./query.ts";
 import { holds, viewWorld } from "./selectors.ts";
@@ -40,11 +40,12 @@ function waitsForStack(option: PlanOption, frame: Frame): boolean {
 }
 
 /** The checklist comes from projected facts and unfinished plans, never hidden cards or Oracle interpretation. */
-export function checklist(frame: Frame): ReviewItem[] {
+export function checklist(frame: Frame, state?: PlanState | null): ReviewItem[] {
 	const { view, decision } = frame;
 	if (view.window.kind !== "turn" || !decision || !view.work ||
 		!(decision.situation === "priority" || decision.options.some((one) => ["attack:done", "block:done"].includes(one.id)))) return [];
-	const items: ReviewItem[] = [], state = planState(frame);
+	if (state === undefined) state = planState(frame);
+	const items: ReviewItem[] = [];
 	const objects = view.objects ?? [], done = new Set(view.done ?? []);
 	const add = (id: string, label: string, kind: ReviewItem["kind"], status: ReviewItem["status"], options: Option[], names: string[] = [], remaining?: string[]) => {
 		const visible = new Set(objects.flatMap((object) => object.card ? [object.card] : []));

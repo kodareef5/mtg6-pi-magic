@@ -1459,6 +1459,18 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.equal(execution(sameState, ordinaryNormal.id), undefined, "a different casting mode does not finish the planned mode");
 	assert.deepEqual(execution(sameState, ordinaryWarp.id), { plan: sameState.revision, step: 0 }, "an identical ordinary announcement carries out the step too");
 	assert.match(annotate(sameFrame.decision!.options, sameState).find((one) => one.id === ordinaryWarp.id)!.notes!.join(" "), /Plan step 1/);
+	const indexed = structuredClone(sameFrame), reordered = indexed.decision!.options.find((one) => one.id === ordinaryWarp.id)!;
+	const reverseKeys = (value: unknown): unknown => Array.isArray(value) ? value.map(reverseKeys)
+		: value && typeof value === "object" ? Object.fromEntries(Object.entries(value).reverse().map(([key, one]) => [key, reverseKeys(one)])) : value;
+	reordered.use = reverseKeys(reordered.use) as typeof reordered.use;
+	const collision = structuredClone(reordered); collision.id = "same-payment-different-meaning";
+	collision.use!.instructions.push({ do: "draw", who: "you", count: 1 });
+	indexed.decision!.options.push(collision);
+	const indexedState = planState(indexed)!;
+	assert.deepEqual(execution(indexedState, reordered.id), { plan: sameState.revision, step: 0 }, "object key order does not split equal announcements into different payment buckets");
+	assert.equal(execution(indexedState, collision.id), undefined, "a matching payment key never substitutes for complete instruction equality");
+	assert.deepEqual(indexedState.due[0]!.candidates.map((one) => one.id), sameState.due[0]!.candidates.map((one) => one.id), "indexing retains candidate order and every equivalent payment");
+	assert.deepEqual(checklist(indexed, indexedState), checklist(indexed), "a caller can reuse this frame's plan state without changing its checklist");
 	apply(equivalent, ordinaryWarp.id, "model", "chosen", execution(sameState, ordinaryWarp.id));
 	assert.deepEqual(workFrame(equivalent, 1).view.done, [0], "progress is journaled on the actual chosen row, without a second plan edit");
 	assert.deepEqual(planState(workFrame(equivalent, 1))!.due, [], "the executed cast is not reintroduced as a missing essential step");

@@ -14,17 +14,17 @@ export type Payment = Pick<Activation, "cost" | "paid"> & { funding?: string[] }
 export function choices(options: readonly Option[]) {
 	const uses: Record<string, Use> = {}, payments: Record<string, Payment> = {}, funding: Record<string, Funding> = {};
 	const useKeys = new Map<string, string>(), paymentKeys = new Map<string, string>(), fundingKeys = new Map<string, string>();
-	const intern = <T>(facts: T, keys: Map<string, string>, records: Record<string, T>, prefix: string, identity?: unknown) => {
+	const intern = <T>(facts: T | (() => T), keys: Map<string, string>, records: Record<string, T>, prefix: string, identity?: unknown) => {
 		const key = JSON.stringify(identity ?? facts), found = keys.get(key);
 		if (found) return found;
-		const id = `${prefix}${keys.size}`; keys.set(key, id); records[id] = structuredClone(facts); return id;
+		const id = `${prefix}${keys.size}`; keys.set(key, id); records[id] = structuredClone(typeof facts === "function" ? (facts as () => T)() : facts); return id;
 	};
 	const listed: Choice[] = options.map((option) => {
 		// The trigger fact groups target choices for the seat's order questions; the label already says it.
 		if (!option.use) { const { use: _, trigger: __, ...plain } = option; return structuredClone(plain); }
 		const { source, claim, basis, timing, speed, slots, words, instructions, cost, paid, funding: taps, targets, x } = option.use;
 		return { id: option.id, label: option.label,
-			use: intern({ source, claim, basis, timing, ...(speed ? { speed } : {}), slots, ...(words ? { words } : {}), effects: instructions.map(summary) }, useKeys, uses, "use:", { source, claim, basis, timing, speed, slots, words, instructions }),
+			use: intern(() => ({ source, claim, basis, timing, ...(speed ? { speed } : {}), slots, ...(words ? { words } : {}), effects: instructions.map(summary) }), useKeys, uses, "use:", { source, claim, basis, timing, speed, slots, words, instructions }),
 			payment: intern({ cost, paid, ...(taps ? { funding: taps.map((tap) => intern(tap, fundingKeys, funding, "funding:")) } : {}) }, paymentKeys, payments, "payment:"),
 			targets: structuredClone(targets), ...(x === undefined ? {} : { x }), ...(option.notes?.length ? { notes: [...option.notes] } : {}) };
 	});

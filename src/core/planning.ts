@@ -8,13 +8,13 @@
  * decides what to do with it.
  * Past 150 lines to keep matching, resource marks and execution credit together.
  */
-import { holds as condition, viewWorld, type Scope } from "./selectors.ts";
+import { holds as condition, targetKey, viewWorld, type Scope } from "./selectors.ts";
 import { currentPlan, matches, reached, select } from "./query.ts";
 import { procedureOptions, type ProcedureOption } from "./procedures.ts";
 import type { Plan, PlanOption, Procedure } from "./language.ts";
 import type { Frame, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
-import type { LedgerRow } from "./table.ts";
+import type { Activation, LedgerRow } from "./table.ts";
 import { isDeepStrictEqual } from "node:util";
 
 /** A step or branch that applies now, and the listed options that fit it. */
@@ -58,6 +58,16 @@ function spent(option: Option) {
 		...(cost.exiled ?? []), ...(cost.discarded ?? [])];
 }
 
+/** A coarse payment index. Equal terms share a key regardless of object-key order;
+ * collisions still require full equality, including instructions and restrictions. */
+function activationKey(use: Activation): string {
+	const cost = use.cost;
+	return JSON.stringify([targetKey(use.source), use.controller, use.timing, use.claim, use.x,
+		use.targets.map((set) => set.map(targetKey)), use.paid,
+		use.funding?.map((tap) => [targetKey(tap.source), tap.colors]), cost.generic, cost.colors,
+		[cost.tapped, cost.sacrificed, cost.exiled, cost.discarded, cost.shown, cost.counters?.on].map((refs) => refs?.map(targetKey))]);
+}
+
 function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[] } {
 	const { action } = option;
 	if ("procedure" in action) {
@@ -68,8 +78,16 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 		// The plan adds its own id only for an announcement nothing listed makes,
 		// so one physical action is offered once.
 		const listed = (frame.decision?.options ?? []).filter((one) => one.use);
-		const equivalent = listed.filter((one) => offered.some((choice) => isDeepStrictEqual(one.use, choice.activation)));
-		const procedures = offered.filter((choice) => !listed.some((one) => isDeepStrictEqual(one.use, choice.activation)));
+		const indexed = new Map<string, Option[]>(), matched = new Set<Option>(), procedures: ProcedureOption[] = [];
+		for (const one of listed) {
+			const key = activationKey(one.use!), bucket = indexed.get(key);
+			if (bucket) bucket.push(one); else indexed.set(key, [one]);
+		}
+		for (const choice of offered) {
+			const same = (indexed.get(activationKey(choice.activation)) ?? []).filter((one) => isDeepStrictEqual(one.use, choice.activation));
+			if (same.length) for (const one of same) matched.add(one); else procedures.push(choice);
+		}
+		const equivalent = listed.filter((one) => matched.has(one));
 		return { options: [...procedures.map((choice) => choice.option), ...equivalent], procedures };
 	}
 	const objects = action.objects ? select(action.objects, frame) : null;
