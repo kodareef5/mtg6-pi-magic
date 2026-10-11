@@ -742,7 +742,7 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 	assert.equal(rowsOf(read(grandPath).lines).length, 10);
 });
 
-test("work takes its answer only through submit, and tells the model what was wrong until it is right", async () => {
+test("work takes its answer only through submit, and tells the model what was wrong until it is right", async (test) => {
 	const replies = [
 		{ content: [{ type: "text", text: "We need to cast the Elves first, then..." }], stopReason: "stop" },
 		{ content: [{ type: "toolCall", id: "a", name: "lookup", arguments: { rule: "302.6" } }, { type: "toolCall", id: "b", name: "submit", arguments: { commands: [] } }], stopReason: "toolUse" },
@@ -812,6 +812,24 @@ test("work takes its answer only through submit, and tells the model what was wr
 	assert.match(timed.spent()[0]!.failed!, /timed out/);
 	assert.equal(timed.spent()[1]!.failed, undefined);
 	assert.equal(retry.broken(), null);
+
+	// Pregame's fifteen minutes was measured at high effort already. Capture
+	// the requested deadline and fire it promptly, without a timing assertion.
+	const deadlines: number[] = [], schedule = globalThis.setTimeout;
+	const mocked = test.mock.method(globalThis, "setTimeout", (callback: () => void, delay?: number) => {
+		deadlines.push(delay ?? 0); return schedule(callback, 1);
+	});
+	const stalled = tally(), pregameSignals: AbortSignal[] = [];
+	const pregame = reasoner({ role: "pregame", thinking: "high", model: sol, tally: stalled, attempts: 1,
+		stream: (_model, _context, options) => { pregameSignals.push(options!.signal!); return { result: () => new Promise(() => {}) }; } });
+	const keepAlive = setInterval(() => {}, 100);
+	try { await assert.rejects(pregame.work("matchup brief", { system: "S", user: "decks" }, { submit }), /timed out after 900s/); }
+	finally { clearInterval(keepAlive); mocked.mock.restore(); }
+	assert.deepEqual(deadlines, [900_000], "high effort does not turn fifteen minutes into ninety");
+	assert.equal(pregameSignals[0]!.aborted, true, "the provider receives cancellation at the deadline");
+	assert.equal(stalled.spent().length, 1);
+	assert.match(stalled.spent()[0]!.failed!, /timed out/);
+	assert.equal(stalled.spent()[0]!.ceiling, CEILING.pregame * 6, "output and roster settings are unchanged");
 });
 
 test("opening-hand splits are exact: they match counting every hand", () => {

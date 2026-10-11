@@ -110,8 +110,8 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 900_000, strategy: 150_000, judge: 150_000, summary: 60_000 };
 /**
- * Every timeout and output ceiling in this package was measured on a low-effort model. A model asked to think
- * harder answers later and writes longer answers, so both scale with the thinking level here, in the one place
+ * Output ceilings and non-pregame timeouts were measured on a low-effort model. A model asked to think
+ * harder answers later and writes longer answers, so those scale with the thinking level here, in the one place
  * every chat call passes through. Low is the baseline and scales nothing. Pi adds a provider's thinking budget
  * on top of the ceiling, so the ceiling sizes the answer alone. Measured October 10: Haiku 5.5 medium
  * coordinator answers ran a median of 4,600 output tokens, a p90 of 9,900 and a longest of 18,100 against a
@@ -148,7 +148,7 @@ export function reasoner(options: {
 		taskSignal?.throwIfAborted();
 		options.signal?.throwIfAborted();
 		const effort = EFFORT[(options.thinking ?? "low") as ThinkingLevel] ?? 1;
-		const ceiling = asked * effort, timeoutMs = limitMs * effort;
+		const ceiling = asked * effort, timeoutMs = limitMs * (options.role === "pregame" ? 1 : effort);
 		const began = Date.now();
 		const prompt = createHash("sha256").update(system).update(JSON.stringify(tools ?? [])).digest("hex").slice(0, 16);
 		const finish = meter(options.tally, {
