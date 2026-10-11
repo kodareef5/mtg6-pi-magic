@@ -1,0 +1,146 @@
+{
+	"card": "Simulacrum Synthesizer",
+	"generated": "2026-10-10",
+	"source": "6dee9eaf5003477730ac8c33d3cce281f35b92263afdd2e5c59f441f50da5299",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Simulacrum Synthesizer",
+		"registers": [
+			{
+				"basis": "When this artifact enters, scry 2.",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 2,
+								"of": "you"
+							},
+							"as": "looked"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked"
+							},
+							"count": 2,
+							"upTo": true,
+							"as": "bottomed"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"what": "bound:bottomed",
+							"position": "bottom"
+						},
+						{
+							"do": "order",
+							"who": "you",
+							"every": {
+								"zones": [
+									"library"
+								],
+								"is": "bound:looked",
+								"not": {
+									"is": "bound:bottomed"
+								}
+							},
+							"position": "top"
+						}
+					]
+				}
+			},
+			{
+				"basis": "Whenever another artifact you control with mana value 3 or greater enters, create a 0/0 colorless Construct artifact creature token with \"This token gets +1/+1 for each artifact you control.\"",
+				"kind": "watch",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"artifact"
+						],
+						"controller": "you",
+						"other": true,
+						"manaValue": {
+							"atLeast": 3
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Construct",
+								"types": [
+									"artifact",
+									"creature"
+								],
+								"subtypes": [
+									"Construct"
+								],
+								"colors": [],
+								"power": 0,
+								"toughness": 0,
+								"registers": [
+									{
+										"basis": "Whenever another artifact you control with mana value 3 or greater enters, create a 0/0 colorless Construct artifact creature token with \"This token gets +1/+1 for each artifact you control.\"",
+										"kind": "continuous",
+										"affects": {
+											"is": "this",
+											"zones": [
+												"battlefield"
+											]
+										},
+										"change": {
+											"power": {
+												"count": {
+													"types": [
+														"artifact"
+													],
+													"controller": "you",
+													"zones": [
+														"battlefield"
+													]
+												}
+											},
+											"toughness": {
+												"count": {
+													"types": [
+														"artifact"
+													],
+													"controller": "you",
+													"zones": [
+														"battlefield"
+													]
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -1,0 +1,61 @@
+{
+	"card": "The Fire Crystal",
+	"generated": "2026-10-10",
+	"source": "53c82111e41833aa4bdf6dbf32f7bbb2a1ced6f2fd9a805eb15b122ddee371fa",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Fire Crystal",
+		"registers": [
+			{
+				"basis": "Red spells you cast cost {1} less to cast.",
+				"kind": "cost",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"colors": [
+						"R"
+					]
+				},
+				"reduce": 1
+			},
+			{
+				"basis": "Creatures you control have haste.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Create a token copy of a creature you control, then sacrifice that token at the beginning of the next end step.",
+				"basis": "{4}{R}{R}, {T}: Create a token that's a copy of target creature you control. Sacrifice it at the beginning of the next end step.",
+				"source": {
+					"card": "The Fire Crystal",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

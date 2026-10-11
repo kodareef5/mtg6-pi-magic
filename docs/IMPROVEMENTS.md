@@ -23,31 +23,29 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control and Boros
-Dragons have standing assessments for every main-deck card. They still have
-thirteen, eight, thirteen, fifteen and five cards with deferred uses respectively.
-All five have completed source-reviewed games.
-[Status](STATUS.md) holds the current count. The other fourteen lists still need
-standing assessments.
+Seven imported main decks have complete standing coverage. Six have completed
+source-reviewed games; Izzet Aggro is admitted and still needs its first game.
+[Status](STATUS.md) holds the current evidence. Twelve lists still need standing
+assessments.
 
-1. Continue saved games from their reviewed repair points, then run fresh
+1. Stage announcements in core before resuming the parked Control versus
+   Azorius game. Priority chooses a use; X, targets, additional costs and mana
+   payment follow as recorded decisions. Do not build their full Cartesian
+   product first. Preserve every available choice, prepared plan guidance,
+   pending-state visibility, cancellation, replay and clone continuation.
+2. Keep large journal menus as an ordered hash and count, retaining the chosen
+   action and accepted terms. Preserve old journal reads. Keep pregame's
+   already measured fifteen-minute request timeout independent of effort scaling.
+3. Resume saved games from their reviewed repair points, then run fresh
    imported pairings in both seat orders. Reuse compatible matchup briefs.
-2. Review accepted runtime procedures and exercised standing terms against
-   their source, including casting opportunities the engine failed to offer.
-   A gap-free replay does not establish correct card meaning. Keep rejected
-   branches and repair before the first affected action.
-3. Resolve the next observed runtime failure with a shared mechanic and an
-   invariant test. Native graveyard prices, Harmonize payments and optional
-   search groups now have that support. Three Steps Ahead now has a token-copy
-   operation for single-face permanents and ordinary tokens; multiple-face
-   copies and copy exceptions remain explicit gaps. Refuse malformed library scopes during
-   preparation and retain the runtime visibility guard.
-4. Widen standing coverage toward the next complete main deck. Entry and spell copies, damage
-   replacements and ability-resolution counts remain blockers. Belladonna Took
-   is the last standing blocker in Boros Tokens. Boros Dragons completed its
-   first ordinary pairing in both seat orders.
-   Review stored restriction words as well as refusals: accepted prose does
-   not execute a missing mechanic.
+   Review runtime procedures and exercised standing terms against their source,
+   including casting opportunities the engine failed to offer. Repair before
+   the first affected action and keep rejected branches.
+4. Widen standing coverage after announcement staging is validated. Iridescent
+   Vinelasher blocks both Rakdos Lizards and Mono-Black Aggro; its additional
+   cost and token-copy exceptions are next. Valley Flamecaller's damage
+   replacement is the other Rakdos blocker. Keep replacement-order choices
+   explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 
 One assessed imported list can play an established opponent; it need not wait

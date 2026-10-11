@@ -55,14 +55,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Bringer of the Last Gift": {
-		"reason": "Bringer of the Last Gift is not ready: When this creature enters, if you cast it, each player sacrifices all other creatures they control. Then each player returns all creature cards from their graveyard that weren't put there this way to the battlefield. — Missing operations: testing whether you cast this permanent for the intervening condition, and selecting graveyard creature cards while excluding exactly those put there by this ability's sacrifices. Cast history this turn does not establish this permanent's casting provenance; the supplied selectors cannot express the required exclusion.",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Carnage, Crimson Chaos": {
 		"reason": "Source review rejected an unconditional graveyard permission for Mayhem {B}{R}. Casting must be restricted to this card having been discarded this turn; a condition on one procedure cannot restrict the shared printed cast. Conditional native permission and discarded-this-turn history are not supported yet.",
 		"decks": [
@@ -399,14 +391,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Simulacrum Synthesizer": {
-		"reason": "Simulacrum Synthesizer is not ready: When this artifact enters, scry 2. — The supplied instruction syntax cannot privately inspect the top two library cards and let their controller put any number on the bottom and the rest on top in any order.",
-		"decks": [
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Slickshot Show-Off": {
 		"reason": "Slickshot Show-Off is not ready: Plot {1}{R} (You may pay {1}{R} and exile this card from your hand. Cast it as a sorcery on a later turn without paying its mana cost. Plot only as a sorcery.) — Performing plot from hand requires a special action that does not use the stack (702.170a–b). The supplied procedure and deferred-use timings cannot express that special action; timing stack would incorrectly make it an activated ability.",
 		"decks": [
@@ -473,14 +457,6 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
-	},
-	"The Fire Crystal": {
-		"reason": "The Fire Crystal is not ready: Red spells you cast cost {1} less to cast. — Missing standing cost-reduction registration: reduce the generic casting cost of red spells you cast by {1}, while this artifact is on the battlefield. Procedure cost.reduce cannot supply a global static reduction.",
-		"decks": [
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
 	},
 	"The Mind Stone": {
 		"reason": "The Mind Stone is not ready: {5}{W}, {T}: Harness The Mind Stone. (Once harnessed, its ∞ ability is active.) — Missing operation: grant the harnessed designation until this permanent leaves the battlefield. Harnessed is not an ability or characteristic, so granting a word or counter is not equivalent.; ∞ — At the beginning of your end step, exile up to one other target nonland permanent you control, then return that card to the battlefield under its owner's control. — Missing standing operation: grant this triggered ability only while the permanent has the harnessed designation. The schema has",
