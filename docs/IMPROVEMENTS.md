@@ -15,74 +15,32 @@ Each finished batch yields a ledger of broken concepts: cards refused as
 unsupported, interpretations that failed, gaps, help requests and rulings.
 Those drive engine and syntax work, ordered by how many decks they block.
 
-## Takeover sequence, October 10
-
-The checkpoint at `2f1dd88` passes 213 offline tests and the type check. The
-156 stored assessments establish source coverage, not executable completeness.
-Every imported deck still has setup blockers. Keep the current roster.
-
-1. Repair the package store and use it through the shared seating path for Pi
-   and the runners. Check source identity and interpreter compatibility, exclude
-   the refusal ledger, write atomically, and preserve carried preparation.
-   Distinguish registration, standing assessment, deferred interpretation and
-   played evidence in the pool report.
-2. Finish the land mechanics already accepted: life payments during mana
-   funding, live conditional-mana checks, and optional entry payments through
-   every battlefield-entry route. Extend the conservation and replay tests.
-3. Expose structured faces from pinned card data. Keep one physical card and
-   its registered full name; derive characteristics from the selected face and
-   zone. Scope source quotations, standing terms and deferred uses by face.
-4. Add alternate casting, Adventure exile permissions and Omen shuffling, then
-   Room door designations and unlocking. Failed resolution must not receive the
-   successful spell's continuation. Unlocking is a special action.
-5. Add transformation without a zone change, entry transformed, craft costs and
-   return, Saga lore and chapter lifecycle, and Prepare's castable copy in exile.
-   Use shared operations and the current collection's cards as regression
-   positions. Other abilities on those cards remain explicit blockers until
-   their own shared operations work.
-6. Reassess affected cards, record the remaining blockers, and play newly ready
-   lists from ordinary setup. Save journals and verify replay and clone parity.
-   Do not rewrite historical decisions or claim a fixture proves a whole deck.
-
-Each stage requires `npm test` and `npm run check`. No inference runs in those
-checks. Live assessment and games retain calls, failures, cost and timing.
-
-Stages 1 and 2 landed in `1971a81`, with 216 passing tests. Stage 3 and alternate
-casting now pass 218 tests and the type check: face-specific source claims,
-modal and split casting, Adventure permission, Omen shuffling and replay. The
-card TSV is unchanged; a source-hashed companion carries structured faces.
-New journals pin it. Older journals keep their original single-face reading.
-Room unlocking, transformation, crafting, Saga lore and Prepare now pass 223
-offline tests and the type check, including replay and clone checks. The fresh
-assessment and pool audit include sideboards, since setup registers those too.
-
-The fresh pass accepted eleven of seventeen multi-face cards' standing terms
-and inventories for $0.5462. Six remain refused for separate operations. Ten of
-the accepted cards still have deferred uses. All nineteen imported lists remain
-blocked when sideboards count. [Status](STATUS.md#takeover-audit-october-10) records
-the evidence and the limits of those counts.
-
 ## Next implementation chunk
 
-1. Extend shared fact queries with mana value, colors, intersecting types and
-   comparisons between objects. Carry the values of the selected spell face
-   through cast events. Use Scalding Viper, Aang's land creatures and Otter's
-   blocking restriction as distinct positions of the same query invariant.
-2. Give a permission its accepted alternative price and explicit expiry, and
-   give generated mana an explicit expiry. Airbend and Roku should use these
-   same records. Preserve them through zone changes, replay and cloning without
-   granting broader permission to an unrelated incarnation.
+1. Assess the 55 remaining cards, mostly newly counted sideboard entries, and
+   update the pool report before choosing further engine work.
+2. Extend shared fact queries with mana value and colors, including the selected
+   spell face in cast events. Scalding Viper is a direct blocker; Thor also
+   needs selector unions and permission expiry, and Colorstorm Stallion needs
+   actual mana-spent facts and token copying. Do not count either as unblocked
+   by queries alone. Add intersecting types and object comparisons when their
+   accepted terms require them.
 3. Add damage events with their amount and recipient, then a resolution-use
    marker for optional once-per-turn effects. Cecil and Jennifer should use the
    same event data; a declined optional effect must leave the use available.
-4. Add bounded private look and selection, selection from an earlier binding,
-   and deterministic library ordering. Use earned visibility throughout. Then
-   interpret the deferred uses that currently need these operations, including
-   the accepted cards whose source coverage outpaces executable support.
-5. Assess the 55 remaining cards, mostly newly counted sideboard entries. Re-run
-   the complete pool report. Start ordinary-deck games only for lists whose
-   standing coverage is complete; a deferred-use stop becomes the next recorded
-   blocker. Keep Jev, the roster and two-game concurrency.
+4. Give permissions an accepted alternative price and explicit expiry, and give
+   generated mana an explicit expiry. Airbend and Roku should use these records
+   without granting permission to an unrelated incarnation.
+5. Add bounded private look and selection, selection from an earlier binding,
+   and deterministic library ordering, starting with Aang at the Crossroads.
+   Keep earned visibility through the whole sequence.
+
+Start ordinary-deck games when two lists have complete standing coverage; a
+required deferred use that cannot execute becomes the next recorded blocker.
+Keep Jev, the current roster and two-game concurrency. Each mechanic lands in
+its own commit with invariant tests and the type check passing. Reassessment
+records costs and source-backed refusals; completed games retain their journals,
+gaps, rulings and replay checks. [Status](STATUS.md) holds the current evidence.
 
 ## Steps, in order
 
@@ -99,11 +57,11 @@ the evidence and the limits of those counts.
    and a refused deck is recorded, not dropped from the list of wanted decks.
    Done: nineteen imported, Boros Dwarves refused on legality.
 3. **Card interpretations once per card.** Packages are per card, not per deck
-   or opponent. A store under `prepared/packages/` keyed by card name and
-   card-file date is loaded before seating, so a new pairing assesses only
-   cards no game has seen, and saves what it assesses. Setup then costs the
-   two briefs, not sixty card readings. Built in `src/core/packages.ts`; the
-   store fills as pairings are prepared.
+   or opponent. Seating loads the read-only seed under `prepared/packages/`
+   and compatible overrides in Pi's `magic/packages/` cache. It assesses missing
+   cards and caches successes there. Bad files and failed writes emit notices;
+   a game's accepted equipment stays in its journal. `tools/assess.ts` maintains
+   the shipped seed explicitly.
 4. **Any two decks.** `tools/matchup.ts --decks "A,B"` seats two collection
    decks by name with short labels; `tools/sim.ts --random N` draws seeded
    random pairings, alternates who plays first, and runs two games at a time.
