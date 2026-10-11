@@ -226,6 +226,23 @@ export function laterStep(state: PlanState, at: number): boolean {
  */
 export function annotate(options: Option[], state: PlanState): Option[] {
 	const order = triggerOrder(state, options);
+	// A payment may belong to several branches but only the first matching step.
+	// Index once: scanning each candidate list for each offered payment is quadratic.
+	const due = new Map<string, string>(), waiting = new Map<string, string>(), branches = new Map<string, string[]>();
+	for (const step of state.due) {
+		const mark = `Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`;
+		for (const option of step.candidates) if (!due.has(option.id)) due.set(option.id, mark);
+	}
+	for (const step of state.waiting) {
+		const mark = `Carries out plan step ${step.at + 1}, ${step.label}, which is scheduled for ${scheduledFor(state.plan.steps[step.at]!.when)}; it is not due now.`;
+		for (const option of step.candidates) if (!waiting.has(option.id)) waiting.set(option.id, mark);
+	}
+	for (const branch of state.branches) {
+		const mark = `Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`;
+		for (const id of new Set(branch.candidates.map(one => one.id))) {
+			const marks = branches.get(id); if (marks) marks.push(mark); else branches.set(id, [mark]);
+		}
+	}
 	return [...options, ...state.procedures.map((choice) => choice.option)].map((option) => {
 		const marks: string[] = [];
 		// Stated in placement order: the trigger named first is the one that goes on now.
@@ -234,11 +251,9 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		// A named target counts whenever its trigger waits, alone included, unless the order puts that trigger on later.
 		else if (option.trigger && (!order || order.now.includes(option.trigger.id)) && state.triggers.some((policy) => aims(policy, option)))
 			marks.push("Aims where your plan's trigger targets name this trigger's target.");
-		const step = state.due.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
-		if (step) marks.push(`Plan step ${step.at + 1}${laterStep(state, step.at) ? ", out of order" : ""}: ${step.label}.${step.waiting ? " Waiting for the stack to empty." : ""}${state.plan.steps[step.at]!.purpose ? ` Choices: ${state.plan.steps[step.at]!.purpose}` : ""}`);
 		// An option that would carry out a step whose window has not come says so, so taking it now is not mistaken for the step.
-		const later = step ? undefined : state.waiting.find((one) => one.candidates.some((candidate) => candidate.id === option.id));
-		if (later) marks.push(`Carries out plan step ${later.at + 1}, ${later.label}, which is scheduled for ${scheduledFor(state.plan.steps[later.at]!.when)}; it is not due now.`);
+		const step = due.get(option.id) ?? waiting.get(option.id);
+		if (step) marks.push(step);
 		if (option.id === "attack:done") {
 			const unfinished = state.due.flatMap((one) => {
 				if (one.candidates.some((candidate) => candidate.id === option.id)) return [];
@@ -247,7 +262,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 			});
 			if (unfinished.length) marks.push(`Finishing now leaves available plan steps unfinished: ${unfinished.join("; ")}.`);
 		}
-		for (const branch of state.branches) if (branch.candidates.some((candidate) => candidate.id === option.id)) marks.push(`Plan branch: ${branch.label}.${branch.waiting ? " Waiting for the stack to empty." : ""}${state.plan.may![branch.at]!.purpose ? ` Choices: ${state.plan.may![branch.at]!.purpose}` : ""}`);
+		for (const mark of branches.get(option.id) ?? []) marks.push(mark);
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
 			// One fact per held object factors across payments. A sentence per

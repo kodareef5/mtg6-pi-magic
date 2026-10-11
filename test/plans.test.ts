@@ -1465,6 +1465,15 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	const largeFacts = planningChoices(largeFrame).uses[0]!;
 	assert.deepEqual(largeFacts, { ...smallFacts, offeredCombinations: 150000 });
 	assert.match(annotate(sameFrame.decision!.options, sameState).find((one) => one.id === ordinaryWarp.id)!.notes!.join(" "), /Plan step 1/);
+	const overlapping = { ...sameFrame, view: { ...sameFrame.view, work: prepareWork(sameFrame, [{ do: "plan.put", plan: { ...sameState.plan,
+		steps: [sameState.plan.steps[0]!, { ...sameState.plan.steps[0]!, label: "A later occurrence" }],
+		may: [{ ...sameState.plan.steps[0]!, label: "First matching branch" }, { ...sameState.plan.steps[0]!, label: "Second matching branch" }],
+	} }]) } };
+	const overlapMarks = annotate(overlapping.decision!.options, planState(overlapping)!).find(one => one.id === ordinaryWarp.id)!.notes!.filter(one => one.startsWith("Plan "));
+	assert.equal(overlapMarks.length, 3, "one payment gets the first matching step and every matching branch");
+	assert.match(overlapMarks[0]!, /^Plan step 1/);
+	assert.match(overlapMarks[1]!, /First matching branch/);
+	assert.match(overlapMarks[2]!, /Second matching branch/);
 	const indexed = structuredClone(sameFrame), reordered = indexed.decision!.options.find((one) => one.id === ordinaryWarp.id)!;
 	const reverseKeys = (value: unknown): unknown => Array.isArray(value) ? value.map(reverseKeys)
 		: value && typeof value === "object" ? Object.fromEntries(Object.entries(value).reverse().map(([key, one]) => [key, reverseKeys(one)])) : value;
