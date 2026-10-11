@@ -14,7 +14,7 @@ import { castWords } from "./cast-words.ts";
 import { enoughExile } from "./cost-selection.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
-import { capacity, fundings, sameness, sick, spentWords, type Price } from "./funding.ts";
+import { capacity, fundings, sameness, sick, spentWords, type Price, type Funding } from "./funding.ts";
 import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure, Target } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
@@ -30,7 +30,7 @@ type Color = Mana["color"];
 
 /** Offer terms can be shared across payments, but never changed through another
  * option. Callers' equipment is cloned before it enters these snapshots. */
-function immutable<T>(value: T): T {
+export function immutable<T>(value: T): T {
 	if (value && typeof value === "object" && !Object.isFrozen(value)) {
 		for (const part of Object.values(value)) immutable(part);
 		Object.freeze(value);
@@ -170,14 +170,14 @@ export function targetConflicts(targets: Chosen[], world: World, controller: Sea
 }
 
 /** The objects and players each slot could take now, before counting. */
-function candidates(slot: Target, scope: Scope): Chosen[] {
+export function targetCandidates(slot: Target, scope: Scope): Chosen[] {
 	const seats = slot.player === undefined ? [] : slot.player === "any" ? scope.world.players.map((one) => one.id) : players(scope, slot.player);
 	return [...(slot.object ? scope.world.objects.filter((object) => matches(scope, object, slot.object!)).map(ref) : []), ...seats.map((player) => ({ player }))];
 }
 
 /** Every way to fill the slots, each chosen with the earlier slots in scope: "Equipment attached to that creature". */
 export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots.reduce<Chosen[][][]>((sets, slot) => sets.flatMap((set) =>
-	subsets(candidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1)).map((option) => [...set, option])), [[]]);
+	subsets(targetCandidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1)).map((option) => [...set, option])), [[]]);
 
 /** The extra costs a procedure states, as each way they can be paid. */
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; reduce?: number; exileSelection?: Activation["exileSelection"] };
@@ -258,15 +258,14 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 
 /** Every source, X, cost, payment and target this seat could announce now.
  * Activation terms are immutable snapshots; activation copies the selected terms. */
-export function offers(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
+export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) {
 	procedure = immutable(structuredClone(procedure));
 	const slots = procedure.targets ?? immutable([]), effects = procedure.instructions.map(summary);
 	const world = viewWorld(frame.view), printed = frame.view.printed ?? {};
-	if (procedure.timing === "spell" && castRestrictions(world, frame.seat).length) return [];
+	if (procedure.timing === "spell" && castRestrictions(world, frame.seat).length) return;
 	const seen = new Set<string>();
 	const sources = useSources(frame, procedure).filter((source) =>
 		!seen.has(sameness(frame, source)) && !!seen.add(sameness(frame, source)));
-	const offered: ProcedureOption[] = [];
 	for (const original of sources) {
 		if (procedure.cost?.loyalty !== undefined && (!(mainWindow(frame) || instantLoyalty(world, frame.seat, original)) || original.zone !== "battlefield" || loyaltyUsed(world, original))) continue;
 		if (procedure.timing !== "spell" && procedure.timing !== "land" && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
@@ -309,59 +308,87 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				const announced = { ...scope, source: spending, x };
 				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
-				const aims = immutable(targetings(slots, announced)).map((targets) => {
-					const aimed = targets.flat(), text = aiming(targets, world, frame.seat);
-					return { targets, refs: aimed.flatMap((chosen) => "id" in chosen ? [chosen] : []),
-						id: targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join(""),
-						label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${text.slice(0, targets.length).join(" ")}` : ""}`,
-						notes: immutable(targetConflicts(aimed, world, frame.seat).map((one) => one.reason)),
-						shows: [...text, ...effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" ") };
-				});
-				if (!aims.length) continue;
-				for (const extra of extras(procedure, announced, source, frame)) {
-					const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
-					const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
-					const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) });
-					const extraRefs = extra.uses.filter((id) => id !== source.id).flatMap((id) => {
-						const object = frame.view.objects?.find((one) => one.id === id); return object ? [immutable(ref(object))] : [];
+				yield { procedure, prefix, slots, effects, world, printed, original, source, sourceRef, selected, granted, mana, reduce, stacked, x, spending, words, scope: announced };
+			}
+		}
+	}
+}
+
+export type OfferBase = ReturnType<typeof offerBases> extends Generator<infer Basis> ? Basis : never;
+
+/** Extra resources and the locked mana price share one calculation in both menus. */
+export function offerCosts(base: OfferBase, frame: Frame) {
+	const { procedure, scope, source, reduce, world, spending, original, mana, x } = base;
+	return extras(procedure, scope, source, frame).map((extra) => {
+		const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
+		const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
+		const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid) });
+		const extraRefs = extra.uses.filter((id) => id !== source.id).flatMap((id) => {
+			const object = frame.view.objects?.find((one) => one.id === id); return object ? [immutable(ref(object))] : [];
+		});
+		return { extra, reduction, price, cost, extraRefs };
+	});
+}
+export type OfferCost = ReturnType<typeof offerCosts>[number];
+
+/** Freeze the selected cost and mana sources; targets are supplied separately. */
+export function paidActivation(base: OfferBase, frame: Frame, way: OfferCost, funding: Funding): Omit<Activation, "targets"> {
+	const { procedure, source, sourceRef, granted, printed, slots, words, mana, x } = base, { extra, cost } = way;
+	const payment = immutable(structuredClone(funding));
+	const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
+	return { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
+		...(procedure.source.registered ? { registered: procedure.source.registered } : {}),
+		...(extra.exileSelection ? { exileSelection: structuredClone(extra.exileSelection) } : {}),
+		...(granted.permission ? { permission: granted.permission } : {}),
+		...(granted.leavesStack ? { leavesStack: granted.leavesStack } : {}),
+		...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),
+		...(extra.paid.exiled?.some((one) => one.id === source.id) ? { bound: { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } } : {}),
+		...(procedure.speed ? { speed: procedure.speed } : {}), cost, paid: payment.paid,
+		...(payment.taps.length ? { funding: payment.taps } : {}), slots, instructions: procedure.instructions,
+		...(spellWords.length ? { words: spellWords } : {}), ...(mana.x ? { x } : {}) };
+}
+
+/** Every complete historical announcement. Staged decisions read the same bases
+ * before they select targets, extra costs and individual mana sources. */
+export function offers(procedure: Procedure, frame: Frame, prefix: string): ProcedureOption[] {
+	const offered: ProcedureOption[] = [];
+	for (const base of offerBases(procedure, frame, prefix)) {
+		const { procedure, prefix, slots, effects, world, source, sourceRef, selected, granted, mana, stacked, x, spending, scope: announced } = base;
+		const aims = immutable(targetings(slots, announced)).map((targets) => {
+			const aimed = targets.flat(), text = aiming(targets, world, frame.seat);
+			return { targets, refs: aimed.flatMap((chosen) => "id" in chosen ? [chosen] : []),
+				id: targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join(""),
+				label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${text.slice(0, targets.length).join(" ")}` : ""}`,
+				notes: immutable(targetConflicts(aimed, world, frame.seat).map((one) => one.reason)),
+				shows: [...text, ...effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" ") };
+		});
+		if (!aims.length) continue;
+		for (const way of offerCosts(base, frame)) {
+			const { extra, reduction, price, extraRefs } = way;
+			for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
+				const accepted = paidActivation(base, frame, way, funding), spellWords = accepted.words ?? [];
+				const payment = { paid: accepted.paid, taps: accepted.funding ?? [] };
+				const id = `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}`;
+				const shows = [
+					`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
+					granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
+					procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
+						`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduction ? ` (reduced by ${reduction})` : ""}. ${extra.shows}${paying}`,
+					procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
+					spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
+					(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
+				].filter(Boolean).join(" ");
+				const spent = [sourceRef, ...payment.taps.map((tap) => tap.source), ...extraRefs, ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? [])];
+				for (const aim of aims) {
+					offered.push({
+						option: {
+							id: `${id}${aim.id}`,
+							// The label names its targets, so an option says what it hits without a cross-reference.
+							label: aim.label, notes: aim.notes, shows: `${shows} ${aim.shows}`,
+							objects: [...spent, ...aim.refs],
+						},
+						activation: { ...accepted, targets: aim.targets },
 					});
-					for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
-						const payment = immutable(structuredClone(funding));
-						const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
-						const id = `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}`;
-						const shows = [
-							`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
-							granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
-							procedure.timing === "land" ? "Play this land. It uses this turn's land play." :
-								`Cost: ${price.generic} generic${price.colors.map((color) => ` + {${color}}`).join("")}${mana.x ? `, X=${x}` : ""}${reduction ? ` (reduced by ${reduction})` : ""}. ${extra.shows}${paying}`,
-							procedure.timing === "mana" ? "Resolves immediately." : procedure.timing === "spell" ? "Cast this card onto the stack." : procedure.timing === "stack" ? "Put the ability on the stack." : "",
-							spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
-							(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
-						].filter(Boolean).join(" ");
-						const spent = [sourceRef, ...payment.taps.map((tap) => tap.source), ...extraRefs, ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? [])];
-						for (const aim of aims) {
-								offered.push({
-									option: {
-										id: `${id}${aim.id}`,
-										// The label names its targets, so an option says what it hits without a cross-reference.
-										label: aim.label, notes: aim.notes, shows: `${shows} ${aim.shows}`,
-										objects: [...spent, ...aim.refs],
-									},
-									activation: { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
-									...(procedure.source.registered ? { registered: procedure.source.registered } : {}),
-									...(extra.exileSelection ? { exileSelection: structuredClone(extra.exileSelection) } : {}),
-									...(granted.permission ? { permission: granted.permission } : {}),
-									...(granted.leavesStack ? { leavesStack: granted.leavesStack } : {}),
-									...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),
-									...(extra.paid.exiled?.some((one) => one.id === source.id) ? { bound: { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } } : {}),
-									...(procedure.speed ? { speed: procedure.speed } : {}),
-									cost, paid: payment.paid,
-									...(payment.taps.length ? { funding: payment.taps } : {}),
-										targets: aim.targets, slots, instructions: procedure.instructions,
-									...(spellWords.length ? { words: spellWords } : {}), ...(mana.x ? { x } : {}) },
-							});
-						}
-					}
 				}
 			}
 		}

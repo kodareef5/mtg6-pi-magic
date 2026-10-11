@@ -108,18 +108,23 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 }
 
 /**
- * Every distinct way to pay exactly, from floating mana, tapped sources, or both.
+ * The available payment resources, without enumerating combinations.
  * `spending` is the spell as it will be on the stack, or an activation's source
  * in its actual zone. Restricted mana is used only when it matches.
  */
-export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject): { funding: Funding; shows: string }[] {
+export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set(), spending?: SeenObject): Unit[] {
 	const allowed = (spendOnly?: Selector) => !spendOnly || (!!spending && matches({ world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, spendOnly, spending.traits));
 	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter((mana) => allowed(mana.spendOnly))
 		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}|${JSON.stringify(mana.spellWords ?? null)}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
 			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""})` }));
 	const sources = manaSources(frame, except).map((unit) => ({ ...unit, yields: unit.yields.filter((one) => allowed(one.spendOnly)) })).filter((unit) => unit.yields.length);
+	return [...pool, ...sources];
+}
+
+/** Historical complete payments, also used to check staged payment coverage. */
+export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject): { funding: Funding; shows: string }[] {
 	const life = (frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0) - (cost.life ?? 0);
-	return exact([...pool, ...sources], cost).filter((units) => units.reduce((sum, unit) => sum + (unit.yields[0]!.life ?? 0), 0) <= life).map((units) => {
+	return exact(paymentUnits(frame, except, spending), cost).filter((units) => units.reduce((sum, unit) => sum + (unit.yields[0]!.life ?? 0), 0) <= life).map((units) => {
 		const made = cover(units, cost)!;
 		return {
 			funding: { paid: units.flatMap((unit) => unit.pool ? [unit.id] : []),
