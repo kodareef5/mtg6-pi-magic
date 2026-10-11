@@ -1458,6 +1458,12 @@ test("payments are tried together: the creature takes the Village's red so a Mou
 	assert.ok(ordinaryWarp && ordinaryNormal);
 	assert.equal(execution(sameState, ordinaryNormal.id), undefined, "a different casting mode does not finish the planned mode");
 	assert.deepEqual(execution(sameState, ordinaryWarp.id), { plan: sameState.revision, step: 0 }, "an identical ordinary announcement carries out the step too");
+	// Repetition leaves this aggregate unchanged except its count. Its input
+	// length must not become a JavaScript function's argument count.
+	const largeFrame = { ...sameFrame, decision: { ...sameFrame.decision!, options: Array(150000).fill(ordinaryWarp) } };
+	const smallFacts = planningChoices({ ...sameFrame, decision: { ...sameFrame.decision!, options: [ordinaryWarp] } }).uses[0]!;
+	const largeFacts = planningChoices(largeFrame).uses[0]!;
+	assert.deepEqual(largeFacts, { ...smallFacts, offeredCombinations: 150000 });
 	assert.match(annotate(sameFrame.decision!.options, sameState).find((one) => one.id === ordinaryWarp.id)!.notes!.join(" "), /Plan step 1/);
 	const indexed = structuredClone(sameFrame), reordered = indexed.decision!.options.find((one) => one.id === ordinaryWarp.id)!;
 	const reverseKeys = (value: unknown): unknown => Array.isArray(value) ? value.map(reverseKeys)

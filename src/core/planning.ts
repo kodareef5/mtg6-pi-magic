@@ -118,7 +118,7 @@ export function planState(frame: Frame): PlanState | null {
 			...(one.purpose ? { purpose: one.purpose } : {}) }));
 	const fit = (option: PlanOption, at: number, kind: "s" | "b"): Fit => {
 		const found = candidates(option, frame, `plan:${revision}:${kind}${at}`);
-		procedures.push(...found.procedures);
+		for (const procedure of found.procedures) procedures.push(procedure);
 		// Holds warn about spending; they cannot change which action was carried out.
 		return { at, label: option.label, candidates: found.options,
 			...(option.waitFor === "empty-stack" && frame.view.objects?.some((one) => one.zone === "stack") ? { waiting: true as const } : {}) };

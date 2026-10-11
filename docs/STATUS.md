@@ -13,10 +13,10 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 6 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens |
-| Completed source-reviewed alpha games | 16, covering five admitted decks; Boros Tokens is newly admitted |
-| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders |
+| Completed source-reviewed alpha games | 17, covering five admitted decks; Boros Tokens is newly admitted |
+| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Control versus Azorius needs lower memory use for large payment menus; Azorius versus Izzet is running with token copies; Boros Tokens enters live testing |
+| Current runtime work | Control versus Azorius resumes after large-menu memory and summary fixes; Boros Tokens is in live testing; No More Lies needs its unused counter-to-exile branch corrected |
 | Recent shared mechanics | Completed ability resolution counts, token copies with base terms and complete activations, counter-placement thresholds, standing spell reductions, token abilities and ownership |
 | Stored card assessments | 233 accepted, 74 refused, five basic lands; Izzet Aggro lacks Mockingbird's entry copy |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |

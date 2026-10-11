@@ -146,16 +146,17 @@ export function bindingFacts(frame: Frame, base: Plan, nextTurn = false) {
 export function planningChoices(frame: Frame) {
 	const options = frame.decision?.options ?? [];
 	const manaSources = sources(frame);
-	const uses = new Map<string, { terms: Omit<NonNullable<Option["use"]>, "paid" | "funding" | "targets">; bindings: Map<string, NonNullable<Option["use"]>["targets"]>; notes: string[]; payments: number; left: number[] }>();
+	const uses = new Map<string, { terms: Omit<NonNullable<Option["use"]>, "paid" | "funding" | "targets">; bindings: Map<string, NonNullable<Option["use"]>["targets"]>; notes: string[]; payments: number; minimum: number; maximum: number }>();
 	for (const option of options) {
 		if (!option.use) continue;
 		const { paid: _paid, funding, targets, ...terms } = option.use;
 		const notes = option.notes ?? [], key = JSON.stringify({ terms, notes });
-		const use = uses.get(key) ?? { terms, bindings: new Map(), notes, payments: 0, left: [] as number[] };
+		const use = uses.get(key) ?? { terms, bindings: new Map(), notes, payments: 0, minimum: Infinity, maximum: -Infinity };
 		use.bindings.set(JSON.stringify(targets), targets);
 		const spent = new Set([...(funding ?? []).map((tap) => tap.source.id), ...(terms.cost.tap ? [terms.source.id] : []),
 			...[...(terms.cost.tapped ?? []), ...(terms.cost.sacrificed ?? []), ...(terms.cost.exiled ?? [])].map((ref) => ref.id)]);
-		use.left.push(manaSources.filter(({ object }) => !spent.has(object.id)).length);
+		const left = manaSources.filter(({ object }) => !spent.has(object.id)).length;
+		use.minimum = Math.min(use.minimum, left); use.maximum = Math.max(use.maximum, left);
 		use.payments += 1;
 		uses.set(key, use);
 	}
@@ -164,7 +165,7 @@ export function planningChoices(frame: Frame) {
 		const { instructions: _instructions, ...terms } = use.terms;
 		return { ...terms, card: source?.card, from: source?.zone, targets: [...use.bindings.values()], notes: [...use.notes],
 			manaRequired: use.terms.cost.generic + use.terms.cost.colors.length,
-			untappedSourcesAfterPayment: { minimum: Math.min(...use.left), maximum: Math.max(...use.left),
+			untappedSourcesAfterPayment: { minimum: use.minimum, maximum: use.maximum,
 				scope: "Remaining current mana-source objects immediately after paying, before resolution or changes to their abilities. Floating mana is separate." },
 			offeredCombinations: use.payments };
 	}) };
