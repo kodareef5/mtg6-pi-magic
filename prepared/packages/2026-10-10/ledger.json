@@ -71,6 +71,14 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
+	"Carnage, Crimson Chaos": {
+		"reason": "Source review rejected an unconditional graveyard permission for Mayhem {B}{R}. Casting must be restricted to this card having been discarded this turn; a condition on one procedure cannot restrict the shared printed cast. Conditional native permission and discarded-this-turn history are not supported yet.",
+		"decks": [
+			"Mardu Discard"
+		],
+		"model": "gpt-6.1-sol:high",
+		"at": "2026-10-11"
+	},
 	"Casey Jones, Vigilante": {
 		"reason": "Casey Jones, Vigilante is not ready: When Casey Jones enters, draw three cards. At the beginning of your next upkeep, discard three cards at random. — The entry trigger must draw three cards and create a one-shot delayed trigger for its controller's next upkeep, even if Casey Jones leaves. The syntax supports drawing and delayed triggers but lacks random selection from a hand for the required discard; player-chosen cards would not implement this ability.",
 		"decks": [

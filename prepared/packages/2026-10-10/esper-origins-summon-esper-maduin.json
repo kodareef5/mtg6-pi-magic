@@ -8,6 +8,18 @@
 		"card": "Esper Origins // Summon: Esper Maduin",
 		"registers": [
 			{
+				"face": 0,
+				"kind": "permit",
+				"basis": "Flashback {3}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{3}{G}",
+					"leavesStack": "exile"
+				}
+			},
+			{
 				"face": 1,
 				"kind": "chapter",
 				"numbers": [
@@ -17,28 +29,34 @@
 				"effect": {
 					"instructions": [
 						{
+							"do": "look",
+							"who": "you",
+							"what": {
+								"top": 1,
+								"of": "you"
+							},
+							"as": "top-card"
+						},
+						{
 							"do": "choose",
 							"who": "you",
 							"from": {
 								"zones": [
 									"library"
 								],
-								"is": {
-									"top": 1,
-									"of": "you"
-								}
+								"is": "bound:top-card"
 							},
 							"count": 1,
 							"reveal": true,
-							"as": "revealed-card"
+							"as": "revealed"
 						},
 						{
 							"do": "move",
-							"what": "bound:revealed-card",
+							"what": "bound:revealed",
 							"to": "hand",
 							"reason": "resolve",
 							"if": {
-								"is": "bound:revealed-card",
+								"is": "bound:revealed",
 								"matches": {
 									"zones": [
 										"library"
@@ -116,7 +134,7 @@
 		"deferred": [
 			{
 				"face": 0,
-				"claim": "Cast Esper Origins at its printed cost; surveil, gain life, and return transformed with a finality counter if cast from a graveyard.",
+				"claim": "Cast Esper Origins at its printed cost; surveil, gain life, and return transformed with finality if cast from a graveyard",
 				"basis": "Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.)",
 				"source": {
 					"card": "Esper Origins // Summon: Esper Maduin",
@@ -131,7 +149,7 @@
 			},
 			{
 				"face": 0,
-				"claim": "Cast Esper Origins from the graveyard for its flashback cost, including its surveil, life gain, transformed return, and flashback exile replacement.",
+				"claim": "Flashback Esper Origins; surveil, gain life, then exile and return transformed under its owner's control with a finality counter",
 				"basis": "Surveil 2. You gain 2 life. If this spell was cast from a graveyard, exile it, then put it onto the battlefield transformed under its owner's control with a finality counter on it. (If a creature with a finality counter on it would die, exile it instead.) ... Flashback {3}{G} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
 				"source": {
 					"card": "Esper Origins // Summon: Esper Maduin",

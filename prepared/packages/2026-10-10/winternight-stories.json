@@ -6,13 +6,24 @@
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Winternight Stories",
-		"registers": [],
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {4}{U} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{4}{U}",
+					"leavesStack": "exile"
+				}
+			}
+		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": false,
 		"deferred": [
 			{
-				"claim": "Cast Winternight Stories normally; draw three cards, then discard two cards unless discarding a creature card.",
+				"claim": "Draw three cards, then discard a creature card or two cards",
 				"basis": "Draw three cards. Then discard two cards unless you discard a creature card.",
 				"source": {
 					"card": "Winternight Stories",
@@ -26,7 +37,7 @@
 				"timing": "spell"
 			},
 			{
-				"claim": "Cast Winternight Stories from your graveyard for its harmonize cost, optionally tapping a creature you control to reduce the cost by its power; perform the draw and discard effect and exile the spell.",
+				"claim": "Harmonize with an optional creature tap; draw three, then discard a creature or two cards",
 				"basis": "Draw three cards. Then discard two cards unless you discard a creature card. ... Harmonize {4}{U} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
 				"source": {
 					"card": "Winternight Stories",

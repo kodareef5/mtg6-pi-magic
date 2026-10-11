@@ -6,12 +6,24 @@
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Practiced Offense",
-		"registers": [],
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Flashback {1}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{1}{W}",
+					"leavesStack": "exile"
+				}
+			}
+		],
 		"procedures": [],
 		"assessed": true,
 		"deferred": [
 			{
-				"claim": "Cast Practiced Offense: counters on target player's creatures and choose double strike or lifelink for target creature on resolution.",
+				"claim": "Cast Practiced Offense: put a +1/+1 counter on each creature target player controls, then grant target creature double strike or lifelink chosen on resolution until end of turn.",
 				"basis": "Put a +1/+1 counter on each creature target player controls. Target creature gains your choice of double strike or lifelink until end of turn.",
 				"source": {
 					"card": "Practiced Offense",
@@ -25,7 +37,7 @@
 				"timing": "spell"
 			},
 			{
-				"claim": "Cast Practiced Offense using flashback for {1}{W}, with its two targets and keyword choice on resolution; exile it instead of any other destination whenever it leaves the stack.",
+				"claim": "Flashback Practiced Offense for {1}{W}: put a +1/+1 counter on each creature target player controls, then grant target creature double strike or lifelink chosen on resolution until end of turn; exile it when it leaves the stack.",
 				"basis": "Put a +1/+1 counter on each creature target player controls. Target creature gains your choice of double strike or lifelink until end of turn. ... Flashback {1}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
 				"source": {
 					"card": "Practiced Offense",

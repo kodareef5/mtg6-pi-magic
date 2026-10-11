@@ -6,12 +6,24 @@
 	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Channeled Dragonfire",
-		"registers": [],
+		"registers": [
+			{
+				"kind": "permit",
+				"basis": "Harmonize {5}{R}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{5}{R}{R}",
+					"leavesStack": "exile"
+				}
+			}
+		],
 		"procedures": [],
 		"assessed": true,
 		"deferred": [
 			{
-				"claim": "Cast Channeled Dragonfire normally to deal 2 damage to any target.",
+				"claim": "Cast Channeled Dragonfire to deal 2 damage to any target",
 				"basis": "Channeled Dragonfire deals 2 damage to any target.",
 				"source": {
 					"card": "Channeled Dragonfire",
@@ -25,19 +37,7 @@
 				"timing": "spell"
 			},
 			{
-				"claim": "Cast Channeled Dragonfire from your graveyard for its harmonize cost without tapping a creature; deal 2 damage to any target and apply harmonize's exile requirement.",
-				"basis": "Channeled Dragonfire deals 2 damage to any target. ... Harmonize {5}{R}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
-				"source": {
-					"card": "Channeled Dragonfire",
-					"zones": [
-						"graveyard"
-					],
-					"controller": "any"
-				},
-				"timing": "spell"
-			},
-			{
-				"claim": "Cast Channeled Dragonfire from your graveyard with harmonize, tapping a creature you control to reduce the generic cost by its power; deal 2 damage to any target and apply harmonize's exile requirement.",
+				"claim": "Harmonize Channeled Dragonfire with an optional creature tap to reduce generic mana, dealing 2 damage to any target",
 				"basis": "Channeled Dragonfire deals 2 damage to any target. ... Harmonize {5}{R}{R} (You may cast this card from your graveyard for its harmonize cost. You may tap a creature you control to reduce that cost by {X}, where X is its power. Then exile this spell.)",
 				"source": {
 					"card": "Channeled Dragonfire",
