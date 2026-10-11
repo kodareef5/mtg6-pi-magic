@@ -351,16 +351,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-10"
 	},
-	"Multiversal Passage": {
-		"reason": "Multiversal Passage is not ready: As this land enters, choose a basic land type. Then you may pay 2 life. If you don't, it enters tapped. ... This land is the chosen type. — Missing operations: choose and retain one basic land type (Plains, Island, Swamp, Mountain, or Forest) as part of entry, then continuously give this land that chosen subtype and its corresponding intrinsic mana ability. The entry and continuous-registration schemas cannot express that choice or reference its chosen value.",
-		"decks": [
-			"Boros Dragons",
-			"Izzet Prowess",
-			"Izzet Spellementals"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Mutagen Man, Living Ooze": {
 		"reason": "Mutagen Man, Living Ooze is not ready: Activated abilities of artifact tokens you control cost {1} less to activate. — Missing operation: a standing continuous generic-mana activation-cost reduction applying to all artifact tokens you control, including future tokens and their activated abilities. Procedure-local cost.reduce cannot register this global static effect.",
 		"decks": [

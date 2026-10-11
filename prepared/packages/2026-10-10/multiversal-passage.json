@@ -1,0 +1,42 @@
+{
+	"card": "Multiversal Passage",
+	"generated": "2026-10-10",
+	"source": "199ff8d0375f2950783df330848f1d57090868e8afd54ee3e5e7646fc562e85b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Multiversal Passage",
+		"registers": [
+			{
+				"basis": "As this land enters, choose a basic land type. Then you may pay 2 life. If you don't, it enters tapped.",
+				"kind": "enters",
+				"choose": {
+					"as": "landType",
+					"from": "basic-land-type"
+				},
+				"tapped": true,
+				"unlessPay": {
+					"life": 2
+				}
+			},
+			{
+				"basis": "This land is the chosen type.",
+				"kind": "continuous",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"subtypes": {
+						"set": {
+							"chosen": "landType"
+						},
+						"of": "land"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": []
+	}
+}
