@@ -40,7 +40,7 @@ if (a.help) {
   --green P        the strategy pattern for whichever seat plays the Green list; --red likewise. One roster facing another:
                    run the arm twice with the patterns swapped and count wins by roster, not by list
   --jobs N         games at once. Two: three games at once hit the strategy provider's rate limit
-  --stall S        a game whose log is silent this long is killed and counted as a stall
+  --stall S        a game with no gameplay or inference trace activity this long is killed and counted as a stall
   --seeds-only     write the seed journals and stop, with no model call
   --report DIR     summarise saved results in DIR without playing
 
@@ -89,7 +89,7 @@ function seedGames(base: string, n: number, source: string, dir: string): Record
 
 type Run = { seed: string; exit: number | null; stalled: boolean; startedAt: number; endedAt: number };
 
-/** One game in its own process. A log silent past the stall limit is a loop or a hung call, not a wait. */
+/** One game in its own process. Gameplay and inference activity both reset the stall deadline. */
 function playOne(record: Record_, dir: string, options: { turns: string; stall: number; strategy?: string; green?: string; red?: string }): Promise<Run> {
 	const log = join(dir, `${record.seed}.log`), out = join(dir, record.seed);
 	mkdirSync(out, { recursive: true });
@@ -101,7 +101,10 @@ function playOne(record: Record_, dir: string, options: { turns: string; stall: 
 		const child = spawn(process.execPath, args, { stdio: ["ignore", fd, fd], detached: true });
 		let stalled = false;
 		const watchdog = setInterval(() => {
-			if ((Date.now() - statSync(log).mtimeMs) / 1000 > options.stall) { stalled = true; try { process.kill(-child.pid!, "SIGTERM"); } catch { /* already gone */ } }
+			// Pregame can make many healthy calls before the first game action reaches the log.
+			const activity = Math.max(statSync(log).mtimeMs, ...readdirSync(out).filter((name) => name.endsWith(".calls.jsonl"))
+				.map((name) => statSync(join(out, name)).mtimeMs));
+			if ((Date.now() - activity) / 1000 > options.stall) { stalled = true; try { process.kill(-child.pid!, "SIGTERM"); } catch { /* already gone */ } }
 		}, 30_000);
 		child.on("exit", (code) => {
 			clearInterval(watchdog); closeSync(fd);
