@@ -606,15 +606,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Voice of Victory": {
-		"reason": "Voice of Victory is not ready: Mobilize 2 (Whenever this creature attacks, create two tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.) — The token instruction supports tapped tokens but cannot put the created tokens onto the battlefield attacking, including choosing what each token attacks. Mobilize cannot be faithfully prepared without that operation.",
-		"decks": [
-			"Boros Dragons",
-			"Boros Tokens"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-10"
-	},
 	"Wan Shi Tong, Librarian": {
 		"reason": "Wan Shi Tong, Librarian is not ready: When Wan Shi Tong enters, put X +1/+1 counters on him. Then draw half X cards, rounded down. — The enters trigger requires a draw count of floor(X/2); the Amount schema has no division or rounding operation.; Whenever an opponent searches their library, put a +1/+1 counter on Wan Shi Tong and draw a card. — The Event schema has no library-search event to watch; library choice, movement, or shuffling cannot substitute for an opponent searching their library.",
 		"decks": [

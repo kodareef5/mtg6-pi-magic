@@ -97,7 +97,7 @@ export function resolving(table: Table): Pending | null {
 		...(instruction.as ? { bind: { [instruction.as]: { objects: [], players: [], amount: 0 } } } : {}) });
 	const last = pending.program.length === 1;
 	const moves: Move[] = step.choices.map((choice) => ({
-		option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },
+		option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick && "id" in choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },
 		changes: [...choice.changes, ...(last && !choice.pick && !choice.expand ? finish(choice.changes) : []),
 			{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(choice.bind ? { bind: choice.bind } : {}),
 				...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],

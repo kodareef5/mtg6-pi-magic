@@ -29,6 +29,13 @@ const name = (object: Thing) => object.card ?? object.token?.name ?? object.id;
 const body = (traits?: Traits) => `${traits?.power ?? "?"}/${traits?.toughness ?? "?"}`;
 const words = (traits?: Traits) => traits?.words.length ? `, ${traits.words.join(", ")}` : "";
 const destination = (to?: ObjectRef) => to ? `:to:${to.id}@${to.incarnation}` : "";
+/** Defenders for a declaration or a creature entering attacking in this two-player game (508.4). */
+export function defenders(table: Table, active: number): { chosen: Chosen; defending: number; label: string }[] {
+	const opponent = playing(table).find((one) => one.id !== active);
+	return opponent ? [{ chosen: { player: opponent.id }, defending: opponent.id, label: opponent.name },
+		...cardsIn(table, "battlefield").filter((one) => one.controller === opponent.id && characteristics(table, one)?.types.includes("planeswalker"))
+			.sort((a, b) => a.id.localeCompare(b.id)).map((one) => ({ chosen: ref(one), defending: opponent.id, label: `${name(one)} (${one.counters.loyalty ?? 0} loyalty)` }))] : [];
+}
 const defenderFacts = (table: Table, attacker: ObjectRef) => {
 	const attack = table.combat?.attackers.find((one) => same(one, attacker));
 	if (!attack?.to) return undefined;
@@ -77,15 +84,14 @@ const lethal = (table: Table, source: Thing, target: Thing) => lethalDamage(trai
 /** 508.1: the active player picks attackers one at a time, then finishes. */
 export function declareAttackers(table: Table): Pending {
 	const active = table.cursor.active;
-	const defending = playing(table).find((one) => one.id !== active)!.id;
+	const recipients = defenders(table, active), defending = recipients[0]!.defending;
 	const picks = (table.combat?.choosing ?? []).flatMap((pick) => "blocker" in pick ? [] : [pick]);
 	const chosen = picks.map((pick) => pick.attacker);
-	const walkers = cardsIn(table, "battlefield").filter((one) => one.controller === defending && traitsOf(table, one)?.types.includes("planeswalker"))
-		.sort((a, b) => a.id.localeCompare(b.id));
+	const walkers = recipients.flatMap((one) => "id" in one.chosen ? [table.things.get(one.chosen.id)!] : []);
 	const able = cardsIn(table, "battlefield").filter((object) => {
 		const traits = traitsOf(table, object);
 		return object.controller === active && !object.tapped && !!traits?.types.includes("creature") && !traits.types.includes("battle") &&
-			!sick(table, object) && !chosen.some((one) => same(one, object));
+			!sick(table, object) && !chosen.some((one) => same(one, object)) && !table.combat?.attackers.some((one) => same(one, object));
 	}).sort((a, b) => a.id.localeCompare(b.id));
 	const attackers = chosen.flatMap((one) => present(table, one) ?? []);
 	const moves: Move[] = able.flatMap((object) => [undefined, ...walkers].map((target): Move => {
@@ -100,7 +106,7 @@ export function declareAttackers(table: Table): Pending {
 	}));
 	const description = (object: Thing) => { const to = picks.find((one) => same(one.attacker, object))?.to;
 		return `${name(object)}${to ? ` at ${name(table.things.get(to.id)!)}` : walkers.length ? ` at seat ${defending}` : ""}`; };
-	moves.push({ option: { id: "attack:done", label: attackers.length ? `Finish: attack with ${attackers.map(description).join(", ")}` : "Attack with nothing",
+	moves.push({ option: { id: "attack:done", label: attackers.length ? `Finish: attack with ${attackers.map(description).join(", ")}` : table.combat?.attackers.length ? "Declare no additional attackers; creatures already attacking remain in combat" : "Attack with nothing",
 		spends: attackers.filter((object) => !has(traitsOf(table, object), "vigilance")).map(ref),
 		...(attackers.length ? { objects: attackers.map(ref) } : {}) },
 		changes: [

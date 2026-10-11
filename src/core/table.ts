@@ -199,8 +199,8 @@ export type Resolution = {
 	targetsChecked?: true;
 	/** Every target was illegal: nothing resolves (608.2b). */
 	lost?: boolean;
-	/** Picks so far in the current `choose`. */
-	picked: ObjectRef[];
+	/** Picks so far in the current instruction, including entering attackers' defenders. */
+	picked: Chosen[];
 	/** Inspection entitlements while this effect resolves; public reveals also grant them to the spectator. Receipts preserve the disclosure afterward. */
 	seen?: Partial<Record<Viewer, ObjectRef[]>>;
 	/** A "you may" trigger whose controller has not yet said whether to use it. */

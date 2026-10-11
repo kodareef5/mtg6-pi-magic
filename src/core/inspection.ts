@@ -46,7 +46,7 @@ export function inspection(table: Table, scope: Scope, instruction: Extract<Inst
 		id: "order", label: `Put ${pool.length} cards on the ${instruction.position}${instruction.random ? " in random order" : ""}`,
 		changes: changes(pool), ...bind(pool),
 	}] };
-	const picked = pending.picked.filter((one) => pool.some((card) => card.id === one.id && card.incarnation === one.incarnation));
+	const picked = pending.picked.filter((one) => "id" in one).filter((one) => pool.some((card) => card.id === one.id && card.incarnation === one.incarnation));
 	const choices: Choice[] = pool.filter((one) => !picked.some((card) => card.id === one.id)).map((one) => {
 		const ordered = [...picked, ref(one)], last = ordered.length === pool.length;
 		return { id: one.id, label: `Place ${one.card ?? "this card"} ${picked.length + 1} of ${pool.length} (topmost first)`, objects: [ref(one)],

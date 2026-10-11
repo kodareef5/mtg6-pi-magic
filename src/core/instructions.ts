@@ -8,7 +8,7 @@
  * so "that much" and "its power" mean what they mean now (608.2h).
  * Past 150 lines because each instruction is a short case of one switch.
  */
-import { amount, holds, objects, players, select, type Bound, type Scope, type Seen } from "./selectors.ts";
+import { amount, holds, objects, players, select, targetKey, type Bound, type Chosen, type Scope, type Seen } from "./selectors.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
@@ -17,12 +17,14 @@ import { inspection, selectionBlock } from "./inspection.ts";
 import { project } from "./view.ts";
 import { summary } from "./announce.ts";
 import { cardNameChoices } from "./card-names.ts";
+import { defenders } from "./combat.ts";
+import { STEPS } from "./steps.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 
-export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: ObjectRef; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef };
+export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: Chosen; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef };
 export type Step = { actor: SeatId; question: string; choices: Choice[]; blocked?: string };
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -167,7 +169,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const blocked = selectionBlock(table, scope, instruction.from, who);
 			if (blocked) return { actor: who, question: blocked, choices: [], blocked };
 			const count = amount(scope, instruction.count);
-			const picked = pending.picked;
+			const picked = pending.picked.filter((one) => "id" in one);
 			// "You" in the selector is still the ability's controller, whoever chooses.
 			// Identical cards in a library or hand are one choice: nothing tells them apart.
 			const seen = new Set<string>();
@@ -227,8 +229,18 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "token": {
 			const count = amount(scope, instruction.count);
 			const ids = Array.from({ length: count }, (_, at) => `token-${table.cursor.clock + 1}-${at}`);
-			return one(`Create ${count} ${instruction.spec.name}`, ids.map((id) => ({ do: "token" as const, id, spec: structuredClone(instruction.spec), controller, ...(instruction.tapped ? { tapped: true as const } : {}) })),
-				bind(instruction, { objects: ids.map((id) => ({ id, incarnation: 0 })), players: [] }));
+			const options = instruction.attacking && count && controller === table.cursor.active && STEPS[table.cursor.steps[0]!]?.phase === "combat" ? defenders(table, controller) : [];
+			const create = (chosen: Chosen[]): Choice => ({ id: "do", label: `Create ${count} ${instruction.spec.name}${instruction.tapped ? " tapped" : ""}${options.length ? " attacking" : ""}`,
+				changes: ids.map((id, at) => { const defender = options.find((one) => targetKey(one.chosen) === targetKey(chosen[at]!));
+					return { do: "token", id, spec: structuredClone(instruction.spec), controller, ...(instruction.tapped ? { tapped: true as const } : {}),
+						...(defender ? { attacking: { defending: defender.defending, ...("id" in defender.chosen ? { to: defender.chosen } : {}) } } : {}) }; }),
+				...bind(instruction, { objects: ids.map((id) => ({ id, incarnation: 0 })), players: [] }) });
+			if (!options.length) return { actor: controller, question: `Create ${count} ${instruction.spec.name}.`, choices: [create([])] };
+			const previous = pending.picked.map((pick, at) => `token ${at + 1} at ${options.find((one) => targetKey(one.chosen) === targetKey(pick))?.label ?? "the former defender"}`);
+			return { actor: controller, question: `Choose what ${instruction.spec.name} token ${pending.picked.length + 1} of ${count} enters attacking.${previous.length ? ` Chosen: ${previous.join(", ")}.` : ""}`,
+				choices: options.map((defender) => ({ ...(pending.picked.length + 1 === count ? create([...pending.picked, defender.chosen]) : { changes: [], pick: defender.chosen }),
+					id: `attack-${targetKey(defender.chosen)}`, label: `${instruction.spec.name} token ${pending.picked.length + 1} attacks ${defender.label}`,
+					...("id" in defender.chosen ? { objects: [defender.chosen] } : {}) })) };
 		}
 		case "modify": {
 			const affected = many(table, scope, instruction).filter((object) => object.zone === "battlefield");

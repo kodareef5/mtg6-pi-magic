@@ -22,6 +22,7 @@ schemas, and every `basis` is checked against the card's text.
 | `reveal-hand.md` | publicly reveal a whole hand before its opponent chooses an eligible discard |
 | `loyalty.md` | abilities carried by tokens, signed loyalty payment, starting counters, and Empower Jace's ordered creation and choice |
 | `token-abilities.md` | complete Map and Clue abilities, sorcery timing, public top-card reveal and explore's land or nonland branches |
+| `attacking-tokens.md` | choose each entering token's defender, create the group together, and sacrifice only those tokens at the next end step |
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |
 | `last-known.md` | exile before life changes, using a departed target's former controller |
 | `entry-choices.md` | basic land and creature-type choices; restricted mana that grants spell properties when spent |

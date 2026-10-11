@@ -25,7 +25,7 @@ import { combatLookup } from "../src/context/strategy-combat.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { dossier } from "../src/context/dossier.ts";
-import { establish, finish, matchup, pack, quiet } from "./play.ts";
+import { establish, finish, main, matchup, pack, passBoth, quiet, step } from "./play.ts";
 
 /** Answer quietly until the table asks this step's turn-based question on this turn. */
 function reach(table: Table, step: string, turn: number): Decision {
@@ -267,6 +267,53 @@ test("planeswalker attacks retain their chosen recipient through blocks, removal
 		else assert.equal(current.zone, "hand");
 		assert.deepEqual(relive(continuation, table.ledger.slice(resumedAt)), table);
 	}
+});
+
+test("entering attackers choose defenders together, never declare attacks, and retain delayed sacrifice through replay", () => {
+	const table = start(standard, [{ deck: alpha(deck("Boros Dragons")) }, { deck: alpha(deck("Azorius Control")) }], "mobilize");
+	const voice = establish(table, 0, "Voice of Victory"), walker = establish(table, 1, "The Theorist, Jace Beleren", []);
+	establish(table, 1, "Fountainport", [{ kind: "watch", basis: "Fixture counts opposing creatures that attack.",
+		event: { on: "attacks", of: { types: ["creature"], controller: "opponent" } }, effect: { instructions: [{ do: "life", who: "you", amount: 1 }] } }]);
+	reach(table, "declare-attackers", 3);
+	const initial = structuredClone(table), from = table.ledger.length;
+	pick(table, `attack:${voice.id}`); pick(table, "attack:done");
+	while (nextDecision(table)?.situation === "trigger-order") apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen");
+	passBoth(table); finish(table); // The opposing fixture's trigger resolves first.
+	assert.equal(table.seats[1]!.life, 21);
+	passBoth(table); // Mobilize now asks which defender each token attacks.
+	const untouched = structuredClone(table);
+	assert.equal(nextDecision(table)!.options.length, 2);
+	assert.deepEqual(table, untouched, "listing entering defenders creates no token");
+	step(table, (label) => label.includes("Jace Beleren"));
+	assert.equal([...table.things.values()].filter((one) => one.token?.name === "Warrior").length, 0, "the group waits for every defender choice");
+	const pending = structuredClone(table), at = table.ledger.length;
+	step(table, (label) => !label.includes("Jace Beleren")); finish(table);
+	const tokens = [...table.things.values()].filter((one) => one.token?.name === "Warrior");
+	assert.equal(tokens.length, 2); assert.ok(tokens.every((one) => one.tapped));
+	assert.equal(table.log.filter((one) => one.changes.filter((change) => change.do === "token").length === 2).length, 1);
+	assert.deepEqual(table.combat!.attackers.find((one) => one.id === tokens[0]!.id)!.to, { id: walker.id, incarnation: walker.incarnation });
+	assert.equal(table.combat!.attackers.find((one) => one.id === tokens[1]!.id)!.to, undefined);
+	assert.equal(table.waiting.length, 0, "entering attackers do not fire the declaration watch");
+	assert.equal(tableWorld(table).history.filter((one) => one.kind === "attacked").flatMap((one) => one.kind === "attacked" ? one.attackers : []).length, 1);
+	reach(table, "declare-blockers", 3); pick(table, "block:done");
+	reach(table, "combat-damage", 3); pick(table, "damage"); finish(table);
+	assert.equal(walker.counters.loyalty, 2); assert.equal(table.seats[1]!.life, 19);
+	main(table, 1, 4); // The next end-step trigger sacrifices just the two bound tokens.
+	assert.ok(tokens.every((one) => !table.things.has(one.id))); assert.equal(voice.zone, "battlefield");
+	assert.equal(table.log.filter((one) => one.changes.filter((change) => change.do === "move" && change.reason === "sacrifice" && tokens.some((token) => token.id === change.what)).length === 2).length, 1);
+	assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
+	assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+
+	// An established fixture can also put a creature in combat before the declaration.
+	const early = start(standard, [{ deck: alpha(deck("Boros Dragons")) }, { deck: alpha(deck("Azorius Control")) }], "early-attacker");
+	main(early, 0, 1, "begin-combat");
+	commit(early, [{ do: "token", id: "early-warrior", controller: 0, attacking: { defending: 1 },
+		spec: tokens[0]!.token! }], "resolve");
+	assert.equal(early.things.get("early-warrior")!.tapped, false, "entering attacking does not imply tapped");
+	reach(early, "declare-attackers", 1); pick(early, "attack:done");
+	reach(early, "declare-blockers", 1); pick(early, "block:done");
+	reach(early, "combat-damage", 1); pick(early, "damage");
+	assert.equal(early.seats[1]!.life, 19, "an empty declaration keeps creatures already attacking");
 });
 
 test("double strike deals damage in both steps, and a creature killed by first strike deals none", () => {

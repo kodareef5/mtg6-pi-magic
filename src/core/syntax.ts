@@ -75,7 +75,7 @@ export type Change =
 		/** The controller's answer to the optional entry cost. Absent until that choice is settled. */
 		entry?: "paid" | "declined"; face?: 0 | 1 }
 	/** A token made on the battlefield (111.1). */
-	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true }
+	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true; attacking?: { defending: SeatId; to?: ObjectRef } }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
 	/** A chosen name belongs to this permanent's incarnation, as entry choices do. */
@@ -102,7 +102,7 @@ export type Change =
 	 * what it moved under names bound earlier (400.7); `expand`
 	 * puts an `each` in its place; `follow` is the permanent a spell became.
 	 */
-	| { do: "resolution"; action: "next"; what: string; pick?: ObjectRef; bind?: Record<string, Bound>;
+	| { do: "resolution"; action: "next"; what: string; pick?: Chosen; bind?: Record<string, Bound>;
 		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true;
 		/** A chosen limited effect, journaled even when this group moves no object. */
 		use?: { source: ObjectRef; basis: string; by: SeatId } }

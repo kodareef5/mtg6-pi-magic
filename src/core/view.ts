@@ -146,7 +146,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const resolution = table.resolution ? structuredClone(table.resolution) : undefined;
 	if (resolution) {
 		resolution.bound = bound(resolution.bound);
-		resolution.picked = resolution.picked.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`));
+		resolution.picked = resolution.picked.filter((one) => "player" in one || visibleRefs.has(`${one.id}@${one.incarnation}`));
 		if (resolution.seen) resolution.seen = viewer === "spectator" && !inspected.length ? {} : { [viewer]: structuredClone(inspected) };
 	}
 	const objects: NonNullable<SeatView["objects"]> = [...table.things.values()]

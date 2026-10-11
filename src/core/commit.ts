@@ -14,6 +14,7 @@
 
 import { room, transformable } from "./faces.ts";
 import { chapterTriggers } from "./sagas.ts";
+import { STEPS } from "./steps.ts";
 import { createHash } from "node:crypto";
 
 import { firstMulliganFree, type Format } from "./format.ts";
@@ -382,6 +383,14 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 					tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered: table.cursor.clock + 1, token: structuredClone(change.spec) };
 				table.things.set(change.id, token);
 				enter(table, token, change, before, born);
+				if (change.attacking && change.controller === table.cursor.active && STEPS[table.cursor.steps[0]!]?.phase === "combat") {
+					const traits = characteristics(table, token), target = change.attacking.to && table.things.get(change.attacking.to.id);
+					if (traits?.types.includes("creature") && !traits.types.includes("battle") &&
+						(!change.attacking.to || target?.incarnation === change.attacking.to.incarnation && target.zone === "battlefield" && target.controller === change.attacking.defending && characteristics(table, target)?.types.includes("planeswalker"))) {
+						const combat = table.combat ??= { attackers: [], blockers: [], blocked: [], choosing: [], assigned: [] };
+						combat.attackers.push({ id: token.id, incarnation: token.incarnation, ...structuredClone(change.attacking) });
+					}
+				}
 				break;
 			}
 			case "reveal": {
@@ -416,9 +425,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				break;
 			}
 			case "attack":
-				table.combat = { attackers: structuredClone(change.attackers), blockers: [], blocked: [], choosing: [], assigned: [] };
+				table.combat = { attackers: [...(table.combat?.attackers ?? []), ...structuredClone(change.attackers)], blockers: [], blocked: [], choosing: [], assigned: [] };
 				// 508.8: nobody attacked, so there are no blockers and no combat damage.
-				if (!change.attackers.length) table.cursor.steps = table.cursor.steps.filter((step) => step !== "declare-blockers" && step !== "combat-damage");
+				if (!table.combat.attackers.length) table.cursor.steps = table.cursor.steps.filter((step) => step !== "declare-blockers" && step !== "combat-damage");
 				break;
 			case "block": {
 				const combat = table.combat!;

@@ -13,14 +13,14 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 4 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control |
-| Completed source-reviewed alpha games | 11, covering Control, Landfall and Izzet; Azorius has begun its first game |
-| Imported lists facing each other | Selesnya versus Control and Izzet versus Control completed in both seat orders; Landfall versus Izzet also completed |
+| Completed source-reviewed alpha games | 12, covering Control, Landfall and Izzet; Azorius has begun play but has no counted finish |
+| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Azorius continues after Countersculpt's token and loyalty gap; the reversed Izzet versus Landfall finish is excluded pending an entry-counter correction |
-| Recent shared mechanics | Token activated abilities, loyalty costs and starting counters, planeswalker attacks, public hand reveal and library-scope validation |
-| Stored card assessments | 227 accepted, 80 refused, five basic lands; source review retired four inert restriction assessments, including sideboard cards |
+| Current runtime work | Azorius reached Get Lost's token-controller gap; Control versus Azorius reached Jace's Machinations' temporary loyalty-timing permission |
+| Recent shared mechanics | Token abilities, loyalty costs and starting counters, planeswalker attacks, layer-five color changes and tokens entering attacking |
+| Stored card assessments | 228 accepted, 79 refused, five basic lands; Voice of Victory is assessed, leaving one standing blocker in Boros Dragons |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 262 invariant tests pass |
+| Validation | Type check and 264 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
