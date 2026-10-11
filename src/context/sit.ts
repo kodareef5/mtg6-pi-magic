@@ -42,6 +42,7 @@ import { editWork } from "../core/work-tools.ts";
 import { assessCard } from "./assess.ts";
 import { interpret } from "./interpret.ts";
 import type { RunTiming } from "./spend.ts";
+import type { BriefCache } from "./brief-cache.ts";
 
 /** What Pi gives us, narrowed to the two calls a game makes. */
 export type Inference = { classify: Classify; stream: Stream };
@@ -54,6 +55,7 @@ export type Seated = {
 	players: Record<SeatId, Player>;
 	intents: Record<SeatId, Intent>;
 	chronicle: Chronicle;
+	briefs?: { seat: SeatId; from: "written" | "cached" | "carried" }[];
 	tally: Tally;
 	/** Requests to the decision model, attempts included. Read from the bill. */
 	picks: () => number;
@@ -87,6 +89,8 @@ export async function seat(
 		format: string;
 		/** Reuse and save source-checked packages for a new game only. */
 		reusePackages?: boolean;
+		/** New games that reuse preparation also cache matchup briefs. False opts out. */
+		briefCache?: false | Omit<BriefCache, "identity">;
 		/** Cache failures are notices; accepted equipment stays in this game's journal. */
 		packageNotice?: (message: string) => void;
 		/**
@@ -113,6 +117,7 @@ export async function seat(
 	const dialled: Record<string, number> = {};
 	const planned: Planned[] = [];
 	const chronicle: Chronicle = { briefs: {}, recaps: [] };
+	const briefs: NonNullable<Seated["briefs"]> = [];
 	const players: Record<SeatId, Player> = {};
 	const intents: Record<SeatId, Intent> = {};
 
@@ -130,6 +135,7 @@ export async function seat(
 	 */
 	const take = (at: SeatId, made: Brief, how: "written" | "carried") => {
 		chronicle.briefs[at] = made;
+		briefs.push({ seat: at, from: how === "carried" ? how : made.cache?.reused ? "cached" : "written" });
 		if (how === "written" && options.journal) keep(options.journal, at, made);
 		for (const gap of made.gaps) table.gaps.push(`Seat ${at} brief (${how}): ${gap}`);
 	};
@@ -254,6 +260,12 @@ export async function seat(
 				return;
 			}
 			const others = table.seats.filter((other) => other.id !== at.id) as Seat[];
+			const cache = reuse && options.briefCache !== false ? { ...options.briefCache, identity: {
+				format: table.format, rosters: [at, ...others].map((one) => parts.get(one.id)!.map((part) => ({
+					role: part.role, pattern: part.pattern, off: part.off, problem: part.problem,
+					model: part.model && { id: part.model.id, provider: part.model.provider, api: part.model.api }, thinking: part.thinkingLevel,
+				})).sort((a, b) => a.role.localeCompare(b.role))),
+			} } : undefined;
 			// A reasoner per call, so one analyst's failures cannot stop its siblings or the synthesis.
 			const written = await brief(at, others, universe, () => reasoner({
 				role: "pregame",
@@ -262,7 +274,7 @@ export async function seat(
 				model: role.model as Model<Api>,
 				...(role.thinkingLevel ? { thinking: role.thinkingLevel } : {}),
 				tally: counted,
-			}), { format: options.format, guides: guideFor, ...(options.rules ? { rules: options.rules } : {}) });
+			}), { format: options.format, guides: guideFor, cache, ...(options.rules ? { rules: options.rules } : {}) });
 			take(at.id, written, "written");
 		}),
 	);
@@ -274,7 +286,7 @@ export async function seat(
 		timing, fromVersion, judged: { cases: 0, failed: 0 },
 		players,
 		intents,
-		chronicle,
+		chronicle, briefs,
 		tally: counted,
 		picks: () => counted.spent().filter((spend) => spend.role === "decide").length,
 		dials: dialled,

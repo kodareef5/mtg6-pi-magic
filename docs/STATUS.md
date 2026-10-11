@@ -20,7 +20,7 @@ measures whether ordinary games can execute their cards correctly.
 | Recent shared mechanics | Adventure counts, chosen creature types, spent-mana spell properties, exile-until returns, collected-evidence payment and private inspection |
 | Stored card assessments | 229 accepted, 78 refused, five basic lands; these totals include deferred sideboard work |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 244 invariant tests pass |
+| Validation | Type check and 246 invariant tests pass |
 | Rejected evidence | Public inspection substitutes, reordered printed instructions and incorrect library incarnation changes remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
 

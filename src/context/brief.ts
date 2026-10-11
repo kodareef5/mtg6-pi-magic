@@ -27,6 +27,7 @@ import type { Step } from "../core/steps.ts";
 import type { Seat } from "../core/table.ts";
 import type { SeatId, SeatView } from "../core/types.ts";
 import type { Lookup, Reasoner, Submission } from "./reason.ts";
+import { briefKey, readBrief, saveBrief, type BriefCache } from "./brief-cache.ts";
 
 /** Steps with seat choices, including cleanup discards and exceptional priority. */
 const STEPS = ["upkeep", "draw", "precombat-main", "begin-combat", "declare-attackers", "declare-blockers", "combat-damage", "end-of-combat", "postcombat-main", "end", "cleanup"] as const satisfies readonly Step[];
@@ -61,7 +62,8 @@ const BriefSchema = object({
 	policies: PlaybookSchema,
 });
 /** Older version-three briefs used free-form opening notes. Keep those intact on replay. */
-export type Brief = Omit<Static<typeof BriefSchema>, "opening" | "policies"> & { policies?: Playbook; opening: Static<typeof Note>; seat: SeatId; version: 3; gaps: string[] };
+export type Brief = Omit<Static<typeof BriefSchema>, "opening" | "policies"> & { policies?: Playbook; opening: Static<typeof Note>; seat: SeatId; version: 3; gaps: string[];
+	cache?: { key: string; writtenAt: string; reused: boolean } };
 
 export const emptyBrief = (seat: SeatId): Brief => ({
 	seat, version: 3, role: "", route: "", recovery: "", matchup: "", opening: "", steps: {}, cards: {}, traps: [], gaps: [],
@@ -209,10 +211,10 @@ function facts(seat: Seat, others: Seat[], universe: Universe, format: string, g
 	const mine = listed(seat.deck.main);
 	const guide = (deck: string, whose: string) => { const text = guides?.(deck); return text ? ["", `${whose} deck guide, written before the game about how ${deck} is designed to be played. Advice, not facts; the lists above and the card text win any disagreement.`, text] : []; };
 	return [
-		`You are seat ${seat.id} in a ${others.length + 1}-seat game of ${format}. Who plays first is not yet known.`,
+		`You prepare your deck for a ${others.length + 1}-seat game of ${format}. Who plays first is not yet known. Refer to you and your opponents by deck, never by seat number; this advice is reused across seeds and seat swaps.`,
 		"", `Your registered deck:`, ...deckLines(mine, universe), "", numbers(mine, universe),
-		...others.flatMap((other) => ["", `Seat ${other.id}'s public registered deck:`, ...deckLines(listed(other.deck.main), universe), "", numbers(listed(other.deck.main), universe)]),
-		...guide(seat.deck.name, "Your"), ...others.flatMap((other) => guide(other.deck.name, `Seat ${other.id}'s`)),
+		...others.flatMap((other, index) => ["", `Opponent ${index + 1}'s public registered deck (${other.deck.name}):`, ...deckLines(listed(other.deck.main), universe), "", numbers(listed(other.deck.main), universe)]),
+		...guide(seat.deck.name, "Your"), ...others.flatMap((other, index) => guide(other.deck.name, `Opponent ${index + 1}'s`)),
 	].join("\n");
 }
 
@@ -226,9 +228,15 @@ export async function brief(
 	others: Seat[],
 	universe: Universe,
 	reasoners: () => Pick<Reasoner, "work">,
-	options: { format: string; rules?: Rules; guides?: (deck: string) => string | undefined },
+	options: { format: string; rules?: Rules; guides?: (deck: string) => string | undefined; cache?: BriefCache },
 ): Promise<Brief> {
 	const user = facts(seat, others, universe, options.format, options.guides);
+	const key = options.cache && briefKey({ contract: 1, identity: options.cache.identity, user,
+		decks: [seat, ...others].map((one) => one.deck),
+		cards: { generated: universe.generated, entries: [...universe.cards].sort(([a], [b]) => a.localeCompare(b)) },
+		rules: options.rules && { effective: options.rules.effective, entries: options.rules.entries },
+		prompts: [SYSTEM, SYNTHESIS, QUESTIONS, FAMILIES, FindingsSchema, WrittenSchema, BriefSchema, ANALYST, SYNTHESIZED] });
+	if (key && options.cache) { const kept = readBrief(key, seat.id, BriefSchema, options.cache); if (kept) return kept; }
 	const tools = lookups(universe, options.rules);
 	const results = await Promise.all(Object.entries(QUESTIONS).map(async ([key, question]) => {
 		try {
@@ -259,7 +267,8 @@ export async function brief(
 	].join("\n") }, { submit: written }, SYNTHESIZED);
 	const made = complete(answer.value as Written) as Static<typeof BriefSchema>;
 	const cards = Object.fromEntries(Object.entries(made.cards ?? {}).flatMap(([key, note]) => names(key).map((name) => [name, note])));
-	return { ...made, cards, seat: seat.id, version: 3, gaps: failed };
+	const writtenBrief: Brief = { ...made, cards, seat: seat.id, version: 3, gaps: failed };
+	return key && options.cache ? saveBrief(key, writtenBrief, options.cache) : writtenBrief;
 }
 
 /** Output ceilings: an analyst thinks and looks things up; the synthesis writes every field. */

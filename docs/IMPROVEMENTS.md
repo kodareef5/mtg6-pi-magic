@@ -118,3 +118,14 @@ win/survival/development objective, optional checked fragments, plan before
 rationale, pilot tap annotations, automatic combat-fact attachments, the draft
 rehearsal interface, the analyst wave, and Luna-low prompt work on growth
 lethal. Details in the ignored evidence directories.
+
+### Matchup preparation reuse
+
+Fresh games reuse complete briefs when both registered lists, roster, card and
+rule contents, guides and prompt contract match. The brief addresses decks
+relative to its owner and carries both play and draw opening policies, so a
+new seed or seat swap reuses it. A cache hit is written into the new journal;
+clones and resumed games retain their own preparation. Corrupt cache files
+cause a notice and fresh preparation. Failed analysts never seed the cache.
+Reports distinguish written, cached and carried briefs without inventing model
+calls or saved-cost estimates.

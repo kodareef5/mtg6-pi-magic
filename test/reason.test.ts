@@ -9,7 +9,7 @@
 
 import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
-import { appendFileSync, mkdtempSync, readFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -170,6 +170,51 @@ test("the pregame asks four analysts at once, then one synthesis, and files the 
 	if (say(written.route)) assert.ok(plan.includes(say(written.route)), "the whole brief reaches the strategist, not a filtered slice");
 	assert.match(plan, /Written before the game by your pregame analysts/, "model-written strategy is marked as advice");
 
+});
+
+test("matchup brief reuse follows both lists, source contents and preparation inputs across seat swaps", async () => {
+	const dir = mkdtempSync(join(tmpdir(), "magic-briefs-")), built = table(), notices: string[] = [];
+	const talk = pregame(), counted = tally(), rules = loadRules("rules/cr.tsv");
+	const cache = { directory: dir, identity: { roster: "test", format: standard }, notice: (message: string) => notices.push(message) };
+	const options = { format: standard.name, rules, guides: () => "Prepared guide.", cache };
+	const writers = () => reasoner({ role: "pregame", stream: talk.stream, model: sol, tally: counted, backoffMs: 0 });
+	try {
+		const first = await brief(built.seats[0]!, [built.seats[1]!], universe, writers, options);
+		assert.equal(first.cache?.reused, false); assert.equal(talk.tasks.length, 5);
+		const me = { ...built.seats[0]!, id: 1 }, them = { ...built.seats[1]!, id: 0 };
+		const swapped = await brief(me, [them], universe, writers, options);
+		assert.equal(swapped.cache?.reused, true); assert.equal(swapped.seat, 1);
+		assert.deepEqual({ ...swapped, seat: 0, cache: first.cache }, first);
+		assert.equal(counted.spent().length, 5, "reuse creates no fictional model call");
+		assert.ok(talk.seen.every((prompt) => !/You are seat|Seat [01]'s/.test(prompt)), "advice has no original seat numbering");
+		const changed = structuredClone(universe); changed.cards.get("Forest")!.oracle = "Changed same-date source.";
+		const changedRules = structuredClone(rules); changedRules.entries[0]!.text += " Changed source.";
+		const deckChange = { ...them, deck: { ...them.deck, sideboard: { ...them.deck.sideboard, "Negate": 3 } } };
+		for (const [cardSource, other, setup] of [
+			[changed, them, options], [universe, them, { ...options, rules: changedRules }],
+			[universe, deckChange, options], [universe, them, { ...options, guides: () => "Revised guide." }],
+			[universe, them, { ...options, cache: { ...cache, identity: { roster: "different", format: standard } } }],
+		] as const) {
+			const before: number = talk.tasks.length;
+			assert.equal((await brief(me, [other], cardSource, writers, setup)).cache?.reused, false);
+			assert.equal(talk.tasks.length - before, 5);
+		}
+		const path = join(dir, `${first.cache!.key}.json`);
+		writeFileSync(path, "{torn");
+		assert.equal((await brief(me, [them], universe, writers, options)).cache?.reused, false);
+		assert.ok(notices.some((one) => one.includes("Skipped matchup brief")));
+		writeFileSync(path, JSON.stringify({ key: first.cache!.key, writtenAt: "now", brief: { role: "incomplete" } }));
+		assert.equal((await brief(me, [them], universe, writers, options)).cache?.reused, false, "an incomplete cached policy is regenerated");
+		const failed = pregame({ fail: "OPENING" });
+		const degradedOptions = { ...options, cache: { ...cache, identity: "failed" } };
+		const degraded = await brief(me, [them], universe, () => reasoner({ role: "pregame", stream: failed.stream, model: sol, tally: tally(), backoffMs: 0 }), degradedOptions);
+		assert.equal(degraded.gaps.length, 1); assert.equal(degraded.cache, undefined);
+		assert.equal((await brief(me, [them], universe, writers, degradedOptions)).cache?.reused, false, "failed analysts cannot seed reuse");
+		const blocked = join(dir, "file"); writeFileSync(blocked, "not a directory");
+		const written = await brief(me, [them], universe, writers, { ...options, cache: { ...cache, directory: blocked } });
+		assert.deepEqual(written.gaps, []); assert.equal(written.cache, undefined);
+		assert.ok(notices.some((one) => one.includes("Could not cache matchup brief")));
+	} finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("the analysts read both lists and computed odds, look rules up, and a failed analyst reaches the synthesis as a failure", async () => {
@@ -616,7 +661,7 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 		{ role: "summary" as const, pattern: "off", off: true },
 	];
 	const header = (id: string, built: Table) => ({
-		id, format: standard.name, seed: "life",
+		id, format: standard.name, seed: built.rng.seed,
 		seats: built.seats.map((at) => ({ id: at.id, name: at.name, deck: at.deck })),
 		cards: { path: "cards/standard.tsv", generated: universe.generated },
 		rules: { path: "y", effective: "z" },
@@ -631,12 +676,24 @@ test("a game saved, cloned, torn, resumed and cloned again is the same game thro
 	const parentPath = join(dir, "parent.jsonl");
 	const parentJournal = open(parentPath, header("parent", first));
 	const seated = await seatTable(first, async () => parts, inference, universe, {
-		format: standard.name, journal: parentJournal,
+		format: standard.name, journal: parentJournal, reusePackages: true, briefCache: { directory: join(dir, "briefs") },
 	});
 	assert.ok(await run(first, seated, inference, parts[2]!, undefined, parentJournal, 50), "finished");
 
 	assert.equal(preparedIn(read(parentPath).lines).length, 2, "both briefs kept");
 	assert.deepEqual(gameplay(parentPath), linesOf(first), "the file holds the whole game");
+
+	const swapped = start(standard, [{ deck: deck("Island turns") }, { deck: deck("Forest turns") }], "fresh-seed");
+	const swappedJournal = open(join(dir, "swapped.jsonl"), header("swapped", swapped));
+	const reused = await seatTable(swapped, async () => parts, inference, universe, {
+		format: standard.name, journal: swappedJournal, reusePackages: true, briefCache: { directory: join(dir, "briefs") },
+	});
+	assert.equal(reused.tally.spent().length, 0, "a new seed with swapped seats reuses both matchup briefs");
+	assert.deepEqual(reused.briefs, [{ seat: 0, from: "cached" }, { seat: 1, from: "cached" }]);
+	const savedBriefs = preparedIn(read(swappedJournal.path).lines);
+	assert.equal(savedBriefs.length, 2, "cache hits are journaled as preparation owned by the new game");
+	assert.deepEqual(savedBriefs.map((one) => (one.made as { seat: number }).seat), [0, 1]);
+	await Promise.all(Object.values(reused.players).map((player) => player.close()));
 
 	// Two: cloned at a version in the middle of it.
 	const at = 20;

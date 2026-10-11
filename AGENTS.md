@@ -132,7 +132,11 @@ the opening, a challenger looking for traps), with both registered lists, exact
 opening-hand odds computed in code, and tools to look up a rule or a card. One
 synthesis then reconciles them into the brief; a failed analyst reaches it as a
 failure, never as an invented answer. Both seats prepare at the same time, so the
-brief's wall time is the slowest analyst plus one synthesis. The brief is filed by where
+brief's wall time is the slowest analyst plus one synthesis. Fresh games reuse
+complete matchup briefs from Pi's cache when both exact lists, pinned source
+contents, roster, guides and prompt contract match. Advice uses relative decks,
+so seeds and seat swaps need no new pregame. A cache hit becomes preparation in
+the new journal; a clone or resume always keeps its carried brief. The brief is filed by where
 it is read: strategy reads the policies and visible card notes; the pilot reads the opening policy while it
 mulligans, the note for its phase on whose turn it is, and notes for the cards
 its options name. A decision about blocking does not want the mulligan reasoning.
@@ -495,6 +499,7 @@ src/context/           questions for a decision model. Its own AGENTS.md
   model.ts, reason.ts  the two adapters onto Pi: classifier, and chat
   spend.ts             what every call cost, and the output ceiling per role
   brief.ts             the pregame wave, and the snippets it files by use
+  brief-cache.ts       source- and roster-pinned matchup advice for fresh games
   assess.ts            standing terms and the inventory of uses before dealing
   interpret.ts         deferred uses prepared through the selected strategy model
   summary.ts           the turn in two sentences, from the spectator view

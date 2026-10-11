@@ -13,6 +13,7 @@ export type GameResult = {
 	schema?: 1;
 	seed: string; turn: number; outcome: Outcome | null; gaps: string[]; elapsedMs: number;
 	calls: readonly Spend[]; planned?: Planned[];
+	briefs?: Seated["briefs"];
 	seats?: { id: number; name: string }[];
 	timing?: RunTiming; fromVersion?: number; version?: number;
 	replayMatches?: boolean; journal?: string; trace?: string; error?: string;
@@ -41,7 +42,7 @@ export function gameResult(table: Table, seated: Seated, extra: Pick<GameResult,
 	return {
 		schema: 1, seed: table.rng.seed, turn: table.cursor.turn, outcome: table.outcome, gaps: [...table.gaps],
 		seats: table.seats.map(({ id, name }) => ({ id, name })), fromVersion: seated.fromVersion, version: table.ledger.length,
-		timing: structuredClone(seated.timing), elapsedMs: now - seated.timing.startedAt, calls, planned: [...seated.planned],
+		timing: structuredClone(seated.timing), elapsedMs: now - seated.timing.startedAt, calls, planned: [...seated.planned], briefs: seated.briefs,
 		reasons: Object.fromEntries(["forced", "delegated", "chosen", "declared", "fallback"].map((why) => [why, table.ledger.filter((row) => row.why === why).length])),
 		interruptions: {
 			stops: requests.filter((reason) => reason.startsWith("Stop:") && !/^Stop: Step \d+ cannot be taken now/.test(reason)).length,
@@ -87,6 +88,7 @@ export function report(result: GameResult): string[] {
 		`health    replay ${result.replayMatches === undefined ? "unchecked" : result.replayMatches ? "matched" : "MISMATCH"}  gaps ${result.gaps.length}  fallback ${reasons?.fallback ?? "?"}`,
 		`time      wall ${duration(result.elapsedMs)}  prepare ${duration(diff(timing?.preparedAt ?? (!timing?.playStartedAt ? timing?.finishedAt : undefined), timing?.startedAt))}  play ${duration(timing && !timing.playStartedAt ? 0 : diff(timing?.playEndedAt, timing?.playStartedAt))}  finish ${duration(diff(timing?.finishedAt, timing?.playEndedAt ?? timing?.preparedAt))}  strategy wait ${result.planned ? duration(waitedMs) : "?"}`,
 		`scope     calls and waits: this run; game counters: retained prefix${result.fromVersion === undefined ? "" : ` (started at decision ${result.fromVersion}, now ${result.version})`}`,
+		...(result.briefs ? [`briefs    ${["written", "cached", "carried"].map((from) => `${from} ${result.briefs!.filter((one) => one.from === from).length}`).join("  ")}`] : []),
 		...(reasons ? [`decisions ${Object.entries(reasons).map(([why, n]) => `${why} ${n}`).join("  ")}`] : []),
 		`jev       ${byRole("decide")} calls  ${purpose("pick")} picks  ${purpose("review")} reviews  ${byRole("decide") - purpose("pick") - purpose("review")} other`,
 		`strategy  ${byRole("strategy")} calls  ${planned.length} sessions${plans ? `  ${plans.accepted} plans  ${plans.steps} steps  ${plans.branches} branches` : ""}${stops ? `; help ${stops.help}  stops ${stops.stops}  essential ${stops.essential}` : ""}`,
