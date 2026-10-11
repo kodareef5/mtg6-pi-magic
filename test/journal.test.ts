@@ -9,7 +9,7 @@
 
 import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -25,6 +25,7 @@ import {
 	open,
 	preparedIn,
 	read,
+	repair,
 	relive,
 	replay,
 	rowsOf,
@@ -107,6 +108,27 @@ test("a journal is a header and lines, and refuses a second header", async () =>
 	rows[3] = "{not json";
 	writeFileSync(broken, rows.join("\n"));
 	assert.throws(() => read(broken), /line 4 is not a line/);
+
+	// A line and a UTF-8 code point can straddle read chunks. Repair must
+	// preserve preceding bytes, even when the last line spans several chunks.
+	const wide = join(dir, "wide.jsonl"), head = `${JSON.stringify({ header: made })}\n`;
+	const prefix = '{"v":0,"prepared":{"seat":0,"made":"';
+	const note = "x".repeat(1024 * 1024 - Buffer.byteLength(head + prefix) - 1) + "🦜" + "y".repeat(2 * 1024 * 1024);
+	const tail = JSON.stringify({ v: 0, prepared: { seat: 0, made: note } });
+	writeFileSync(wide, head + tail);
+	assert.equal(preparedIn(read(wide).lines)[0]!.made, note);
+	assert.equal(repair(wide), null);
+	const intact = readFileSync(wide);
+	assert.deepEqual(intact, Buffer.from(head + tail + "\n"));
+	assert.equal(repair(wide), null, "an already terminated journal needs no repair");
+	const torn = '{"v":0,"prepared":' + " ".repeat(2 * 1024 * 1024) + '"🦜';
+	appendFileSync(wide, torn);
+	assert.match(read(wide).truncated!, /ends mid line/);
+	assert.equal(repair(wide), torn);
+	assert.deepEqual(readFileSync(wide), intact, "tail repair does not rewrite historical bytes");
+	const cloned = join(dir, "wide-clone.jsonl");
+	fork(wide, 0, "wide-clone", cloned);
+	assert.equal(preparedIn(read(cloned).lines)[0]!.made, note);
 });
 
 test("replay rebuilds the game and refuses data it was not played against", async () => {

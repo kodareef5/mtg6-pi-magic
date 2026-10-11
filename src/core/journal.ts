@@ -11,8 +11,9 @@
  * should not have to find which of four files answers.
  */
 
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { journalLines, repairTail } from "./journal-file.ts";
 
 import { advance, apply, nextDecision } from "./decisions.ts";
 import type { Said } from "./say.ts";
@@ -91,9 +92,8 @@ export type Journal = {
  * and nothing buffered, so a crash costs at most a partial last line.
  */
 export function open(path: string, header: Header): Journal {
-	if (existsSync(path) && readFileSync(path, "utf8").trim().length > 0) {
+	if (existsSync(path)) for (const line of journalLines(path)) if (line.text.trim())
 		throw new Error(`${path} already holds a game. Pick another id or fork it.`);
-	}
 	mkdirSync(dirname(path), { recursive: true });
 	writeFileSync(path, `${JSON.stringify({ header })}\n`);
 	return { path, header, saved: 0, ruled: 0 };
@@ -126,7 +126,8 @@ export function reopen(path: string, header: Header, already: Table): Journal {
 	// the actions an earlier judge rolled past.
 	const reconciled = back.truncated || recorded.length !== rebuilt.length;
 	if (reconciled) {
-		const raw: Line[] = readFileSync(path, "utf8").trimEnd().split("\n").slice(1).filter(Boolean).map((line) => JSON.parse(line) as Line);
+		const raw: Line[] = [];
+		for (const line of journalLines(path)) if (line.number > 1 && line.text) raw.push(JSON.parse(line.text) as Line);
 		const cut = raw.findLastIndex((line) => "ruling" in line && line.ruling.kept !== undefined);
 		const last = raw[cut];
 		const kept = last && "ruling" in last ? last.ruling.kept! : 0;
@@ -135,7 +136,8 @@ export function reopen(path: string, header: Header, already: Table): Journal {
 		const rulings = tail.filter((line) => "ruling" in line);
 		const merged = [...rebuilt.slice(kept).map((line, at) => ({ line, at, v: line.v })), ...rulings.map((line, at) => ({ line, at, v: line.v + 0.5 }))]
 			.sort((a, b) => a.v - b.v || a.at - b.at).map(({ line }) => line);
-		writeFileSync(path, [JSON.stringify({ header }), ...[...prefix, ...tail.filter((line) => "prepared" in line), ...merged].map((line) => JSON.stringify(line))].join("\n") + "\n");
+		writeFileSync(path, `${JSON.stringify({ header })}\n`);
+		for (const line of [...prefix, ...tail.filter((line) => "prepared" in line), ...merged]) appendFileSync(path, `${JSON.stringify(line)}\n`);
 	}
 	const repaired = [torn, reconciled ? back.truncated ?? "Reconstructed missing derived journal entries." : null].filter(Boolean).join(" ");
 	return { path, header, saved: rebuilt.length, ruled: already.rulings.length, ...(repaired ? { repaired } : {}) };
@@ -174,17 +176,7 @@ export function save(journal: Journal, table: Table): number {
  * drops are the ones `read` already refuses to count as part of the game.
  */
 export function repair(path: string): string | null {
-	const text = readFileSync(path, "utf8");
-	if (!text.length || text.endsWith("\n")) return null;
-	const end = text.lastIndexOf("\n");
-	const torn = text.slice(end + 1);
-	try {
-		JSON.parse(torn);
-		writeFileSync(path, `${text}\n`);
-		return null;
-	} catch { /* Only an incomplete JSON value is a torn line. */ }
-	writeFileSync(path, text.slice(0, end + 1));
-	return torn;
+	return repairTail(path);
 }
 
 /** Every line a table has produced so far, in order, ready to append. */
@@ -208,44 +200,34 @@ export function linesOf(table: Table): Line[] {
  * cannot be trusted to be the game that was played.
  */
 export function read(path: string): { header: Header; lines: Line[]; truncated?: string } {
-	const text = readFileSync(path, "utf8");
-	const rows = text.split("\n");
-	const last = rows.pop();
-	const first = rows.shift();
-	if (!first) throw new Error(`${path} is empty. A file without a header is not a game.`);
-	const opening = JSON.parse(first) as { header?: Header };
-	if (!opening.header) throw new Error(`${path} does not start with a header.`);
-
+	let header: Header | undefined, truncated: string | undefined;
 	let lines: Line[] = [];
 	// A rollback leaves the game it rolled past in the file and out of the game.
 	const take = (line: Line) => {
 		if ("ruling" in line && line.ruling.kept !== undefined) lines = lines.filter((one) => one.v <= line.v || "prepared" in one || "ruling" in one);
 		lines.push(line);
 	};
-	for (const [at, row] of rows.entries()) {
-		if (!row) continue;
+	for (const row of journalLines(path)) {
+		if (row.number === 1) {
+			if (!row.text || !row.complete) throw new Error(`${path} is empty. A file without a header is not a game.`);
+			header = (JSON.parse(row.text) as { header?: Header }).header;
+			if (!header) throw new Error(`${path} does not start with a header.`);
+			continue;
+		}
+		if (!row.text) continue;
 		let line: Line;
-		try {
-			line = JSON.parse(row) as Line;
-		} catch (error) {
-			throw new Error(`${path} line ${at + 2} is not a line: ${String(error)}`);
+		try { line = JSON.parse(row.text) as Line; }
+		catch (error) {
+			if (row.complete) throw new Error(`${path} line ${row.number} is not a line: ${String(error)}`);
+			truncated = `${path} ends mid line. The last entry was dropped.`; continue;
 		}
 		take(line);
 	}
-	let truncated: string | undefined;
-	if (last && last.length) {
-		let line: Line | undefined;
-		try {
-			line = JSON.parse(last) as Line;
-		} catch {
-			truncated = `${path} ends mid line. The last entry was dropped.`;
-		}
-		if (line) take(line);
-	}
+	if (!header) throw new Error(`${path} is empty. A file without a header is not a game.`);
 	const durable = lines.reduce((last, line) => "row" in line ? Math.max(last, line.row.seq + 1) : last, 0);
 	const complete = lines.filter((line) => "ruling" in line || line.v <= durable);
 	if (complete.length !== lines.length) truncated = [truncated, `${path} ends before its decision group completed. Uncommitted entries were dropped.`].filter(Boolean).join(" ");
-	return { header: opening.header, lines: complete, ...(truncated ? { truncated } : {}) };
+	return { header, lines: complete, ...(truncated ? { truncated } : {}) };
 }
 
 /**
