@@ -248,12 +248,12 @@ export function activate(table: Table, activation: Activation, choice: Pick<Ledg
 		const draft = table.announcement;
 		const expected = announcedActivation({ seat: draft.controller, version: table.cursor.clock, view: project(table, draft.controller) }, draft);
 		if (!expected || !isDeepStrictEqual(activation, expected)) throw new Error("Finish or cancel the selected announcement before performing another action.");
-		choice = { ...choice, execution: draft.execution };
+		choice = { ...choice, execution: choice.execution ?? draft.execution };
 	}
 	if (table.payment) {
 		const expected = { ...table.payment.activation, cost: { ...table.payment.activation.cost, exiled: table.payment.picked } };
 		if (!isDeepStrictEqual(activation, expected)) throw new Error("Finish or cancel the pending payment before announcing another action.");
-		if (table.payment.execution) choice = { ...choice, execution: table.payment.execution };
+		if (!choice.execution && table.payment.execution) choice = { ...choice, execution: table.payment.execution };
 	}
 	if (activation.exileSelection && !activation.cost.exiled) {
 		const { exileSelection, ...rest } = activation;

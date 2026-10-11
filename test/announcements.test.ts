@@ -102,6 +102,29 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	assert.match(JSON.stringify(focus(workFrame(table, 0), startingIntent(0)).plan), /Target Voice of Victory/, "the selected use retains its original execution policy");
 	pick(`announce:target:${voice.id}@${voice.incarnation}`); checkpoint();
 	pick("announce:cost:0");
+	// An explicit repair of this same use replaces stale payment guidance. An
+	// unrelated plan above did not erase the selected use's original policy.
+	const repaired = structuredClone(table), beforeRepair = structuredClone(table), repairFrom = table.ledger.length;
+	const amend = { objective: "Finish the selected Rush", guidance: "Complete the pending payment.", throughTurn: 1,
+		steps: [{ label: "Finish Rush", when, action: { procedure: rush }, purpose: "Target Voice of Victory. Pay W with Plains, generic with Mountain; confirm." }] };
+	editWork(repaired, 0, [{ do: "plan.put", plan: amend }], "repair-payment-policy");
+	const amendedAt = repaired.work[0]!.planned;
+	assert.deepEqual(repaired.announcement, beforeRepair.announcement, "replanning does not replace accepted terms or partial choices");
+	const policy = focus(workFrame(repaired, 0), startingIntent(0)).plan!;
+	assert.match(policy.due!, /Pay W with Plains/);
+	assert.deepEqual(policy.done, [], "the old plan's completion indexes do not apply to the repair");
+	const different = workFrame(repaired, 0);
+	different.view.work!.plan!.steps[0]!.action = { procedure: { ...rush, cost: { mana: "{0}" } } };
+	assert.equal(planState(different)!.amended, undefined, "a replan cannot substitute a cheaper mode for the pending one");
+	const unchanged = structuredClone(repaired); planState(workFrame(repaired, 0)); assert.deepEqual(repaired, unchanged);
+	while (repaired.announcement) {
+		const decision = nextDecision(repaired)!, option = decision.options.find(one => one.id === "announce:confirm") ?? decision.options.find(one => one.id.startsWith("announce:pay:"))!;
+		const state = planState(workFrame(repaired, 0))!;
+		apply(repaired, option.id, "model", "chosen", execution(state, option.id));
+	}
+	assert.equal(repaired.ledger.at(-1)!.execution!.plan, amendedAt, "confirmation completes the repair's matching step");
+	assert.deepEqual(project(repaired, 0).done, [0]);
+	assert.deepEqual(relive(beforeRepair, repaired.ledger.slice(repairFrom), repaired.workLog.slice(beforeRepair.workLog.length)), repaired);
 	while (!nextDecision(table)!.options.some((one) => one.id === "announce:confirm")) {
 		pick(nextDecision(table)!.options.find((one) => one.id.startsWith("announce:pay:"))!.id);
 		const state = planState(workFrame(table, 0))!;

@@ -48,6 +48,8 @@ export type PlanState = {
 	announcements?: AnnouncementOffer[];
 	/** This question selects one part of the already chosen use. */
 	preparing?: true;
+	/** A later plan explicitly addresses the selected use; partial choices still have no execution credit. */
+	amended?: true;
 };
 
 /** Ledger rows record which step or branch an action carried out. */
@@ -141,11 +143,25 @@ function candidates(option: PlanOption, frame: Frame, prefix: string): { options
 
 /** The seat's plan as it stands at this frame, or null without one. */
 export function planState(frame: Frame): PlanState | null {
-	const work = frame.view.work, plan = frame.view.announcementPlan ?? currentPlan(frame);
+	const work = frame.view.work, current = currentPlan(frame), draft = frame.view.announcement;
+	let plan = frame.view.announcementPlan ?? current;
 	if (!work || !plan || work.planned === undefined) return null;
-	const revision = frame.view.announcement?.plan ?? work.planned;
+	let revision = draft?.plan ?? work.planned, progress = draft?.execution, amended = false;
 	const scope: Scope = { world: viewWorld(frame.view), controller: frame.seat };
-	const done = new Set(frame.view.done ?? []), at = frame.view.window;
+	if (draft && current && work.planned !== draft.plan) {
+		// Reuse native/plan matching with the selected use as the only root. A
+		// replan can amend its policy, never replace its accepted card terms.
+		const root: Option = { id: "pending-use", label: draft.procedure.claim, objects: [draft.source], announcement: draft };
+		const pending = { ...frame, decision: { ...frame.decision!, options: [root] } };
+		const fits = (one: PlanOption) => matches(one.when, frame) && (!one.if || condition(scope, one.if)) &&
+			candidates(one, pending, "amendment").options.some((option) => option.id === root.id);
+		const step = current.steps.findIndex(fits), branch = (current.may ?? []).findIndex(fits);
+		if (step >= 0 || branch >= 0) {
+			plan = current; revision = work.planned; amended = true;
+			progress = { plan: revision, ...(step >= 0 ? { step } : { branch }) };
+		}
+	}
+	const done = new Set(amended ? [] : frame.view.done ?? []), at = frame.view.window;
 	const held = (plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, frame)))
 		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
 	const combat = at.kind === "turn" && at.active === frame.seat && (at.step === "declare-attackers" || frame.view.remainingSteps?.includes("declare-attackers"))
@@ -156,11 +172,10 @@ export function planState(frame: Frame): PlanState | null {
 		return [{ label: step.label, objects: select(action.objects, frame).filter((one) => one.zone === "battlefield" && one.controller === frame.seat) }];
 	}) : [];
 	if (frame.view.announcement) {
-		const draft = frame.view.announcement, progress = draft.execution;
 		const options = (frame.decision?.options ?? []).filter((one) => !["announce:cancel", "announce:back", "payment:cancel"].includes(one.id) &&
 			!one.id.startsWith("announce:unpay:") && !one.id.startsWith("announce:remove-target:") && !one.id.startsWith("payment:remove:"));
 		const fit = (at: number, label: string): Fit => ({ at, label, candidates: options });
-		return { revision, plan, seat: frame.seat, preparing: true, procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
+		return { revision, plan, seat: frame.seat, preparing: true, ...(amended ? { amended: true as const } : {}), procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
 			due: progress?.step !== undefined && plan.steps[progress.step] ? [fit(progress.step, plan.steps[progress.step]!.label)] : [],
 			branches: progress?.branch !== undefined && plan.may?.[progress.branch] ? [fit(progress.branch, plan.may[progress.branch]!.label)] : [],
 			held };

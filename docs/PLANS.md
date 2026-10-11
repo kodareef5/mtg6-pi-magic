@@ -125,6 +125,12 @@ priority without executing a plan step. Each part survives replay and cloning,
 including a plan revised while a use is pending. Historical games retain their
 complete menus until an explicit announcement boundary.
 
+An explicit replan for the same selected use replaces its payment and target
+guidance, and confirmation completes that revised step. The match includes
+the accepted mode, costs, instructions, source and permission. A different
+use cannot replace the pending terms; it requires cancellation first. A plan
+that does not address the pending use leaves its original execution policy.
+
 Payment warnings name each held resource separately. Individual mana choices
 carry those marks, and the final confirmation shows the complete payment.
 Historical inspection menus factor shared holds across payment combinations.
