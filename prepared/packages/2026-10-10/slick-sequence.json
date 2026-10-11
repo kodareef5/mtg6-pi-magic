@@ -3,15 +3,12 @@
 	"generated": "2026-10-10",
 	"source": "7cb9c514a41f1807c6779d2efd0dad2d4a23cb6c24d4b292077f02b52fb6e4cc",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Slick Sequence",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Cast Slick Sequence to deal 2 damage to any target, then draw a card if you've cast another spell this turn.",
+				"claim": "Cast Slick Sequence to deal 2 damage to any target, then draw a card if you've cast another spell this turn (this spell counts toward the total, so at least two spells cast this turn by you).",
 				"basis": "Slick Sequence deals 2 damage to any target. If you've cast another spell this turn, draw a card.",
 				"source": {
 					"card": "Slick Sequence",
@@ -22,8 +19,59 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{U}{R}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1,
+						"if": {
+							"amount": {
+								"history": "cast",
+								"of": {
+									"types": [
+										"artifact",
+										"battle",
+										"creature",
+										"enchantment",
+										"instant",
+										"planeswalker",
+										"sorcery",
+										"kindred"
+									],
+									"zones": [
+										"stack"
+									]
+								},
+								"by": "you"
+							},
+							"atLeast": 2
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

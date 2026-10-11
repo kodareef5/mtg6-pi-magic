@@ -13,11 +13,11 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 8 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards |
-| Completed source-reviewed alpha games | 25, covering all eight admitted decks |
+| Completed source-reviewed alpha games | 27, covering all eight admitted decks |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Reverse Landfall versus Rakdos and Izzet Aggro versus Boros Dragons; Izzet Prowess still needs plot before setup |
-| Recent shared mechanics | Staged announcements with amended and cancellation plans; offspring copies; ordered damage increases; modal and additional triggers; relative-power blocking restrictions |
+| Current runtime work | Complete-payment menus in fresh Dragons versus Izzet Aggro and Rakdos versus Landfall games; Izzet Prowess still needs plot before setup |
+| Recent shared mechanics | Complete payments with explicit remaining resources; staged announcements and amended plans; offspring copies; damage increases; additional triggers; relative-power blocking restrictions |
 | Stored card assessments | 246 accepted, 62 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and 278 invariant tests pass |
