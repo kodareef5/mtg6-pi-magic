@@ -18,7 +18,7 @@
 import { characteristics, has, sick, type Traits } from "./characteristics.ts";
 import { cardsIn, playing, type LedgerRow, type Table, type Thing } from "./table.ts";
 import type { Change } from "./syntax.ts";
-import type { Chosen } from "./selectors.ts";
+import { tableWorld, type Chosen } from "./selectors.ts";
 import type { Move, Pending } from "./moves.ts";
 import type { ObjectRef } from "./types.ts";
 import { attackConflicts, blockConflicts, combatExchange, lethalDamage } from "./combat-facts.ts";
@@ -122,6 +122,7 @@ export function declareAttackers(table: Table): Pending {
 /** 509.1: the defending player picks blocks one at a time, then finishes. */
 export function declareBlockers(table: Table): Pending {
 	const combat = table.combat!;
+	const world = tableWorld(table);
 	const attackers = combat.attackers.flatMap((one) => present(table, one) ?? []);
 	const defending = combat.attackers[0]?.defending ?? playing(table).find((one) => one.id !== table.cursor.active)!.id;
 	const blocks = combat.choosing.flatMap((pick) => "blocker" in pick ? [pick] : []);
@@ -133,7 +134,7 @@ export function declareBlockers(table: Table): Pending {
 	}).sort((a, b) => a.id.localeCompare(b.id));
 	const moves: Move[] = able.flatMap((blocker) => attackers.map((attacker): Move => {
 		const attack = { ...attacker, traits: traitsOf(table, attacker) }, block = { ...blocker, traits: traitsOf(table, blocker) };
-		const marks = blockConflicts(attack, block, blocking(attacker));
+		const marks = blockConflicts(attack, block, world, blocking(attacker));
 		const calculation = blocking(attacker) ? "" : combatExchange(attack, block, defenderFacts(table, attacker))?.summary ?? "";
 		const shows = [...marks, ...(calculation ? [calculation] : [])].join(" ");
 		return { option: { id: `block:${blocker.id}:${attacker.id}`, label: `Block ${name(attacker)} (${body(traitsOf(table, attacker))}${words(traitsOf(table, attacker))}) with ${name(blocker)} (${body(traitsOf(table, blocker))}${words(traitsOf(table, blocker))})`,

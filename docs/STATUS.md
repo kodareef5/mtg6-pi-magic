@@ -13,14 +13,14 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 8 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards |
-| Completed source-reviewed alpha games | 23, covering seven admitted decks; Rakdos Lizards' first game is running |
+| Completed source-reviewed alpha games | 25, covering all eight admitted decks |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; Azorius versus Landfall also completed in both orders, and Azorius versus Izzet completed once |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Rakdos versus Landfall and a repaired Landfall versus Izzet continuation; source review excluded an Esper Origins return error |
-| Recent shared mechanics | Staged announcements and matching replans; named additional mana costs and offspring token copies; ordered damage increases; modal triggers and last known information conditions |
-| Stored card assessments | 244 accepted, 64 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
+| Current runtime work | Reverse Landfall versus Rakdos and Izzet Aggro versus Boros Dragons; Izzet Prowess still needs plot before setup |
+| Recent shared mechanics | Staged announcements with amended and cancellation plans; offspring copies; ordered damage increases; modal and additional triggers; relative-power blocking restrictions |
+| Stored card assessments | 246 accepted, 62 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 277 invariant tests pass |
+| Validation | Type check and 278 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Private-information leaks, wrong discard bindings, missed native cast permissions, wrong search actors and earlier instruction-order errors remain excluded; unused bad terms found in the latest reviews were corrected for future games |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

@@ -1,5 +1,6 @@
 /** Damage arithmetic for one attacker and at most one blocker, with unchanged characteristics. */
 import type { SeenObject } from "./work.ts";
+import { matches, type World } from "./selectors.ts";
 
 type Fighter = Pick<SeenObject, "id" | "card" | "token" | "traits" | "damage">;
 const named = (one: Fighter) => one.card ?? one.token?.name ?? one.id;
@@ -12,14 +13,22 @@ export function lethalDamage(source: { words: string[] } | undefined, target: { 
 
 export const attackConflicts = (attacker: Fighter) => ["defender", "can't attack"].filter((word) => attacker.traits?.words.includes(word)).map((word) => `Conflicts with ${word}.`);
 
-/** These are the same keyword conflicts offered beside a physical block, not enforced legality. */
-export function blockConflicts(attacker: Fighter, blocker: Fighter, others = 0): string[] {
+/** The same source-backed conflicts accompany a physical block and its projected analysis. */
+export function blockConflicts(attacker: Fighter & { incarnation: number }, blocker: Fighter & { incarnation: number }, world: World, others = 0): string[] {
 	const on = attacker.traits?.words ?? [], by = blocker.traits?.words ?? [], found: string[] = [];
 	if (on.includes("flying") && !by.includes("flying") && !by.includes("reach")) found.push("Conflicts with flying: needs flying or reach.");
 	if (on.includes("can't be blocked")) found.push("Conflicts with can't be blocked.");
 	if (by.includes("can't block")) found.push("Conflicts with can't block.");
 	if (on.includes("menace") && others === 0) found.push("Conflicts with menace unless another creature also blocks it.");
 	if (on.includes("can't be blocked by more than one creature") && others > 0) found.push("Conflicts with can't be blocked by more than one creature.");
+	const attack = world.objects.find(one => one.id === attacker.id && one.incarnation === attacker.incarnation);
+	const block = world.objects.find(one => one.id === blocker.id && one.incarnation === blocker.incarnation);
+	if (attack && block) for (const source of world.objects.filter(one => one.zone === "battlefield")) {
+		const scope = { world, source, controller: source.controller };
+		for (const rule of world.read(source)?.registrations ?? []) if (rule.kind === "prohibit" && "block" in rule &&
+			matches(scope, attack, rule.block.attacker) && matches(scope, block, rule.block.blocker))
+			found.push(`Conflicts with ${world.read(source)?.name ?? source.id}: ${rule.basis}`);
+	}
 	return found;
 }
 

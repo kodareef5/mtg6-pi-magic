@@ -128,14 +128,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Elusive Otter // Grove's Bounty": {
-		"reason": "Creatures with power less than this creature's power can't block it. Source review rejected the refreshed inert change.words sentence; combat needs a source-backed relative-power block restriction.",
-		"decks": [
-			"Izzet Prowess"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Emptiness": {
 		"reason": "Emptiness is not ready: Printed mana cost \"{4}{W/B}{W/B}\": normal casting requires hybrid mana payment, which the printed-cost reader and procedure cost syntax do not support.; \"Evoke {W/B}{W/B}\": the alternative cast requires unsupported hybrid mana payment. Its standing enters trigger also requires checking whether the evoke alternative cost was paid before its controller sacrifices it; cast.paid supports named additional mana costs only, not alternative-cost identity.",
 		"decks": [

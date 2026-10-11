@@ -355,6 +355,8 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), cast: PlayerRef, during: Type.Optional(PlayerRef), if: Type.Optional(Type.Ref("Condition")) }),
 		/** Restrictions name sources in any zone; a mana exception preserves payment abilities. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), activate: Type.Ref("Selector"), exceptMana: Type.Optional(Type.Literal(true)), if: Type.Optional(Type.Ref("Condition")) }),
+		/** A forbidden attacker/blocker pair. Both selectors read the registration's source. */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), block: object({ attacker: Type.Ref("Selector"), blocker: Type.Ref("Selector") }) }),
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("suppress"), event: Type.Ref("Event") }),
 	]),
 };

@@ -15,7 +15,7 @@
  */
 
 import { cardsIn, playing, seat, manaDuration, type Receipt, type Table, type Thing } from "./table.ts";
-import { happened } from "./selectors.ts";
+import { happened, viewWorld } from "./selectors.ts";
 import { damageNotes } from "./damage.ts";
 import { activationTimingNotes } from "./activated.ts";
 import { owedFor, mulligansSettled } from "./pregame.ts";
@@ -193,17 +193,13 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const declaration = recentBlock(table), declarationReview = pendingBlockRuling(table);
 	const involved = declaration?.blockers.flatMap((one) => [one, ...one.blocking]) ?? [];
 	const current = objects.filter((object) => involved.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
-	const conflicts = declaration?.blockers.flatMap((blocker) => blocker.blocking.flatMap((ref) => {
-		const attack = current.find((one) => one.id === ref.id && one.incarnation === ref.incarnation), block = current.find((one) => one.id === blocker.id && one.incarnation === blocker.incarnation);
-		const others = new Set(declaration.blockers.filter((one) => one.blocking.some((aim) => aim.id === ref.id && aim.incarnation === ref.incarnation)).map((one) => `${one.id}@${one.incarnation}`)).size - 1;
-		return attack && block ? blockConflicts(attack, block, others).map((conflict) => `${block.card ?? block.token?.name ?? block.id} blocking ${attack.card ?? attack.token?.name ?? attack.id}: ${conflict}`) : [];
-	})) ?? [];
+
 	const history = happened(table);
 	const castings = Object.fromEntries([...objects, ...history.flatMap((event) => event.kind === "cast" ? [event.spell] : [])].flatMap((object) => {
 		const paid = !object.faceDown && casting(table, object);
 		return paid ? [[`${object.id}@${object.incarnation}`, structuredClone(paid)]] : [];
 	}));
-	return { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
+	const view: SeatView = { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		starting: table.seats[0]!.id,
 		...(table.announcementsFrom !== undefined && table.ledger.length >= table.announcementsFrom ? { stagedAnnouncements: true as const } : {}),
 		...(viewer !== "spectator" && table.announcement?.controller === viewer ? { announcement: structuredClone(table.announcement) } : {}),
@@ -221,13 +217,22 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		seats: table.seats.map((one) => ({ id: one.id, name: one.name })),
 		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		...(declarationReview ? { declarationReview } : {}),
-		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts } } : {}),
+		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts: [] } } : {}),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history, castings,
 		...(at.kind === "turn" ? { visit: table.cursor.visit, remainingSteps: [...cursor.steps], stepDone: cursor.stepDone, turnBegan: cursor.began[cursor.active] } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { work: structuredClone(table.work[viewer]), done: table.ledger.flatMap((row) =>
 			!withdrawn.has(row.seq) && row.seat === viewer && row.execution?.plan === (table.announcement?.controller === viewer ? table.announcement.plan : table.work[viewer]!.planned) && row.execution?.step !== undefined ? [row.execution.step] : []) } : {}),
 		...(viewer !== "spectator" && table.work[viewer] ? { actions: actions(table, viewer), worked: worked(table, viewer, withdrawn) } : {}),
 		since: table.log.slice(since).map((r) => describe(table, r, viewer)).filter(Boolean), ...(at.kind === "turn" ? { recent: recent(table, viewer) } : {}) };
+	if (declaration && view.blockDeclaration) {
+		const world = viewWorld(view);
+		view.blockDeclaration.conflicts = declaration.blockers.flatMap((blocker) => blocker.blocking.flatMap((ref) => {
+			const attack = current.find((one) => one.id === ref.id && one.incarnation === ref.incarnation), block = current.find((one) => one.id === blocker.id && one.incarnation === blocker.incarnation);
+			const others = new Set(declaration.blockers.filter((one) => one.blocking.some((aim) => aim.id === ref.id && aim.incarnation === ref.incarnation)).map((one) => `${one.id}@${one.incarnation}`)).size - 1;
+			return attack && block ? blockConflicts(attack, block, world, others).map((conflict) => `${block.card ?? block.token?.name ?? block.id} blocking ${attack.card ?? attack.token?.name ?? attack.id}: ${conflict}`) : [];
+		}));
+	}
+	return view;
 }
 
 /** The last five turns by each receipt's recorded turn, read backwards from now and never to the start of the game. */

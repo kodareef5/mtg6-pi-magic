@@ -176,6 +176,41 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 		assert.equal(position.things.get(hydra.id)!.zone, keyword === "indestructible" ? "battlefield" : "graveyard");
 		assert.equal(position.things.get(challenger.id)!.zone, keyword === "deathtouch" ? "graveyard" : "battlefield");
 	}
+	const relative = start(standard, [{ deck: alpha(deck("Izzet Prowess")) }, { deck: deck("Mono-Red Aggro") }], "relative-block-power");
+	const otter = establish(relative, 0, "Elusive Otter // Grove's Bounty"), other = establish(relative, 0, "Drake Hatcher", []);
+	const small = establish(relative, 1, "Hired Claw", []), equal = establish(relative, 1, "Emberheart Challenger", []);
+	commit(relative, [{ do: "counters", what: otter.id, kind: "+1/+1", amount: 1 }], "game-setup");
+	reach(relative, "declare-attackers", 3); pick(relative, `attack:${otter.id}`); pick(relative, `attack:${other.id}`); pick(relative, "attack:done");
+	reach(relative, "declare-blockers", 3);
+	const restricted = `block:${small.id}:${otter.id}`, allowed = `block:${equal.id}:${otter.id}`;
+	assert.match(option(relative, restricted)!.shows!, /Creatures with power less/);
+	assert.ok(!option(relative, allowed)!.shows?.includes("Conflicts"), "equal power is allowed");
+	assert.ok(!option(relative, `block:${small.id}:${other.id}`)!.shows?.includes("Conflicts"), "the restriction names only Otter");
+	const initial = structuredClone(relative), at = relative.ledger.length;
+	for (const seat of [0, 1]) {
+		const frame = workFrame(relative, seat);
+		assert.match(JSON.parse(combatLookup(frame).answer({ attacker: otter.id, blocker: small.id })).conflicts.join(" "), /Creatures with power less/);
+		assert.deepEqual(JSON.parse(combatLookup(frame).answer({ attacker: otter.id, blocker: equal.id })).conflicts, []);
+	}
+	const forecast = dossier({ frame: workFrame(relative, 1) }).split("\n").find(line => line.startsWith(`- Elusive Otter // Grove's Bounty (`) && line.includes("can block it"))!;
+	assert.ok(forecast); assert.ok(forecast.includes("Emberheart Challenger")); assert.ok(!forecast.includes("Hired Claw"));
+	assert.deepEqual(relative, initial, "all projections and conflict reads are pure");
+	const grown = structuredClone(relative);
+	commit(grown, [{ do: "counters", what: small.id, kind: "+1/+1", amount: 1 }], "game-setup");
+	assert.ok(!option(grown, restricted)!.shows?.includes("Conflicts"), "a blocker's current counters change the comparison");
+	commit(grown, [{ do: "note", note: { kind: "label", by: 0, on: { id: otter.id, incarnation: otter.incarnation }, until: "end-of-turn",
+		text: "Fixture adds the prowess boost", change: { power: 1, toughness: 1 } } }], "game-setup");
+	assert.match(option(grown, restricted)!.shows!, /Creatures with power less/);
+	commit(grown, [{ do: "note", note: { kind: "label", by: 0, on: { id: otter.id, incarnation: otter.incarnation }, until: "end-of-turn",
+		text: "Fixture removes the ability", change: { loseAbilities: true } } }], "game-setup");
+	assert.ok(!option(grown, restricted)!.shows?.includes("Conflicts"), "removed abilities leave no restriction behind");
+	pick(relative, restricted); // The table offers the warning; a seat can still declare this physical block.
+	const partial = structuredClone(relative), from = relative.ledger.length;
+	pick(relative, "block:done");
+	for (const viewer of [0, 1, "spectator"] as const) assert.match(project(relative, viewer).blockDeclaration!.conflicts.join(" "), /Creatures with power less/);
+	finish(relative);
+	assert.deepEqual(relive(partial, relative.ledger.slice(from)), relative);
+	assert.deepEqual(relive(initial, relative.ledger.slice(at)), relative);
 });
 
 test("trample assigns lethal to the blocker before the player, counting marked damage", () => {

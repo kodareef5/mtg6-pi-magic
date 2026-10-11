@@ -16,6 +16,7 @@ import { damageNotes } from "../core/damage.ts";
 import { activationTimingNotes } from "../core/activated.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { blockConflicts } from "../core/combat-facts.ts";
+import { viewWorld } from "../core/selectors.ts";
 import { cardDefinition } from "./strategy-position.ts";
 import { manaLines } from "./strategy-facts.ts";
 import { useSources } from "../core/readiness.ts";
@@ -197,18 +198,19 @@ function effects(frame: Frame, name: (seat: SeatId) => string): string {
 		now.length ? now.join("\n") : "None on the battlefield.", ...damageNotes(frame.view.notes ?? []), ...activationTimingNotes(frame.view.notes ?? [], name), ...(later.length ? [later.join("\n")] : [])].join("\n");
 }
 
-/** For each opposing creature, which of your creatures could block it on their next turn, by keyword conflicts only. */
+/** For each opposing creature, which of your creatures could block it with the current characteristics. */
 function blocking(frame: Frame, name: (seat: SeatId) => string): string {
+	const world = viewWorld(frame.view);
 	const creatures = (mine: boolean) => (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && (one.controller === frame.seat) === mine && one.traits?.types.includes("creature"));
 	const body = (one: SeenObject) => `${one.card ?? one.token?.name ?? one.id} (${ref(one)}, ${one.traits?.power ?? "?"}/${one.traits?.toughness ?? "?"}${one.traits?.words.length ? `, ${one.traits.words.join(", ")}` : ""})`;
 	const ours = creatures(true), theirs = creatures(false);
 	const opponent = theirs[0] ? name(theirs[0].controller) : "the opponent";
 	const lines = theirs.map((attacker) => {
-		const able = ours.filter((blocker) => blockConflicts(attacker, blocker, 1).length === 0);
+		const able = ours.filter((blocker) => blockConflicts(attacker, blocker, world, 1).length === 0);
 		const menace = attacker.traits?.words.includes("menace");
 		return `- ${body(attacker)}: ${able.length ? `${able.map(body).join(", ")} can block it${menace ? "; menace needs two of them together" : ""}` : "no creature of yours on the battlefield now can block it"}.`;
 	});
-	return [`## Blocking on ${opponent}'s next turn`, "Keyword conflicts only, by what is on the battlefield now. Summoning sickness does not stop a creature blocking, so a creature you cast this turn can block on their turn. Yours that stay tapped cannot block.",
+	return [`## Blocking on ${opponent}'s next turn`, "Blocking restrictions use what is on the battlefield now. Summoning sickness does not stop a creature blocking, so a creature you cast this turn can block on their turn. Yours that stay tapped cannot block.",
 		lines.length ? lines.join("\n") : "They have no creatures on the battlefield."].join("\n");
 }
 
