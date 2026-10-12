@@ -101,7 +101,7 @@ export function announcing(table: Table): Pending | null {
 			moves.push(...complete.map(one => ({ ...one, changes: [], reason: "announcement" as const })));
 			choose("announce:individual", "Choose mana sources individually; spend nothing yet", { ...draft, paymentMode: "individual" });
 		} else {
-			const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending);
+			const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending, base.castFrom);
 			preparing = { stage: "mana", selected: menu.chosen.map((one) => one.label), remainingMana: menu.remainingMana, missingColors: menu.missingColors, ready: menu.complete };
 			question += ` Select mana sources one at a time for ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${preparing.selected!.join("; ") || "none"}. Still needs ${menu.remainingMana} mana${menu.missingColors.length ? `, including ${menu.missingColors.map((color) => `{${color}}`).join("")}` : ""}.`;
 			for (const part of menu.next) {

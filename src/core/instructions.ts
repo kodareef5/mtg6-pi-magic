@@ -14,7 +14,7 @@ import { damageResult } from "./damage.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
-import { manaTerms } from "./funding.ts";
+import { colorChoices, manaTerms } from "./funding.ts";
 import { inspection, selectionBlock } from "./inspection.ts";
 import { libraryKeyword } from "./library-keywords.ts";
 import { project } from "./view.ts";
@@ -240,6 +240,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const add = (colors: Mana["color"][]) => who.map((one) => ({ do: "add-mana" as const, who: one, colors: Array.from({ length: times }, () => colors).flat(),
 				...manaTerms(instruction, scope) }));
 			if (instruction.colors) return one(`Add ${instruction.colors.join("")}${times > 1 ? ` ${times} times` : ""}${duration}`, add(instruction.colors as Mana["color"][]));
+			if (instruction.combination) return { actor: controller, question: `${claim}: choose the mana colors.`, choices: colorChoices((instruction.any ?? 1) * times, true).map(colors => ({
+				id: colors.join(""), label: `Add ${colors.join("")}${duration}`, changes: who.map(who => ({ do: "add-mana" as const, who, colors, ...manaTerms(instruction, scope) })) })) };
 			return { actor: controller, question: `${claim}: choose a color.`, choices: COLORS.map((color) => ({ id: color, label: `Add ${color.repeat(instruction.any ?? 1)}${duration}`, changes: add(Array(instruction.any ?? 1).fill(color)) })) };
 		}
 		case "tap": case "untap": {

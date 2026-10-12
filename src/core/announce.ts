@@ -303,7 +303,8 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 				const announced = { ...scope, source: spending, x };
 				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
 				if (procedure.if && !holds(announced, procedure.if)) continue;
-				yield { procedure, prefix, slots, effects, world, printed, original, source, sourceRef, selected, granted, mana, reduce, stacked, x, spending, words, scope: announced };
+				yield { procedure, prefix, slots, effects, world, printed, original, source, sourceRef, selected, granted, mana, reduce, stacked, x, spending,
+					castFrom: procedure.timing === "spell" ? original.zone : undefined, words, scope: announced };
 			}
 		}
 	}
@@ -363,7 +364,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		if (!aims.length) continue;
 		for (const way of offerCosts(base, frame)) {
 			const { extra, reduction, price, extraRefs } = way;
-			for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending)) {
+			for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending, base.castFrom)) {
 				const accepted = paidActivation(base, frame, way, funding), spellWords = accepted.words ?? [];
 				const payment = { paid: accepted.paid, taps: accepted.funding ?? [] };
 				const id = `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}`;

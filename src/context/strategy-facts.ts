@@ -27,11 +27,11 @@ export function manaLines(frame: Frame): string[] {
 	const only = (selector: Selector) => selector.zones?.join() === "stack" && Object.keys(selector).every((key) => ["zones", "types", "subtypes"].includes(key)) && Array.isArray(selector.subtypes ?? [])
 		? `only to cast ${[(selector.subtypes as string[] | undefined)?.join(" or "), selector.types?.join(" or ")].filter(Boolean).join(" ")} spells` : `only on ${JSON.stringify(selector)}`;
 	const describe = (yields: ReturnType<typeof sources>[number]["yields"]) => [...new Set(yields.map((one) =>
-		`${one.colors.join("")}${one.spendOnly ? ` (${only(one.spendOnly)})` : ""}${one.spellWords ? ` (the spell ${one.spellWords.join(", ")})` : ""}${one.sacrifice ? " (sacrificing it)" : ""}`))].join(" or ");
+		`${one.colors.join("")}${one.spendOnly ? ` (${only(one.spendOnly)})` : ""}${one.spendFrom ? ` (only spells cast from ${one.spendFrom.join(" or ")})` : ""}${one.spellWords ? ` (the spell ${one.spellWords.join(", ")})` : ""}${one.sacrifice ? " (sacrificing it)" : ""}`))].join(" or ");
 	const now = sources(frame);
 	const floating = frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? [];
 	const lines = [`Mana now: ${now.length ? now.map(({ object, yields }) => `${object.card ?? object.token?.name} (${object.id}@${object.incarnation}) makes ${describe(yields)}`).join("; ") : "no untapped source"}` +
-		`${floating.length ? `; floating ${floating.map((one) => `${one.color} (${manaDuration(one)}${one.spendOnly ? `; ${only(one.spendOnly)}` : ""}${one.spellWords ? `; the spell ${one.spellWords.join(", ")}` : ""})`).join(", ")}` : ""}.`];
+		`${floating.length ? `; floating ${floating.map((one) => `${one.color} (${manaDuration(one)}${one.spendOnly ? `; ${only(one.spendOnly)}` : ""}${one.spendFrom ? `; only spells cast from ${one.spendFrom.join(" or ")}` : ""}${one.spellWords ? `; the spell ${one.spellWords.join(", ")}` : ""})`).join(", ")}` : ""}.`];
 	lines.push(`Maximum mana from these sources and the pool now: ${floating.length + now.reduce((n, one) => n + Math.max(...one.yields.map((yielded) => yielded.colors.length)), 0)}; colors and spending restrictions still apply.`);
 	const tapped = (frame.view.objects ?? []).filter((one) => one.zone === "battlefield" && one.controller === frame.seat && one.tapped);
 	if (tapped.length) lines.push(`Already tapped, so unavailable for tap costs: ${tapped.map((one) => `${one.card ?? one.token?.name ?? "unknown"} (${one.id}@${one.incarnation})`).join(", ")}.`);

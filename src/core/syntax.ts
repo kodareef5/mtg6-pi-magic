@@ -98,7 +98,7 @@ export type Change =
 	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }
 	| { do: "prepare"; what: string; prepared: boolean }
 	| { do: "designate"; what: string; designation: Designation }
-	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; until?: Mana["until"]; spellWords?: string[] }
+	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true; prevented?: number; replacements?: string[] }
 	| { do: "activate"; what: string; id: string; ability: Activation }

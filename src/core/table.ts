@@ -102,6 +102,8 @@ export type Mana = {
 	color: "W" | "U" | "B" | "R" | "G" | "C";
 	/** "Spend this mana only to cast a creature spell": what it may pay for, as a selector. */
 	spendOnly?: Selector;
+	/** Only casting a spell from one of these original zones can spend this mana. */
+	spendFrom?: Zone[];
 	/** Words granted to the spell this mana actually pays for (106.6). */
 	spellWords?: string[];
 	/** Omitted mana empties at each step end. */

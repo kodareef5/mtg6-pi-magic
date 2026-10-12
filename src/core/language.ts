@@ -292,7 +292,7 @@ export const Defs = {
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("TargetAmount") }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),
-		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })) }),
+		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), combination: Type.Optional(Type.Literal(true)), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), spendFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })) }),
 		step({ do: Type.Literal("tap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
@@ -355,9 +355,9 @@ export const Defs = {
 			unlessPay: Type.Optional(Type.Union([object({ life: positive }), object({ show: object({ choose: Type.Ref("Selector"), count: positive }) })])) }),
 		/** "If it would die, exile it instead." */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("replace"), on: Type.Literal("dies"), to: Zone, until: Type.Optional(Duration) }),
-		/** A mana ability, used while paying (605, 601.2g): `colors` once each, or `any` mana of one chosen color; `times` repeats it ("{G} for each Elf"). */
-		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("mana"), cost: Type.Ref("Cost"), colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive),
-			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })),
+		/** A mana ability, used while paying (605, 601.2g): `colors` once each, or `any` mana of one chosen color (`combination` permits mixed colors); `times` repeats it ("{G} for each Elf"). */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("mana"), cost: Type.Ref("Cost"), colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), combination: Type.Optional(Type.Literal(true)),
+			times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), spendFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })),
 			/** "Activate only if you control an Island or a Swamp": the ability is usable while this holds. */
 			if: Type.Optional(Type.Ref("Condition")) }),
 		/** An ability carried by a permanent, including a token or a granted ability. */

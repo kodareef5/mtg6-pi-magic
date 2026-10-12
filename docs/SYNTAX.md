@@ -203,7 +203,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
-| `mana` | `colors` or `any`, `times` to repeat, `spendOnly`; optional `until` end of combat or end of turn; `spellWords` granted only to the spell it pays for |
+| `mana` | `colors` or `any`, optional `combination` for mixed colors, `times`, `spendOnly`; `spendFrom` limits original casting zones; optional `until` end of combat or end of turn; `spellWords` granted only to the spell it pays for |
 | `tap`, `untap` | |
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |

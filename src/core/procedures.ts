@@ -14,14 +14,14 @@ import { checkExile, enoughExile } from "./cost-selection.ts";
 import { isDeepStrictEqual } from "node:util";
 import { castableFace, faceFacts } from "./faces.ts";
 import { permanentSpell, targetless, type Printed } from "./printed.ts";
-import { check, ProcedureSchema, type Instruction, type Procedure, type Selector, type Target } from "./language.ts";
+import { check, ProcedureSchema, type Instruction, type Procedure, type Target } from "./language.ts";
 import { offers, type ProcedureOption } from "./announce.ts";
 import { commit } from "./commit.ts";
 import { attach } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
 import { selectionScoped } from "./inspection.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
-import { covers, manaTerms, paying, produces, spentWords } from "./funding.ts";
+import { covers, manaTerms, paying, produces, spendable, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, checkOngoingCondition, flashed, playable } from "./permits.ts";
@@ -95,6 +95,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if (terms.cost?.loyalty !== undefined && terms.cost.counters?.kind === "loyalty")
 				throw new Error("Combine all loyalty-symbol adjustments in cost.loyalty, without a second loyalty counter cost.");
 			if (terms.kind === "mana" && terms.cost?.loyalty !== undefined) throw new Error("A loyalty ability cannot be a mana ability.");
+			if ("combination" in value && (!("any" in value) || !value.any || "colors" in value)) throw new Error("A mana combination needs any and cannot also state colors.");
 			for (const [key, one] of Object.entries(value)) {
 				if (key === "targets" && Array.isArray(one)) for (const slot of one as Target[]) {
 					if (slot.atLeast !== undefined && (slot.upTo || (slot.count !== "any" && slot.atLeast > (slot.count ?? 1))))
@@ -214,20 +215,20 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const payment = paid.map((id) => pool.find((mana) => mana.id === id));
 	// Restricted mana pays only for what it allows, read against the spell as it will be on the stack.
 	const spending = spell;
-	const allowed = (spendOnly?: Selector) => !spendOnly || matches(scope, spending, spendOnly, traits);
+	const allowed = (terms: Pick<Mana, "spendOnly" | "spendFrom">) => spendable(terms, scope, spending, activation.timing === "spell" ? object.zone : undefined, traits);
 	const tapped = new Set([...(cost.tap ? [source.id] : []), ...(cost.tapped ?? []).map((ref) => ref.id), ...funding.map((tap) => tap.source.id)]);
 	for (const tap of funding) {
 		const mana = live(table, tap.source);
 		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
 		if (activationRestrictions(world, mana, true).length) throw new Error("A mana source in the payment cannot activate its ability.");
 		const made = characteristics(table, mana);
-		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!) && !tap.spellWords && !tap.spendOnly && !tap.until && !tap.sacrifice && !tap.life)) throw new Error("A basic land type produces one mana of that type's color with no additional effects.");
+		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!) && !tap.spellWords && !tap.spendOnly && !tap.spendFrom && !tap.until && !tap.sacrifice && !tap.life)) throw new Error("A basic land type produces one mana of that type's color with no additional effects.");
 		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, { world, controller, source: mana })).some((one) => one.colors.join() === tap.colors.join() &&
-			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && JSON.stringify(one.spellWords) === JSON.stringify(tap.spellWords) && one.until === tap.until && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
+			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && JSON.stringify(one.spendFrom) === JSON.stringify(tap.spendFrom) && JSON.stringify(one.spellWords) === JSON.stringify(tap.spellWords) && one.until === tap.until && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
 			throw new Error("The source has no registered mana ability that makes that mana.");
-		if (!allowed(tap.spendOnly)) throw new Error("That mana may not be spent on this.");
+		if (!allowed(tap)) throw new Error("That mana may not be spent on this.");
 	}
-	if (new Set(paid).size !== paid.length || tapped.size !== (cost.tap ? 1 : 0) + (cost.tapped?.length ?? 0) + funding.length || payment.some((mana) => !mana || !allowed(mana.spendOnly)) ||
+	if (new Set(paid).size !== paid.length || tapped.size !== (cost.tap ? 1 : 0) + (cost.tapped?.length ?? 0) + funding.length || payment.some((mana) => !mana || !allowed(mana)) ||
 		!covers([...payment.map((mana) => mana?.color as Mana["color"]), ...funding.flatMap((tap) => tap.colors)], cost)) {
 		throw new Error("The stated payment is unavailable, restricted, duplicated, or does not cover the stated cost.");
 	}

@@ -78,7 +78,7 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
 	const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
 	const price = (position: Frame) => action ? reduced(position, { ...spending, zone: source.zone }, mana, action) : mana;
-	const possible = (position: Frame) => payable(position, price(position), reserved, spending);
+	const possible = (position: Frame) => payable(position, price(position), reserved, spending, procedure.timing === "spell" ? source.zone : undefined);
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
 		? (frame.view.objects ?? []).filter((one) => one.traits?.types.includes("land") && one.zone !== "battlefield" && playable(world, frame.seat, one, turn, true)) : [];
@@ -366,7 +366,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				const responses: string[] = [];
 				for (const { at, act } of branches) {
 					if (act.tap && cannotTap(later, act.source!, spent)) { responses.push(`${at}: its source cannot pay the tap cost after this example line`); continue; }
-					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act)).length)
+					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act), act.spell ? act.source!.zone : undefined).length)
 						responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent, held)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
 				}
 				if (preferResponses && responses.length) { unfunded = true; return false; }
@@ -390,11 +390,11 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				for (const { object } of sources(position)) if (!selected.has(object.id)) reserved.add(object.id);
 				paymentPosition = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => item.fixed!.paid.includes(mana.id)) })) } };
 			}
-			const ways = fundings(paymentPosition, item.price, reserved, spending(item))
+			const ways = fundings(paymentPosition, item.price, reserved, spending(item), item.spell ? item.source.zone : undefined)
 				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
 			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent, held)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
-			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}|${mana ? manaDuration(mana) : ""}|${JSON.stringify(mana?.spendOnly ?? null)}`; };
+			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}|${mana ? manaDuration(mana) : ""}|${JSON.stringify(mana?.spendOnly ?? null)}${mana?.spendFrom ? `|from:${mana.spendFrom.join(",")}` : ""}`; };
 			const distinct = new Map(ways.map((way) => [`${way.funding.taps.map((tap) => `${tap.source.id}:${tap.life ?? 0}`).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}`, way]));
 			return [...distinct.values()].some(({ funding }) => {
 				const paid = new Set(funding.paid);

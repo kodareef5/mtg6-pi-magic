@@ -29,7 +29,7 @@ export function* announcementBases(frame: Frame, draft: Announcement) {
 
 export function affordableCosts(base: OfferBase, frame: Frame, targets: Chosen[][]): OfferCost[] {
 	return offerCosts({ ...base, scope: { ...base.scope, targets } }, frame).filter((way) =>
-		payable(frame, { ...way.price, life: way.extra.paid.life }, new Set(way.extra.uses), base.spending));
+		payable(frame, { ...way.price, life: way.extra.paid.life }, new Set(way.extra.uses), base.spending, base.castFrom));
 }
 
 /** Find one possible completion, without allocating every combination of targets.
@@ -80,7 +80,7 @@ export function announcementOffers(procedure: Procedure, frame: Frame, prefix: s
 export function announcedActivation(frame: Frame, draft: Announcement): Activation | undefined {
 	const base = announcementBases(frame, draft).next().value;
 	if (!base || draft.x === undefined || draft.targets.length !== base.slots.length || !draft.cost) return;
-	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, new Set(draft.cost.extra.uses), base.spending);
+	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, new Set(draft.cost.extra.uses), base.spending, base.castFrom);
 	if (!menu.complete || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return;
 	return { ...paidActivation(base, frame, draft.cost, menu.funding), targets: structuredClone(draft.targets) };
 }
@@ -91,7 +91,7 @@ export function announcementPayments(frame: Frame, draft: Announcement) {
 	const base = announcementBases(frame, draft).next().value;
 	if (!base || draft.targets.length !== base.slots.length || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return undefined;
 	const cost = { ...draft.cost.price, life: draft.cost.extra.paid.life };
-	const menu = paymentOptions(frame, cost, draft.payment, new Set(draft.cost.extra.uses), base.spending);
+	const menu = paymentOptions(frame, cost, draft.payment, new Set(draft.cost.extra.uses), base.spending, base.castFrom);
 	return completePayments(frame, cost, menu)?.map((payment, at) => {
 		const activation = { ...paidActivation(base, frame, draft.cost!, payment.funding), targets: structuredClone(draft.targets) };
 		return { activation, option: { id: `announce:payment:${at}`, label: `Confirm and pay: ${payment.label}`, use: activation,

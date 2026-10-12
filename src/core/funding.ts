@@ -11,7 +11,7 @@ import { activationRestrictions } from "./permits.ts";
 import { manaDuration, type Mana } from "./table.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
 import type { Registration, Selector } from "./language.ts";
-import type { Change } from "./syntax.ts";
+import type { Change, Zone } from "./syntax.ts";
 import { amount, chosenSelector, holds, matches, viewWorld, type Scope } from "./selectors.ts";
 import type { SeenObject } from "./work.ts";
 
@@ -19,13 +19,20 @@ import type { SeenObject } from "./work.ts";
 export type Price = { generic: number; colors: Mana["color"][]; life?: number };
 type Color = Mana["color"];
 /** One mana ability activated while paying, with the claim it was accepted under. `sacrifice` is part of its cost, as a Treasure's is. */
-export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; until?: Mana["until"]; spellWords?: string[]; sacrifice?: true; life?: number };
+export type Tap = { source: ObjectRef; colors: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[]; sacrifice?: true; life?: number };
 export type Funding = { paid: string[]; taps: Tap[] };
 /** One way a source can produce mana, what it claims, and what that mana may pay for. */
 type Yield = Omit<Tap, "source">;
 type Unit = { key: string; id: string; label: string; yields: Yield[]; pool?: Mana; source?: SeenObject };
 
 const COLORS: Color[] = ["W", "U", "B", "R", "G"];
+/** Color order is immaterial within one output; every mixed multiset remains a choice. */
+export function colorChoices(count: number, combination = false): Color[][] {
+	if (!combination) return COLORS.map(color => Array(count).fill(color));
+	const choose = (left: number, from: number): Color[][] => left === 0 ? [[]]
+		: COLORS.flatMap((color, at) => at < from ? [] : choose(left - 1, at).map(rest => [color, ...rest]));
+	return choose(count, 0);
+}
 /** 302.6, read from what the seat sees: a creature that is not yet its controller's since its turn began, without haste. */
 export const sick = (frame: Frame, object: SeenObject) => !!object.traits?.types.includes("creature") && !object.traits.words.includes("haste") &&
 	(object.entered ?? 0) >= (frame.view.began ?? 0);
@@ -53,13 +60,21 @@ export function produces(registration: Registration, scope: Scope): Yield[] {
 	const times = amount(scope, registration.times ?? 1);
 	const repeat = (colors: Color[]) => Array.from({ length: times }, () => colors).flat();
 	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), ...terms }];
-	return registration.any ? COLORS.map((color) => ({ colors: repeat(Array(registration.any).fill(color)), ...terms })) : [];
+	return registration.any ? colorChoices(registration.combination ? registration.any * times : registration.any, registration.combination)
+		.map(colors => ({ colors: registration.combination ? colors : repeat(colors), ...terms })) : [];
 }
 
 /** Additional effects travel with the produced mana, independent of later source changes. */
-export function manaTerms(terms: { spendOnly?: Selector; until?: string; spellWords?: string[] }, scope: Scope): Pick<Mana, "spendOnly" | "until" | "spellWords"> {
+export function manaTerms(terms: { spendOnly?: Selector; spendFrom?: readonly string[]; until?: string; spellWords?: string[] }, scope: Scope): Pick<Mana, "spendOnly" | "spendFrom" | "until" | "spellWords"> {
 	return { ...(terms.spendOnly ? { spendOnly: chosenSelector(scope, terms.spendOnly) } : {}),
+		...(terms.spendFrom ? { spendFrom: [...terms.spendFrom] as Zone[] } : {}),
 		...(terms.until ? { until: terms.until as Mana["until"] } : {}), ...(terms.spellWords ? { spellWords: [...terms.spellWords] } : {}) };
+}
+
+/** The casting origin is supplied only for a proposed spell, never an activation or plot payment. */
+export function spendable(terms: Pick<Mana, "spendOnly" | "spendFrom">, scope: Scope, spending?: SeenObject, from?: Zone, traits = spending?.traits): boolean {
+	return (!terms.spendFrom || from !== undefined && terms.spendFrom.includes(from)) &&
+		(!terms.spendOnly || !!spending && matches(scope, spending, terms.spendOnly, traits));
 }
 
 /** Only mana selected for this payment grants words; the rest of the pool grants nothing. */
@@ -79,7 +94,7 @@ export function paying(funding: Funding, who: SeatId, clock: number, offset: num
 		if (tap.life) changes.push({ do: "change-life", who, amount: -tap.life, reason: "cost-payment" });
 		if (tap.sacrifice) changes.push({ do: "move", what: tap.source.id, to: "graveyard", reason: "sacrifice" });
 		tap.colors.forEach((_, unit) => made.push(`mana-${clock + 1}-${offset + changes.length}-${unit}`));
-		changes.push({ do: "add-mana", who, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}), ...(tap.until ? { until: tap.until } : {}), ...(tap.spellWords ? { spellWords: tap.spellWords } : {}) });
+		changes.push({ do: "add-mana", who, colors: tap.colors, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}), ...(tap.spendFrom ? { spendFrom: tap.spendFrom } : {}), ...(tap.until ? { until: tap.until } : {}), ...(tap.spellWords ? { spellWords: tap.spellWords } : {}) });
 	}
 	if (funding.paid.length || made.length) changes.push({ do: "spend-mana", who, ids: [...funding.paid, ...made] });
 	return changes;
@@ -113,19 +128,19 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
  * `spending` is the spell as it will be on the stack, or an activation's source
  * in its actual zone. Restricted mana is used only when it matches.
  */
-export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set(), spending?: SeenObject): Unit[] {
-	const allowed = (spendOnly?: Selector) => !spendOnly || (!!spending && matches({ world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, spendOnly, spending.traits));
-	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter((mana) => allowed(mana.spendOnly))
-		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}|${JSON.stringify(mana.spellWords ?? null)}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
-			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""}${mana.spellWords?.length ? `, grants ${mana.spellWords.join(", ")}` : ""})` }));
-	const sources = manaSources(frame, except).map((unit) => ({ ...unit, yields: unit.yields.filter((one) => allowed(one.spendOnly)) })).filter((unit) => unit.yields.length);
+export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone): Unit[] {
+	const allowed = (terms: Pick<Mana, "spendOnly" | "spendFrom">) => spendable(terms, { world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, from);
+	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter(allowed)
+		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}|${JSON.stringify(mana.spellWords ?? null)}${mana.spendFrom ? `|from:${mana.spendFrom.join(",")}` : ""}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
+			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""}${mana.spendFrom ? `, only spells cast from ${mana.spendFrom.join(" or ")}` : ""}${mana.spellWords?.length ? `, grants ${mana.spellWords.join(", ")}` : ""})` }));
+	const sources = manaSources(frame, except).map((unit) => ({ ...unit, yields: unit.yields.filter(allowed) })).filter((unit) => unit.yields.length);
 	return [...pool, ...sources];
 }
 
 /** Historical complete payments, also used to check staged payment coverage. */
-export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject): { funding: Funding; shows: string }[] {
+export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone): { funding: Funding; shows: string }[] {
 	const life = (frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0) - (cost.life ?? 0);
-	return exact(paymentUnits(frame, except, spending), cost).filter((units) => units.reduce((sum, unit) => sum + (unit.yields[0]!.life ?? 0), 0) <= life).map((units) => {
+	return exact(paymentUnits(frame, except, spending, from), cost).filter((units) => units.reduce((sum, unit) => sum + (unit.yields[0]!.life ?? 0), 0) <= life).map((units) => {
 		const made = cover(units, cost)!;
 		return {
 			funding: { paid: units.flatMap((unit) => unit.pool ? [unit.id] : []),
@@ -134,6 +149,7 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 					...(made.get(unit.id)!.life ? { life: made.get(unit.id)!.life! } : {}),
 					...(made.get(unit.id)!.until ? { until: made.get(unit.id)!.until! } : {}),
 					...(made.get(unit.id)!.spellWords ? { spellWords: made.get(unit.id)!.spellWords! } : {}),
+					...(made.get(unit.id)!.spendFrom ? { spendFrom: made.get(unit.id)!.spendFrom! } : {}),
 					...(made.get(unit.id)!.spendOnly ? { spendOnly: made.get(unit.id)!.spendOnly! } : {}) }] : []) },
 			shows: units.length ? `Pay with ${units.map((unit) => unit.source ? `${unit.label}${made.get(unit.id)!.sacrifice ? " and sacrifice it" : ""}${made.get(unit.id)!.life ? ` and pay ${made.get(unit.id)!.life} life` : ""} for ${made.get(unit.id)!.colors.join("")}` : unit.label).join(", ")}.` : "No mana is spent.",
 		};

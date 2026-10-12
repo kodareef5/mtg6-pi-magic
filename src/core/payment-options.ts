@@ -4,17 +4,18 @@ import { canPay } from "./payment-search.ts";
 import type { Frame } from "./types.ts";
 import type { Mana } from "./table.ts";
 import type { SeenObject } from "./work.ts";
+import type { Zone } from "./syntax.ts";
 
 export type PaymentPart = {
 	id: string; resource: string; label: string; colors: Mana["color"][]; life: number; funding: Funding;
 };
 
 /** Existence is a resource question, not an instruction to pick the first payment. */
-export const payable = (frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject): boolean =>
-	canPay(paymentUnits(frame, except, spending), cost, frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0);
+export const payable = (frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone): boolean =>
+	canPay(paymentUnits(frame, except, spending, from), cost, frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0);
 
-export function paymentOptions(frame: Frame, cost: Price, selected: readonly string[] = [], except: ReadonlySet<string> = new Set(), spending?: SeenObject) {
-	const units = paymentUnits(frame, except, spending), parts: PaymentPart[] = [];
+export function paymentOptions(frame: Frame, cost: Price, selected: readonly string[] = [], except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone) {
+	const units = paymentUnits(frame, except, spending, from), parts: PaymentPart[] = [];
 	for (const unit of units) for (const yield_ of unit.yields) {
 		const id = `mana:${parts.length}`, { colors, claim, ...terms } = yield_;
 		parts.push({ id, resource: unit.id, colors, life: terms.life ?? 0,
