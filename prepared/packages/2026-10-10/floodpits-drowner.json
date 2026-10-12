@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "ea202ed2680748f65661df40fe368ebdc793b72b3dcbafab63521c3d4e0cb184",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Floodpits Drowner",
 		"registers": [
@@ -66,7 +65,75 @@
 				}
 			}
 		],
-		"procedures": [],
+		"procedures": [
+			{
+				"claim": "Activate Floodpits Drowner on a creature with a stun counter",
+				"basis": "{1}{U}, {T}: Shuffle this creature and target creature with a stun counter on it into their owners' libraries.",
+				"source": {
+					"card": "Floodpits Drowner",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"counters": {
+								"stun": {
+									"atLeast": 1
+								}
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"any": [
+								{
+									"is": "this"
+								},
+								{
+									"is": "target:0"
+								}
+							]
+						},
+						"to": "library",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "owner:this"
+					},
+					{
+						"do": "shuffle",
+						"who": "owner:target:0",
+						"if": {
+							"not": {
+								"is": "target:0",
+								"matches": {
+									"zones": [
+										"battlefield"
+									],
+									"owner": "owner:this"
+								},
+								"lastKnown": true
+							}
+						}
+					}
+				]
+			}
+		],
 		"assessed": true,
 		"deferred": [
 			{
@@ -82,18 +149,6 @@
 					"controller": "any"
 				},
 				"timing": "spell"
-			},
-			{
-				"claim": "Activate Floodpits Drowner to shuffle it and target creature with a stun counter into their owners' libraries",
-				"basis": "{1}{U}, {T}: Shuffle this creature and target creature with a stun counter on it into their owners' libraries.",
-				"source": {
-					"card": "Floodpits Drowner",
-					"zones": [
-						"battlefield"
-					],
-					"controller": "self"
-				},
-				"timing": "stack"
 			}
 		]
 	}

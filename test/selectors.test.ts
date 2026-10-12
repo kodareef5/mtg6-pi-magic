@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { start, commit } from "../src/core/commit.ts";
 import { standard } from "../src/core/format.ts";
 import { SelectorSchema, check } from "../src/core/language.ts";
-import { matches, select, tableWorld, viewWorld } from "../src/core/selectors.ts";
+import { matches, select, tableWorld, viewWorld, chosenSelector } from "../src/core/selectors.ts";
 import { project } from "../src/core/view.ts";
 import { deck } from "../src/core/decks.ts";
 import { establish, place } from "./play.ts";
@@ -27,6 +27,13 @@ test("set queries preserve zone bounds, intersections, exclusions and hidden ide
 	assert.deepEqual(select(scope, { any: [{ types: ["creature"] }, { types: ["land"] }] }).map((one) => one.id).sort(), [thor.id, land!.id].sort(), "overlapping branches never duplicate an object");
 	assert.ok(!matches(scope, land!, { not: { is: "bound:chosen" } }));
 	assert.deepEqual(select(scope, { zones: ["battlefield"], is: "bound:chosen" }).map((one) => one.id), [land!.id]);
+	commit(table, [{ do: "counters", what: thor.id, kind: "stun", amount: 2 }, { do: "counters", what: thor.id, kind: "+1/+1", amount: 1 }], "game-setup");
+	assert.ok(matches(scope, thor, check(SelectorSchema, { counters: { stun: { atLeast: 2, atMost: 2 }, "+1/+1": { parity: "odd" } } }, "Selector")));
+	assert.ok(!matches(scope, thor, { counters: { stun: { atMost: 1 } } }));
+	assert.ok(matches(scope, land!, { counters: { stun: { atMost: 0 } } }), "an absent counter is zero");
+	assert.ok(matches(scope, thor, { counters: { stun: { atLeast: { counters: "stun", on: "this" } } } }));
+	assert.deepEqual(chosenSelector({ ...scope, source: { ...thor, choices: { parity: "even" } } }, { counters: { stun: { parity: { chosen: "parity" } } } }), { counters: { stun: { parity: "even" } } });
+
 	commit(table, [{ do: "move", what: land!.id, to: "hand", reason: "bounce" }], "resolve");
 	assert.deepEqual(select(scope, { zones: ["hand"], is: "bound:chosen" }), [], "a binding never follows an unrelated zone change");
 	const privateScope = { world: viewWorld(project(table, 0)), controller: 0 };

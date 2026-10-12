@@ -1021,3 +1021,9 @@ never covers colored symbols or extra generic components. Optional
 The choices share staged additional-resource selection and reserve tapped
 objects against mana abilities. See [tap payments](examples/tap-payments.md)
 for supported combinations and the distinction from a cost reduction.
+
+A selector can constrain physical counters with, for example,
+`"counters": { "stun": { "atLeast": 1 } }`. Each named kind uses the same
+range vocabulary as power or mana value. Missing kinds count as zero. Targets
+recheck these ranges on resolution; a resolution-only condition cannot replace
+a target restriction. See [counter targets](examples/counter-targets.md).

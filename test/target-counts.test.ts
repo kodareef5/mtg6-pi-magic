@@ -1,4 +1,5 @@
-/** One occurrence of target selects distinct recipients and keeps a single instruction simultaneous. */
+/** One target slot keeps its announcement and resolution restrictions.
+ * The grouped, per-controller and counter-qualified positions share this invariant past 150 lines. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { commit, start } from "../src/core/commit.ts";
@@ -61,6 +62,7 @@ test("one target slot enforces its range and uniqueness while resolving all surv
 	assert.equal(returned.length, 2); assert.equal(crab!.zone, "hand"); assert.equal(hearth!.zone, "hand");
 	finish(table); assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
 	controllerTargets();
+	counterTargets();
 });
 
 /** One generic target group retains the player named by each choice. */
@@ -112,5 +114,52 @@ function controllerTargets() {
 		assert.equal(returned.length, choose ? opponents : 0, "legal chosen targets return in one group");
 		for (const pair of pairs) { assert.equal(pair[0]!.zone, choose ? "hand" : "battlefield"); assert.equal(pair[1]!.zone, "battlefield"); }
 		finish(table); assert.deepEqual(relive(initial, table.ledger.slice(version)), table);
+	}
+}
+
+
+/** A physical counter restriction belongs to the target, not a later instruction gate. */
+function counterTargets() {
+	const procedure = example("Activate Floodpits Drowner on a creature with a stun counter");
+	for (const mode of ["opponent", "own", "self", "counter-lost", "source-gone", "target-returned"] as const) {
+		const table = start(standard, [{ deck: deck("Dimir Midrange") }, { deck: deck("Selesnya Landfall") }], `counter-target-${mode}`);
+		const [source, own] = place(table, 0, "battlefield", "Floodpits Drowner", "Spyglass Siren");
+		const [other, unstunned, land] = place(table, 1, "battlefield", "Llanowar Elves", "Llanowar Elves", "Forest");
+		main(table, 0);
+		const target = mode === "self" ? source! : mode === "own" ? own! : other!;
+		commit(table, [{ do: "counters", what: target.id, kind: "stun", amount: 1 }, { do: "counters", what: land!.id, kind: "stun", amount: 1 },
+			{ do: "add-mana", who: 0, colors: ["U", "C"] }], "game-setup");
+		const initial = structuredClone(table), at = table.ledger.length;
+		const options = offered(table, procedure);
+		assert.ok(options.length); assert.ok(options.every(one => one.activation.targets[0]!.length === 1 && "id" in one.activation.targets[0]![0]! && one.activation.targets[0]![0]!.id === target.id));
+		assert.deepEqual(table, initial, "target and payment discovery moves nothing");
+		const bad = structuredClone(options[0]!.activation); bad.targets = [[{ id: unstunned!.id, incarnation: unstunned!.incarnation }]];
+		assert.throws(() => activationChanges(table, bad), /target/);
+		const staged = announcementOffers(procedure, workFrame(table, 0), "counter-target")[0]!;
+		beginAnnouncement(table, staged.announcement, { picked: staged.option.id, offered: [staged.option.id], by: "model", why: "chosen" });
+		assert.ok(nextDecision(table)!.options.some(one => one.id === `announce:target:${targetKey(target)}`));
+		assert.ok(!nextDecision(table)!.options.some(one => one.id === `announce:target:${targetKey(unstunned!)}`));
+		apply(table, `announce:target:${targetKey(target)}`, "model", "chosen");
+		const selecting = structuredClone(table), selectingAt = table.ledger.length;
+		apply(table, "announce:cost:0", "model", "chosen");
+		apply(table, nextDecision(table)!.options.find(one => one.id.startsWith("announce:payment:"))!.id, "model", "chosen");
+		assert.equal(source!.tapped, true);
+		if (mode === "counter-lost") commit(table, [{ do: "counters", what: target.id, kind: "stun", amount: -1 }], "resolve");
+		if (mode === "source-gone") commit(table, [{ do: "move", what: source!.id, to: "exile", reason: "exile" }], "resolve");
+		if (mode === "target-returned") commit(table, [{ do: "move", what: target.id, to: "exile", reason: "exile" },
+			{ do: "move", what: target.id, to: "battlefield", reason: "resolve", counters: { stun: 1 } }], "resolve");
+		const pending = structuredClone(table), from = table.ledger.length, logAt = table.log.length;
+		passBoth(table); finish(table);
+		const invalid = mode === "counter-lost" || mode === "target-returned";
+		assert.equal(source!.zone, invalid ? "battlefield" : mode === "source-gone" ? "exile" : "library");
+		assert.equal(target.zone, invalid ? "battlefield" : "library");
+		const shuffles = table.log.slice(logAt).flatMap(one => one.changes).filter(one => one.do === "shuffle");
+		assert.deepEqual(shuffles.map(one => one.whose).sort(), invalid ? [] : mode === "own" || mode === "self" ? [0] : [0, 1]);
+		if (!invalid && mode !== "source-gone") assert.ok(table.log.slice(logAt).some(one => one.changes.filter(change => change.do === "move" && change.to === "library").length === (mode === "self" ? 1 : 2)), "both moves share one committed group");
+		assert.deepEqual(relive(pending, table.ledger.slice(from)), table);
+		if (!["counter-lost", "source-gone", "target-returned"].includes(mode)) {
+			assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
+			assert.deepEqual(relive(selecting, table.ledger.slice(selectingAt)), table);
+		}
 	}
 }

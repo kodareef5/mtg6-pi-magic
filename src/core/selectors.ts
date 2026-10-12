@@ -221,6 +221,7 @@ export function chosenSelector(scope: Scope, selector: Selector): Selector {
 	return { ...selector, ...(selector.subtypes ? { subtypes: subtypes(scope, selector.subtypes) } : {}),
 		...(selector.power ? { power: range(selector.power) } : {}), ...(selector.toughness ? { toughness: range(selector.toughness) } : {}),
 		...(selector.manaValue ? { manaValue: range(selector.manaValue) } : {}),
+		...(selector.counters ? { counters: Object.fromEntries(Object.entries(selector.counters).map(([kind, count]) => [kind, range(count)!])) } : {}),
 		...(typeof selector.name === "object" ? { name: scope.source?.choices?.[selector.name.chosen] ?? "" } : {}),
 		...(selector.not ? { not: chosenSelector(scope, selector.not) } : {}),
 		...(selector.any ? { any: selector.any.map((one) => chosenSelector(scope, one)) } : {}),
@@ -271,6 +272,7 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 			(range.parity === undefined || Number.isInteger(value) && (parity === "even" ? value % 2 === 0 : parity === "odd" && Math.abs(value % 2) === 1));
 	};
 	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness) || !within(traits.manaValue, selector.manaValue)) return false;
+	if (selector.counters && !Object.entries(selector.counters).every(([kind, range]) => within(object.counters[kind] ?? 0, range))) return false;
 	if (!within(object.zone === "battlefield" ? object.level ?? 1 : undefined, selector.level)) return false;
 	if (selector.tapped !== undefined && selector.tapped !== object.tapped) return false;
 	if (selector.designations && !selector.designations.every(one => object.designations?.includes(one))) return false;

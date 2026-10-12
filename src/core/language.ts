@@ -80,6 +80,8 @@ const SelectorFields = {
 	power: Type.Optional(Range),
 	toughness: Type.Optional(Range),
 	manaValue: Type.Optional(Range),
+	/** Every named counter count must fit its range; an absent kind counts as zero. */
+	counters: Type.Optional(Type.Record(Type.String(), Range, { minProperties: 1 })),
 	/** Has the alternative Adventure characteristics, even when they are inactive (715.2a). */
 	hasAdventure: Type.Optional(Type.Boolean()),
 	tapped: Type.Optional(Type.Boolean()),
