@@ -1,0 +1,83 @@
+{
+	"card": "Tishana's Tidebinder",
+	"generated": "2026-10-10",
+	"source": "adffad3e24a63b26115decdbd66c315aa10f384c0a3fb0caf3b817cc69c0e7cb",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tishana's Tidebinder",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"stack"
+								],
+								"ability": "any"
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counter",
+							"what": "target:0",
+							"as": "countered"
+						},
+						{
+							"do": "modify",
+							"every": {
+								"is": "source:bound:countered",
+								"types": [
+									"artifact",
+									"creature",
+									"planeswalker"
+								]
+							},
+							"until": "while-source",
+							"change": {
+								"loseAbilities": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

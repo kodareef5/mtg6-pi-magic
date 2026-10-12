@@ -170,6 +170,10 @@ export function objects(scope: Scope, ref: string | { top: Amount; of: string } 
 		case "attached": { const at = scope.source?.attached && live(scope.world, scope.source.attached); return at ? [at] : []; }
 		case "target": return (scope.targets?.[Number(rest)] ?? []).flatMap((chosen) => "id" in chosen && !scope.illegal?.includes(targetKey(chosen)) ? read(chosen) ?? [] : []);
 		case "bound": return (scope.bound?.[rest]?.objects ?? []).flatMap((one) => read(one) ?? []);
+		case "source": return objects(scope, rest, true).flatMap(one => {
+			const source = one.ability?.timing === "spell" ? one : one.ability?.source;
+			return source ? read(source) ?? [] : [];
+		});
 		case "event": {
 			if (rest === "objects") return scope.event?.objects ?? [];
 			const object = scope.event?.[rest as "object" | "source" | "recipient"];
@@ -218,6 +222,8 @@ export function chosenSelector(scope: Scope, selector: Selector): Selector {
 export function matches(scope: Scope, object: Seen, selector: Selector, read = traitsOf(scope, object), inherited: readonly string[] = ["battlefield"]): boolean {
 	const zones = selector.zones ?? inherited;
 	if ((selector.zones || !selector.any && !selector.all) && !zones.includes(object.zone)) return false;
+	if (selector.ability && (object.zone !== "stack" || object.ability?.timing !== "stack" ||
+		selector.ability !== "any" && selector.ability !== (object.ability.trigger ? "triggered" : "activated"))) return false;
 	if (selector.any && !selector.any.some((branch) => matches(scope, object, branch, read, zones))) return false;
 	if (selector.all && !selector.all.every((branch) => matches(scope, object, branch, read, zones))) return false;
 	// Neither an unknown card nor a face-down exiled card supplies characteristics.

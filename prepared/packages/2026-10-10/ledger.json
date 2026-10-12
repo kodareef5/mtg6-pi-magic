@@ -368,14 +368,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Tishana's Tidebinder": {
-		"reason": "Tishana's Tidebinder is not ready: When this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.) — The syntax cannot select only activated or triggered abilities as targets, test whether the target ability was successfully countered, or reference that ability's source permanent to remove its abilities for the stated duration.",
-		"decks": [
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Vengeful Tracker": {
 		"reason": "Vengeful Tracker is not ready: Whenever an opponent sacrifices an artifact, this creature deals 2 damage to them. — Cannot register faithfully: the available event schema has no sacrifice event or sacrifice-reason filter. A leaves or dies watch would also trigger for nonsacrifice events and would not correctly handle sacrifices whose graveyard destination is replaced.",
 		"decks": [

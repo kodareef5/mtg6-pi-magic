@@ -57,6 +57,7 @@ any. Any other lowercase word is recorded for the players and the judge.
 | `bound:name` | what an earlier instruction bound with `as` ("that land", "that much") |
 | `event:object`, `event:objects` | what the triggering event happened to ("that land", "those creatures") |
 | `event:player`, `event:source` | who caused the event, and the spell or ability that did ("that player", ward's "that spell") |
+| `source:target:N`, `source:bound:name` | an ability's source, including after that ability was countered; motion still requires the source's current incarnation |
 | `event:recipient` | the permanent dealt damage, when the matched event has one shared recipient |
 | `{top: 1, of: "you"}` | the top card of each named library; `top` accepts a computed amount and `of` may name each-player |
 | `{exceptBottom: 6, of: "each-player"}` | all but the bottom six of each library, combined before simultaneous motion; it grants no look |
@@ -190,7 +191,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `damage` | `to` an object or player, `amount`, `from` (default the source); `as` binds recipients dealt positive damage and their total after prevention |
 | `damage-rule` | global all-damage prevention or prohibition (`mode: "prevent"` or `"unpreventable"`), optionally `combat`, lasting until `until`; no bounded shield or additional prevention effects |
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
-| `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed |
+| `move` | `what` or `every`, `to` a zone, `position`, `tapped`, `counters`, `controller`, `reason`, `link`, `face` for entry transformed; `change` applies a continuous characteristic effect with battlefield entry |
 | `destroy` | moves to the graveyard; indestructible refuses it |
 | `choose` | `who` picks `count` from a selector, `upTo` for "up to", `reveal` to show it to everyone; another hand needs an earlier explicit look, and a library search must name its owner or controller, or a bound inspected subset |
 | `reveal` | publicly reveal `what` or `every` without moving it; optional `as` binds the revealed cards for a later selection; confirmation contains no hidden names |
@@ -218,7 +219,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
 | `reflect` | "when you do": a reflexive trigger with its intervening `check` (603.12) |
 | `attach` | an Aura or Equipment to an object |
-| `counter` | a spell or ability, `unless` a player pays a cost; `to: "exile"` replaces the countered spell's graveyard destination, without an intermediate move; no `as` binding |
+| `counter` | a spell or ability, `unless` a player pays a cost; `to: "exile"` replaces the countered spell's graveyard destination; `as` binds only countered stack incarnations, with their count |
 | `each` | repeat for each player, with `bound:player` |
 
 Searching a library is `choose` from the library, then `move`, then `shuffle`.

@@ -45,7 +45,7 @@ const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
  * other than `event:*` are fixed when that trigger is created.
  */
 export const ObjectRef = Type.Union([
-	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*)$" }),
+	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*|source:(this|event:object|event:source|target:[0-9]+|bound:[a-z][a-z0-9-]*))$" }),
 	object({ top: Type.Ref("Amount"), of: Type.String({ pattern: "^(you|self|opponent|each-player|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
 	/** One window per named library, combined before motion for simultaneous effects. */
 	object({ exceptBottom: Type.Ref("Amount"), of: Type.String({ pattern: "^(you|self|opponent|each-player|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
@@ -66,6 +66,8 @@ const SelectorFields = {
 	controller: Type.Optional(Side),
 	owner: Type.Optional(Side),
 	types: Type.Optional(Type.Array(one(...CARD_TYPES), { minItems: 1 })),
+	/** A nonmana ability on the stack, distinct from a spell. */
+	ability: Type.Optional(one("activated", "triggered", "any")),
 	subtypes: Type.Optional(Type.Union([Type.Array(text, { minItems: 1 }), object({ chosen: text })])),
 	supertypes: Type.Optional(Type.Array(one("basic", "legendary", "snow"), { minItems: 1 })),
 	/** Any listed color; an empty list means colorless. C is a mana type, not a color. */

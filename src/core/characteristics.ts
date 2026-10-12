@@ -35,6 +35,8 @@ export type Traits = {
 	words: string[];
 	/** The abilities it has now: its own unless removed, and granted ones. */
 	registrations: Registration[];
+	/** Derived in layer 6; separate granted abilities can still exist afterward. */
+	lostAbilities?: true;
 };
 
 const SUPERTYPES = new Set(["basic", "legendary", "ongoing", "snow", "world"]);
@@ -66,7 +68,7 @@ export const creatureType = (subtype: string) => (creatureNames ??= new Set(crea
 const BASIC: Record<string, Color> = { plains: "W", island: "U", swamp: "B", mountain: "R", forest: "G" };
 export const basicLandTypes = Object.keys(BASIC).map((name) => name[0]!.toUpperCase() + name.slice(1));
 /** 305.6: a land with a basic land type taps for that type's color. */
-export const intrinsic = (traits?: Traits): Color[] => traits?.types.includes("land")
+export const intrinsic = (traits?: Traits): Color[] => traits?.types.includes("land") && !traits.lostAbilities
 	? traits.subtypes.flatMap((subtype) => BASIC[subtype.toLowerCase()] ? [BASIC[subtype.toLowerCase()]!] : []) : [];
 
 /** The printed card or the token spec, before any effect. */
@@ -219,7 +221,7 @@ function layers(world: World, now: Map<string, Traits>, field: Seen[], announced
 	});
 	// Layer 6: abilities. Keyword counters are keywords too (122.1b).
 	each((change, traits) => {
-		if (change.loseAbilities) { traits.registrations = []; traits.words = []; }
+		if (change.loseAbilities) { traits.registrations = []; traits.words = []; traits.lostAbilities = true; }
 		if (change.words) traits.words = [...new Set([...traits.words, ...change.words])];
 		if (change.registers) traits.registrations = [...traits.registrations, ...change.registers];
 	});

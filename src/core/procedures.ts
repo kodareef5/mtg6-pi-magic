@@ -77,7 +77,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	// name for the program that creates it.
 	const refs = (value: unknown, slots: number, bound: Set<string>, declared: Target[] = []): void => {
 		if (typeof value === "string") {
-			const target = value.match(/^(?:(?:controller|owner):)?target:(\d+)$/), name = value.match(/^(?:(?:controller|owner):)?bound:([a-z][a-z0-9-]*)$/)?.[1];
+			const target = value.match(/^(?:(?:controller|owner|source):)?target:(\d+)$/), name = value.match(/^(?:(?:controller|owner|source):)?bound:([a-z][a-z0-9-]*)$/)?.[1];
 			if (target && Number(target[1]) >= slots) throw new Error(`target:${target[1]} names a target slot the procedure does not have.`);
 			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
 		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound, declared));
@@ -122,8 +122,6 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
 		for (const instruction of instructions) {
 			if (instruction.do === "permit" && instruction.while) checkOngoingCondition(instruction.while);
-			if (instruction.do === "counter" && instruction.as)
-				throw new Error("counter does not supply an as binding. Use counter.to for a countered spell's replacement destination; report other unsupported counter-result dependencies.");
 			if (instruction.do === "choose" && instruction.from.zones?.includes("library") && !selectionScoped(instruction.from))
 				throw new Error("A library selection needs an explicit owner, controller or inspected binding in every branch; card characteristics do not grant a search.");
 			refs(instruction, slots, bound, declared);
@@ -165,6 +163,8 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (activation.timing === "spell" && !price) throw new Error("The selected casting permission or its departure replacement is no longer available.");
 	const spell = activation.timing === "spell" ? { ...object, controller, zone: "stack" as const, faceDown: false, face: activation.face ?? 0 as const, ability: activation } : object;
 	const traits = characteristics(table, spell);
+	if (object.zone === "battlefield" && traits?.lostAbilities && !fromHand && !activation.special && !activation.registered)
+		throw new Error("The source has lost its prepared abilities; only its currently registered granted abilities can be activated.");
 	if (activation.registered && !traits?.registrations.some((one) => one.kind === "activated" && one.basis === activation.registered))
 		throw new Error("The source no longer has that registered activated ability.");
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;

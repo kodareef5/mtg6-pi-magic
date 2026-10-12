@@ -281,7 +281,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 					...("id" in defender.chosen ? { objects: [defender.chosen] } : {}) })) };
 		}
 		case "modify": {
-			const affected = many(table, scope, instruction).filter((object) => object.zone === "battlefield");
+			const remaining = source && table.things.get(source.id);
+			const active = instruction.until !== "while-source" || remaining?.zone === "battlefield" && remaining.incarnation === source!.incarnation;
+			const affected = active ? many(table, scope, instruction).filter((object) => object.zone === "battlefield") : [];
 			const change = captured(scope, instruction.change);
 			const text = instruction.label ?? claim;
 			return one(`${text}: ${affected.map(name).join(", ") || "nothing"}`, affected.map((object): Change => ({ do: "note", note: {
@@ -335,18 +337,23 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "counter": {
 			const stacked = live(table, objects(scope, instruction.what)).filter((object) => object.zone === "stack");
-			const counter: Change[] = stacked.map((object): Change => object.card ? { do: "move", what: object.id, to: instruction.to === "exile" ? "exile" : "graveyard", reason: "counter" } : { do: "cease", what: object.id });
+			const counter = (selected: Seen[]): Pick<Choice, "changes" | "bind"> => ({
+				changes: selected.map((object): Change => object.card ? { do: "move", what: object.id, to: instruction.to === "exile" ? "exile" : "graveyard", reason: "counter" } : { do: "cease", what: object.id }),
+				...bind(instruction, { objects: selected.map(ref), players: [], amount: selected.length }),
+			});
 			const destination = instruction.to === "exile" ? " Countered spells go directly to exile." : "";
 			const protectedIds = new Set(stacked.filter((object) => has(characteristics(table, object as never), "can't be countered")).map((one) => one.id));
 			const respect: Choice[] = protectedIds.size ? [{ id: "restrictions", label: "Apply can't be countered: leave protected spells on the stack",
-				changes: counter.filter((change) => !("what" in change && protectedIds.has(change.what))) }] : [];
+				...counter(stacked.filter(object => !protectedIds.has(object.id))) }] : [];
 			const warning = protectedIds.size ? " (conflicts with can't be countered)" : "";
 			const unless = instruction.unless;
 			if (!unless) return { actor: controller, question: `Counter ${stacked.map(name).join(", ") || "nothing"}.`,
-				choices: [...respect, { id: "do", label: `Counter ${stacked.map(name).join(", ") || "nothing"}${warning}${destination}`, changes: counter }] };
+				choices: [...respect, { id: "do", label: `Counter ${stacked.map(name).join(", ") || "nothing"}${warning}${destination}`, ...counter(stacked) }] };
 			const payer = players(scope, unless.who)[0] ?? controller;
 			const pay = paymentChoices(table, scope, unless.pays, payer, pending.object);
-			return { actor: payer, question: `${claim}: pay, or apply the counter instruction.`, choices: [...respect, ...pay, { id: "decline", label: `Do not pay; it is countered${warning}${destination}`, changes: counter }] };
+			return { actor: payer, question: `${claim}: pay, or apply the counter instruction.`, choices: [...respect,
+				...pay.map(choice => ({ ...choice, ...bind(instruction, { objects: [], players: [], amount: 0 }) })),
+				{ id: "decline", label: `Do not pay; it is countered${warning}${destination}`, ...counter(stacked) }] };
 		}
 		case "perform": {
 			const actor = players(scope, instruction.who)[0] ?? controller, player = pending.program[0]?.player;

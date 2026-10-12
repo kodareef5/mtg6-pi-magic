@@ -7,9 +7,11 @@ never visits the graveyard. `counter.to` accepts `graveyard` (the default) or
 spell on the stack. The usual can't-be-countered conflict remains available
 for the seat to respect or dispute.
 
-`counter` supplies no `as` binding. A later move guarded by an invented binding
-does not implement a replacement effect. This shape does not supply other
-conditional effects of countering or choices among replacement destinations.
+`counter` with `as` binds the old stack incarnations actually countered. It does
+not bind the cards that arrived in a graveyard or exile. A later move guarded
+by that binding does not implement a replacement effect. Choices among
+replacement destinations remain unsupported. See `ability-counter.md` for a
+conditional effect on a countered ability's source.
 
 ```json procedure
 {

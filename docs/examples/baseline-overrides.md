@@ -43,6 +43,12 @@ cast procedure claims it with `speed: "instant"`, and the table then offers the
 cast whenever you have priority. Another seat can object if the card has no
 flash.
 
+A shared `printedCast` also reads a self-registration that supplies the `flash`
+word in casting zones, including the stack. A registration scoped only to the
+battlefield cannot grant casting timing. See `ability-counter.md` for the
+complete standing form; either form still needs priority and permission to cast
+the card from its current zone.
+
 ```json procedure
 {
   "source": { "zones": ["hand"], "controller": "self", "card": "Ambush Gigapede" },

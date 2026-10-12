@@ -12,7 +12,8 @@ export function useSources(frame: Frame, use: Pick<Procedure, "source" | "timing
 	const played = use.timing === "spell" || use.timing === "land";
 	const world = viewWorld(frame.view);
 	return select({ ...use.source, zones: use.source.zones ?? [played ? "hand" : "battlefield"] }, frame)
-		.filter((source) => (source.card || source.token) && (!source.faceDown || source.zone !== "battlefield" || use.special === "turn-face-up" || use.source.registered) && (played
+		.filter((source) => (source.card || source.token) && (!source.faceDown || source.zone !== "battlefield" || use.special === "turn-face-up" || use.source.registered) &&
+			(played || source.zone !== "battlefield" || !source.traits?.lostAbilities || use.special || use.source.registered) && (played
 			? castableFace(source.card ? frame.view.printed?.[source.card] : undefined, use.face ?? 0, source) && playable(world, frame.seat, source, turn, use.timing === "land", use.face)
 			: (source.zone === "battlefield" || source.zone === "stack" ? source.controller : source.owner) === frame.seat));
 }

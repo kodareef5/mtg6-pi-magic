@@ -114,4 +114,5 @@ export function playable(world: World, seat: SeatId, object: Seen, turn: number,
 
 /** A spell this seat may cast as though it had flash, read as it will be on the stack, where a flash selector looks unless it says otherwise. */
 export const flashed = (world: World, seat: SeatId, object: Seen) =>
+	!!world.read(object)?.words.includes("flash") ||
 	allowance(world, seat).flash.some((selector) => matches({ world, controller: seat }, { ...object, zone: "stack" }, { zones: ["stack"], ...selector }, world.read(object)));

@@ -11,8 +11,8 @@ import { symbols } from "../src/core/announce.ts";
 import { announce, example, finish, main, passBoth, place, step } from "./play.ts";
 
 test("a countered spell goes straight to its replacement destination, while payment or protection preserves it", () => {
-	const counter = example("Cast No More Lies, exiling the countered spell unless its controller pays three mana");
-	assert.throws(() => checkProcedure({ ...counter, instructions: [{ ...counter.instructions[0]!, as: "countered" }] }), /counter does not supply an as binding/);
+	const prepared = example("Cast No More Lies, exiling the countered spell unless its controller pays three mana");
+	const counter = checkProcedure({ ...prepared, instructions: [{ ...prepared.instructions[0]!, as: "countered" }] });
 	for (const choice of ["pay", "decline", "unfunded", "protected"] as const) {
 		const table = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: deck("Mono-Red Aggro") }], `counter-destination-${choice}`);
 		place(table, 0, "hand", "No More Lies"); const [nova] = place(table, 1, "hand", "Nova Hellkite");
@@ -29,8 +29,11 @@ test("a countered spell goes straight to its replacement destination, while paym
 		assert.equal(decision.seat, 1, "the target spell's controller answers the tax");
 		if (choice === "unfunded") assert.ok(!decision.options.some(one => one.label.startsWith("Pay ")));
 		step(table, label => choice === "pay" ? label.startsWith("Pay ") : choice === "protected" ? label.startsWith("Apply can't be countered") : label.startsWith("Do not pay"));
-		finish(table);
 		const moved = choice === "decline" || choice === "unfunded";
+		const completed = table.log.at(-1)!.changes.find(one => one.do === "resolution" && one.action === "next");
+		assert.ok(completed?.do === "resolution" && completed.action === "next");
+		assert.deepEqual(completed.bind!.countered, { objects: moved ? [{ id: nova!.id, incarnation }] : [], players: [], amount: Number(moved) });
+		finish(table);
 		assert.equal(nova!.zone, moved ? "exile" : "stack"); assert.equal(nova!.incarnation, incarnation + Number(moved));
 		const departures = table.log.flatMap(receipt => receipt.changes).filter(change => change.do === "move" && change.what === nova!.id && change.reason === "counter");
 		assert.deepEqual(departures.map(change => "to" in change ? change.to : undefined), moved ? ["exile"] : []);

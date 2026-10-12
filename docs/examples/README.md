@@ -21,6 +21,7 @@ schemas, and every `basis` is checked against the card's text.
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `entry-effects.md` | return as an enchantment; characteristic effects applied with entry under 611.2e |
+| `ability-counter.md` | activated and triggered ability targets, successful counter bindings, ability sources and ability removal |
 | `counter-watches.md` | counter placements, entry counters and crossing an Nth-counter threshold |
 | `resolution-counts.md` | Belladonna Took's first, second and third completed ability resolutions in a turn |
 | `counter-destinations.md` | No More Lies counters directly into exile unless its controller pays |

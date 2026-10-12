@@ -46,6 +46,7 @@ function words(value: unknown, as: "thing" | "amount" | "condition" = "thing"): 
 	if (typeof value === "number") return String(value);
 	if (typeof value === "string") {
 		const target = /^target:(\d+)$/.exec(value);
+		if (value.startsWith("source:")) return `the source of ${words(value.slice(7))}`;
 		return target ? `target ${Number(target[1]) + 1}` : value.startsWith("bound:") ? `the chosen ${value.slice(6)}` : value === "event:object" ? "that object" : value;
 	}
 	if (!value || typeof value !== "object") return JSON.stringify(value);
