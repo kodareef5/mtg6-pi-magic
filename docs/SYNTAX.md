@@ -226,6 +226,13 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `each` | repeat for each player, with `bound:player` |
 | `choose-actions` | each player named by `who` chooses `count` actions, then all occur simultaneously; supports `sacrifice` with a selector, `discard: true`, and fixed positive `loseLife`. Selected resources cannot be reused; discards stay private until the final group. See [simultaneous choices](examples/simultaneous-choices.md) |
 
+`token.spec.name` is the token's actual name. Under pinned rule 111.4, an
+unnamed token takes its subtypes followed by "Token": Soldier Token, Human
+Soldier Token, or Treasure Token. Explicit names and named exceptions in 111.10
+take precedence; copies keep the copied name. Older examples can retain the
+previous naming convention, so check token names and related selectors against
+the pinned rules when preparing a new card.
+
 Searching a library is `choose` from the library, then `move`, then `shuffle`.
 Name the library's owner or controller explicitly. Equipment validation refuses
 an explicit library selection without that scope or an inspected binding;
