@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "e1bd969ae222bcf2c2413b62d10b48c94879912492b92fab7f54f495f2d78d86",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dalkovan Encampment",
 		"registers": [
@@ -40,11 +39,9 @@
 				]
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Create this turn's attack-triggered Warriors, tapped and attacking, with sacrifice at the next end step.",
+				"claim": "Activate the encampment: pay {2}{W} and tap it to create a this-turn trigger that makes two tapped, attacking 1/1 red Warrior tokens whenever I attack, sacrificing them at the next end step.",
 				"basis": "{2}{W}, {T}: Whenever you attack this turn, create two 1/1 red Warrior creature tokens that are tapped and attacking. Sacrifice them at the beginning of the next end step.",
 				"source": {
 					"card": "Dalkovan Encampment",
@@ -53,8 +50,68 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "attacked-with",
+							"by": "you",
+							"batch": true
+						},
+						"until": "end-of-turn",
+						"effect": {
+							"instructions": [
+								{
+									"do": "token",
+									"count": 2,
+									"spec": {
+										"name": "Warrior Token",
+										"types": [
+											"creature"
+										],
+										"subtypes": [
+											"Warrior"
+										],
+										"colors": [
+											"R"
+										],
+										"power": 1,
+										"toughness": 1
+									},
+									"controller": "you",
+									"tapped": true,
+									"attacking": true,
+									"as": "warriors"
+								},
+								{
+									"do": "delay",
+									"event": {
+										"on": "step",
+										"step": "end"
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "move",
+												"what": "bound:warriors",
+												"to": "graveyard",
+												"reason": "sacrifice"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

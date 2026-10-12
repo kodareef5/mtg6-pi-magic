@@ -27,6 +27,7 @@ schemas, and every `basis` is checked against the card's text.
 | `combined-tap-costs.md` | source tap symbols plus chosen permanents, shared mana-payment resources and summoning sickness |
 | `card-names.md` | choose and retain an Oracle card name, including out-of-format cards and individual faces, then match it in a continuous effect |
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
+| `attack-delays.md` | Repeated attack triggers with separately bound tokens and unqualified next-end-step sacrifices |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
 | `entry-effects.md` | return as an enchantment; characteristic effects applied with entry under 611.2e |
 | `ability-counter.md` | activated and triggered ability targets, successful counter bindings, ability sources and ability removal |
