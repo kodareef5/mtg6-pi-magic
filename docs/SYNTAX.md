@@ -967,3 +967,9 @@ to 1, independently of counters. `on: "level"` with `level: 3` watches a change
 to exactly level 3. Class bars use sorcery activations with a preceding-level
 condition and continuous grants at or above the stated level. See
 [Class levels](examples/class-levels.md); level-up counters are separate.
+
+The accepted word `attacks each combat if able` marks an unconditional attack
+requirement. Declaration completion warns about omitted able creatures; the
+seat still selects attackers and confirms its declaration. The word does not
+grant haste, implement attack costs, or solve competing attacker-count limits.
+See [attack requirements](examples/attack-requirements.md).

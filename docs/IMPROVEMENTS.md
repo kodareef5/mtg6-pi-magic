@@ -37,7 +37,7 @@ currently wait on strategy-provider credits.
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
    stopped games. Mardu needs
-   Carnage's conditional graveyard casting and required-attack guidance. Mardu's accepted graveyard interactions now have direct tests.
+   Carnage's conditional graveyard casting. Its returned creature's attack and sacrifice grants now have direct tests. Mardu's accepted graveyard interactions now have direct tests.
    Keep refused meanings in the ledger until their shared
    operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.

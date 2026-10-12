@@ -7,6 +7,7 @@ schemas, and every `basis` is checked against the card's text.
 
 | File | Shows |
 |---|---|
+| `attack-requirements.md` | Required-attack warnings and Carnage's incarnation-bound combat sacrifice grant |
 | `class-levels.md` | Physical levels, sorcery activations, continuous grants and level-change triggers |
 | `random-selection.md` | Seeded selections, private bindings, delayed random discard and graveyard exile |
 | `library-keywords.md` | Scry and surveil choices, privacy, actual selected results and completion events |

@@ -94,6 +94,10 @@ export function declareAttackers(table: Table): Pending {
 			!sick(table, object) && !chosen.some((one) => same(one, object)) && !table.combat?.attackers.some((one) => same(one, object));
 	}).sort((a, b) => a.id.localeCompare(b.id));
 	const attackers = chosen.flatMap((one) => present(table, one) ?? []);
+	const required = able.filter(object => {
+		const traits = traitsOf(table, object);
+		return has(traits, "attacks each combat if able") && !attackConflicts({ ...object, traits }).length;
+	});
 	const moves: Move[] = able.flatMap((object) => [undefined, ...walkers].map((target): Move => {
 		const traits = traitsOf(table, object);
 		const to = target ? ref(target) : undefined;
@@ -107,6 +111,7 @@ export function declareAttackers(table: Table): Pending {
 	const description = (object: Thing) => { const to = picks.find((one) => same(one.attacker, object))?.to;
 		return `${name(object)}${to ? ` at ${name(table.things.get(to.id)!)}` : walkers.length ? ` at seat ${defending}` : ""}`; };
 	moves.push({ option: { id: "attack:done", label: attackers.length ? `Finish: attack with ${attackers.map(description).join(", ")}` : table.combat?.attackers.length ? "Declare no additional attackers; creatures already attacking remain in combat" : "Attack with nothing",
+		...(required.length ? { shows: `Conflicts with attack requirements: ${required.map(name).join(", ")} must attack this combat if able (508.1d). This declaration omits them.` } : {}),
 		spends: attackers.filter((object) => !has(traitsOf(table, object), "vigilance")).map(ref),
 		...(attackers.length ? { objects: attackers.map(ref) } : {}) },
 		changes: [
