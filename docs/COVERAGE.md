@@ -46,8 +46,8 @@ main-deck assessments. Adding a legal list is not proof that it plays.
 | Preparation across the whole legal snapshot | Cards |
 | --- | ---: |
 | Shared printed handling, without rules text needing assessment | 22 |
-| Accepted assessment with all identified uses prepared | 3,306 |
-| Accepted assessment with deferred uses | 153 |
+| Accepted assessment with all identified uses prepared | 3,308 |
+| Accepted assessment with deferred uses | 151 |
 | Recorded refusals without an accepted replacement | 1,667 |
 | Not assessed | 16 |
 
@@ -58,10 +58,10 @@ or deferred. The seventeen shared printed cards and one older complete package
 in that scope were already covered.
 
 Across the pinned pool, complete preparation plus shared printed handling covers
-3,328 cards, or 64.4%. The remaining sixteen unassessed cards are Dwarves'
+3,330 cards, or 64.5%. The remaining sixteen unassessed cards are Dwarves'
 thirteen main-deck cards and three sideboard-only cards.
 
-The 153 deferred cards contain 220 deferred uses. Even a complete assessment
+The 151 deferred cards contain 218 deferred uses. Even a complete assessment
 means accepted structured terms, not verified play. Unassessed cards are unknown,
 not proven engine gaps. A refusal records the operation an assessment could
 not express. Check that claim against existing helpers before making it an
@@ -102,14 +102,14 @@ Complete preparation does not replace ordinary games, interaction checks, replay
 or clone checks. The sweep did not re-certify imported meanings or add counted
 games. Subsequent source review corrected default token names, Lively Dirge's
 selection and Case of the Uneaten Feast's physical solved designation.
-The Map and Amalia programs now use recorded explore completion. A remaining
-imported follow-up is Torch the Tower's death replacement
-being lost when its recipient loses abilities. Existing counted games do not
-establish those interactions.
+The Map and Amalia programs use recorded explore completion. Independent rule
+records now preserve Torch the Tower's death replacement through ability loss
+and end Braided Net's activation ban at the first actual untap. Invariant tests
+cover these interactions; a counted finish does not establish an unused branch.
 
 | Order | Work | Completion evidence |
 | --- | --- | --- |
-| 1 | Resume stopped games and the ten prepared pairings covering the original lists without a counted finish. Use direct Typesafe Jev and CLI Haiku, two games at a time. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Preserve failed branches and reuse their preparation. |
+| 1 | Finish the original nineteen lists' reviewed coverage, including queued continuations and replacements for withdrawn results. Use direct Typesafe Jev and CLI Haiku, two games at a time. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Preserve failed branches and reuse their preparation. |
 | 2 | After the original nineteen lists finish, exercise representative newly qualified families. Revisit refusals only with a concrete existing representation or shared operation. | The wider pass already has 3,172 new complete packages and 1,646 refusals from 4,818 candidates. Each new family still needs game evidence. |
 | 3 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
 | 4 | Reassess sideboard refusals and the additional unassessed sideboard cards. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |

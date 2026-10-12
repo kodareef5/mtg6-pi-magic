@@ -23,16 +23,17 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Nineteen imported main decks have complete standing coverage; nine have completed
-source-reviewed games. The wider qualification pass is complete: 3,172 new
+Nineteen imported main decks have complete standing coverage. [Status](STATUS.md)
+tracks source-reviewed finishes and withdrawn evidence. The wider qualification
+pass is complete: 3,172 new
 complete meanings from existing mechanics, with source-backed refusals for the
 rest. Dwarves and sideboards remain later work. [Coverage](COVERAGE.md) defines
 the preparation states, known source issues and resumable worklists. [Status](STATUS.md) holds
 the current game evidence. Direct Jev and CLI Haiku have cleared the provider
 funding blocker.
 
-1. Resume the two stopped Azorius pairings and the ten prepared pairings covering
-   every original list without a reviewed finish. Use direct Jev and CLI Haiku,
+1. Finish the queued continuations and fill the remaining gaps in reviewed deck
+   coverage, including replacements for withdrawn results. Use direct Jev and CLI Haiku,
    two games at a time, carrying each journal's accepted meanings and briefs.
    A stopped game supplies the next concrete runtime or interpretation fix.
 2. Review every completed game's new procedures, exercised standing terms and
