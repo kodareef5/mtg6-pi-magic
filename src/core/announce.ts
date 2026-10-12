@@ -148,7 +148,7 @@ export function subsets<T>(items: T[], most: number, least = most): T[][] {
 }
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
-const name = (object: Seen) => object.card ?? object.token?.name ?? object.id;
+const name = (object: Seen) => object.faceDown ? `Face-down object (${object.id})` : object.card ?? object.token?.name ?? object.id;
 
 /** Each target slot as an option shows it, then any choice that conflicts with hexproof. One wording for spells, abilities and triggers. */
 export function aiming(targets: Chosen[][], world: World, controller: SeatId): string[] {
@@ -263,7 +263,8 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 	for (const original of sources) {
 		if (procedure.cost?.loyalty !== undefined && (!(mainWindow(frame) || instantLoyalty(world, frame.seat, original)) || original.zone !== "battlefield" || loyaltyUsed(world, original))) continue;
 		if ((procedure.timing === "stack" || procedure.timing === "mana") && activationRestrictions(world, original, procedure.timing === "mana").length) continue;
-		if (procedure.timing === "special" && (!mainWindow(frame) || original.zone !== "hand" || original.owner !== frame.seat)) continue;
+		if (procedure.special === "plot" && (!mainWindow(frame) || original.zone !== "hand" || original.owner !== frame.seat)) continue;
+		if (procedure.special === "turn-face-up" && (!original.manifested || !original.faceDown || original.zone !== "battlefield" || original.controller !== frame.seat)) continue;
 		const selected = procedure.timing === "spell" ? faceFacts(printed[original.card ?? ""], procedure.face ?? 0) : undefined;
 		const source = selected ? { ...original, faceDown: false, traits: spellCharacteristics(frame.view, original, frame.seat, procedure.face), ...(procedure.face !== undefined ? { face: procedure.face } : {}) } : original;
 		const sourceRef = immutable(ref(source));

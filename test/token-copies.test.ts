@@ -100,7 +100,7 @@ test("a copy freezes printed values and complete abilities, applies entry terms,
 	editWork(abilities, 1, [{ do: "package.put", package: { ...landPackage, procedures: [], deferred: [{
 		claim: animate.claim, basis: animate.basis, source: animate.source, timing: "stack" }] } }], "deferred-copy-source");
 	assert.match((tokenCopy(abilities, sanctuary) as { blocked: string }).blocked, /activations prepared/);
-	assert.match((tokenCopy(abilities, { ...sanctuary, faceDown: true }) as { blocked: string }).blocked, /face-down/);
+	assert.deepEqual(tokenCopy(abilities, { ...sanctuary, faceDown: true }), { spec: { name: "", types: ["creature"], colors: [], power: 2, toughness: 2 } });
 	const faced = start(standard, [{ deck: alpha(deck("4c Control")) }, { deck: deck("Mono-Green Landfall") }], "copy-room-gap");
 	const [room] = place(faced, 0, "battlefield", "Unholy Annex // Ritual Chamber"), unchanged = structuredClone(faced);
 	assert.match((tokenCopy(faced, room!) as { blocked: string }).blocked, /multiple faces/); assert.deepEqual(faced, unchanged);

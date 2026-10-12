@@ -13,6 +13,7 @@ import type { Frame, SeatId } from "./types.ts";
 import { STEPS } from "./steps.ts";
 import { isPrintedCast, printedCast } from "./procedures.ts";
 import { activatedUses } from "./activated.ts";
+import { faceUpUses } from "./manifest.ts";
 
 /** The journal contract selects a menu shape, while both use the same terms. */
 function useMoves(procedure: Procedure, frame: Frame, prefix: string): Move[] {
@@ -113,7 +114,7 @@ export function preparedMoves(table: Table, frame: Frame): Move[] {
 }
 
 /** Abilities carried by current permanents are offered without card-specific player code. */
-export const registeredMoves = (frame: Frame): Move[] => activatedUses(frame).flatMap(({ key, procedure }) =>
+export const registeredMoves = (frame: Frame): Move[] => [...activatedUses(frame), ...faceUpUses(frame)].flatMap(({ key, procedure }) =>
 	useMoves(procedure, frame, key).map((move) => ({ ...move, reason: "activate" })));
 
 /**

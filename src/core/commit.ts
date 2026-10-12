@@ -148,12 +148,17 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
  * cards watch for. Two creatures dying together is not two deaths.
  */
 export function commit(table: Table, changes: Change[], reason: Reason): Receipt {
+	// 708.9: record the departure or game-end reveal without shifting mana ids assigned by payment.
+	const reveal = [...table.things.values()].filter(object => object.faceDown && object.zone === "battlefield" && changes.some(change =>
+		change.do === "move" && change.what === object.id && change.to !== "battlefield" || change.do === "end-game"));
+	changes = [...changes, ...reveal.filter(object => !changes.some(change => change.do === "reveal" && change.what === object.id)).map(object => ({ do: "reveal" as const, what: object.id }))];
 	// Refuse an unavailable or duplicated payment before an earlier tap can commit.
 	// Mana added earlier in the same group, by a mana ability activated while paying, can be spent.
 	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
 	for (const [index, change] of changes.entries()) {
 		if (change.do === "increase-speed" && (!Number.isInteger(change.amount) || change.amount <= 0)) throw new Error("Speed increases by a positive integer.");
-		if (change.do === "move" && change.faceDown && change.to !== "exile") throw new Error("Face-down motion is supported only into exile.");
+		if (change.do === "move" && change.faceDown && change.to !== (change.faceDown === "manifest" ? "battlefield" : "exile")) throw new Error("Face-down motion needs exile, or manifest onto the battlefield.");
+		if (change.do === "turn-face-up" && (!table.things.get(change.what)?.faceDown || table.things.get(change.what)?.zone !== "battlefield")) throw new Error("Turning face up needs a face-down permanent.");
 		if (change.do === "add-mana") change.colors.forEach((_, unit) => available.get(change.who)?.add(`mana-${table.cursor.clock + 1}-${index}-${unit}`));
 		if (change.do === "spend-mana") for (const id of change.ids) {
 			if (!available.get(change.who)?.delete(id)) throw new Error(`Mana ${id} is not available to spend.`);
@@ -203,6 +208,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	for (const change of changes) {
 		if (change.do === "token" && change.attacking?.to) {
 			const target = table.things.get(change.attacking.to.id); if (target) before[target.id] = structuredClone(target);
+		}
+		if (change.do === "attack") for (const one of change.attackers) {
+			const attacker = table.things.get(one.id);
+			if (attacker?.faceDown) { before[one.id] = structuredClone(attacker); const traits = characteristics(table, attacker); if (traits) known[one.id] = structuredClone(traits); }
 		}
 		if (change.do === "attack") for (const one of change.attackers) if (one.to) {
 			const target = table.things.get(one.to.id); if (target) before[target.id] = structuredClone(target);
@@ -259,6 +268,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				moving.tapped = change.to === "battlefield" && !!change.tapped;
 				moving.controller = change.controller ?? moving.owner;
 				moving.faceDown = !!change.faceDown;
+				delete moving.manifested;
+				if (change.faceDown === "manifest") moving.manifested = true;
 				delete moving.lookedBy;
 				if (lookedBy.length) moving.lookedBy = lookedBy;
 				const previousFace = moving.face;
@@ -272,7 +283,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.to === "battlefield" && change.choices) moving.choices = structuredClone(change.choices);
 				if ((change.to === "stack" || change.to === "battlefield") && change.face !== undefined) moving.face = change.face;
 				else if (change.to === "battlefield" && from === "stack" && previousFace !== undefined) moving.face = previousFace;
-				if (change.to === "battlefield" && room(moving.card ? table.printed[moving.card] : undefined)) {
+				if (change.to === "battlefield" && !moving.faceDown && room(moving.card ? table.printed[moving.card] : undefined)) {
 					moving.doors = from === "stack" ? [previousFace ?? 0] : [];
 					delete moving.face;
 				}
@@ -282,7 +293,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				delete moving.attached;
 				if (change.to === "battlefield") moving.entered = table.cursor.clock + 1;
 				else delete moving.entered;
-				if (change.to === "battlefield" && change.registers?.length) moving.registrations = structuredClone(change.registers);
+				if (change.to === "battlefield" && !moving.faceDown && change.registers?.length) moving.registrations = structuredClone(change.registers);
 				else delete moving.registrations;
 				if (change.to === "battlefield") enter(table, moving, change, before, born);
 				if (ORDERED.has(change.to)) {
@@ -298,6 +309,12 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				}
 				table.notes = table.notes.filter((note) => !(("on" in note && note.on.id === moving.id) ||
 					(note.until === "while-source" && note.source?.id === moving.id)));
+				break;
+			}
+			case "turn-face-up": {
+				const object = thing(table, change.what);
+				object.faceDown = false; delete object.manifested; delete object.lookedBy;
+				if (change.registers?.length) object.registrations = structuredClone(change.registers);
 				break;
 			}
 			case "transform": {
@@ -320,7 +337,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			}
 			case "door": {
 				const object = thing(table, change.what);
-				if (object.zone !== "battlefield" || !room(object.card ? table.printed[object.card] : undefined)) break;
+				if (object.zone !== "battlefield" || object.faceDown || !room(object.card ? table.printed[object.card] : undefined)) break;
 				object.doors = [...new Set([...(object.doors ?? []).filter((face) => face !== change.face), ...(change.unlocked ? [change.face] : [])])].sort();
 				break;
 			}

@@ -4,7 +4,7 @@ import type { Traits } from "./characteristics.ts";
 import type { Notebook, WorkCommand } from "./work-language.ts";
 import type { Package, Plan } from "./language.ts";
 
-/** A projected object with current characteristics. Only visible battlefield creatures carry derived summoning sickness. A face-down object has neither. */
+/** A projected object with current characteristics. Battlefield creatures, including face-down creatures, carry public traits and derived summoning sickness. */
 export type SeenObject = Omit<Thing, "card"> & { card?: string; traits?: Traits; summoningSick?: boolean };
 export type Workspace = {
 	revision: number;

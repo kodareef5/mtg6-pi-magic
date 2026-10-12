@@ -49,7 +49,7 @@ export function resolving(table: Table): Pending | null {
 	const scope: Scope = { world, controller: ability.controller, source: world.lastKnown(pending.source)?.object, targets: ability.targets, illegal: pending.illegal,
 		...(ability.timing === "stack" && ability.source ? { resolving: { source: ability.source, basis: ability.basis } } : {}),
 		event: eventScope(world, ability.trigger?.event),
-		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
+		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}), ...(item?.object ? { object: { objects: [item.object], players: [] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;
 	const checked = (moves: Move[]): Move[] => {
 		const conflicts = pending.targetsChecked ? [] : targetConflicts(ability.targets.flat(), world, ability.controller)
@@ -102,14 +102,14 @@ export function resolving(table: Table): Pending | null {
 		const keyword = done ? [{ do: "keyword" as const, name: done.name, who: done.who, count: done.count }] : [];
 		const selected = (done && pending.bound[done.selected]?.objects || []).filter(ref => {
 			const now = table.things.get(ref.id);
-			return now?.incarnation === ref.incarnation && now.zone === (done!.name === "surveil" ? "graveyard" : "library");
+			return now?.incarnation === ref.incarnation && now.zone === (done!.name === "manifest-dread" ? "battlefield" : done!.name === "surveil" ? "graveyard" : "library");
 		});
 		const bind = { ...choice.bind, ...(done?.as ? { [done.as]: { objects: selected, players: [], amount: selected.length } } : {}) };
 		return {
 			option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick && "id" in choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },
 			changes: [...choice.changes, ...keyword, ...(last && !choice.pick && !choice.expand ? finish(choice.changes) : []),
 				{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(Object.keys(bind).length ? { bind } : {}),
-					...(choice.expand ? { expand: choice.expand } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
+					...(choice.expand ? { expand: choice.expand.map(inner => ({ ...(item.player !== undefined ? { player: item.player } : {}), ...(item.object ? { object: item.object } : {}), ...inner })) } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
 			reason: "resolve",
 		};
 	});

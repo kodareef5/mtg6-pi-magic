@@ -1,0 +1,112 @@
+{
+	"card": "Unidentified Hovership",
+	"generated": "2026-10-10",
+	"source": "be61014e25248ad306bd5c9fa849bd037f7438e070572bbbd041e20ab3684ec5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unidentified Hovership",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this Vehicle enters, exile up to one target creature with toughness 5 or less.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								],
+								"toughness": {
+									"atMost": 5
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"link": true
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this Vehicle leaves the battlefield, the exiled card's owner manifests dread.",
+				"event": {
+					"on": "leaves",
+					"of": {
+						"is": "this"
+					},
+					"from": [
+						"battlefield"
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "each",
+							"objects": {
+								"zones": [
+									"exile"
+								],
+								"linked": true
+							},
+							"instructions": [
+								{
+									"do": "keyword",
+									"name": "manifest-dread",
+									"who": "owner:bound:object"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Crew Unidentified Hovership",
+				"basis": "Crew 1",
+				"source": {
+					"card": "Unidentified Hovership",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

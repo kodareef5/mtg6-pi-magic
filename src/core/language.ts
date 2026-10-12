@@ -216,7 +216,7 @@ export const Defs = {
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
 		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword"),
-		keyword: Type.Optional(one("scry", "surveil")),
+		keyword: Type.Optional(one("scry", "surveil", "manifest-dread")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
 		/** Ordinal among all spells cast by that caster this turn, not only those matching of. */
@@ -244,7 +244,7 @@ export const Defs = {
 	TriggerEffect: Type.Union([Type.Ref("Effect"), object({ modes: Type.Array(Type.Ref("Effect"), { minItems: 2 }) })]),
 
 	TokenSpec: object({
-		name: text, types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
+		name: Type.String(), types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
 		/** A copied token keeps the original's mana cost; ordinary created tokens omit it. */
 		mana: Type.Optional(ManaCost),
 		supertypes: Type.Optional(Type.Array(one("legendary", "snow"))), colors: Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true }),
@@ -256,13 +256,15 @@ export const Defs = {
 	/** One step of resolution. `if` gates it, `as` binds its result, `may` makes it optional for its actor. */
 	Instruction: Type.Union([
 		/** Shared library keyword choices; completion is recorded after all their movement. */
-		step({ do: Type.Literal("keyword"), name: one("scry", "surveil"), who: PlayerRef, count: Type.Ref("Amount") }),
+		step({ do: Type.Literal("keyword"), name: one("scry", "surveil", "manifest-dread"), who: PlayerRef, count: Type.Optional(Type.Ref("Amount")) }, { allOf: [
+			{ if: { properties: { name: { const: "manifest-dread" } } }, then: { not: { required: ["count"] } }, else: { required: ["count"] } },
+		] }),
 		step({ do: Type.Literal("damage"), to: Type.Optional(Type.Union([ObjectRef, PlayerRef])), every: Type.Optional(Type.Ref("Selector")), amount: Type.Ref("TargetAmount"), from: Type.Optional(ObjectRef) }),
 		/** A global prevention rule. Bounded shields and prevention with additional effects are not represented. */
 		step({ do: Type.Literal("damage-rule"), mode: DamageMode, combat: Type.Optional(Type.Boolean()), until: Duration }),
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
-			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face), faceDown: Type.Optional(Type.Literal(true)),
+			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face), faceDown: Type.Optional(Type.Union([Type.Literal(true), Type.Literal("manifest")])),
 			/** Exile until this battlefield incarnation leaves; return immediately to the original zone. */
 			until: Type.Optional(object({ leaves: ObjectRef })),
 			/** With as, bind how many moved objects came from this zone, before their incarnations change. */
@@ -271,7 +273,9 @@ export const Defs = {
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { allOf: [
 				{ if: { required: ["countFrom"] }, then: { required: ["as"] } },
 				{ if: { required: ["until"] }, then: { properties: { to: { const: "exile" } } } },
-				{ if: { required: ["faceDown"] }, then: { properties: { to: { const: "exile" } }, not: { required: ["face"] } } },
+				{ if: { required: ["faceDown"] }, then: { not: { required: ["face"] }, allOf: [
+					{ if: { properties: { faceDown: { const: "manifest" } } }, then: { properties: { to: { const: "battlefield" } } }, else: { properties: { to: { const: "exile" } } } },
+				] } },
 			] }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
@@ -323,7 +327,8 @@ export const Defs = {
 		step({ do: Type.Literal("counter"), what: ObjectRef, to: Type.Optional(one("graveyard", "exile")), unless: Type.Optional(object({ who: PlayerRef, pays: Type.Ref("Cost") })) }),
 		/** One player accepts or declines an optional ordered group; each inner instruction keeps its own actor. */
 		step({ do: Type.Literal("perform"), who: PlayerRef, instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) }),
-		step({ do: Type.Literal("each"), players: one("each-player", "opponent"), instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) }),
+		step({ do: Type.Literal("each"), players: Type.Optional(one("each-player", "opponent")), objects: Type.Optional(Type.Ref("Selector")), instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) },
+			{ oneOf: [{ required: ["players"], not: { required: ["objects"] } }, { required: ["objects"], not: { required: ["players"] } }] }),
 	]),
 
 	/** A public note on an object, quoting the text it carries out in `basis`. It lives while that object exists, unless `until` ends it sooner. */
@@ -426,7 +431,7 @@ export const ProcedureDef = object({
 	basis: text,
 	timing: one("spell", "land", "stack", "mana", "special"),
 	/** A shared special action, paid through the same staged announcement. */
-	special: Type.Optional(Type.Literal("plot")),
+	special: Type.Optional(one("plot", "turn-face-up")),
 	/** An activation's "only as a sorcery", or `instant` on a spell to claim flash. Otherwise a spell's timing comes from its type line. */
 	speed: Type.Optional(one("instant", "sorcery")),
 	cost: Type.Optional(Type.Ref("Cost")),

@@ -22,7 +22,7 @@ export function selectionBlock(table: Table, scope: Scope, from: Selector, who: 
 	if (!selectionScoped(from) && scope.world.objects.some((one) => one.zone === "library" &&
 		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined)))
 		return "Selection reaches unseen cards without naming whose library to search or an inspected binding. State owner, controller or is explicitly; no card identities were shown.";
-	return scope.world.objects.some((one) => (one.zone !== "library" || one.faceDown) && !visible.has(`${one.id}@${one.incarnation}`) &&
+	return scope.world.objects.some((one) => (one.zone !== "library" || one.faceDown) && one.zone !== "battlefield" && !visible.has(`${one.id}@${one.incarnation}`) &&
 		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined))
 		? "Selection reaches unseen cards. Look at the other hand or hidden cards explicitly before selecting them; no card identities were shown." : undefined;
 }

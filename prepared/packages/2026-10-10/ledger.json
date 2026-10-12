@@ -410,14 +410,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Unidentified Hovership": {
-		"reason": "Unidentified Hovership is not ready: When this Vehicle leaves the battlefield, the exiled card's owner manifests dread. — Manifest dread requires putting a chosen card from the owner's top two library cards onto the battlefield face down as a 2/2 creature, with manifest's turn-face-up rules, and putting the other card into their graveyard. Face-down permanents and manifest are unsupported; this standing leaves-the-battlefield trigger cannot be faithfully prepared.",
-		"decks": [
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Vengeful Tracker": {
 		"reason": "Vengeful Tracker is not ready: Whenever an opponent sacrifices an artifact, this creature deals 2 damage to them. — Cannot register faithfully: the available event schema has no sacrifice event or sacrifice-reason filter. A leaves or dies watch would also trigger for nonsacrifice events and would not correctly handle sacrifices whose graveyard destination is replaced.",
 		"decks": [

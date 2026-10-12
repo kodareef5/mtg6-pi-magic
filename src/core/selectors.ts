@@ -140,7 +140,10 @@ export function happened(table: Table): Happened[] {
 			if (change.do === "attack") events.push({ kind: "attacked", by: table.cursor.active, attackers: change.attackers.map((one) => {
 				const now = table.things.get(one.id);
 				const traits = now?.incarnation === one.incarnation ? characteristics(table, now) : undefined;
-				return { object: receipt.before[one.id] ?? now!, ...(traits ? { traits } : {}) };
+				const object = receipt.before[one.id] ?? now!;
+				if (!object.faceDown) return { object, ...(traits ? { traits } : {}) };
+				const { card, copied, registrations, choices, copy, ...publicObject } = object;
+				return { object: publicObject, traits: receipt.known?.[one.id] ?? characteristics(table, object) };
 			}) });
 			if (change.do === "damage" && "player" in change.target) events.push({ kind: "life", who: change.target.player, amount: -change.amount });
 			if (change.do === "change-life") events.push({ kind: "life", who: change.who, amount: change.amount });

@@ -77,7 +77,7 @@ export type Change =
 	 * battlefield: part of the motion, never a step after it (614.1c-d).
 	 */
 	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[];
-		tapped?: true; counters?: Record<string, number>; controller?: SeatId; choices?: Record<string, string>; faceDown?: true;
+		tapped?: true; counters?: Record<string, number>; controller?: SeatId; choices?: Record<string, string>; faceDown?: true | "manifest";
 		/** The controller's answer to the optional entry cost. Absent until that choice is settled. */
 		entry?: "paid" | "declined"; face?: 0 | 1; copied?: { source: ObjectRef; spec: TokenSpec } }
 	/** A token made on the battlefield (111.1). */
@@ -85,12 +85,13 @@ export type Change =
 		choices?: Record<string, string>; entry?: "paid" | "declined"; attacking?: { defending: SeatId; to?: ObjectRef } }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
+	| { do: "turn-face-up"; what: string; registers?: Registration[] }
 	/** A chosen name belongs to this permanent's incarnation, as entry choices do. */
 	| { do: "name-card"; what: string; key: string; name: string }
 	/** A private inspection during resolution. Nothing moves. */
 	| { do: "look"; who: SeatId; what: string }
 	/** A completed keyword operation, never a substitute for its physical choices. */
-	| { do: "keyword"; name: "scry" | "surveil"; who: SeatId; count: number }
+	| { do: "keyword"; name: "scry" | "surveil" | "manifest-dread"; who: SeatId; count: number }
 	/** A library subset placed in the stated order, or shuffled before placement. */
 	| { do: "order"; who: SeatId; whose: SeatId; cards: ObjectRef[]; position: "top" | "bottom"; random?: true }
 	| { do: "tap" | "untap"; what: string }

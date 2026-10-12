@@ -22,8 +22,8 @@ export function tokenCopy(table: Table, source: Seen, except?: { power: number; 
 /** A single-faced permanent copies the current face; creating a double-faced
  * token also needs the other face and remains a separate unsupported shape. */
 export function copiable(table: Table, source: Seen, form: "token" | "permanent"): { spec: TokenSpec } | { blocked: string } {
-	if (source.faceDown) return { blocked: "Copying a face-down permanent needs its face-down copiable characteristics." };
 	if (source.zone !== "battlefield") return { blocked: "This copy operation needs a permanent or its last battlefield existence." };
+	if (source.faceDown) return { spec: { name: "", types: ["creature"], colors: [], power: 2, toughness: 2 } };
 	if (source.copied) return form === "token" && source.card && doubleFaced(table.printed[source.card])
 		? { blocked: "Copying a double-faced permanent into a token needs both physical faces, including any copy effects." }
 		: { spec: structuredClone(source.copied.spec) };

@@ -25,7 +25,7 @@ import { attackConflicts, blockConflicts, combatExchange, lethalDamage } from ".
 
 const ref = (object: Pick<Thing, "id" | "incarnation">): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 const same = (a: ObjectRef, b: ObjectRef) => a.id === b.id && a.incarnation === b.incarnation;
-const name = (object: Thing) => object.card ?? object.token?.name ?? object.id;
+const name = (object: Thing) => object.faceDown ? `Face-down creature (${object.id})` : object.card ?? object.token?.name ?? object.id;
 const body = (traits?: Traits) => `${traits?.power ?? "?"}/${traits?.toughness ?? "?"}`;
 const words = (traits?: Traits) => traits?.words.length ? `, ${traits.words.join(", ")}` : "";
 const destination = (to?: ObjectRef) => to ? `:to:${to.id}@${to.incarnation}` : "";

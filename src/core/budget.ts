@@ -192,7 +192,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const procedure = action.procedure;
 			if (procedure.timing === "mana" || procedure.instructions.some((instruction) => instruction.do === "mana")) honest = false;
 			if (procedure.timing !== "land" && procedure.timing !== "spell" && !Object.keys(procedure.cost ?? {}).length) return undefined;
-			const fromHand = procedure.timing === "land" || procedure.timing === "spell" || procedure.timing === "special";
+			const fromHand = procedure.timing === "land" || procedure.timing === "spell" || procedure.special === "plot";
 			const query = { ...procedure.source, zones: procedure.source.zones ?? [fromHand ? "hand" as const : "battlefield" as const] };
 			const chosen = select(query, hypothetical);
 			let source = fromHand ? offBoard(chosen, select(query, initial)) : chosen[0];

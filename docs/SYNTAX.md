@@ -279,7 +279,7 @@ A **procedure** is one announced action, the unit a plan prepares.
 | `claim` | what the seat says it is doing |
 | `basis` | the card text it carries out, quoted |
 | `timing` | `spell`, `land`, `stack` (an activated ability), `mana` or `special` |
-| `special` | `plot`: pay a fixed mana cost from hand and exile the source, without using the stack |
+| `special` | `plot` exiles a hand card; `turn-face-up` pays a manifested creature card's cost at priority. Both use staged payment without the stack |
 | `speed` | an activation's "only as a sorcery", or `instant` on a spell to claim its flash |
 | `cost` | `mana` (with `{X}` announced as you cast), `tap` (the source, or chosen creatures such as crew's), `sacrifice`, `return` to owners' hands, `exile`, `life`, `discard`, `counters`, signed `loyalty`, `show`, and a computed `reduce` |
 | `if`, `limit` | when the seat may announce it, and "once each turn" |
@@ -720,18 +720,17 @@ and an escalation is the fix when the plan stops fitting.
 
 A shape is added when a card needs it. Coverage grows by reviewing cards that
 need real support and checking each one against the syntax, not by adding
-shapes in advance. Revealing a hand for another seat to choose from is the next
-likely addition; no card in the matchup needs it yet.
+shapes in advance. A shared mechanic needs source-backed examples and recorded
+choices before a new assessment can rely on it.
 
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.
-- Revealing a hand for another seat to choose from.
 - Replacement ordering when two replacements change where something goes. None
   of these cards produce it.
-- Copies, effects that take control of a permanent, and face-down permanents.
-  None of these cards produce them.
-- Read ahead and general card or spell copying beyond Prepare's copy.
+- Effects that take control of a permanent, morph, disguise, and other face-up
+  replacement effects.
+- Read ahead, general spell copying, and double-faced token copies.
 - Hybrid and Phyrexian mana symbols. The printed cost reader and a stated cost
   both accept generic, colored and X symbols only.
 
@@ -773,8 +772,8 @@ in that resolution lets its viewer keep looking at the new exiled incarnation
 (406.3). Its identity stays private and it has no characteristics in exile.
 A permitted cast or land play reads its prospective face-up characteristics
 and turns it face up on confirmation. Departing exile or being exiled again
-ends the old permission and look entitlement. Face-down battlefield objects
-and uninformed selection from exiled piles remain unsupported.
+ends the old permission and look entitlement. Uninformed selection from
+exiled piles remains unsupported.
 
 `permit.while` checks a condition on each use, with "you" fixed to the granting
 controller. It can become false and true again without removing the note.
@@ -787,3 +786,26 @@ at one during the state check; the inherent ability increases it once on each
 of that player's turns when an opponent loses life. This trigger has no source
 and uses the normal stack. A max speed grant reads `{speed: "you"}` equal to
 four through a conditional continuous registration. See [player speed](examples/speed.md).
+
+### Manifest dread and face-down creatures
+
+`keyword` with `name: "manifest-dread"` takes `who` and no `count`. It inspects
+two privately, manifests the chosen card, then moves the remainder to the
+graveyard. An empty library still completes this keyword without drawing.
+`as` binds the manifested permanent. `move` with `faceDown: "manifest"` moves
+one card from another zone onto the battlefield; the shared keyword supplies
+its controller and ordered selection. Other multi-card manifest instructions
+must repeat the operation rather than move a simultaneous group.
+
+The layer walk reads a nameless colorless 2/2 creature. Only its controller may
+inspect the underlying identity. Every adapter receives the paid face-up
+special action for a creature card with a supported mana cost. Face-up payment
+works at any priority, including the opponent's turn and a nonempty stack.
+It changes no incarnation and repeats no entry behavior. Departure and game end
+reveal face-down permanents publicly; earlier event descriptions stay private.
+
+`each.objects` iterates a selector over public zones, binding `bound:object`
+within each iteration. It is an alternative to `each.players`, not an implicit
+search or private look. Hovership uses it to read the owner of each linked
+exile card, and performs nothing when there are none. See
+[manifest dread](examples/manifest.md) for the complete example and limits.

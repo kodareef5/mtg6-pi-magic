@@ -7,12 +7,12 @@ import { playable } from "./permits.ts";
 import { viewWorld } from "./selectors.ts";
 
 /** Visible sources in the accepted zone with this seat's permission. Costs, targets and timing are separate. */
-export function useSources(frame: Frame, use: Pick<Procedure, "source" | "timing" | "face">,
+export function useSources(frame: Frame, use: Pick<Procedure, "source" | "timing" | "face" | "special">,
 	turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0) {
 	const played = use.timing === "spell" || use.timing === "land";
 	const world = viewWorld(frame.view);
 	return select({ ...use.source, zones: use.source.zones ?? [played ? "hand" : "battlefield"] }, frame)
-		.filter((source) => (source.card || source.token) && (played
+		.filter((source) => (source.card || source.token) && (!source.faceDown || source.zone !== "battlefield" || use.special === "turn-face-up" || use.source.registered) && (played
 			? castableFace(source.card ? frame.view.printed?.[source.card] : undefined, use.face ?? 0, source) && playable(world, frame.seat, source, turn, use.timing === "land", use.face)
 			: (source.zone === "battlefield" || source.zone === "stack" ? source.controller : source.owner) === frame.seat));
 }

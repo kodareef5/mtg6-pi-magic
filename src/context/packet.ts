@@ -36,7 +36,7 @@ export type PlanSlice = {
 export type Seen = {
 	id: string; incarnation: number; name: string; controller: SeatId; zone: string; position?: number;
 	tapped?: true; summoningSick?: boolean; types?: string[]; subtypes?: string[]; body?: string;
-	colors?: string[]; manaValue?: number; faceDown?: true;
+	colors?: string[]; manaValue?: number; faceDown?: true; manifested?: true;
 	counters?: Record<string, number>; damage?: number; words?: string[]; effect?: string[];
 	activeName?: string; face?: 0 | 1; doors?: (0 | 1)[]; prepared?: true; copy?: SeenObject["copy"]; designations?: SeenObject["designations"];
 	targets?: NonNullable<SeenObject["ability"]>["targets"]; source?: NonNullable<SeenObject["ability"]>["source"];
@@ -64,7 +64,7 @@ export type Packet = {
 const seen = (object: SeenObject): Seen => {
 	const traits = object.traits;
 	return { id: object.id, incarnation: object.incarnation, name: object.card ?? object.token?.name ?? object.ability?.claim ?? "unknown", controller: object.controller, zone: object.zone,
-		...(object.faceDown ? { faceDown: true as const } : {}),
+		...(object.faceDown ? { faceDown: true as const } : {}), ...(object.manifested ? { manifested: true as const } : {}),
 		...(traits && traits.name !== object.card ? { activeName: traits.name } : {}),
 		...(!object.faceDown ? { ...(object.face !== undefined ? { face: object.face } : {}), ...(object.doors ? { doors: [...object.doors] } : {}),
 			...(object.prepared ? { prepared: true as const } : {}), ...(object.copy ? { copy: structuredClone(object.copy) } : {}) } : {}),

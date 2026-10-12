@@ -111,7 +111,8 @@ changes, then abilities, then power and toughness with counters, by timestamp
 labels with a change are the effects; dependency (613.8) is approximated by
 dropping an effect whose ability was removed earlier in the walk. State-based
 actions, mana, sickness and the view all read the result. Face-down objects
-have no characteristics yet. Do not silently omit counters, layers,
+in exile have no characteristics; manifested battlefield objects have the
+public nameless colorless 2/2 creature values. Do not silently omit counters, layers,
 protection, replacements or entry instructions to make another card fit.
 
 Listing a forced action does not apply it. The loop applies the listed group

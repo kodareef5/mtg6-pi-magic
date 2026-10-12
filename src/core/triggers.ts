@@ -27,7 +27,7 @@ import { casting } from "./casting.ts";
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
 	on: GameEvent["on"];
-	keyword?: "scry" | "surveil";
+	keyword?: "scry" | "surveil" | "manifest-dread";
 	ordinal?: number;
 	/** What it happened to, as it was then. */
 	object?: Seen;
@@ -388,13 +388,13 @@ export function triggerWindow(table: Table): Pending | null {
 	if (!seat) return null;
 	const world = tableWorld(table);
 	const mine = current.filter((trigger) => trigger.controller === seat.id);
-	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.card ?? source?.token?.name ?? trigger.source?.id ?? "Inherent ability"; };
+	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.faceDown ? `Face-down creature (${source.id})` : source?.card ?? source?.token?.name ?? trigger.source?.id ?? "Inherent ability"; };
 	// Putting one on now places it under every trigger put later, so it resolves after them.
 	const after = (trigger: (typeof mine)[number]) => { const others = mine.filter((other) => other !== trigger).map((other) => `${sourceName(other)}'s trigger`);
 		return others.length ? `Put on now, it resolves after ${[...new Set(others)].map((one) => { const n = others.filter((other) => other === one).length; return n > 1 ? `${one} (x${n})` : one; }).join(", ")}.` : "It is the last trigger to put on."; };
 	const moves: Move[] = mine.flatMap((trigger): Move[] => {
 		const source = world.lastKnown(trigger.source)?.object;
-		const name = source?.card ?? source?.token?.name ?? trigger.source?.id ?? "Inherent ability";
+		const name = sourceName(trigger);
 		const scope: Scope = { world, controller: trigger.controller, ...(source ? { source } : {}), event: eventScope(world, trigger.event),
 			...(trigger.bound ? { bound: trigger.bound } : {}), ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 		const modal = "modes" in trigger.effect;

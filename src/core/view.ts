@@ -142,9 +142,9 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	}
 
 	const inspected = table.resolution?.seen?.[viewer] ?? [];
-	const canLook = (item: Thing) => viewer !== "spectator" && item.zone === "exile" && !!item.lookedBy?.includes(viewer);
+	const canLook = (item: Thing) => viewer !== "spectator" && (item.zone === "exile" && !!item.lookedBy?.includes(viewer) || item.zone === "battlefield" && item.controller === viewer);
 	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation);
-	const visibleRefs = new Set([...table.things.values()].filter((one) => entitled(one) && (!one.faceDown || canLook(one))).map((one) => `${one.id}@${one.incarnation}`));
+	const visibleRefs = new Set([...table.things.values()].filter((one) => entitled(one) && (!one.faceDown || canLook(one) || one.zone === "battlefield")).map((one) => `${one.id}@${one.incarnation}`));
 	const bound = (values: NonNullable<Table["resolution"]>["bound"]) => Object.fromEntries(Object.entries(values).map(([key, value]) => [key,
 		{ ...value, objects: value.objects.filter((one) => visibleRefs.has(`${one.id}@${one.incarnation}`)) }]));
 	const resolution = table.resolution ? structuredClone(table.resolution) : undefined;
@@ -158,14 +158,17 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		.filter(entitled)
 		.map((item) => {
 			const { card, copied, ...seen } = structuredClone(item);
+			if (item.faceDown) { delete seen.registrations; delete seen.choices; delete seen.face; delete seen.doors; delete seen.copy; }
 			if (seen.ability?.bound) seen.ability.bound = bound(seen.ability.bound);
 			if (seen.ability?.trigger?.bound) seen.ability.trigger.bound = bound(seen.ability.trigger.bound);
 			// Read through the layers on every projection, never stored on the object.
 			const traits = characteristics(table, item);
-			return item.faceDown ? { ...seen, ...(canLook(item) ? { card } : {}) } : { ...seen, card, ...(copied ? { copied } : {}), ...(traits ? { traits: structuredClone(traits) } : {}),
+			const publicTraits = { ...(traits ? { traits: structuredClone(traits) } : {}),
 				...(item.zone === "battlefield" && traits?.types.includes("creature") ? { summoningSick: sick(table, item, traits) } : {}) };
+			return item.faceDown ? { ...seen, ...(canLook(item) ? { card } : {}), ...(item.zone === "battlefield" ? publicTraits : {}) }
+				: { ...seen, card, ...(copied ? { copied } : {}), ...publicTraits };
 		});
-	for (const item of objects) if (item.faceDown && item.card) yours.push(`Face-down exile you may look at: ${item.card} (${item.id}@${item.incarnation})`);
+	for (const item of objects) if (item.faceDown && item.card) yours.push(`Face-down ${item.zone} you may look at: ${item.card} (${item.id}@${item.incarnation})`);
 	if (table.combat) {
 		const combat = table.combat, named = (one: { id: string }) => publicName(table.things.get(one.id));
 		for (const one of combat.attackers) lines.push(`Attacking ${one.to ? one.removedDefender ? "nothing (the planeswalker left combat)" : named(one.to) : seat(table, one.defending).name}: ${named(one)}${combat.blocked.some((aimed) => aimed.id === one.id) ? ", blocked" : ""}`);
@@ -370,13 +373,16 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			}
 			case "keyword":
-				parts.push(`${seat(table, change.who).name} ${change.name === "scry" ? "scried" : "surveilled"} ${change.count}`);
+				parts.push(`${seat(table, change.who).name} ${change.name === "manifest-dread" ? "manifested dread" : `${change.name === "scry" ? "scried" : "surveilled"} ${change.count}`}`);
 				break;
 			case "order":
 				parts.push(`${seat(table, change.who).name} put ${change.cards.length} cards on the ${change.position} of ${seat(table, change.whose).name}'s library${change.random ? " in random order" : " in their chosen order"}${viewer === change.who && !change.random ? `: ${change.cards.map((one) => receipt.before[one.id]?.card ?? "a card").join(", ")} (topmost first)` : ""}`);
 				break;
 			case "counters":
 				parts.push(`${change.amount < 0 ? "removed" : "put"} ${Math.abs(change.amount)} ${change.kind} ${change.amount < 0 ? "from" : "on"} ${publicName(receipt.before[change.what])}`);
+				break;
+			case "turn-face-up":
+				parts.push(`${publicName(receipt.after[change.what])} turned face up`);
 				break;
 			case "transform":
 				parts.push(`applied a transform instruction to ${publicName(receipt.before[change.what])}`);

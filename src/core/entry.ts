@@ -20,7 +20,7 @@ export const tokenObject = (change: Extract<Change, { do: "token" }>, entered: n
 export function attach(table: Table, changes: Change[], frozen?: Record<ObjectId, Registration[]>): Record<ObjectId, Registration[]> {
 	const used: Record<ObjectId, Registration[]> = {};
 	for (const change of changes) {
-		if (change.do !== "move" || change.to !== "battlefield") continue;
+		if (change.do !== "move" || change.to !== "battlefield" || change.faceDown) continue;
 		const object = thing(table, change.what);
 		// It enters under the move's controller, or its owner's: that seat's package applies.
 		const registers = frozen ? frozen[object.id] : object.card ? pack(table, change.controller ?? object.owner, object.card) : undefined;

@@ -70,6 +70,7 @@ export const intrinsic = (traits?: Traits): Color[] => traits?.types.includes("l
 
 /** The printed card or the token spec, before any effect. */
 export function base(table: Table, object: Thing): Traits | undefined {
+	if (object.faceDown && object.zone === "battlefield") return { name: "", types: ["creature"], subtypes: [], supertypes: [], colors: [], manaValue: 0, power: 2, toughness: 2, words: [], registrations: registered(table, object) };
 	const printedCard = object.card ? table.printed[object.card] : undefined;
 	const active = printedCard ? activeFaces(printedCard, object) : [0];
 	// A self characteristic with an explicit nonbattlefield scope applies there, such as changeling.
@@ -114,7 +115,7 @@ const registered = (table: Table, object: Thing) => table.notes.flatMap((note) =
 /** One object's characteristics now, including explicitly scoped self terms outside the battlefield. */
 export function characteristics(table: Table, object: Thing): Traits | undefined {
 	const real = table.things.get(object.id);
-	const same = real && real.incarnation === object.incarnation && real.zone === object.zone && real.face === object.face && real.ability?.x === object.ability?.x;
+	const same = real && real.incarnation === object.incarnation && real.zone === object.zone && real.face === object.face && real.faceDown === object.faceDown && real.ability?.x === object.ability?.x;
 	return walk(table, same ? undefined : object).get(object.id);
 }
 

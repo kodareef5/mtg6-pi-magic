@@ -111,7 +111,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 				} else if (key !== "instructions") refs(one, slots, bound, declared);
 			}
 			if ("instructions" in value && Array.isArray(value.instructions))
-				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...bound, "player"]) : bound, declared);
+				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...bound, "objects" in value ? "object" : "player"]) : bound, declared);
 		}
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
@@ -162,7 +162,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if (activation.registered && !traits?.registrations.some((one) => one.kind === "activated" && one.basis === activation.registered))
 		throw new Error("The source no longer has that registered activated ability.");
 	const main = table.cursor.active === controller && MAIN.includes(table.cursor.steps[0]!) && !cardsIn(table, "stack").length;
-	if ((activation.timing === "special" || price?.speed === "sorcery") && !main) throw new Error("This special action or casting permission needs this seat's main phase and an empty stack, regardless of flash.");
+	if ((activation.special === "plot" || price?.speed === "sorcery") && !main) throw new Error("This special action or casting permission needs this seat's main phase and an empty stack, regardless of flash.");
 	if (cost.loyalty !== undefined && (activation.timing !== "stack" || object.zone !== "battlefield" || !(main || instantLoyalty(world, controller, object)) || loyaltyUsed(world, source)))
 		throw new Error("A loyalty ability needs its controller's main phase and an empty stack, or a timing permission, and no earlier loyalty activation of this permanent this turn.");
 	if (cost.loyalty !== undefined && (object.counters.loyalty ?? 0) + cost.loyalty < 0) throw new Error("Not enough loyalty counters to pay.");

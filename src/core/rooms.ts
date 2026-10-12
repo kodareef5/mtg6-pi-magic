@@ -9,7 +9,7 @@ import type { Move } from "./moves.ts";
 
 export function unlocks(table: Table, frame: Frame): Move[] {
 	if (table.cursor.active !== frame.seat || !["precombat-main", "postcombat-main"].includes(table.cursor.steps[0]!) || cardsIn(table, "stack").length) return [];
-	return cardsIn(table, "battlefield").filter((object) => object.controller === frame.seat && room(table.printed[object.card ?? ""]))
+	return cardsIn(table, "battlefield").filter((object) => object.controller === frame.seat && !object.faceDown && room(table.printed[object.card ?? ""]))
 		.flatMap((object) => ([0, 1] as const).filter((face) => !object.doors?.includes(face)).flatMap((face) => {
 			const printed = faceFacts(table.printed[object.card!], face), cost = manaCost(printed);
 			if (!cost) return [];

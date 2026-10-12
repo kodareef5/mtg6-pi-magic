@@ -24,7 +24,7 @@ import { defenders } from "./combat.ts";
 import { tokenCopy } from "./copies.ts";
 import { STEPS } from "./steps.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
-import type { Instruction, Modification } from "./language.ts";
+import type { Instruction, Modification, Selector } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 
@@ -134,12 +134,14 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				}
 				return ordered;
 			}
+			if (terms?.faceDown === "manifest" && (moving.length > 1 || moving.some(object => object.zone === "battlefield")))
+				return { actor: controller, question: "Manifest one card onto the battlefield.", choices: [], blocked: "Manifest moves one card at a time from another zone; use a repeated keyword operation for multiple cards." };
 			const counters = terms?.counters ? Object.fromEntries(Object.entries(terms.counters).map(([kind, value]) => [kind, amount(scope, value)])) : undefined;
 			const controlled = terms?.controller ? players(scope, terms.controller)[0] : undefined;
 			const changes: Change[] = moving.flatMap((object): Change[] => [
 				{ do: "move", what: object.id, to, reason: (destroy ? "destroy" : terms!.reason) as Reason, ...(terms?.position ? { position: terms.position as "top" | "bottom" } : {}),
 					...(terms?.face !== undefined ? { face: terms.face } : {}),
-					...(terms?.faceDown ? { faceDown: true as const } : {}),
+					...(terms?.faceDown ? { faceDown: terms.faceDown } : {}),
 					...(terms?.tapped ? { tapped: true as const } : {}), ...(counters ? { counters } : {}), ...(controlled !== undefined ? { controller: controlled } : {}) },
 				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + (object.zone !== to || to === "exile" ? 1 : 0) }, source } }] : []),
 				...(waiting && object.zone !== to ? [{ do: "note" as const, note: { kind: "return" as const, by: controller, until: "indefinite" as const,
@@ -174,7 +176,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "door": {
 			const object = live(table, objects(scope, instruction.what))[0];
 			const unlocked = instruction.action === "unlock";
-			const faces = object?.zone === "battlefield" && room(table.printed[object.card ?? ""]) ? ([0, 1] as const)
+			const faces = object?.zone === "battlefield" && !object.faceDown && room(table.printed[object.card ?? ""]) ? ([0, 1] as const)
 				.filter((face) => (instruction.face === undefined || instruction.face === face) && !!object.doors?.includes(face) !== unlocked) : [];
 			return faces.length ? { actor: controller, question: `Choose a door to ${instruction.action}.`, choices: faces.map((face) => ({
 				id: String(face), label: `${instruction.action} ${table.printed[object!.card!]!.faces![face]!.name}`,
@@ -192,14 +194,14 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const seen = new Set<string>();
 			const pool = select(scope, instruction.from).filter((object) => !picked.some((one) => one.id === object.id)).filter((object) => {
 				if (object.zone !== "library" && object.zone !== "hand") return true;
-				const key = `${object.zone}|${object.owner}|${object.card}`;
+				const key = `${object.zone}|${object.owner}|${object.faceDown ? object.id : object.card}`;
 				return !seen.has(key) && !!seen.add(key);
 			});
 			const finish = (more: ObjectRef[]): Partial<Choice> => bind(instruction, { objects: [...picked, ...more], players: [] });
 			// Once the count is met there is nothing left to pick, even when it is zero.
 			const choices: Choice[] = picked.length >= count ? [] : pool.map((object) => {
 				const last = picked.length + 1 >= count;
-				return { id: object.id, label: `Choose ${object.card ?? object.token?.name ?? "an unknown card"} (${object.zone})`, objects: [ref(object)], ...(object.card ? { cards: [object.card] } : {}), changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
+				return { id: object.id, label: `Choose ${object.faceDown ? `face-down creature ${object.id}` : object.card ?? object.token?.name ?? "an unknown card"} (${object.zone})`, objects: [ref(object)], ...(!object.faceDown && object.card ? { cards: [object.card] } : {}), changes: instruction.reveal ? [{ do: "reveal", what: object.id }] : [],
 					...(last ? finish([ref(object)]) : { pick: ref(object) }) };
 			});
 			// Up to, a hidden-zone search, and running out are all ways to stop short (701.23b).
@@ -351,6 +353,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				...bind(instruction, { objects: [], players: [], amount: 1 }) }] };
 		}
 		case "each": {
+			if (instruction.objects) {
+				const privateZone = (selector: Selector): boolean => !!selector.zones?.some(zone => !["battlefield", "exile", "graveyard", "stack", "command"].includes(zone)) || !!selector.any?.some(privateZone) || !!selector.all?.some(privateZone);
+				const blocked = privateZone(instruction.objects) ? "Object iteration supports public zones only; it cannot inspect hidden cards." : selectionBlock(table, scope, instruction.objects, controller);
+				if (blocked) return { actor: controller, question: blocked, choices: [], blocked };
+				const selected = select(scope, instruction.objects);
+				return one(`For each of ${selected.length} objects`, [], { expand: selected.flatMap(object => instruction.instructions.map(inner => ({ instruction: inner, object: ref(object) }))) });
+			}
 			const who = instruction.players === "each-player" ? scope.world.players.map((one) => one.id) : players(scope, "opponent");
 			return one(`For each of ${who.length} players`, [], { expand: who.flatMap((player) => instruction.instructions.map((inner) => ({ instruction: inner, player }))) });
 		}

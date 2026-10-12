@@ -27,6 +27,7 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
 		const source = { ...object, zone: "battlefield" as const, controller: who,
+			faceDown: change.do === "move" && !!change.faceDown,
 			face: change.do === "move" ? change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) : 0 as const,
 			...(change.do === "move" ? { registrations: change.registers ?? [] } : {}),
 			...(change.do === "move" && change.copied ? { copied: change.copied, registrations: [] } : {}) };

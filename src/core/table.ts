@@ -84,6 +84,8 @@ export type Thing = {
 	position?: number;
 	tapped: boolean;
 	faceDown: boolean;
+	/** Manifest grants its controller the special action while this permanent remains face down. */
+	manifested?: true;
 	/** Seats allowed to keep looking at this face-down exiled incarnation (406.3). */
 	lookedBy?: SeatId[];
 	counters: Record<string, number>;
@@ -203,7 +205,7 @@ export type Resolution = {
 	object: ObjectId;
 	/** "This": the source, or the permanent a resolving spell became. */
 	source?: ObjectRef;
-	program: { instruction: Instruction; player?: SeatId; detail?: string; completed?: Extract<Change, { do: "keyword" }> & { as?: string; selected: string } }[];
+	program: { instruction: Instruction; player?: SeatId; object?: ObjectRef; detail?: string; completed?: Extract<Change, { do: "keyword" }> & { as?: string; selected: string } }[];
 	bound: Record<string, Bound>;
 	/** Targets illegal as resolution began, by target key (608.2b). */
 	illegal: string[];

@@ -17,7 +17,7 @@ export type Entry = { changes: Change[]; reason: Reason; clock: number; choices:
 
 function requirements(table: Table, changes: Change[]) {
 	return changes.flatMap((change, index) => {
-		if (change.do !== "token" && (change.do !== "move" || change.to !== "battlefield")) return [];
+		if (change.do !== "token" && (change.do !== "move" || change.to !== "battlefield" || change.faceDown)) return [];
 		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
 		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.do === "move" ? change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) : 0 as const,
