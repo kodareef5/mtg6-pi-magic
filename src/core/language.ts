@@ -371,6 +371,10 @@ export const Defs = {
 			/** A cast through this permission replaces every departure from the stack. */
 			leavesStack: Type.Optional(Zone) }, { if: { required: ["leavesStack"] }, then: { required: ["mana"] } }),
 		step({ do: Type.Literal("register"), on: ObjectRef, registration: Type.Ref("Registration") }),
+		/** A resolving effect changes a rule for these incarnations; it grants no ability. */
+		step({ do: Type.Literal("rule"), on: ObjectRef, rule: Type.Union([
+			object({ activate: Type.Literal(false) }), object({ diesTo: Zone }),
+		]), until: Type.Union([Duration, Type.Literal("while-tapped")]) }),
 		/** A delayed trigger (603.7). It fires once unless `until` gives it a span. */
 		step({ do: Type.Literal("delay"), event: Type.Ref("Event"), effect: Type.Ref("Effect"), until: Type.Optional(Duration) }),
 		/** "When you do" (603.12). `check` is its intervening if. */

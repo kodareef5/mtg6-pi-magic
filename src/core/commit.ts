@@ -186,6 +186,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const dying = change.do === "move" && change.to === "graveyard" ? table.things.get(change.what) : undefined;
 		const instead = dying?.zone === "battlefield" ? characteristics(table, dying)?.registrations.find((one) => one.kind === "replace" && one.on === "dies") : undefined;
 		if (change.do === "move" && instead?.kind === "replace") change.to = instead.to as Zone;
+		const rule = dying?.zone === "battlefield" ? table.notes.find(note => note.kind === "rule" && "diesTo" in note.rule &&
+			note.on.id === dying.id && note.on.incarnation === dying.incarnation) : undefined;
+		if (change.do === "move" && rule?.kind === "rule" && "diesTo" in rule.rule) change.to = rule.rule.diesTo;
 		if (change.do === "move" && dying?.zone === "battlefield" && (dying.counters.finality ?? 0) > 0) change.to = "exile";
 	}
 	// 122.1d: one or more stun counters replace an actual untap with removing one.
@@ -391,6 +394,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			}
 			case "untap":
 				thing(table, change.what).tapped = false;
+				table.notes = table.notes.filter(note => !(note.until === "while-tapped" && "on" in note && note.on.id === change.what &&
+					note.on.incarnation === thing(table, change.what).incarnation));
 				break;
 			case "increase-speed":
 				seat(table, change.who).speed = (seat(table, change.who).speed ?? 0) + change.amount;

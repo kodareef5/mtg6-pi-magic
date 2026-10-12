@@ -10,6 +10,7 @@ schemas, and every `basis` is checked against the card's text.
 | `attack-requirements.md` | Required-attack warnings, Carnage's mayhem price and incarnation-bound combat sacrifice grant |
 | `class-levels.md` | Physical levels, sorcery activations, continuous grants and level-change triggers |
 | `random-selection.md` | Seeded selections, private bindings, delayed random discard and graveyard exile |
+| `object-rules.md` | Incarnation-bound activation bans and death replacements, independent of abilities |
 | `milled-return.md` | Mill-result bindings, optional permanent return and a check in the resulting hand zone |
 | `library-keywords.md` | Scry and surveil choices, privacy, actual selected results and completion events |
 | `library-windows.md` | Simultaneous top or all-but-bottom windows across separate libraries |

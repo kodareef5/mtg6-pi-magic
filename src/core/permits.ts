@@ -74,13 +74,15 @@ export function castRestrictions(world: World, seat: SeatId): string[] {
 
 /** Activation restrictions follow the source in every zone, including a visible card in hand. */
 export function activationRestrictions(world: World, object: Seen, mana = false): string[] {
-	return world.objects.filter((source) => source.zone === "battlefield").flatMap((source) => {
+	const rules = world.notes.flatMap(note => note.kind === "rule" && "activate" in note.rule &&
+		note.on.id === object.id && note.on.incarnation === object.incarnation ? [note.text] : []);
+	return [...rules, ...world.objects.filter((source) => source.zone === "battlefield").flatMap((source) => {
 		const scope = { world, source, controller: source.controller };
 		return (world.read(source)?.registrations ?? []).flatMap((registration) => registration.kind === "prohibit" && "activate" in registration &&
 			!(mana && registration.exceptMana) && (!registration.if || holds(scope, registration.if)) &&
 			matches(scope, object, registration.activate, world.read(object), [object.zone])
 			? [`${world.read(source)?.name ?? source.id}: ${registration.basis}`] : []);
-	});
+	})];
 }
 
 /** What this seat's permanents permit it. Additional assumed registrations

@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "641ec9f2c79576a4133e84874e8d445692429897739e61e53653118562f3137d",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Braided Net // Braided Quipu",
 		"registers": [
@@ -16,10 +15,7 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
 				"face": 0,
 				"claim": "Tap another nonland permanent and prevent its activated abilities from being activated for as long as it remains tapped.",
@@ -32,7 +28,43 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"counters": {
+						"kind": "net",
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"not": {
+								"types": [
+									"land"
+								]
+							},
+							"other": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					},
+					{
+						"do": "rule",
+						"on": "target:0",
+						"rule": {
+							"activate": false
+						},
+						"until": "while-tapped"
+					}
+				]
 			},
 			{
 				"face": 0,
@@ -46,8 +78,52 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
-			},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}",
+					"exile": {
+						"choose": {
+							"any": [
+								{
+									"zones": [
+										"battlefield"
+									],
+									"types": [
+										"artifact"
+									],
+									"controller": "you",
+									"other": true
+								},
+								{
+									"zones": [
+										"graveyard"
+									],
+									"types": [
+										"artifact"
+									],
+									"owner": "you"
+								}
+							]
+						},
+						"count": 1,
+						"source": true
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "bound:cost-source",
+						"to": "battlefield",
+						"face": 1,
+						"reason": "resolve"
+					}
+				],
+				"speed": "sorcery"
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
 			{
 				"face": 1,
 				"claim": "Draw a card for each artifact you control, then put this artifact into its owner's library third from the top.",

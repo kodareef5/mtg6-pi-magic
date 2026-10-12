@@ -38,15 +38,12 @@
 						"as": "damaged"
 					},
 					{
-						"do": "register",
+						"do": "rule",
 						"on": "bound:damaged",
-						"registration": {
-							"basis": "If a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
-							"kind": "replace",
-							"on": "dies",
-							"to": "exile",
-							"until": "end-of-turn"
-						}
+						"rule": {
+							"diesTo": "exile"
+						},
+						"until": "end-of-turn"
 					}
 				]
 			},
@@ -112,15 +109,12 @@
 						"count": 1
 					},
 					{
-						"do": "register",
+						"do": "rule",
 						"on": "bound:damaged",
-						"registration": {
-							"basis": "If a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
-							"kind": "replace",
-							"on": "dies",
-							"to": "exile",
-							"until": "end-of-turn"
-						}
+						"rule": {
+							"diesTo": "exile"
+						},
+						"until": "end-of-turn"
 					}
 				]
 			}

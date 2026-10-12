@@ -272,7 +272,7 @@ export type Note = {
 	id: string;
 	/** Who wrote it. */
 	by: SeatId;
-	until: "end-of-turn" | "end-of-combat" | "while-source" | "indefinite" | { endOfNextTurn: SeatId; afterTurn: number } | { nextEndStep: SeatId };
+	until: "end-of-turn" | "end-of-combat" | "while-source" | "while-tapped" | "indefinite" | { endOfNextTurn: SeatId; afterTurn: number } | { nextEndStep: SeatId };
 	/** For `while-source`, and the exiling object of a link. */
 	source?: ObjectRef;
 	/** Rises with the clock, because "which of these two is newer" must have an answer (613.7). */
@@ -280,6 +280,8 @@ export type Note = {
 } & (
 	| { kind: "label"; on: ObjectRef; text: string; change?: Modification }
 	| { kind: "register"; on: ObjectRef; registration: Registration }
+	/** A resolving effect changes rules without granting the affected object an ability (611.2c). */
+	| { kind: "rule"; on: ObjectRef; text: string; rule: { activate: false } | { diesTo: Zone } }
 	| { kind: "link"; on: ObjectRef; source: ObjectRef }
 	/** A second one-shot effect under 610.3, not a leaves trigger. */
 	| { kind: "return"; on: ObjectRef; source: ObjectRef; to: Zone }

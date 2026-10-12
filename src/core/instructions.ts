@@ -372,6 +372,14 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				...(instruction.of ? { of: structuredClone(instruction.of) } : {}), ...(instruction.leavesStack ? { leavesStack: instruction.leavesStack as Zone } : {}),
 				...(source && until === "while-source" ? { source } : {}) } })));
 		}
+		case "rule": {
+			const on = live(table, objects(scope, instruction.on)).filter(object => object.zone === "battlefield" &&
+				(instruction.until !== "while-tapped" || object.tapped));
+			return one(`Apply a rule to ${on.map(name).join(", ") || "nothing"}: ${claim}`, on.map((object): Change => ({ do: "note", note: {
+				kind: "rule", by: controller, until: instruction.until as Until, on: ref(object), text: claim,
+				rule: "activate" in instruction.rule ? { activate: false } : { diesTo: instruction.rule.diesTo as Zone },
+				...(source && instruction.until === "while-source" ? { source } : {}) } })));
+		}
 		case "register": {
 			const on = live(table, objects(scope, instruction.on));
 			const until = (instruction.registration.kind === "replace" ? instruction.registration.until ?? "indefinite" : "indefinite") as Until;

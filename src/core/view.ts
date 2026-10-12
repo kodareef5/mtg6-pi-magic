@@ -422,6 +422,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			case "note":
 				if (change.note.kind === "label") parts.push(`labelled ${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])}: ${change.note.text}`);
 				if (change.note.kind === "register") parts.push(`${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])} registered: ${change.note.registration.basis}`);
+				if (change.note.kind === "rule") parts.push(`Rule for ${publicName(table.things.get(change.note.on.id) ?? receipt.before[change.note.on.id])}: ${change.note.text} (${change.note.until})`);
 				if (change.note.kind === "cast-words") parts.push(`${seat(table, change.note.who).name}'s ${change.note.next ? "next matching spell" : "matching spells"}: ${change.note.words.join(", ")} (${change.note.until})`);
 				if (change.note.kind === "activation-timing") parts.push(`${seat(table, change.note.who).name} may activate matching loyalty abilities at instant speed (${change.note.until})`);
 				if (change.note.kind === "damage-rule") parts.push(`${change.note.combat === undefined ? "All" : change.note.combat ? "Combat" : "Noncombat"} damage ${change.note.mode === "prevent" ? "is prevented" : "can't be prevented"} (${change.note.until})`);

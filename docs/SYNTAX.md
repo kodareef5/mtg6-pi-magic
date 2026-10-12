@@ -226,6 +226,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `modify` | change characteristics `until` a duration, written as a public label |
 | `permit` | a player may play a card; `who: "owner"` grants each affected card's owner permission for that card; `from` now or next turn, `until` a duration; optional `mana` grants casting at that alternative price only; `while` rechecks a live condition on each use |
 | `register` | add a registration to an object |
+| `rule` | `on` fixes affected battlefield incarnations; `rule: {activate: false}` prevents their activations, or `{diesTo: "exile"}` replaces their death. This grants no ability. `until` may also be `"while-tapped"`, ending permanently on the first actual untap |
 | `delay` | a delayed trigger: an event and an effect, once unless `until` gives it a span (603.7) |
 | `reflect` | "when you do": a reflexive trigger with its intervening `check` (603.12) |
 | `attach` | an Aura or Equipment to an object |
