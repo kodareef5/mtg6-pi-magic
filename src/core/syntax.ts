@@ -30,7 +30,7 @@ export type Zone =
 	| "outside";
 
 /** Physical designations persist for this battlefield incarnation, not as abilities or copiable values. */
-export type Designation = "harnessed";
+export type Designation = "harnessed" | "solved";
 
 /**
  * Cards watch the reason, not the motion. Destroying, discarding, milling and

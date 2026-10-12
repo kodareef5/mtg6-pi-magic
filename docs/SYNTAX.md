@@ -88,7 +88,7 @@ watched. Each field narrows, and a list matches any of its members.
 | `words` | "creature with flying" |
 | `power`, `toughness`, `manaValue` | `manaValue: {atMost: 3}`; bounds may also be amounts, such as `{atMost: {x: true}}` |
 | `hasAdventure` | whether the visible object has Adventure characteristics, including when its normal face is active (715.2a) |
-| `designations` | every named physical designation must be present; currently `harnessed` (701.64) |
+| `designations` | every named physical designation must be present; `harnessed` (701.64) or `solved` (719.3b) |
 | `subtypes.chosen` | read the source's named entry choice; a missing choice matches nothing; mana freezes it when produced |
 | `tapped`, `token`, `attacking`, `blocking` | |
 | `blocked` | true selects blocked attackers; false selects unblocked attackers, after the blocker declaration; a departed blocker does not change that status |

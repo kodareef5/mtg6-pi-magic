@@ -34,7 +34,7 @@ const ManaCost = Type.String({ pattern: MANA_PATTERN });
 const Duration = one("end-of-turn", "end-of-combat", "while-source", "indefinite");
 const DamageMode = Type.Union([Type.Literal("prevent"), Type.Literal("unpreventable")]);
 const ManaDuration = one("end-of-combat", "end-of-turn");
-const Designation = Type.Literal("harnessed");
+const Designation = Type.Union([Type.Literal("harnessed"), Type.Literal("solved")]);
 const Reason = one("resolve", "destroy", "sacrifice", "discard", "mill", "exile", "bounce", "counter");
 const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
 

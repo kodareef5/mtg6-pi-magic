@@ -10,11 +10,12 @@ import { copiable } from "../src/core/copies.ts";
 import { relive } from "../src/core/journal.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { project, describe } from "../src/core/view.ts";
+import { matches, tableWorld } from "../src/core/selectors.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { announce, establish, example, finish, main, pack, passBoth, place, quiet } from "./play.ts";
 
-test("harnessing grants infinity while present, survives ability loss, and is neither copied nor carried across zones", () => {
+test("permanent designations grant scoped abilities, survive ability loss, and are neither copied nor carried across zones", () => {
 	const card = "The Mind Stone", harness = example("Harness The Mind Stone");
 	const table = start(standard, [{ deck: alpha(deck("Bant Airbending Combo")) }, { deck: alpha(deck("Bant Airbending Combo")) }], "harness");
 	const stone = establish(table, 0, card), elf = place(table, 1, "hand", "Llanowar Elves")[0]!;
@@ -86,4 +87,42 @@ test("harnessing grants infinity while present, survives ability loss, and is ne
 	assert.deepEqual(relive(announced, table.ledger.slice(startAt)), table);
 	commit(table, [{ do: "designate", what: stone.id, designation: "harnessed" }], "resolve");
 	assert.equal(stone.designations, undefined, "only a permanent can be harnessed");
+	// A Case's solved marker uses the same physical designation, not an ability word.
+	for (const gained of [4, 5]) {
+		const cases = start(standard, [{ deck: alpha(deck("Lifegain")) }, { deck: alpha(deck("Lifegain")) }], `solved-${gained}`);
+		main(cases, 0);
+		const card = "Case of the Uneaten Feast", source = establish(cases, 0, card);
+		const solved = () => matches({ world: tableWorld(cases), controller: 0, source }, source, { designations: ["solved"] });
+		assert.equal(solved(), false);
+		commit(cases, [{ do: "change-life", who: 0, amount: gained, reason: "resolve" }], "resolve");
+		main(cases, 0, 1, "postcombat-main");
+		const beforeEnd = structuredClone(cases), from = cases.ledger.length;
+		for (let guard = 0; guard < 100 && !cases.waiting.length && cases.cursor.steps[0] !== "end"; guard++) {
+			const decision = nextDecision(cases);
+			if (decision) apply(cases, quiet(decision.options).id, "model", "chosen"); else advance(cases);
+		}
+		assert.equal(cases.waiting.length, gained === 5 ? 1 : 0);
+		if (gained === 4) continue;
+		while (!nextDecision(cases)) advance(cases);
+		apply(cases, nextDecision(cases)!.options[0]!.id, "model", "chosen");
+		assert.equal(solved(), false, "triggering does not solve before resolution");
+		const pending = structuredClone(cases), at = cases.ledger.length;
+		const alreadySolved = structuredClone(cases);
+		commit(alreadySolved, [{ do: "designate", what: source.id, designation: "solved" }], "resolve");
+		passBoth(alreadySolved); finish(alreadySolved);
+		assert.equal(alreadySolved.log.flatMap(one => one.changes).filter(one => one.do === "designate").length, 1, "the intervening unsolved condition is rechecked");
+		passBoth(cases); finish(cases); assert.equal(solved(), true);
+		assert.ok(!characteristics(cases, source)!.words.includes("solved"));
+		assert.deepEqual(relive(structuredClone(beforeEnd), cases.ledger.slice(from)), cases);
+		assert.deepEqual(relive(pending, cases.ledger.slice(at)), cases);
+		const ref = { id: source.id, incarnation: source.incarnation };
+		commit(cases, [{ do: "note", note: { kind: "label", by: 0, on: ref, until: "end-of-turn", text: "Case ability loss fixture", change: { loseAbilities: true } } }], "resolve");
+		assert.equal(solved(), true); assert.equal(characteristics(cases, source)!.registrations.length, 0);
+		for (const viewer of [0, 1, "spectator"] as const) assert.deepEqual(project(cases, viewer).objects!.find(one => one.id === source.id)!.designations, ["solved"]);
+		main(cases, 0, 3);
+		assert.equal(solved(), true); assert.equal(characteristics(cases, source)!.registrations.length, 2);
+		commit(cases, [{ do: "move", what: source.id, to: "exile", reason: "exile" }, { do: "move", what: source.id, to: "battlefield", reason: "resolve", registers: pack(card) }], "resolve");
+		assert.equal(source.designations, undefined); assert.equal(solved(), false);
+	}
+
 });
