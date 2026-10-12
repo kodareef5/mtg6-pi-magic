@@ -57,13 +57,40 @@ overnight and need reassessment before becoming implementation tasks.
 
 ## Work order and completion gates
 
+The current priority is broad qualification using the mechanics already built,
+before Dwarves, sideboards or further mechanic implementation. Scan cards outside
+the twenty imported lists first. Shorter Oracle text orders the queue; it does
+not grant support. Each accepted card needs source-backed standing terms and
+complete executable uses, with no deferred inventory counted as complete.
+
+```sh
+node tools/assess.ts --universe --outside-imported --complete --limit 100 --jobs 4 --out .pi/standard-expansion
+```
+
+Repeating the command selects the next pending batch. Accepted packages are
+reusable; explicit unsupported answers enter the refusal ledger. Transport and
+invalid-answer failures remain unfinished work, and a settled provider failure
+stops further dispatch. `--retry` revisits refusals; `--refresh --card NAME`
+retires a reviewed suspect meaning before reassessing it. Each run keeps its
+exact card list, source pins, model, replies, outcomes and usage in `--out`.
+Universe assessment sends each draft through a separate source-review call
+before saving it, using the same selected pregame model and full source.
+The reviewer submits corrected terms through the same complete-use checks,
+or records the missing operation. Drafts and reviews remain in the run evidence.
+The normal deck command still prepares standing terms with deferred uses.
+
+Qualification here means accepted structured meaning checked against the source
+and existing vocabulary. Review accepted terms against the printed card before
+treating them as play evidence. Complete preparation does not replace ordinary
+games, interaction checks, replay or clone checks.
+
 | Order | Work | Completion evidence |
 | --- | --- | --- |
-| 1 | Exercise the original nineteen lists. Ten have no counted finish; resume the saved pairings and two stopped games. Direct Typesafe Jev and CLI Haiku now work; no OpenRouter credits are needed for that route. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Then swapped seats and imported-deck opponents. |
-| 2 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
-| 3 | Reassess the 21 refusals and three additional unassessed sideboard-only cards introduced by Dwarves. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |
-| 4 | Add representative legal lists with new mechanics. Select cards by reuse across lists and distinct interactions. | Each expansion earns the same game evidence as the first pool. Do not implement thousands of isolated exceptions. |
-| 5 | Assess the remaining legal universe in bounded batches, group refusals by shared missing operation, implement that operation, then reassess its cards. | Every legal card has reviewed standing terms and a use inventory, plus evidence for each mechanical family and its interactions. |
+| 1 | Qualify the wider pinned Standard pool using existing mechanics, in resumable complete-assessment batches. Group unsupported answers for later work. | Counts distinguish complete, deferred, refused and unfinished cards. Source review checks accepted terms; no new engine mechanic is needed for an acceptance. |
+| 2 | Exercise the original nineteen lists and representative newly qualified families. Ten original lists have no counted finish. Direct Typesafe Jev and CLI Haiku work. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Then swapped seats and imported-deck opponents. |
+| 3 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
+| 4 | Reassess sideboard refusals and the additional unassessed sideboard cards. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |
+| 5 | Implement the shared missing operations identified by the wider assessment, then reassess affected cards and add representative legal lists. | Each expansion earns the same game evidence as the first pool. Do not implement thousands of isolated exceptions. |
 | 6 | Audit the general rules and refresh the pinned sources as an explicit migration. | Replacement ordering, layer dependencies, loops, permissions, privacy and timing have representative fixtures; old journals retain their source pins. |
 
 No reliable engineering-day estimate follows from the card count. Source

@@ -38,7 +38,8 @@ Per-game seeds, journal paths, bills, continuations and review findings are in
 `.pi/alpha-20261011/summary.md`, beside the raw evidence. Earlier measurements
 are retained under `design-ref/experiments/` and in Git history.
 [The next implementation chunk](IMPROVEMENTS.md#next-implementation-chunk)
-keeps observed game failures ahead of further breadth work.
+starts with broader Standard qualification using existing mechanics, before
+Dwarves and sideboards. Game completion remains a separate evidence gate.
 
 [Inference routes](INFERENCE.md) documents the explicit CLI option.
 [Standard coverage](COVERAGE.md) maps the remaining card and gameplay work.

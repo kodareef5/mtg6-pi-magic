@@ -12,7 +12,7 @@ import { matchup, universe } from "./matchup-fixture.ts";
 const { values } = parseArgs({ options: { out: { type: "string", default: ".pi/standard-coverage" } } });
 const decks = [...collection().values()].filter((deck) => /^https?:/.test(deck.source));
 const stored = storedPackages(universe, { cache: PACKAGE_SEED }); // Reproducible shipped evidence, not this machine's cache.
-const refusals = JSON.parse(readFileSync(ledgerPath(universe.generated), "utf8")) as Record<string, { reason: string; at: string }>;
+const refusals = JSON.parse(readFileSync(ledgerPath(universe.generated), "utf8")) as Record<string, { reason: string; at: string; status?: "pending" | "unsupported" }>;
 const printed = printedFacts(universe, [...universe.cards.keys()]);
 const tags: [string, RegExp][] = [
 	["replacement/prevention", /\binstead\b|\bprevent\b|\bas .* enters\b/i],
@@ -31,11 +31,11 @@ const inventory = [...universe.cards.values()].sort((a, b) => a.name.localeCompa
 	const main = decks.filter((deck) => card.name in deck.main).map((deck) => deck.name);
 	const sideboard = decks.filter((deck) => card.name in deck.sideboard).map((deck) => deck.name);
 	const status = pack ? pack.deferred?.length ? "accepted-deferred" : "accepted-complete"
-		: !printed[card.name]?.text ? "shared-printed" : refusal ? "recorded-refusal" : "unassessed";
+		: !printed[card.name]?.text ? "shared-printed" : refusal && refusal.status !== "pending" ? "recorded-refusal" : "unassessed";
 	return { card: card.name, type: card.type, status, main, sideboard,
 		deferredUses: pack?.deferred?.length ?? 0,
 		tags: tags.filter(([, pattern]) => pattern.test(`${card.type}\n${card.oracle}`)).map(([name]) => name),
-		...(refusal && !pack ? { refusal: refusal.reason, assessedAt: refusal.at } : {}) };
+		...(refusal && !pack ? { ...(refusal.status === "pending" ? { pending: refusal.reason } : { refusal: refusal.reason }), assessedAt: refusal.at } : {}) };
 });
 const count = (pick: (one: typeof inventory[number]) => boolean) => inventory.filter(pick).length;
 const unresolved = (one: typeof inventory[number]) => one.status === "unassessed" || one.status === "recorded-refusal";

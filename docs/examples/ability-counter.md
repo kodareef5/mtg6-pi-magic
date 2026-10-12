@@ -5,6 +5,12 @@ Tishana's Tidebinder targets an activated or triggered ability on the stack.
 `activated` and `triggered` selectors are also available. A mana ability does
 not use the stack and cannot be selected this way.
 
+A bare `zones: ["stack"]` includes spells and abilities. To select spells, pair
+that zone with `types: ["artifact", "battle", "creature", "enchantment",
+"instant", "kindred", "planeswalker", "sorcery"]`. Abilities have no card types.
+Keep any printed restrictions; for example, `not: {types: ["creature"]}`
+excludes creature spells. The `not` selector does not accept `ability`.
+
 `counter` with `as` binds only the objects actually countered by the selected
 option. Paying an "unless" cost or respecting "can't be countered" leaves
 that binding empty. `source:bound:countered` reads the countered ability's

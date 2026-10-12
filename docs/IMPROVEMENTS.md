@@ -23,26 +23,30 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Eighteen imported main decks have complete standing coverage; nine have completed
-source-reviewed games. The newly admitted lists await their first games.
-[Status](STATUS.md) holds the current evidence. Mardu still needs standing
-assessments. Viper's optional sacrifice cast is prepared for Jund. Saved live continuations
-currently wait on strategy-provider credits.
+Nineteen imported main decks have complete standing coverage; nine have completed
+source-reviewed games. The immediate priority is broader Standard qualification
+with existing mechanics, before Dwarves and sideboards. [Coverage](COVERAGE.md)
+defines the resumable pool assessment and its limits. [Status](STATUS.md) holds
+the current game evidence. Direct Jev and CLI Haiku have cleared the provider
+funding blocker.
 
-1. Start games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
+1. Assess cards outside the imported lists with complete uses and current shared
+   mechanics. Review accepted meanings against their sources, retain unsupported
+   answers as future work, and keep inference failures separate from card gaps.
+2. Resume games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
    and finish the corrected Azorius continuations. Validate complete-payment menus
    across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
-2. All nineteen main decks have standing coverage. Prioritize stopped games
+3. All nineteen main decks have standing coverage. Prioritize stopped games
    and the ten lists without a first reviewed finish. Mardu's graveyard, discard,
    mayhem and returned-creature grants have direct tests; full games must still
    exercise their deferred uses and interactions. Keep refused meanings in the
    ledger until their shared operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
-3. Retain reviewed runtime uses in the reusable store, preserving complete
+4. Retain reviewed runtime uses in the reusable store, preserving complete
    abilities, target scope, instruction order and additional casting costs.
    Syntax and source-quote checks alone do not establish correct interpretation.
 
