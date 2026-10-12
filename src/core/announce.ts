@@ -22,7 +22,7 @@ import type { Instruction, Procedure } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
-import { maximumSpellReduction, spellReduction } from "./cost-reductions.ts";
+import { maximumSpellReduction, genericReduction } from "./cost-reductions.ts";
 import type { Activation, Mana, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -315,7 +315,8 @@ export type OfferBase = ReturnType<typeof offerBases> extends Generator<infer Ba
 export function offerCosts(base: OfferBase, frame: Frame) {
 	const { procedure, scope, source, reduce, world, spending, original, mana, x } = base;
 	return extras(procedure, scope, source, frame).map((extra) => {
-		const reduction = reduce + (extra.reduce ?? 0) + (procedure.timing === "spell" ? spellReduction(world, spending, original.zone) : 0);
+		const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
+		const reduction = reduce + (extra.reduce ?? 0) + (action ? genericReduction(world, spending, original.zone, action) : 0);
 		const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
 		const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid),
 			...(procedure.cost?.additional ? { additional: procedure.cost.additional.map((one) => one.name) } : {}) });

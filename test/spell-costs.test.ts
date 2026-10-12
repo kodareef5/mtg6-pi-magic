@@ -10,7 +10,7 @@ import { printedCast } from "../src/core/procedures.ts";
 import { editWork, workFrame } from "../src/core/work-tools.ts";
 import { characteristics, spellCharacteristics } from "../src/core/characteristics.ts";
 import { manaBudget, paymentForecast } from "../src/core/budget.ts";
-import { spellReduction } from "../src/core/cost-reductions.ts";
+import { genericReduction } from "../src/core/cost-reductions.ts";
 import { viewWorld } from "../src/core/selectors.ts";
 import { project } from "../src/core/view.ts";
 import type { Package, Procedure, Plan } from "../src/core/language.ts";
@@ -34,17 +34,17 @@ test("standing discounts read the chosen spell and original zone, consume actual
 	const shown = (frame: ReturnType<typeof workFrame>, id: string) => frame.view.objects!.find(one => one.id === id)!;
 	const frame = workFrame(table, 0), proposed = (id: string, face: 0 | 1 = 0) => ({ ...shown(frame, id), controller: 0, zone: "stack" as const,
 		traits: spellCharacteristics(frame.view, shown(frame, id), 0, face) });
-	assert.equal(spellReduction(viewWorld(frame.view), proposed(dragons[0]!.id), "hand"), 1);
-	assert.equal(spellReduction(viewWorld(frame.view), proposed(dragons[0]!.id, 1), "hand"), 0, "the Omen face is not a flying creature spell");
+	assert.equal(genericReduction(viewWorld(frame.view), proposed(dragons[0]!.id), "hand"), 1);
+	assert.equal(genericReduction(viewWorld(frame.view), proposed(dragons[0]!.id, 1), "hand"), 0, "the Omen face is not a flying creature spell");
 	for (const name of [momo, "Voice of Victory"]) {
 		const card = frame.view.objects!.find(one => one.card === name && one.zone === "hand")!;
-		assert.equal(spellReduction(viewWorld(frame.view), proposed(card.id), "hand"), 0, "a Lemur or nonflying creature does not qualify");
+		assert.equal(genericReduction(viewWorld(frame.view), proposed(card.id), "hand"), 0, "a Lemur or nonflying creature does not qualify");
 	}
-	assert.equal(spellReduction(viewWorld(frame.view), { ...proposed(dragons[0]!.id), controller: 1 }, "hand"), 0);
+	assert.equal(genericReduction(viewWorld(frame.view), { ...proposed(dragons[0]!.id), controller: 1 }, "hand"), 0);
 	const nextTurn = structuredClone(frame); if (nextTurn.view.window.kind !== "turn") assert.fail(); nextTurn.view.window.active = 1;
-	assert.equal(spellReduction(viewWorld(nextTurn.view), proposed(dragons[0]!.id), "hand"), 0, "an opponent-turn cast gains no discount");
+	assert.equal(genericReduction(viewWorld(nextTurn.view), proposed(dragons[0]!.id), "hand"), 0, "an opponent-turn cast gains no discount");
 	const noAbility = structuredClone(frame), lost = shown(noAbility, source.id); lost.traits!.registrations = [];
-	assert.equal(spellReduction(viewWorld(noAbility.view), proposed(dragons[0]!.id), "hand"), 0, "the reader uses remaining abilities");
+	assert.equal(genericReduction(viewWorld(noAbility.view), proposed(dragons[0]!.id), "hand"), 0, "the reader uses remaining abilities");
 	assert.equal(manaBudget(frame, cast, shown(frame, dragons[0]!.id)).cost, "{4}{W}");
 	assert.ok(offered(table, cast).every(one => one.activation.cost.generic === 4 && one.activation.cost.colors.join("") === "W"));
 	const plan: Plan = { objective: "Cast both Dragons", guidance: "Pay the first reduction once", steps: dragons.map((one, at) => ({ label: `Dragon ${at + 1}`, when: { active: "self", step: "precombat-main" },
@@ -99,7 +99,7 @@ test("standing discounts read the chosen spell and original zone, consume actual
 	assert.deepEqual(relive(structuredClone(initial), table.ledger.slice(from)), table);
 	for (const viewer of [1, "spectator"] as const) assert.ok(!project(initial, viewer).objects!.some(one => one.id === dragons[1]!.id));
 
-	// Doc's first paragraph is isolated here; plotting remains unsupported.
+	// Doc's casting paragraph reads the original zone independently of plotting.
 	const zones = start(standard, [{ deck: alpha(deck("Bant Airbending Combo")) }, { deck: alpha(deck("Azorius Control")) }], "original-zone-cost");
 	establish(zones, 0, "Doc Aurlock, Grizzled Genius");
 	const familiar = place(zones, 0, "hand", "Bramble Familiar // Fetch Quest")[0]!;

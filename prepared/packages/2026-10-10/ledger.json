@@ -96,14 +96,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Doc Aurlock, Grizzled Genius": {
-		"reason": "Doc Aurlock, Grizzled Genius is not ready: Plotting cards from your hand costs {2} less. — Reduction of plotting costs is unsupported; plotting is not casting a spell.",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Elegy Acolyte": {
 		"reason": "Elegy Acolyte is not ready: Void — At the beginning of your end step, if a nonland permanent left the battlefield this turn or a spell was warped this turn, create a 2/2 colorless Robot artifact creature token. — Cannot express the intervening condition: the available history operations cannot test nonland permanents leaving the battlefield this turn or spells being cast for their warp cost this turn, including events before Elegy Acolyte entered.",
 		"decks": [

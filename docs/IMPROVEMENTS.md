@@ -29,15 +29,15 @@ Azorius coverage after the mana-source audit.
 [Status](STATUS.md) holds the current evidence. Ten lists still need standing
 assessments.
 
-1. Exercise Grove's Bounty's new announced division in the stopped Prowess game
+1. Exercise Grove's Bounty's new announced division in further Prowess games
    and finish the corrected Azorius continuations. Validate complete-payment menus
    across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Azorius Momo needs
-   combined tap payments, draw replacement and spell copies.
+   stopped games. Bant needs mana restricted to exile casts and the harnessed designation.
+   Azorius Momo needs combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete

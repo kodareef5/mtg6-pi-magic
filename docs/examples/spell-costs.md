@@ -7,7 +7,8 @@ The source's controller supplies "you" in its selector and condition.
 Reductions combine and apply to alternative prices too. They cannot remove
 colored or colorless mana symbols or make the generic component negative
 (118.7a, 118.9d, 601.2f). This registration does not support cost increases,
-reductions of colored symbols, or costs of activating abilities and plotting.
+reductions of colored symbols, or activation costs. An explicit `action: "plot"`
+applies the same generic reduction to plotting from hand (702.170).
 
 ## Momo's first qualifying spell
 
@@ -49,8 +50,10 @@ would change needs a new offer and has no forecast payment witness.
 
 ## Casting from a named zone
 
-This partial package describes only Doc Aurlock's spell reduction. Its plotting
-reduction still needs a supported plotting cost before the card can be admitted.
+Doc Aurlock reduces two distinct actions. The default action is casting.
+`action: "plot"` reduces plotting from hand; its selector reads the hand card,
+not a spell on the stack. Both reductions stop at zero generic mana and keep
+every colored symbol. Neither makes plotting count as casting a spell.
 
 ```json package
 {
@@ -60,6 +63,11 @@ reduction still needs a supported plotting cost before the card can be admitted.
     "basis": "Spells you cast from your graveyard or from exile cost {2} less to cast.",
     "cast": { "zones": ["stack"], "controller": "you" },
     "from": ["graveyard", "exile"], "reduce": 2
+  }, {
+    "kind": "cost", "action": "plot",
+    "basis": "Plotting cards from your hand costs {2} less.",
+    "cast": { "zones": ["hand"], "controller": "you" },
+    "from": ["hand"], "reduce": 2
   }]
 }
 ```

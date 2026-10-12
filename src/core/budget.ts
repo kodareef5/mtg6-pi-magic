@@ -37,7 +37,7 @@ import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { manaSurvives, manaDuration } from "./table.ts";
-import { spellReduction } from "./cost-reductions.ts";
+import { genericReduction } from "./cost-reductions.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
 
@@ -49,8 +49,9 @@ function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: strin
 	return prices.length === 1 ? permissionMana(prices[0]!.mana, printed) ?? stated ?? printed : undefined;
 }
 
-const reduction = (frame: Frame, source: SeenObject) => spellReduction(viewWorld(frame.view), { ...source, controller: frame.seat, zone: "stack" }, source.zone);
-const reduced = (frame: Frame, source: SeenObject, price: Price): Price => ({ ...price, generic: Math.max(0, price.generic - reduction(frame, source)) });
+const reduction = (frame: Frame, source: SeenObject, action: "cast" | "plot" = "cast") => genericReduction(viewWorld(frame.view),
+	{ ...source, controller: frame.seat, zone: action === "cast" ? "stack" : "hand" }, source.zone, action);
+const reduced = (frame: Frame, source: SeenObject, price: Price, action: "cast" | "plot" = "cast"): Price => ({ ...price, generic: Math.max(0, price.generic - reduction(frame, source, action)) });
 
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
 export function afterUntap(frame: Frame): Frame {
@@ -75,7 +76,8 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
-	const price = (position: Frame) => procedure.timing === "spell" ? reduced(position, { ...spending, zone: source.zone }, mana) : mana;
+	const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
+	const price = (position: Frame) => action ? reduced(position, { ...spending, zone: source.zone }, mana, action) : mana;
 	const possible = (position: Frame) => payable(position, price(position), reserved, spending);
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
@@ -202,7 +204,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const mana = stated ? symbols(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
 			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || procedure.timing === "special" || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key));
-			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: procedure.timing === "spell" && source ? reduced(hypothetical, source, mana) : { generic: mana.generic, colors: mana.colors } } : {}),
+			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: (procedure.timing === "spell" || procedure.special === "plot") && source ? reduced(hypothetical, source, mana, procedure.special === "plot" ? "plot" : "cast") : { generic: mana.generic, colors: mana.colors } } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
 		}

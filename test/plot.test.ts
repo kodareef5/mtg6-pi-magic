@@ -1,4 +1,5 @@
-/** Plot preserves its payment, private announcement and later incarnation-scoped permission. */
+/** Plot preserves its payment, private announcement and later incarnation-scoped permission.
+ * Past 150 lines to keep cost reductions and casting restrictions in the same lifecycle. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { commit, start } from "../src/core/commit.ts";
@@ -15,14 +16,14 @@ import { happened, tableWorld } from "../src/core/selectors.ts";
 import { playable } from "../src/core/permits.ts";
 import { project, describe } from "../src/core/view.ts";
 import { preparation } from "../src/core/readiness.ts";
-import { paymentForecast } from "../src/core/budget.ts";
+import { manaBudget, paymentForecast } from "../src/core/budget.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { example, finish, main, pack, passBoth, place } from "./play.ts";
 
 const plot = example("Plot Slickshot Show-Off"), card = "Slickshot Show-Off";
-function position() {
-	const table = start(standard, [{ deck: alpha(deck("Izzet Prowess")) }, { deck: alpha(deck("Jeskai Artifacts")) }], "plot", undefined, { announcementsFrom: 0 });
+function position(opponent = "Jeskai Artifacts") {
+	const table = start(standard, [{ deck: alpha(deck("Izzet Prowess")) }, { deck: alpha(deck(opponent)) }], "plot", undefined, { announcementsFrom: 0 });
 	place(table, 0, "hand", card, card);
 	place(table, 0, "battlefield", "Island", "Steam Vents");
 	main(table, 0);
@@ -123,4 +124,32 @@ test("plot is a paid special action, followed only on a later turn by its owner'
 	assert.equal(forecast.payments.length, 0, "the forecast supplies no payment witness past the special action's boundary");
 	assert.match(forecast.unchecked.join(" "), /stopped at steps\[0\].*later steps/);
 	assert.match(paymentForecast(workFrame(restricted, 0), plan).conflicts.join(" "), /costs/, "the known plot price is still checked against spending restrictions");
+
+	for (const controller of [0, 1]) {
+		const discounted = position("Bant Airbending Combo"), doc = "Doc Aurlock, Grizzled Genius";
+		const genius = cardsIn(discounted, "library", 1).find(one => one.card === doc)!;
+		commit(discounted, [{ do: "move", what: genius.id, to: "battlefield", controller, reason: "game-setup", registers: pack(doc) },
+			{ do: "tap", what: cardsIn(discounted, "battlefield", 0).find(one => one.card === "Island")!.id }], "game-setup");
+		const hand = cardsIn(discounted, "hand", 0).find(one => one.card === card)!, frame = workFrame(discounted, 0);
+		assert.equal(manaBudget(frame, plot, frame.view.objects!.find(one => one.id === hand.id)!).cost, controller === 0 ? "{R}" : "{1}{R}");
+		assert.equal(paymentForecast(frame, plan).conflicts.length > 0, controller !== 0, "forecast checks the discounted boundary price without predicting a later cast");
+		assert.equal(announcementOffers(cast, frame, "cast").length, 0, "Doc does not discount an ordinary hand cast");
+		if (controller !== 0) {
+			assert.equal(announcementOffers(plot, frame, "plot").length, 0, "the opponent's Doc leaves the full price");
+			continue;
+		}
+		const initial = structuredClone(discounted), from = discounted.ledger.length;
+		begin(discounted); apply(discounted, "announce:cost:0", "model", "chosen");
+		const pending = structuredClone(discounted), at = discounted.ledger.length;
+		assert.equal(hand.zone, "hand", "the reduced draft spends nothing");
+		const paid = nextDecision(discounted)!.options.find(one => one.use)!;
+		assert.equal(paid.use!.cost.generic, 0); assert.deepEqual(paid.use!.cost.colors, ["R"]);
+		apply(discounted, paid.id, "model", "chosen");
+		assert.equal(hand.zone, "exile");
+		assert.equal(happened(discounted).filter(one => one.kind === "cast").length, 0);
+		assert.deepEqual(relive(structuredClone(initial), discounted.ledger.slice(from)), discounted);
+		assert.deepEqual(relive(pending, discounted.ledger.slice(at)), discounted);
+		commit(initial, [{ do: "move", what: genius.id, to: "exile", reason: "exile" }], "game-setup");
+		assert.equal(announcementOffers(plot, workFrame(initial, 0), "plot").length, 0, "the reduction ends when Doc leaves");
+	}
 });

@@ -105,7 +105,7 @@ prepared spell and staged announcement; plotting is neither a cast nor an
 activation and triggers neither event.
 
 This form supports a fixed mana plot cost from hand. It does not support
-nonmana plot costs, plot-cost reductions, permissions to plot from other zones
+nonmana plot costs, permissions to plot from other zones
 or effects that make another exiled card plotted. The resource forecast checks
 the plot payment and stops there; it does not predict the later free cast.
 Accepted syntax and paid resources do not certify the quoted interpretation.

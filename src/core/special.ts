@@ -4,7 +4,7 @@ import type { Activation, Table } from "./table.ts";
 import type { Change } from "./syntax.ts";
 
 /** This first form supports plotting from hand for a fixed mana cost (702.170).
- * Other plotting zones, nonmana costs and plot-specific reductions need terms. */
+ * Other plotting zones and nonmana costs need terms. */
 export function checkSpecial(procedure: Procedure): void {
 	if (procedure.timing !== "special") {
 		if (procedure.special) throw new Error("A special action needs special timing.");

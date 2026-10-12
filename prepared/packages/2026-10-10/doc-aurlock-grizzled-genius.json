@@ -1,0 +1,46 @@
+{
+	"card": "Doc Aurlock, Grizzled Genius",
+	"generated": "2026-10-10",
+	"source": "a4a0815e93841d01a2b94ecbc9d521797e167b55aafd7ec4258e70a413a2bc42",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Doc Aurlock, Grizzled Genius",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "Spells you cast from your graveyard or from exile cost {2} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you"
+				},
+				"from": [
+					"graveyard",
+					"exile"
+				],
+				"reduce": 2
+			},
+			{
+				"kind": "cost",
+				"action": "plot",
+				"basis": "Plotting cards from your hand costs {2} less.",
+				"cast": {
+					"zones": [
+						"hand"
+					],
+					"controller": "you"
+				},
+				"from": [
+					"hand"
+				],
+				"reduce": 2
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}
