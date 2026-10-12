@@ -132,6 +132,14 @@ test("assessment covers the whole card before play, and accepted terms supply en
 		affects: { is: "this" }, if: { amount: { speed: "you" }, atLeast: 4 }, change: { registers: [
 			{ kind: "mana", basis: maximum, cost: { tap: true }, colors: ["R", "R"] },
 		] } }] }]), [], "granting a paid mana ability conditionally does not grant its output for free");
+	for (const [card, word] of [["Barbed Bloodletter", "wither"], ["Elenda, Saint of Dusk", "hexproof from instants"],
+		["Giant Cindermaw", "players can't gain life"], ["Mornsong Aria", "players can't draw cards"], ["Ureni, the Song Unending", "protection from white"]]) {
+		const basis = universe.cards.get(card!)!.oracle;
+		assert.ok(basis.toLowerCase().includes(word!));
+		const inert: Package = { card: card!, registers: [], procedures: [{ ...normal(card!, basis),
+			instructions: [{ do: "perform", who: "you", instructions: [{ do: "modify", what: "this", until: "end-of-turn", change: { words: [word!] } }] }] }] };
+		assert.match(registrationProblems([inert]).join("; "), /has no shared operation/, "an inert keyword cannot hide in a nested resolving instruction");
+	}
 	const role: Package = { card: "Besotted Knight // Betroth the Beast", registers: [], procedures: [{
 		...normal("Besotted Knight // Betroth the Beast", universe.cards.get("Besotted Knight // Betroth the Beast")!.oracle),
 		instructions: [{ do: "perform", who: "you", instructions: [{ do: "token", count: 1, spec: { name: "Royal", types: ["enchantment"], subtypes: ["Aura", "Role"], colors: [] } }] }],

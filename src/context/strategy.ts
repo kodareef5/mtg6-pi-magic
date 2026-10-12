@@ -80,7 +80,10 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 	};
 	const selectors = (value: unknown, card: string): void => {
 		if (!value || typeof value !== "object") return;
-		const term = value as { do?: string; from?: Selector; on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] }; spec?: { subtypes?: string[] } };
+		const term = value as { do?: string; from?: Selector; on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] }; spec?: { subtypes?: string[]; words?: string[] }; change?: { words?: string[] }; words?: string[]; timing?: string };
+		const written = [...(term.change?.words ?? []), ...(term.spec?.words ?? []), ...(term.timing || term.do === "spell-words" ? term.words ?? [] : [])];
+		for (const word of written.filter(word => /^(?:hexproof from .+|protection from .+|wither|players can't (?:draw cards|gain life)|solved)$/i.test(word)))
+			found.push(`package ${card}: ${JSON.stringify(word)} has no shared operation. Recording this word does not implement its rules; refuse the missing operation. Other words still require source review.`);
 		if (term.do === "token" && term.spec?.subtypes?.some(type => type.toLowerCase() === "role"))
 			found.push(`package ${card}: Role tokens require the unsupported same-controller Role state-based action (303.7a). Supplying token abilities does not implement that rule; do not replace it with a trigger.`);
 		if (term.do === "choose" && term.from && unscopedBinding(term.from))
