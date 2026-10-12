@@ -36,3 +36,18 @@ token text; they need no invented printed card source.
   ]
 }
 ```
+
+## Explore completion
+
+`{ "do": "keyword", "name": "explore", "what": "this" }` explores with one
+named permanent. Its controller reveals their top card, puts a land into hand,
+or adds a counter and chooses whether to put the nonland into the graveyard.
+The completion event identifies that permanent with `event:object` and its
+controller with `event:player`, including last known information when it left
+(701.44b-c). A watch uses `on:"keyword"`, `keyword:"explore"`, `of` and `by`.
+An optional `as` binds the revealed card actually put in the graveyard, with
+amount zero or one. Exploration still completes with an empty library.
+
+Several permanents exploring at once require APNAP ordering choices (701.44d);
+the current instruction refuses that group before revealing anything. The
+Map and Amalia examples each name one permanent.

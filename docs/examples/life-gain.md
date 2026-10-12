@@ -106,10 +106,11 @@ The life changes happen with damage; triggered abilities wait for priority.
 
 ## Amalia Benavides Aguirre
 
-Explore uses the reveal, conditional hand move, counter and optional graveyard
-move already available. It adds the counter even with an empty library. The
-power check follows all those instructions. These terms do not emit an explore
-event for cards that watch the keyword; those cards still need that event.
+Explore uses the shared keyword operation. A land goes to hand; otherwise the
+permanent receives a counter and its controller may put the card in their
+graveyard. Amalia's power check follows completion. An empty library still
+explores, and a departed Amalia uses its last known controller (701.44b-c).
+These terms do not order simultaneous exploration of several permanents.
 
 ```json package
 {
@@ -121,12 +122,7 @@ event for cards that watch the keyword; those cards still need that event.
     { "kind": "watch", "basis": "Whenever you gain life, Amalia Benavides Aguirre explores. Then destroy all other creatures if its power is exactly 20. (To have this creature explore, reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.)",
       "event": { "on": "life-gained", "by": "you" },
       "effect": { "instructions": [
-        { "do": "reveal", "what": { "top": 1, "of": "you" }, "as": "top" },
-        { "do": "choose", "who": "you", "from": { "zones": ["library"], "is": "bound:top", "types": ["land"] }, "count": 1, "as": "land" },
-        { "do": "move", "what": "bound:land", "to": "hand", "reason": "resolve" },
-        { "do": "counters", "on": "this", "kind": "+1/+1", "amount": 1, "if": { "not": { "bound": "land" } } },
-        { "do": "perform", "who": "you", "may": true, "if": { "all": [{ "bound": "top" }, { "not": { "bound": "land" } }] },
-          "instructions": [{ "do": "move", "what": "bound:top", "to": "graveyard", "reason": "resolve" }] },
+        { "do": "keyword", "name": "explore", "what": "this" },
         { "do": "destroy", "every": { "types": ["creature"], "other": true }, "if": { "amount": { "power": "this" }, "atLeast": 20, "atMost": 20 } }
       ] } }
   ]

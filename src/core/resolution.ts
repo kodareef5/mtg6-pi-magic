@@ -101,10 +101,10 @@ export function resolving(table: Table): Pending | null {
 	const last = pending.program.length === 1;
 	const moves: Move[] = step.choices.map((choice) => {
 		const done = item.completed && !choice.pick && !choice.expand && !choice.search && !choice.actionChoices && !skipped ? item.completed : undefined;
-		const keyword = done ? [{ do: "keyword" as const, name: done.name, who: done.who, count: done.count }] : [];
+		const keyword = done ? [{ do: "keyword" as const, name: done.name, who: done.who, count: done.count, ...(done.object ? { object: done.object } : {}) }] : [];
 		const selected = (done && pending.bound[done.selected]?.objects || []).filter(ref => {
 			const now = table.things.get(ref.id);
-			return now?.incarnation === ref.incarnation && now.zone === (done!.name === "manifest-dread" ? "battlefield" : done!.name === "surveil" ? "graveyard" : "library");
+			return now?.incarnation === ref.incarnation && now.zone === (done!.name === "manifest-dread" ? "battlefield" : ["surveil", "explore"].includes(done!.name) ? "graveyard" : "library");
 		});
 		const bind = { ...choice.bind, ...(done?.as ? { [done.as]: { objects: selected, players: [], amount: selected.length } } : {}) };
 		return {

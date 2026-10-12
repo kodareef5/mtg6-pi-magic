@@ -27,7 +27,7 @@ import { casting } from "./casting.ts";
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
 	on: GameEvent["on"];
-	keyword?: "scry" | "surveil" | "manifest-dread" | "search";
+	keyword?: "scry" | "surveil" | "manifest-dread" | "search" | "explore";
 	ordinal?: number;
 	/** What it happened to, as it was then. */
 	object?: Seen;
@@ -101,9 +101,12 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	};
 	for (const change of changes) {
 		switch (change.do) {
-			case "keyword":
-				if (change.count > 0) found.push({ on: "keyword", keyword: change.name, player: change.who, amount: change.count, ...(change.whose !== undefined ? { whose: change.whose } : {}) });
+			case "keyword": {
+				const explored = change.object && tableWorld(table).lastKnown(change.object);
+				if (change.count > 0) found.push({ on: "keyword", keyword: change.name, player: change.who, amount: change.count,
+					...(explored ? { object: explored.object, traits: explored.traits, found: change.object } : {}), ...(change.whose !== undefined ? { whose: change.whose } : {}) });
 				break;
+			}
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
 				if (!was || !is || was.incarnation === is.incarnation) break;

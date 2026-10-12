@@ -46,7 +46,7 @@ schemas, and every `basis` is checked against the card's text.
 | `reveal-hand.md` | publicly reveal a whole hand before its opponent chooses an eligible discard |
 | `loyalty.md` | abilities carried by tokens, signed loyalty payment, starting counters, Empower Jace's ordered creation and choice, and temporary loyalty timing |
 | `amass.md` | ordered destruction and amass; a departed target's controller, power and conditional draw |
-| `token-abilities.md` | complete Map and Clue abilities, another player creating tokens, sorcery timing and explore's revealed branches |
+| `token-abilities.md` | complete Map and Clue abilities, another player creating tokens, sorcery timing and explore completion |
 | `token-copies.md` | copiable base terms, retained mana cost and complete activations, entry behavior, combined Spree modes and offspring's fixed power/toughness exception |
 | `spell-copies.md` | Sage's cast trigger, copied announcement choices, independent stack lifetime and resolving token permanents |
 | `damage-additions.md` | fixed damage increases, prevention ordering, affected-player choices and simultaneous results |
@@ -76,7 +76,7 @@ schemas, and every `basis` is checked against the card's text.
 | `optional-search.md` | another player's optional search after destruction; declining versus searching and finding nothing |
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
 | `draw-replacements.md` | conditional increases to a whole draw instruction and recorded replacement order |
-| `life-gain.md` | life-gain occurrences, lifelink source grouping, Starscape offspring and Amalia's explore instructions |
+| `life-gain.md` | life-gain occurrences, lifelink source grouping, Starscape offspring and Amalia's explore completion |
 | `sacrifice-events.md` | pre-departure sacrifice watches, turn counts, and Jund's Lander, Clue and Treasure interactions |
 | `discard-events.md` | discard counts, cycling, hidden destinations and simultaneous cleanup selection |
 | `graveyard-events.md` | graveyard entry versus look-back departure, grouped movements, and trigger-time conditions |

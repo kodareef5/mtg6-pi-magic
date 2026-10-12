@@ -233,7 +233,7 @@ export const Defs = {
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
 		on: one("enters", "leaves", "dies", "sacrificed", "discarded", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "level", "counters", "keyword", "crime", "life-gained"),
-		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search")),
+		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search", "explore")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
 		/** Ordinal among all spells cast by that caster this turn, not only those matching of. */
@@ -278,6 +278,8 @@ export const Defs = {
 
 	/** One step of resolution. `if` gates it, `as` binds its result, `may` makes it optional for its actor. */
 	Instruction: Type.Union([
+		/** One exploring permanent, including its last battlefield incarnation (701.44c). */
+		step({ do: Type.Literal("keyword"), name: Type.Literal("explore"), what: ObjectRef }),
 		/** Shared library keyword choices; completion is recorded after all their movement. */
 		step({ do: Type.Literal("keyword"), name: one("scry", "surveil", "manifest-dread"), who: PlayerRef, count: Type.Optional(Type.Ref("Amount")) }, { allOf: [
 			{ if: { properties: { name: { const: "manifest-dread" } } }, then: { not: { required: ["count"] } }, else: { required: ["count"] } },

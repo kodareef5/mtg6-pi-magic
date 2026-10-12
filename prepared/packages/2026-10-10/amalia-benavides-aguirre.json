@@ -3,13 +3,12 @@
 	"generated": "2026-10-10",
 	"source": "30fefbf55e8703a82564f46124dbf90a39754923b0f097006ed859f8c7d54de1",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Amalia Benavides Aguirre",
 		"registers": [
 			{
 				"kind": "watch",
-				"basis": "Ward—Pay 3 life.",
+				"basis": "Ward\u2014Pay 3 life.",
 				"event": {
 					"on": "targeted",
 					"of": {
@@ -42,69 +41,9 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "reveal",
-							"what": {
-								"top": 1,
-								"of": "you"
-							},
-							"as": "top"
-						},
-						{
-							"do": "choose",
-							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"is": "bound:top",
-								"types": [
-									"land"
-								]
-							},
-							"count": 1,
-							"as": "land"
-						},
-						{
-							"do": "move",
-							"what": "bound:land",
-							"to": "hand",
-							"reason": "resolve"
-						},
-						{
-							"do": "counters",
-							"on": "this",
-							"kind": "+1/+1",
-							"amount": 1,
-							"if": {
-								"not": {
-									"bound": "land"
-								}
-							}
-						},
-						{
-							"do": "perform",
-							"who": "you",
-							"may": true,
-							"if": {
-								"all": [
-									{
-										"bound": "top"
-									},
-									{
-										"not": {
-											"bound": "land"
-										}
-									}
-								]
-							},
-							"instructions": [
-								{
-									"do": "move",
-									"what": "bound:top",
-									"to": "graveyard",
-									"reason": "resolve"
-								}
-							]
+							"do": "keyword",
+							"name": "explore",
+							"what": "this"
 						},
 						{
 							"do": "destroy",

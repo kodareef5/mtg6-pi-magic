@@ -387,6 +387,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			}
 			case "keyword":
+				if (change.name === "explore") { parts.push(`${publicName(change.object && receipt.before[change.object.id])} explored`); break; }
 				parts.push(`${seat(table, change.who).name} ${change.name === "search" ? `searched ${seat(table, change.whose!).name}'s library` : change.name === "manifest-dread" ? "manifested dread" : `${change.name === "scry" ? "scried" : "surveilled"} ${change.count}`}`);
 				break;
 			case "order":

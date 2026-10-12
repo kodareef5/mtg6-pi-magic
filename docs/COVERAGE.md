@@ -102,8 +102,8 @@ Complete preparation does not replace ordinary games, interaction checks, replay
 or clone checks. The sweep did not re-certify imported meanings or add counted
 games. Subsequent source review corrected default token names, Lively Dirge's
 selection and Case of the Uneaten Feast's physical solved designation.
-Known imported follow-ups include Spyglass Siren's Map lacking an explore
-completion event and Torch the Tower's death replacement
+The Map and Amalia programs now use recorded explore completion. A remaining
+imported follow-up is Torch the Tower's death replacement
 being lost when its recipient loses abilities. Existing counted games do not
 establish those interactions.
 

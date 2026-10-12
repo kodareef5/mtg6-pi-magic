@@ -34,7 +34,7 @@ function settle(table: Table, decline = false) {
 	for (let guard = 0; guard < 150; guard++) {
 		const decision = nextDecision(table); if (!decision) { advance(table); continue; }
 		if (decision.situation === "priority" && !cardsIn(table, "stack").length) return;
-		const pick = decision.situation === "priority" ? "pass" : (decline && decision.options.find(one => one.label.startsWith("Decline")) || decision.options[0])!.id;
+		const pick = decision.situation === "priority" ? "pass" : (decline && decision.options.find(one => /^(Decline|Done)/.test(one.label)) || decision.options[0])!.id;
 		apply(table, pick, "model", "chosen");
 	}
 	throw new Error("Resolution did not settle");
@@ -116,24 +116,33 @@ test("life-gain watches count positive source events, retain amounts and resolve
 		assert.equal(protectedOne.zone, choice === "pay" ? "graveyard" : "battlefield"); replay(table, pending); replay(table, before);
 	}
 	// Amalia checks power after exploring; a revealed land is not drawn and a nonland stays a real choice.
-	for (const variant of ["land", "keep", "graveyard", "empty", "twenty", "over-twenty", "removed"] as const) {
+	for (const variant of ["land", "keep", "graveyard", "empty", "twenty", "over-twenty", "removed", "stolen", "removed-stolen"] as const) {
 		const table = build(); main(table, 0); prepare(table, amalia); const explorer = put(table, amalia, "hand");
 		commit(table, [{ do: "add-mana", who: 0, colors: ["W", "B"] }], "game-setup");
 		announce(table, printedCast(amalia, table.printed[amalia]!)); passBoth(table); finish(table);
 		const victim = put(table, sanctifier, "battlefield", 1);
+		const who = variant.includes("stolen") ? 1 : 0;
+		const observer = put(table, "Plains", "battlefield", 1 - who, [{ kind: "watch", basis: "Fixture observes explore completion", event: { on: "keyword", keyword: "explore", by: "opponent", of: { types: ["creature"], controller: "opponent" } },
+			effect: { instructions: [{ do: "counters", on: "this", kind: "observed", amount: 1 }] } }]);
+		const explored = ref(explorer);
 		if (variant === "twenty" || variant === "over-twenty") commit(table, [{ do: "counters", what: explorer.id, kind: "+1/+1", amount: variant === "twenty" ? 17 : 18 }], "game-setup");
-		const top = put(table, variant === "land" ? "Plains" : "Starscape Cleric", "hand");
+		const top = put(table, variant === "land" ? "Plains" : "Starscape Cleric", "hand", who);
 		commit(table, [{ do: "move", what: top.id, to: "library", position: "top", reason: "game-setup" }], "game-setup");
 		if (variant === "empty") commit(table, cardsIn(table, "library", 0).map(one => ({ do: "move" as const, what: one.id, to: "exile" as const, reason: "game-setup" as const })), "game-setup");
 		life(table, 1); assert.equal(table.waiting.length, 1);
-		if (variant === "removed") commit(table, [{ do: "move", what: explorer.id, to: "graveyard", reason: "destroy" }], "destroy");
-		const before = structuredClone(table); apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); step(table);
+		// A hypothetical control change after triggering isolates exploration from the ability controller.
+		if (who) explorer.controller = who;
+		if (variant.startsWith("removed")) commit(table, [{ do: "move", what: explorer.id, to: "graveyard", reason: "destroy" }], "destroy");
+		const before = structuredClone(table); apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); step(table); step(table);
 		const revealed = structuredClone(table); if (variant !== "empty") for (const viewer of [0, 1, "spectator"] as const) assert.equal(project(table, viewer).objects!.find(one => one.id === top.id)!.card, top.card);
 		settle(table, variant !== "graveyard");
 		assert.equal(table.outcome, null, "exploring an empty library is not a failed draw");
 		assert.equal(top.zone, variant === "empty" ? "exile" : variant === "land" ? "hand" : variant === "graveyard" ? "graveyard" : "library");
-		assert.equal(explorer.counters["+1/+1"] ?? 0, variant === "land" || variant === "removed" ? 0 : variant === "twenty" ? 18 : variant === "over-twenty" ? 19 : 1);
+		assert.equal(explorer.counters["+1/+1"] ?? 0, variant === "land" || variant.startsWith("removed") ? 0 : variant === "twenty" ? 18 : variant === "over-twenty" ? 19 : 1);
 		assert.equal(victim.zone, variant === "twenty" ? "graveyard" : "battlefield");
+		assert.equal(observer.counters.observed, 1, "one completion is seen even with no library card or surviving explorer");
+		assert.deepEqual(table.log.flatMap(one => one.changes).filter(one => one.do === "keyword" && one.name === "explore"),
+			[{ do: "keyword", name: "explore", who, count: 1, object: explored }]);
 		replay(table, revealed); replay(table, before);
 	}
 });

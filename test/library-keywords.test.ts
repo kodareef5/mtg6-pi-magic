@@ -8,6 +8,8 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { relive } from "../src/core/journal.ts";
 import { project, describe } from "../src/core/view.ts";
+import { libraryKeyword } from "../src/core/library-keywords.ts";
+import { tableWorld } from "../src/core/selectors.ts";
 import { checkProcedure } from "../src/core/procedures.ts";
 import { main, place, announce, passBoth, step, finish, example, establish } from "./play.ts";
 
@@ -76,4 +78,29 @@ test("scry and surveil complete once after ordered private choices, with no even
 		assert.deepEqual(relive(structuredClone(initial), table.ledger.slice(from)), table);
 		assert.deepEqual(relive(middle, JSON.parse(JSON.stringify(table.ledger.slice(at)))), table);
 	}
+	for (const graveyard of [false, true]) {
+		const table = start(standard, [{ deck: alpha(deck("Izzet Prowess")) }, { deck: alpha(deck("Mono-Red Aggro")) }], `explore-result-${graveyard}`);
+		main(table, 0); place(table, 0, "hand", "Opt");
+		const explorer = establish(table, 0, "Slickshot Show-Off", []), top = cardsIn(table, "library", 0).find(one => !table.printed[one.card!]!.type.includes("Land"))!;
+		commit(table, [{ do: "order", who: 0, whose: 0, cards: [{ id: top.id, incarnation: top.incarnation }], position: "top" }, { do: "add-mana", who: 0, colors: ["U"] }], "game-setup");
+		const second = establish(table, 0, "Slickshot Show-Off", []), before = structuredClone(table);
+		const scope = { world: tableWorld(table), controller: 0, targets: [[explorer, second].map(one => ({ id: one.id, incarnation: one.incarnation }))] };
+		assert.match(libraryKeyword(table, scope, { do: "keyword", name: "explore", what: "target:0" }).blocked!, /APNAP/);
+		assert.deepEqual(table, before, "a simultaneous unsupported group reveals and moves nothing");
+		const procedure = checkProcedure({ ...example("Cast Opt with recorded scry completion"), claim: "Explore completion result fixture", targets: [{ object: { types: ["creature"], controller: "you" } }], instructions: [
+			{ do: "keyword", name: "explore", what: "target:0", as: "away" }, { do: "life", who: "you", amount: { bound: "away" } },
+		] });
+		announce(table, procedure, one => one.activation.targets[0]!.some(ref => "id" in ref && ref.id === explorer.id)); passBoth(table); step(table); step(table);
+		const revealed = structuredClone(table);
+		while (table.resolution) {
+			const decision = nextDecision(table)!;
+			if (decision.options.length === 1) step(table);
+			else step(table, label => graveyard ? label.includes(top.card!) : /^(Decline|Done)/.test(label));
+		}
+		finish(table); assert.equal(table.seats[0]!.life, 20 + Number(graveyard));
+		assert.equal(top.zone, graveyard ? "graveyard" : "library");
+		assert.deepEqual(relive(structuredClone(before), table.ledger.slice(before.ledger.length)), table);
+		assert.deepEqual(relive(revealed, table.ledger.slice(revealed.ledger.length)), table);
+	}
+
 });

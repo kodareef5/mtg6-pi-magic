@@ -15,7 +15,7 @@ import { describe, project } from "../src/core/view.ts";
 import { announce, establish, example, finish, main, offered, pack, passBoth, place, step } from "./play.ts";
 
 test("a Map's own activation reveals before branching, pays once, and survives its source's departure and replay", () => {
-	for (const mode of ["land", "keep", "graveyard", "empty"] as const) {
+	for (const mode of ["land", "keep", "graveyard", "empty", "illegal"] as const) {
 		const table = start(standard, [{ deck: alpha(deck("Dimir Midrange")) }, { deck: alpha(deck("Selesnya Landfall")) }], `map-${mode}`);
 		editWork(table, 0, [{ do: "package.put", package: { card: "Spyglass Siren", registers: pack("Spyglass Siren"), printedCast: true, assessed: true } }], "map-package");
 		main(table, 0); const [siren] = place(table, 0, "hand", "Spyglass Siren");
@@ -27,7 +27,8 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 			{ do: "add-mana", who: 0, colors: ["U", "C"] },
 		], "game-setup");
 		const initial = structuredClone(table), from = table.ledger.length;
-		announce(table, printedCast("Spyglass Siren", table.printed["Spyglass Siren"]!)); passBoth(table); finish(table);
+		const cast = printedCast("Spyglass Siren", table.printed["Spyglass Siren"]!); cast.source.refs = [{ id: siren!.id, incarnation: siren!.incarnation }];
+		announce(table, cast); passBoth(table); finish(table);
 		assert.equal(nextDecision(table)!.situation, "trigger-order");
 		apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); finish(table);
 		const map = cardsIn(table, "battlefield", 0).find((one) => one.token?.name === "Map Token")!;
@@ -39,23 +40,34 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 		for (const viewer of [0, 1, "spectator"] as const) assert.match(describe(table, sacrificed, viewer), /put Map Token into graveyard \(sacrifice\)/);
 		finish(table); assert.equal(table.things.has(map.id), false, "sacrificed token ceases while its ability remains on the stack");
 		assert.match(describe(table, sacrificed), /put Map Token into graveyard/, "the receipt keeps the token's event-time name after it ceases");
+		if (mode === "illegal") {
+			commit(table, [{ do: "move", what: siren!.id, to: "hand", reason: "bounce" }], "resolve");
+			const invalid = structuredClone(table), invalidAt = table.ledger.length;
+			passBoth(table); finish(table);
+			assert.equal(table.log.some(one => one.changes.some(change => change.do === "keyword" && change.name === "explore")), false);
+			assert.ok(!project(table, "spectator").objects!.some(one => one.id === top.id), "an illegal target never reveals the top card");
+			assert.deepEqual(relive(invalid, table.ledger.slice(invalidAt)), table); continue;
+		}
 		passBoth(table);
 		const hidden = structuredClone(table);
 		assert.ok(!JSON.stringify(nextDecision(table)).includes(top.id), "the reveal confirmation names no unseen object");
 		if (mode !== "empty") for (const viewer of [0, 1, "spectator"] as const) assert.ok(!project(table, viewer).objects!.some((one) => one.id === top.id));
 		assert.deepEqual(table, hidden);
+		step(table); // Begin explore.
 		step(table); // Public reveal.
 		const prefix = structuredClone(table), at = table.ledger.length;
 		if (mode !== "empty") for (const viewer of [0, 1, "spectator"] as const) assert.equal(project(table, viewer).objects!.find((one) => one.id === top.id)!.card, top.card);
 		for (let guard = 0; table.resolution && guard < 12; guard++) {
 			const decision = nextDecision(table)!;
 			if (decision.options.length === 1) step(table);
-			else step(table, (label) => label.startsWith(mode === "graveyard" ? "Carry out" : "Decline"));
+			else step(table, (label) => mode === "graveyard" ? label.includes(top.card!) : /^(Decline|Done)/.test(label));
 		}
 		finish(table);
 		assert.equal(siren!.counters["+1/+1"] ?? 0, mode === "land" ? 0 : 1);
 		if (mode !== "empty") assert.equal(top.zone, mode === "land" ? "hand" : mode === "graveyard" ? "graveyard" : "library");
 		assert.equal(table.seats[0]!.pool.length, 0);
+		const completed = table.log.flatMap(one => one.changes).filter(one => one.do === "keyword" && one.name === "explore");
+		assert.deepEqual(completed, [{ do: "keyword", name: "explore", who: 0, count: 1, object: { id: siren!.id, incarnation: siren!.incarnation } }]);
 		assert.deepEqual(relive(prefix, table.ledger.slice(at)), table);
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 		const after = structuredClone(table);

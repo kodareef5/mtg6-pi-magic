@@ -13,7 +13,7 @@ Rule 111.10s gives a Map its cost, target and sorcery timing. Under 701.44a,
 the creature's controller reveals their library's top card. A land goes to
 hand; otherwise the creature gets a counter and its controller may put the
 revealed card into the graveyard. An empty library still takes the nonland
-branch. The bound land selection retains that branch after the card moves.
+branch. The shared operation retains that branch after the card moves.
 
 ```json package
 {
@@ -30,14 +30,7 @@ branch. The bound land selection retains that branch after the card moves.
           "cost": { "mana": "{1}", "tap": true, "sacrifice": "this" }, "speed": "sorcery",
           "effect": {
             "targets": [{ "object": { "types": ["creature"], "controller": "you" } }],
-            "instructions": [
-              { "do": "reveal", "what": { "top": 1, "of": "you" }, "as": "top" },
-              { "do": "choose", "who": "controller:target:0", "from": { "zones": ["library"], "is": "bound:top", "types": ["land"] }, "count": 1, "as": "land" },
-              { "do": "move", "what": "bound:land", "to": "hand", "reason": "resolve" },
-              { "do": "counters", "on": "target:0", "kind": "+1/+1", "amount": 1, "if": { "not": { "bound": "land" } } },
-              { "do": "perform", "who": "controller:target:0", "may": true, "if": { "all": [{ "bound": "top" }, { "not": { "bound": "land" } }] },
-                "instructions": [{ "do": "move", "what": "bound:top", "to": "graveyard", "reason": "resolve" }] }
-            ]
+            "instructions": [{ "do": "keyword", "name": "explore", "what": "target:0" }]
           }
         }]
       } }] }
@@ -46,9 +39,9 @@ branch. The bound land selection retains that branch after the card moves.
 }
 ```
 
-These instructions perform explore's reveal, movement and counter changes.
-They do not emit a named explore event; a card that watches for exploring still
-needs that event support before it can join a game.
+The shared operation emits one explore event after its physical steps, even
+with an empty library or a departed exploring permanent (701.44b-c). Simultaneous
+exploration of multiple permanents still requires an ordering operation.
 
 ## A Clue draws after being sacrificed
 
@@ -93,7 +86,7 @@ does not replace `token.controller`.
 Get Lost destroys first and creates the Maps second. An indestructible target
 still gives its controller Maps. A target that became illegal before resolution
 causes the whole spell to fail, including token creation. This example supplies
-the complete Map ability; it does not supply the still-unsupported explore event.
+the complete Map ability, including the exploring permanent and completion event.
 
 ```json procedure
 {
@@ -110,14 +103,7 @@ the complete Map ability; it does not supply the still-unsupported explore event
         "cost": { "mana": "{1}", "tap": true, "sacrifice": "this" }, "speed": "sorcery",
         "effect": {
           "targets": [{ "object": { "types": ["creature"], "controller": "you" } }],
-          "instructions": [
-            { "do": "reveal", "what": { "top": 1, "of": "you" }, "as": "top" },
-            { "do": "choose", "who": "controller:target:0", "from": { "zones": ["library"], "is": "bound:top", "types": ["land"] }, "count": 1, "as": "land" },
-            { "do": "move", "what": "bound:land", "to": "hand", "reason": "resolve" },
-            { "do": "counters", "on": "target:0", "kind": "+1/+1", "amount": 1, "if": { "not": { "bound": "land" } } },
-            { "do": "perform", "who": "controller:target:0", "may": true, "if": { "all": [{ "bound": "top" }, { "not": { "bound": "land" } }] },
-              "instructions": [{ "do": "move", "what": "bound:top", "to": "graveyard", "reason": "resolve" }] }
-          ]
+          "instructions": [{ "do": "keyword", "name": "explore", "what": "target:0" }]
         }
       }]
     } }
