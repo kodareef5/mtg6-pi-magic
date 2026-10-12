@@ -358,6 +358,9 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			prepared: Type.Optional(Type.Literal(true)),
 			copy: Type.Optional(object({ of: Type.Ref("Selector"), may: Type.Optional(Type.Literal(true)),
+				except: Type.Optional(object({ name: Type.Optional(text), power: Type.Optional(Type.Integer()), toughness: Type.Optional(Type.Integer()) })),
+				/** A linked trigger from the final applied copy effect, with bound:copied naming that card. */
+				whenCopied: Type.Optional(Type.Ref("Effect")),
 				add: Type.Optional(object({ creatureTypes: Type.Optional(Type.Array(text)), words: Type.Optional(Type.Array(text)) })) })),
 			choose: Type.Optional(object({ as: text, from: one("basic-land-type", "creature-type") })),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),

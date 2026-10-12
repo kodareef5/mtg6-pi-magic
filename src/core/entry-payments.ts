@@ -9,10 +9,13 @@ import { activeFaces } from "./faces.ts";
 import { basicLandTypes, creatureTypeChoices } from "./characteristics.ts";
 import { paymentChoices } from "./costs.ts";
 import { tokenObject } from "./entry.ts";
-import { entryCopy } from "./entry-copies.ts";
+import { entryCopy, copiedTriggers } from "./entry-copies.ts";
+import type { ObjectRef } from "./types.ts";
+import type { Effect } from "./language.ts";
 
 export type Entry = { changes: Change[]; reason: Reason; clock: number; choices: Record<number, "paid" | "declined">;
 	values?: Record<number, Record<string, string>>; reveals?: Record<number, string[]>;
+	copyTriggers?: Record<number, { copied: ObjectRef; basis: string; effect: Effect }>;
 	copies?: Record<number, string[]>; blocked?: { who: number; reason: string } };
 
 function requirements(table: Table, changes: Change[]) {
@@ -63,7 +66,7 @@ function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
 	const mana = new Map(changes.flatMap((change, index) => change.do === "add-mana" ? change.colors.map((_, unit) =>
 		[`mana-${entry.clock + 1}-${index}-${unit}`, `mana-${table.cursor.clock + 1}-${index + reveals.length}-${unit}`]) : []));
 	for (const change of changes) if (change.do === "spend-mana") change.ids = change.ids.map((id) => mana.get(id) ?? id);
-	changes.push({ do: "entry" });
+	changes.push(...copiedTriggers(table, entry), { do: "entry" });
 	return [...reveals, ...changes];
 }
 

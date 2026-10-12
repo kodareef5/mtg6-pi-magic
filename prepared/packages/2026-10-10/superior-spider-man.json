@@ -1,0 +1,53 @@
+{
+	"card": "Superior Spider-Man",
+	"generated": "2026-10-10",
+	"source": "9032048880711f16f6a9894955e318352016ea08272c0f4ab5385891f7e1246f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Superior Spider-Man",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "Mind Swap — You may have Superior Spider-Man enter as a copy of any creature card in a graveyard, except his name is Superior Spider-Man and he's a 4/4 Spider Human Hero in addition to his other types. When you do, exile that card.",
+				"copy": {
+					"of": {
+						"zones": [
+							"graveyard"
+						],
+						"types": [
+							"creature"
+						]
+					},
+					"may": true,
+					"except": {
+						"name": "Superior Spider-Man",
+						"power": 4,
+						"toughness": 4
+					},
+					"add": {
+						"creatureTypes": [
+							"Spider",
+							"Human",
+							"Hero"
+						]
+					},
+					"whenCopied": {
+						"instructions": [
+							{
+								"do": "move",
+								"what": "bound:copied",
+								"to": "exile",
+								"reason": "exile"
+							}
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

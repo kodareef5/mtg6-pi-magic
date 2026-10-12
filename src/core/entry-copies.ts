@@ -1,4 +1,4 @@
-/** Copy replacements choose from the battlefield before the entire entry group.
+/** Copy replacements choose public permanents or graveyard cards before entry.
  * The choice freezes copiable values; later entry terms read that new base. */
 import type { Table } from "./table.ts";
 import type { Entry } from "./entry-payments.ts";
@@ -6,9 +6,10 @@ import type { Pending } from "./moves.ts";
 import { tokenObject } from "./entry.ts";
 import { activeFaces } from "./faces.ts";
 import { holds, matches, tableWorld } from "./selectors.ts";
-import { copiable } from "./copies.ts";
+import { copiable, copyExceptions, entryCopySelector } from "./copies.ts";
 import { characteristics, creatureType } from "./characteristics.ts";
 import type { Registration } from "./language.ts";
+import type { Change } from "./syntax.ts";
 
 const hasCopy = (terms?: Registration[]): boolean => !!terms?.some(one => one.kind === "enters" && one.copy ||
 	one.kind === "continuous" && hasCopy(one.change.registers));
@@ -41,11 +42,13 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 			blocked: "Ordering multiple copy replacements on the same entering permanent is not implemented." };
 		const registration = copies[0]!;
 		if (registration.kind !== "enters" || !registration.copy) continue;
-		const copy = registration.copy, name = object.card ?? object.token!.name;
-		const selected = world.objects.filter(one => one.zone === "battlefield" && matches(scope, one, copy.of));
+		const copy = registration.copy, name = source.faceDown ? "Face-down creature" : object.card ?? object.token!.name;
+		if (!entryCopySelector(copy.of)) return { situation: "replacement-order", seat: who, question: "Choose a public entry copy source.", moves: [],
+			blocked: "An entry copy selects only public battlefield permanents or graveyard cards." };
+		const selected = world.objects.filter(one => ["battlefield", "graveyard"].includes(one.zone) && matches(scope, one, copy.of));
 		const answered: Entry = { ...entry, copies: { ...entry.copies, [index]: [...entry.copies?.[index] ?? [], registration.basis] } };
 		const moves: Pending["moves"] = selected.map(one => {
-			const result = copiable(table, one, "permanent"), next = structuredClone(answered);
+			const result = copyExceptions(copiable(table, one, "permanent"), copy.except), next = structuredClone(answered);
 			const added = copy.add?.creatureTypes ?? [];
 			const invalid = added.filter(type => !creatureType(type));
 			if ("blocked" in result || invalid.length) next.blocked = { who, reason: "blocked" in result ? result.blocked : `Unknown creature types in copy exception: ${invalid.join(", ")}.` };
@@ -56,6 +59,10 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 				const move = next.changes[index]!;
 				if (move.do === "token") move.spec = spec;
 				else if (move.do === "move") { move.copied = { source: { id: one.id, incarnation: one.incarnation }, spec }; move.registers = []; }
+				// 707.9g: a later copy effect suppresses the earlier effect's linked trigger.
+				if (next.copyTriggers) delete next.copyTriggers[index];
+				if (copy.whenCopied) next.copyTriggers = { ...next.copyTriggers, [index]: { copied: { id: one.id, incarnation: one.incarnation },
+					basis: registration.basis, effect: structuredClone(copy.whenCopied) } };
 			}
 			return { option: { id: `entry:${index}:copy:${one.id}@${one.incarnation}`, label: `${name} enters as a copy of ${world.read(one)?.name ?? one.card ?? one.token?.name}`,
 				objects: [{ id: one.id, incarnation: one.incarnation }], cards: [name], shows: registration.basis },
@@ -65,4 +72,17 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 			changes: [{ do: "entry", entry: answered }], reason: entry.reason });
 		return { situation: "replacement-order", seat: who, question: `Choose how ${name} enters. This copy choice does not target.`, moves };
 	}
+}
+
+/** These triggers wait beside the copied permanent's entry abilities. The copied
+ * card stays in its graveyard until the separately stacked instruction resolves. */
+export function copiedTriggers(table: Table, entry: Entry): Change[] {
+	return Object.entries(entry.copyTriggers ?? {}).flatMap(([index, link]): Change[] => {
+		const change = entry.changes[Number(index)];
+		if (!change || change.do !== "token" && (change.do !== "move" || change.to !== "battlefield")) return [];
+		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
+		const source = { id: object.id, incarnation: object.incarnation + (change.do === "move" ? 1 : 0) };
+		return [{ do: "trigger", action: "wait", trigger: { id: `trigger-${table.cursor.clock + 1}-entry-copy-${index}`, controller: change.controller ?? object.owner,
+			source, basis: link.basis, effect: structuredClone(link.effect), event: { object: source }, bound: { copied: { objects: [link.copied], players: [] } } } }];
+	});
 }

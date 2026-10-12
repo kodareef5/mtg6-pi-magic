@@ -9,6 +9,7 @@ import { costChanges } from "./costs.ts";
 import { announcedActivation, announcementPayments } from "./announcement-options.ts";
 import { project } from "./view.ts";
 import { checkSpecial, specialChanges } from "./special.ts";
+import { entryCopySelector } from "./copies.ts";
 import { castWords } from "./cast-words.ts";
 import { checkExile, enoughExile } from "./cost-selection.ts";
 import { isDeepStrictEqual } from "node:util";
@@ -96,6 +97,9 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if (terms.cost?.loyalty !== undefined && terms.cost.counters?.kind === "loyalty")
 				throw new Error("Combine all loyalty-symbol adjustments in cost.loyalty, without a second loyalty counter cost.");
 			if (terms.kind === "mana" && terms.cost?.loyalty !== undefined) throw new Error("A loyalty ability cannot be a mana ability.");
+			const entryCopy = (value as { kind?: string; copy?: { of: import("./language.ts").Selector } });
+			if (entryCopy.kind === "enters" && entryCopy.copy && !entryCopySelector(entryCopy.copy.of))
+				throw new Error("An entry copy selects only public battlefield permanents or graveyard cards.");
 			if ("combination" in value && (!("any" in value) || !value.any || "colors" in value)) throw new Error("A mana combination needs any and cannot also state colors.");
 			for (const [key, one] of Object.entries(value)) {
 				if (key === "targets" && Array.isArray(one)) for (const slot of one as Target[]) {
@@ -103,10 +107,10 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 						throw new Error("A target minimum cannot exceed its count or combine with upTo.");
 				}
 				if (key === "registers" || key === "registration") refs(one, 0, new Set());
-				else if (key === "effect") {
+				else if (key === "effect" || key === "whenCopied") {
 					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
 					const ownSlots = effect.targets?.length || ((value as { do?: string }).do === "delay" ? slots : 0);
-					refs(effect, ownSlots, new Set(bound), (value as { do?: string }).do === "delay" ? declared : []);
+					refs(effect, ownSlots, new Set(key === "whenCopied" ? ["copied"] : bound), (value as { do?: string }).do === "delay" ? declared : []);
 				} else if (key === "modes" && Array.isArray(one)) {
 					for (const mode of one as { targets?: unknown[] }[]) refs(mode, mode.targets?.length ?? 0, new Set(bound));
 				} else if (key !== "instructions") refs(one, slots, bound, declared);

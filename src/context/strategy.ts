@@ -25,6 +25,7 @@ import { dossier } from "./dossier.ts";
 import { matchupExamples } from "./dossier-strategy.ts";
 import { ASSESSMENT, coordinatorAsk, coordinatorSystem, responseSystem, workSections } from "./coordinator.ts";
 import { combatLookup } from "./strategy-combat.ts";
+import { entryCopySelector } from "../core/copies.ts";
 
 const docs = join(import.meta.dirname, "..", "..", "docs");
 export const exampleIndex = readFileSync(join(docs, "examples", "README.md"), "utf8").trim();
@@ -90,8 +91,8 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 	};
 	const visit = (registrations: Registration[], card: string) => {
 		for (const one of registrations) {
-			if (one.kind === "enters" && one.copy && (one.affects || one.copy.of.zones?.some(zone => zone !== "battlefield")))
-				found.push(`package ${card}: an entry copy affects only its own permanent and chooses a battlefield source.`);
+			if (one.kind === "enters" && one.copy && (one.affects || !entryCopySelector(one.copy.of)))
+				found.push(`package ${card}: an entry copy affects only its own permanent and chooses a public battlefield or graveyard source.`);
 			const carriesActivation = one.kind === "activated" || one.kind === "continuous" && one.change.registers?.some(child => child.kind === "activated" && child.basis === one.basis);
 			if (one.kind !== "mana" && !carriesActivation && /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/.test(one.basis))
 				found.push(`package ${card}: ${JSON.stringify(one.basis)} is an activated ability; supply a procedure, a mana registration, or a complete granted activated ability. A free standing change does not pay its cost.`);

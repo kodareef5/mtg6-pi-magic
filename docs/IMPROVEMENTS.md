@@ -23,19 +23,19 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Ten imported main decks have complete standing coverage; nine have completed
-source-reviewed games. Bant awaits its first game.
-[Status](STATUS.md) holds the current evidence. Nine lists still need standing
-assessments.
+Twelve imported main decks have complete standing coverage; nine have completed
+source-reviewed games. Bant, Jeskai and Dimir Excruciator await their first games.
+[Status](STATUS.md) holds the current evidence. Seven lists still need standing
+assessments. Saved live continuations currently wait on strategy-provider credits.
 
-1. Start Bant games and exercise Grove's Bounty's announced division in Prowess games
+1. Start games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
    and finish the corrected Azorius continuations. Validate complete-payment menus
    across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Jeskai Artifacts needs Perilous Snare and Unidentified Hovership.
+   stopped games. Dimir Midrange needs entry type changes, linked ability removal and library-search events.
    Azorius Momo needs combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.

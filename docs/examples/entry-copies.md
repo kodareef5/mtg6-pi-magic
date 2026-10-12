@@ -1,6 +1,6 @@
 # Entry copies
 
-An `enters.copy` registration chooses a battlefield source before its permanent
+An `enters.copy` registration chooses a public battlefield or graveyard source before its permanent
 enters. It is a replacement choice, without targets. `copy.of` reads current
 characteristics for eligibility; the chosen copy keeps base characteristics and
 complete printed battlefield abilities, excluding counters, damage and temporary
@@ -9,14 +9,16 @@ result (614.12, 707.2, 707.5).
 
 `copy.add.creatureTypes` adds creature types when the copied base is a creature
 or kindred. `copy.add.words` adds abilities. These exceptions become copiable
-values (707.9a-b); later copies retain them. This supports additive creature
-types and abilities, not arbitrary characteristic exceptions.
+values (707.9a-b); later copies retain them. `copy.except` can set a fixed name,
+power or toughness. It does not express arbitrary characteristic exceptions.
 
 The physical card keeps an incarnation-scoped copy effect. Its characteristics
 are read through the layers, and leaving the battlefield removes the effect.
 A nontoken copy of a double-faced permanent copies only its current face. It
-does not acquire another physical face. Creating double-faced token copies,
-copying face-down permanents, ordering multiple simultaneous copy replacements
+does not acquire another physical face. A graveyard card supplies its front
+characteristics and accepted battlefield abilities. Face-down permanents supply
+their nameless colorless 2/2 creature values. Creating double-faced token copies,
+ordering multiple simultaneous copy replacements
 on one permanent, and copying incomplete battlefield activations remain
 unsupported. Selecting an unsupported source records the choice and leaves entry
 pending; it never installs an incomplete copy.
@@ -65,3 +67,41 @@ later counters nor a temporary boost. Copying an animated Soulstone Sanctuary
 copies its land base: it gains flying but does not gain Bird, since that base has
 no card type that can carry creature types (205.3d). The animation itself is not
 copied. Becoming a creature later does not retroactively apply this exception.
+
+## Superior Spider-Man
+
+This entry choice can use either player's graveyard. It does not target or
+exile the chosen card as a cost. `whenCopied` supplies the linked triggered
+ability, with `bound:copied` naming the exact selected incarnation. It waits
+beside the new permanent's other entry triggers; its controller orders them.
+The selected card remains in its graveyard until that ability resolves.
+
+```json package
+{
+  "card": "Superior Spider-Man", "printedCast": true,
+  "registers": [{
+    "kind": "enters",
+    "basis": "Mind Swap — You may have Superior Spider-Man enter as a copy of any creature card in a graveyard, except his name is Superior Spider-Man and he's a 4/4 Spider Human Hero in addition to his other types. When you do, exile that card.",
+    "copy": {
+      "of": { "zones": ["graveyard"], "types": ["creature"] }, "may": true,
+      "except": { "name": "Superior Spider-Man", "power": 4, "toughness": 4 },
+      "add": { "creatureTypes": ["Spider", "Human", "Hero"] },
+      "whenCopied": { "instructions": [{ "do": "move", "what": "bound:copied", "to": "exile", "reason": "exile" }] }
+    }
+  }]
+}
+```
+
+Copying Doomsday Excruciator makes a nonlegendary 4/4 with the retained name,
+the Excruciator's mana cost, flying, Demon plus Spider Human Hero, and its entry
+and upkeep abilities. Because Spider-Man was cast, the copied entry ability
+also triggers. Copying Mossborn Hydra gives the fixed 4/4 base before its entry
+counter. Later copies retain these exceptions, excluding counters.
+
+If another copy effect applies afterward, it replaces these exceptions and
+suppresses this linked trigger (707.9e-g). For example, copying a graveyard
+Mockingbird and then choosing a battlefield creature uses the later copy's
+values and leaves Mockingbird in the graveyard. Declining that later copy keeps
+the first effect and its trigger. A power/toughness exception still refuses
+sources whose base-setting abilities need characteristic-defining status
+distinguished; it never substitutes a temporary modifier.

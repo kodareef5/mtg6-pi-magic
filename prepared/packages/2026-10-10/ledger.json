@@ -327,15 +327,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Superior Spider-Man": {
-		"reason": "Superior Spider-Man is not ready: Mind Swap — You may have Superior Spider-Man enter as a copy of any creature card in a graveyard, except his name is Superior Spider-Man and he's a 4/4 Spider Human Hero in addition to his other types. When you do, exile that card. — Unsupported: entry copying from a graveyard with copiable name and fixed power/toughness exceptions, and a linked reflexive trigger exiling the chosen card. enters.copy supports battlefield sources and additive creature types/abilities only; it cannot implement this replacement and its associated trigger.",
-		"decks": [
-			"4c Reanimator",
-			"Dimir Excruciator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Terror of the Peaks": {
 		"reason": "Terror of the Peaks is not ready: Spells your opponents cast that target this creature cost an additional 3 life to cast. — Unsupported standing additional life cost imposed on opponents' spells targeting this creature; cost registrations support only fixed generic mana reductions, not cost increases or additional life payments.",
 		"decks": [
