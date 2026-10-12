@@ -361,7 +361,7 @@ test("a recap is two sentences of public events and skips a turn where nothing h
 	assert.equal(said.from, from);
 	assert.equal(said.to, built.log.length);
 	assert.equal(counted.spent()[0]!.ceiling, CEILING.summary);
-	assert.equal(sent[0]!.maxTokens, 200);
+	assert.equal(sent[0]!.maxTokens, CEILING.summary);
 
 	// The commentator is told what it does not know, and is given no private fact.
 	assert.match(sent[0]!.system, /not know anybody's hand/);

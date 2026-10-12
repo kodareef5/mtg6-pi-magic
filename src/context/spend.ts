@@ -30,7 +30,7 @@ import type { Role } from "./roles.ts";
  * How much output each role may ask for.
  *
  * Read these together with the prompt that uses them. A summary is two or three
- * sentences, so it requests 200 tokens. The route decides whether to enforce
+ * sentences, but the model's thinking shares the ceiling, so it requests 1,000 tokens. The route decides whether to enforce
  * that request; the ledger keeps actual usage and the reported stop reason.
  */
 export const CEILING: Record<Role, number> = {
@@ -42,8 +42,8 @@ export const CEILING: Record<Role, number> = {
 	strategy: 4000,
 	/** A verdict, the rule it rests on, and the remedy. */
 	judge: 700,
-	/** Two sentences, three if it must. */
-	summary: 200,
+	/** Two sentences, three if it must. Haiku's thinking counts inside this ceiling: at 200, one recap in three came back empty. */
+	summary: 1000,
 };
 
 /** A card assessment may include several casting modes, registrations and their full source quotes. */
