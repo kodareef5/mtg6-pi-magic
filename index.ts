@@ -42,7 +42,7 @@ import {
 import { degraded, run, seat as seatTable, type Inference, type Seated } from "./src/context/sit.ts";
 import { gameResult, report, preparationFailure, saveReport } from "./tools/game-report.ts";
 import { load, type Universe } from "./src/core/cards.ts";
-import { alpha, collection, deck } from "./src/core/decks.ts";
+import { alpha, collection, deck, seatLabels } from "./src/core/decks.ts";
 import { admittedAlpha } from "./src/core/packages.ts";
 import { start } from "./src/core/commit.ts";
 import { nextDecision } from "./src/core/decisions.ts";
@@ -183,7 +183,8 @@ export default function (pi: ExtensionAPI) {
 				ctx.ui.notify(`Resumed past a torn last line. Dropped: ${journal.repaired.slice(0, 80)}`, "warning");
 			}
 		} else {
-			opened = start(standard, (from.decks ?? PLAY).map((name) => ({ deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0 });
+			const chosen = from.decks ?? PLAY, names = seatLabels(chosen);
+			opened = start(standard, chosen.map((name, at) => ({ name: names[at]!, deck: from.alpha ? alpha(deck(name)) : deck(name) })), from.seed, cards, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0 });
 			header = {
 				announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0, discardsFrom: 0,
 				id: from.seed,

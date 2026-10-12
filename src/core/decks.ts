@@ -67,3 +67,9 @@ export function deck(name: string): Deck {
 	if (!found) throw new Error(`No deck named ${name} in decks/collection. Kept: ${[...kept.keys()].join(", ")}.`);
 	return structuredClone(found);
 }
+
+/** A seat's public name from its deck: short, readable in recaps, and distinct in a mirror. */
+export function seatLabels(decks: readonly string[]): string[] {
+	const short = decks.map((name, at) => name.replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-|-$/g, "").slice(0, 20) || `Seat${at}`);
+	return short.map((name, at) => short.indexOf(name) === at ? name : `${name}-${at + 1}`);
+}
