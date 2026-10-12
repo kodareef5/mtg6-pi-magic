@@ -19,12 +19,8 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Cast Practiced Offense: put a +1/+1 counter on each creature target player controls, then grant target creature double strike or lifelink chosen on resolution until end of turn.",
-				"basis": "Put a +1/+1 counter on each creature target player controls. Target creature gains your choice of double strike or lifelink until end of turn.",
 				"source": {
 					"card": "Practiced Offense",
 					"zones": [
@@ -34,20 +30,76 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
-			},
-			{
-				"claim": "Flashback Practiced Offense for {1}{W}: put a +1/+1 counter on each creature target player controls, then grant target creature double strike or lifelink chosen on resolution until end of turn; exile it when it leaves the stack.",
-				"basis": "Put a +1/+1 counter on each creature target player controls. Target creature gains your choice of double strike or lifelink until end of turn. ... Flashback {1}{W} (You may cast this card from your graveyard for its flashback cost. Then exile it.)",
-				"source": {
-					"card": "Practiced Offense",
-					"zones": [
-						"graveyard"
-					],
-					"controller": "any"
-				},
-				"timing": "spell"
+				"timing": "spell",
+				"claim": "Cast Practiced Offense normally or with flashback; choose double strike or lifelink during resolution",
+				"basis": "Put a +1/+1 counter on each creature target player controls. Target creature gains your choice of double strike or lifelink until end of turn.",
+				"targets": [
+					{
+						"player": "any"
+					},
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							],
+							"controller": "target:0"
+						},
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "choose-one",
+						"who": "you",
+						"options": [
+							{
+								"label": "double strike",
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:1",
+										"change": {
+											"words": [
+												"double strike"
+											]
+										},
+										"until": "end-of-turn"
+									}
+								]
+							},
+							{
+								"label": "lifelink",
+								"instructions": [
+									{
+										"do": "modify",
+										"what": "target:1",
+										"change": {
+											"words": [
+												"lifelink"
+											]
+										},
+										"until": "end-of-turn"
+									}
+								]
+							}
+						]
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": false
 	}
 }
