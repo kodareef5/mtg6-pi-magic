@@ -5,7 +5,7 @@ import type { Mana, Receipt, Table } from "./table.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
 
-export type Casting = { from: Zone; by: SeatId; mana: (Mana["color"] | null)[]; x?: number; additional?: string[] };
+export type Casting = { from: Zone; by: SeatId; mana: (Mana["color"] | null)[]; x?: number; additional?: string[]; alternative?: string };
 const cache = new WeakMap<Table, { clock: number; values: Map<string, Casting | undefined> }>();
 
 /** Public payment facts, derived from receipts. A null color names legacy mana
@@ -31,6 +31,7 @@ export function casting(table: Table, ref: ObjectRef, pending?: Pick<Receipt, "c
 			});
 			found = { from: origin.zone, by: cast.ability.controller, mana: [...mana, ...(cast.ability.funding ?? []).flatMap((tap) => tap.colors)],
 				...(cast.ability.cost.additional ? { additional: [...cast.ability.cost.additional] } : {}),
+				...(cast.ability.cost.alternative ? { alternative: cast.ability.cost.alternative } : {}),
 				...(cast.ability.x !== undefined ? { x: cast.ability.x } : {}) };
 			break;
 		}

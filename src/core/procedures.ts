@@ -87,9 +87,10 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if ("bound" in value && typeof value.bound === "string" && !bound.has(value.bound))
 				throw new Error(`bound:${value.bound} is used before an instruction binds it with "as".`);
 			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
-			for (const cost of [terms.cost, terms.pays]) if (cost?.additional) {
-				if (terms.timing !== "spell") throw new Error("Named additional mana costs belong to a spell announcement, not an activation or resolving payment.");
-				if (new Set(cost.additional.map((one) => one.name)).size !== cost.additional.length)
+			for (const cost of [terms.cost, terms.pays]) if (cost?.additional || cost?.alternative) {
+				if (terms.timing !== "spell") throw new Error("Named additional and alternative costs belong to a spell announcement, not an activation or resolving payment.");
+				if (cost.alternative && cost.mana === undefined) throw new Error("A named alternative cost states its mana price, including {0} when it has none.");
+				if (cost.additional && new Set(cost.additional.map((one) => one.name)).size !== cost.additional.length)
 					throw new Error("Each additional cost instance needs a distinct name.");
 			}
 			if (terms.cost?.loyalty !== undefined && terms.cost.counters?.kind === "loyalty")
@@ -141,6 +142,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const { controller, source, cost, paid, funding = [] } = activation;
 	if (cost.additional && (activation.timing !== "spell" || new Set(cost.additional).size !== cost.additional.length))
 		throw new Error("Named additional payments require a spell and distinct cost instances.");
+	if (cost.alternative && activation.timing !== "spell") throw new Error("A named alternative cost belongs to a spell announcement.");
 	if (cost.loyalty !== undefined && cost.counters?.kind === "loyalty") throw new Error("Combine loyalty payment in one signed cost.");
 	if (table.outcome || table.resolution || table.cursor.priority !== controller || table.cursor.passes >= table.seats.filter((one) => !one.result).length) throw new Error("A prepared action needs this seat's priority opportunity.");
 	const object = live(table, source);
@@ -154,7 +156,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	if ((activation.timing === "stack" || activation.timing === "mana") && activationRestrictions(world, object, activation.timing === "mana").length)
 		throw new Error(`Activation is prohibited: ${activationRestrictions(world, object, activation.timing === "mana").join("; ")}`);
 	if (activation.timing === "spell" && !castableFace(object.card ? table.printed[object.card] : undefined, activation.face ?? 0, object)) throw new Error("This card cannot be cast using that face.");
-	const price = activation.timing === "spell" ? castingPrices(world, controller, object, table.cursor.turn, activation.face)
+	const price = activation.timing === "spell" ? castingPrices(world, controller, object, table.cursor.turn, activation.face, undefined, cost.alternative)
 		.find((price) => price.permission === activation.permission && price.leavesStack === activation.leavesStack) : undefined;
 	if (activation.timing === "spell" && !price) throw new Error("The selected casting permission or its departure replacement is no longer available.");
 	const spell = activation.timing === "spell" ? { ...object, controller, zone: "stack" as const, faceDown: false, face: activation.face ?? 0 as const, ability: activation } : object;

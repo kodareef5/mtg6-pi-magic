@@ -1,0 +1,154 @@
+{
+	"card": "Deceit",
+	"generated": "2026-10-10",
+	"source": "e6a0684d679265a620855d02d2195dec78b53ce6d05b4893f753e159328b9483",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deceit",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {U}{U} was spent to cast it, return up to one other target nonland permanent to its owner's hand.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "U"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"other": true,
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {B}{B} was spent to cast it, target opponent reveals their hand. You choose a nonland card from it. That player discards that card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "B"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "reveal",
+							"every": {
+								"zones": [
+									"hand"
+								],
+								"owner": "target:0"
+							},
+							"as": "hand"
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"count": 1,
+							"as": "discard",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"is": "bound:hand",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Evoke {U/B}{U/B}",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"alternative": "evoke"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Deceit for its evoke alternative cost",
+				"basis": "Evoke {U/B}{U/B}",
+				"source": {
+					"card": "Deceit",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

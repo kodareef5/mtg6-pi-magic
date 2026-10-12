@@ -1,0 +1,137 @@
+{
+	"card": "Wistfulness",
+	"generated": "2026-10-10",
+	"source": "ab1e61bf7e523daf053e9bd719f73637d5d0614d9476799fc3e165466a1c7229",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wistfulness",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {G}{G} was spent to cast it, exile target artifact or enchantment an opponent controls.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "G"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"artifact",
+									"enchantment"
+								],
+								"controller": "opponent"
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {U}{U} was spent to cast it, draw two cards, then discard a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "U"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 2
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you"
+							},
+							"count": 1,
+							"as": "discard"
+						},
+						{
+							"do": "move",
+							"what": "bound:discard",
+							"to": "graveyard",
+							"reason": "discard"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Evoke {G/U}{G/U} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"alternative": "evoke"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Wistfulness for its evoke cost",
+				"basis": "Evoke {G/U}{G/U} (You may cast this spell for its evoke cost. If you do, it's sacrificed when it enters.)",
+				"source": {
+					"card": "Wistfulness",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

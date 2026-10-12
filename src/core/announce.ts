@@ -267,7 +267,7 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 		// The mana: stated, or printed for a spell; reduced, never below zero (601.2f).
 		const turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 		const prices = procedure.timing === "spell" ? castingPrices(world, frame.seat, original, turn, procedure.face,
-			procedure.cost?.mana !== selected?.mana ? procedure.cost?.mana : undefined) : [{}];
+			procedure.cost?.mana !== selected?.mana ? procedure.cost?.mana : undefined, procedure.cost?.alternative) : [{}];
 		for (const granted of prices) {
 			if (granted.speed === "sorcery" && !mainWindow(frame)) continue;
 			if (granted.mana === "printed" && !selected?.mana) continue;
@@ -311,6 +311,7 @@ export function offerCosts(base: OfferBase, frame: Frame) {
 		const reduction = reduce + (extra.reduce ?? 0) + (action ? genericReduction(world, spending, original.zone, action) : 0);
 		const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
 		const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid),
+			...(procedure.cost?.alternative ? { alternative: procedure.cost.alternative } : {}),
 			...(procedure.cost?.additional ? { additional: procedure.cost.additional.map((one) => one.name) } : {}) });
 		const extraRefs = extra.uses.filter((id) => id !== source.id).flatMap((id) => {
 			const object = frame.view.objects?.find((one) => one.id === id); return object ? [immutable(ref(object))] : [];

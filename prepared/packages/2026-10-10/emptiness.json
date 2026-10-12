@@ -1,0 +1,136 @@
+{
+	"card": "Emptiness",
+	"generated": "2026-10-10",
+	"source": "ef30dca87dc67b8b9c8bf64458f033d17170b394621118c01180c9c180d4c008",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Emptiness",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {W}{W} was spent to cast it, return target creature card with mana value 3 or less from your graveyard to the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "W"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 3
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, if {B}{B} was spent to cast it, put three -1/-1 counters on up to one target creature.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"manaSpent": "this",
+						"color": "B"
+					},
+					"atLeast": 2
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature"
+								]
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "target:0",
+							"kind": "-1/-1",
+							"amount": 3
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Evoke {W/B}{W/B}",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"alternative": "evoke"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "this",
+							"to": "graveyard",
+							"reason": "sacrifice"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Evoke Emptiness",
+				"basis": "Evoke {W/B}{W/B}",
+				"source": {
+					"card": "Emptiness",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

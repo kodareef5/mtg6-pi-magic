@@ -723,6 +723,14 @@ need real support and checking each one against the syntax, not by adding
 shapes in advance. A shared mechanic needs source-backed examples and recorded
 choices before a new assessment can rely on it.
 
+Hybrid costs choose a nonhybrid equivalent before targets and reductions;
+[hybrid mana](examples/hybrid-mana.md) shows the shared payment and forecast
+behavior. `cost.alternative` names an alternative spell cost, with its explicit
+`mana` price. `{cast: "this", alternative: "evoke"}` reads that chosen name
+through resolution into the permanent. [Evoke](examples/evoke.md) shows its
+entry trigger and independent actual-mana conditions. These names grant no
+zone permission and cannot combine two alternative costs.
+
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.
