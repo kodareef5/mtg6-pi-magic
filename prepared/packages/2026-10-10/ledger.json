@@ -7,14 +7,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Carnage, Crimson Chaos": {
-		"reason": "Carnage, Crimson Chaos is not ready: Mayhem {B}{R} — Mayhem grants an alternative graveyard cast only for a card discarded this turn. The native permit.cast registration cannot express this conditional permission; an unconditional graveyard permission would incorrectly broaden the ability.",
-		"decks": [
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Crystal Barricade": {
 		"reason": "Crystal Barricade is not ready: Prevent all noncombat damage that would be dealt to other creatures you control. — Missing a standing damage-prevention effect that filters noncombat damage and protects other creatures controlled by this permanent's controller.",
 		"decks": [

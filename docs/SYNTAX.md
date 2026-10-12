@@ -392,7 +392,7 @@ checked by the table; the opponent sees both, and objects when they differ.
 | `replace` | "if it would die, exile it instead" | 614 |
 | `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |
 | `activated` | a complete ability carried by a permanent: `cost`, `effect`, optional `speed: "sorcery"`, `if` and `limit`; offered through normal stack procedures while the registration remains active | 602, 606 |
-| `permit` | an extra land play, lands from another zone, flash; `cast: {from, mana, leavesStack?}` grants this card's owner an alternative cast from the named zones | 305.2, 702.180 |
+| `permit` | an extra land play, lands from another zone, flash; `cast: {from, mana, if?, leavesStack?}` grants this card's owner an alternative cast from the named zones | 305.2, 702.180, 702.187 |
 | `prohibit` | `cast` names players who cannot cast, with optional `during`; `activate` selects sources whose abilities cannot be activated, with optional `exceptMana: true`; these shapes accept `if`. `block: {attacker, blocker}` names two selectors whose matching pair cannot block | 101.2, 509.1b |
 | `suppress` | events that don't cause triggers | Torpor Orb |
 
@@ -416,6 +416,10 @@ review. It cannot express requirements on an entire blocking group. See
 A native `permit.cast` is read from the card's accepted standing terms in its
 stated zone. It activates readiness before affordability or timing, then
 supplies the price and any departure replacement to the usual casting path.
+A `cast.if` condition gates both readiness and the price. Mayhem reads
+`{discardedThisTurn: "this", by: "you"}` against committed public discard history.
+The exact incarnation must match; another zone change or turn ends eligibility.
+This condition does not replace a discard watch or inspect hidden destinations.
 A deferred source zone alone grants no casting permission. This registration
 does not express mandatory nonmana permission costs. Harmonize's optional tap
 is a cost variant: `tap: {choose: {types: ["creature"], controller: "you"},

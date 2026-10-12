@@ -35,11 +35,11 @@ currently wait on strategy-provider credits.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
-2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Mardu needs
-   Carnage's conditional graveyard casting. Its returned creature's attack and sacrifice grants now have direct tests. Mardu's accepted graveyard interactions now have direct tests.
-   Keep refused meanings in the ledger until their shared
-   operations are implemented.
+2. All nineteen main decks have standing coverage. Prioritize stopped games
+   and the ten lists without a first reviewed finish. Mardu's graveyard, discard,
+   mayhem and returned-creature grants have direct tests; full games must still
+   exercise their deferred uses and interactions. Keep refused meanings in the
+   ledger until their shared operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete

@@ -20,7 +20,8 @@ export const permissions = (world: World, seat: SeatId, object: Seen, turn: numb
 		(!note.while || holds({ world, controller: note.by }, note.while)) &&
 		(!note.of || permittedSpell(world, seat, object, face, note.of))),
 	...(object.owner === seat ? world.read(object)?.registrations ?? [] : []).flatMap((one, at) => one.kind === "permit" && one.cast?.from.includes(object.zone as never) &&
-		(one.face === undefined || one.face === (face ?? 0)) ? [{ id: `own:${object.id}@${object.incarnation}:${at}`, mana: one.cast.mana, leavesStack: one.cast.leavesStack as Zone | undefined }] : []),
+		(one.face === undefined || one.face === (face ?? 0)) && (!one.cast.if || holds({ world, controller: seat, source: object }, one.cast.if))
+		? [{ id: `own:${object.id}@${object.incarnation}:${at}`, mana: one.cast.mana, leavesStack: one.cast.leavesStack as Zone | undefined }] : []),
 ];
 
 /** Ongoing conditions read live state with "you" fixed to the granting controller.

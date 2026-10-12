@@ -293,3 +293,8 @@ changes and cleared on a zone change. Missing levels read as 1 for permanents
 (716.2d); copies receive no level. Class abilities are derived from the level,
 and the newly granted watch can see the change that granted it. Level counters
 do not change this designation.
+
+Native casting permissions may carry a condition checked before readiness
+and announcement. Discard history retains only a publicly visible arrival
+incarnation and expires with the turn. Another zone change cannot inherit a
+prior discard. This reads committed history, not an in-progress trigger event.

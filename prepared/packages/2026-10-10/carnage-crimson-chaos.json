@@ -1,0 +1,112 @@
+{
+	"card": "Carnage, Crimson Chaos",
+	"generated": "2026-10-10",
+	"source": "ae07a3f578a8098023ddac5d55aed7992680b1743ea02801259fecef6c75bfc4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Carnage, Crimson Chaos",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "permit",
+				"basis": "Mayhem {B}{R}",
+				"cast": {
+					"from": [
+						"graveyard"
+					],
+					"mana": "{B}{R}",
+					"if": {
+						"discardedThisTurn": "this",
+						"by": "you"
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Carnage enters, return target creature card with mana value 3 or less from your graveyard to the battlefield. It gains \"This creature attacks each combat if able\" and \"When this creature deals combat damage to a player, sacrifice it.\"",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"types": [
+									"creature"
+								],
+								"manaValue": {
+									"atMost": 3
+								},
+								"token": false
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "battlefield",
+							"controller": "you",
+							"reason": "resolve",
+							"change": {
+								"words": [
+									"attacks each combat if able"
+								],
+								"registers": [
+									{
+										"kind": "watch",
+										"basis": "When this creature deals combat damage to a player, sacrifice it.",
+										"event": {
+											"on": "combat-damage",
+											"of": {
+												"is": "this"
+											},
+											"player": true
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "move",
+													"what": "this",
+													"to": "graveyard",
+													"reason": "sacrifice"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

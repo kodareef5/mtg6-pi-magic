@@ -354,6 +354,10 @@ function history(scope: Scope, value: Extract<Amount, { history: string }>): num
 
 export function holds(scope: Scope, condition: Condition): boolean {
 	if ("step" in condition) return scope.world.turn?.step === condition.step;
+	if ("discardedThisTurn" in condition) return objects(scope, condition.discardedThisTurn).some(ref =>
+		scope.world.history.some(event => event.kind === "physical" && event.action === "discarded" &&
+			event.object?.id === ref.id && event.object.incarnation === ref.incarnation &&
+			(condition.by === undefined || players(scope, condition.by).includes(event.by))));
 	if ("enteredThisTurn" in condition) {
 		const began = scope.world.turn?.began;
 		return began !== undefined && objects(scope, condition.enteredThisTurn).some((ref) => {

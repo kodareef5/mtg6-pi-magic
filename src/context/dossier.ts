@@ -16,7 +16,7 @@ import { damageNotes } from "../core/damage.ts";
 import { activationTimingNotes } from "../core/activated.ts";
 import { activeWatches } from "../core/triggers.ts";
 import { blockConflicts } from "../core/combat-facts.ts";
-import { viewWorld } from "../core/selectors.ts";
+import { holds, viewWorld } from "../core/selectors.ts";
 import { cardDefinition } from "./strategy-position.ts";
 import { manaLines } from "./strategy-facts.ts";
 import { useSources } from "../core/readiness.ts";
@@ -161,7 +161,7 @@ function graveyards(frame: Frame, name: (seat: SeatId) => string): string {
 			const granted = permits.flatMap((note) => note.kind === "permit" && note.on.id === one.id && note.on.incarnation === one.incarnation ? [
 				`${note.plotted ? "Plotted: " : ""}${note.who === frame.seat ? "you" : name(note.who)} may ${note.mana ? `cast it for ${note.mana === "printed" ? "its printed mana cost" : `${note.mana} instead of its mana cost`}` : "cast or play it"} from turn ${note.fromTurn} ${note.speed === "sorcery" ? "only in their main phase with an empty stack, regardless of flash" : "at its normal timing"}; ${typeof note.until === "object" ? "nextEndStep" in note.until ? `until ${name(note.until.nextEndStep)}'s next end step begins` : `until the end of ${name(note.until.endOfNextTurn)}'s next turn after turn ${note.until.afterTurn}` : `duration ${note.until}`}${note.of ? `; matching spell ${JSON.stringify(note.of)}` : ""}${note.leavesStack ? `; put it into ${note.leavesStack} whenever it leaves the stack` : ""}`] : []);
 			for (const registration of one.traits?.registrations ?? []) if (registration.kind === "permit" && registration.cast?.from.includes(zone))
-				granted.push(`its owner may cast it for ${registration.cast.mana} at normal timing${registration.cast.leavesStack ? `; put it into ${registration.cast.leavesStack} whenever it leaves the stack` : ""}`);
+				granted.push(`its owner's casting price ${registration.cast.mana} at normal timing${registration.cast.if ? `; condition ${JSON.stringify(registration.cast.if)} is ${holds({ world: viewWorld(frame.view), controller: one.owner, source: one }, registration.cast.if) ? "met" : "unmet"}` : ""}${registration.cast.leavesStack ? `; put it into ${registration.cast.leavesStack} whenever it leaves the stack` : ""}`);
 			for (const note of frame.view.notes ?? []) if (note.kind === "return" && note.on.id === one.id && note.on.incarnation === one.incarnation) {
 				const source = frame.view.objects?.find((item) => item.id === note.source.id && item.incarnation === note.source.incarnation);
 				granted.push(`returns to its owner's ${note.to} immediately when ${source ? named(source) : note.source.id} leaves the battlefield`);

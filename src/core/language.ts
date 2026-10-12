@@ -134,7 +134,7 @@ export const Defs = {
 		/** This turn so far, read from what was recorded. */
 		object({ history: one("cast", "attacked", "life-lost", "life-gained"), of: Type.Optional(Type.Ref("Selector")), by: Type.Optional(Side) }),
 		/** Physical actions counted for their event-time player, with no hidden object identity. */
-		object({ history: one("descended", "entered-face-down", "turned-face-up", "sacrificed"), by: Type.Optional(Side) }),
+		object({ history: one("descended", "entered-face-down", "turned-face-up", "sacrificed", "discarded"), by: Type.Optional(Side) }),
 		/** The X announced for this spell or ability; a permanent remembers the X it was cast with (107.3m). */
 		object({ x: Type.Literal(true) }),
 		object({ sum: Type.Array(Type.Ref("Amount"), { minItems: 2 }) }),
@@ -158,6 +158,8 @@ export const Defs = {
 		object({ cast: ObjectRef, from: Type.Optional(Zone), by: Type.Optional(PlayerRef), paid: Type.Optional(name), alternative: Type.Optional(name) }),
 		/** The current battlefield incarnation entered during the current turn. */
 		object({ enteredThisTurn: ObjectRef }),
+		/** The exact public incarnation produced by a committed discard this turn. */
+		object({ discardedThisTurn: ObjectRef, by: Type.Optional(PlayerRef) }),
 		/** Whose turn it is: "if it's not your turn". */
 		object({ turn: one("self", "opponent") }),
 		object({ step: Step }),
@@ -415,7 +417,7 @@ export const Defs = {
 		/** A choice the baseline rules would not offer: extra land plays, lands from a zone, flash. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("permit"), lands: Type.Optional(positive), landsFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), flash: Type.Optional(Type.Ref("Selector")),
 			/** This card's owner may cast it from the named zones at this alternative mana price. */
-			cast: Type.Optional(object({ from: Type.Array(Zone, { minItems: 1 }), mana: ManaCost, leavesStack: Type.Optional(Zone) })) }),
+			cast: Type.Optional(object({ from: Type.Array(Zone, { minItems: 1 }), mana: ManaCost, leavesStack: Type.Optional(Zone), if: Type.Optional(Type.Ref("Condition")) })) }),
 		/** A standing restriction on the named players' casting, optionally during a named player's turn. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("prohibit"), cast: PlayerRef, during: Type.Optional(PlayerRef), if: Type.Optional(Type.Ref("Condition")) }),
 		/** Restrictions name sources in any zone; a mana exception preserves payment abilities. */

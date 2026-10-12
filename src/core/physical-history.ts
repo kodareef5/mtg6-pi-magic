@@ -1,9 +1,9 @@
-/** Public action counts from recorded physical changes, without exposing the cards involved. */
+/** Public actions from recorded changes. Discard refs name only publicly visible arrivals. */
 import type { Receipt, Table } from "./table.ts";
-import type { SeatId } from "./types.ts";
+import type { ObjectRef, SeatId } from "./types.ts";
 
-export type PhysicalAction = "descended" | "entered-face-down" | "turned-face-up" | "sacrificed";
-export type PhysicalEvent = { kind: "physical"; action: PhysicalAction; by: SeatId };
+export type PhysicalAction = "descended" | "entered-face-down" | "turned-face-up" | "sacrificed" | "discarded";
+export type PhysicalEvent = { kind: "physical"; action: PhysicalAction; by: SeatId; object?: ObjectRef };
 
 /** 700.11 counts permanent cards arriving in the graveyard, even if they later leave.
  * Face-down entry and face-up special actions use event-time controllers, not current ones. */
@@ -15,12 +15,16 @@ export function physicalHistory(receipt: Receipt, printed: Table["printed"]): Ph
 			const was = objects[change.what];
 			if (!was || was.zone === change.to && change.to !== "exile") continue;
 			const controller = change.controller ?? was.owner;
+			const incarnation = was.incarnation + 1;
+			if (was.zone === "hand" && was.card && !was.token && !was.copy && ["discard", "cleanup-discard"].includes(change.reason))
+				events.push({ kind: "physical", action: "discarded", by: was.owner,
+					...(!change.faceDown && ["graveyard", "exile", "battlefield", "stack", "command"].includes(change.to) ? { object: { id: was.id, incarnation } } : {}) });
 			if (was.zone === "battlefield" && change.reason === "sacrifice") events.push({ kind: "physical", action: "sacrificed", by: was.controller });
 			if (change.to === "graveyard" && was.card && !was.token && !was.copy &&
 				/\b(Artifact|Battle|Creature|Enchantment|Land|Planeswalker)\b/.test(printed[was.card]?.type.split("—")[0] ?? ""))
 				events.push({ kind: "physical", action: "descended", by: was.owner });
 			if (change.to === "battlefield" && change.faceDown) events.push({ kind: "physical", action: "entered-face-down", by: controller });
-			objects[was.id] = { ...was, zone: change.to, controller, faceDown: !!change.faceDown };
+			objects[was.id] = { ...was, zone: change.to, incarnation, controller, faceDown: !!change.faceDown };
 		}
 		if (change.do === "turn-face-up") {
 			const was = objects[change.what];

@@ -9,6 +9,9 @@ interpretation work even when the seat cannot afford it (702.180).
 alternative mana cost, at normal timing. `leavesStack` replaces every departure
 from the stack when this price was chosen. The registration does not express
 mandatory nonmana permission costs; do not use it to omit such a cost.
+An optional `cast.if` gates the permission before readiness or announcement.
+See `attack-requirements.md` for Carnage's mayhem condition, which requires
+the current graveyard incarnation to have been discarded this turn.
 
 ```json package
 {
