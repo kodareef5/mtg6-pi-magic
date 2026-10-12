@@ -16,6 +16,7 @@ import { checkProcedure } from "../src/core/procedures.ts";
 import { announce, example, finish, main, passBoth, place, step } from "./play.ts";
 
 test("private inspection exposes only its bounded window and orders it without changing identities", () => {
+	const stock = checkProcedure(JSON.parse(readFileSync("prepared/packages/2026-10-10/stock-up.json", "utf8")).package.procedures[0]);
 	for (const random of [false, true]) {
 		const table = start(standard, [{ deck: alpha(deck("4c Control")) }, { deck: alpha(deck("Mono-Red Aggro")) }], `private-window-${random}`);
 		main(table, 0);
@@ -26,7 +27,7 @@ test("private inspection exposes only its bounded window and orders it without c
 			{ do: "add-mana", who: 0, colors: ["C", "C", "U", "U"] }], "game-setup");
 		const library = structuredClone(cardsIn(table, "library", 0)), window = library.slice(0, size);
 		const initial = structuredClone(table), from = table.ledger.length;
-		announce(table, example(random ? "Consult the Star Charts with kicker" : "Stock Up from five cards")); passBoth(table);
+		announce(table, random ? example("Consult the Star Charts with kicker") : stock); passBoth(table);
 		assert.match(nextDecision(table)!.options[0]!.label, new RegExp(`Look at ${size} cards`));
 		assert.equal(project(table, 0).objects!.filter((one) => one.zone === "library").length, 0);
 		step(table, (label) => label.startsWith("Look"));
@@ -43,6 +44,7 @@ test("private inspection exposes only its bounded window and orders it without c
 		const selected: string[] = [];
 		const choose = () => {
 			const decision = nextDecision(table)!;
+			assert.ok(!decision.options.some(one => one.id.endsWith(":done")), "taking two is mandatory while at least two cards are available");
 			assert.ok(decision.options.every((one) => !one.objects?.length || one.objects.every((ref) => window.some((card) => card.id === ref.id))));
 			const option = decision.options.find((one) => one.objects?.length)!;
 			selected.push(option.objects![0]!.id); apply(table, option.id, "model", "chosen");
@@ -81,7 +83,7 @@ test("private inspection exposes only its bounded window and orders it without c
 		commit(table, [...cardsIn(table, "library", 0).slice(left).map((one) => ({ do: "move" as const, what: one.id, to: "outside" as const, reason: "game-setup" as const })),
 			{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
 		const initial = structuredClone(table), at = table.ledger.length, hand = cardsIn(table, "hand", 0).length;
-		announce(table, example("Stock Up from five cards")); passBoth(table); finish(table);
+		announce(table, stock); passBoth(table); finish(table);
 		assert.equal(cardsIn(table, "hand", 0).length, hand - 1 + left);
 		assert.equal(table.outcome, null, "looking and choosing from a short library is not a failed draw");
 		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);

@@ -3,16 +3,11 @@
 	"generated": "2026-10-10",
 	"source": "90515f288bb7584924b36478d740898cf2ae894f1d0d9a472114da7ce7d4c2c7",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Stock Up",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Cast Stock Up to look at the top five cards, put two into hand, and put the rest on the bottom in any order.",
-				"basis": "Look at the top five cards of your library. Put two of them into your hand and the rest on the bottom of your library in any order.",
 				"source": {
 					"card": "Stock Up",
 					"zones": [
@@ -22,8 +17,52 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"claim": "Cast Stock Up to look at the top five cards, put two into hand, and put the rest on the bottom in any order.",
+				"basis": "Look at the top five cards of your library. Put two of them into your hand and the rest on the bottom of your library in any order.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 5,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 2,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }
