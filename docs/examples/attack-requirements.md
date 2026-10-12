@@ -11,6 +11,23 @@ This handles the unconditional requirement. Attack costs, goad's preferred
 opponent and competing limits on the number of attackers need further terms;
 this word does not implement them.
 
+The native words `can't attack` and `can't block` mark conflicting declarations.
+A continuous registration can grant either word under an `if` condition. For
+"can't attack unless you control another artifact", grant `can't attack` to
+`this` while the count of artifacts controlled by `you`, with `other: true`,
+is zero. The condition is read through the layer walk each time; it is not a
+stored flag or a requirement to remember an earlier trigger. The seat still
+chooses its declaration. Arbitrary restriction sentences are not native words.
+
+This represents the permanent's own static ability. Restrictions imposed by
+another source are not abilities granted to the affected permanent (113.12).
+For example, losing a creature's abilities does not remove Pacifism's attack
+restriction. A temporary "can't be blocked" rule also survives ability removal;
+granting a removable word or `prohibit` registration to the recipient changes
+that meaning. The current syntax has no standalone temporary blocking rule or
+cross-object attack prohibition. A permanent source can impose a blocking-only
+restriction with its own `prohibit.block` registration.
+
 ## Carnage, Crimson Chaos
 
 Carnage may be cast for its printed cost from hand or for its mayhem price
