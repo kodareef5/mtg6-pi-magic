@@ -85,7 +85,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	for (const s of table.seats) {
 		const field = cardsIn(table, "battlefield").filter((t) => t.controller === s.id);
 		lines.push(
-			`${s.name}: ${s.life} life, ${cardsIn(table, "hand", s.id).length} in hand, ` +
+			`${s.name}: ${s.life} life${s.speed === undefined ? "" : `, speed ${s.speed}`}, ${cardsIn(table, "hand", s.id).length} in hand, ` +
 				`${cardsIn(table, "library", s.id).length} in library, ` +
 				`${cardsIn(table, "graveyard", s.id).length} in graveyard, ` +
 				`${field.length} on the battlefield` +
@@ -173,8 +173,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		for (const pick of combat.choosing) lines.push("blocker" in pick ? `Declaring a block: ${named(pick.blocker)} on ${named(pick.attacker)}` : `Declaring an attacker: ${named(pick.attacker)}${pick.to ? ` at ${named(pick.to)}` : ""}`);
 	}
 	for (const trigger of table.waiting) {
-		const source = table.things.get(trigger.source.id);
-		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
+		const source = trigger.source && table.things.get(trigger.source.id);
+		lines.push(`Waiting to go on the stack: ${seat(table, trigger.controller).name}'s ${source && source.incarnation === trigger.source?.incarnation ? publicName(source) : "trigger"}: ${trigger.basis}`);
 	}
 	// A rollback does not make anyone forget: every seat is told it happened.
 	for (const { case: open, ruling, kept, failed } of table.rulings) {
@@ -220,7 +220,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		...(resolution ? { resolution } : {}),
 		...(viewer !== "spectator" ? { purposes: purposes(table, viewer) } : {}),
 		seats: table.seats.map((one) => ({ id: one.id, name: one.name })),
-		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life, ...(one.speed === undefined ? {} : { speed: one.speed }), startingLife: table.format.startingLife, hand: cardsIn(table, "hand", one.id).length, library: cardsIn(table, "library", one.id).length })),
 		...(declarationReview ? { declarationReview } : {}),
 		...(declaration ? { blockDeclaration: { ...declaration, current, conflicts: [] } } : {}),
 		notes: structuredClone(table.notes), combat: structuredClone(table.combat), history, castings,
@@ -342,6 +342,9 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			case "shuffle":
 				parts.push(`${seat(table, change.whose).name} shuffled`);
+				break;
+			case "increase-speed":
+				parts.push(`${seat(table, change.who).name} increased speed by ${change.amount}`);
 				break;
 			case "change-life":
 				parts.push(

@@ -121,6 +121,7 @@ export function summary(instruction: Instruction): string {
 		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${words(instruction.count, "amount")} ${of(instruction.from)}${instruction.reveal ? ", revealed" : ""}${gate}.`;
 		case "move": return `Put ${what} into ${instruction.to} (${instruction.reason})${instruction.tapped ? " tapped" : ""}${gate}.`;
 		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${words(instruction.count, "amount")}` : ""}${gate}.`;
+		case "increase-speed": return `${of(instruction.who)} increases speed by ${instruction.amount}${gate}.`;
 		case "life": return `${of(instruction.who)} changes life by ${words(instruction.amount, "amount")}${gate}.`;
 		case "counters": return `Put ${words(instruction.amount, "amount")} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
 		case "mana": return `${who(instruction.who, "add")} ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${instruction.until ? `, lasting until ${instruction.until.replaceAll("-", " ")}` : ""}${gate}.`;

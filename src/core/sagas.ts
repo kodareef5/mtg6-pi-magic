@@ -35,7 +35,7 @@ export function chapterTriggers(table: Table, before: Record<string, Thing>, bor
 export function completedSaga(table: Table, object: Thing): boolean {
 	const numbers = chapters(table, object).flatMap((one) => one.numbers);
 	if (!numbers.length || (object.counters.lore ?? 0) < Math.max(...numbers)) return false;
-	const same = (source: { id: string; incarnation: number }) => source.id === object.id && source.incarnation === object.incarnation;
+	const same = (source: { id: string; incarnation: number } | undefined) => source?.id === object.id && source.incarnation === object.incarnation;
 	return !table.waiting.some((trigger) => trigger.chapter !== undefined && same(trigger.source)) &&
 		!cardsIn(table, "stack").some((one) => one.ability?.trigger?.chapter !== undefined && same(one.ability.source));
 }

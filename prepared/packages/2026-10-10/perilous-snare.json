@@ -1,0 +1,118 @@
+{
+	"card": "Perilous Snare",
+	"generated": "2026-10-10",
+	"source": "21c06815f653389b9e3d105f0b5958e165934147bbfb0858f93453b86f8a7d7d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Perilous Snare",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.)",
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"words": [
+						"start your engines!"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters, exile target nonland permanent an opponent controls until this artifact leaves the battlefield.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"controller": "opponent",
+								"not": {
+									"types": [
+										"land"
+									]
+								}
+							}
+						}
+					],
+					"instructions": [
+						{
+							"do": "move",
+							"what": "target:0",
+							"to": "exile",
+							"reason": "exile",
+							"until": {
+								"leaves": "this"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Max speed — {T}: Put a +1/+1 counter on target creature or Vehicle you control. Activate only as a sorcery.",
+				"if": {
+					"amount": {
+						"speed": "you"
+					},
+					"atLeast": 4,
+					"atMost": 4
+				},
+				"affects": {
+					"is": "this"
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "activated",
+							"basis": "Max speed — {T}: Put a +1/+1 counter on target creature or Vehicle you control. Activate only as a sorcery.",
+							"cost": {
+								"tap": true
+							},
+							"speed": "sorcery",
+							"effect": {
+								"targets": [
+									{
+										"object": {
+											"controller": "you",
+											"any": [
+												{
+													"types": [
+														"creature"
+													]
+												},
+												{
+													"subtypes": [
+														"Vehicle"
+													]
+												}
+											]
+										}
+									}
+								],
+								"instructions": [
+									{
+										"do": "counters",
+										"on": "target:0",
+										"kind": "+1/+1",
+										"amount": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

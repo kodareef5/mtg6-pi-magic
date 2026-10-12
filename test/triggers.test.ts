@@ -87,7 +87,7 @@ test("a landfall watch triggers once per land, waits for priority, and resolves 
 	// Two lands entering together are two occurrences (603.2c).
 	const [one, two] = cardsIn(table, "library", 0).filter((card) => card.card === "Forest");
 	commit(table, [{ do: "move", what: one!.id, to: "battlefield", reason: "resolve" }, { do: "move", what: two!.id, to: "battlefield", reason: "resolve" }], "resolve");
-	assert.equal(table.waiting.filter((waiting) => waiting.source.id === chocobo.id).length, 2);
+	assert.equal(table.waiting.filter((waiting) => waiting.source?.id === chocobo.id).length, 2);
 });
 
 test("entering terms read the permanent as it enters, and another permanent can change how lands enter", () => {

@@ -159,7 +159,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const ability = table.things.get(pending.object)?.ability;
 			const turning = many(table, scope, instruction).filter((object) => transformable(table.printed[object.card ?? ""], object));
 			return one(`Transform ${turning.map(name).join(", ") || "nothing"}`, turning.map((object): Change => ({ do: "transform", what: object.id,
-				...(ability?.source.id === object.id && ability.source.incarnation === object.incarnation && ability.transformAt !== undefined ? { since: ability.transformAt } : {}) })));
+				...(ability?.source?.id === object.id && ability.source.incarnation === object.incarnation && ability.transformAt !== undefined ? { since: ability.transformAt } : {}) })));
 		}
 		case "designate": {
 			const marked = live(table, objects(scope, instruction.what)).filter(object => object.zone === "battlefield" && !object.designations?.includes(instruction.designation));
@@ -228,6 +228,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				: `${count < 0 ? "Remove" : "Put"} ${Math.abs(count)} ${instruction.kind} ${count < 0 ? "from" : "on"} ${on.map(name).join(", ") || "nothing"}`;
 			return one(label, counts.filter(one => one.count).map(({ object, count }) => ({ do: "counters" as const, what: object.id, kind: instruction.kind, amount: count })));
 		}
+		case "increase-speed": return one(`Increase speed by ${instruction.amount}`, players(scope, instruction.who).map(who => ({ do: "increase-speed", who, amount: instruction.amount })));
 		case "life": {
 			const change = amount(scope, instruction.amount);
 			return one(`${change < 0 ? "Lose" : "Gain"} ${Math.abs(change)} life`, change ? players(scope, instruction.who).map((who) => ({ do: "change-life" as const, who, amount: change, reason: "resolve" as const })) : [],

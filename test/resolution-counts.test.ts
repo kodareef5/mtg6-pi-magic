@@ -86,5 +86,5 @@ test("completed ability resolutions keep one ordinal through their program, rese
 	const departed = pending(), incarnation = departed.source.incarnation;
 	commit(departed.table, [{ do: "move", what: departed.source.id, to: "graveyard", reason: "destroy" }], "destroy");
 	passBoth(departed.table); finish(departed.table);
-	assert.equal(completed(departed.table)[0]!.source.incarnation, incarnation, "a departed source keeps the original ability's identity");
+	assert.equal(completed(departed.table)[0]!.source?.incarnation, incarnation, "a departed source keeps the original ability's identity");
 });

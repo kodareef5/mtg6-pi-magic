@@ -32,7 +32,7 @@ import { damageSource, tableWorld, targetKey } from "./selectors.ts";
 import { orderedDamage } from "./damage.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import {
-	type Activation,
+	type Ability,
 	manaSurvives,
 	cardsIn,
 	ORDERED,
@@ -152,6 +152,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// Mana added earlier in the same group, by a mana ability activated while paying, can be spent.
 	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
 	for (const [index, change] of changes.entries()) {
+		if (change.do === "increase-speed" && (!Number.isInteger(change.amount) || change.amount <= 0)) throw new Error("Speed increases by a positive integer.");
 		if (change.do === "move" && change.faceDown && change.to !== "exile") throw new Error("Face-down motion is supported only into exile.");
 		if (change.do === "add-mana") change.colors.forEach((_, unit) => available.get(change.who)?.add(`mana-${table.cursor.clock + 1}-${index}-${unit}`));
 		if (change.do === "spend-mana") for (const id of change.ids) {
@@ -333,6 +334,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			}
 			case "untap":
 				thing(table, change.what).tapped = false;
+				break;
+			case "increase-speed":
+				seat(table, change.who).speed = (seat(table, change.who).speed ?? 0) + change.amount;
 				break;
 			case "add-mana":
 				seat(table, change.who).pool.push(...change.colors.map((color, unit) => ({ id: `mana-${table.cursor.clock + 1}-${index}-${unit}`, color,
@@ -592,7 +596,7 @@ function order(table: Table, change: Omit<Extract<Change, { do: "order" }>, "do"
 }
 
 /** An ability or trigger goes on top of the stack as its own object. */
-function stack(table: Table, id: string, ability: Activation): void {
+function stack(table: Table, id: string, ability: Ability): void {
 	for (const object of cardsIn(table, "stack")) object.position = (object.position ?? 0) + 1;
 	table.things.set(id, { id, incarnation: 0, owner: ability.controller, controller: ability.controller,
 		zone: "stack", position: 0, tapped: false, faceDown: false, counters: {}, damage: 0, ability: structuredClone(ability) });
@@ -624,7 +628,7 @@ function prepare(table: Table, object: Thing): void {
 /** Remaining instructions and choices belong to the table throughout resolution. */
 function resolutionTransition(table: Table, change: Extract<Change, { do: "resolution" }>): void {
 	if (change.action === "begin") {
-		table.resolution = { object: change.what, source: structuredClone(change.source), program: structuredClone(change.program), bound: structuredClone(change.bound ?? {}),
+		table.resolution = { object: change.what, ...(change.source ? { source: structuredClone(change.source) } : {}), program: structuredClone(change.program), bound: structuredClone(change.bound ?? {}),
 			illegal: [...change.illegal], picked: [], ...(change.lost ? { lost: true } : {}), ...(change.optional ? { optional: true } : {}) };
 		table.cursor.priority = null;
 		return;
@@ -649,7 +653,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	const object = table.things.get(change.what);
 	const ability = object?.ability;
 	if (!pending.lost && ability?.timing === "stack" && countsResolutions(ability.instructions))
-		change.resolved = { source: structuredClone(ability.source), basis: ability.basis, by: ability.controller };
+		change.resolved = { ...(ability.source ? { source: structuredClone(ability.source) } : {}), basis: ability.basis, by: ability.controller };
 	if (object?.card) delete object.ability;
 	else if (object) {
 		table.things.delete(object.id);

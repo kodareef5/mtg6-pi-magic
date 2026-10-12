@@ -240,14 +240,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Perilous Snare": {
-		"reason": "Perilous Snare is not ready: Start your engines! (If you have no speed, it starts at 1. It increases once on each of your turns when an opponent loses life. Max speed is 4.) — The syntax cannot initialize player speed through a state-based action or implement the source-independent, once-per-turn opponent-life-loss trigger that increases speed to a maximum of 4.; Max speed — {T}: Put a +1/+1 counter on target creature or Vehicle you control. Activate only as a sorcery. — The syntax has no player-speed condition to require speed 4 for this activation.",
-		"decks": [
-			"Jeskai Artifacts"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Preacher of the Schism": {
 		"reason": "Preacher of the Schism is not ready: Whenever this creature attacks the player with the most life or tied for most life, create a 1/1 white Vampire creature token with lifelink. — Missing an attack-event filter identifying the attacked player (excluding attacks against planeswalkers or battles) and checking that player's life ranking when attackers are declared. The documented event.player filter concerns combat damage, not the recipient of an attack.",
 		"decks": [

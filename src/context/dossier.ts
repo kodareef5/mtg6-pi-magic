@@ -71,6 +71,7 @@ function situation({ frame, forecast }: DossierInput, name: (seat: SeatId) => st
 	} else lines.push("- The game is in its opening.");
 	lines.push(`- Life: you ${you?.life ?? "unknown"}, ${others.map((one) => `${name(one.id)} ${one.life}`).join(", ")}.`,
 		`- Cards in hand: you ${you?.hand ?? 0}, ${others.map((one) => `${name(one.id)} ${one.hand ?? 0}`).join(", ")}. Library: you ${you?.library ?? 0}, ${others.map((one) => `${name(one.id)} ${one.library ?? 0}`).join(", ")}.`);
+	if (players.some(one => one.speed !== undefined)) lines.push(`- Speed: ${players.map(one => `${name(one.id)} ${one.speed ?? "not started"}`).join(", ")}.`);
 	if (frame.view.turnDraw?.length) lines.push(`- ${at.kind === "turn" && at.active === frame.seat ? "Drawn this turn" : "Your draw on your last turn"}: ${frame.view.turnDraw.map((one) => one.card ?? "an unknown card").join(", ")}.`);
 	const combat = frame.view.combat;
 	if (combat && (combat.attackers.length || combat.choosing.length)) {

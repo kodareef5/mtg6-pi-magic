@@ -15,5 +15,5 @@ export function resolutionNumber(scope: Scope): number {
 	const current = scope.resolving;
 	if (!current) return 0;
 	return 1 + scope.world.history.filter((event) => event.kind === "resolved" &&
-		event.source.id === current.source.id && event.source.incarnation === current.source.incarnation && event.basis === current.basis).length;
+		event.source?.id === current.source.id && event.source.incarnation === current.source.incarnation && event.basis === current.basis).length;
 }

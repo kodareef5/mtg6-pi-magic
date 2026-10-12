@@ -30,6 +30,7 @@ import { triggerWindow } from "./triggers.ts";
 import { STEPS } from "./steps.ts";
 import { preparation } from "./readiness.ts";
 import { unlocks } from "./rooms.ts";
+import { startingSpeed } from "./speed.ts";
 import { completedSaga } from "./sagas.ts";
 import { project } from "./view.ts";
 import { selectingPayment } from "./cost-selection.ts";
@@ -215,7 +216,7 @@ function stateBased(table: Table): Pending | null {
 	const losing = playing(table).filter((s) =>
 		s.life <= 0 || (s.marks["drew-from-empty"] ?? 0) > 0 || (s.marks.poison ?? 0) >= 10,
 	);
-	const changes: Change[] = [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const }))];
+	const changes: Change[] = [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const })), ...startingSpeed(table)];
 	const field = cardsIn(table, "battlefield");
 	const gone = new Set<string>();
 	const leave = (object: Thing, reason: "state-based-action" | "destroy") => { gone.add(object.id); changes.push({ do: "move", what: object.id, to: "graveyard", reason }); };

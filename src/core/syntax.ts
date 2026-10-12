@@ -3,7 +3,7 @@
  */
 
 import type { ObjectRef, SeatId } from "./types.ts";
-import type { Activation, Combat, Mana, Note, Resolution, Trigger } from "./table.ts";
+import type { Activation, Ability, Combat, Mana, Note, Resolution, Trigger } from "./table.ts";
 import type { Bound, Chosen } from "./selectors.ts";
 import type { Registration, Selector, TokenSpec } from "./language.ts";
 
@@ -98,11 +98,12 @@ export type Change =
 	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }
 	| { do: "prepare"; what: string; prepared: boolean }
 	| { do: "designate"; what: string; designation: Designation }
+	| { do: "increase-speed"; who: SeatId; amount: number }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
 	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true; prevented?: number; replacements?: string[] }
 	| { do: "activate"; what: string; id: string; ability: Activation }
-	| { do: "resolution"; action: "begin"; what: string; source: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean;
+	| { do: "resolution"; action: "begin"; what: string; source?: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean;
 		bound?: Resolution["bound"]; optional?: true }
 	/** The seat accepts target restrictions, or continues with the warned targets. No instruction is carried out. */
 	| { do: "resolution"; action: "targets"; what: string; illegal: string[] }
@@ -115,7 +116,7 @@ export type Change =
 	| { do: "resolution"; action: "next"; what: string; pick?: Chosen; bind?: Record<string, Bound>;
 		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true;
 		/** Filled by commit after a counted ability completes, including an optional decline. */
-		resolved?: { source: ObjectRef; basis: string; by: SeatId };
+		resolved?: { source?: ObjectRef; basis: string; by: SeatId };
 		/** A chosen limited effect, journaled even when this group moves no object. */
 		use?: { source: ObjectRef; basis: string; by: SeatId } }
 	/** A reflexive trigger made during resolution waits for the next priority (603.12). */
@@ -124,7 +125,7 @@ export type Change =
 	 * A waiting trigger goes on the stack with its targets as `id`, or, with no
 	 * legal targets, is removed (603.3d).
 	 */
-	| { do: "trigger"; action: "put"; trigger: string; id?: string; ability?: Activation; was?: Pick<Trigger, "source" | "basis" | "turn"> }
+	| { do: "trigger"; action: "put"; trigger: string; id?: string; ability?: Ability; was?: Pick<Trigger, "source" | "basis" | "turn"> & { controller?: SeatId } }
 	| { do: "shuffle"; whose: SeatId }
 	/** Counters of one kind put on or, negative, removed. */
 	| { do: "counters"; what: string; kind: string; amount: number }

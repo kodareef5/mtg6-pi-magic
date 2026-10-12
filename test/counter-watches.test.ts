@@ -54,7 +54,7 @@ test("counter watches distinguish each placement and a threshold, including entr
 	commit(tokenTable, [{ do: "token", id: "entering-jace", controller: 0,
 		spec: { name: "Jace", types: ["planeswalker"], subtypes: ["Jace"], colors: ["U"], loyalty: 4 } },
 		{ do: "counters", what: "entering-jace", kind: "loyalty", amount: -1 }], "resolve");
-	assert.equal(tokenTable.waiting.length, 1); assert.equal(tokenTable.waiting[0]!.source.id, watcher.id);
+	assert.equal(tokenTable.waiting.length, 1); assert.equal(tokenTable.waiting[0]!.source?.id, watcher.id);
 	assert.equal(tokenTable.things.get("entering-jace")!.counters.loyalty, 3);
 
 	const table = setup();

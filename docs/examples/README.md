@@ -43,6 +43,7 @@ schemas, and every `basis` is checked against the card's text.
 | `last-known.md` | exile before life changes, using a departed target's former controller |
 | `entry-choices.md` | basic land and creature-type choices; restricted mana that grants spell properties when spent |
 | `designations.md` | harnessed physical state, infinity ability grants, noncopiable markers and zone-change reset |
+| `speed.md` | Player speed, source-less inherent triggers and conditional max-speed abilities |
 | `mana-origins.md` | mixed mana colors and spell restrictions that read the original casting zone |
 | `prevention.md` | all-damage prevention, standing source and recipient filters, turn-wide prohibition and printed instruction order |
 | `damage.md` | damage sources, recipients and amounts; starting life; an optional effect used once each turn |

@@ -32,7 +32,7 @@ test("additional trigger instances add once, keep independent choices and exclud
 		const initial = structuredClone(game), from = game.ledger.length;
 		announce(game, cast);
 		assert.equal(game.waiting.length, (count + 1) ** 2, "each granted prowess is an ability; two Staffs add two instances to each ability");
-		assert.ok(game.waiting.every(one => one.controller === 0 && one.source.id === creature!.id), "the granted trigger belongs to the equipped creature's controller");
+		assert.ok(game.waiting.every(one => one.controller === 0 && one.source?.id === creature!.id), "the granted trigger belongs to the equipped creature's controller");
 		assert.equal(new Set(game.waiting.map(one => one.id)).size, game.waiting.length);
 		const waiting = structuredClone(game), at = game.ledger.length;
 		assert.deepEqual(nextDecision(game), nextDecision(game)); assert.deepEqual(game, waiting);

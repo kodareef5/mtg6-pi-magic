@@ -490,6 +490,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   cast-words.ts      properties applied to matching spells during announcement
   faces.ts, rooms.ts  face characteristics, casting faces and unlocked Room doors
   sagas.ts            chapter entry, lore on the main-phase boundary and completed Saga sacrifice
+  speed.ts            player speed, its state-based start and source-less inherent trigger
   triggers.ts        events read from each group, watches matched, the trigger window
   combat.ts          declaring attackers and blockers, dividing and dealing combat damage
   damage.ts          all-damage prevention and prohibition before damage results

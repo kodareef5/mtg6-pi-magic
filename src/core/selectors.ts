@@ -23,19 +23,19 @@ export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "contro
 export type Happened =
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
 	| { kind: "activated"; by: SeatId; source: ObjectRef; basis: string; loyalty?: true }
-	| { kind: "resolved"; by: SeatId; source: ObjectRef; basis: string }
+	| { kind: "resolved"; by: SeatId; source?: ObjectRef; basis: string }
 	| { kind: "attacked"; by: SeatId; attackers: { object: Seen; traits?: Traits }[] }
 	| { kind: "life"; who: SeatId; amount: number };
 export type World = {
 	printed?: Table["printed"];
 	objects: Seen[];
 	read(object: Seen): Traits | undefined;
-	players: { id: SeatId; life: number; startingLife?: number; name?: string }[];
+	players: { id: SeatId; life: number; speed?: number; startingLife?: number; name?: string }[];
 	notes: Note[];
 	combat: Combat | null;
 	history: Happened[];
 	/** The object as it is, or as it last was (608.2h). */
-	lastKnown(ref: ObjectRef): { object: Seen; traits?: Traits } | undefined;
+	lastKnown(ref: ObjectRef | undefined): { object: Seen; traits?: Traits } | undefined;
 	casting?(ref: ObjectRef): Casting | undefined;
 	/** Whose turn it is and how many turns each seat has begun, the current one included. Absent before the first turn. */
 	turn?: { active: SeatId; taken: Record<SeatId, number>; began?: number; step?: Step; stepDone?: boolean };
@@ -72,12 +72,13 @@ export function tableWorld(table: Table, read?: (object: Seen) => Traits | undef
 	let events: Happened[] | undefined;
 	return {
 		objects: [...table.things.values()], read: reader, printed: table.printed,
-		players: playing(table).map((one) => ({ id: one.id, life: one.life, startingLife: table.format.startingLife, name: one.name })),
+		players: playing(table).map((one) => ({ id: one.id, life: one.life, ...(one.speed === undefined ? {} : { speed: one.speed }), startingLife: table.format.startingLife, name: one.name })),
 		notes: table.notes, combat: table.combat,
 		...(table.cursor.turn > 0 ? { turn: { active: table.cursor.active, taken: turnsTaken(table.seats[0]!.id, table.seats.map((one) => one.id), table.cursor.turn), began: table.cursor.began[table.cursor.active], step: table.cursor.steps[0], stepDone: table.cursor.stepDone } } : {}),
 		get history() { return (events ??= happened(table)); },
 		casting: (ref) => casting(table, ref),
 		lastKnown(ref) {
+			if (!ref) return undefined;
 			const now = table.things.get(ref.id);
 			if (now?.incarnation === ref.incarnation) return { object: now, traits: reader(now) };
 			for (let at = table.log.length - 1; at >= 0; at--) {
@@ -115,7 +116,7 @@ export function viewWorld(view: SeatView): World {
 		objects, read: (object) => (object as SeenObject).traits, printed: view.printed,
 		players: (view.players ?? []).map((one) => ({ ...one, name: view.seats?.find((seat) => seat.id === one.id)?.name })), notes: view.notes ?? [],
 		combat: view.combat ?? null, history: view.history ?? [],
-		lastKnown(ref) { const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
+		lastKnown(ref) { if (!ref) return undefined; const object = seen.find((one) => one.id === ref.id && one.incarnation === ref.incarnation); return object ? { object, ...(object.traits ? { traits: object.traits } : {}) } : undefined; },
 		casting: (ref) => view.castings?.[targetKey(ref)],
 		...(view.window.kind === "turn" && view.starting !== undefined ? { turn: { active: view.window.active,
 			taken: turnsTaken(view.starting, (view.seats ?? view.players ?? []).map((one) => one.id), view.window.turn), began: view.turnBegan, step: view.window.step, stepDone: view.stepDone } } : {}),
@@ -301,6 +302,7 @@ export function amount(scope: Scope, value: Amount): number {
 	}
 	if ("bound" in value) { const bound = scope.bound?.[value.bound]; return bound?.amount ?? (bound ? bound.objects.length + bound.players.length : 0); }
 	if ("distinct" in value) return new Set(select(scope, value.among).flatMap((one) => traitsOf(scope, one)?.types ?? [])).size;
+	if ("speed" in value) return players(scope, value.speed).reduce((sum, id) => sum + (scope.world.players.find(one => one.id === id)?.speed ?? 0), 0);
 	if ("life" in value) return players(scope, value.life).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.life ?? 0), 0);
 	if ("startingLife" in value) return players(scope, value.startingLife).reduce((sum, id) => sum + (scope.world.players.find((one) => one.id === id)?.startingLife ?? 0), 0);
 	if ("event" in value) return scope.event?.amount ?? 0;

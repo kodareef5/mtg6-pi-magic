@@ -35,7 +35,7 @@ export function begin(table: Table, object: Thing): Change {
 	// An intervening "if" that no longer holds: it does nothing (603.4).
 	const lost = spent || (chosen.length > 0 && illegal.length === chosen.length) || (!!trigger?.check && !holds(scope, trigger.check));
 	const permanent = ability.timing === "spell" && !!characteristics(table, object)?.types.some((type) => PERMANENT.includes(type));
-	return { do: "resolution", action: "begin", what: object.id, source: ability.timing === "spell" ? { id: object.id, incarnation: object.incarnation } : ability.source,
+	return { do: "resolution", action: "begin", what: object.id, ...(ability.timing === "spell" ? { source: { id: object.id, incarnation: object.incarnation } } : ability.source ? { source: ability.source } : {}),
 		program: [...(permanent ? [{ instruction: { do: "move" as const, what: "this", to: "battlefield" as const, reason: "resolve" as const, controller: "you" as const } }] : []),
 			...ability.instructions.map((instruction) => ({ instruction }))], illegal, ...(lost ? { lost: true } : {}),
 		...(ability.bound || trigger?.bound ? { bound: structuredClone({ ...ability.bound, ...trigger?.bound }) } : {}), ...(trigger?.may ? { optional: true } : {}) };
@@ -47,7 +47,7 @@ export function resolving(table: Table): Pending | null {
 	const object = table.things.get(pending.object)!, ability = object.ability!;
 	const world = tableWorld(table), item = pending.program[0];
 	const scope: Scope = { world, controller: ability.controller, source: world.lastKnown(pending.source)?.object, targets: ability.targets, illegal: pending.illegal,
-		...(ability.timing === "stack" ? { resolving: { source: ability.source, basis: ability.basis } } : {}),
+		...(ability.timing === "stack" && ability.source ? { resolving: { source: ability.source, basis: ability.basis } } : {}),
 		event: eventScope(world, ability.trigger?.event),
 		bound: { ...pending.bound, ...(item?.player !== undefined ? { player: { objects: [], players: [item.player] } } : {}) }, ...(ability.x !== undefined ? { x: ability.x } : {}) };
 	const prefix = `resolve:${pending.object}:${pending.program.length}:${pending.picked.length}`;
@@ -86,7 +86,7 @@ export function resolving(table: Table): Pending | null {
 	}
 	if (pending.optional) return { situation: "resolution", seat: ability.controller, question: `Resolve: ${ability.claim}. It is optional.${ability.trigger?.event.amount !== undefined ? ` Amount in the triggering event: ${ability.trigger.event.amount}.` : ""}`, moves: checked([
 		{ option: { id: `${prefix}:use`, label: "Use it" }, changes: [{ do: "resolution", action: "next", what: object.id, accept: true,
-			...(ability.trigger?.limit === "once-per-turn-use" ? { use: { source: ability.source, basis: ability.basis, by: ability.controller } } : {}) }], reason: "resolve" },
+			...(ability.trigger?.limit === "once-per-turn-use" && ability.source ? { use: { source: ability.source, basis: ability.basis, by: ability.controller } } : {}) }], reason: "resolve" },
 		{ option: { id: `${prefix}:decline`, label: "Decline: it is optional" }, changes: [{ do: "resolution", action: "next", what: object.id, abort: true }], reason: "resolve" },
 	]) };
 	const instruction = item.instruction;

@@ -15,12 +15,13 @@ import { characteristics, walk, type Traits } from "./characteristics.ts";
 import { doubleFaced } from "./faces.ts";
 import { aiming, summary, targetings } from "./announce.ts";
 import { damageSource, happened, holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
-import { playing, type Activation, type Table, type Thing, type Trigger } from "./table.ts";
+import { playing, type Ability, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Pending, Move } from "./moves.ts";
 import type { GameEvent, Registration } from "./language.ts";
 import type { Change, Zone } from "./syntax.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
 import type { Step } from "./steps.ts";
+import { speedTrigger } from "./speed.ts";
 import { casting } from "./casting.ts";
 
 /** One thing that happened in a group, as a watch reads it. */
@@ -72,7 +73,7 @@ export function before(table: Table, changes: Change[]): World | undefined {
 	return {
 		objects, read: (object) => object.zone === "battlefield" ? traits.get(object.id) : world.read(object),
 		players: world.players.map((one) => ({ ...one })), notes: [...table.notes], combat: structuredClone(table.combat), history, ...(world.turn ? { turn: world.turn } : {}),
-		lastKnown: (wanted) => { const object = objects.find((one) => one.id === wanted.id && one.incarnation === wanted.incarnation); return object ? { object, traits: traits.get(object.id) } : undefined; },
+		lastKnown: (wanted) => { if (!wanted) return undefined; const object = objects.find((one) => one.id === wanted.id && one.incarnation === wanted.incarnation); return object ? { object, traits: traits.get(object.id) } : undefined; },
 	};
 }
 
@@ -243,7 +244,8 @@ function groups(event: GameEvent, matched: Occurrence[]): Occurrence[][] {
 }
 
 /** 603.2h: declining or losing targets does not use the effect; a use persists even after its source leaves. */
-export function usedThisTurn(table: Table, source: ObjectRef, basis: string, by: SeatId): boolean {
+export function usedThisTurn(table: Table, source: ObjectRef | undefined, basis: string, by: SeatId): boolean {
+	if (!source) return false;
 	return table.log.some((receipt) => receipt.turn === table.cursor.turn && receipt.changes.some((change) => {
 		const use = change.do === "resolution" && change.action === "next" ? change.use : undefined;
 		return use?.source.id === source.id && use.source.incarnation === source.incarnation && use.basis === basis && use.by === by;
@@ -251,18 +253,19 @@ export function usedThisTurn(table: Table, source: ObjectRef, basis: string, by:
 }
 
 /** Whether this ability already triggered this turn, for "only once each turn". */
-function triggeredThisTurn(table: Table, source: ObjectRef, basis: string, also: Trigger[]): boolean {
+function triggeredThisTurn(table: Table, source: ObjectRef | undefined, basis: string, also: Trigger[], controller?: SeatId): boolean {
 	// What triggered this turn: still waiting, or put on the stack, or removed from it for want of a target (603.3d).
-	const same = (trigger: Pick<Trigger, "source" | "basis" | "turn">) => trigger.source.id === source.id && trigger.source.incarnation === source.incarnation &&
+	const same = (trigger: Pick<Trigger, "source" | "basis" | "turn"> & { controller?: SeatId }) =>
+		(source ? trigger.source?.id === source.id && trigger.source.incarnation === source.incarnation : !trigger.source && trigger.controller === controller) &&
 		trigger.basis === basis && (trigger.turn ?? table.cursor.turn) === table.cursor.turn;
 	if ([...table.waiting, ...also].some(same)) return true;
 	const began = table.cursor.began[table.cursor.active] ?? 0;
 	return table.log.some((receipt) => (receipt.clock ?? 0) > began && receipt.changes.some((change) => change.do === "trigger" && change.action === "wait" ? same(change.trigger) :
-		change.do === "trigger" && change.action === "put" && (change.was ? same(change.was) : !!change.ability && same({ source: change.ability.source, basis: change.ability.basis }))));
+		change.do === "trigger" && change.action === "put" && (change.was ? same(change.was) : !!change.ability && same({ source: change.ability.source, basis: change.ability.basis, controller: change.ability.controller }))));
 }
 
 /** What a put change keeps of the trigger, so a once-each-turn count can read it back. */
-const triggered = (trigger: Trigger): Pick<Trigger, "source" | "basis" | "turn"> => ({ source: trigger.source, basis: trigger.basis, ...(trigger.turn !== undefined ? { turn: trigger.turn } : {}) });
+const triggered = (trigger: Trigger): Pick<Trigger, "source" | "basis" | "turn"> & { controller?: SeatId } => ({ ...(trigger.source ? { source: trigger.source } : { controller: trigger.controller }), basis: trigger.basis, ...(trigger.turn !== undefined ? { turn: trigger.turn } : {}) });
 
 /** A watcher: a permanent's watch or suppression, read on one side of the group. */
 type Watch = { object: Seen; controller: SeatId; registration: Registration; world: World };
@@ -298,7 +301,8 @@ export function activeWatches(frame: Frame) {
  */
 export function detect(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }, prior?: World): { waiting: Trigger[]; spent: string[] } {
 	const happened = occurrences(table, changes, receipt);
-	if (!happened.length) return { waiting: [], spent: [] };
+	const speed = speedTrigger(table, changes);
+	if (!happened.length && !speed) return { waiting: [], spent: [] };
 	const after = tableWorld(table);
 	// Watches inspect the group before its receipt is appended, including its new casts and resolved entries.
 	const pending = { ...receipt, changes, after: Object.fromEntries([...table.things]) };
@@ -355,6 +359,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			if (fired && note.once) spent.push(note.id);
 		}
 	}
+	if (speed && !triggeredThisTurn(table, undefined, speed.basis, waiting, speed.controller)) waiting.push({ ...speed, id: stamp() });
 	return { waiting, spent };
 }
 
@@ -383,13 +388,13 @@ export function triggerWindow(table: Table): Pending | null {
 	if (!seat) return null;
 	const world = tableWorld(table);
 	const mine = current.filter((trigger) => trigger.controller === seat.id);
-	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.card ?? source?.token?.name ?? trigger.source.id; };
+	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.card ?? source?.token?.name ?? trigger.source?.id ?? "Inherent ability"; };
 	// Putting one on now places it under every trigger put later, so it resolves after them.
 	const after = (trigger: (typeof mine)[number]) => { const others = mine.filter((other) => other !== trigger).map((other) => `${sourceName(other)}'s trigger`);
 		return others.length ? `Put on now, it resolves after ${[...new Set(others)].map((one) => { const n = others.filter((other) => other === one).length; return n > 1 ? `${one} (x${n})` : one; }).join(", ")}.` : "It is the last trigger to put on."; };
 	const moves: Move[] = mine.flatMap((trigger): Move[] => {
 		const source = world.lastKnown(trigger.source)?.object;
-		const name = source?.card ?? source?.token?.name ?? trigger.source.id;
+		const name = source?.card ?? source?.token?.name ?? trigger.source?.id ?? "Inherent ability";
 		const scope: Scope = { world, controller: trigger.controller, ...(source ? { source } : {}), event: eventScope(world, trigger.event),
 			...(trigger.bound ? { bound: trigger.bound } : {}), ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 		const modal = "modes" in trigger.effect;
@@ -399,7 +404,7 @@ export function triggerWindow(table: Table): Pending | null {
 			const aims = slots.length ? targetings(slots, scope) : [trigger.targets ?? []];
 			return aims.map((targets): Move => {
 				const id = `ability-${table.cursor.clock + 1}`;
-				const ability: Activation = { source: trigger.source, controller: trigger.controller, claim: `${name}: ${trigger.basis}${modeName}`, basis: trigger.basis, timing: "stack",
+				const ability: Ability = { ...(trigger.source ? { source: trigger.source } : {}), controller: trigger.controller, claim: `${name}: ${trigger.basis}${modeName}`, basis: trigger.basis, timing: "stack",
 					...(doubleFaced(table.printed[source?.card ?? ""]) ? { transformAt: trigger.transformAt ?? source?.transformed ?? 0 } : {}),
 					cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(effect.instructions),
 					trigger: { event: structuredClone(trigger.event), ...(trigger.chapter !== undefined ? { chapter: trigger.chapter } : {}), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
@@ -411,9 +416,9 @@ export function triggerWindow(table: Table): Pending | null {
 				const eventAmount = trigger.event.amount === undefined ? [] : [`Amount in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
 				return { option: { id: `trigger:${trigger.id}${modal ? `:mode:${mode}` : ""}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetChoiceKey).join("+")}` : "").join("") : ""}`,
 					label: [`Put on the stack: ${name}: ${trigger.basis}${modeName}`, ...aimed].join(" "),
-					shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...eventAmount, ...aimed, ...effect.instructions.map(summary), after(trigger)].join(" "),
-					objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
-					trigger: { id: trigger.id, name: `${name} (${trigger.source.id}@${trigger.source.incarnation})`, text: `${trigger.basis}${modeName}`, targets: structuredClone(targets.flat()) } },
+					shows: [trigger.source ? `Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).` : "This inherent ability has no source.", ...eventAmount, ...aimed, ...effect.instructions.map(summary), after(trigger)].join(" "),
+					objects: [...(trigger.source ? [trigger.source] : []), ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],
+					trigger: { id: trigger.id, name: trigger.source ? `${name} (${trigger.source.id}@${trigger.source.incarnation})` : name, text: `${trigger.basis}${modeName}`, targets: structuredClone(targets.flat()) } },
 					changes: [{ do: "trigger", action: "put", trigger: trigger.id, id, ability, was: triggered(trigger) }], reason: "resolve" };
 			});
 		});

@@ -92,8 +92,9 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 		for (const one of registrations) {
 			if (one.kind === "enters" && one.copy && (one.affects || one.copy.of.zones?.some(zone => zone !== "battlefield")))
 				found.push(`package ${card}: an entry copy affects only its own permanent and chooses a battlefield source.`);
-			if (one.kind !== "mana" && /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/.test(one.basis))
-				found.push(`package ${card}: ${JSON.stringify(one.basis)} is an activated ability; announce it as a procedure, not a registration. Only mana abilities are registered.`);
+			const carriesActivation = one.kind === "activated" || one.kind === "continuous" && one.change.registers?.some(child => child.kind === "activated" && child.basis === one.basis);
+			if (one.kind !== "mana" && !carriesActivation && /^[^."]*(\{[^}]+\}|\bSacrifice\b|\bPay \d+ life\b)[^."]*:\s/.test(one.basis))
+				found.push(`package ${card}: ${JSON.stringify(one.basis)} is an activated ability; supply a procedure, a mana registration, or a complete granted activated ability. A free standing change does not pay its cost.`);
 			if (one.kind === "continuous" && one.change.registers) visit(one.change.registers, card);
 		}
 	};

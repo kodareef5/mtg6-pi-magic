@@ -111,7 +111,7 @@ test("entry copies use actual cast mana and copiable terms, apply before entry, 
  prepare(triggered, "Nova Hellkite", novaTerms);
  const novaBird = place(triggered, 0, "hand", "Mockingbird")[0]!;
  cast(triggered, 4); choose(triggered, nova);
- assert.equal(triggered.waiting.length, 1); assert.equal(triggered.waiting[0]!.source.id, novaBird.id, "the copied entry ability sees its own entry");
+ assert.equal(triggered.waiting.length, 1); assert.equal(triggered.waiting[0]!.source?.id, novaBird.id, "the copied entry ability sees its own entry");
  const trigger = nextDecision(triggered)!; assert.equal(trigger.situation, "trigger-order");
  apply(triggered, trigger.options[0]!.id, "model", "chosen"); passBoth(triggered); step(triggered);
  assert.equal(target.damage, 1, "the copied trigger executes with its new source");

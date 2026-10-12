@@ -68,7 +68,7 @@ export type Thing = {
 	incarnation: number;
 	/** Cards have a name. Spells and noncard stack objects hold accepted instructions. */
 	card?: string;
-	ability?: Activation;
+	ability?: Ability;
 	/** The clock when it last entered the battlefield. */
 	entered?: number;
 	/** What it registered as it entered: public, and gone when it leaves. docs/SYNTAX.md. */
@@ -118,7 +118,7 @@ export const manaDuration = (mana: Pick<Mana, "until">): string => mana.until
 	? `lasts until ${mana.until.replaceAll("-", " ")}` : "expires at step end";
 
 /** One accepted announcement, frozen at execution so replay never infers its meaning again. */
-export type Activation = {
+export type Ability = {
 	/** A chosen graveyard payment is assembled before this announcement commits. */
 	exileSelection?: Extract<Cost["exile"], { graveyard: unknown }>;
 	/** The permission whose alternative price was chosen, frozen with the announcement. */
@@ -130,7 +130,7 @@ export type Activation = {
 	transformAt?: number;
 	/** Objects a paid cost makes available to its resolving effect. */
 	bound?: Record<string, Bound>;
-	source: ObjectRef;
+	source?: ObjectRef;
 	controller: SeatId;
 	claim: string;
 	basis: string;
@@ -155,6 +155,8 @@ export type Activation = {
 	/** Set when a triggered ability was put on the stack: what it needs to resolve. */
 	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound" | "chapter" | "limit">;
 };
+/** An announced cast or activation always has a physical source; inherent triggers need none. */
+export type Activation = Ability & { source: ObjectRef };
 /**
  * A triggered ability waiting to be put on the stack (603.3). It belongs to the
  * table: detection writes it, and the next time a player would receive priority
@@ -166,7 +168,7 @@ export type Trigger = {
 	id: string;
 	controller: SeatId;
 	/** "This": the object whose ability triggered, as it was when it triggered. */
-	source: ObjectRef;
+	source?: ObjectRef;
 	basis: string;
 	effect: Effect | { modes: Effect[] };
 	/** The intervening "if", checked as it triggers and again as it resolves (603.4). */
@@ -200,7 +202,7 @@ export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tappe
 export type Resolution = {
 	object: ObjectId;
 	/** "This": the source, or the permanent a resolving spell became. */
-	source: ObjectRef;
+	source?: ObjectRef;
 	program: { instruction: Instruction; player?: SeatId; detail?: string; completed?: Extract<Change, { do: "keyword" }> & { as?: string; selected: string } }[];
 	bound: Record<string, Bound>;
 	/** Targets illegal as resolution began, by target key (608.2b). */
@@ -379,6 +381,8 @@ export type Seat = {
 	/** The deck registered for this game. Kept so a game replays from the seed. */
 	deck: Deck;
 	life: number;
+	/** Absent until started; independent of the permanent that started it (702.179). */
+	speed?: number;
 	pool: Mana[];
 	landsPlayed: number;
 	/**

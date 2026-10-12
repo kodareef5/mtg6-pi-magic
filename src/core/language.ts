@@ -119,6 +119,7 @@ export const Defs = {
 		object({ bound: name }),
 		object({ distinct: Type.Literal("card-types"), among: Type.Ref("Selector") }),
 		object({ life: PlayerRef }),
+		object({ speed: PlayerRef }),
 		object({ startingLife: PlayerRef }),
 		object({ event: Type.Literal("amount") }),
 		/** This source-backed ability's current resolution number within the turn, starting at one. */
@@ -292,6 +293,7 @@ export const Defs = {
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("TargetAmount") }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),
+		step({ do: Type.Literal("increase-speed"), who: PlayerRef, amount: positive }),
 		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), combination: Type.Optional(Type.Literal(true)), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), spendFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })) }),
 		step({ do: Type.Literal("tap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("untap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),

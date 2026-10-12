@@ -147,6 +147,7 @@ An **amount** is worked out when it is read and never stored.
 | `manaSpent` | actual mana spent to cast the referenced spell or the permanent it became; optional `color` counts one mana type |
 | `colorsSpent` | distinct colors spent on that cast; colorless mana adds no color |
 | `distinct: "card-types"` among a selector | Keen-Eyed Curator |
+| `speed` of a player | Perilous Snare; reads zero before speed starts |
 | `life` of a player | "if you have 10 or less life" |
 | `startingLife` of a player | the format's starting life total, independent of current life |
 | `{event: "amount"}` | damage dealt in the matched event, including simultaneous sources or recipients |
@@ -185,6 +186,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 
 | Instruction | What it does |
 |---|---|
+| `increase-speed` | `who`, positive integer `amount`; sets absent speed to that value or increases existing speed (702.179c) |
 | `damage` | `to` an object or player, `amount`, `from` (default the source); `as` binds recipients dealt positive damage and their total after prevention |
 | `damage-rule` | global all-damage prevention or prohibition (`mode: "prevent"` or `"unpreventable"`), optionally `combat`, lasting until `until`; no bounded shield or additional prevention effects |
 | `fight` | two creatures deal damage equal to their power to each other in one group (701.14) |
@@ -779,3 +781,9 @@ controller. It can become false and true again without removing the note.
 It supports live counts, life, history and turn conditions; source, target,
 binding, event and named-choice captures are refused. An instruction
 `if` checks only on resolution. See `examples/face-down-exile.md`.
+
+Player speed belongs to the seat. The `start your engines!` keyword starts it
+at one during the state check; the inherent ability increases it once on each
+of that player's turns when an opponent loses life. This trigger has no source
+and uses the normal stack. A max speed grant reads `{speed: "you"}` equal to
+four through a conditional continuous registration. See [player speed](examples/speed.md).

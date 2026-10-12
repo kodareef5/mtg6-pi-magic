@@ -76,7 +76,7 @@ const seen = (object: SeenObject): Seen => {
 			...(traits.manaValue !== undefined ? { manaValue: traits.manaValue } : {}) } : {}),
 		...(object.summoningSick === undefined ? {} : { summoningSick: object.summoningSick }),
 		...(object.ability ? { effect: [object.ability.basis, ...object.ability.instructions.map(summary)],
-			targets: structuredClone(object.ability.targets), source: { ...object.ability.source } } : {}) };
+			targets: structuredClone(object.ability.targets), ...(object.ability.source ? { source: { ...object.ability.source } } : {}) } : {}) };
 };
 
 function inPlanOrder<T extends { id: string }>(options: readonly T[], state: ReturnType<typeof planState>): T[] {
@@ -119,7 +119,7 @@ function happened(event: NonNullable<SeatView["history"]>[number], view: SeatVie
 		case "activated": { const source = view.objects?.find((one) => one.id === event.source.id && one.incarnation === event.source.incarnation) ?? view.objects?.find((one) => one.id === event.source.id);
 			return `${who(event.by)} activated ${source?.card ?? source?.token?.name ?? "an ability"} (${event.source.id}@${event.source.incarnation}): ${event.basis}`; }
 		case "attacked": return `${who(event.by)} attacked with ${event.attackers.map((one) => thing(one.object)).join(", ")}.`;
-		case "resolved": return `${who(event.by)} finished resolving the counted ability of ${event.source.id}@${event.source.incarnation}: ${event.basis}`;
+		case "resolved": return `${who(event.by)} finished resolving the counted ability of ${event.source ? `${event.source.id}@${event.source.incarnation}` : "no source"}: ${event.basis}`;
 		case "life": return `${who(event.who)} ${event.amount < 0 ? "lost" : "gained"} ${Math.abs(event.amount)} life.`;
 	}
 }
@@ -175,7 +175,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 	// watches belong to action/review questions, before those events happen.
 	if (!view.resolution) for (const watch of watches) names.add(watch.source.name);
 	for (const object of scoped.objects) if (object.ability) {
-		const name = view.objects?.find((one) => one.id === object.ability!.source.id)?.card;
+		const name = view.objects?.find((one) => one.id === object.ability!.source?.id)?.card;
 		if (name) names.add(name);
 	}
 	const step = view.window.kind === "turn" ? context.brief?.steps?.[view.window.step as keyof Brief["steps"]] : undefined;
