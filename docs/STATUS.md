@@ -13,12 +13,12 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 19 of 20: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator, Dimir Midrange, Mono-Black Aggro, 4c Reanimator, Azorius Momo, Lifegain, Jund Sacrifice, Mardu Discard |
-| Completed source-reviewed alpha games | 32, covering fourteen admitted decks; Bant, Dimir Midrange, Mono-Black, Reanimator and Momo await their first finishes |
+| Completed source-reviewed alpha games | 33, covering fifteen admitted decks; Dimir Midrange, Mono-Black, Reanimator and Momo await their first finishes |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Direct Typesafe Jev and CLI Haiku completed Mardu/Jund, Dimir/Jeskai and Jund/Lifegain. Bant/Prowess and Reanimator/Midrange run with carried briefs; Black/Midrange is ready to resume; Momo transfer and two old Azorius branches remain |
+| Current runtime work | Direct Typesafe Jev and CLI Haiku completed four pairings in this round, including Bant/Prowess. Black/Midrange and Reanimator/Midrange run with carried briefs; Momo/Landfall is ready to resume; two old Azorius branches need earlier source corrections |
 | Recent shared mechanics | Per-controller targets, combined mana values, solved Cases, explore completion, bound sacrifice costs, ninjutsu entry and waterbend payment |
-| Stored card assessments | 3,459 accepted: 3,303 complete and 156 deferred; 1,667 recorded refusals; sixteen unassessed cards reserved for Dwarves and sideboards |
+| Stored card assessments | 3,459 accepted: 3,305 complete and 154 deferred; 1,667 recorded refusals; sixteen unassessed cards reserved for Dwarves and sideboards |
 | Wider Standard qualification | All 4,818 outside-list candidates examined: 3,172 new complete, source-reviewed packages and 1,646 refusals; no unfinished submissions or new counted games |
 | Main-deck guides | Original 19 written; 57 provider calls, $0.8770 reported |
 | Validation | Type check and all 322 invariant tests pass: 236 fast and 86 whole-game |
