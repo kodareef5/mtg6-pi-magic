@@ -216,7 +216,10 @@ const subtypes = (scope: Scope, types: NonNullable<Selector["subtypes"]>): strin
 
 /** Freeze a source's named type choice for mana that can outlive that source. */
 export function chosenSelector(scope: Scope, selector: Selector): Selector {
+	const range = (one: Selector["manaValue"]) => typeof one?.parity === "object" ? { ...one, parity: scope.source?.choices?.[one.parity.chosen] ?? "" } : one;
 	return { ...selector, ...(selector.subtypes ? { subtypes: subtypes(scope, selector.subtypes) } : {}),
+		...(selector.power ? { power: range(selector.power) } : {}), ...(selector.toughness ? { toughness: range(selector.toughness) } : {}),
+		...(selector.manaValue ? { manaValue: range(selector.manaValue) } : {}),
 		...(typeof selector.name === "object" ? { name: scope.source?.choices?.[selector.name.chosen] ?? "" } : {}),
 		...(selector.not ? { not: chosenSelector(scope, selector.not) } : {}),
 		...(selector.any ? { any: selector.any.map((one) => chosenSelector(scope, one)) } : {}),
@@ -260,8 +263,12 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 	if (not && (not.types?.some((type) => traits.types.includes(type)) || not.subtypes && subtypes(scope, not.subtypes).some(subtype) ||
 		not.supertypes?.some((one) => traits.supertypes.includes(one)) || not.words?.some((word) => traits.words.includes(word)) || not.colors && colored(not.colors) ||
 		not.is && objects(scope, not.is).some((one) => one.id === object.id && one.incarnation === object.incarnation))) return false;
-	const within = (value: number | undefined, range?: { atLeast?: Amount; atMost?: Amount }) => !range ||
-		(value !== undefined && (range.atLeast === undefined || value >= amount(scope, range.atLeast)) && (range.atMost === undefined || value <= amount(scope, range.atMost)));
+	const within = (value: number | undefined, range?: Selector["manaValue"]) => {
+		if (!range) return true;
+		const parity = typeof range.parity === "object" ? scope.source?.choices?.[range.parity.chosen] : range.parity;
+		return value !== undefined && (range.atLeast === undefined || value >= amount(scope, range.atLeast)) && (range.atMost === undefined || value <= amount(scope, range.atMost)) &&
+			(range.parity === undefined || Number.isInteger(value) && (parity === "even" ? value % 2 === 0 : parity === "odd" && Math.abs(value % 2) === 1));
+	};
 	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness) || !within(traits.manaValue, selector.manaValue)) return false;
 	if (selector.tapped !== undefined && selector.tapped !== object.tapped) return false;
 	if (selector.designations && !selector.designations.every(one => object.designations?.includes(one))) return false;

@@ -1,0 +1,83 @@
+{
+	"card": "Gollum, Riddle Master",
+	"generated": "2026-10-10",
+	"source": "17bc020ca9f920b00e9d59f306fb3f2a5ae35db39410cfa080e88d78bba23940",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gollum, Riddle Master",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "As Gollum enters, choose odd or even. (Zero is even.)",
+				"choose": {
+					"as": "quality",
+					"options": [
+						"odd",
+						"even"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card.",
+				"event": {
+					"on": "cast",
+					"by": "opponent",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"manaValue": {
+							"parity": {
+								"chosen": "quality"
+							}
+						}
+					}
+				},
+				"effect": {
+					"unchosen": true,
+					"modes": [
+						{
+							"instructions": [
+								{
+									"do": "counters",
+									"on": "this",
+									"kind": "+1/+1",
+									"amount": 1
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "life",
+									"who": "opponent",
+									"amount": -2
+								},
+								{
+									"do": "life",
+									"who": "you",
+									"amount": 2
+								}
+							]
+						},
+						{
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

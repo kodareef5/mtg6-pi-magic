@@ -409,7 +409,15 @@ export function triggerWindow(table: Table): Pending | null {
 			...(trigger.bound ? { bound: trigger.bound } : {}), ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 		const modal = "modes" in trigger.effect;
 		const effects = "modes" in trigger.effect ? trigger.effect.modes : [trigger.effect];
+		const remember = "modes" in trigger.effect && trigger.effect.unchosen;
+		// Choosing, not resolving, uses a mode. The source's later incarnations start over.
+		const used = new Set(remember ? table.log.flatMap(receipt => receipt.changes.flatMap(change => {
+			const ability = change.do === "trigger" && change.action === "put" ? change.ability : undefined;
+			return ability?.trigger?.mode !== undefined && ability.source?.id === trigger.source?.id &&
+				ability.source?.incarnation === trigger.source?.incarnation && ability.basis === trigger.basis ? [ability.trigger.mode] : [];
+		})) : []);
 		const choices = effects.flatMap((effect, mode): Move[] => {
+			if (used.has(mode)) return [];
 			const slots = effect.targets ?? [], modeName = modal ? ` Mode ${mode + 1}: ${effect.instructions.map(summary).join(" ")}` : "";
 			const aims = slots.length ? targetings(slots, scope) : [trigger.targets ?? []];
 			return aims.map((targets): Move => {
@@ -418,6 +426,7 @@ export function triggerWindow(table: Table): Pending | null {
 					...(doubleFaced(table.printed[source?.card ?? ""]) ? { transformAt: trigger.transformAt ?? source?.transformed ?? 0 } : {}),
 					cost: { generic: 0, colors: [] }, paid: [], targets, slots: structuredClone(slots), instructions: structuredClone(effect.instructions),
 					trigger: { event: structuredClone(trigger.event), ...(trigger.chapter !== undefined ? { chapter: trigger.chapter } : {}), ...(trigger.check ? { check: structuredClone(trigger.check) } : {}), ...(trigger.may ? { may: true } : {}),
+						...(remember ? { mode } : {}),
 						...(trigger.limit === "once-per-turn-use" ? { limit: trigger.limit } : {}),
 						...(trigger.bound ? { bound: structuredClone(trigger.bound) } : {}) }, ...(trigger.x !== undefined ? { x: trigger.x } : {}) };
 				const aimed = slots.length ? aiming(targets, world, trigger.controller) : [];
@@ -433,7 +442,7 @@ export function triggerWindow(table: Table): Pending | null {
 			});
 		});
 		return choices.length ? choices : [{ option: { id: `trigger:${trigger.id}:removed`, label: `${name}: ${trigger.basis}`,
-			shows: modal ? "No mode has legal targets: remove the ability (603.3c)." : "No legal targets: it is removed from the stack (603.3d)." },
+			shows: modal ? `No ${remember ? "unchosen " : ""}mode has legal targets: remove the ability (603.3c).` : "No legal targets: it is removed from the stack (603.3d)." },
 			changes: [{ do: "trigger", action: "put", trigger: trigger.id, was: triggered(trigger) }], reason: "resolve" }];
 	});
 	return { situation: "trigger-order", seat: seat.id, question: "Choose one waiting trigger and its targets to put on the stack. Triggers put on later resolve first (603.3b).", moves };

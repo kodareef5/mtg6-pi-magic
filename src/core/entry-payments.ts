@@ -82,8 +82,8 @@ export function entryPayment(table: Table): Pending | null {
 	if (!next) return { situation: "replacement-order", seat: table.cursor.active, question: "Apply the prepared entry group.",
 		moves: [{ option: { id: "entry:finish", label: "Complete the entry group" }, changes: answered(table, entry, all), reason: entry.reason }] };
 	const choice = unanswered(entry, next), cards = next.object.card ? [next.object.card] : [], name = next.object.card ?? next.object.token!.name;
-	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${name} enters, choose a ${choice.from.replaceAll("-", " ")} for ${choice.as}.`,
-		moves: (choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${name}`, cards },
+	if (choice) return { situation: "replacement-order", seat: next.who, question: `As ${name} enters, choose ${"from" in choice ? `a ${choice.from.replaceAll("-", " ")}` : choice.options.join(" or ")} for ${choice.as}.`,
+		moves: ("options" in choice ? choice.options : choice.from === "creature-type" ? creatureTypeChoices() : basicLandTypes).map((value) => ({ option: { id: `entry:${next.index}:choose:${choice.as}:${value}`, label: `Choose ${value} for ${name}`, cards },
 			changes: answered(table, { ...entry, values: { ...entry.values, [next.index]: { ...entry.values?.[next.index], [choice.as]: value } } }, all), reason: entry.reason })) };
 	if (next.show) {
 		const ways = paymentChoices(table, { world: tableWorld(table), controller: next.who, source: next.object }, { show: next.show }, next.who, next.object.id);

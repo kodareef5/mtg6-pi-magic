@@ -95,14 +95,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Gollum, Riddle Master": {
-		"reason": "Gollum, Riddle Master is not ready: As Gollum enters, choose odd or even. (Zero is even.) — Unsupported entry choice: enters.choose supports basic land types and creature types, not a remembered odd/even choice.; Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card. — Unsupported standing trigger: matching spell mana-value parity against the remembered entry choice, choosing a mode as the trigger is put on the stack, and tracking previously chosen modes for this incarnation are not expressible in the supplied syntax.",
-		"decks": [
-			"Mono-Black Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Hydro-Man, Fluid Felon": {
 		"reason": "Hydro-Man, Fluid Felon is not ready: At the beginning of your end step, untap Hydro-Man. Until your next turn, he becomes a land and gains \"{T}: Add {U}.\" (He's not a creature during that time.) — Untapping, setting the card type to land, and granting the blue tap mana ability are expressible, but the required duration \"until your next turn\" is not. The available durations cannot expire the type-changing effect and granted mana ability as your next turn begins; restoring printed types later would not correctly end this effect amid other type-changing effects. This standing trigger cannot be deferred or shortened to end of turn.",
 		"decks": [

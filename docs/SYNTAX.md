@@ -351,7 +351,11 @@ Counter watches use `on: "counters"`, optional `counter` for the kind and
 See [counter watches](examples/counter-watches.md) for batching and actor limits.
 
 A standing watch's `effect.modes` offers one mode before its controller puts the
-trigger on the stack. `event.ordinal` selects a numbered spell cast by that
+trigger on the stack. `effect.unchosen: true` excludes modes previously chosen
+for this ability and source incarnation, even if they were countered.
+`enters.choose` accepts `options` for an explicit named choice. Numeric selector
+ranges accept `parity` as odd, even or `{chosen: key}`; zero is even.
+`event.ordinal` selects a numbered spell cast by that
 caster this turn, independently of a later resolution-time condition. See
 [modal triggers](examples/modal-triggers.md) for target scope and limits.
 

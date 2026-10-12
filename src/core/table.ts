@@ -155,7 +155,7 @@ export type Ability = {
 	words?: string[];
 	x?: number;
 	/** Set when a triggered ability was put on the stack: what it needs to resolve. */
-	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound" | "chapter" | "limit">;
+	trigger?: Pick<Trigger, "check" | "may" | "event" | "bound" | "chapter" | "limit"> & { mode?: number };
 };
 /** An announced cast or activation always has a physical source; inherent triggers need none. */
 export type Activation = Ability & { source: ObjectRef };
@@ -172,7 +172,7 @@ export type Trigger = {
 	/** "This": the object whose ability triggered, as it was when it triggered. */
 	source?: ObjectRef;
 	basis: string;
-	effect: Effect | { modes: Effect[] };
+	effect: Effect | { modes: Effect[]; unchosen?: true };
 	/** The intervening "if", checked as it triggers and again as it resolves (603.4). */
 	check?: Condition;
 	/** "You may": asked as it resolves. */

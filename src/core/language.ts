@@ -52,7 +52,8 @@ export const ObjectRef = Type.Union([
 ]);
 export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source|bound:[a-z][a-z0-9-]*)|owner:(this|attached|target:[0-9]+|event:object|bound:[a-z][a-z0-9-]*))$" });
 const Side = Type.Union([PlayerRef, Type.Literal("any")]);
-const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.Optional(Type.Ref("Amount")) });
+const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.Optional(Type.Ref("Amount")),
+	parity: Type.Optional(Type.Union([one("odd", "even"), object({ chosen: text })])) });
 
 /** Objects that exist and match. Each field narrows; a list field matches any of its members. */
 const SelectorFields = {
@@ -248,7 +249,7 @@ export const Defs = {
 
 	Effect: object({ targets: Type.Optional(Type.Array(Type.Ref("Target"))), instructions: Type.Array(Type.Ref("Instruction")) }),
 	/** A standing modal trigger chooses exactly one complete effect as it is put on the stack. */
-	TriggerEffect: Type.Union([Type.Ref("Effect"), object({ modes: Type.Array(Type.Ref("Effect"), { minItems: 2 }) })]),
+	TriggerEffect: Type.Union([Type.Ref("Effect"), object({ modes: Type.Array(Type.Ref("Effect"), { minItems: 2 }), unchosen: Type.Optional(Type.Literal(true)) })]),
 
 	TokenSpec: object({
 		name: Type.String(), types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
@@ -369,7 +370,8 @@ export const Defs = {
 				/** A linked trigger from the final applied copy effect, with bound:copied naming that card. */
 				whenCopied: Type.Optional(Type.Ref("Effect")),
 				add: Type.Optional(object({ creatureTypes: Type.Optional(Type.Array(text)), words: Type.Optional(Type.Array(text)) })) })),
-			choose: Type.Optional(object({ as: text, from: one("basic-land-type", "creature-type") })),
+			choose: Type.Optional(Type.Union([object({ as: text, from: one("basic-land-type", "creature-type") }),
+				object({ as: text, options: Type.Array(text, { minItems: 1, uniqueItems: true }) })])),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), if: Type.Optional(Type.Ref("Condition")),
 			/** Optional entry payments: life or choosing public permanents/revealing hand cards. Other entry costs remain unsupported. */
 			unlessPay: Type.Optional(Type.Union([object({ life: positive }), object({ show: object({ choose: Type.Ref("Selector"), count: positive }) })])) }),

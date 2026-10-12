@@ -32,7 +32,50 @@ but do not narrow the set counted by `ordinal`.
 
 Trigger policy can name the intended mode in its existing `purpose` guidance;
 the pilot still chooses an offered option. This form supports one mode chosen
-by the ability's controller. Choosing several modes, another player choosing,
-or remembering which modes were chosen on earlier triggers remains unsupported.
+by the ability's controller. Choosing several modes or another player choosing
+remains unsupported.
 Ordinal matching currently applies only to cast events. Acceptance checks the
 shape and source quote, not the interpretation's rules legality.
+
+## Remembered modes and entry choices
+
+`enters.choose` can supply an explicit `options` list instead of a type catalog.
+The controller chooses before the entry group commits. The named value belongs
+to that battlefield incarnation and is public after entry.
+
+Numeric selector ranges can use `parity: odd`, `parity: even`, or
+`parity: {chosen: key}`. A missing or unrelated choice matches nothing. Zero is
+even. A cast event reads the spell's mana value on the stack, including X.
+
+`effect.unchosen: true` restricts its modes to those not chosen for the same
+ability on that source incarnation. Choosing a mode consumes it when the
+trigger goes on the stack, even if the trigger is countered. The choices persist
+across turns and changes of controller. Removing and returning the source gives
+it a fresh incarnation. Several waiting triggers consult the choices already
+put on the stack. When none remain, the ability is removed under 603.3c.
+
+```json package
+{
+  "card": "Gollum, Riddle Master",
+  "printedCast": true,
+  "registers": [
+    { "kind": "enters", "basis": "As Gollum enters, choose odd or even. (Zero is even.)",
+      "choose": { "as": "quality", "options": ["odd", "even"] } },
+    { "kind": "watch",
+      "basis": "Whenever an opponent casts a spell with mana value of the chosen quality, choose one that hasn't been chosen —\n• Put a +1/+1 counter on Gollum.\n• Each opponent loses 2 life and you gain 2 life.\n• Draw a card.",
+      "event": { "on": "cast", "by": "opponent", "of": { "zones": ["stack"], "manaValue": { "parity": { "chosen": "quality" } } } },
+      "effect": { "unchosen": true, "modes": [
+        { "instructions": [{ "do": "counters", "on": "this", "kind": "+1/+1", "amount": 1 }] },
+        { "instructions": [
+          { "do": "life", "who": "opponent", "amount": -2 },
+          { "do": "life", "who": "you", "amount": 2 }
+        ] },
+        { "instructions": [{ "do": "draw", "who": "you", "count": 1 }] }
+      ] } }
+  ]
+}
+```
+
+This tracks choices from this source's ability. It does not implement choosing
+multiple modes, transferring remembered choices to copies, or shared choices
+among different sources.
