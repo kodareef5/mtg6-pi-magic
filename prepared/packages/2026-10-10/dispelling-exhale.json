@@ -3,16 +3,11 @@
 	"generated": "2026-10-10",
 	"source": "2642709c65db007ae9e97e7eb1c855a9014c7af5605e69b5d82991e8721f7342",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dispelling Exhale",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Cast without beholding a Dragon: counter target spell unless its controller pays {2}.",
-				"basis": "As an additional cost to cast this spell, you may behold a Dragon. (You may choose a Dragon you control or reveal a Dragon card from your hand.) ... Counter target spell unless its controller pays {2}. If a Dragon was beheld, counter that spell unless its controller pays {4} instead.",
 				"source": {
 					"card": "Dispelling Exhale",
 					"zones": [
@@ -22,11 +17,45 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"claim": "Cast without beholding a Dragon: counter target spell unless its controller pays {2}.",
+				"basis": "As an additional cost to cast this spell, you may behold a Dragon. (You may choose a Dragon you control or reveal a Dragon card from your hand.)\nCounter target spell unless its controller pays {2}. If a Dragon was beheld, counter that spell unless its controller pays {4} instead.",
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{U}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
 			},
 			{
-				"claim": "Cast with the optional additional cost of beholding a Dragon you control or revealing a Dragon card from your hand: counter target spell unless its controller pays {4} instead.",
-				"basis": "As an additional cost to cast this spell, you may behold a Dragon. (You may choose a Dragon you control or reveal a Dragon card from your hand.) ... Counter target spell unless its controller pays {2}. If a Dragon was beheld, counter that spell unless its controller pays {4} instead.",
 				"source": {
 					"card": "Dispelling Exhale",
 					"zones": [
@@ -36,8 +65,59 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"claim": "Cast with the optional additional cost of beholding a Dragon you control or revealing a Dragon card from your hand: counter target spell unless its controller pays {4} instead.",
+				"basis": "As an additional cost to cast this spell, you may behold a Dragon. (You may choose a Dragon you control or reveal a Dragon card from your hand.)\nCounter target spell unless its controller pays {2}. If a Dragon was beheld, counter that spell unless its controller pays {4} instead.",
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{U}",
+					"show": {
+						"choose": {
+							"zones": [
+								"hand",
+								"battlefield"
+							],
+							"controller": "you",
+							"subtypes": [
+								"Dragon"
+							]
+						},
+						"count": 1
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{4}"
+							}
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

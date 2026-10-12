@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { start, commit } from "../src/core/commit.ts";
 import { deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
-import { activationChanges } from "../src/core/procedures.ts";
+import { activationChanges, checkProcedure } from "../src/core/procedures.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { editWork } from "../src/core/work-tools.ts";
 import { characteristics } from "../src/core/characteristics.ts";
@@ -56,8 +57,9 @@ test("costs select distinct available resources and pay once before any conditio
 	passBoth(table); finish(table);
 	assert.equal(claw.zone, "graveyard"); assert.equal(table.seats[0]!.life, 22);
 	assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
-	for (const zone of ["battlefield", "hand"] as const) {
-	const beheld = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], `behold-${zone}`);
+	const exhale = JSON.parse(readFileSync("prepared/packages/2026-10-10/dispelling-exhale.json", "utf8")).package.procedures.map(checkProcedure);
+	for (const zone of ["battlefield", "hand"] as const) for (const dragon of [false, true]) {
+	const beheld = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], `behold-${zone}-${dragon}`);
 	const changeling: Registration = { kind: "continuous", basis: "Changeling (This card is every creature type.)",
 		affects: { is: "this", zones: ["hand", "battlefield", "stack"] }, change: { subtypes: { allCreatureTypes: true } } };
 	place(beheld, 1, "hand", "Shock");
@@ -74,17 +76,23 @@ test("costs select distinct available resources and pay once before any conditio
 		assert.equal(project(beheld, 1).objects!.find((one) => one.id === core.id)?.traits, undefined, "a private characteristic reveals no identity");
 	}
 	place(beheld, 0, "hand", "Dispelling Exhale");
-	commit(beheld, [{ do: "add-mana", who: 0, colors: ["U", "C"] }, { do: "add-mana", who: 1, colors: ["R"] }], "game-setup");
+	commit(beheld, [{ do: "add-mana", who: 0, colors: ["U", "C"] }, { do: "add-mana", who: 1, colors: ["R", "C", "C", "C"] }], "game-setup");
 	const before = structuredClone(beheld), startAt = beheld.ledger.length;
 	announce(beheld, { source: { card: "Shock", zones: ["hand"] }, claim: "Shock", basis: beheld.printed.Shock!.oracle, timing: "spell",
 		targets: [{ player: "opponent" }], instructions: [{ do: "damage", to: "target:0", amount: 2 }] });
 	apply(beheld, "pass", "model", "chosen");
-	const shown = announce(beheld, example("Dispelling Exhale with a beheld Dragon"));
-	assert.deepEqual(shown.activation.cost.shown, [{ id: core.id, incarnation: core.incarnation, ...(zone === "hand" ? { reveal: true } : {}) }]);
-	assert.equal(beheld.log.at(-1)!.changes.some((change) => change.do === "reveal"), zone === "hand", "only a Dragon in hand must be revealed");
-	passBoth(beheld); finish(beheld);
+	assert.ok(!characteristics(beheld, core)!.types.includes("creature"), "a Dragon artifact can be beheld without becoming a creature");
+	const shown = announce(beheld, exhale[dragon ? 1 : 0]);
+	assert.deepEqual(shown.activation.cost.shown ?? [], dragon ? [{ id: core.id, incarnation: core.incarnation, ...(zone === "hand" ? { reveal: true } : {}) }] : []);
+	assert.equal(beheld.log.at(-1)!.changes.some((change) => change.do === "reveal"), dragon && zone === "hand", "only a beheld Dragon in hand must be revealed");
+	passBoth(beheld);
+	const pending = structuredClone(beheld), pendingAt = beheld.ledger.length;
+	assert.equal(nextDecision(beheld)!.options.some(one => one.label.startsWith("Pay ")), !dragon, "three mana pays the ordinary tax but not the beheld tax");
+	step(beheld, label => label.startsWith(dragon ? "Do not pay" : "Pay ")); finish(beheld);
+	if (!dragon) { passBoth(beheld); finish(beheld); }
 	assert.equal(cardsIn(beheld, "stack").length, 0);
-	assert.equal(beheld.seats[0]!.life, 20);
+	assert.equal(beheld.seats[0]!.life, dragon ? 20 : 18);
 	assert.deepEqual(relive(before, beheld.ledger.slice(startAt)), beheld);
+	assert.deepEqual(relive(pending, beheld.ledger.slice(pendingAt)), beheld, "a clone retains the tax fixed by the announcement");
 	}
 });

@@ -28,6 +28,12 @@ checks the stated payment and source text; it does not certify the interpretatio
 }
 ```
 
+Beholding a Dragon does not require a creature. Firdoch Core's changeling
+makes the unanimated Kindred Artifact eligible in hand or on the battlefield.
+The ordinary Exhale variant omits the behold cost and asks the target spell's
+controller to pay two mana; the beheld variant asks for four. Choosing a Dragon on the battlefield reveals
+nothing new, while choosing one in hand records its reveal.
+
 Dyadrine's [attack example](cast-facts.md) instead pays during resolution. It
 offers a complete pair of creatures with counters, or decline. One creature
 cannot supply both shares; if the pair is unavailable, no counter is removed
