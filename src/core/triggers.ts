@@ -116,6 +116,8 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 					found.push(left);
 					// 700.4: dies means put into a graveyard from the battlefield.
 					if (is.zone === "graveyard") found.push({ ...left, on: "dies" });
+					// 603.10a: sacrifice watches use the permanent and its controller before departure, even when its destination was replaced.
+					if (change.reason === "sacrifice") found.push({ ...left, on: "sacrificed", player: was.controller, amount: 1 });
 				}
 				break;
 			}
@@ -196,7 +198,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	return found;
 }
 
-const eventPlayer = (one: Occurrence) => one.on === "keyword" || one.on === "life-gained" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
+const eventPlayer = (one: Occurrence) => one.on === "keyword" || one.on === "life-gained" || one.on === "sacrificed" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
 
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
@@ -364,7 +366,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 			if (note.kind !== "delay" || note.written > table.cursor.clock) continue;
 			// A while-source delay may have expired in this group. Departures
 			// still read its prior existence; later events read the current notes.
-			if ((note.event.on === "leaves" || note.event.on === "dies") !== (world !== after)) continue;
+			if (["leaves", "dies", "sacrificed"].includes(note.event.on) !== (world !== after)) continue;
 			const scope: Scope = { world, controller: note.by, source: world.lastKnown(note.fixed.source)?.object ?? after.lastKnown(note.fixed.source)?.object,
 				targets: note.fixed.targets, bound: note.fixed.bound, ...(note.fixed.x !== undefined ? { x: note.fixed.x } : {}) };
 			const fired = raise(scope, note.by, note.fixed.source, `Delayed: ${note.effect.instructions.map(summary).join(" ")}`, note.event, {

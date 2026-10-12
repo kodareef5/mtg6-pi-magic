@@ -7,14 +7,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Biotech Specialist": {
-		"reason": "Biotech Specialist is not ready: Whenever you sacrifice an artifact, this creature deals 2 damage to target opponent. — The event syntax cannot distinguish sacrifice from other battlefield departures; neither a leaves watch nor a dies watch faithfully registers this trigger.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Carnage, Crimson Chaos": {
 		"reason": "Carnage, Crimson Chaos is not ready: Mayhem {B}{R} — Mayhem grants an alternative graveyard cast only for a card discarded this turn. The native permit.cast registration cannot express this conditional permission; an unconditional graveyard permission would incorrectly broaden the ability.",
 		"decks": [
@@ -127,14 +119,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Obsessive Pursuit": {
-		"reason": "Obsessive Pursuit is not ready: Whenever you attack, put X +1/+1 counters on target attacking creature, where X is the number of permanents you've sacrificed this turn. If X is three or more, that creature gains lifelink until end of turn. — Unsupported operation: reading the number of permanents sacrificed by you this turn. The available history amounts do not include sacrifices, so neither the counter amount nor the lifelink threshold can be prepared faithfully.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Oildeep Gearhulk": {
 		"reason": "Oildeep Gearhulk is not ready: When this creature enters, look at target player's hand. You may choose a card from it. If you do, that player discards that card, then draws a card. — Missing operation: privately looking at another player's entire hand and optionally choosing a card from it for that player to discard.",
 		"decks": [
@@ -236,14 +220,6 @@
 		"decks": [
 			"Azorius Momo",
 			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
-	"The Sackville-Bagginses": {
-		"reason": "The Sackville-Bagginses is not ready: Whenever you sacrifice a token, target opponent loses 1 life. — The event syntax cannot distinguish a sacrifice from other battlefield departures; a sacrifice-specific watch is required.",
-		"decks": [
-			"Jund Sacrifice"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"

@@ -2,7 +2,7 @@
 import type { Receipt, Table } from "./table.ts";
 import type { SeatId } from "./types.ts";
 
-export type PhysicalAction = "descended" | "entered-face-down" | "turned-face-up";
+export type PhysicalAction = "descended" | "entered-face-down" | "turned-face-up" | "sacrificed";
 export type PhysicalEvent = { kind: "physical"; action: PhysicalAction; by: SeatId };
 
 /** 700.11 counts permanent cards arriving in the graveyard, even if they later leave.
@@ -15,6 +15,7 @@ export function physicalHistory(receipt: Receipt, printed: Table["printed"]): Ph
 			const was = objects[change.what];
 			if (!was || was.zone === change.to && change.to !== "exile") continue;
 			const controller = change.controller ?? was.owner;
+			if (was.zone === "battlefield" && change.reason === "sacrifice") events.push({ kind: "physical", action: "sacrificed", by: was.controller });
 			if (change.to === "graveyard" && was.card && !was.token && !was.copy &&
 				/\b(Artifact|Battle|Creature|Enchantment|Land|Planeswalker)\b/.test(printed[was.card]?.type.split("—")[0] ?? ""))
 				events.push({ kind: "physical", action: "descended", by: was.owner });

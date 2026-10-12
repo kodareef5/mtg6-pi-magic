@@ -1,0 +1,116 @@
+{
+	"card": "The Sackville-Bagginses",
+	"generated": "2026-10-10",
+	"source": "346c3672cd35449daac0eef5ab8dd0b8b0af5dfecb4aea315fec948cccfbc366",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "The Sackville-Bagginses",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When The Sackville-Bagginses enter, you may sacrifice another creature or artifact. If you do, draw a card and create a Treasure token.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"sacrifice": {
+									"choose": {
+										"zones": [
+											"battlefield"
+										],
+										"types": [
+											"creature",
+											"artifact"
+										],
+										"controller": "you",
+										"other": true
+									},
+									"count": 1
+								}
+							},
+							"may": true,
+							"as": "sacrificed"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "sacrificed"
+							}
+						},
+						{
+							"do": "token",
+							"count": 1,
+							"if": {
+								"bound": "sacrificed"
+							},
+							"spec": {
+								"name": "Treasure",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Treasure"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "mana",
+										"basis": "{T}, Sacrifice this token: Add one mana of any color.",
+										"cost": {
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"any": 1
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice a token, target opponent loses 1 life.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"token": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "life",
+							"who": "target:0",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

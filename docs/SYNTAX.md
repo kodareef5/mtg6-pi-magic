@@ -155,6 +155,7 @@ An **amount** is worked out when it is read and never stored.
 | `{resolution: true}` | this ability's current resolution number this turn, starting at one; Belladonna Took's first, second and third effects |
 | `half` of an amount, with `round: "up"` or `"down"` | Cecil's comparison with half starting life |
 | `history` this turn: `cast`, `attacked`, `life-lost`, `life-gained`, with `of` and `by` | Witchstalker Frenzy, Magebane Lizard, Hired Claw |
+| `history: "sacrificed"`, with `by` | Obsessive Pursuit; counts permanent sacrifices, including tokens and replacement exile, without past-object selectors |
 | `x` | the X announced for this spell or ability; a permanent remembers its X (107.3m) |
 | `sum` | amounts added together: Calamitous Cave-In's Caves plus Cave cards |
 | `negate` | an amount taken away |
@@ -755,6 +756,14 @@ Life-gain watches use `on: "life-gained"` and `by` for the recipient.
 Lifelink groups damage by source before raising these events; zero gains and
 life payments do not qualify. See [life-gain events](examples/life-gain.md).
 This adds no life-gain replacement or source-selector support.
+
+Sacrifice watches use `on: "sacrificed"`, `by` for the sacrificing player,
+and `of` for the permanent's characteristics before departure. They look back
+under 603.10a, including when the watching permanent leaves in the same group.
+Replacement exile still counts; destruction and ordinary departures do not.
+`event:amount` is the number of matching sacrifices and `event:player` retains
+their actor. [Sacrifice events](examples/sacrifice-events.md) exercises costs,
+token sacrifices and turn counts without certifying a sacrifice's legality.
 
 An `emblem` instruction gives its recipient an independent command-zone object
 with the stated registrations. Its effects and default watches function there

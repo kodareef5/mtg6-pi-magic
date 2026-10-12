@@ -1,0 +1,119 @@
+{
+	"card": "Biotech Specialist",
+	"generated": "2026-10-10",
+	"source": "2795dce0392053113ae882721dbed9a88a94de76120c21590926db441e55e63e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Biotech Specialist",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this creature enters, create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"spec": {
+								"name": "Lander",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Lander"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+										"cost": {
+											"mana": "{2}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"instructions": [
+												{
+													"do": "choose",
+													"who": "you",
+													"from": {
+														"zones": [
+															"library"
+														],
+														"owner": "you",
+														"types": [
+															"land"
+														],
+														"supertypes": [
+															"basic"
+														]
+													},
+													"count": 1,
+													"upTo": true,
+													"as": "land"
+												},
+												{
+													"do": "move",
+													"what": "bound:land",
+													"to": "battlefield",
+													"tapped": true,
+													"reason": "resolve"
+												},
+												{
+													"do": "shuffle",
+													"who": "you"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you sacrifice an artifact, this creature deals 2 damage to target opponent.",
+				"event": {
+					"on": "sacrificed",
+					"by": "you",
+					"of": {
+						"zones": [
+							"battlefield"
+						],
+						"types": [
+							"artifact"
+						]
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"player": "opponent"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"to": "target:0",
+							"amount": 2
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

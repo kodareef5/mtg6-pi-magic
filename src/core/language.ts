@@ -132,7 +132,7 @@ export const Defs = {
 		/** This turn so far, read from what was recorded. */
 		object({ history: one("cast", "attacked", "life-lost", "life-gained"), of: Type.Optional(Type.Ref("Selector")), by: Type.Optional(Side) }),
 		/** Physical actions counted for their event-time player, with no hidden object identity. */
-		object({ history: one("descended", "entered-face-down", "turned-face-up"), by: Type.Optional(Side) }),
+		object({ history: one("descended", "entered-face-down", "turned-face-up", "sacrificed"), by: Type.Optional(Side) }),
 		/** The X announced for this spell or ability; a permanent remembers the X it was cast with (107.3m). */
 		object({ x: Type.Literal(true) }),
 		object({ sum: Type.Array(Type.Ref("Amount"), { minItems: 2 }) }),
@@ -223,7 +223,7 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime", "life-gained"),
+		on: one("enters", "leaves", "dies", "sacrificed", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime", "life-gained"),
 		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),

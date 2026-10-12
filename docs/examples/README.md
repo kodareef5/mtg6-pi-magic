@@ -72,6 +72,7 @@ schemas, and every `basis` is checked against the card's text.
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
 | `draw-replacements.md` | conditional increases to a whole draw instruction and recorded replacement order |
 | `life-gain.md` | life-gain occurrences, lifelink source grouping, Starscape offspring and Amalia's explore instructions |
+| `sacrifice-events.md` | pre-departure sacrifice watches, turn counts, and Jund's Lander, Clue and Treasure interactions |
 | `emblems.md` | command-zone emblem objects, lasting characteristic effects and Ajani's loyalty abilities |
 | `animation.md` | crew, a land becoming a creature, layer 5 color changes, earthbend, changing creature types and granting a trigger |
 | `x-costs.md` | X in a cost, a permanent remembering X, counted X, `sum`, damage to each |
