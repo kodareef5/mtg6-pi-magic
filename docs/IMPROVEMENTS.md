@@ -31,26 +31,24 @@ the preparation states, known source issues and resumable worklists. [Status](ST
 the current game evidence. Direct Jev and CLI Haiku have cleared the provider
 funding blocker.
 
-1. Exercise representative newly prepared families through registered real decks.
-   Repair the imported source issues identified in Coverage before their affected
-   interactions. Revisit wider-pool refusals with a concrete existing expression
-   or a shared operation; retain unsupported answers and separate inference failures.
-2. Resume games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
-   and finish the corrected Azorius continuations. Validate complete-payment menus
-   across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
-   Review runtime procedures and exercised standing terms against their source,
-   including casting opportunities the engine failed to offer. Repair before
-   the first affected action and keep rejected branches.
-3. All nineteen main decks have standing coverage. Prioritize stopped games
-   and the ten lists without a first reviewed finish. Mardu's graveyard, discard,
-   mayhem and returned-creature grants have direct tests; full games must still
-   exercise their deferred uses and interactions. Keep refused meanings in the
-   ledger until their shared operations are implemented.
-   Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
-   Sideboard-only refusals do not delay this alpha.
-4. Retain reviewed runtime uses in the reusable store, preserving complete
-   abilities, target scope, instruction order and additional casting costs.
-   Syntax and source-quote checks alone do not establish correct interpretation.
+1. Resume the two stopped Azorius pairings and the ten prepared pairings covering
+   every original list without a reviewed finish. Use direct Jev and CLI Haiku,
+   two games at a time, carrying each journal's accepted meanings and briefs.
+   A stopped game supplies the next concrete runtime or interpretation fix.
+2. Review every completed game's new procedures, exercised standing terms and
+   casting opportunities against the pinned source. Repair before the first
+   affected action, preserve rejected branches, and check replay and continuation
+   from saved prefixes. Only then count a finish. Retain reviewed runtime uses
+   in the reusable store, preserving target scope, order and additional costs.
+3. Repair the imported source issues identified in Coverage before their affected
+   interactions. Complete the original nineteen lists' first reviewed games
+   before widening the pool. Repeat imported pairings in both seat orders using
+   compatible saved briefs; exercise Grove's Bounty's announced division and
+   the newer graveyard, discard, mayhem and returned-creature grants in play.
+4. After those finishes, exercise representative newly prepared families through
+   registered real decks. Revisit refusals with a concrete existing expression
+   or a shared operation. Keep inference failures separate from unsupported
+   meanings. Dwarves and sideboards remain later work.
 
 Staged announcements are live. Priority chooses a use; X, targets, additional
 costs and complete mana payments follow as recorded decisions, with individual

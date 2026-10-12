@@ -108,8 +108,8 @@ establish those interactions.
 
 | Order | Work | Completion evidence |
 | --- | --- | --- |
-| 1 | Wider-pool qualification with existing mechanics: first pass complete. Revisit recorded refusals only with a concrete existing representation or new shared operation. | All 4,818 candidates have a checked outcome: 3,172 new complete packages and 1,646 refusals; no unfinished submissions. |
-| 2 | Exercise the original nineteen lists and representative newly qualified families. Ten original lists have no counted finish. Direct Typesafe Jev and CLI Haiku work. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Then swapped seats and imported-deck opponents. |
+| 1 | Resume stopped games and the ten prepared pairings covering the original lists without a counted finish. Use direct Typesafe Jev and CLI Haiku, two games at a time. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Preserve failed branches and reuse their preparation. |
+| 2 | After the original nineteen lists finish, exercise representative newly qualified families. Revisit refusals only with a concrete existing representation or shared operation. | The wider pass already has 3,172 new complete packages and 1,646 refusals from 4,818 candidates. Each new family still needs game evidence. |
 | 3 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
 | 4 | Reassess sideboard refusals and the additional unassessed sideboard cards. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |
 | 5 | Implement the shared missing operations identified by the wider assessment, then reassess affected cards and add representative legal lists. | Each expansion earns the same game evidence as the first pool. Do not implement thousands of isolated exceptions. |
