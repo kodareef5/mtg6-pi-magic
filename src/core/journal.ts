@@ -37,6 +37,8 @@ export type Header = {
 	searchesFrom?: number;
 	/** Ledger version at which deathtouch expires after each state-based check. */
 	deathtouchFrom?: number;
+	/** Ledger version at which cleanup collects a simultaneous discard group. */
+	discardsFrom?: number;
 	/** The game id. Also the directory a published game lives in. */
 	id: string;
 	format: string;
@@ -425,6 +427,8 @@ export function replay(
 	else delete initial.searchesFrom;
 	if (header.deathtouchFrom !== undefined) initial.deathtouchFrom = header.deathtouchFrom;
 	else delete initial.deathtouchFrom;
+	if (header.discardsFrom !== undefined) initial.discardsFrom = header.discardsFrom;
+	else delete initial.discardsFrom;
 	// A catalog cannot change the options of a journal that never pinned it.
 	if (!header.cards.names) delete initial.cardNames;
 	else if (initial.cardNames?.sha256 !== header.cards.names.sha256) throw new Error(`${path} cannot be replayed here: Oracle name data differs from the game's pinned source`);

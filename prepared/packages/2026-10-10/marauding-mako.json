@@ -1,0 +1,60 @@
+{
+	"card": "Marauding Mako",
+	"generated": "2026-10-10",
+	"source": "ef17df553f1229593770c04053db16f8cc074db7f95ae5ba171aaf89d332f735",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marauding Mako",
+		"registers": [
+			{
+				"basis": "Whenever you discard one or more cards, put that many +1/+1 counters on this creature.",
+				"kind": "watch",
+				"event": {
+					"on": "discarded",
+					"by": "you",
+					"batch": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"event": "amount"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Marauding Mako",
+					"zones": [
+						"hand"
+					],
+					"controller": "self"
+				},
+				"claim": "Cycle Marauding Mako",
+				"basis": "Cycling {2} ({2}, Discard this card: Draw a card.)",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"discard": "this"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

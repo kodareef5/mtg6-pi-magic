@@ -187,6 +187,8 @@ function take(
 /** A listed action and its bookkeeping are one committed event. */
 function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 	if (table.payment || table.announcement) return [];
+	// 514.1's discard event precedes 514.2's expiry, so its watches still see temporary abilities.
+	if (p.situation === "turn-based" && table.cursor.steps[0] === "cleanup" && table.discardsFrom !== undefined && table.ledger.length >= table.discardsFrom) return [];
 	const id = move.option.id;
 	if (table.cursor.steps[0] === "cleanup" && table.cursor.stepDone && !table.cursor.cleanupPriority &&
 		(p.situation === "state-based" && move.changes.some(one => one.do !== "state-check") || p.situation === "trigger-order")) return [{ do: "turn", action: "priority" }];

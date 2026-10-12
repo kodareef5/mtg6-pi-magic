@@ -116,6 +116,32 @@ test("cleanup keeps the discard obligation pending until the hand fits", () => {
 	assert.equal(nextDecision(built), null);
 	advance(built);
 	assert.equal(built.cursor.active, 1);
+	// New journals collect the whole cleanup discard privately, then move it together before expiry.
+	const grouped = table(); grouped.discardsFrom = 0; main(grouped, 0, 1, "end");
+	commit(grouped, cardsIn(grouped, "library", 0).slice(0, 2).map(card => ({ do: "move", what: card.id, to: "hand", reason: "game-setup" })), "game-setup");
+	const source = cardsIn(grouped, "hand", 0)[0]!;
+	commit(grouped, [{ do: "move", what: source.id, to: "battlefield", reason: "game-setup" }], "game-setup");
+	commit(grouped, [{ do: "note", note: { kind: "label", on: { id: source.id, incarnation: source.incarnation }, by: 0, until: "end-of-turn", text: "Temporary discard watcher fixture", change: { registers: [
+		{ kind: "watch", basis: "Simultaneous cleanup fixture", event: { on: "discarded", by: "you", batch: true }, effect: { instructions: [{ do: "life", who: "you", amount: { event: "amount" } }] } }
+	] } } }, { do: "move", what: cardsIn(grouped, "library", 0)[0]!.id, to: "hand", reason: "game-setup" }], "game-setup");
+	passBoth(grouped); advance(grouped); assert.equal(grouped.cursor.steps[0], "cleanup");
+	const before = structuredClone(grouped), hidden = project(grouped, 1), hand = cardsIn(grouped, "hand", 0); assert.equal(hand.length, 9);
+	const first = hand[0]!, second = hand[1]!, logs = grouped.log.length;
+	apply(grouped, `discard:${first.id}`, "model", "chosen");
+	assert.equal(cardsIn(grouped, "hand", 0).length, 9); assert.equal(grouped.log.length, logs); assert.equal(grouped.waiting.length, 0);
+	assert.deepEqual(project(grouped, 1), hidden, "selecting a private discard leaks nothing"); assert.match(JSON.stringify(project(grouped, 0)), /Selected for cleanup discard/);
+	const selected = structuredClone(grouped); nextDecision(grouped); assert.deepEqual(grouped, selected);
+	apply(grouped, `discard:${first.id}`, "model", "chosen"); assert.equal(grouped.cursor.discarding, undefined);
+	apply(grouped, `discard:${second.id}`, "model", "chosen"); apply(grouped, `discard:${first.id}`, "model", "chosen");
+	assert.equal(cardsIn(grouped, "hand", 0).length, 7); assert.equal(grouped.cursor.discarding, undefined); assert.equal(grouped.cursor.stepDone, false);
+	assert.equal(grouped.waiting.length, 1); assert.equal(grouped.waiting[0]!.event.amount, 2);
+	assert.equal(grouped.log.at(-1)!.changes.filter(one => one.do === "move").length, 2); assert.ok(grouped.notes.some(one => one.until === "end-of-turn"));
+	assert.equal(nextDecision(grouped), null); advance(grouped); assert.equal(grouped.notes.some(one => one.until === "end-of-turn"), false);
+	const trigger = nextDecision(grouped)!; assert.equal(trigger.situation, "trigger-order"); apply(grouped, trigger.options[0]!.id, "model", "chosen");
+	assert.equal(grouped.cursor.cleanupPriority, true); passBoth(grouped); while (grouped.resolution) step(grouped); assert.equal(grouped.seats[0]!.life, 22);
+	while (!nextDecision(grouped)) advance(grouped);
+	assert.deepEqual(relive(structuredClone(before), grouped.ledger.slice(before.ledger.length)), grouped);
+	assert.deepEqual(relive(structuredClone(selected), grouped.ledger.slice(selected.ledger.length)), grouped);
 
 	// 514.2 removes damage and temporary effects together. 514.3a checks
 	// afterward, opens priority for either exception, and repeats cleanup.

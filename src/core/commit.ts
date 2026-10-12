@@ -61,7 +61,7 @@ export type Entrant = {
  * library and its sideboard outside the game. Printed facts come from the
  * pinned card file, the shipped Standard file by default.
  */
-export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number; deathtouchFrom?: number } = {}): Table {
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number; deathtouchFrom?: number; discardsFrom?: number } = {}): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -75,6 +75,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		...(options.excessManaFrom !== undefined ? { excessManaFrom: options.excessManaFrom } : {}),
 		...(options.searchesFrom !== undefined ? { searchesFrom: options.searchesFrom } : {}),
 		...(options.deathtouchFrom !== undefined ? { deathtouchFrom: options.deathtouchFrom } : {}),
+		...(options.discardsFrom !== undefined ? { discardsFrom: options.discardsFrom } : {}),
 		...(universe.names ? { cardNames: { ...universe.names } } : {}),
 		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
@@ -768,6 +769,10 @@ const control = (changes: Change[]): boolean =>
 function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): void {
 	const cursor = table.cursor;
 	switch (change.action) {
+		case "discard":
+			if (change.selected.length) cursor.discarding = structuredClone(change.selected);
+			else delete cursor.discarding;
+			return;
 		case "pass": {
 			cursor.passes += 1;
 			const order = playing(table);
@@ -786,6 +791,7 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 			// 514.2: after the final discard, expire effects and damage together,
 			// before checking for state-based actions or waiting triggers.
 			if (cursor.steps[0] === "cleanup" && cursor.stepDone) {
+				delete cursor.discarding;
 				for (const thing of table.things.values()) {
 					thing.damage = 0;
 					if (table.deathtouchFrom === undefined || table.ledger.length < table.deathtouchFrom) delete thing.deathtouched;

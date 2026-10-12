@@ -95,14 +95,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Marauding Mako": {
-		"reason": "Marauding Mako is not ready: Whenever you discard one or more cards, put that many +1/+1 counters on this creature. — The event syntax cannot watch discards or capture the number of cards discarded in a discard batch. A hand-to-graveyard movement watch would not distinguish discarding from other movements and would miss discards redirected to another zone.",
-		"decks": [
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Nowhere to Run": {
 		"reason": "Nowhere to Run is not ready: Creatures your opponents control can be the targets of spells and abilities as though they didn't have hexproof. Ward abilities of those creatures don't trigger. — The syntax cannot selectively disregard hexproof for targeting while leaving that ability intact, or suppress only ward abilities of the affected creatures. A targeted-event suppression would also suppress unrelated targeting triggers and is not equivalent.",
 		"decks": [

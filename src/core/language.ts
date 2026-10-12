@@ -224,7 +224,7 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
-		on: one("enters", "leaves", "dies", "sacrificed", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime", "life-gained"),
+		on: one("enters", "leaves", "dies", "sacrificed", "discarded", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime", "life-gained"),
 		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),

@@ -307,6 +307,8 @@ export type Cursor = {
 	stepDone: boolean;
 	/** 514.3a opened priority in this cleanup; another cleanup is owed after the stack and passes finish. */
 	cleanupPriority?: true;
+	/** Private choices for the active seat's simultaneous cleanup discard. */
+	discarding?: ObjectRef[];
 	/** Turns begun, starting at 1. */
 	turn: number;
 	/** Consecutive passes with nothing waiting. A phase ends by consensus. */
@@ -427,6 +429,8 @@ export type Table = {
 	searchesFrom?: number;
 	/** Ledger version at which deathtouch expires after each state-based check. */
 	deathtouchFrom?: number;
+	/** Ledger version at which cleanup collects a simultaneous discard group. */
+	discardsFrom?: number;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

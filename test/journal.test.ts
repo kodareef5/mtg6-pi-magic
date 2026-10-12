@@ -34,6 +34,8 @@ import {
 import { play } from "../src/core/loop.ts";
 import type { Player } from "../src/core/player.ts";
 import { cardsIn } from "../src/core/table.ts";
+import { advance, apply, nextDecision } from "../src/core/decisions.ts";
+import { main, passBoth } from "./play.ts";
 import { fingerprint, offered, sameMenu } from "../src/core/offered.ts";
 import type { Frame } from "../src/core/types.ts";
 
@@ -187,6 +189,22 @@ test("replay rebuilds the game and refuses data it was not played against", asyn
 
 test("forking at version zero reuses the pregame, and later forks carry the position", async () => {
 	const dir = where();
+	// A five-card hand limit exercises a pending simultaneous cleanup choice with ordinary decks.
+	const cleanupHeader = { ...header("cleanup", "cleanup-clone"), format: "cleanup-fixture", discardsFrom: 0 };
+	const initialize = (from: Header) => start({ ...standard, name: "cleanup-fixture", maxHandSize: 5 }, from.seats.map(at => ({ name: at.name, deck: at.deck })), from.seed);
+	const cleanup = initialize(cleanupHeader); cleanup.discardsFrom = 0; main(cleanup, 0, 1, "end"); passBoth(cleanup); advance(cleanup);
+	if (cleanup.cardNames) cleanupHeader.cards.names = cleanup.cardNames;
+	const selected = nextDecision(cleanup)!.options[0]!.id; apply(cleanup, selected, "model", "chosen");
+	assert.equal(cleanup.cursor.discarding?.length, 1); assert.equal(cardsIn(cleanup, "hand", 0).length, 7);
+	const cleanupJournal = open(join(dir, "cleanup.jsonl"), cleanupHeader);
+	for (const line of linesOf(cleanup)) append(cleanupJournal, line);
+	const cleanupClone = join(dir, "cleanup-clone.jsonl"); fork(cleanupJournal.path, cleanup.ledger.length, "cleanup-clone", cleanupClone);
+	const copied = replay(cleanupClone, initialize).table; assert.deepEqual(copied, cleanup);
+	const other = nextDecision(cleanup)!.options.find(one => one.id !== selected)!.id;
+	for (const game of [cleanup, copied]) { apply(game, other, "model", "chosen"); while (!nextDecision(game)) advance(game); }
+	assert.deepEqual(copied, cleanup); assert.equal(cardsIn(cleanup, "graveyard", 0).length, 2);
+	const { discardsFrom, ...oldHeader } = cleanupHeader, old = open(join(dir, "old-cleanup.jsonl"), { ...oldHeader, id: "old-cleanup" });
+	assert.equal(replay(old.path, from => ({ ...initialize(from), discardsFrom: 0 })).table.discardsFrom, undefined);
 	const parent = new Map<number, Frame>();
 	const { table, journal } = await recorded(dir, "parent", "journal", (frame, at) => parent.set(at, frame));
 

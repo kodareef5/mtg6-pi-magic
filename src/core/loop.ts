@@ -170,7 +170,7 @@ export async function play(
 		const step = `${table.cursor.turn}:${table.cursor.active}:${table.cursor.steps[0] ?? ""}`;
 		if (positions?.step !== step) positions = { step, seen: new Map() };
 		const key = createHash("sha256").update(JSON.stringify([decision.seat, decision.situation, decision.question, decision.options.map((one) => one.id).sort(),
-			[...table.things], table.combat ?? null, table.waiting.map((one) => one.id), table.resolution ?? null, table.announcement ?? null, table.work[decision.seat]?.revision ?? 0])).digest("hex");
+			[...table.things], table.combat ?? null, table.waiting.map((one) => one.id), table.resolution ?? null, table.announcement ?? null, table.cursor.discarding ?? null, table.work[decision.seat]?.revision ?? 0])).digest("hex");
 		const repeated = (positions.seen.get(key) ?? 0) + 1;
 		positions.seen.set(key, repeated);
 		if (repeated >= LOOP) {

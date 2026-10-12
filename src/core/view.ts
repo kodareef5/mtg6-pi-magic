@@ -127,6 +127,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const yours: string[] = [];
 	if (viewer !== "spectator") {
 		const hand = cardsIn(table, "hand", viewer);
+		if (viewer === cursor.active && cursor.discarding?.length) yours.push(`Selected for cleanup discard: ${cursor.discarding.map(ref => hand.find(one => one.id === ref.id)?.card ?? "a card").join(", ")}. Nothing has moved.`);
 		yours.push(
 			hand.length ? `Your hand: ${hand.map((c) => c.card).sort().join(", ")}` : "Your hand is empty",
 		);

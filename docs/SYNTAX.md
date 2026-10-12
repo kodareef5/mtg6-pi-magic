@@ -931,3 +931,10 @@ power/toughness only for creatures. Conditions on the recorded alternative
 casting price also apply while the entry event is being inspected, before its
 receipt is appended. See [impending](examples/impending.md) for entry counters,
 conditional creature status and an end-step countdown.
+
+Discard watches use `on: "discarded"`, `by` for the owner, and `batch: true`
+for one or more cards discarded together. `event:amount` retains their count.
+Unlike sacrifice watches, they read the post-event world. Cleanup collects its
+choices privately and discards the whole group before end-of-turn expiry.
+See [discard events](examples/discard-events.md) for cycling and visibility
+limits; counting a discard does not certify its legality.

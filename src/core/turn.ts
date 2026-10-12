@@ -1,4 +1,5 @@
-/** Turn-based obligations and step boundaries. All transitions commit through the table. */
+/** Turn-based obligations and step boundaries. All transitions commit through the table.
+ * Past 150 lines to retain historical cleanup alongside simultaneous discard selection. */
 import { mulligansSettled } from "./pregame.ts";
 import type { Pending } from "./moves.ts";
 import { STEPS } from "./steps.ts";
@@ -73,12 +74,25 @@ export function turnBased(table: Table): Pending | null {
 	if (step === "declare-blockers") return declareBlockers(table);
 	if (step === "combat-damage") return combatDamage(table);
 
-	// 514.1: the active player discards down to maximum hand size, one card at
-	// a time so the option list stays readable.
+	// 514.1: select privately, then discard the group together. Historical journals
+	// retain the earlier path that moved each card as it was selected.
 	if (step === "cleanup") {
 		const hand = cardsIn(table, "hand", active.id);
 		const over = hand.length - table.format.maxHandSize;
 		if (over <= 0) return null;
+		if (table.discardsFrom !== undefined && table.ledger.length >= table.discardsFrom) {
+			const chosen = cursor.discarding ?? [], selected = new Set(chosen.map(one => one.id));
+			return { situation: "turn-based", seat: active.id, question: `Discard ${over} cards together. ${chosen.length} selected; nothing has moved.`,
+				moves: hand.map(card => {
+					const remove = selected.has(card.id), ref = { id: card.id, incarnation: card.incarnation };
+					const next = remove ? chosen.filter(one => one.id !== card.id) : [...chosen, ref];
+					const done = next.length === over;
+					return { option: { id: `discard:${card.id}`, label: `${remove ? "Remove" : "Select"} ${card.card}${done ? `; discard all ${over} selected cards` : " for discard"}`, objects: [ref] },
+						changes: done ? [...next.map(one => ({ do: "move" as const, what: one.id, to: "graveyard" as const, reason: "cleanup-discard" as const })),
+							{ do: "turn" as const, action: "discard" as const, selected: [] }]
+							: [{ do: "turn" as const, action: "discard" as const, selected: next }], reason: "cleanup-discard" as const };
+				}) };
+		}
 		return {
 			situation: "turn-based",
 			seat: active.id,

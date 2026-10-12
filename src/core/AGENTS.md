@@ -155,6 +155,9 @@ that occurrence. The check is a compulsory recorded decision; listing it is
 pure. A check that only clears those occurrences opens no cleanup priority.
 Older journals retain their path until their recorded deathtouchFrom version.
 
+Cleanup records private discard selections, then moves the selected cards together.
+Its discard event precedes removal of damage and temporary effects, so temporary
+watchers still see it. Old journals retain their path until discardsFrom.
 Cleanup finishes its discards, then removes damage and temporary effects together.
 Its state-based actions or waiting triggers open priority for both seats and
 create an obligation for another cleanup. A resolving effect cannot restart

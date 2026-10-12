@@ -74,6 +74,7 @@ export type Change =
 	/** Control transitions are recorded too: a pass changes who can answer next. */
 	| { do: "turn"; action: "pass" | "act"; who: SeatId; land?: boolean }
 	| { do: "turn"; action: "complete" | "priority" | "end" }
+	| { do: "turn"; action: "discard"; selected: ObjectRef[] }
 	| { do: "opening"; action: "begin" | "round" }
 	| { do: "opening"; action: "declare"; who: SeatId; choice: "keep" | "mulligan" }
 	| { do: "opening"; action: "bottom"; who: SeatId }

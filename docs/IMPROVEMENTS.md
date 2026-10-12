@@ -37,8 +37,10 @@ currently wait on strategy-provider credits.
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
    stopped games. Mardu needs
-   discard events, conditional graveyard permission, Class levels and random
-   selections. Keep those meanings in the refusal ledger until their shared
+   next-end-step permissions, conditional graveyard casting, Class levels and random
+   selections. Review Hardened Academic's graveyard-departure watch and Moonshadow's
+   graveyard-entry watch; those accepted terms currently lack matching engine events.
+   Keep refused meanings in the ledger until their shared
    operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.

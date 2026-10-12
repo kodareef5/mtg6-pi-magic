@@ -106,6 +106,12 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
 				if (!was || !is || was.incarnation === is.incarnation) break;
+				// 701.9, 603.10: discards use the owner's hand and the post-event world, even with replacement exile.
+				if (was.zone === "hand" && was.card && !was.token && !was.copy && ["discard", "cleanup-discard"].includes(change.reason)) {
+					const visible = PUBLIC.has(is.zone) && !is.faceDown;
+					found.push({ on: "discarded", player: was.owner, amount: 1, from: "hand", to: is.zone,
+						...(visible ? { object: is, traits: read(is), found: ref(is) } : {}) });
+				}
 				if (change.to === "battlefield") {
 					found.push({ on: "enters", object: is, traits: read(is), found: ref(is), from: was.zone, to: "battlefield" });
 					counters(is.id, change.counters ?? {}, true);
@@ -198,7 +204,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	return found;
 }
 
-const eventPlayer = (one: Occurrence) => one.on === "keyword" || one.on === "life-gained" || one.on === "sacrificed" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
+const eventPlayer = (one: Occurrence) => ["keyword", "life-gained", "sacrificed", "discarded"].includes(one.on) ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
 
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
