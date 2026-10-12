@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "b23b596664b34ed5fe88c895e10a993f5b64f7a8982a70b1514b05a819abaae3",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Enlightened Confidant",
 		"registers": [
@@ -37,27 +36,10 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "choose",
+							"do": "keyword",
+							"name": "surveil",
 							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"owner": "you",
-								"is": {
-									"top": 1,
-									"of": "you"
-								}
-							},
 							"count": 1,
-							"upTo": true,
-							"as": "surveilled"
-						},
-						{
-							"do": "move",
-							"what": "bound:surveilled",
-							"to": "graveyard",
-							"reason": "resolve",
 							"as": "binned"
 						},
 						{

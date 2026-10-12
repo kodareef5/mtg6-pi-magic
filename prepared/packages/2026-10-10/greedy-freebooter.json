@@ -18,32 +18,10 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "choose",
+							"do": "keyword",
+							"name": "scry",
 							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"owner": "you",
-								"is": {
-									"top": 1,
-									"of": "you"
-								}
-							},
-							"count": 1,
-							"upTo": true,
-							"as": "scry-card"
-						},
-						{
-							"do": "move",
-							"what": "bound:scry-card",
-							"to": "library",
-							"position": "bottom",
-							"reason": "resolve",
-							"may": true,
-							"if": {
-								"bound": "scry-card"
-							}
+							"count": 1
 						},
 						{
 							"do": "token",

@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "dc59f13aa66e6d08026cf1d906c211caef927eb43a36ca296a42fde30d5fd67c",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dream Beavers",
 		"registers": [
@@ -47,29 +46,10 @@
 							"amount": 1
 						},
 						{
-							"do": "choose",
+							"do": "keyword",
+							"name": "scry",
 							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"owner": "you",
-								"is": {
-									"top": 1,
-									"of": "you"
-								}
-							},
-							"count": 1,
-							"upTo": true,
-							"as": "scry-card"
-						},
-						{
-							"do": "move",
-							"what": "bound:scry-card",
-							"to": "library",
-							"position": "bottom",
-							"reason": "resolve",
-							"may": true
+							"count": 1
 						}
 					]
 				}

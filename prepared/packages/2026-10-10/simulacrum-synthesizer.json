@@ -18,46 +18,10 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "look",
+							"do": "keyword",
+							"name": "scry",
 							"who": "you",
-							"what": {
-								"top": 2,
-								"of": "you"
-							},
-							"as": "looked"
-						},
-						{
-							"do": "choose",
-							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"is": "bound:looked"
-							},
-							"count": 2,
-							"upTo": true,
-							"as": "bottomed"
-						},
-						{
-							"do": "order",
-							"who": "you",
-							"what": "bound:bottomed",
-							"position": "bottom"
-						},
-						{
-							"do": "order",
-							"who": "you",
-							"every": {
-								"zones": [
-									"library"
-								],
-								"is": "bound:looked",
-								"not": {
-									"is": "bound:bottomed"
-								}
-							},
-							"position": "top"
+							"count": 2
 						}
 					]
 				}

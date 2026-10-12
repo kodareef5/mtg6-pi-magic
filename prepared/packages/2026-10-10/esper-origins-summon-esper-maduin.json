@@ -148,43 +148,10 @@
 				},
 				"instructions": [
 					{
-						"do": "look",
+						"do": "keyword",
+						"name": "surveil",
 						"who": "you",
-						"what": {
-							"top": 2,
-							"of": "you"
-						},
-						"as": "surveil-window"
-					},
-					{
-						"do": "choose",
-						"who": "you",
-						"from": {
-							"zones": [
-								"library"
-							],
-							"is": "bound:surveil-window"
-						},
-						"count": 2,
-						"upTo": true,
-						"as": "put-in-graveyard"
-					},
-					{
-						"do": "move",
-						"what": "bound:put-in-graveyard",
-						"to": "graveyard",
-						"reason": "mill"
-					},
-					{
-						"do": "order",
-						"who": "you",
-						"every": {
-							"zones": [
-								"library"
-							],
-							"is": "bound:surveil-window"
-						},
-						"position": "top"
+						"count": 2
 					},
 					{
 						"do": "life",
@@ -239,43 +206,10 @@
 				},
 				"instructions": [
 					{
-						"do": "look",
+						"do": "keyword",
+						"name": "surveil",
 						"who": "you",
-						"what": {
-							"top": 2,
-							"of": "you"
-						},
-						"as": "surveil-window"
-					},
-					{
-						"do": "choose",
-						"who": "you",
-						"from": {
-							"zones": [
-								"library"
-							],
-							"is": "bound:surveil-window"
-						},
-						"count": 2,
-						"upTo": true,
-						"as": "put-in-graveyard"
-					},
-					{
-						"do": "move",
-						"what": "bound:put-in-graveyard",
-						"to": "graveyard",
-						"reason": "mill"
-					},
-					{
-						"do": "order",
-						"who": "you",
-						"every": {
-							"zones": [
-								"library"
-							],
-							"is": "bound:surveil-window"
-						},
-						"position": "top"
+						"count": 2
 					},
 					{
 						"do": "life",

@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "3123e38f44a45f976fd25ac66fc6576faf36bb6538b20f5d51381cbf94e9f59f",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Political Triumph",
 		"registers": [
@@ -22,20 +21,10 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "look",
+							"do": "keyword",
+							"name": "scry",
 							"who": "you",
-							"what": {
-								"top": 1,
-								"of": "you"
-							},
-							"as": "scry"
-						},
-						{
-							"do": "order",
-							"who": "you",
-							"what": "bound:scry",
-							"position": "bottom",
-							"may": true
+							"count": 1
 						},
 						{
 							"do": "counters",

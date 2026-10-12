@@ -305,9 +305,9 @@ test("Saga chapters cross lore thresholds, wait through resolution and sacrifice
 		commit(cast, [{ do: "add-mana", who: 0, colors: ["G", "C", "C", "C"] }], "game-setup");
 		const initial = structuredClone(cast), at = cast.ledger.length, life = cast.seats[0]!.life;
 		announce(cast, use); passBoth(cast);
-		step(cast); // Look, then choose both cards for the graveyard.
+		step(cast); step(cast); // Begin surveil, look, then choose both cards for the graveyard.
 		step(cast, label => label.startsWith("Choose ")); step(cast, label => label.startsWith("Choose "));
-		step(cast); step(cast); step(cast); // Mill, empty order, gain life.
+		step(cast); step(cast); step(cast); // Put into graveyard, finish surveil, gain life.
 		assert.equal(cast.seats[0]!.life, life + 2);
 		step(cast); // Check the one condition for the whole group.
 		if (zone === "graveyard") {

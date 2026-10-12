@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "2bbd16ecd6d358b52738d07868731a4a6191a79b5f2db5b9bb139b295cc88a69",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Meticulous Archive",
 		"registers": [
@@ -24,27 +23,10 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "choose",
+							"do": "keyword",
+							"name": "surveil",
 							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"is": {
-									"top": 1,
-									"of": "you"
-								}
-							},
-							"count": 1,
-							"upTo": true,
-							"as": "surveilled"
-						},
-						{
-							"do": "move",
-							"what": "bound:surveilled",
-							"to": "graveyard",
-							"reason": "resolve",
-							"may": true
+							"count": 1
 						}
 					]
 				}

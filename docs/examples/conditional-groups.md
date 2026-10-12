@@ -20,45 +20,7 @@ instruction then runs in printed order without repeating the condition.
   },
   "timing": "spell",
   "instructions": [
-    {
-      "do": "look",
-      "who": "you",
-      "what": {
-        "top": 2,
-        "of": "you"
-      },
-      "as": "surveil-window"
-    },
-    {
-      "do": "choose",
-      "who": "you",
-      "from": {
-        "zones": [
-          "library"
-        ],
-        "is": "bound:surveil-window"
-      },
-      "count": 2,
-      "upTo": true,
-      "as": "put-in-graveyard"
-    },
-    {
-      "do": "move",
-      "what": "bound:put-in-graveyard",
-      "to": "graveyard",
-      "reason": "mill"
-    },
-    {
-      "do": "order",
-      "who": "you",
-      "every": {
-        "zones": [
-          "library"
-        ],
-        "is": "bound:surveil-window"
-      },
-      "position": "top"
-    },
+    { "do": "keyword", "name": "surveil", "who": "you", "count": 2 },
     {
       "do": "life",
       "who": "you",

@@ -28,8 +28,7 @@ A jump from two plan counters to five crosses four just once.
       "basis": "Whenever a creature you control enters, scry 1 and put a plan counter on this enchantment.",
       "event": { "on": "enters", "of": { "types": ["creature"], "controller": "you" } },
       "effect": { "instructions": [
-        { "do": "look", "who": "you", "what": { "top": 1, "of": "you" }, "as": "scry" },
-        { "do": "order", "who": "you", "what": "bound:scry", "position": "bottom", "may": true },
+        { "do": "keyword", "name": "scry", "who": "you", "count": 1 },
         { "do": "counters", "on": "this", "kind": "plan", "amount": 1 }
       ] } },
     { "kind": "watch",

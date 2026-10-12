@@ -1,17 +1,19 @@
 /** Keyword completion follows private choices, retains actual results, and waits for priority. */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import type { Package } from "../src/core/language.ts";
 import { start, commit } from "../src/core/commit.ts";
 import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
-import { apply, nextDecision } from "../src/core/decisions.ts";
+import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { relive } from "../src/core/journal.ts";
 import { project, describe } from "../src/core/view.ts";
 import { libraryKeyword } from "../src/core/library-keywords.ts";
 import { tableWorld } from "../src/core/selectors.ts";
 import { checkProcedure } from "../src/core/procedures.ts";
-import { main, place, announce, passBoth, step, finish, example, establish } from "./play.ts";
+import { main, place, announce, passBoth, step, finish, example, establish, quiet } from "./play.ts";
 
 test("scry and surveil complete once after ordered private choices, with no event for zero and no early trigger resolution", () => {
 	for (const name of ["scry", "surveil"] as const) for (const who of [0, 1]) for (const size of [0, 4]) for (const count of [0, 4]) {
@@ -102,5 +104,38 @@ test("scry and surveil complete once after ordered private choices, with no even
 		assert.deepEqual(relive(structuredClone(before), table.ledger.slice(before.ledger.length)), table);
 		assert.deepEqual(relive(revealed, table.ledger.slice(revealed.ledger.length)), table);
 	}
-
+	// These stored abilities caused live-game source failures: the choice must follow
+	// a private look, and Confidant must use the surveil result's new incarnation.
+	for (const card of ["Greedy Freebooter", "Enlightened Confidant"]) for (const away of [false, true]) {
+		const table = start(standard, [{ deck: alpha(deck(card === "Greedy Freebooter" ? "Jund Sacrifice" : "Lifegain")) }, { deck: alpha(deck("Mono-Red Aggro")) }], `stored-keyword-${card}-${away}`);
+		main(table, 0);
+		const prepared: Package = JSON.parse(readFileSync(`prepared/packages/2026-10-10/${card.toLowerCase().replaceAll(" ", "-")}.json`, "utf8")).package;
+		const source = establish(table, 0, card, prepared.registers);
+		const top = cardsIn(table, "library", 0).find(one => table.printed[one.card!]!.type.includes("Land"))!;
+		commit(table, [{ do: "order", who: 0, whose: 0, cards: [{ id: top.id, incarnation: top.incarnation }], position: "top" },
+			...(card === "Greedy Freebooter" ? [{ do: "move" as const, what: source.id, to: "graveyard" as const, reason: "sacrifice" as const }] : [{ do: "change-life" as const, who: 0, amount: 3, reason: "resolve" as const }])], "resolve");
+		const initial = structuredClone(table);
+		for (let guard = 0; nextDecision(table)?.situation !== "trigger-order"; guard++) {
+			assert.ok(guard < 100, `${card} must raise its trigger`); const decision = nextDecision(table);
+			if (!decision) advance(table); else apply(table, quiet(decision.options).id, "model", "chosen");
+		}
+		apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); step(table); step(table);
+		const looked = structuredClone(table);
+		for (const viewer of [0, 1, "spectator"] as const) assert.equal(project(table, viewer).objects!.find(one => one.id === top.id)?.card, viewer === 0 ? top.card : undefined);
+		while (table.resolution) {
+			const decision = nextDecision(table)!;
+			if (decision.options.length === 1) step(table);
+			else apply(table, decision.options.find(one => away ? one.objects?.some(ref => ref.id === top.id) : one.id.endsWith(":done"))!.id, "model", "chosen");
+		}
+		finish(table);
+		assert.equal(table.log.filter(one => one.changes.some(change => change.do === "keyword")).length, 1);
+		if (card === "Greedy Freebooter") {
+			assert.equal(cardsIn(table, "battlefield", 0).filter(one => one.token?.name === "Treasure Token").length, 1);
+			assert.equal(cardsIn(table, "library", 0)[away ? cardsIn(table, "library", 0).length - 1 : 0]!.id, top.id);
+		} else {
+			assert.equal(top.zone, away ? "hand" : "library");
+			assert.ok(table.log.every(one => one.changes.every(change => change.do !== "move" || change.reason !== "mill")));
+		}
+		for (const prefix of [initial, looked]) assert.deepEqual(relive(prefix, table.ledger.slice(prefix.ledger.length)), table);
+	}
 });

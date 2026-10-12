@@ -106,20 +106,10 @@
 						"as": "damaged"
 					},
 					{
-						"do": "look",
+						"do": "keyword",
+						"name": "scry",
 						"who": "you",
-						"what": {
-							"top": 1,
-							"of": "you"
-						},
-						"as": "scried"
-					},
-					{
-						"do": "order",
-						"who": "you",
-						"what": "bound:scried",
-						"position": "bottom",
-						"may": true
+						"count": 1
 					},
 					{
 						"do": "register",

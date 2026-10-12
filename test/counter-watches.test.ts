@@ -71,8 +71,8 @@ test("counter watches distinguish each placement and a threshold, including entr
 	};
 	for (let count = 1; count <= 4; count++) {
 		announce(table, printedCast("Voice of Victory", table.printed["Voice of Victory"]!)); passBoth(table); finish(table);
-		putTrigger(); passBoth(table); step(table); // Look privately, then keep the top card.
-		step(table, label => label.startsWith("Decline"));
+		putTrigger(); passBoth(table); step(table); step(table); // Begin scry, look privately, then keep the top card.
+		apply(table, nextDecision(table)!.options.find(one => one.id.endsWith(":done"))!.id, "model", "chosen");
 		assert.equal(triumph!.counters.plan ?? 0, count - 1, "scry precedes the counter");
 		finish(table); assert.equal(triumph!.counters.plan, count);
 		assert.equal(table.waiting.length, count === 4 ? 1 : 0);

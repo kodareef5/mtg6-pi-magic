@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "12b286f40daf8943e52cf88663a987e92080dd5e1aab9545b987c49c86becad7",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Candy Trail",
 		"registers": [
@@ -19,46 +18,10 @@
 				"effect": {
 					"instructions": [
 						{
-							"do": "look",
+							"do": "keyword",
+							"name": "scry",
 							"who": "you",
-							"what": {
-								"top": 2,
-								"of": "you"
-							},
-							"as": "looked"
-						},
-						{
-							"do": "choose",
-							"who": "you",
-							"from": {
-								"zones": [
-									"library"
-								],
-								"is": "bound:looked"
-							},
-							"count": 2,
-							"upTo": true,
-							"as": "bottomed"
-						},
-						{
-							"do": "order",
-							"who": "you",
-							"what": "bound:bottomed",
-							"position": "bottom"
-						},
-						{
-							"do": "order",
-							"who": "you",
-							"every": {
-								"zones": [
-									"library"
-								],
-								"is": "bound:looked",
-								"not": {
-									"is": "bound:bottomed"
-								}
-							},
-							"position": "top"
+							"count": 2
 						}
 					]
 				}

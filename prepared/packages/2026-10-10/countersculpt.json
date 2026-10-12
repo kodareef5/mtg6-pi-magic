@@ -103,43 +103,10 @@
 									"effect": {
 										"instructions": [
 											{
-												"do": "look",
+												"do": "keyword",
+												"name": "surveil",
 												"who": "you",
-												"what": {
-													"top": 1,
-													"of": "you"
-												},
-												"as": "looked"
-											},
-											{
-												"do": "choose",
-												"who": "you",
-												"from": {
-													"zones": [
-														"library"
-													],
-													"is": "bound:looked"
-												},
-												"count": 1,
-												"upTo": true,
-												"as": "binned"
-											},
-											{
-												"do": "move",
-												"what": "bound:binned",
-												"to": "graveyard",
-												"reason": "mill"
-											},
-											{
-												"do": "order",
-												"who": "you",
-												"every": {
-													"zones": [
-														"library"
-													],
-													"is": "bound:looked"
-												},
-												"position": "top"
+												"count": 1
 											}
 										]
 									}
@@ -272,43 +239,10 @@
 									"effect": {
 										"instructions": [
 											{
-												"do": "look",
+												"do": "keyword",
+												"name": "surveil",
 												"who": "you",
-												"what": {
-													"top": 1,
-													"of": "you"
-												},
-												"as": "looked"
-											},
-											{
-												"do": "choose",
-												"who": "you",
-												"from": {
-													"zones": [
-														"library"
-													],
-													"is": "bound:looked"
-												},
-												"count": 1,
-												"upTo": true,
-												"as": "binned"
-											},
-											{
-												"do": "move",
-												"what": "bound:binned",
-												"to": "graveyard",
-												"reason": "mill"
-											},
-											{
-												"do": "order",
-												"who": "you",
-												"every": {
-													"zones": [
-														"library"
-													],
-													"is": "bound:looked"
-												},
-												"position": "top"
+												"count": 1
 											}
 										]
 									}
