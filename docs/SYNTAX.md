@@ -749,6 +749,12 @@ through resolution into the permanent. [Evoke](examples/evoke.md) shows its
 entry trigger and independent actual-mana conditions. These names grant no
 zone permission and cannot combine two alternative costs.
 
+Life-gain watches use `on: "life-gained"` and `by` for the recipient.
+`event:player` and `event:amount` retain the recipient and positive amount.
+Lifelink groups damage by source before raising these events; zero gains and
+life payments do not qualify. See [life-gain events](examples/life-gain.md).
+This adds no life-gain replacement or source-selector support.
+
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.

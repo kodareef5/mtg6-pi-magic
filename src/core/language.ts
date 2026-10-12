@@ -223,7 +223,7 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime"),
+		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime", "life-gained"),
 		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
@@ -231,7 +231,7 @@ export const Defs = {
 		ordinal: Type.Optional(positive),
 		face: Type.Optional(Face), fully: Type.Optional(Type.Literal(true)),
 		of: Type.Optional(Type.Ref("Selector")),
-		/** Who cast, attacked, or controls the targeting spell or ability. */
+		/** Who cast, attacked, gained life, or controls the targeting spell or ability. */
 		by: Type.Optional(Side),
 		from: Type.Optional(Type.Array(Zone)),
 		to: Type.Optional(Type.Array(Zone)),

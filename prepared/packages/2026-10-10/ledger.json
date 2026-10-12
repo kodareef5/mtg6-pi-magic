@@ -7,14 +7,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Amalia Benavides Aguirre": {
-		"reason": "Amalia Benavides Aguirre is not ready: Whenever you gain life, Amalia Benavides Aguirre explores. Then destroy all other creatures if its power is exactly 20. (To have this creature explore, reveal the top card of your library. Put that card into your hand if it's a land. Otherwise, put a +1/+1 counter on this creature, then put the card back or put it into your graveyard.) — The event syntax has no life-gain watch, so this standing trigger cannot be prepared. Explore's instructions and the subsequent exactly-20 power check are otherwise expressible.",
-		"decks": [
-			"Lifegain"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Aven Interrupter": {
 		"reason": "Aven Interrupter is not ready: When this creature enters, exile target spell. It becomes plotted. (Its owner may cast it as a sorcery on a later turn without paying its mana cost.) — Exiling the targeted spell is expressible, but the syntax has no plotted designation or permission combining an owner's free alternative-cost cast, mandatory sorcery timing, and exclusion of the turn it became plotted. A generic permit would not implement this ability.; Spells your opponents cast from graveyards or from exile cost {2} more to cast. — The syntax has no standing casting-cost increase registration or selector for the zone a spell is being cast from; characteristic words do not implement the required additional generic mana payment.",
 		"decks": [
@@ -217,14 +209,6 @@
 		"reason": "Sphinx of False Conclusions is not ready: When this creature dies, if it isn't a token, create a token that's a copy of it. — Creating a token copy using the dying creature's last-known copiable characteristics is not expressible: token instructions require a fixed TokenSpec and provide no copy operation.",
 		"decks": [
 			"Azorius Control"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
-	"Starscape Cleric": {
-		"reason": "Starscape Cleric is not ready: Whenever you gain life, each opponent loses 1 life. — The Event schema has no life-gain event, so this standing trigger cannot be registered faithfully. Life-gained history cannot substitute for watching each life-gain occurrence.",
-		"decks": [
-			"Lifegain"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"

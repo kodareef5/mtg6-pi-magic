@@ -1,0 +1,105 @@
+{
+	"card": "Starscape Cleric",
+	"generated": "2026-10-10",
+	"source": "24fcaa8df3aa875a15c184d3ad4bbffe0583e9016db9dbc149c9230a9f64f6b4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Starscape Cleric",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Offspring {2}{B} (You may pay an additional {2}{B} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"cast": "this",
+					"paid": "offspring"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": 1,
+							"copy": "this",
+							"except": {
+								"power": 1,
+								"toughness": 1
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "prohibit",
+				"basis": "This creature can't block.",
+				"block": {
+					"attacker": {
+						"types": [
+							"creature"
+						]
+					},
+					"blocker": {
+						"is": "this"
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, each opponent loses 1 life.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Starscape Cleric with offspring",
+				"basis": "Offspring {2}{B} (You may pay an additional {2}{B} as you cast this spell. If you do, when this creature enters, create a 1/1 token copy of it.)",
+				"source": {
+					"card": "Starscape Cleric",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

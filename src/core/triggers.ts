@@ -196,7 +196,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	return found;
 }
 
-const eventPlayer = (one: Occurrence) => one.on === "keyword" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
+const eventPlayer = (one: Occurrence) => one.on === "keyword" || one.on === "life-gained" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
 
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
@@ -309,13 +309,14 @@ export function activeWatches(frame: Frame) {
  * The triggers one group causes, in the order their watches were found, and the
  * once-only delayed triggers it used up. `prior` is the world before the group.
  */
-export function detect(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }, prior?: World): { waiting: Trigger[]; spent: string[] } {
+export function detect(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits>; lifeGains: { who: SeatId; amount: number }[] }, prior?: World): { waiting: Trigger[]; spent: string[] } {
 	// Watches inspect the group before its receipt is appended, including its new casts and resolved entries.
 	let current: Record<string, Thing> | undefined;
 	const pending = { ...receipt, changes, get after() { return current ??= Object.fromEntries(table.things); } };
 	let traits: Map<string, Traits> | undefined;
 	const read: World["read"] = object => (traits ??= walk(table, undefined, pending)).get(object.id);
 	const happened = occurrences(table, changes, receipt, read);
+	happened.push(...receipt.lifeGains.map(({ who, amount }): Occurrence => ({ on: "life-gained", player: who, amount })));
 	const speed = speedTrigger(table, changes);
 	if (!happened.length && !speed) return { waiting: [], spent: [] };
 	const after = tableWorld(table, read);

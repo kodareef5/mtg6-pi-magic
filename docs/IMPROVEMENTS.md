@@ -35,7 +35,7 @@ assessments. Saved live continuations currently wait on strategy-provider credit
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Life-gain events, explore and emblems block Lifegain.
+   stopped games. Ajani Resolute's emblem is Lifegain's final standing blocker.
    Jund needs shared sacrifice and replacement mechanics. Mardu's remaining source mechanics stay
    in the refusal ledger until their shared operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.

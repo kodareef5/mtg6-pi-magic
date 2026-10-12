@@ -32,6 +32,7 @@ import { damageSource, tableWorld, targetKey } from "./selectors.ts";
 import { orderedDamage } from "./damage.ts";
 import { expandDraw } from "./draw.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
+import type { SeatId } from "./types.ts";
 import {
 	type Ability,
 	manaSurvives,
@@ -201,8 +202,17 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		return applied;
 	});
 	// 120.3f: lifelink is a result of damage in this same group, not a triggered ability.
-	changes = [...changes, ...[...damage].flatMap(([change, facts]): Change[] => change.amount > 0 && facts.source && has(facts.source.traits, "lifelink")
-		? [{ do: "change-life", who: facts.source.object.controller, amount: change.amount, reason }] : [])];
+	const lifeGains = changes.flatMap(change => change.do === "change-life" && change.amount > 0 ? [{ who: change.who, amount: change.amount }] : []);
+	const linkedGains = new Map<string, { who: SeatId; amount: number }>();
+	changes = [...changes, ...[...damage].flatMap(([change, facts]): Change[] => {
+		if (change.amount <= 0 || !facts.source || !has(facts.source.traits, "lifelink")) return [];
+		const source = facts.source.object, who = source.controller, key = `${source.id}@${source.incarnation}:${who}`;
+		const prior = linkedGains.get(key); linkedGains.set(key, { who, amount: (prior?.amount ?? 0) + change.amount });
+		return [{ do: "change-life", who, amount: change.amount, reason }];
+	})];
+	// 119.9, 702.15e: one gain per source, even when its damage has several recipients.
+	// Keep the historical physical changes while grouping these events by source.
+	lifeGains.push(...linkedGains.values());
 	// A fixture's setup is not a game event, and triggers nothing.
 	const detecting = reason !== "game-setup" && !changes.every((change) => change.do === "announcement");
 	const prior = detecting ? lookBack(table, changes) : undefined;
@@ -581,7 +591,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// What the group caused to trigger waits for the next time a player would receive priority.
 	if (detecting) {
 		forget(table);
-		const found = detect(table, changes, { before, known }, prior);
+		const found = detect(table, changes, { before, known, lifeGains }, prior);
 		table.waiting.push(...[...found.waiting, ...chapterTriggers(table, before, born)].map((trigger) => round ? { ...trigger, round } : trigger));
 		if (found.spent.length) table.notes = table.notes.filter((note) => !found.spent.includes(note.id));
 	}
