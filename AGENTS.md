@@ -549,8 +549,14 @@ src/context/           questions for a decision model. Its own AGENTS.md
   metrics.ts, trace.ts usage arithmetic and the bill; exact requests and replies when tracing
   playbook.ts, plan.ts the policy schema; the starting intent
 src/seating/           protocol and validation; sockets unfinished
+src/board/             board pictures: no game logic, never read by a seat
+  snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
+  render.ts            the renderer seam, the art map, and SVG to PNG through resvg
+  cardboard.ts         the interim renderer: a snapshot as a cardboard-api scene (optional dependency)
+  feed.ts              one picture per turn and at the end, drawn off the game loop and saved
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot
+tools/card-art.ts      pin one Scryfall printing per card for board art, from the same snapshot
 tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           bulk games: carried seeds of one matchup, or seeded random pairings from the deck pool; one table per arm
 src/core/packages.ts   source-checked card interpretations, reused through shared seating for new games

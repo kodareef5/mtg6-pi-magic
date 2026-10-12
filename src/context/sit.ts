@@ -343,6 +343,8 @@ export async function run(
 	journal?: Journal,
 	/** How long to wait for outstanding recaps once the game is saved. */
 	grace = 30_000,
+	/** Told as each turn ends, for a picture of the board. Never awaited. */
+	turnEnded?: (turn: number) => void,
 ): Promise<Outcome | null> {
 	seated.timing.playStartedAt = Date.now();
 	delete seated.timing.finishedAt;
@@ -368,6 +370,7 @@ export async function run(
 	const flight: Promise<void>[] = [];
 	let outcome: Outcome | null;
 	try { outcome = await play(table, seated.players, seated.intents, { watch, onTurn: (turn, active, from) => {
+		turnEnded?.(turn);
 		// A reasoner that has given up is one problem, not one per turn. The gap
 		// it wrote on the way down says the rest of the game ran without recaps.
 		if (!talking || talking.broken()) return;

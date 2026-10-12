@@ -21,6 +21,10 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { Image } from "@earendil-works/pi-tui";
+import { boardFeed } from "./src/board/feed.ts";
+import { artIds, type BoardRenderer } from "./src/board/render.ts";
+import { cardboardRenderer } from "./src/board/cardboard.ts";
 import { Type } from "typebox";
 
 import {
@@ -116,6 +120,16 @@ export default function (pi: ExtensionAPI) {
 	let seated: Seated | null = null;
 	let running = false;
 	const games = new WeakMap<Table, Journal>();
+	// Board pictures: one after each turn and one at the end, saved beside the game and shown above the
+	// editor where the terminal draws images; elsewhere the widget names the file.
+	let renderer: Promise<BoardRenderer | null> | undefined;
+	const feedFor = (ctx: ExtensionContext, game: Table) => boardFeed(game, renderer ??= cardboardRenderer(artIds(), join(CACHE, "art")),
+		join(GAMES, `${games.get(game)?.header.id ?? "table"}-boards`),
+		(png, path) => {
+			if (ctx.hasUI) ctx.ui.setWidget("magic-board", (_tui, theme) => new Image(Buffer.from(png).toString("base64"), "image/png",
+				{ fallbackColor: (text) => theme.fg("dim", text) }, { maxWidthCells: 120, filename: path }));
+		},
+		(message) => ctx.ui.notify(message, "warning"));
 
 	/**
 	 * Deal a table, give every seat a model, and run the pregame.
@@ -324,6 +338,7 @@ export default function (pi: ExtensionAPI) {
 				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed: playSeed, ...(decks ? { decks } : {}), ...(alphaGame ? { alpha: true as const } : {}) });
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
 				running = true;
+				const board = feedFor(ctx, opened);
 				let outcome, failure: unknown;
 				try { outcome = await run(
 					opened,
@@ -332,7 +347,11 @@ export default function (pi: ExtensionAPI) {
 					commentator,
 					(line) => ctx.ui.notify(line, "info"),
 					games.get(opened),
+					30_000,
+					(turn) => board.take(`after-turn-${String(turn).padStart(2, "0")}`),
 				); } catch (error) { failure = error; } finally { running = false; }
+				board.take("final");
+				await board.settled();
 				const result = gameResult(opened, seated!, { journal: games.get(opened)?.path, ...(failure ? { error: String(failure) } : {}) });
 				const resultPath = join(GAMES, `${playSeed}-${seated!.timing.startedAt}.result.json`);
 				const paths = saveReport(resultPath, result, opened);
@@ -341,6 +360,14 @@ export default function (pi: ExtensionAPI) {
 						[...report(result), ...paths].join("\n"),
 					outcome && !degraded(opened, seated!) ? "info" : "warning",
 				);
+				return;
+			}
+
+			if (verb === "board") {
+				if (!table) { ctx.ui.notify("No table. /magic play opens one.", "warning"); return; }
+				const board = feedFor(ctx, table);
+				board.take(`now-${table.cursor.clock}`);
+				await board.settled();
 				return;
 			}
 
@@ -452,7 +479,7 @@ export default function (pi: ExtensionAPI) {
 			ctx.ui.notify(
 				"Usage: /magic play [seed] | /magic play random [seed] | /magic play <deck A> vs <deck B> [seed] | /magic resume <game> | " +
 					"/magic clone <game> <version> <new-id> | " +
-					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic work [seat] | /magic log | " +
+					"/magic models [why|<role> <pattern> [seat]] | /magic step | /magic board | /magic work [seat] | /magic log | " +
 					"/magic export <game> [public|full|<seat>] | " +
 					"/magic cards [format|universe] | /magic rules <query|build>",
 				"info",
