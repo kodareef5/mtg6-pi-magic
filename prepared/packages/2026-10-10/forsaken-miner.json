@@ -1,0 +1,64 @@
+{
+	"card": "Forsaken Miner",
+	"generated": "2026-10-10",
+	"source": "4ab5d64d5d65f095c140be2ccbd7d0e6b50cc6c87941be1dfc73abed58b400c3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Forsaken Miner",
+		"registers": [
+			{
+				"kind": "prohibit",
+				"basis": "This creature can't block.",
+				"block": {
+					"attacker": {
+						"types": [
+							"creature"
+						]
+					},
+					"blocker": {
+						"is": "this"
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"zones": [
+					"graveyard"
+				],
+				"basis": "Whenever you commit a crime, you may pay {B}. If you do, return this card from your graveyard to the battlefield. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.)",
+				"event": {
+					"on": "crime",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"may": true,
+							"cost": {
+								"mana": "{B}"
+							},
+							"as": "paid"
+						},
+						{
+							"do": "move",
+							"what": "this",
+							"to": "battlefield",
+							"reason": "resolve",
+							"controller": "you",
+							"if": {
+								"bound": "paid"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

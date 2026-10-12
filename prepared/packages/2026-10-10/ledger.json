@@ -87,14 +87,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Forsaken Miner": {
-		"reason": "Forsaken Miner is not ready: Whenever you commit a crime, you may pay {B}. If you do, return this card from your graveyard to the battlefield. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.) — Cannot prepare this standing graveyard trigger: the available watch syntax cannot register an ability active in the graveyard or detect committing a crime once per spell cast, ability activation, or triggered ability put on the stack, including targeting opposing players, spells, and abilities. A targeted-object watch would not faithfully represent that event.",
-		"decks": [
-			"Mono-Black Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Gene Pollinator": {
 		"reason": "Gene Pollinator is not ready: {T}, Tap an untapped permanent you control: Add one mana of any color. — Unsupported combined payment: cost.tap can express either the source's tap-symbol cost or tapping a chosen permanent, but cannot express both in the same mana ability while retaining the source's summoning-sickness requirement.",
 		"decks": [

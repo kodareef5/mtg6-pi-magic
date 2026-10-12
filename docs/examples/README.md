@@ -60,6 +60,7 @@ schemas, and every `basis` is checked against the card's text.
 | `costs.md` | sacrifice with last known information, discard or exile the card itself, life, reductions |
 | `named-search.md` | private searches by a bound object's name, with counts from original zones |
 | `search.md` | searching as choose, move, shuffle, from a land and from a spell |
+| `crime.md` | one crime per targeted announcement, explicit public watch zones and Forsaken Miner's paid return |
 | `physical-history.md` | descent, face-down entries and face-up action counts; Corpses and Bookworm end-step choices |
 | `library-searches.md` | recorded search starts, private inspection, repeated searches and Wan Shi Tong's own-library watch |
 | `optional-search.md` | another player's optional search after destruction; declining versus searching and finding nothing |

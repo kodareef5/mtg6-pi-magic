@@ -836,3 +836,15 @@ who descended, controlled the face-down entry or took the face-up special action
 Later departures do not erase these events. Hidden identities are not attached
 to the counts. [Physical history](examples/physical-history.md) gives the source
 examples and scope.
+
+## Watch zones and crime
+
+A watch's optional `zones` lists battlefield, graveyard, stack, exile or command.
+Omitted zones mean battlefield; hidden-zone watches are unsupported. Standing
+packages supply an object's watch in an explicitly named public zone.
+
+`on: crime` with `by` matches a cast, activation or trigger placement that targets
+an opponent, an opposing permanent/spell/ability, or a card in an opponent's
+graveyard. Multiple qualifying targets give one event (700.13). Resolution is
+not required. [Forsaken Miner](examples/crime.md) demonstrates a graveyard watch
+and an optional payment before return.

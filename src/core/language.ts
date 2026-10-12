@@ -222,7 +222,7 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
-		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword"),
+		on: one("enters", "leaves", "dies", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime"),
 		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
@@ -356,7 +356,7 @@ export const Defs = {
 		/** Extra instances of abilities the matching permanent has, never delayed or reflexive triggers (603.2d). */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("trigger-rule"), affects: Type.Ref("Selector"), additional: positive }),
 		/** A triggered ability. `if` is its intervening if (603.4). */
-		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("TriggerEffect"),
+		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), zones: Type.Optional(Type.Array(one("battlefield", "graveyard", "stack", "exile", "command"), { minItems: 1, uniqueItems: true })), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("TriggerEffect"),
 			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Union([Type.Literal("once-per-turn"), Type.Literal("once-per-turn-use")])) },
 			{ additionalProperties: false, if: { properties: { limit: { const: "once-per-turn-use" } }, required: ["limit"] }, then: { required: ["may"] } }),
 		/** A static ability. Applies while `if` holds, to whatever matches `affects` at each reading. */

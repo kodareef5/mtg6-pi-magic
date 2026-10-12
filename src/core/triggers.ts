@@ -148,6 +148,14 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				// Cast from the zone the card was in before the group moved it to the stack (601.2a).
 				const from = receipt.before[spell.id]?.zone;
 				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", ordinal: castOrdinal(ability.controller), object: spell, traits: characteristics(table, spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
+				// 700.13: one crime per cast, activation or trigger placement, however many qualifying targets.
+				const opponent = (who: number) => who !== ability.controller && playing(table).some(one => one.id === who);
+				if (ability.targets.flat().some(chosen => {
+					if ("player" in chosen) return opponent(chosen.player);
+					const current = now(chosen.id), before = receipt.before[chosen.id];
+					const target = current?.incarnation === chosen.incarnation ? current : before?.incarnation === chosen.incarnation ? before : undefined;
+					return target && (["battlefield", "stack"].includes(target.zone) ? opponent(target.controller) : target.zone === "graveyard" && !!target.card && !target.token && !target.copy && opponent(target.owner));
+				})) found.push({ on: "crime", player: ability.controller, source: spell, object: spell, found: ref(spell), traits: characteristics(table, spell) });
 				for (const chosen of ability.targets.flat()) {
 					const aimed = "id" in chosen ? now(chosen.id) : undefined;
 					if (aimed && "id" in chosen && aimed.incarnation === chosen.incarnation) found.push({ on: "targeted", object: aimed, traits: characteristics(table, aimed), found: ref(aimed), player: ability.controller, source: spell });
@@ -268,13 +276,14 @@ function triggeredThisTurn(table: Table, source: ObjectRef | undefined, basis: s
 /** What a put change keeps of the trigger, so a once-each-turn count can read it back. */
 const triggered = (trigger: Trigger): Pick<Trigger, "source" | "basis" | "turn"> & { controller?: SeatId } => ({ ...(trigger.source ? { source: trigger.source } : { controller: trigger.controller }), basis: trigger.basis, ...(trigger.turn !== undefined ? { turn: trigger.turn } : {}) });
 
-/** A watcher: a permanent's watch or suppression, read on one side of the group. */
+/** A watcher in its declared public zone, or a battlefield suppression, read on one side of the group. */
 type Watch = { object: Seen; controller: SeatId; registration: Registration; world: World };
 
 function watches(world: World, objects: Seen[]): Watch[] {
-	return objects.filter((object) => object.zone === "battlefield").flatMap((object) => (world.read(object)?.registrations ?? [])
-		.filter((registration) => registration.kind === "watch" || registration.kind === "suppress")
-		.map((registration) => ({ object, controller: object.controller, registration, world })));
+	return objects.filter(object => PUBLIC.has(object.zone) && (!object.faceDown || object.zone === "battlefield")).flatMap(object => (world.read(object)?.registrations ?? [])
+		.filter(registration => registration.kind === "watch" ? (registration.zones ?? ["battlefield"]).includes(object.zone as never)
+			: registration.kind === "suppress" && object.zone === "battlefield")
+		.map(registration => ({ object, controller: ["battlefield", "stack"].includes(object.zone) ? object.controller : object.owner, registration, world })));
 }
 
 /** Read extra instances from the same side of the event as the triggering ability. */
@@ -284,7 +293,7 @@ export function additionalTriggers(world: World, object: Seen): number {
 			matches({ world, source, controller: source.controller }, object, rule.affects) ? rule.additional : 0), 0), 0);
 }
 
-/** Registered watches on visible permanents now. A card in hand supplies none; this predicts no future event. */
+/** Registered watches in visible public zones now. A card in hand supplies none; this predicts no future event. */
 export function activeWatches(frame: Frame) {
 	const world = viewWorld(frame.view);
 	return watches(world, world.objects).flatMap(({ object, controller, registration }) => registration.kind === "watch" ? [{

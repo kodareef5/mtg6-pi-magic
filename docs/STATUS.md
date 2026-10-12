@@ -17,10 +17,10 @@ measures whether ordinary games can execute their cards correctly.
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Two saved continuations stopped on provider credits; corrected Sleight of Hand passed local replay and awaits a live continuation |
-| Recent shared mechanics | Public descent, face-down entry and face-up action history; recorded library searches; countered-ability sources |
-| Stored card assessments | 263 accepted, 45 refused, five basic lands; six imported main decks still have standing blockers |
+| Recent shared mechanics | Crime events and public-zone watches; physical action history; recorded library searches |
+| Stored card assessments | 264 accepted, 44 refused, five basic lands; six imported main decks still have standing blockers |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 295 invariant tests pass |
+| Validation | Type check and 296 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
