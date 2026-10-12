@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "e7866c485b1deecf506f16bcc0d3baaf3c4284c91616ec4b3b47fe4bb6c5da17",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Dyadrine, Synthesis Amalgam",
 		"registers": [
@@ -70,7 +69,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Robot",
+								"name": "Robot Token",
 								"types": [
 									"artifact",
 									"creature"

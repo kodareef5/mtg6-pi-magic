@@ -57,7 +57,7 @@ onto the battlefield without casting it supplies none.
         "kind": "+1/+1", "count": 1, "on": { "choose": { "types": ["creature"], "controller": "you" }, "count": 2 }
       } } },
       { "do": "draw", "who": "you", "count": 1, "if": { "bound": "paid" } },
-      { "do": "token", "count": 1, "spec": { "name": "Robot", "types": ["artifact", "creature"], "subtypes": ["Robot"], "colors": [], "power": 2, "toughness": 2 }, "if": { "bound": "paid" } }
+      { "do": "token", "count": 1, "spec": { "name": "Robot Token", "types": ["artifact", "creature"], "subtypes": ["Robot"], "colors": [], "power": 2, "toughness": 2 }, "if": { "bound": "paid" } }
     ] }
   }]
 }

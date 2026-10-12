@@ -41,7 +41,7 @@ investigates, which makes a Clue token:
     { "do": "choose", "who": "you", "from": { "zones": ["library"], "owner": "you", "supertypes": ["basic"], "types": ["land"] }, "count": 1, "upTo": true, "as": "land" },
     { "do": "move", "what": "bound:land", "to": "battlefield", "tapped": true, "reason": "resolve" },
     { "do": "shuffle", "who": "you" },
-    { "do": "token", "count": 1, "spec": { "name": "Clue", "types": ["artifact"], "subtypes": ["Clue"], "colors": [] } }
+    { "do": "token", "count": 1, "spec": { "name": "Clue Token", "types": ["artifact"], "subtypes": ["Clue"], "colors": [] } }
   ]
 }
 ```

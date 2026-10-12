@@ -28,7 +28,7 @@ still chooses a legal target and pays tap and sacrifice at sorcery speed.
     { "kind": "watch", "basis": "When Mutagen Man enters, create X Mutagen tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
       "event": { "on": "enters", "of": { "is": "this" } },
       "effect": { "instructions": [{ "do": "token", "count": { "x": true }, "spec": {
-        "name": "Mutagen", "types": ["artifact"], "subtypes": ["Mutagen"], "colors": [],
+        "name": "Mutagen Token", "types": ["artifact"], "subtypes": ["Mutagen"], "colors": [],
         "registers": [{ "kind": "activated", "basis": "{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
           "speed": "sorcery", "cost": { "mana": "{1}", "tap": true, "sacrifice": "this" },
           "effect": { "targets": [{ "object": { "zones": ["battlefield"], "types": ["creature"] } }],

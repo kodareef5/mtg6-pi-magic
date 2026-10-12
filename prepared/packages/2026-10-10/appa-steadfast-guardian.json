@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "f94e0cad3adca0b0606885a505744a154c92ada93807eec55c4d6563fbc0342d",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Appa, Steadfast Guardian",
 		"registers": [
@@ -108,7 +107,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Ally",
+								"name": "Ally Token",
 								"types": [
 									"creature"
 								],

@@ -58,7 +58,7 @@ test("physical turn counts retain their original player and never require hidden
 			const land = cardsIn(table, "library", 1).find(one => one.card === "Forest")!;
 			commit(table, [{ do: "move", what: land.id, to: "graveyard", reason: "mill" }], "resolve");
 		} else if (mode === "token") {
-			commit(table, [{ do: "token", id: "skeleton-fixture", controller: 0, spec: { name: "Skeleton Pirate", types: ["creature"], subtypes: ["Skeleton", "Pirate"], colors: ["B"], power: 2, toughness: 2 } }], "resolve");
+			commit(table, [{ do: "token", id: "skeleton-fixture", controller: 0, spec: { name: "Skeleton Pirate Token", types: ["creature"], subtypes: ["Skeleton", "Pirate"], colors: ["B"], power: 2, toughness: 2 } }], "resolve");
 			commit(table, [{ do: "move", what: "skeleton-fixture", to: "graveyard", reason: "destroy" }], "resolve");
 		}
 		const expected = mode === "repeated" ? 2 : ["permanent", "decline"].includes(mode) ? 1 : 0;

@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "e6b881c176192138a82be1c3185c1b3434f795b7c801c8e68d506f2ff7d71296",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Greedy Freebooter",
 		"registers": [
@@ -50,7 +49,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Treasure",
+								"name": "Treasure Token",
 								"types": [
 									"artifact"
 								],

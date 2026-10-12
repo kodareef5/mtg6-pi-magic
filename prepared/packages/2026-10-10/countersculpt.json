@@ -82,7 +82,7 @@
 							"atMost": 0
 						},
 						"spec": {
-							"name": "Jace",
+							"name": "Jace Token",
 							"types": [
 								"planeswalker"
 							],
@@ -251,7 +251,7 @@
 							"atMost": 0
 						},
 						"spec": {
-							"name": "Jace",
+							"name": "Jace Token",
 							"types": [
 								"planeswalker"
 							],

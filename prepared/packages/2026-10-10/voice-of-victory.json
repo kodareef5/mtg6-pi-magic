@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "3c716b67c62e538096b2089d407ed8d5283d448ffb84b240f056e00722f148f0",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Voice of Victory",
 		"registers": [
@@ -25,7 +24,7 @@
 							"attacking": true,
 							"as": "mobilized",
 							"spec": {
-								"name": "Warrior",
+								"name": "Warrior Token",
 								"types": [
 									"creature"
 								],

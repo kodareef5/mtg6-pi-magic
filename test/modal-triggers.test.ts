@@ -49,7 +49,7 @@ test("a numbered cast makes one modal trigger, fixes its mode before responses a
 		assert.equal(game.waiting.length, 0, "the third spell creates no second-spell trigger");
 		passBoth(game); step(game); step(game, label => label.startsWith("Decline")); finish(game);
 		passBoth(game); finish(game);
-		assert.equal(cardsIn(game, "battlefield").filter(one => one.token?.name === "Human Soldier").length, mode === 0 ? 2 : 0);
+		assert.equal(cardsIn(game, "battlefield").filter(one => one.token?.name === "Human Soldier Token").length, mode === 0 ? 2 : 0);
 		assert.equal(companion.counters["+1/+1"] ?? 0, mode === 0 ? 0 : 1, "the selected mode still resolves after a third spell and source departure");
 		passBoth(game); finish(game);
 		assert.deepEqual(relive(initial, game.ledger.slice(from)), game);

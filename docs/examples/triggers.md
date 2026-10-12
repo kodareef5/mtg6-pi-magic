@@ -53,7 +53,7 @@ Its flash is about casting it, so it goes on the cast procedure, not here; see
       "event": { "on": "step", "step": "upkeep", "whose": "you" },
       "effect": { "instructions": [
         { "do": "life", "who": "you", "amount": -1 },
-        { "do": "token", "count": 1, "spec": { "name": "Faerie", "types": ["creature"], "subtypes": ["Faerie"], "colors": ["U", "B"],
+        { "do": "token", "count": 1, "spec": { "name": "Faerie Token", "types": ["creature"], "subtypes": ["Faerie"], "colors": ["U", "B"],
           "power": 1, "toughness": 1, "words": ["flying"] } }
       ] } }
   ]
@@ -74,7 +74,7 @@ the creature that died still fires.
       "event": { "on": "dies", "of": { "is": "this" } },
       "effect": { "instructions": [
         { "do": "damage", "to": "you", "amount": 1, "from": "this" },
-        { "do": "token", "count": 1, "spec": { "name": "Clue", "types": ["artifact"], "subtypes": ["Clue"], "colors": [] } }
+        { "do": "token", "count": 1, "spec": { "name": "Clue Token", "types": ["artifact"], "subtypes": ["Clue"], "colors": [] } }
       ] } }
   ]
 }
@@ -86,7 +86,7 @@ the creature that died still fires.
   "registers": [
     { "basis": "When this creature enters, create a 1/1 black Rat creature token with \"This token can't block.\"", "kind": "watch",
       "event": { "on": "enters", "of": { "is": "this" } },
-      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Rat", "types": ["creature"], "subtypes": ["Rat"], "colors": ["B"],
+      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Rat Token", "types": ["creature"], "subtypes": ["Rat"], "colors": ["B"],
         "power": 1, "toughness": 1, "words": ["can't block"] } }] } },
     { "basis": "Whenever another creature you control dies, put a +1/+1 counter on this creature.", "kind": "watch",
       "event": { "on": "dies", "of": { "types": ["creature"], "controller": "you", "other": true } },

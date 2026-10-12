@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "4143963748311b9b213676e03c6466991fe4f4bfdd0e909d190f66e068ad4c2f",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Mutagen Man, Living Ooze",
 		"registers": [
@@ -55,7 +54,7 @@
 								"x": true
 							},
 							"spec": {
-								"name": "Mutagen",
+								"name": "Mutagen Token",
 								"types": [
 									"artifact"
 								],

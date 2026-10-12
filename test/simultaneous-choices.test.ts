@@ -98,11 +98,11 @@ test("Viper choices stay private and unspent until one group, retain departed co
 	// Sackville sees a token sacrificed with it, although the player selects Sackville first.
 	const group = build(); main(group, 0); const b = place(group, 0, "hand", viper)[0]!, sack = place(group, 1, "hand", "The Sackville-Bagginses")[0]!;
 	commit(group, [{ do: "move", what: sack.id, to: "battlefield", reason: "game-setup", registers: pack(sack.card!) }], "game-setup");
-	commit(group, [{ do: "token", id: "chosen-treasure", controller: 1, spec: { name: "Treasure", types: ["artifact"], subtypes: ["Treasure"], colors: [],
+	commit(group, [{ do: "token", id: "chosen-treasure", controller: 1, spec: { name: "Treasure Token", types: ["artifact"], subtypes: ["Treasure"], colors: [],
 		registers: [{ kind: "mana", basis: "{T}, Sacrifice this token: Add one mana of any color.", cost: { tap: true, sacrifice: "this" }, any: 1 }] } },
 		{ do: "move", what: b.id, to: "battlefield", reason: "resolve", registers: pack(viper) }, { do: "counters", what: b.id, kind: "blight", amount: 1 }], "resolve");
 	const groupStart = structuredClone(group); choices(group); pick(group, label => label.includes(sack.card!) && label.endsWith("to sacrifice"));
-	pick(group, label => label === "Choose Treasure to sacrifice"); assert.equal(group.waiting.length, 0);
+	pick(group, label => label === "Choose Treasure Token to sacrifice"); assert.equal(group.waiting.length, 0);
 	const groupPending = structuredClone(group); pick(group, label => label.startsWith("Carry out all"));
 	assert.equal(group.waiting.length, 1); assert.equal(group.waiting[0]!.source!.id, sack.id); assert.equal(group.waiting[0]!.event.amount, 1);
 	replay(group, groupPending); replay(group, groupStart);

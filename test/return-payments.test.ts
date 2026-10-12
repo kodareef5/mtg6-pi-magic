@@ -70,11 +70,11 @@ test("return payments require live distinct controlled permanents and preserve u
  assert.equal(offered(table, { ...sneak, cost: { ...sneak.cost, sacrifice: { choose: { blocked: false }, count: 1 } } }).length, 0);
  const before = structuredClone(table), began = table.ledger.length, incarnation = free.incarnation;
  announce(table, sneak); assert.equal(free.zone, "hand"); assert.equal(free.incarnation, incarnation + 1); assert.equal(spell.zone, "stack");
- assert.equal(table.seats[0]!.pool.length, 0); assert.equal([...table.things.values()].filter(one => one.token?.name === "Ninja Turtle Spirit").length, 0);
+ assert.equal(table.seats[0]!.pool.length, 0); assert.equal([...table.things.values()].filter(one => one.token?.name === "Ninja Turtle Spirit Token").length, 0);
  const pending = structuredClone(table), at = table.ledger.length;
  passBoth(table);
  step(table, label => label.includes("The Theorist")); step(table, label => !label.includes("The Theorist")); step(table, label => !label.includes("The Theorist")); finish(table);
- const tokens = [...table.things.values()].filter(one => one.token?.name === "Ninja Turtle Spirit");
+ const tokens = [...table.things.values()].filter(one => one.token?.name === "Ninja Turtle Spirit Token");
  assert.equal(tokens.length, 3); assert.ok(tokens.every(one => one.tapped && table.combat!.attackers.some(attack => attack.id === one.id)));
  assert.deepEqual(table.combat!.attackers.find(one => one.id === tokens[0]!.id)!.to, ref(walker));
  assert.equal(table.waiting.length, 0, "entering attackers do not declare attacks");

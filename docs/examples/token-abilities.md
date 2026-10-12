@@ -24,7 +24,7 @@ branch. The bound land selection retains that branch after the card moves.
       "kind": "watch", "basis": "When this creature enters, create a Map token.",
       "event": { "on": "enters", "of": { "is": "this" } },
       "effect": { "instructions": [{ "do": "token", "count": 1, "spec": {
-        "name": "Map", "types": ["artifact"], "subtypes": ["Map"], "colors": [],
+        "name": "Map Token", "types": ["artifact"], "subtypes": ["Map"], "colors": [],
         "registers": [{
           "kind": "activated", "basis": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.",
           "cost": { "mana": "{1}", "tap": true, "sacrifice": "this" }, "speed": "sorcery",
@@ -67,7 +67,7 @@ ability remains on the stack and draws when it resolves.
       "effect": { "instructions": [
         { "do": "damage", "to": "you", "amount": 1 },
         { "do": "token", "count": 1, "spec": {
-          "name": "Clue", "types": ["artifact"], "subtypes": ["Clue"], "colors": [],
+          "name": "Clue Token", "types": ["artifact"], "subtypes": ["Clue"], "colors": [],
           "registers": [{ "kind": "activated", "basis": "{2}, Sacrifice this token: Draw a card.",
             "cost": { "mana": "{2}", "sacrifice": "this" },
             "effect": { "instructions": [{ "do": "draw", "who": "you", "count": 1 }] }
@@ -104,7 +104,7 @@ the complete Map ability; it does not supply the still-unsupported explore event
   "instructions": [
     { "do": "destroy", "what": "target:0" },
     { "do": "token", "count": 2, "controller": "controller:target:0", "spec": {
-      "name": "Map", "types": ["artifact"], "subtypes": ["Map"], "colors": [],
+      "name": "Map Token", "types": ["artifact"], "subtypes": ["Map"], "colors": [],
       "registers": [{
         "kind": "activated", "basis": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.",
         "cost": { "mana": "{1}", "tap": true, "sacrifice": "this" }, "speed": "sorcery",

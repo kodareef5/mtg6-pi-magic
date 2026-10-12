@@ -68,7 +68,7 @@ test("optional sacrifices lock a generic discount, preserve every reachable sele
 		assert.deepEqual([...table.things], things); snapshots.push(structuredClone(table)); pick(table, "announce:confirm");
 		assert.equal(source.zone, "stack"); assert.equal(source.ability!.cost.sacrificed!.length, count);
 		assert.equal(source.ability!.cost.sacrificeReduction, count); assert.equal(table.seats[0]!.pool.length, Math.min(count, 5));
-		assert.equal(cardsIn(table, "graveyard").filter(one => one.token?.name === "Treasure").length, count);
+		assert.equal(cardsIn(table, "graveyard").filter(one => one.token?.name === "Treasure Token").length, count);
 		settle(table); assert.equal(source.zone, "battlefield"); assert.equal(source.counters.blight, 1); assert.equal(table.seats[1]!.life, 16);
 		for (const snapshot of snapshots) replay(table, snapshot);
 	}
@@ -82,7 +82,7 @@ test("optional sacrifices lock a generic discount, preserve every reachable sele
 		pick(table, "announce:sacrifices-done"); pick(table, "announce:cost:0");
 		const payment = nextDecision(table)!.options.find(one => one.id.startsWith("announce:payment:"))!;
 		assert.equal(payment.use!.funding!.length, 1); assert.equal(payment.use!.funding![0]!.source.id, "treasure-5"); assert.deepEqual(payment.use!.funding![0]!.colors, ["B"]);
-		pick(table, payment.id); settle(table); assert.equal(cardsIn(table, "battlefield").filter(one => one.token?.name === "Treasure").length, 0);
+		pick(table, payment.id); settle(table); assert.equal(cardsIn(table, "battlefield").filter(one => one.token?.name === "Treasure Token").length, 0);
 	}
 	// Borrowed Elves may tap for mana before their sacrifice; ownership is not control.
 	const { table, source } = build(), elf = place(table, 1, "hand", "Llanowar Elves")[0]!;

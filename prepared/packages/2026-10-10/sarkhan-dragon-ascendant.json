@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "6e2d30f7262ec7e2a20680bc2f9d746f11d61bb71d4ef8b997d5a7fd49a77392",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sarkhan, Dragon Ascendant",
 		"registers": [
@@ -43,7 +42,7 @@
 								"bound": "dragon"
 							},
 							"spec": {
-								"name": "Treasure",
+								"name": "Treasure Token",
 								"types": [
 									"artifact"
 								],

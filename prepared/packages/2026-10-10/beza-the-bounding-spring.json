@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "d2d7c33ecdf545ed5bec27df14d9526328eb3ede2321d7af80abbd4d31e9268e",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Beza, the Bounding Spring",
 		"registers": [
@@ -47,7 +46,7 @@
 								"atLeast": 1
 							},
 							"spec": {
-								"name": "Treasure",
+								"name": "Treasure Token",
 								"types": [
 									"artifact"
 								],
@@ -92,7 +91,7 @@
 							"do": "token",
 							"count": 2,
 							"spec": {
-								"name": "Fish",
+								"name": "Fish Token",
 								"types": [
 									"creature"
 								],

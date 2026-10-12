@@ -143,7 +143,7 @@ test("unlocking pays as a special action and only the unlocked Room faces supply
 	const chamber = table.printed[card]!.faces![1]!;
 	assert.equal(characteristics(table, object)!.manaValue, 8, "both Room costs count in hand");
 	const registration = { face: 1 as const, basis: chamber.oracle, kind: "watch" as const, event: { on: "unlocks" as const, face: 1 as const, of: { is: "this" } },
-		effect: { instructions: [{ do: "token" as const, count: 1, spec: { name: "Demon", types: ["creature" as const], subtypes: ["Demon"], colors: ["B" as const], power: 6, toughness: 6, words: ["flying"] } }] } };
+		effect: { instructions: [{ do: "token" as const, count: 1, spec: { name: "Demon Token", types: ["creature" as const], subtypes: ["Demon"], colors: ["B" as const], power: 6, toughness: 6, words: ["flying"] } }] } };
 	// An established registration isolates this door's event; it is not a whole-card assessment.
 	editWork(table, 0, [{ do: "package.put", package: { card, registers: [registration] } }], "room-face-source");
 	main(table, 0); commit(table, [{ do: "add-mana", who: 0, colors: Array(8).fill("B") }], "game-setup");
@@ -167,7 +167,7 @@ test("unlocking pays as a special action and only the unlocked Room faces supply
 	assert.equal(table.waiting.length, 1);
 	assert.equal(nextDecision(table)!.situation, "trigger-order");
 	apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); finish(table);
-	assert.equal([...table.things.values()].filter((one) => one.token?.name === "Demon").length, 1);
+	assert.equal([...table.things.values()].filter((one) => one.token?.name === "Demon Token").length, 1);
 	const rebuilt = relive(structuredClone(original), table.ledger.slice(before));
 	assert.deepEqual(rebuilt.things, table.things);
 	assert.deepEqual(rebuilt.log, table.log);

@@ -23,7 +23,7 @@ before the search resolves, and the damage trigger waits above that ability.
     { "kind": "watch", "basis": "When this creature enters, create a Lander token. (It's an artifact with \"{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.\")",
       "event": { "on": "enters", "of": { "is": "this" } },
       "effect": { "instructions": [{ "do": "token", "count": 1, "spec": {
-        "name": "Lander", "types": ["artifact"], "subtypes": ["Lander"], "colors": [],
+        "name": "Lander Token", "types": ["artifact"], "subtypes": ["Lander"], "colors": [],
         "registers": [{ "kind": "activated", "basis": "{2}, {T}, Sacrifice this token: Search your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
           "cost": { "mana": "{2}", "tap": true, "sacrifice": "this" },
           "effect": { "instructions": [
@@ -54,7 +54,7 @@ A Treasure sacrificed for mana can trigger both this watch and Biotech's.
         { "do": "pay", "who": "you", "cost": { "sacrifice": { "choose": { "zones": ["battlefield"], "types": ["creature", "artifact"], "controller": "you", "other": true }, "count": 1 } }, "may": true, "as": "sacrificed" },
         { "do": "draw", "who": "you", "count": 1, "if": { "bound": "sacrificed" } },
         { "do": "token", "count": 1, "if": { "bound": "sacrificed" }, "spec": {
-          "name": "Treasure", "types": ["artifact"], "subtypes": ["Treasure"], "colors": [],
+          "name": "Treasure Token", "types": ["artifact"], "subtypes": ["Treasure"], "colors": [],
           "registers": [{ "kind": "mana", "basis": "{T}, Sacrifice this token: Add one mana of any color.", "cost": { "tap": true, "sacrifice": "this" }, "any": 1 }]
         } }
       ] } },
@@ -79,7 +79,7 @@ still belongs to the creature that deals the damage.
       "event": { "on": "enters", "of": { "is": "this" } },
       "effect": { "instructions": [
         { "do": "life", "who": "you", "amount": -1 },
-        { "do": "token", "count": 1, "spec": { "name": "Clue", "types": ["artifact"], "subtypes": ["Clue"], "colors": [],
+        { "do": "token", "count": 1, "spec": { "name": "Clue Token", "types": ["artifact"], "subtypes": ["Clue"], "colors": [],
           "registers": [{ "kind": "activated", "basis": "{2}, Sacrifice this token: Draw a card.", "cost": { "mana": "{2}", "sacrifice": "this" },
             "effect": { "instructions": [{ "do": "draw", "who": "you", "count": 1 }] } }]
         } }
@@ -88,7 +88,7 @@ still belongs to the creature that deals the damage.
       "event": { "on": "step", "step": "upkeep", "whose": "you" },
       "effect": { "instructions": [
         { "do": "life", "who": "you", "amount": -1 },
-        { "do": "token", "count": 1, "spec": { "name": "Clue", "types": ["artifact"], "subtypes": ["Clue"], "colors": [],
+        { "do": "token", "count": 1, "spec": { "name": "Clue Token", "types": ["artifact"], "subtypes": ["Clue"], "colors": [],
           "registers": [{ "kind": "activated", "basis": "{2}, Sacrifice this token: Draw a card.", "cost": { "mana": "{2}", "sacrifice": "this" },
             "effect": { "instructions": [{ "do": "draw", "who": "you", "count": 1 }] } }]
         } }

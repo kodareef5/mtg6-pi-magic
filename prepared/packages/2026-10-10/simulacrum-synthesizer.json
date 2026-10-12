@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "6dee9eaf5003477730ac8c33d3cce281f35b92263afdd2e5c59f441f50da5299",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Simulacrum Synthesizer",
 		"registers": [
@@ -85,7 +84,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Construct",
+								"name": "Construct Token",
 								"types": [
 									"artifact",
 									"creature"

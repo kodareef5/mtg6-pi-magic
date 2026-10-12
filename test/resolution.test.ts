@@ -204,11 +204,11 @@ test("targets that partly fail, labels, fight, tokens, each player, and counter 
 	assert.deepEqual([table.things.get(elves!.id)!.zone, table.things.get(claw!.id)!.zone], ["graveyard", "graveyard"]);
 
 	// A token, with what its spec registers.
-	announce(table, ability("Treasure", [{ do: "token", count: 1, as: "made", spec: { name: "Treasure", types: ["artifact"], subtypes: ["Treasure"], colors: [],
+	announce(table, ability("Treasure", [{ do: "token", count: 1, as: "made", spec: { name: "Treasure Token", types: ["artifact"], subtypes: ["Treasure"], colors: [],
 		registers: [{ basis: "{T}, Sacrifice this token: Add one mana of any color.", kind: "mana", cost: { tap: true, sacrifice: "this" }, any: 1 }] } }]));
 	passBoth(table);
 	finish(table);
-	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure")!;
+	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure Token")!;
 	assert.deepEqual([characteristics(table, treasure)!.types, characteristics(table, treasure)!.registrations.length], [["artifact"], 1]);
 
 	// Each player, with the player bound.

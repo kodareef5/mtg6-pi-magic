@@ -49,7 +49,7 @@
 									"count": 1,
 									"controller": "controller:target:0",
 									"spec": {
-										"name": "Goblin Army",
+										"name": "Goblin Army Token",
 										"types": [
 											"creature"
 										],

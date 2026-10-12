@@ -31,13 +31,13 @@ test("Empower creates a complete token, waits for the loyalty counter, and share
 		announce(table, printedCast("Llanowar Elves", table.printed["Llanowar Elves"]!)); apply(table, "pass", "model", "chosen");
 		announce(table, counter); passBoth(table); step(table); // Counter the spell.
 		if (!existing) step(table); // Create at zero; the next instruction chooses it before a checkpoint.
-		const token = cardsIn(table, "battlefield").find((one) => one.token?.name === "Jace")!;
+		const token = cardsIn(table, "battlefield").find((one) => one.token?.name === "Jace Token")!;
 		assert.equal(token.counters.loyalty ?? 0, existing ? 3 : 0);
 		assert.equal(nextDecision(table)!.situation, "resolution", "state checks wait through Empower's choice and counter");
 		const middle = structuredClone(table), at = table.ledger.length;
 		step(table); finish(table);
 		assert.equal(token.counters.loyalty, existing ? 4 : 1);
-		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Jace").length, 1);
+		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Jace Token").length, 1);
 		assert.equal(activatedUses(workFrame(table, 0)).length, 2);
 		assert.ok(Object.keys(actions(workFrame(table, 0))).some((key) => key.startsWith(`ability:${token.id}`)));
 		assert.ok(!nextDecision(table)!.options.some((one) => one.id.startsWith(`ability:${token.id}`)), "no loyalty activation on the other seat's turn");
@@ -78,7 +78,7 @@ test("a loyalty timing grant includes later permanents, respects priority and tu
 	assert.ok(table.notes.some((one) => one.kind === "activation-timing"));
 	const pending = structuredClone(table), at = table.ledger.length;
 	finish(table);
-	const token = cardsIn(table, "battlefield").find((one) => one.token?.name === "Jace")!;
+	const token = cardsIn(table, "battlefield").find((one) => one.token?.name === "Jace Token")!;
 	assert.equal(token.counters.loyalty, 8); assert.equal(table.cursor.active, 1);
 	assert.equal(cardsIn(table, "stack").length, 1, "the first spell is still waiting underneath Machinations");
 	const world = tableWorld(table), view = workFrame(table, 0);

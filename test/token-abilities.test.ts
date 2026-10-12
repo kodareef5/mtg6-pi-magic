@@ -30,15 +30,15 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 		announce(table, printedCast("Spyglass Siren", table.printed["Spyglass Siren"]!)); passBoth(table); finish(table);
 		assert.equal(nextDecision(table)!.situation, "trigger-order");
 		apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); finish(table);
-		const map = cardsIn(table, "battlefield", 0).find((one) => one.token?.name === "Map")!;
+		const map = cardsIn(table, "battlefield", 0).find((one) => one.token?.name === "Map Token")!;
 		const use = activatedUses(workFrame(table, 0)).find((one) => one.procedure.source.refs?.[0]?.id === map.id)!;
 		assert.ok(use); assert.ok(offered(table, use.procedure).length);
 		// A creature without haste cannot tap on entry, but a Map is not a creature.
 		announce(table, use.procedure); assert.equal(map.zone, "graveyard");
 		const sacrificed = table.log.findLast((one) => one.changes.some((change) => change.do === "move" && change.what === map.id && change.reason === "sacrifice"))!;
-		for (const viewer of [0, 1, "spectator"] as const) assert.match(describe(table, sacrificed, viewer), /put Map into graveyard \(sacrifice\)/);
+		for (const viewer of [0, 1, "spectator"] as const) assert.match(describe(table, sacrificed, viewer), /put Map Token into graveyard \(sacrifice\)/);
 		finish(table); assert.equal(table.things.has(map.id), false, "sacrificed token ceases while its ability remains on the stack");
-		assert.match(describe(table, sacrificed), /put Map into graveyard/, "the receipt keeps the token's event-time name after it ceases");
+		assert.match(describe(table, sacrificed), /put Map Token into graveyard/, "the receipt keeps the token's event-time name after it ceases");
 		passBoth(table);
 		const hidden = structuredClone(table);
 		assert.ok(!JSON.stringify(nextDecision(table)).includes(top.id), "the reveal confirmation names no unseen object");
@@ -68,7 +68,7 @@ test("a Map's own activation reveals before branching, pays once, and survives i
 	assert.equal(nextDecision(table)!.situation, "trigger-order");
 	apply(table, nextDecision(table)!.options[0]!.id, "model", "chosen"); passBoth(table); finish(table);
 	assert.equal(table.seats[0]!.life, 19, "the source's death trigger deals its damage before making the Clue");
-	const clue = cardsIn(table, "battlefield", 0).find((one) => one.token?.name === "Clue")!;
+	const clue = cardsIn(table, "battlefield", 0).find((one) => one.token?.name === "Clue Token")!;
 	assert.ok(clue); assert.equal(inspector.zone, "graveyard");
 	assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 	main(table, 1, 2); apply(table, "pass", "model", "chosen");
@@ -107,16 +107,16 @@ test("token creation uses the target's last controller, survives failed destruct
 		assert.equal(victim.controller, mode === "destroyed" ? 0 : 1);
 		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token).length, 0);
 		const pending = structuredClone(table), at = table.ledger.length;
-		assert.equal(nextDecision(table)!.options[0]!.label, `${table.seats[1]!.name} create 2 Map`);
+		assert.equal(nextDecision(table)!.options[0]!.label, `${table.seats[1]!.name} create 2 Map Token`);
 		assert.deepEqual(table, pending, "listing a creator reads last known information without writing it");
 		finish(table);
-		const maps = cardsIn(table, "battlefield").filter((one) => one.token?.name === "Map");
+		const maps = cardsIn(table, "battlefield").filter((one) => one.token?.name === "Map Token");
 		assert.equal(maps.length, 2); assert.ok(maps.every((one) => one.owner === 1 && one.controller === 1));
 		assert.ok(maps.every((one) => one.token!.colors.length === 0));
 		assert.equal(activatedUses(workFrame(table, 0)).filter((one) => maps.some((map) => one.procedure.source.refs?.[0]?.id === map.id)).length, 0);
 		assert.equal(activatedUses(workFrame(table, 1)).filter((one) => maps.some((map) => one.procedure.source.refs?.[0]?.id === map.id)).length, 2);
 		const receipt = table.log.findLast((one) => one.changes.some((change) => change.do === "token"))!;
-		assert.ok(describe(table, receipt).startsWith(`${table.seats[1]!.name} created Map (x2)`));
+		assert.ok(describe(table, receipt).startsWith(`${table.seats[1]!.name} created Map Token (x2)`));
 		assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 	}
@@ -129,7 +129,7 @@ test("token creation uses the target's last controller, survives failed destruct
 			{ do: "counters", what: victim!.id, kind: "+1/+1", amount: 2 }], "game-setup");
 		if (mode === "indestructible") commit(table, [{ do: "note", note: { kind: "label", by: 0, on: { id: victim!.id, incarnation: victim!.incarnation },
 			until: "indefinite", text: "Fixture protects the target", change: { words: ["indestructible"] } } }], "game-setup");
-		if (mode === "existing") commit(table, [{ do: "token", id: "previous-army", controller, spec: { name: "Goblin Army", types: ["creature"],
+		if (mode === "existing") commit(table, [{ do: "token", id: "previous-army", controller, spec: { name: "Goblin Army Token", types: ["creature"],
 			subtypes: ["Goblin", "Army"], colors: ["B"], power: 0, toughness: 0 } },
 			{ do: "counters", what: "previous-army", kind: "+1/+1", amount: 1 }], "game-setup");
 		const registers = pack(card);
@@ -157,7 +157,7 @@ test("token creation uses the target's last controller, survives failed destruct
 		step(table); // Create an Army only if needed.
 		assert.equal(nextDecision(table)!.seat, controller, "the target's last controller chooses the Army");
 		finish(table);
-		const armies = cardsIn(table, "battlefield").filter(one => one.token?.name === "Goblin Army");
+		const armies = cardsIn(table, "battlefield").filter(one => one.token?.name === "Goblin Army Token");
 		assert.equal(armies.length, 1); assert.equal(armies[0]!.controller, controller);
 		assert.equal(armies[0]!.counters["+1/+1"], mode === "existing" ? 4 : 3, "amass reads layered power before destruction");
 		assert.equal(cardsIn(table, "hand", 0).length, hand + (mode === "opponent" ? 0 : 1));

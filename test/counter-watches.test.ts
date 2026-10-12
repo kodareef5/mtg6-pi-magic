@@ -52,7 +52,7 @@ test("counter watches distinguish each placement and a threshold, including entr
 	// A token's counters come from its actual entry terms, not its count after later changes.
 	const { table: tokenTable, source: watcher } = position(0, { ...threshold, event: { on: "counters", counter: "loyalty", reaches: 4 } });
 	commit(tokenTable, [{ do: "token", id: "entering-jace", controller: 0,
-		spec: { name: "Jace", types: ["planeswalker"], subtypes: ["Jace"], colors: ["U"], loyalty: 4 } },
+		spec: { name: "Jace Token", types: ["planeswalker"], subtypes: ["Jace"], colors: ["U"], loyalty: 4 } },
 		{ do: "counters", what: "entering-jace", kind: "loyalty", amount: -1 }], "resolve");
 	assert.equal(tokenTable.waiting.length, 1); assert.equal(tokenTable.waiting[0]!.source?.id, watcher.id);
 	assert.equal(tokenTable.things.get("entering-jace")!.counters.loyalty, 3);

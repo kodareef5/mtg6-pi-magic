@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "f4faa67ba698744ac4a3d2c7492595406ba68b77f81c4eef84880b53b6610e64",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Restless Anchorage",
 		"registers": [
@@ -47,7 +46,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Map",
+								"name": "Map Token",
 								"types": [
 									"artifact"
 								],

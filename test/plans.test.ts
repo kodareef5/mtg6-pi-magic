@@ -324,7 +324,7 @@ test("a branch and a held resource are marked on the options they touch, and not
 		assert.match(annotate(earlier.decision!.options, planState(earlier)!).find((one) => one.id === "attack:1-49")!.notes!.join(" "), /Spends Smaug the Magnificent \(1-49@\d+\), which the plan holds for:/);
 		writeFileSync(path, gunzipSync(readFileSync("test/fixtures/benchmarks/red-treasure-lethal.jsonl.gz")));
 		const tokens = workFrame(replay(path, (header) => matchTable(header.seed), 236).table, 1);
-		const treasure = tokens.view.objects!.find((one) => one.token?.name === "Treasure")!;
+		const treasure = tokens.view.objects!.find((one) => one.token?.name === "Treasure Token")!;
 		assert.ok(treasure);
 		tokens.view.work!.plan!.holds = [{ objects: { refs: [{ id: treasure.id, incarnation: treasure.incarnation }] }, purpose: "Keep Treasure for Smaug." }];
 		const markedTokens = annotate(tokens.decision!.options, planState(tokens)!);

@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "de858ffabffb07dbea47b4850dd713ac4238042d89d4a32933cc462f8c9fc10a",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Lunar Convocation",
 		"registers": [
@@ -70,7 +69,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Bat",
+								"name": "Bat Token",
 								"types": [
 									"creature"
 								],

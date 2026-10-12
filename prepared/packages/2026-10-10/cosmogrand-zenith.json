@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "620b764c195faf016f28ce9a2711d26c3850dc6135cac6bdec4032b85211f799",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Cosmogrand Zenith",
 		"registers": [
@@ -28,7 +27,7 @@
 									"do": "token",
 									"count": 2,
 									"spec": {
-										"name": "Human Soldier",
+										"name": "Human Soldier Token",
 										"types": [
 											"creature"
 										],

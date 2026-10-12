@@ -124,7 +124,7 @@ function otherSourceTypes() {
   prepareTide(table); main(table, 1);
   const registers: Registration[] = kind === "enchantment" ? [{ kind: "watch",
    basis: "When this enchantment enters, create a 2/2 black Skeleton Pirate creature token.",
-   event: { on: "enters", of: { is: "this" } }, effect: { instructions: [{ do: "token", count: 1, spec: { name: "Skeleton Pirate", types: ["creature"], subtypes: ["Skeleton", "Pirate"], colors: ["B"], power: 2, toughness: 2 } }] },
+   event: { on: "enters", of: { is: "this" } }, effect: { instructions: [{ do: "token", count: 1, spec: { name: "Skeleton Pirate Token", types: ["creature"], subtypes: ["Skeleton", "Pirate"], colors: ["B"], power: 2, toughness: 2 } }] },
   }] : [];
   commit(table, [{ do: "move", what: source.id, to: "battlefield", registers, reason: "resolve" }], "resolve");
   commit(table, [{ do: "add-mana", who: 0, colors: ["U", "C", "C"] }, { do: "add-mana", who: 1, colors: Array(5).fill("C") }], "game-setup");

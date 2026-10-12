@@ -39,7 +39,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	const table = position(); main(table, 0);
 	const song: Procedure = { source: { card: "Song of Totentanz", zones: ["hand"], controller: "self" }, timing: "spell",
 		claim: "Cast Song of Totentanz", basis: table.printed["Song of Totentanz"]!.oracle,
-		instructions: [{ do: "token", count: { x: true }, spec: { name: "Rat", types: ["creature"], subtypes: ["Rat"], colors: ["B"], power: 1, toughness: 1, words: ["can't block"] } },
+		instructions: [{ do: "token", count: { x: true }, spec: { name: "Rat Token", types: ["creature"], subtypes: ["Rat"], colors: ["B"], power: 1, toughness: 1, words: ["can't block"] } },
 			{ do: "modify", every: { types: ["creature"], controller: "you" }, change: { words: ["haste"] }, until: "end-of-turn" }] };
 	const rush: Procedure = { source: { card: "Frontline Rush", zones: ["hand"], controller: "self" }, timing: "spell",
 		claim: "Cast Frontline Rush to strengthen a creature", basis: table.printed["Frontline Rush"]!.oracle,
@@ -87,7 +87,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	assert.equal(table.announcement, undefined); assert.equal(cardsIn(table, "stack")[0]!.ability!.x, 2);
 	assert.equal(cardsIn(table, "battlefield").filter((one) => one.tapped).length, 3);
 	passBoth(table); finish(table);
-	assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Rat").length, 2);
+	assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Rat Token").length, 2);
 	const voice = cardsIn(table, "battlefield").find((one) => one.card === "Voice of Victory")!;
 	const when = { active: "self" as const, step: "precombat-main" as const, fromTurn: 1, throughTurn: 1 };
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Strengthen Voice", guidance: "Keep the target explicit.", throughTurn: 1,

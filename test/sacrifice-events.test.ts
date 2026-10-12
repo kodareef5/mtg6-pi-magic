@@ -52,11 +52,11 @@ test("sacrifices retain their actor, pre-departure characteristics and turn coun
 		replay(table, before);
 	}
 	assert.equal(table.seats[0]!.life, 19); assert.equal(table.seats[1]!.life, 17); assert.equal(count(table), 1);
-	const lander = cardsIn(table, "battlefield").find(one => one.token?.name === "Lander")!;
-	const treasure = cardsIn(table, "battlefield").find(one => one.token?.name === "Treasure")!;
-	assert.ok(lander); assert.ok(treasure); assert.equal(cardsIn(table, "battlefield").filter(one => one.token?.name === "Clue").length, 0);
+	const lander = cardsIn(table, "battlefield").find(one => one.token?.name === "Lander Token")!;
+	const treasure = cardsIn(table, "battlefield").find(one => one.token?.name === "Treasure Token")!;
+	assert.ok(lander); assert.ok(treasure); assert.equal(cardsIn(table, "battlefield").filter(one => one.token?.name === "Clue Token").length, 0);
 	main(table, 0, 3); assert.equal(count(table), 0); assert.equal(table.seats[0]!.life, 18);
-	const clue = cardsIn(table, "battlefield").find(one => one.token?.name === "Clue")!; assert.ok(clue);
+	const clue = cardsIn(table, "battlefield").find(one => one.token?.name === "Clue Token")!; assert.ok(clue);
 	for (const token of [lander, clue]) {
 		mana(table, ["C", "C"]); const before = structuredClone(table), hand = cardsIn(table, "hand", 0).length;
 		const use = activatedUses(workFrame(table, 0)).find(one => one.procedure.source.refs?.[0]?.id === token.id)!;

@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "42fae4d939dab77cbf7a4e30f3ea12784438330d47ff1a4754c587c4d6308f68",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Moseo, Vein's New Dean",
 		"registers": [
@@ -34,7 +33,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Pest",
+								"name": "Pest Token",
 								"types": [
 									"creature"
 								],

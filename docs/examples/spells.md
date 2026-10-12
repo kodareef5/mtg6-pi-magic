@@ -85,7 +85,7 @@ to activate it. Bake into a Pie destroys the target and creates that Food:
   "targets": [{ "object": { "types": ["creature"] } }],
   "instructions": [
     { "do": "destroy", "what": "target:0" },
-    { "do": "token", "count": 1, "spec": { "name": "Food", "types": ["artifact"], "subtypes": ["Food"], "colors": [],
+    { "do": "token", "count": 1, "spec": { "name": "Food Token", "types": ["artifact"], "subtypes": ["Food"], "colors": [],
       "registers": [{ "kind": "activated", "basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
         "cost": { "mana": "{2}", "tap": true, "sacrifice": "this" },
         "effect": { "instructions": [{ "do": "life", "who": "you", "amount": 3 }] }
@@ -99,7 +99,7 @@ The equivalent explicit procedure is:
 
 ```json procedure
 {
-  "source": { "zones": ["battlefield"], "controller": "self", "card": "Food", "registered": "{2}, {T}, Sacrifice this token: You gain 3 life." },
+  "source": { "zones": ["battlefield"], "controller": "self", "card": "Food Token", "registered": "{2}, {T}, Sacrifice this token: You gain 3 life." },
   "claim": "Sacrifice a Food for 3 life",
   "basis": "{2}, {T}, Sacrifice this token: You gain 3 life.",
   "timing": "stack",

@@ -70,7 +70,7 @@
 						"count": 1,
 						"controller": "you",
 						"spec": {
-							"name": "Fish",
+							"name": "Fish Token",
 							"types": [
 								"creature"
 							],
@@ -107,7 +107,7 @@
 						"count": 1,
 						"controller": "you",
 						"spec": {
-							"name": "Treasure",
+							"name": "Treasure Token",
 							"types": [
 								"artifact"
 							],

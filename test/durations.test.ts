@@ -30,11 +30,11 @@ test("exile-until ends between instructions, tracks exact objects and returns si
 		// The fixture exercises destruction and token creation; it does not exercise a Map activation.
 		announce(table, { source: { card: "Get Lost", zones: ["hand"] }, claim: "Destroy the exiling enchantment, then make its controller's Maps", timing: "spell",
 			basis: table.printed["Get Lost"]!.oracle, targets: [{ object: { types: ["enchantment"], controller: "you" } }],
-			instructions: [{ do: "destroy", what: "target:0" }, { do: "token", count: 2, spec: { name: "Map", types: ["artifact"], subtypes: ["Map"], colors: [] } }] });
+			instructions: [{ do: "destroy", what: "target:0" }, { do: "token", count: 2, spec: { name: "Map Token", types: ["artifact"], subtypes: ["Map"], colors: [] } }] });
 		passBoth(table); step(table);
 		assert.equal(seam!.zone, "graveyard"); assert.equal(victim.zone, "battlefield");
 		assert.ok(table.resolution, "the return precedes the next instruction in Get Lost");
-		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Map").length, 0);
+		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Map Token").length, 0);
 		assert.ok(!table.notes.some((one) => one.kind === "return"));
 		assert.ok(!table.waiting.some((one) => /return/i.test(one.basis)), "the duration creates no leaves trigger");
 		finish(table);
@@ -66,7 +66,7 @@ test("exile-until ends between instructions, tracks exact objects and returns si
 	const table = start(standard, [{ deck: deck("Azorius Control") }, { deck: deck("Mono-Red Aggro") }], "simultaneous-returns");
 	const sources = place(table, 0, "battlefield", "Seam Rip", "Seam Rip");
 	const [a, b, gone] = place(table, 1, "exile", "Hired Claw", "Hired Claw", "Hired Claw");
-	commit(table, [{ do: "token", id: "map", controller: 1, spec: { name: "Map", types: ["artifact"], subtypes: ["Map"], colors: [] } }], "game-setup");
+	commit(table, [{ do: "token", id: "map", controller: 1, spec: { name: "Map Token", types: ["artifact"], subtypes: ["Map"], colors: [] } }], "game-setup");
 	commit(table, [{ do: "move", what: "map", to: "exile", reason: "exile" }], "exile");
 	const token = table.things.get("map")!;
 	commit(table, [a!, b!, gone!, token].map((one, at) => ({ do: "note" as const, note: { kind: "return" as const, by: 0, until: "indefinite" as const,

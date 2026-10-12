@@ -277,7 +277,7 @@ test("Smaug makes a Treasure at upkeep, and the Treasure pays by being sacrifice
 	place(table, 1, "hand", "Emberheart Challenger");
 	main(table, 1, 2, "upkeep");
 	resolveTop(table);
-	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure")!;
+	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure Token")!;
 	assert.equal(treasure.controller, 1);
 	main(table, 1, 2);
 	const cast = nextDecision(table)!.options.find((option) => option.label.includes("Emberheart Challenger") && option.shows!.includes("sacrifice it"));
@@ -427,7 +427,7 @@ test("one Treasure cannot both be sacrificed as a cost and sacrificed for its ow
 	place(table, 1, "battlefield", "Mountain");
 	main(table, 1, 2, "upkeep");
 	resolveTop(table);
-	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure")!;
+	const treasure = [...table.things.values()].find((one) => one.token?.name === "Treasure Token")!;
 	main(table, 1, 2);
 	// Not printed: an ability that wants an artifact sacrificed and one mana.
 	const options = offered(table, { claim: "Gain 1 life", basis: "{1}, Sacrifice an artifact: You gain 1 life.", source: { zones: ["battlefield"], controller: "self", card: "Smaug the Magnificent" },

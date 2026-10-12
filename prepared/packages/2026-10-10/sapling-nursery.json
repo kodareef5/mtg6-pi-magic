@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "8ee5ce5a18da8206f567e3f50e36fb403ee350c6886af8ae16f0815787d1728c",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sapling Nursery",
 		"registers": [
@@ -25,7 +24,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Treefolk",
+								"name": "Treefolk Token",
 								"types": [
 									"creature"
 								],

@@ -320,10 +320,10 @@ test("entering attackers choose defenders together, never declare attacks, and r
 	assert.equal(nextDecision(table)!.options.length, 2);
 	assert.deepEqual(table, untouched, "listing entering defenders creates no token");
 	step(table, (label) => label.includes("Jace Beleren"));
-	assert.equal([...table.things.values()].filter((one) => one.token?.name === "Warrior").length, 0, "the group waits for every defender choice");
+	assert.equal([...table.things.values()].filter((one) => one.token?.name === "Warrior Token").length, 0, "the group waits for every defender choice");
 	const pending = structuredClone(table), at = table.ledger.length;
 	step(table, (label) => !label.includes("Jace Beleren")); finish(table);
-	const tokens = [...table.things.values()].filter((one) => one.token?.name === "Warrior");
+	const tokens = [...table.things.values()].filter((one) => one.token?.name === "Warrior Token");
 	assert.equal(tokens.length, 2); assert.ok(tokens.every((one) => one.tapped));
 	assert.equal(table.log.filter((one) => one.changes.filter((change) => change.do === "token").length === 2).length, 1);
 	assert.deepEqual(table.combat!.attackers.find((one) => one.id === tokens[0]!.id)!.to, { id: walker.id, incarnation: walker.incarnation });

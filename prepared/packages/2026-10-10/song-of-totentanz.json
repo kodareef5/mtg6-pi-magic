@@ -30,7 +30,7 @@
 							"x": true
 						},
 						"spec": {
-							"name": "Rat",
+							"name": "Rat Token",
 							"types": [
 								"creature"
 							],

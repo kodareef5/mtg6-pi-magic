@@ -48,7 +48,7 @@ with both doors locked. Registrations on a locked face do not apply.
     { "face": 1, "basis": "When you unlock this door, create a 6/6 black Demon creature token with flying.",
       "kind": "watch", "event": { "on": "unlocks", "face": 1, "of": { "is": "this" } },
       "effect": { "instructions": [{ "do": "token", "count": 1,
-        "spec": { "name": "Demon", "types": ["creature"], "subtypes": ["Demon"], "colors": ["B"], "power": 6, "toughness": 6, "words": ["flying"] } }] } }
+        "spec": { "name": "Demon Token", "types": ["creature"], "subtypes": ["Demon"], "colors": ["B"], "power": 6, "toughness": 6, "words": ["flying"] } }] } }
   ]
 }
 ```

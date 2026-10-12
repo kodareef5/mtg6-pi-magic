@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "346c3672cd35449daac0eef5ab8dd0b8b0af5dfecb4aea315fec948cccfbc366",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "The Sackville-Bagginses",
 		"registers": [
@@ -55,7 +54,7 @@
 								"bound": "sacrificed"
 							},
 							"spec": {
-								"name": "Treasure",
+								"name": "Treasure Token",
 								"types": [
 									"artifact"
 								],

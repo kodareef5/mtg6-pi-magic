@@ -22,7 +22,7 @@ but do not narrow the set counted by `ordinal`.
     "kind": "watch", "event": { "on": "cast", "by": "you", "ordinal": 2 },
     "effect": { "modes": [
       { "instructions": [{ "do": "token", "count": 2, "spec": {
-        "name": "Human Soldier", "types": ["creature"], "subtypes": ["Human", "Soldier"], "colors": ["W"], "power": 1, "toughness": 1
+        "name": "Human Soldier Token", "types": ["creature"], "subtypes": ["Human", "Soldier"], "colors": ["W"], "power": 1, "toughness": 1
       } }] },
       { "instructions": [{ "do": "counters", "every": { "types": ["creature"], "controller": "you" }, "kind": "+1/+1", "amount": 1 }] }
     ] }

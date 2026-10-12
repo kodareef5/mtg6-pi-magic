@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "2795dce0392053113ae882721dbed9a88a94de76120c21590926db441e55e63e",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Biotech Specialist",
 		"registers": [
@@ -22,7 +21,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Lander",
+								"name": "Lander Token",
 								"types": [
 									"artifact"
 								],

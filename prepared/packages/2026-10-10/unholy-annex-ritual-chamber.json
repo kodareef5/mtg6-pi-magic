@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "3ecf6f89984b2d41240417b3cc175ab8bafb76e9d065d7333ff363f9acb13597",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Unholy Annex // Ritual Chamber",
 		"registers": [
@@ -106,7 +105,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Demon",
+								"name": "Demon Token",
 								"types": [
 									"creature"
 								],

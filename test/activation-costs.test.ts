@@ -38,7 +38,7 @@ test("activation discounts preserve targets and nonmana costs, bound X, and agre
 		commit(table, [{ do: "add-mana", who: 0, colors: ["G", "G", ...Array(x).fill("C")] }], "game-setup");
 		const before = structuredClone(table);
 		announce(table, cast, one => one.activation.x === x); assert.ok(characteristics(table, source)!.words.includes("trample")); settle(table);
-		const tokens = cardsIn(table, "battlefield").filter(one => one.token?.name === "Mutagen");
+		const tokens = cardsIn(table, "battlefield").filter(one => one.token?.name === "Mutagen Token");
 		assert.equal(tokens.length, x); assert.equal(table.seats[0]!.pool.length, 0); assert.ok(characteristics(table, source)!.words.includes("trample")); replay(table, before);
 		if (!x) continue;
 		const token = tokens[0]!, uses = activatedUses(workFrame(table, 0)), use = uses.find(one => one.procedure.source.refs?.[0]?.id === token.id)!.procedure;

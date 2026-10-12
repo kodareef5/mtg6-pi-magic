@@ -28,7 +28,7 @@ turn it is from the standing registration.
       "event": { "on": "attacks", "of": { "is": "this" } },
       "effect": { "instructions": [
         { "do": "token", "count": 2, "tapped": true, "attacking": true, "as": "mobilized",
-          "spec": { "name": "Warrior", "types": ["creature"], "subtypes": ["Warrior"], "colors": ["R"], "power": 1, "toughness": 1 } },
+          "spec": { "name": "Warrior Token", "types": ["creature"], "subtypes": ["Warrior"], "colors": ["R"], "power": 1, "toughness": 1 } },
         { "do": "delay", "event": { "on": "step", "step": "end", "whose": "any" },
           "effect": { "instructions": [{ "do": "move", "what": "bound:mobilized", "to": "graveyard", "reason": "sacrifice" }] } }
       ] }

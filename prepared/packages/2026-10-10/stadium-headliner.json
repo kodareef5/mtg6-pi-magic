@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "b23d9acff1e5a2339ef912f992048afa4d959ff8893b7290b7f7e9de974134a5",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Stadium Headliner",
 		"registers": [
@@ -25,7 +24,7 @@
 							"attacking": true,
 							"as": "mobilized",
 							"spec": {
-								"name": "Warrior",
+								"name": "Warrior Token",
 								"types": [
 									"creature"
 								],

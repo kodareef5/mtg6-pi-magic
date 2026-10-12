@@ -52,7 +52,7 @@ it has no live object. Omitting the field asks about a live incarnation.
                 "count": 1,
                 "controller": "controller:target:0",
                 "spec": {
-                  "name": "Goblin Army",
+                  "name": "Goblin Army Token",
                   "types": [
                     "creature"
                   ],

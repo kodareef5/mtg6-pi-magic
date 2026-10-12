@@ -28,7 +28,7 @@ controlled it.
     { "kind": "continuous", "basis": "Skeletons you control get +1/+0 and have haste.", "affects": { "subtypes": ["Skeleton"], "controller": "you" }, "change": { "power": 1, "words": ["haste"] } },
     { "kind": "watch", "basis": "When this enchantment enters, create a 2/2 black Skeleton Pirate creature token.",
       "event": { "on": "enters", "of": { "is": "this" } },
-      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Skeleton Pirate", "types": ["creature"], "subtypes": ["Skeleton", "Pirate"], "colors": ["B"], "power": 2, "toughness": 2 } }] } },
+      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Skeleton Pirate Token", "types": ["creature"], "subtypes": ["Skeleton", "Pirate"], "colors": ["B"], "power": 2, "toughness": 2 } }] } },
     { "kind": "watch", "basis": "At the beginning of your end step, if you descended this turn, you may pay 1 life. If you do, return this enchantment to its owner's hand. (You descended if a permanent card was put into your graveyard from anywhere.)",
       "event": { "on": "step", "step": "end", "whose": "you" },
       "if": { "amount": { "history": "descended", "by": "you" }, "atLeast": 1 },

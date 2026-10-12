@@ -18,7 +18,7 @@ token survives long enough to receive that counter.
     {
       "do": "token", "count": 1,
       "if": { "amount": { "count": { "controller": "you", "types": ["planeswalker"], "subtypes": ["Jace"], "token": true } }, "atMost": 0 },
-      "spec": { "name": "Jace", "types": ["planeswalker"], "subtypes": ["Jace"], "colors": ["U"], "loyalty": 0,
+      "spec": { "name": "Jace Token", "types": ["planeswalker"], "subtypes": ["Jace"], "colors": ["U"], "loyalty": 0,
         "registers": [
           {
             "kind": "activated", "basis": "[−1]: Surveil 1", "cost": { "loyalty": -1 },
@@ -89,7 +89,7 @@ activation without priority. The grant expires during cleanup.
       "count": 1,
       "if": {"amount": {"count": {"controller": "you", "types": ["planeswalker"], "subtypes": ["Jace"], "token": true}}, "atMost": 0},
       "spec": {
-        "name": "Jace",
+        "name": "Jace Token",
         "types": ["planeswalker"],
         "subtypes": ["Jace"],
         "colors": ["U"],

@@ -36,7 +36,7 @@ Its enters trigger is registered as usual and fires whichever way it was cast:
   "registers": [
     { "basis": "When this creature enters, create a 1/1 white Human Soldier creature token.", "kind": "watch",
       "event": { "on": "enters", "of": { "is": "this" } },
-      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Human Soldier", "types": ["creature"], "subtypes": ["Human", "Soldier"], "colors": ["W"], "power": 1, "toughness": 1 } }] } }
+      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Human Soldier Token", "types": ["creature"], "subtypes": ["Human", "Soldier"], "colors": ["W"], "power": 1, "toughness": 1 } }] } }
   ]
 }
 ```

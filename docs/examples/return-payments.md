@@ -26,7 +26,7 @@ the returned attacker's defender remains unsupported.
   "timing": "spell",
   "instructions": [
     { "do": "token", "count": 3,
-      "spec": { "name": "Ninja Turtle Spirit", "types": ["creature"], "subtypes": ["Ninja", "Turtle", "Spirit"], "colors": ["W"], "power": 1, "toughness": 1 } }
+      "spec": { "name": "Ninja Turtle Spirit Token", "types": ["creature"], "subtypes": ["Ninja", "Turtle", "Spirit"], "colors": ["W"], "power": 1, "toughness": 1 } }
   ]
 }
 ```
@@ -41,7 +41,7 @@ the returned attacker's defender remains unsupported.
   "cost": { "mana": "{1}{W}", "return": { "choose": { "types": ["creature"], "blocked": false }, "count": 1 } },
   "instructions": [
     { "do": "token", "count": 3, "tapped": true, "attacking": true,
-      "spec": { "name": "Ninja Turtle Spirit", "types": ["creature"], "subtypes": ["Ninja", "Turtle", "Spirit"], "colors": ["W"], "power": 1, "toughness": 1 } }
+      "spec": { "name": "Ninja Turtle Spirit Token", "types": ["creature"], "subtypes": ["Ninja", "Turtle", "Spirit"], "colors": ["W"], "power": 1, "toughness": 1 } }
   ]
 }
 ```

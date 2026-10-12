@@ -91,7 +91,7 @@ comes from the rules (111.10a), not from Smaug's card.
         "instructions": [{ "do": "damage", "to": "target:0", "amount": { "count": { "subtypes": ["Treasure"], "controller": "you" } } }] } },
     { "basis": "At the beginning of your upkeep, create a Treasure token.", "kind": "watch",
       "event": { "on": "step", "step": "upkeep", "whose": "you" },
-      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Treasure", "types": ["artifact"], "subtypes": ["Treasure"], "colors": [],
+      "effect": { "instructions": [{ "do": "token", "count": 1, "spec": { "name": "Treasure Token", "types": ["artifact"], "subtypes": ["Treasure"], "colors": [],
         "registers": [{ "basis": "{T}, Sacrifice this token: Add one mana of any color.", "kind": "mana",
           "cost": { "tap": true, "sacrifice": "this" }, "any": 1 }] } }] } }
   ]

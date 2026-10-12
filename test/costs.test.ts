@@ -34,7 +34,7 @@ test("costs select distinct available resources and pay once before any conditio
 		const paid = structuredClone(table), at = table.ledger.length;
 		finish(table);
 		assert.equal(cardsIn(table, "hand", 0).length, hand + (choice === "pay" ? 1 : 0));
-		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Robot").length, choice === "pay" ? 1 : 0);
+		assert.equal(cardsIn(table, "battlefield").filter((one) => one.token?.name === "Robot Token").length, choice === "pay" ? 1 : 0);
 		assert.deepEqual(relive(paid, table.ledger.slice(at)), table, "a clone after paying does not pay twice");
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 	}

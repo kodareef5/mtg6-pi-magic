@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "625676cfd4956aa747ee363773d23e8f81b6e3099dc7226f8ad197a85677c2fc",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Corpses of the Lost",
 		"registers": [
@@ -38,7 +37,7 @@
 							"do": "token",
 							"count": 1,
 							"spec": {
-								"name": "Skeleton Pirate",
+								"name": "Skeleton Pirate Token",
 								"types": [
 									"creature"
 								],
