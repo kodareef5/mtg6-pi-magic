@@ -157,7 +157,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 				status: matches(step.when, frame) ? "condition-false" as const : "outside-window" as const, ...(next ? { scheduled: next } : {}) };
 		}),
 		branches: state.branches.map((one) => `${one.waiting ? "Waiting for the stack to empty: " : ""}${instruction(state.plan.may![one.at]!)}`),
-		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}`),
+		held: state.held.map((hold) => `${hold.objects.map((object) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`).join(", ")}: ${hold.purpose}${hold.for ? ` (reserved for ${hold.for.join(" or ")})` : ""}`),
 		stops: state.stops, done: [...done].map((at) => state.plan.steps[at]?.label ?? `step ${at + 1}`),
 		...(scripts.length || here ? { script: { goal: scripts.flatMap((one) => one.goal ? [one.goal] : []), guidance: scripts.map((one) => one.guidance),
 			steps: state.plan.steps.flatMap((step, at) => matches(step.when, frame) ? [`${done.has(at) ? "Done" : laterStep(state, at) ? "Then" : state.due.some((one) => one.at === at && one.waiting) ? "Waiting for the stack to empty" : state.due.some((one) => one.at === at && one.candidates.length) ? "Now" : "Then"}: ${instruction(step)}`] : []),

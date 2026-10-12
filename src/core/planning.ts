@@ -38,7 +38,10 @@ export type PlanState = {
 	unmet?: number;
 	/** Unarmed stops that are false now, and so arm. */
 	arming: string[];
-	held: { purpose: string; objects: SeenObject[] }[];
+	/** `users` are the visible objects a hold's `for` names: spending the reserve on one of them follows the plan. */
+	held: { purpose: string; objects: SeenObject[]; for?: string[]; users?: SeenObject[] }[];
+	/** The source of the use being prepared, when this question selects one of its parts. */
+	using?: { id: string; incarnation: number };
 	/** The seat whose plan this is. */
 	seat: SeatId;
 	/** Trigger orders whose window is open, with each listed source and target resolved to what it names now. */
@@ -66,6 +69,12 @@ function spent(option: Option) {
 		...(use.funding ?? []).flatMap(tapObjects), ...(cost.tapped ?? []), ...(cost.sacrificed ?? []),
 		...(cost.exiled ?? []), ...(cost.discarded ?? []), ...(cost.returned ?? [])];
 }
+
+/** A card named by its full name or one of its faces, or a token by its name. Hidden objects match nothing. */
+const named = (object: SeenObject, names: readonly string[]) => {
+	const name = object.card ?? object.token?.name;
+	return !!name && names.some((one) => one === name || name.split(" // ").includes(one));
+};
 
 /** A coarse payment index. Equal terms share a key regardless of object-key order;
  * collisions still require full equality, including instructions and restrictions. */
@@ -168,7 +177,9 @@ export function planState(frame: Frame): PlanState | null {
 	}
 	const done = new Set(amended ? [] : frame.view.done ?? []), at = frame.view.window;
 	const held = (plan.holds ?? []).filter((hold) => (!hold.releaseWhen || !condition(scope, hold.releaseWhen)) && (!hold.releaseAt || !reached(hold.releaseAt, frame)))
-		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame) })).filter((hold) => hold.objects.length);
+		.map((hold) => ({ purpose: hold.purpose, objects: select(hold.objects, frame),
+			...(hold.for ? { for: hold.for, users: (frame.view.objects ?? []).filter((one) => one.controller === frame.seat && named(one, hold.for!)) } : {}) }))
+		.filter((hold) => hold.objects.length);
 	const combat = at.kind === "turn" && at.active === frame.seat && (at.step === "declare-attackers" || frame.view.remainingSteps?.includes("declare-attackers"))
 		? { ...frame, view: { ...frame.view, window: { ...at, step: "declare-attackers", phase: "combat" } } } as Frame : undefined;
 	const attacks = combat ? plan.steps.flatMap((step, index) => {
@@ -180,7 +191,7 @@ export function planState(frame: Frame): PlanState | null {
 		const options = (frame.decision?.options ?? []).filter((one) => cancelling ? one.id === "announce:cancel" : !["announce:cancel", "announce:back", "announce:individual", "payment:cancel"].includes(one.id) &&
 			!one.id.startsWith("announce:unpay:") && !one.id.startsWith("announce:remove-target:") && !one.id.startsWith("payment:remove:"));
 		const fit = (at: number, label: string): Fit => ({ at, label, candidates: options });
-		return { revision, plan, seat: frame.seat, preparing: true, ...(amended ? { amended: true as const } : {}), procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
+		return { revision, plan, seat: frame.seat, preparing: true, using: draft!.source, ...(amended ? { amended: true as const } : {}), procedures: [], waiting: [], stops: [], arming: [], triggers: [], attacks,
 			due: progress?.step !== undefined && plan.steps[progress.step] ? [fit(progress.step, plan.steps[progress.step]!.label)] : [],
 			branches: progress?.branch !== undefined && plan.may?.[progress.branch] ? [fit(progress.branch, plan.may[progress.branch]!.label)] : [],
 			held };
@@ -337,11 +348,16 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 			if (unfinished.length) marks.push(`Finishing now leaves available plan steps unfinished: ${unfinished.join("; ")}.`);
 		}
 		for (const mark of branches.get(option.id) ?? []) marks.push(mark);
+		const source = option.use?.source ?? option.announcement?.source ?? state.using;
 		for (const hold of state.held) {
 			const used = hold.objects.filter((object) => spent(option).some((ref) => ref.id === object.id && ref.incarnation === object.incarnation));
+			// The reserve's own use spends it as planned; the mark says so rather than warning against the plan.
+			const planned = !!source && !!hold.users?.some((one) => one.id === source.id && one.incarnation === source.incarnation);
 			// One fact per held object factors across payments. A sentence per
 			// subset grows with every combination of lands in a use's menu.
-			for (const object of used) marks.push(`Spends ${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}), which the plan holds for: ${hold.purpose.replace(/\.$/, "")}.`);
+			for (const object of used) marks.push(planned
+				? `Uses ${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}) from the reserve the plan holds for ${hold.for!.join(" or ")}: ${hold.purpose.replace(/\.$/, "")}.`
+				: `Spends ${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation}), which the plan holds for: ${hold.purpose.replace(/\.$/, "")}.`);
 		}
 		if (option.use) {
 			const { cost, source, funding } = option.use;

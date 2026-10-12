@@ -540,8 +540,8 @@ export const PackageSchema = Type.Cyclic({ ...Defs, Procedure: ProcedureDef, Pac
  * `may` holds standing branches, such as reactions and blocks, taken when
  * their window and `if` hold. `askWhen` names visible facts that mean the plan
  * no longer fits, so the seat asks for a new one instead of improvising.
- * `holds` names resources kept for a purpose; an option that spends one is
- * marked, never removed. `packages` corrects accepted card registrations and procedures.
+ * `holds` names resources kept for a purpose, and optionally the cards they pay
+ * for; an option that spends one on anything else is marked, never removed. `packages` corrects accepted card registrations and procedures.
  * `phases` is the pilot's script for each window, which it reads while the window is open.
  * A step marked `essential` is one the line cannot do without: when it cannot be
  * taken where it should be, the table asks for a new plan rather than passing.
@@ -571,7 +571,9 @@ export const PlanDefs = { ...Defs,
 		askWhen: Type.Optional(Type.Array(object({ label: text, when: Type.Optional(WhenSchema), if: Type.Ref("Condition") }))),
 		holds: Type.Optional(Type.Array(object({ objects: QuerySchema, purpose: text, releaseWhen: Type.Optional(Type.Ref("Condition")),
 			/** Released once this window is reached in the turn: its step or phase, or any later step. */
-			releaseAt: Type.Optional(WhenSchema) }))),
+			releaseAt: Type.Optional(WhenSchema),
+			/** The cards this reserve pays for, by name. Spending it on one of them follows the plan; any other spend is marked. */
+			for: Type.Optional(Type.Array(text, { minItems: 1 })) }))),
 		/**
 		 * The pilot's script for a window, read while it is open: the goal, the decisions in it (what to do and why), and the
 		 * few situations that justify asking strategy again. Anything else in the window is normal play.

@@ -133,7 +133,7 @@ export function bindingFacts(frame: Frame, base: Plan, nextTurn = false) {
 			return frame.decision?.options.some((one) => one.id === id) ? [] : [{ step: at, label: step.label, option: id,
 				fact: "Not offered at this decision. An earlier prerequisite may still enable it, but a stale payment or zone incarnation will not become valid. Use a prepared action for the intended cast." }];
 		}),
-		holds: (base.holds ?? []).map((hold) => ({ purpose: hold.purpose,
+		holds: (base.holds ?? []).map((hold) => ({ purpose: hold.purpose, ...(hold.for ? { for: hold.for } : {}),
 			releasedNow: !!hold.releaseWhen && holds(scope, hold.releaseWhen) || !!hold.releaseAt && reached(hold.releaseAt, frame), selected: select(hold.objects, frame).map(sourceFact) })),
 	};
 }

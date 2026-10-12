@@ -606,7 +606,10 @@ A **plan** is what jev flies.
   each with an optional `when` window. A stop fires when its fact becomes true;
   the table then asks strategy for a new plan, at most twice a turn.
 - `holds`: resources kept for a purpose (`objects`, `purpose`, an optional
-  `releaseWhen`). An option that spends one is marked, never removed.
+  `releaseWhen` or `releaseAt`, and an optional `for` naming the cards the
+  reserve pays for). An option that spends one is marked, never removed:
+  spending it on a card `for` names is marked as the planned use, and any
+  other spend as breaking the reserve.
   Marks read payment, tapping and removal commitments, not every participant:
   targeting a held creature or attacking with vigilance does not spend it.
   A nonvigilant attack commits its tap when the declaration finishes.

@@ -112,7 +112,7 @@ export const ResponseSchema = Type.Object({
 		action: Type.Union([PlanDefs.Option.properties.action.anyOf[0]!, Type.Object({ reuse: Type.String({ minLength: 1 }) }, { additionalProperties: false })]),
 	}, { additionalProperties: false }), { minItems: 1 }),
 	phases: Type.Optional(submissionFields.phases),
-	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }) }, { additionalProperties: false }))),
+	holds: Type.Optional(Type.Array(Type.Object({ objects: QuerySchema, purpose: Type.String({ minLength: 1 }), for: planFields.properties.holds.items.properties.for }, { additionalProperties: false }))),
 	triggers: Type.Optional(submissionFields.triggers),
 }, { additionalProperties: false });
 

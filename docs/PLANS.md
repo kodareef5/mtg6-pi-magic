@@ -143,7 +143,10 @@ spell properties remain separate choices. Jev chooses even a single payment.
 The menu contains at most sixteen complete payments. If bounded search cannot
 finish that menu, it offers individual-source selection. The seat can also
 choose that route explicitly, retaining every physical identity and mana ability.
-Payment warnings name each held resource separately. Both complete and individual
+Payment warnings name each held resource separately. A hold whose `for` names
+the card being cast or activated marks its resources as the planned use
+instead: a reserve kept for Shoot the Sheriff is not a warning when it pays
+for Shoot the Sheriff. Both complete and individual
 choices carry those marks. Opening the individual menu records no plan progress.
 A selected use can have no applicable plan step, branch or phase policy. The
 pilot question states that absence; it does not claim a payment policy exists.
