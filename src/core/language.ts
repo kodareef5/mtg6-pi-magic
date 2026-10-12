@@ -11,7 +11,8 @@
  * instructions, an instruction can hold an effect, a registration holds both.
  */
 import { Type, type Static, type TSchema } from "typebox";
-import { Check, Errors } from "typebox/value";
+import { Errors } from "typebox/value";
+import { Compile, type Validator } from "typebox/compile";
 import { STEPS } from "./steps.ts";
 import { MANA_PATTERN } from "./mana-cost.ts";
 
@@ -581,12 +582,21 @@ export type TokenSpec = Static<typeof TokenSpecSchema>;
 export type Procedure = Static<typeof ProcedureSchema>;
 export type Package = Static<typeof PackageSchema>;
 
+// Schemas are fixed descriptions. Compile each once, but check every submitted
+// value again: accepting an object never exempts it from later validation.
+const validators = new WeakMap<TSchema, Validator>();
+function accepts(schema: TSchema, value: unknown): boolean {
+	let validator = validators.get(schema);
+	if (!validator) { validator = Compile(schema); validators.set(schema, validator); }
+	return validator.Check(value);
+}
+
 /**
  * Check a value and say where it is wrong. A union reports every branch it
  * tried; the deepest error is the one that names the field to repair.
  */
 export function check<T extends TSchema>(schema: T, value: unknown, what: string): Static<T> {
-	if (Check(schema, value)) return value as Static<T>;
+	if (accepts(schema, value)) return value as Static<T>;
 	const deepest = [...Errors(schema, value)].sort((a, b) => b.instancePath.length - a.instancePath.length)[0];
 	throw new Error(`${what}: ${deepest ? `${deepest.instancePath || "/"} ${deepest.message}` : "does not match the syntax"}.`);
 }
@@ -597,7 +607,7 @@ export function check<T extends TSchema>(schema: T, value: unknown, what: string
  * fields the schema expected. Empty when the value matches.
  */
 export function problems<T extends TSchema>(schema: T, value: unknown, limit = 12): string[] {
-	if (Check(schema, value)) return [];
+	if (accepts(schema, value)) return [];
 	const found: { path: string; text: string; branch?: string }[] = [];
 	for (const error of Errors(schema, value)) {
 		const path = error.instancePath || "/";

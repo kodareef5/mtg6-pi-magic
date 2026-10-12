@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { strict as assert } from "node:assert";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { check, PackageSchema, PlanSchema, ProcedureSchema, type Package, type Plan, type Procedure } from "../src/core/language.ts";
+import { check, problems, PackageSchema, PlanSchema, ProcedureSchema, type Package, type Plan, type Procedure } from "../src/core/language.ts";
 import { load } from "../src/core/cards.ts";
 import { decks } from "../tools/matchup-fixture.ts";
 import { planWork, syntaxReference } from "../src/context/strategy.ts";
@@ -27,6 +27,7 @@ test("every example block parses and quotes its card", () => {
 	const cards = load(join(import.meta.dirname, "..", "cards", "standard.tsv")).cards;
 	const inMatchup = new Set(decks.flatMap((deck) => [...Object.keys(deck.main), ...Object.keys(deck.sideboard)]));
 	const named = new Set<string>();
+	let mutationChecked = false;
 	const quotes = (card: string, basis: string, where: string, face?: number) => {
 		const source = face === undefined ? cards.get(card) : cards.get(card)?.faces?.[face];
 		const oracle = source?.oracle.replaceAll("\\n", " ");
@@ -56,6 +57,17 @@ test("every example block parses and quotes its card", () => {
 			const schema = SCHEMAS[kind as keyof typeof SCHEMAS];
 			assert.ok(schema, `${where}: unknown kind ${kind}`);
 			const value = check(schema, JSON.parse(body!), where);
+			if (kind === "procedure" && !mutationChecked) {
+				const copy = JSON.parse(body!), before = JSON.stringify(copy);
+				assert.equal(check(schema, copy, where), copy, "validation preserves the submitted object");
+				copy.instructions.push({ do: "invented-operation" });
+				assert.throws(() => check(schema, copy, where));
+				assert.match(problems(schema, copy).join("; "), /instructions/,
+					"previous acceptance does not hide a later invalid nested instruction or its repair feedback");
+				copy.instructions.pop(); check(schema, copy, where);
+				assert.equal(JSON.stringify(copy), before, "validation neither repairs nor changes submitted terms");
+				mutationChecked = true;
+			}
 			for (const [, token] of body!.matchAll(/"spec": \{ "name": "([^"]+)"/g)) tokens.add(token!);
 			if (kind === "procedure") procedure(value as Procedure, where);
 			if (kind === "package") pack(value as Package, where);
