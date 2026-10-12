@@ -1,0 +1,37 @@
+{
+	"card": "Springleaf Drum",
+	"generated": "2026-10-10",
+	"source": "353f3ee169ce2971c280cf8302c38b9ce9dc525c6dc31a6cc55a2c22b0e8a36c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Springleaf Drum",
+		"registers": [
+			{
+				"kind": "mana",
+				"basis": "{T}, Tap an untapped creature you control: Add one mana of any color.",
+				"cost": {
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"tapped": false
+						},
+						"count": 1
+					}
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

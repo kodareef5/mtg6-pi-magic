@@ -5,7 +5,7 @@ import type { Frame, Option } from "../core/types.ts";
 import type { Plan, PlanOption } from "../core/language.ts";
 import type { SeenObject } from "../core/work.ts";
 import { matches, reached, select } from "../core/query.ts";
-import { sources } from "../core/funding.ts";
+import { sources, tapObjects } from "../core/funding.ts";
 import { useSources } from "../core/readiness.ts";
 import { activationRestrictions, castRestrictions, castingPrices, playable } from "../core/permits.ts";
 import { afterUntap, manaBudget } from "../core/budget.ts";
@@ -153,9 +153,9 @@ export function planningChoices(frame: Frame) {
 		const notes = option.notes ?? [], key = JSON.stringify({ terms, notes });
 		const use = uses.get(key) ?? { terms, bindings: new Map(), notes, payments: 0, minimum: Infinity, maximum: -Infinity };
 		use.bindings.set(JSON.stringify(targets), targets);
-		const spent = new Set([...(funding ?? []).map((tap) => tap.source.id), ...(terms.cost.tap ? [terms.source.id] : []),
+		const spent = new Set([...(funding ?? []).flatMap(tapObjects).map(one => one.id), ...(terms.cost.tap ? [terms.source.id] : []),
 			...[...(terms.cost.tapped ?? []), ...(terms.cost.sacrificed ?? []), ...(terms.cost.exiled ?? []), ...(terms.cost.returned ?? [])].map((ref) => ref.id)]);
-		const left = manaSources.filter(({ object }) => !spent.has(object.id)).length;
+		const left = manaSources.filter(({ object, yields }) => !spent.has(object.id) && yields.some(one => !one.tapped?.some(one => spent.has(one.id)))).length;
 		use.minimum = Math.min(use.minimum, left); use.maximum = Math.max(use.maximum, left);
 		use.payments += 1;
 		uses.set(key, use);

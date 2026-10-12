@@ -19,6 +19,7 @@ schemas, and every `basis` is checked against the card's text.
 | `entry-behold.md` | choose a controlled permanent or reveal an owned hand card before a simultaneous entry group commits |
 | `entry-copies.md` | battlefield and graveyard entry copies, fixed and additive exceptions, copied entry terms and linked triggers |
 | `card-copies.md` | Ardyn's exiled-card tokens, fixed color and creature-type exceptions, and preparation of copied activations |
+| `combined-tap-costs.md` | source tap symbols plus chosen permanents, shared mana-payment resources and summoning sickness |
 | `card-names.md` | choose and retain an Oracle card name, including out-of-format cards and individual faces, then match it in a continuous effect |
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |

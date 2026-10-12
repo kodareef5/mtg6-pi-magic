@@ -14,13 +14,16 @@ import type { Registration, Selector } from "./language.ts";
 import type { Change, Zone } from "./syntax.ts";
 import { amount, chosenSelector, holds, matches, viewWorld, type Scope } from "./selectors.ts";
 import type { SeenObject } from "./work.ts";
+import { tapsSource, tapChoices } from "./tap-costs.ts";
 
 /** The mana part of a locked cost. */
 export type Price = { generic: number; colors: Mana["color"][]; life?: number };
 type Color = Mana["color"];
 /** One mana ability activated while paying, with the claim it was accepted under. `sacrifice` is part of its cost, as a Treasure's is. */
-export type Tap = { source: ObjectRef; colors: Color[]; produced?: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[]; sacrifice?: true; life?: number };
+export type Tap = { source: ObjectRef; tapped?: ObjectRef[]; colors: Color[]; produced?: Color[]; claim: string; intrinsic?: true; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[]; sacrifice?: true; life?: number };
 export type Funding = { paid: string[]; taps: Tap[] };
+/** Every object tapped by a mana ability, including its selected additional costs. */
+export const tapObjects = (tap: Pick<Tap, "source" | "tapped">): ObjectRef[] => [tap.source, ...tap.tapped ?? []];
 /** One way a source can produce mana, what it claims, and what that mana may pay for. */
 type Yield = Omit<Tap, "source">;
 type Unit = { key: string; id: string; label: string; yields: Yield[]; pool?: Mana; source?: SeenObject };
@@ -52,7 +55,8 @@ function partialOutputs(one: Yield, maximum: number): Yield[] {
 }
 
 /** Only partial-output payments add a suffix, preserving all historical option ids. */
-export const outputKey = (tap: Tap): string => tap.produced ? `~made${tap.produced.join("")}~spent${tap.colors.join("")}` : "";
+export const outputKey = (tap: Tap): string => (tap.produced ? `~made${tap.produced.join("")}~spent${tap.colors.join("")}` : "") +
+	(tap.tapped?.length ? `~tap${tap.tapped.map(one => `${one.id}@${one.incarnation}`).join("+")}` : "");
 export const outputLabel = (tap: Pick<Tap, "colors" | "produced">): string => tap.produced
 	? `produce ${tap.produced.map(one => `{${one}}`).join("")}, spend ${tap.colors.map(one => `{${one}}`).join("")}, keep ${manaSplit(tap).remaining.map(one => `{${one}}`).join("")} floating`
 	: tap.colors.map(one => `{${one}}`).join("");
@@ -79,21 +83,22 @@ export const sameness = (frame: Frame, object: SeenObject): string => [
 ].join("|");
 
 /**
- * What a registered mana ability produces when its cost is tapping, or tapping
- * and sacrificing the source. The scope supplies conditions, counts and entry choices.
+ * What a registered mana ability produces with source and selected tap costs,
+ * life or source sacrifice. The scope supplies conditions, counts and entry choices.
  */
 export function produces(registration: Registration, scope: Scope): Yield[] {
-	if (registration.kind !== "mana" || registration.cost.tap !== true) return [];
+	if (registration.kind !== "mana" || !tapsSource(registration.cost)) return [];
 	if (scope.source && activationRestrictions(scope.world, scope.source, true).length) return [];
 	if (registration.if && !holds(scope, registration.if)) return [];
-	const { tap: _, sacrifice, life, ...other } = registration.cost;
+	const { tap, sacrifice, life, ...other } = registration.cost;
 	if (Object.keys(other).length || (sacrifice !== undefined && sacrifice !== "this")) return [];
+	const selections = typeof tap === "object" ? tapChoices(scope, tap).map(chosen => ({ tapped: chosen.map(one => ({ id: one.id, incarnation: one.incarnation })) })) : [{}];
 	const terms = { claim: registration.basis, ...manaTerms(registration, scope), ...(sacrifice ? { sacrifice: true as const } : {}), ...(life ? { life } : {}) };
 	const times = amount(scope, registration.times ?? 1);
 	const repeat = (colors: Color[]) => Array.from({ length: times }, () => colors).flat();
-	if (registration.colors) return [{ colors: repeat(registration.colors as Color[]), ...terms }];
-	return registration.any ? colorChoices(registration.combination ? registration.any * times : registration.any, registration.combination)
-		.map(colors => ({ colors: registration.combination ? colors : repeat(colors), ...terms })) : [];
+	const outputs = registration.colors ? [repeat(registration.colors as Color[])] : registration.any
+		? colorChoices(registration.combination ? registration.any * times : registration.any, registration.combination).map(colors => registration.combination ? colors : repeat(colors)) : [];
+	return selections.flatMap(selection => outputs.map(colors => ({ colors, ...terms, ...selection })));
 }
 
 /** Additional effects travel with the produced mana, independent of later source changes. */
@@ -122,7 +127,7 @@ export const spentWords = (funding: Funding, pool: Mana[]): string[] => [...new 
 export function paying(funding: Funding, who: SeatId, clock: number, offset: number): Change[] {
 	const changes: Change[] = [], made: string[] = [];
 	for (const tap of funding.taps) {
-		changes.push({ do: "tap", what: tap.source.id });
+		changes.push(...tapObjects(tap).map(one => ({ do: "tap" as const, what: one.id })));
 		if (tap.life) changes.push({ do: "change-life", who, amount: -tap.life, reason: "cost-payment" });
 		if (tap.sacrifice) changes.push({ do: "move", what: tap.source.id, to: "graveyard", reason: "sacrifice" });
 		manaSplit(tap).paid.forEach(unit => made.push(`mana-${clock + 1}-${offset + changes.length}-${unit}`));
@@ -143,13 +148,15 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
 		const yields = [
 			...intrinsic(object.traits).map((color): Yield => ({ colors: [color], claim: `Tap ${object.card} for mana (basic land type)`, intrinsic: true })),
 			...(object.traits?.registrations ?? []).flatMap((registration) => produces(registration, scope)),
-		].filter((one) => (one.life ?? 0) <= life);
+		].filter((one) => (one.life ?? 0) <= life && !one.tapped?.some(one => except.has(one.id)));
 		// Different payment costs remain choices. The walk uses an object once.
-		const costKey = (one: Yield) => JSON.stringify([one.colors.length, one.life ?? 0, !!one.sacrifice, one.spellWords]);
+		const costKey = (one: Yield) => JSON.stringify([one.colors.length, one.life ?? 0, !!one.sacrifice, one.spellWords, ...(one.tapped ? [one.tapped] : [])]);
 		for (const size of [...new Set(yields.map(costKey))]) {
 			const sized = yields.filter((one) => costKey(one) === size);
 			units.push({ key: `${sameness(frame, object)}|${JSON.stringify(sized)}`, id: object.id, source: object, yields: sized,
-				label: `tap ${object.card} (${object.id})` });
+				label: `tap ${object.card ?? object.token?.name} (${object.id})${sized[0]?.tapped?.length ? ` and ${sized[0].tapped.map(ref => {
+					const one = frame.view.objects?.find(one => one.id === ref.id); return `${one?.card ?? one?.token?.name ?? ref.id} (${ref.id})`;
+				}).join(", ")}` : ""}` });
 		}
 	}
 	return units;
@@ -171,12 +178,15 @@ export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set
 		const groups = new Map<string, Yield[]>();
 		for (const one of yields.flatMap(one => partialOutputs(one, maximum))) {
 			// The exact-payment forecast may pick any yield in a group only when it leaves the same mana and terms.
-			const key = JSON.stringify([one.colors.length, manaSplit(one).remaining, one.life, one.sacrifice, one.spendOnly, one.spendFrom, one.until, one.spellWords]);
+			const key = JSON.stringify([one.colors.length, manaSplit(one).remaining, one.life, one.sacrifice, one.spendOnly, one.spendFrom, one.until, one.spellWords, ...(one.tapped ? [one.tapped] : [])]);
 			groups.set(key, [...groups.get(key) ?? [], one]);
 		}
 		return [...groups].map(([key, yields]) => ({ ...unit, key: `${unit.key}|remainder:${key}`, yields }));
 	});
-	return [...pool, ...sources];
+	// An otherwise identical land is not interchangeable when another ability
+	// names its physical object as part of a selected tap cost.
+	const shared = new Set(sources.flatMap(unit => unit.yields.flatMap(one => one.tapped?.map(one => one.id) ?? [])));
+	return [...pool, ...sources.map(unit => shared.has(unit.id) ? { ...unit, key: `${unit.key}|shared:${unit.id}` } : unit)];
 }
 
 /** Historical complete payments, also used to check staged payment coverage. */
@@ -187,6 +197,7 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 		return {
 			funding: { paid: units.flatMap((unit) => unit.pool ? [unit.id] : []),
 				taps: units.flatMap((unit) => unit.source ? [{ source: { id: unit.source.id, incarnation: unit.source.incarnation }, colors: made.get(unit.id)!.colors,
+					...(made.get(unit.id)!.tapped ? { tapped: made.get(unit.id)!.tapped! } : {}),
 					claim: made.get(unit.id)!.claim, ...(made.get(unit.id)!.intrinsic ? { intrinsic: true as const } : {}), ...(made.get(unit.id)!.sacrifice ? { sacrifice: true as const } : {}),
 					...(made.get(unit.id)!.produced ? { produced: made.get(unit.id)!.produced! } : {}),
 					...(made.get(unit.id)!.life ? { life: made.get(unit.id)!.life! } : {}),
@@ -202,7 +213,7 @@ export function fundings(frame: Frame, cost: Price, except: ReadonlySet<string> 
 /**
  * Each untapped source this seat could tap now and the ways it makes mana: the
  * same reading a payment uses, for a planner to count with. A mana ability with
- * a cost beyond tapping, life and sacrificing the source is not read here, as it is
+ * a cost beyond source/selected taps, life and sacrificing the source is not read here, as it is
  * not read when paying.
  */
 export function sources(frame: Frame): { object: SeenObject; yields: Omit<Yield, "claim" | "intrinsic">[] }[] {
@@ -243,10 +254,12 @@ function exact(units: Unit[], cost: Price, distinct = false): Unit[][] {
 
 /** Pick one yield per unit so the colored symbols are met. */
 function cover(units: Unit[], cost: Price): Map<string, Yield> | null {
-	const pick = (at: number, chosen: Map<string, Yield>): Map<string, Yield> | null => {
+	const sources = new Set(units.filter(one => one.source).map(one => one.id));
+	const pick = (at: number, chosen: Map<string, Yield>, tapped = new Set<string>()): Map<string, Yield> | null => {
 		if (at === units.length) return covers([...chosen.values()].flatMap((one) => one.colors), cost) ? chosen : null;
 		for (const option of units[at]!.yields) {
-			const result = pick(at + 1, new Map([...chosen, [units[at]!.id, option]]));
+			if (option.tapped?.some(one => sources.has(one.id) || tapped.has(one.id))) continue;
+			const result = pick(at + 1, new Map([...chosen, [units[at]!.id, option]]), new Set([...tapped, ...option.tapped?.map(one => one.id) ?? []]));
 			if (result) return result;
 		}
 		return null;

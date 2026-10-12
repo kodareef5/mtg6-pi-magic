@@ -417,6 +417,13 @@ below zero; the tap needs no tap-symbol ability or freedom from summoning
 sickness. See `native-casting.md` for complete discard branches and casting
 terms. Syntax acceptance still does not certify the source interpretation.
 
+`tap: {source: true, choose: selector, count: 1}` pays the source's tap symbol
+and taps a separate selected permanent. Only the source's tap symbol checks
+summoning sickness. Registered mana abilities use this cost during payment;
+every tapped object remains reserved across the other mana abilities and the
+spell's additional costs. See [combined tap costs](examples/combined-tap-costs.md)
+for Drum, Pollinator and the limits on supported mana costs.
+
 **Events** are what the table records: `enters`, `leaves`, `dies`, `attacks`,
 `attacked-with` (a player attacked with one or more), `blocks`, `cast`,
 `targeted`, `damage`, `combat-damage`, and `step` beginnings. `of` selects what it

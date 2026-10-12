@@ -24,7 +24,8 @@
  * beside their shared entry forecast and funding reader.
  */
 import { manaChoices } from "./mana-cost.ts";
-import { fundings, manaSplit, outputKey, sick, sources, type Funding, type Price } from "./funding.ts";
+import { fundings, manaSplit, outputKey, sick, sources, tapObjects, type Funding, type Price } from "./funding.ts";
+import { tapsSource } from "./tap-costs.ts";
 import { payable } from "./payment-options.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
 import { allowance, castingPrices, playable, permissionMana } from "./permits.ts";
@@ -207,7 +208,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const variable = !mana || mana.some(one => one.x > 0) || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || procedure.timing === "special" || procedure.timing === "spell" && hasLifeCosts(viewWorld(hypothetical.view)) || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional", "alternative"].includes(key));
 			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { prices: mana.map(one => (procedure.timing === "spell" || procedure.special === "plot") && source ? reduced(hypothetical, source, one, procedure.special === "plot" ? "plot" : "cast") : { generic: one.generic, colors: one.colors }) } : {}),
-				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
+				...(procedure.timing === "spell" ? { spell: true } : {}), ...(tapsSource(procedure.cost) ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
 		}
 		const id = action.option ?? action.prefix ?? "";
@@ -343,7 +344,8 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 	const fail = (depth: number, message: string) => { if (!deepest || depth > deepest.depth) deepest = { depth, message }; return false; };
 	const left = (position: Frame, spent: ReadonlySet<string>, held: ReadonlySet<string>) => {
 		const all = sources(position);
-		const free = all.filter(({ object }) => !spent.has(object.id) && !held.has(object.id)), kept = all.filter(({ object }) => held.has(object.id) && !spent.has(object.id));
+		const free = all.filter(({ object, yields }) => !spent.has(object.id) && !held.has(object.id) && yields.some(one => !one.tapped?.some(one => spent.has(one.id) || held.has(one.id))));
+		const kept = all.filter(({ object }) => held.has(object.id) && !spent.has(object.id));
 		return `${free.length ? `the steps before it leave ${free.map(({ object, yields }) => `${object.card ?? object.token?.name} (${[...new Set(yields.map((one) => one.colors.join("")))].join("/")})`).join(", ")}` : "the steps before it leave no untapped source"}` +
 			`${kept.length ? `, and the plan holds ${kept.map(({ object }) => object.card ?? object.token?.name).join(", ")}` : ""}`;
 	};
@@ -389,7 +391,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			if (item.tap && attackers.includes(item.source.id)) return fail(index, `${item.at}: its tap cost spends a later planned attacker`);
 			let paymentPosition = position;
 			if (item.fixed) {
-				const selected = new Set(item.fixed.taps.map((tap) => tap.source.id));
+				const selected = new Set(item.fixed.taps.flatMap(tapObjects).map(one => one.id));
 				for (const { object } of sources(position)) if (!selected.has(object.id)) reserved.add(object.id);
 				paymentPosition = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => item.fixed!.paid.includes(mana.id)) })) } };
 			}
@@ -402,17 +404,17 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				id: `forecast-${index}-${tap.source.id}-${at}`, color, ...(tap.spendOnly ? { spendOnly: tap.spendOnly } : {}),
 				...(tap.spendFrom ? { spendFrom: tap.spendFrom } : {}), ...(tap.until ? { until: tap.until } : {}), ...(tap.spellWords ? { spellWords: tap.spellWords } : {}),
 			})));
-			const distinct = new Map(ways.map(way => [`${way.funding.taps.map(tap => `${tap.source.id}:${tap.life ?? 0}`).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}|${JSON.stringify(remainder(way.funding))}`, way]));
+			const distinct = new Map(ways.map(way => [`${way.funding.taps.map(tap => `${tapObjects(tap).map(one => one.id).join("+")}:${tap.life ?? 0}`).sort().join(",")}|${way.funding.paid.map(kind).sort().join(",")}|${JSON.stringify(remainder(way.funding))}`, way]));
 			return [...distinct.values()].some(({ funding }) => {
 				const paid = new Set(funding.paid);
 				const after = { ...position, view: { ...position.view, players: position.view.players?.map((one) => one.id === frame.seat ? { ...one, life: one.life - funding.taps.reduce((sum, tap) => sum + (tap.life ?? 0), 0) } : one),
 					pools: [...(position.view.pools ?? []).filter(one => one.seat !== frame.seat), { seat: frame.seat, mana: [...pool(position).filter(mana => !paid.has(mana.id)), ...remainder(funding)] }] } };
-				const used = new Set([...spent, ...funding.taps.map((tap) => tap.source.id), ...(item.tap ? [item.source.id] : [])]);
+				const used = new Set([...spent, ...funding.taps.flatMap(tapObjects).map(one => one.id), ...(item.tap ? [item.source.id] : [])]);
 				if (!go(index + 1, after, used)) return false;
 				// Necessary mana/tap checks can refute an unpriced cost, but cannot
 				// witness that entire cost or the resources its other parts leave.
 				if (!item.unknown) report.payments.unshift({ step: item.at, source: ref(item.source), funding, tapSource: !!item.tap,
-					untappedManaSourcesAfter: sources(after).filter(({ object }) => !used.has(object.id)).map(({ object }) => ref(object)) });
+					untappedManaSourcesAfter: sources(after).filter(({ object, yields }) => !used.has(object.id) && yields.some(one => !one.tapped?.some(one => used.has(one.id)))).map(({ object }) => ref(object)) });
 				return true;
 			});
 		})();

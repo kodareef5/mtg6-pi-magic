@@ -2,7 +2,7 @@
  * the individual-source route still reaches every identity and mana-ability choice. */
 import { covers, manaSplit, type Funding, type Price } from "./funding.ts";
 import { canPay } from "./payment-search.ts";
-import { paymentOptions, type PaymentPart } from "./payment-options.ts";
+import { paymentOptions, paymentResources, type PaymentPart } from "./payment-options.ts";
 import type { Frame } from "./types.ts";
 
 export type CompletePayment = { parts: PaymentPart[]; funding: Funding; label: string; leaves: string };
@@ -12,7 +12,7 @@ type Resource = { id: string; key: string[]; parts: PaymentPart[] };
  * Bounds limit menu construction, not legal payments or player decisions. */
 export function completePayments(frame: Frame, cost: Price, menu: ReturnType<typeof paymentOptions>, limit = 16, work = 2048): CompletePayment[] | undefined {
 	if (!menu.possible) return [];
-	const selected = new Set(menu.chosen.map(one => one.resource));
+	const selected = new Set(paymentResources(menu.chosen));
 	const resources = new Map<string, Resource>();
 	for (const unit of menu.units) {
 		if (selected.has(unit.id)) continue;
@@ -32,16 +32,17 @@ export function completePayments(frame: Frame, cost: Price, menu: ReturnType<typ
 		if (overflow) return;
 		if (++visited > work) { overflow = true; return; }
 		const colors = parts.flatMap(one => one.colors), paidLife = parts.reduce((sum, one) => sum + one.life, 0);
-		if (!canPay(units.slice(at).map(one => ({ id: one.id, yields: one.parts })), cost, life, { colors, life: paidLife })) return;
+		const used = paymentResources(parts);
+		if (!canPay(units.slice(at).map(one => ({ id: one.id, yields: one.parts })), cost, life, { colors, life: paidLife, used })) return;
 		if (covers(colors, cost)) {
 			const funding = { paid: parts.flatMap(one => one.funding.paid), taps: parts.flatMap(one => one.funding.taps) };
 			const signature = JSON.stringify(funding);
 			if (signatures.has(signature)) return;
 			signatures.add(signature);
 			if (found.length === limit) { overflow = true; return; }
-			const used = new Set(parts.map(one => one.resource));
-			const open = [...new Map(menu.units.filter(one => one.source && !used.has(one.id)).map(one => [one.id, one.source!])).values()];
-			const floating = menu.units.filter(one => one.pool && !used.has(one.id));
+			const spent = new Set(used);
+			const open = [...new Map(menu.units.filter(one => one.source && !spent.has(one.id) && one.yields.some(one => !one.tapped?.some(one => spent.has(one.id)))).map(one => [one.id, one.source!])).values()];
+			const floating = menu.units.filter(one => one.pool && !spent.has(one.id));
 			const produced = funding.taps.flatMap(tap => manaSplit(tap).remaining.map(color => `{${color}}${tap.spendOnly || tap.spendFrom ? " (restricted)" : ""}${tap.until ? ` (until ${tap.until})` : ""}${tap.spellWords?.length ? ` (grants ${tap.spellWords.join(", ")})` : ""}`));
 			found.push({ parts, funding, label: parts.length ? parts.map(one => one.label).join("; ") : "No mana is spent",
 				leaves: [open.length ? `Leaves available: ${open.map(one => `${one.card ?? one.token?.name ?? one.id} (${one.id})`).join(", ")}.` : "Leaves no unused mana source from this payment menu.",

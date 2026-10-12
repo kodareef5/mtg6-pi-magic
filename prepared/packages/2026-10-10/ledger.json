@@ -79,14 +79,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Gene Pollinator": {
-		"reason": "Gene Pollinator is not ready: {T}, Tap an untapped permanent you control: Add one mana of any color. — Unsupported combined payment: cost.tap can express either the source's tap-symbol cost or tapping a chosen permanent, but cannot express both in the same mana ability while retaining the source's summoning-sickness requirement.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Hydro-Man, Fluid Felon": {
 		"reason": "Hydro-Man, Fluid Felon is not ready: At the beginning of your end step, untap Hydro-Man. Until your next turn, he becomes a land and gains \"{T}: Add {U}.\" (He's not a creature during that time.) — Untapping, setting the card type to land, and granting the blue tap mana ability are expressible, but the required duration \"until your next turn\" is not. The available durations cannot expire the type-changing effect and granted mana ability as your next turn begins; restoring printed types later would not correctly end this effect amid other type-changing effects. This standing trigger cannot be deferred or shortened to end of turn.",
 		"decks": [
@@ -241,14 +233,6 @@
 		"reason": "Sphinx of False Conclusions is not ready: When this creature dies, if it isn't a token, create a token that's a copy of it. — Creating a token copy using the dying creature's last-known copiable characteristics is not expressible: token instructions require a fixed TokenSpec and provide no copy operation.",
 		"decks": [
 			"Azorius Control"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
-	"Springleaf Drum": {
-		"reason": "Springleaf Drum is not ready: {T}, Tap an untapped creature you control: Add one mana of any color. — The cost requires both tapping Springleaf Drum using its tap symbol and tapping a chosen untapped creature you control. cost.tap supports either the source tap or a chosen-creature tap, but cannot express both together.",
-		"decks": [
-			"Azorius Momo"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"

@@ -1,0 +1,34 @@
+{
+	"card": "Gene Pollinator",
+	"generated": "2026-10-10",
+	"source": "0c90390b70d819ee136ec2bcc35fd2c7b16406038671ea7d86ea0ee2d319776a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gene Pollinator",
+		"registers": [
+			{
+				"kind": "mana",
+				"basis": "{T}, Tap an untapped permanent you control: Add one mana of any color.",
+				"cost": {
+					"tap": {
+						"source": true,
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"tapped": false
+						},
+						"count": 1
+					}
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

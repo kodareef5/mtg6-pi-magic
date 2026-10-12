@@ -11,6 +11,7 @@ import type { LedgerRow, Table } from "./table.ts";
 import type { Frame } from "./types.ts";
 import type { Move, Pending } from "./moves.ts";
 import { manaLabel } from "./mana-cost.ts";
+import { tapObjects } from "./funding.ts";
 
 export function beginAnnouncement(table: Table, draft: Announcement, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">): void {
 	if (table.announcement || table.payment || table.entry || table.resolution || table.cursor.priority !== draft.controller)
@@ -118,8 +119,8 @@ export function announcing(table: Table): Pending | null {
 			question += ` Select mana sources one at a time for ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${preparing.selected!.join("; ") || "none"}. Still needs ${menu.remainingMana} mana${menu.missingColors.length ? `, including ${menu.missingColors.map((color) => `{${color}}`).join("")}` : ""}.`;
 			for (const part of menu.next) {
 				choose(`announce:pay:${part.id}`, `Add to payment: ${part.label}`, { ...draft, payment: [...draft.payment, part.id] }, `Keeps every source already selected and adds ${part.colors.length} mana. Nothing is spent yet.`);
-				moves.at(-1)!.option.spends = part.funding.taps.map((one) => one.source);
-				moves.at(-1)!.option.objects!.push(...part.funding.taps.map((one) => one.source));
+				moves.at(-1)!.option.spends = part.funding.taps.flatMap(tapObjects);
+				moves.at(-1)!.option.objects!.push(...part.funding.taps.flatMap(tapObjects));
 			}
 			for (const part of menu.chosen) choose(`announce:unpay:${part.id}`, `Undo selection: ${part.label}`, { ...draft, payment: draft.payment.filter((id) => id !== part.id) }, `Removes ${part.colors.length} mana from the pending payment; it will need ${menu.remainingMana + part.colors.length} mana again.`);
 			const activation = announcedActivation(frame, draft);

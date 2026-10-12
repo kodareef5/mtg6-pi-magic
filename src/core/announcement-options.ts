@@ -9,6 +9,7 @@ import type { Activation, LedgerRow } from "./table.ts";
 import type { Procedure } from "./language.ts";
 import type { Frame, ObjectRef, Option } from "./types.ts";
 import { manaLabel } from "./mana-cost.ts";
+import { tapObjects } from "./funding.ts";
 
 export type Announcement = {
 	controller: number; source: ObjectRef; prefix: string; procedure: Procedure; permission?: string;
@@ -98,7 +99,7 @@ export function announcementPayments(frame: Frame, draft: Announcement) {
 	return completePayments(frame, cost, menu)?.map((payment, at) => {
 		const activation = { ...paidActivation(base, frame, draft.cost!, payment.funding), targets: structuredClone(draft.targets) };
 		return { activation, option: { id: `announce:payment:${at}`, label: `Confirm and pay: ${payment.label}`, use: activation,
-			objects: [draft.source, ...draft.targets.flat().flatMap(one => "id" in one ? [one] : []), ...draft.cost!.extraRefs, ...payment.funding.taps.map(one => one.source)],
+			objects: [draft.source, ...draft.targets.flat().flatMap(one => "id" in one ? [one] : []), ...draft.cost!.extraRefs, ...payment.funding.taps.flatMap(tapObjects)],
 			shows: [draft.cost!.extra.shows, payment.leaves].filter(Boolean).join(" ") } };
 	});
 }

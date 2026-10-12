@@ -18,6 +18,7 @@ import type { Activation, LedgerRow } from "./table.ts";
 import { isDeepStrictEqual } from "node:util";
 import { announcementOffers, type Announcement, type AnnouncementOffer } from "./announcement-options.ts";
 import { faceFacts } from "./faces.ts";
+import { tapObjects } from "./funding.ts";
 
 /** A step or branch that applies now, and the listed options that fit it. */
 export type Fit = { at: number; label: string; candidates: Option[]; waiting?: true };
@@ -61,7 +62,7 @@ function spent(option: Option) {
 	if (!use) return option.spends ?? [];
 	const cost = use.cost;
 	return [...(use.timing === "spell" || use.timing === "land" || use.timing === "special" || cost.tap || cost.counters && !cost.counters.on ? [use.source] : []), ...(cost.counters?.on ?? []), ...(cost.shown ?? []),
-		...(use.funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.sacrificed ?? []),
+		...(use.funding ?? []).flatMap(tapObjects), ...(cost.tapped ?? []), ...(cost.sacrificed ?? []),
 		...(cost.exiled ?? []), ...(cost.discarded ?? []), ...(cost.returned ?? [])];
 }
 
@@ -343,7 +344,7 @@ export function annotate(options: Option[], state: PlanState): Option[] {
 		}
 		if (option.use) {
 			const { cost, source, funding } = option.use;
-			const taps = [...(funding ?? []).map((one) => one.source), ...(cost.tapped ?? []), ...(cost.tap ? [source] : [])];
+			const taps = [...(funding ?? []).flatMap(tapObjects), ...(cost.tapped ?? []), ...(cost.tap ? [source] : [])];
 			for (const attack of state.attacks) for (const object of attack.objects) if (taps.some((ref) => ref.id === object.id && ref.incarnation === object.incarnation))
 				marks.push(`This payment taps ${object.card ?? object.token?.name ?? object.id}, named by the remaining attack step "${attack.label}". It would need to untap before attacking.`);
 		}

@@ -16,7 +16,7 @@ import { castWords } from "./cast-words.ts";
 import { enoughExile } from "./cost-selection.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
-import { capacity, fundings, outputKey, sameness, sick, spentWords, type Price, type Funding } from "./funding.ts";
+import { capacity, fundings, outputKey, sameness, sick, spentWords, tapObjects, type Price, type Funding } from "./funding.ts";
 import { amount, holds, matches, objects, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
 import type { Instruction, Procedure } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
@@ -27,6 +27,9 @@ import type { Activation, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { manaChoices } from "./mana-cost.ts";
+import { tapsSource, tapChoices } from "./tap-costs.ts";
+import { subsets } from "./subsets.ts";
+export { subsets } from "./subsets.ts";
 export { symbols } from "./mana-cost.ts";
 
 export type ProcedureOption = { option: Option; activation: Activation };
@@ -122,18 +125,6 @@ const MAIN = ["precombat-main", "postcombat-main"];
 export const mainWindow = (frame: Frame) => frame.view.window.kind === "turn" && frame.view.window.active === frame.seat &&
 	MAIN.includes(frame.view.window.step) && !frame.view.objects?.some((object) => object.zone === "stack");
 
-/** Every way to choose `count` of `items`, or fewer down to `least`. */
-export function subsets<T>(items: T[], most: number, least = most): T[][] {
-	const found: T[][] = [];
-	const walk = (from: number, chosen: T[]) => {
-		if (chosen.length >= least) found.push(chosen);
-		if (chosen.length === most) return;
-		for (let at = from; at < items.length; at++) walk(at + 1, [...chosen, items[at]!]);
-	};
-	walk(0, []);
-	return found;
-}
-
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 const name = (object: Seen) => object.faceDown ? `Face-down object (${object.id})` : object.card ?? object.token?.name ?? object.id;
 
@@ -180,19 +171,15 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 		if (source.zone !== "battlefield" || (source.counters.loyalty ?? 0) + cost.loyalty < 0) return [];
 		add([{ paid: { loyalty: cost.loyalty }, uses: [], shows: `${cost.loyalty >= 0 ? "+" : ""}${cost.loyalty} loyalty. ` }]);
 	}
-	if (cost.tap === true) {
+	if (tapsSource(cost)) {
 		if (source.zone !== "battlefield" || source.tapped || sick(frame, source)) return [];
 		add([{ paid: { tap: true }, uses: [source.id], shows: "Tap the source. " }]);
-	} else if (cost.tap) {
+	}
+	if (typeof cost.tap === "object") {
 		const crew = cost.tap;
-		const able = query({ zones: ["battlefield"], controller: "self", tapped: false }, frame).filter((one) => matches(scope, one, crew.choose));
-		const enough = (chosen: SeenObject[]) => (crew.count === undefined || chosen.length >= crew.count) &&
-			(crew.totalPower === undefined || chosen.reduce((sum, one) => sum + (one.traits?.power ?? 0), 0) >= crew.totalPower);
-		// Only the smallest sets that pay: a larger one taps something for nothing.
-		const sets = crew.upTo ? subsets(able, crew.count ?? 1, 0) : subsets(able, able.length, 1)
-			.filter((set) => enough(set) && set.every((_, at) => !enough(set.filter((__, other) => other !== at))));
+		const sets = tapChoices(scope, crew);
 		add(sets.map((set) => ({ paid: { tapped: set.map(ref) }, uses: set.map((one) => one.id),
-			...(crew.reduce ? { reduce: Math.max(0, set.reduce((sum, one) => sum + (one.traits?.power ?? 0), 0)) } : {}),
+			...(crew.reduce ? { reduce: Math.max(0, set.reduce((sum, one) => sum + (scope.world.read(one)?.power ?? 0), 0)) } : {}),
 			shows: set.length ? `Tap ${set.map(name).join(", ")}. ` : "Tap no permanents. " })));
 	}
 	for (const kind of ["sacrifice", "return"] as const) {
@@ -379,7 +366,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 					spellWords.length ? `Spell properties: ${spellWords.join(", ")}.` : "",
 					(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
 				].filter(Boolean).join(" ");
-				const spent = [sourceRef, ...payment.taps.map((tap) => tap.source), ...extraRefs, ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? [])];
+				const spent = [sourceRef, ...payment.taps.flatMap(tapObjects), ...extraRefs, ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? [])];
 				for (const aim of group) {
 					offered.push({
 						option: {
