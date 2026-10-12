@@ -90,8 +90,8 @@ export type Change =
 	| { do: "name-card"; what: string; key: string; name: string }
 	/** A private inspection during resolution. Nothing moves. */
 	| { do: "look"; who: SeatId; what: string }
-	/** A completed keyword operation, never a substitute for its physical choices. */
-	| { do: "keyword"; name: "scry" | "surveil" | "manifest-dread"; who: SeatId; count: number }
+	/** A keyword event: search begins before private selection; the others record completion. */
+	| { do: "keyword"; name: "scry" | "surveil" | "manifest-dread" | "search"; who: SeatId; count: number; whose?: SeatId }
 	/** A library subset placed in the stated order, or shuffled before placement. */
 	| { do: "order"; who: SeatId; whose: SeatId; cards: ObjectRef[]; position: "top" | "bottom"; random?: true }
 	| { do: "tap" | "untap"; what: string }
@@ -115,6 +115,7 @@ export type Change =
 	 * puts an `each` in its place; `follow` is the permanent a spell became.
 	 */
 	| { do: "resolution"; action: "next"; what: string; pick?: Chosen; bind?: Record<string, Bound>;
+		search?: { who: SeatId; whose: SeatId[] };
 		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true;
 		/** Filled by commit after a counted ability completes, including an optional decline. */
 		resolved?: { source?: ObjectRef; basis: string; by: SeatId };

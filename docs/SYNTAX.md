@@ -817,3 +817,13 @@ within each iteration. It is an alternative to `each.players`, not an implicit
 search or private look. Hovership uses it to read the owner of each linked
 exile card, and performs nothing when there are none. See
 [manifest dread](examples/manifest.md) for the complete example and limits.
+
+## Library search events
+
+A whole-library `choose` with an explicit owner starts a recorded private search.
+A bound inspected subset does not. Watches use `on: keyword`, `keyword: search`,
+`by` for the searcher and `whose` for the library owner. `whose: event:player`
+requires the searcher to own that library. Empty and failed searches count;
+optional groups that are declined do not. Multiple searches of the same library
+by one player in an effect before its shuffle count once (701.23h).
+See [the search example](examples/library-searches.md) for Wan Shi Tong and limits.

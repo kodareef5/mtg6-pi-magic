@@ -62,8 +62,8 @@ function seedGames(base: string, n: number, source: string, dir: string): Record
 		if (!existsSync(path)) {
 			carried ??= replay(source, dealtTable, 0, { cards: matchup.cards, rules: matchup.rules });
 			const entrants = decks.map((one, at) => ({ name: at ? "Red" : "Green", deck: one }));
-			const table = start(standard, swapped ? [...entrants].reverse() : entrants, seed, universe, { announcementsFrom: 0, excessManaFrom: 0 });
-			const journal = open(path, { id: seed, format: "standard", seed, announcementsFrom: 0, excessManaFrom: 0, seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })),
+			const table = start(standard, swapped ? [...entrants].reverse() : entrants, seed, universe, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0 });
+			const journal = open(path, { id: seed, format: "standard", seed, announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })),
 				cards: matchup.cards, rules: matchup.rules, created: new Date().toISOString() });
 			const prepared: { seat: number; made: unknown }[] = [];
 			for (const seat of table.seats) {

@@ -376,14 +376,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Wan Shi Tong, Librarian": {
-		"reason": "Wan Shi Tong, Librarian is not ready: Whenever an opponent searches their library, put a +1/+1 counter on Wan Shi Tong and draw a card. — Unsupported standing trigger event: an opponent searching their own library. The event schema has no library-search event; library selections, card movements, and shuffling cannot faithfully substitute for that event.",
-		"decks": [
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Wolverine, Fierce Fighter": {
 		"reason": "Wolverine, Fierce Fighter is not ready: If damage would be dealt to Wolverine, instead that damage is dealt, but all other damage already dealt to him is healed. — Unsupported damage replacement: heal previously marked damage while retaining the incoming damage. The available damage-rule and replacement operations cannot express this.",
 		"decks": [

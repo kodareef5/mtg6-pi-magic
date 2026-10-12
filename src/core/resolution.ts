@@ -98,7 +98,7 @@ export function resolving(table: Table): Pending | null {
 		...(instruction.as ? { bind: { [instruction.as]: { objects: [], players: [], amount: 0 } } } : {}) });
 	const last = pending.program.length === 1;
 	const moves: Move[] = step.choices.map((choice) => {
-		const done = item.completed && !choice.pick && !choice.expand && !skipped ? item.completed : undefined;
+		const done = item.completed && !choice.pick && !choice.expand && !choice.search && !skipped ? item.completed : undefined;
 		const keyword = done ? [{ do: "keyword" as const, name: done.name, who: done.who, count: done.count }] : [];
 		const selected = (done && pending.bound[done.selected]?.objects || []).filter(ref => {
 			const now = table.things.get(ref.id);
@@ -107,8 +107,8 @@ export function resolving(table: Table): Pending | null {
 		const bind = { ...choice.bind, ...(done?.as ? { [done.as]: { objects: selected, players: [], amount: selected.length } } : {}) };
 		return {
 			option: { id: `${prefix}:${choice.id}`, label: choice.label, ...(choice.objects ? { objects: choice.objects } : choice.pick && "id" in choice.pick ? { objects: [choice.pick] } : {}), ...(choice.cards ? { cards: choice.cards } : {}) },
-			changes: [...choice.changes, ...keyword, ...(last && !choice.pick && !choice.expand ? finish(choice.changes) : []),
-				{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(Object.keys(bind).length ? { bind } : {}),
+			changes: [...choice.changes, ...keyword, ...(last && !choice.pick && !choice.expand && !choice.search ? finish(choice.changes) : []),
+				{ do: "resolution", action: "next", what: object.id, ...(choice.pick ? { pick: choice.pick } : {}), ...(choice.search ? { search: choice.search } : {}), ...(Object.keys(bind).length ? { bind } : {}),
 					...(choice.expand ? { expand: choice.expand.map(inner => ({ ...(item.player !== undefined ? { player: item.player } : {}), ...(item.object ? { object: item.object } : {}), ...inner })) } : {}), ...(choice.follow ? { follow: choice.follow } : {}) }],
 			reason: "resolve",
 		};

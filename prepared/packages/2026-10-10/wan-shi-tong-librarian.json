@@ -1,0 +1,133 @@
+{
+	"card": "Wan Shi Tong, Librarian",
+	"generated": "2026-10-10",
+	"source": "eb440aaf8bfda6c27da3a7fadb01e90fb0120698a684fd8dab8ec6b23fff1f7e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wan Shi Tong, Librarian",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying, vigilance",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"vigilance"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Wan Shi Tong enters, put X +1/+1 counters on him. Then draw half X cards, rounded down.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": {
+								"x": true
+							}
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"half": {
+									"x": true
+								},
+								"round": "down"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever an opponent searches their library, put a +1/+1 counter on Wan Shi Tong and draw a card.",
+				"event": {
+					"on": "keyword",
+					"keyword": "search",
+					"by": "opponent",
+					"whose": "event:player"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "+1/+1",
+							"amount": 1
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": [
+			{
+				"claim": "Cast Wan Shi Tong with chosen X and flash timing",
+				"basis": "Flash",
+				"source": {
+					"card": "Wan Shi Tong, Librarian",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

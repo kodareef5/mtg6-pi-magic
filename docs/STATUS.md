@@ -12,15 +12,15 @@ measures whether ordinary games can execute their cards correctly.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 12 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator |
-| Completed source-reviewed alpha games | 29, covering nine admitted decks; Bant, Jeskai and Dimir Excruciator have standing coverage and await their first games |
+| Imported main decks admitted to setup | 13 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator, Dimir Midrange |
+| Completed source-reviewed alpha games | 29, covering nine admitted decks; Bant, Jeskai and both Dimir lists have standing coverage and await their first games |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Two saved continuations stopped on provider credits; corrected Sleight of Hand passed local replay and awaits a live continuation |
-| Recent shared mechanics | Countered-ability sources and ability-removal lifetimes; characteristic effects applied with entry; graveyard copies with fixed exceptions and linked triggers |
-| Stored card assessments | 260 accepted, 48 refused, five basic lands; Dimir Midrange needs only Wan Shi Tong |
+| Recent shared mechanics | Recorded library searches with private inspection and search triggers; countered-ability sources; characteristic effects applied with entry |
+| Stored card assessments | 261 accepted, 47 refused, five basic lands; six imported main decks still have standing blockers |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 293 invariant tests pass |
+| Validation | Type check and 294 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

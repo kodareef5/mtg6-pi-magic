@@ -10,6 +10,7 @@ import { exampleIndex, exampleReference, registrationProblems, syntaxReference }
 import { ASSESSMENT_CEILING } from "./spend.ts";
 
 const SYSTEM = [
+	"A whole-library choose with an explicit owner starts a recorded search and privately shows all cards, even when it finds none. A bound inspected window is selection, not search. Watches use on keyword, keyword search, by for the searcher and whose for the library owner; whose event:player means their own library. Optional searches wrap choose, move and shuffle in perform with who and may. Read library-searches.md. Partial-library search replacements and simultaneous searches by multiple players remain unsupported.",
 	"Assess one registered Magic card before play. Prepare its standing behavior and identify every use. This is card interpretation, not a strategic line. Complete executable programs for all casts and activations are not required.",
 	"Use the supplied printed fields and full Oracle text. Account for every ability, including flying and other keywords, entry counters, mana, triggers, static effects, replacements and play permissions.",
 	"Mana colors is the whole output of one activation: [W,U] adds two mana together. A choice of W or U needs two mana registrations with the same quoted basis and one color each. Read mana.md. This represents the alternatives without granting two activations of one tapped source; syntax alone cannot verify that the printed ability permits the stated output.",

@@ -11,14 +11,16 @@ import { project } from "./view.ts";
 export const selectionScoped = (selector: Selector): boolean => !!(selector.owner || selector.controller || selector.is ||
 	selector.all?.some(selectionScoped) || selector.any?.length && selector.any.every(selectionScoped));
 
+/** Scope and explicit object windows, without predicates that inspect card identities. */
+export const selectionExtent = (selector: Selector): Selector => ({ zones: selector.zones, controller: selector.controller, owner: selector.owner, is: selector.is,
+	...(selector.any ? { any: selector.any.map(selectionExtent) } : {}), ...(selector.all ? { all: selector.all.map(selectionExtent) } : {}) });
+
 /** A selector's identity predicates cannot establish permission to read hidden cards.
  * Library selection declares a search of an explicitly scoped library. Other private
  * selections require an earlier look, even when their hidden cards would not match. */
 export function selectionBlock(table: Table, scope: Scope, from: Selector, who: number): string | undefined {
 	const visible = new Set((project(table, who).objects ?? []).filter((one) => !one.faceDown || one.card).map((one) => `${one.id}@${one.incarnation}`));
-	const extent = (selector: Selector): Selector => ({ zones: selector.zones, controller: selector.controller, owner: selector.owner, is: selector.is,
-		...(selector.any ? { any: selector.any.map(extent) } : {}), ...(selector.all ? { all: selector.all.map(extent) } : {}) });
-	const range = extent(from);
+	const range = selectionExtent(from);
 	if (!selectionScoped(from) && scope.world.objects.some((one) => one.zone === "library" &&
 		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined)))
 		return "Selection reaches unseen cards without naming whose library to search or an inspected binding. State owner, controller or is explicitly; no card identities were shown.";

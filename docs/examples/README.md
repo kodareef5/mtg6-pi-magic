@@ -60,6 +60,7 @@ schemas, and every `basis` is checked against the card's text.
 | `costs.md` | sacrifice with last known information, discard or exile the card itself, life, reductions |
 | `named-search.md` | private searches by a bound object's name, with counts from original zones |
 | `search.md` | searching as choose, move, shuffle, from a land and from a spell |
+| `library-searches.md` | recorded search starts, private inspection, repeated searches and Wan Shi Tong's own-library watch |
 | `optional-search.md` | another player's optional search after destruction; declining versus searching and finding nothing |
 | `warp.md` | an alternative cost with a delayed exile and a permission to cast again |
 | `animation.md` | crew, a land becoming a creature, layer 5 color changes, earthbend, changing creature types and granting a trigger |

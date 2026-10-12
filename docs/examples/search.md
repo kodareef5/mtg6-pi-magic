@@ -1,8 +1,9 @@
 # Searching a library
 
-There is no search instruction. You look, pick, and move, as hands do:
-`choose` from your library, `move` what you bound, then `shuffle`. The choice
-shows your library to you and nobody else, only while you choose.
+`choose` from your explicitly scoped library, `move` what you bound, then
+`shuffle`. New games record a search start before showing your library to you.
+The private look includes nonmatching cards and ends when the effect finishes
+or the library is shuffled. See [search events](library-searches.md).
 
 Searching for cards with a stated quality may find nothing (701.23b), so write
 `upTo`. Nothing is revealed unless the card says so (701.23e).
@@ -48,5 +49,4 @@ investigates, which makes a Clue token:
 Identical cards in a library are one choice in the menu: nothing tells two
 Forests apart.
 
-Casting the back half of a split card or an Omen is not supported yet: the table
-reads the front face's characteristics.
+Alternate face casts and Omen continuations use the terms in [faces](faces.md).

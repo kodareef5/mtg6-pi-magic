@@ -16,6 +16,7 @@ import { doubleFaced, room, transformable } from "./faces.ts";
 import { paymentChoices } from "./costs.ts";
 import { colorChoices, manaTerms } from "./funding.ts";
 import { inspection, selectionBlock } from "./inspection.ts";
+import { beginSearch, searchQuality } from "./search.ts";
 import { libraryKeyword } from "./library-keywords.ts";
 import { project } from "./view.ts";
 import { summary } from "./announce.ts";
@@ -28,7 +29,7 @@ import type { Instruction, Modification, Selector } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 
-export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: Chosen; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef };
+export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: Chosen; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef; search?: { who: number; whose: number[] } };
 export type Step = { actor: SeatId; question: string; choices: Choice[]; blocked?: string };
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -190,6 +191,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const who = players(scope, instruction.who)[0] ?? controller;
 			const blocked = selectionBlock(table, scope, instruction.from, who);
 			if (blocked) return { actor: who, question: blocked, choices: [], blocked };
+			const search = beginSearch(table, scope, instruction, pending, who);
+			if (search) return search;
 			const count = amount(scope, instruction.count);
 			const picked = pending.picked.filter((one) => "id" in one);
 			// "You" in the selector is still the ability's controller, whoever chooses.
@@ -209,8 +212,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			});
 			// Up to, a hidden-zone search, and running out are all ways to stop short (701.23b).
 			// Declining gives up what the instruction is for, so the label says so; it reads as finishing otherwise.
-			if (instruction.upTo || instruction.may && !picked.length || !pool.length || picked.length >= count) choices.push({ id: "done",
-				label: picked.length ? `Stop here, with ${picked.length} chosen` : pool.length && count ? "Decline: choose none of them, so this finds nothing" : "Nothing can be chosen", changes: [], ...finish([]) });
+			if (instruction.upTo || instruction.may && !pending.searching && !picked.length || pending.searching && searchQuality(instruction.from) || !pool.length || picked.length >= count) choices.push({ id: "done",
+				label: picked.length ? `Stop here, with ${picked.length} chosen` : pending.searching ? "Finish search without finding a card" : pool.length && count ? "Decline: choose none of them, so this finds nothing" : "Nothing can be chosen", changes: [], ...finish([]) });
 			return { actor: who, question: `${claim}: choose ${count === 1 ? "one" : `${count}`}${instruction.upTo ? " or fewer" : ""} (${picked.length} chosen).`, choices };
 		}
 		case "shuffle": return one("Shuffle", players(scope, instruction.who).map((whose) => ({ do: "shuffle" as const, whose })));

@@ -59,7 +59,7 @@ export type Entrant = {
  * library and its sideboard outside the game. Printed facts come from the
  * pinned card file, the shipped Standard file by default.
  */
-export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number } = {}): Table {
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number } = {}): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -71,6 +71,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		format,
 		...(options.announcementsFrom !== undefined ? { announcementsFrom: options.announcementsFrom } : {}),
 		...(options.excessManaFrom !== undefined ? { excessManaFrom: options.excessManaFrom } : {}),
+		...(options.searchesFrom !== undefined ? { searchesFrom: options.searchesFrom } : {}),
 		...(universe.names ? { cardNames: { ...universe.names } } : {}),
 		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
@@ -411,6 +412,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else delete table.announcement;
 				break;
 			case "shuffle": {
+				if (table.resolution?.searched) {
+					table.resolution.searched = table.resolution.searched.filter(one => one.whose !== change.whose);
+					if (!table.resolution.searched.length) delete table.resolution.searched;
+				}
 				// The shuffle is the only randomness in the game. Positions are
 				// swapped so the library stays a list the engine fully knows.
 				const library = cardsIn(table, "library", change.whose);
@@ -661,9 +666,16 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	if (change.accept) { delete pending.optional; return; }
 	pending.targetsChecked = true;
 	if (change.follow) pending.source = structuredClone(change.follow);
+	if (change.search) {
+		pending.searching = true;
+		const { who, whose } = change.search;
+		pending.searched = [...pending.searched ?? [], ...whose.filter(owner => !pending.searched?.some(one => one.who === who && one.whose === owner)).map(owner => ({ who, whose: owner }))];
+		return;
+	}
 	if (change.pick) { pending.picked.push(structuredClone(change.pick)); return; }
 	if (change.bind) Object.assign(pending.bound, structuredClone(change.bind));
 	pending.program.shift();
+	delete pending.searching;
 	pending.picked = [];
 	if (change.expand) pending.program.unshift(...structuredClone(change.expand));
 	if (pending.program.length && !change.abort && !pending.lost) return;

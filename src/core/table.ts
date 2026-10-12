@@ -215,6 +215,10 @@ export type Resolution = {
 	lost?: boolean;
 	/** Picks so far in the current instruction, including entering attackers' defenders. */
 	picked: Chosen[];
+	/** The current selection has begun its whole-library search. */
+	searching?: true;
+	/** Libraries searched by this resolving effect since their last shuffle (701.23h). */
+	searched?: { who: SeatId; whose: SeatId }[];
 	/** Inspection entitlements while this effect resolves; public reveals also grant them to the spectator. Receipts preserve the disclosure afterward. */
 	seen?: Partial<Record<Viewer, ObjectRef[]>>;
 	/** Explicit private looks, distinct from a public reveal, before face-down exile. */
@@ -410,6 +414,8 @@ export type Table = {
 	announcementsFrom?: number;
 	/** Journal decision version at which source output can remain unspent. */
 	excessManaFrom?: number;
+	/** Journal decision version at which library selections record search and look steps. */
+	searchesFrom?: number;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

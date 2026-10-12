@@ -27,7 +27,7 @@ import { casting } from "./casting.ts";
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
 	on: GameEvent["on"];
-	keyword?: "scry" | "surveil" | "manifest-dread";
+	keyword?: "scry" | "surveil" | "manifest-dread" | "search";
 	ordinal?: number;
 	/** What it happened to, as it was then. */
 	object?: Seen;
@@ -101,7 +101,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	for (const change of changes) {
 		switch (change.do) {
 			case "keyword":
-				if (change.count > 0) found.push({ on: "keyword", keyword: change.name, player: change.who, amount: change.count });
+				if (change.count > 0) found.push({ on: "keyword", keyword: change.name, player: change.who, amount: change.count, ...(change.whose !== undefined ? { whose: change.whose } : {}) });
 				break;
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
@@ -188,6 +188,8 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 	return found;
 }
 
+const eventPlayer = (one: Occurrence) => one.on === "keyword" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
+
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
@@ -198,7 +200,7 @@ function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrenc
 	if (event.combat !== undefined && event.combat !== occurrence.combat) return null;
 	if (event.received) occurrence = { ...occurrence, object: occurrence.recipient, traits: occurrence.recipientTraits, found: occurrence.recipient ? ref(occurrence.recipient) : undefined };
 	if (event.face !== undefined && event.face !== occurrence.face || event.fully && !occurrence.fully) return null;
-	const side = (ref: string | undefined, seat?: SeatId) => ref === undefined || ref === "any" || (seat !== undefined && players(scope, ref).includes(seat));
+	const side = (ref: string | undefined, seat?: SeatId) => ref === undefined || ref === "any" || (seat !== undefined && (ref === "event:player" ? seat === eventPlayer(occurrence) : players(scope, ref).includes(seat)));
 	if (!side(event.by, occurrence.player) || !side(event.whose, occurrence.whose)) return null;
 	if (event.step && event.step !== occurrence.step) return null;
 	if (event.from && !(occurrence.from && event.from.includes(occurrence.from as never))) return null;
@@ -220,11 +222,10 @@ function eventOf(occurrences: Occurrence[]): Trigger["event"] {
 		.map((one) => [targetKey(one), one])).values()];
 	const common = (key: "source" | "recipient") => first[key] && occurrences.every((one) => one[key]?.id === first[key]!.id && one[key]?.incarnation === first[key]!.incarnation) ? ref(first[key]!) : undefined;
 	const source = common("source"), recipient = common("recipient");
-	const actor = (one: Occurrence) => one.on === "keyword" ? one.player : one.amount !== undefined ? one.dealt : one.dealt ?? one.player;
-	const player = actor(first);
+	const player = eventPlayer(first);
 	const object = first.amount !== undefined ? objects.length === 1 ? objects[0] : undefined : first.found ?? objects[0];
 	return { ...(object ? { object } : {}), ...(objects.length ? { objects } : {}),
-		...(player !== undefined && occurrences.every((one) => actor(one) === player) ? { player } : {}), ...(source ? { source } : {}), ...(recipient ? { recipient } : {}),
+		...(player !== undefined && occurrences.every((one) => eventPlayer(one) === player) ? { player } : {}), ...(source ? { source } : {}), ...(recipient ? { recipient } : {}),
 		...(first.amount !== undefined ? { amount: occurrences.reduce((sum, one) => sum + (one.amount ?? 0), 0) } : {}) };
 }
 

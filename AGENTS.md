@@ -485,6 +485,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   costs.ts           shared physical payments for announcements and resolving instructions
   cost-reductions.ts standing generic spell discounts, read from active abilities and proposed spell traits
   cost-selection.ts  staged graveyard payments by total mana value, before any resource is spent
+  search.ts          recorded library searches and their private inspection windows
   inspection.ts      bounded private looks and chosen or random library ordering
   library-keywords.ts scry and surveil choices, followed by their recorded completion
   cast-words.ts      properties applied to matching spells during announcement
