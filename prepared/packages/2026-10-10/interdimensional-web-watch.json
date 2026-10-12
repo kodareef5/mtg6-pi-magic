@@ -1,0 +1,60 @@
+{
+	"card": "Interdimensional Web Watch",
+	"generated": "2026-10-10",
+	"source": "f6c6bdea814e5776c9d63a56d8c56663974a1a30d2d99e6d7144d401e4dd1f3c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Interdimensional Web Watch",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When this artifact enters, exile the top two cards of your library. Until the end of your next turn, you may play those cards.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": {
+								"top": 2,
+								"of": "you"
+							},
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": {
+								"endOfNextTurn": "you"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "mana",
+				"basis": "{T}: Add two mana in any combination of colors. Spend this mana only to cast spells from exile.",
+				"cost": {
+					"tap": true
+				},
+				"any": 2,
+				"combination": true,
+				"spendFrom": [
+					"exile"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

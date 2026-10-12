@@ -137,6 +137,8 @@ export type SeatView = {
 	work?: Workspace;
 	/** The announcement menu contract of this journal position. */
 	stagedAnnouncements?: true;
+	/** Source output can remain floating after a payment in this journal position. */
+	excessMana?: true;
 	/** Only its owner sees the unconfirmed use and parameter selections. */
 	announcement?: import("./announcement-options.ts").Announcement;
 	/** The owner's accepted plan at the start of that unfinished use. */

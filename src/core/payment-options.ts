@@ -1,5 +1,5 @@
 /** Mana sources selected one at a time. No resource moves until confirmation. */
-import { covers, paymentUnits, type Funding, type Price } from "./funding.ts";
+import { covers, outputLabel, paymentUnits, type Funding, type Price } from "./funding.ts";
 import { canPay } from "./payment-search.ts";
 import type { Frame } from "./types.ts";
 import type { Mana } from "./table.ts";
@@ -12,14 +12,14 @@ export type PaymentPart = {
 
 /** Existence is a resource question, not an instruction to pick the first payment. */
 export const payable = (frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone): boolean =>
-	canPay(paymentUnits(frame, except, spending, from), cost, frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0);
+	canPay(paymentUnits(frame, except, spending, from, cost.generic + cost.colors.length), cost, frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0);
 
 export function paymentOptions(frame: Frame, cost: Price, selected: readonly string[] = [], except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone) {
-	const units = paymentUnits(frame, except, spending, from), parts: PaymentPart[] = [];
+	const units = paymentUnits(frame, except, spending, from, cost.generic + cost.colors.length), parts: PaymentPart[] = [];
 	for (const unit of units) for (const yield_ of unit.yields) {
 		const id = `mana:${parts.length}`, { colors, claim, ...terms } = yield_;
 		parts.push({ id, resource: unit.id, colors, life: terms.life ?? 0,
-			label: unit.pool ? `Spend ${unit.label}` : `${unit.label}${terms.sacrifice ? " and sacrifice it" : ""}${terms.life ? ` and pay ${terms.life} life` : ""} for ${colors.map((one) => `{${one}}`).join("")}${terms.spellWords ? `; grants ${terms.spellWords.join(", ")}` : ""}`,
+			label: unit.pool ? `Spend ${unit.label}` : `${unit.label}${terms.sacrifice ? " and sacrifice it" : ""}${terms.life ? ` and pay ${terms.life} life` : ""} for ${outputLabel(yield_)}${terms.spellWords ? `; grants ${terms.spellWords.join(", ")}` : ""}`,
 			funding: unit.pool ? { paid: [unit.id], taps: [] } : { paid: [], taps: [{ source: { id: unit.source!.id, incarnation: unit.source!.incarnation }, colors, claim, ...terms }] } });
 	}
 	const picked = selected.map((id) => parts.find((one) => one.id === id));

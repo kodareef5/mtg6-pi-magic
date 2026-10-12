@@ -402,6 +402,8 @@ export type Table = {
 	announcement?: import("./announcement-options.ts").Announcement;
 	/** Journal decision version at which staged announcements replace flat menus. */
 	announcementsFrom?: number;
+	/** Journal decision version at which source output can remain unspent. */
+	excessManaFrom?: number;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

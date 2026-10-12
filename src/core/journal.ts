@@ -31,6 +31,8 @@ import type { Ruled, Case, Ruling } from "./judge.ts";
 export type Header = {
 	/** Missing on historical flat-menu journals. A later version preserves the old prefix. */
 	announcementsFrom?: number;
+	/** Journal decision version at which source output can remain unspent. */
+	excessManaFrom?: number;
 	/** The game id. Also the directory a published game lives in. */
 	id: string;
 	format: string;
@@ -413,6 +415,8 @@ export function replay(
 	const initial = start(header);
 	if (header.announcementsFrom !== undefined) initial.announcementsFrom = header.announcementsFrom;
 	else delete initial.announcementsFrom;
+	if (header.excessManaFrom !== undefined) initial.excessManaFrom = header.excessManaFrom;
+	else delete initial.excessManaFrom;
 	// A catalog cannot change the options of a journal that never pinned it.
 	if (!header.cards.names) delete initial.cardNames;
 	else if (initial.cardNames?.sha256 !== header.cards.names.sha256) throw new Error(`${path} cannot be replayed here: Oracle name data differs from the game's pinned source`);

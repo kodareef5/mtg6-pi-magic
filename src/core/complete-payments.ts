@@ -1,6 +1,6 @@
 /** Bounded complete payments. Interchangeable resources use a named representative;
  * the individual-source route still reaches every identity and mana-ability choice. */
-import { covers, type Funding, type Price } from "./funding.ts";
+import { covers, manaSplit, type Funding, type Price } from "./funding.ts";
 import { canPay } from "./payment-search.ts";
 import { paymentOptions, type PaymentPart } from "./payment-options.ts";
 import type { Frame } from "./types.ts";
@@ -42,9 +42,10 @@ export function completePayments(frame: Frame, cost: Price, menu: ReturnType<typ
 			const used = new Set(parts.map(one => one.resource));
 			const open = [...new Map(menu.units.filter(one => one.source && !used.has(one.id)).map(one => [one.id, one.source!])).values()];
 			const floating = menu.units.filter(one => one.pool && !used.has(one.id));
+			const produced = funding.taps.flatMap(tap => manaSplit(tap).remaining.map(color => `{${color}}${tap.spendOnly || tap.spendFrom ? " (restricted)" : ""}${tap.until ? ` (until ${tap.until})` : ""}${tap.spellWords?.length ? ` (grants ${tap.spellWords.join(", ")})` : ""}`));
 			found.push({ parts, funding, label: parts.length ? parts.map(one => one.label).join("; ") : "No mana is spent",
 				leaves: [open.length ? `Leaves available: ${open.map(one => `${one.card ?? one.token?.name ?? one.id} (${one.id})`).join(", ")}.` : "Leaves no unused mana source from this payment menu.",
-					...(floating.length ? [`Keeps floating: ${floating.map(one => one.label).join(", ")}.`] : [])].join(" ") });
+					...(floating.length || produced.length ? [`Keeps floating: ${[...floating.map(one => one.label), ...produced].join(", ")}.`] : [])].join(" ") });
 			return;
 		}
 		const unit = units[at];

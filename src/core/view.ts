@@ -206,6 +206,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	const view: SeatView = { ...(viewer !== "spectator" ? { began: table.cursor.began[viewer], ...(draw === undefined ? {} : { drawnAt: draw.clock, turnDraw }), landsPlayed: seat(table, viewer).landsPlayed } : {}),
 		starting: table.seats[0]!.id,
 		...(table.announcementsFrom !== undefined && table.ledger.length >= table.announcementsFrom ? { stagedAnnouncements: true as const } : {}),
+		...(table.excessManaFrom !== undefined && table.ledger.length >= table.excessManaFrom ? { excessMana: true as const } : {}),
 		...(viewer !== "spectator" && table.announcement?.controller === viewer ? { announcement: structuredClone(table.announcement) } : {}),
 		...(viewer !== "spectator" && table.announcement?.controller === viewer && table.announcement.plan !== undefined
 			? { announcementPlan: structuredClone(table.workLog.findLast((one) => one.seat === viewer && one.workspace.planned === table.announcement!.plan)?.workspace.plan) } : {}),

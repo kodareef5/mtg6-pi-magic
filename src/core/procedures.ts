@@ -21,7 +21,7 @@ import { attach } from "./entry.ts";
 import { beforeEntry } from "./entry-payments.ts";
 import { selectionScoped } from "./inspection.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
-import { covers, manaTerms, paying, produces, spendable, spentWords } from "./funding.ts";
+import { covers, manaSplit, manaTerms, paying, produces, spendable, spentWords } from "./funding.ts";
 import { characteristics, intrinsic, sick } from "./characteristics.ts";
 import { amount, matches, players, tableWorld, type Scope } from "./selectors.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, checkOngoingCondition, flashed, playable } from "./permits.ts";
@@ -218,12 +218,15 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const allowed = (terms: Pick<Mana, "spendOnly" | "spendFrom">) => spendable(terms, scope, spending, activation.timing === "spell" ? object.zone : undefined, traits);
 	const tapped = new Set([...(cost.tap ? [source.id] : []), ...(cost.tapped ?? []).map((ref) => ref.id), ...funding.map((tap) => tap.source.id)]);
 	for (const tap of funding) {
+		if (!tap.colors.length) throw new Error("A funding source must contribute to the payment.");
+		if (tap.produced && (table.excessManaFrom === undefined || table.ledger.length < table.excessManaFrom)) throw new Error("This journal position requires exact source output.");
+		manaSplit(tap);
 		const mana = live(table, tap.source);
 		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
 		if (activationRestrictions(world, mana, true).length) throw new Error("A mana source in the payment cannot activate its ability.");
 		const made = characteristics(table, mana);
-		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!) && !tap.spellWords && !tap.spendOnly && !tap.spendFrom && !tap.until && !tap.sacrifice && !tap.life)) throw new Error("A basic land type produces one mana of that type's color with no additional effects.");
-		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, { world, controller, source: mana })).some((one) => one.colors.join() === tap.colors.join() &&
+		if (tap.intrinsic && !(tap.colors.length === 1 && intrinsic(made).includes(tap.colors[0]!) && !tap.produced && !tap.spellWords && !tap.spendOnly && !tap.spendFrom && !tap.until && !tap.sacrifice && !tap.life)) throw new Error("A basic land type produces one mana of that type's color with no additional effects.");
+		if (!tap.intrinsic && !(made?.registrations ?? []).flatMap((registration) => produces(registration, { world, controller, source: mana })).some((one) => one.colors.join() === (tap.produced ?? tap.colors).join() &&
 			JSON.stringify(one.spendOnly) === JSON.stringify(tap.spendOnly) && JSON.stringify(one.spendFrom) === JSON.stringify(tap.spendFrom) && JSON.stringify(one.spellWords) === JSON.stringify(tap.spellWords) && one.until === tap.until && !!one.sacrifice === !!tap.sacrifice && (one.life ?? 0) === (tap.life ?? 0)))
 			throw new Error("The source has no registered mana ability that makes that mana.");
 		if (!allowed(tap)) throw new Error("That mana may not be spent on this.");

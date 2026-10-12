@@ -23,21 +23,19 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Nine imported main decks have complete standing coverage and completed
-source-reviewed games. The corrected Azorius versus Control game restores
-Azorius coverage after the mana-source audit.
-[Status](STATUS.md) holds the current evidence. Ten lists still need standing
+Ten imported main decks have complete standing coverage; nine have completed
+source-reviewed games. Bant awaits its first game.
+[Status](STATUS.md) holds the current evidence. Nine lists still need standing
 assessments.
 
-1. Exercise Grove's Bounty's new announced division in further Prowess games
+1. Start Bant games and exercise Grove's Bounty's announced division in Prowess games
    and finish the corrected Azorius continuations. Validate complete-payment menus
    across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Bant needs Web Watch's mana restricted to exile casts,
-   including mixed colors and payments that leave mana floating.
+   stopped games. Jeskai Artifacts needs Perilous Snare and Unidentified Hovership.
    Azorius Momo needs combined tap payments, draw replacement and spell copies.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.

@@ -18,7 +18,7 @@ import { summary } from "../core/announce.ts";
 import { allowance } from "../core/permits.ts";
 import { viewWorld } from "../core/selectors.ts";
 import { damageNotes } from "../core/damage.ts";
-import { sources } from "../core/funding.ts";
+import { outputLabel, sources } from "../core/funding.ts";
 import { openingHand } from "../core/pregame.ts";
 import { odds, within } from "../core/odds.ts";
 import { activeWatches } from "../core/triggers.ts";
@@ -195,7 +195,7 @@ export function focus(frame: Frame, intent: Intent, context: Focus = {}): Packet
 		const mana = [...payment.paid.map((id) => `${view.pools?.flatMap((pool) => pool.mana).find((unit) => unit.id === id)?.color ?? "?"} floating (${id})`),
 			...(payment.funding ?? []).map((id) => {
 				const tap = data.funding[id]!, object = view.objects?.find((object) => object.id === tap.source.id && object.incarnation === tap.source.incarnation);
-				return `${tap.sacrifice ? "sacrifice" : "tap"} ${object?.card ?? object?.token?.name ?? tap.source.id} (${tap.source.id}@${tap.source.incarnation}) for ${tap.colors.join("")}`;
+				return `${tap.sacrifice ? "sacrifice" : "tap"} ${object?.card ?? object?.token?.name ?? tap.source.id} (${tap.source.id}@${tap.source.incarnation}) for ${tap.produced ? outputLabel(tap) : tap.colors.join("")}`;
 			})];
 		// Costs other than mana belong beside it: tapping or sacrificing the source, life, cards.
 		const named = (ref: { id: string; incarnation: number }) => { const object = view.objects?.find((candidate) => candidate.id === ref.id && candidate.incarnation === ref.incarnation); return `${object?.card ?? object?.token?.name ?? ref.id} (${ref.id}@${ref.incarnation})`; };

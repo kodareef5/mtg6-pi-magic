@@ -152,14 +152,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Interdimensional Web Watch": {
-		"reason": "Interdimensional Web Watch is not ready: {T}: Add two mana in any combination of colors. Spend this mana only to cast spells from exile. — The mana spendOnly selector cannot test a proposed spell's original casting zone; zones [\"exile\"] would test its current zone rather than require casting from exile.",
-		"decks": [
-			"Bant Airbending Combo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Inti, Seneschal of the Sun": {
 		"reason": "Inti, Seneschal of the Sun is not ready: Whenever you discard one or more cards, exile the top card of your library. You may play that card until your next end step. — The available event syntax cannot watch discards (including discards replaced with a destination other than the graveyard), and permission durations cannot expire at the beginning of your next end step. A hand-to-graveyard watch or an end-of-turn permission would not faithfully implement this ability.",
 		"decks": [
