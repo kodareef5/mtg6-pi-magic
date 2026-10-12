@@ -38,7 +38,7 @@ import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { standard } from "../src/core/format.ts";
 import { cardsIn, type Table } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
-import { traceInference, type CallTrace } from "../src/context/trace.ts";
+import { expandTraces, traceInference, type CallTrace } from "../src/context/trace.ts";
 
 const universe = loadCards("cards/standard.tsv");
 
@@ -455,11 +455,11 @@ test("the whole table is seated, briefed and played, and the recaps do not block
 	// before any of them answered. A loop that awaited each one could never have
 	// more than a single request outstanding.
 	assert.ok(firstResolvedAfter >= HELD, `${firstResolvedAfter} outstanding when the first answered`);
-	const requests = traces.filter((event) => event.event === "request");
+	const requests = expandTraces(traces).filter((event) => event.event === "request");
 	assert.equal(requests.length, seated.tally.spent().length, "every model attempt has an exact capture");
 	assert.equal(new Set(requests.map((event) => event.id)).size, requests.length);
 	for (const request of requests) {
-		assert.ok(traces.indexOf(request) < traces.findIndex((event) => event.id === request.id && event.event === "reply"));
+		assert.ok(traces.findIndex((event) => event.id === request.id && event.event === "request") < traces.findIndex((event) => event.id === request.id && event.event === "reply"));
 		assert.ok(request.model.includes("/"));
 		assert.equal("baseUrl" in request, false);
 		assert.equal(request.size.bytes, Buffer.byteLength(JSON.stringify(request.request)), "diagnostics report exact serialized bytes without a token estimate");
