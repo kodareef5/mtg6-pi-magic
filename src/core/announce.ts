@@ -112,7 +112,7 @@ export function summary(instruction: Instruction): string {
 		case "damage": return `Deal ${words(instruction.amount, "amount")} damage to ${instruction.to ? of(instruction.to) : what}${gate}.`;
 		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${words(instruction.count, "amount")} ${of(instruction.from)}${instruction.totalManaValueAtMost === undefined ? "" : ` with total mana value at most ${words(instruction.totalManaValueAtMost, "amount")}`}${instruction.random ? " at random" : ""}${instruction.reveal ? ", revealed" : ""}${gate}.`;
 		case "choose-actions": return `${who(instruction.who, "choose")} ${words(instruction.count, "amount")} actions: ${instruction.actions.map(action => "loseLife" in action ? `lose ${action.loseLife} life` : "discard" in action ? "discard a card" : `sacrifice ${of(action.sacrifice)}`).join(" or ")}. Carry out all choices simultaneously${gate}.`;
-		case "move": return `Put ${what} into ${instruction.to} (${instruction.reason})${instruction.tapped ? " tapped" : ""}${gate}.`;
+		case "move": return `Put ${what} into ${instruction.to} (${instruction.reason})${instruction.tapped ? " tapped" : ""}${instruction.attacking ? ` attacking the same defender as ${words(instruction.attacking.sameAs, "thing")}` : ""}${gate}.`;
 		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${words(instruction.count, "amount")}` : ""}${gate}.`;
 		case "increase-speed": return `${of(instruction.who)} increases speed by ${instruction.amount}${gate}.`;
 		case "life": return `${of(instruction.who)} changes life by ${words(instruction.amount, "amount")}${gate}.`;
@@ -229,7 +229,7 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 	}
 	if (cost.show) {
 		const pool = query({ zones: ["hand", "battlefield"], controller: "self" }, frame).filter((one) => matches(scope, one, cost.show!.choose));
-		add(subsets(pool, cost.show.count).map((set) => ({ paid: { shown: set.map((one) => ({ ...ref(one), ...(one.zone === "hand" ? { reveal: true as const } : {}) })) }, uses: [],
+		add(subsets(pool, cost.show.count).map((set) => ({ paid: { shown: set.map((one) => ({ ...ref(one), ...(one.zone === "hand" ? { reveal: true as const, ...(cost.show!.until ? { until: cost.show!.until } : {}) } : {}) })) }, uses: [],
 			shows: `${set.map((one) => `${one.zone === "hand" ? "Reveal" : "Show"} ${name(one)} (${one.zone})`).join("; ")}. ` })));
 	}
 	return ways;
@@ -333,9 +333,10 @@ export function paidActivation(base: OfferBase, frame: Frame, way: OfferCost, fu
 	const { procedure, source, sourceRef, granted, printed, slots, words, mana, x } = base, { extra, cost } = way;
 	const payment = immutable(structuredClone(funding));
 	const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
-	const sacrifice = procedure.cost?.sacrifice, sacrificeAs = typeof sacrifice === "object" && "as" in sacrifice ? sacrifice.as : undefined;
+	const named = [procedure.cost?.sacrifice, procedure.cost?.return].flatMap((cost, index) =>
+		typeof cost === "object" && "as" in cost && cost.as ? [[cost.as, { objects: structuredClone((index ? extra.paid.returned : extra.paid.sacrificed) ?? []), players: [] }]] : []);
 	const bound = { ...(extra.paid.exiled?.some((one) => one.id === source.id) ? { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } : {}),
-		...(sacrificeAs ? { [sacrificeAs]: { objects: structuredClone(extra.paid.sacrificed ?? []), players: [] } } : {}) };
+		...Object.fromEntries(named) };
 	return { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 		...(procedure.special ? { special: procedure.special } : {}),
 		...(procedure.source.registered ? { registered: procedure.source.registered } : {}),

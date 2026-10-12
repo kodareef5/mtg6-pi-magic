@@ -202,7 +202,7 @@ export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tappe
 	/** Announced generic discount from the selected optional sacrifices, including zero. */
 	sacrificeReduction?: number;
 	loyalty?: number;
-	exiled?: ObjectRef[]; discarded?: ObjectRef[]; shown?: (ObjectRef & { reveal?: true })[]; life?: number;
+	exiled?: ObjectRef[]; discarded?: ObjectRef[]; shown?: (ObjectRef & { reveal?: true; until?: "leaves-stack" })[]; life?: number;
 	counters?: { kind: string; count: number; put?: true; on?: ObjectRef[] } };
 /**
  * A resolution in progress. Its remaining program, what it has bound, and the

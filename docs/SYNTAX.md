@@ -1004,3 +1004,11 @@ Choices still require an earned look or scoped search, and all legal subsets
 remain available. Exact-count and random group-limited selections are unsupported.
 [Michelangelo's Technique](examples/selection-totals.md) exercises a private
 look, optional selection, simultaneous entry and random bottom order.
+
+A selected `cost.return` may bind its pre-departure incarnation with `as`, like
+`cost.sacrifice`. A battlefield `move` can enter `attacking` with `sameAs` naming
+one attacker from the current combat, including its departed incarnation.
+It keeps that defender and never declares a new attack. `cost.show` with
+`until: "leaves-stack"` keeps its selected hand incarnation public only while
+the announced spell or ability remains on the stack. See
+[attacking entry](examples/attacking-entry.md) for ninjutsu and its limits.

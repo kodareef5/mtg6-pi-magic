@@ -142,12 +142,17 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				return { actor: controller, question: "Manifest one card onto the battlefield.", choices: [], blocked: "Manifest moves one card at a time from another zone; use a repeated keyword operation for multiple cards." };
 			const counters = terms?.counters ? Object.fromEntries(Object.entries(terms.counters).map(([kind, value]) => [kind, amount(scope, value)])) : undefined;
 			const controlled = terms?.controller ? players(scope, terms.controller)[0] : undefined;
+			const predecessors = terms?.attacking ? objects(scope, terms.attacking.sameAs, true) : [];
+			if (predecessors.length > 1) return { actor: controller, question: "Name one prior attacker.", choices: [], blocked: "Attacking entry needs one attacker whose defender it follows." };
+			const predecessor = predecessors[0], attack = predecessor && table.combat?.attackers.find(one => one.id === predecessor.id && one.incarnation === predecessor.incarnation);
+			const attacking = attack ? { defending: attack.defending, ...(attack.to ? { to: attack.to } : {}) } : undefined;
 			const changes: Change[] = moving.flatMap((object): Change[] => [
 				...(terms?.change && object.zone !== "battlefield" ? [{ do: "note" as const, note: { kind: "label" as const, by: controller,
 					until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + 1 }, text: claim,
 					change: captured(scope, terms.change), ...(source ? { source } : {}) } }] : []),
 				{ do: "move", what: object.id, to, reason: (destroy ? "destroy" : terms!.reason) as Reason, ...(terms?.position ? { position: terms.position as "top" | "bottom" } : {}),
 					...(terms?.face !== undefined ? { face: terms.face } : {}),
+					...(attacking ? { attacking } : {}),
 					...(terms?.faceDown ? { faceDown: terms.faceDown } : {}),
 					...(terms?.tapped ? { tapped: true as const } : {}), ...(counters ? { counters } : {}), ...(controlled !== undefined ? { controller: controlled } : {}) },
 				...(terms?.link && source ? [{ do: "note" as const, note: { kind: "link" as const, by: controller, until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + (object.zone !== to || to === "exile" ? 1 : 0) }, source } }] : []),

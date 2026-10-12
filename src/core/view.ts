@@ -143,7 +143,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 		}
 	}
 
-	const inspected = table.resolution?.seen?.[viewer] ?? [];
+	const retained = cardsIn(table, "stack").flatMap(one => one.ability?.cost.shown?.filter(ref => ref.reveal && ref.until === "leaves-stack") ?? []);
+	const inspected = [...table.resolution?.seen?.[viewer] ?? [], ...retained];
 	const canLook = (item: Thing) => viewer !== "spectator" && (item.zone === "exile" && !!item.lookedBy?.includes(viewer) || item.zone === "battlefield" && item.controller === viewer);
 	const entitled = (item: Thing) => PUBLIC.has(item.zone) || viewer !== "spectator" && item.zone === "hand" && item.owner === viewer || inspected.some((one) => one.id === item.id && one.incarnation === item.incarnation);
 	const visibleRefs = new Set([...table.things.values()].filter((one) => entitled(one) && (!one.faceDown || canLook(one) || one.zone === "battlefield")).map((one) => `${one.id}@${one.incarnation}`));

@@ -198,7 +198,7 @@ export const Defs = {
 		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name) }),
 			object({ choose: Type.Ref("Selector"), any: Type.Literal(true), reduce: positive, as: Type.Optional(name) })])),
 		/** Return controlled permanents to their owners' hands as payment. */
-		return: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
+		return: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name) })])),
 		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) }),
 			/** Select any number of own graveyard cards meeting this total; do not enumerate their subsets. */
 			object({ graveyard: Type.Ref("Selector"), totalManaValue: positive })])),
@@ -211,7 +211,7 @@ export const Defs = {
 			/** Default source; otherwise pay on each distinct selected permanent. */
 			on: Type.Optional(object({ choose: Type.Ref("Selector"), count: positive })) })),
 		/** Choose public permanents or reveal hand cards as payment, such as behold. */
-		show: Type.Optional(object({ choose: Type.Ref("Selector"), count: positive })),
+		show: Type.Optional(object({ choose: Type.Ref("Selector"), count: positive, until: Type.Optional(Type.Literal("leaves-stack")) })),
 		/** Generic mana this cost is reduced by, worked out as it is locked (601.2f). */
 		reduce: Type.Optional(Type.Ref("Amount")),
 	}),
@@ -296,9 +296,12 @@ export const Defs = {
 			until: Type.Optional(object({ leaves: ObjectRef })),
 			/** With as, bind how many moved objects came from this zone, before their incarnations change. */
 			countFrom: Type.Optional(Zone),
+			/** Enter attacking the defender of this exact current-combat attacker, including its departed incarnation. */
+			attacking: Type.Optional(object({ sameAs: ObjectRef })),
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), controller: Type.Optional(PlayerRef),
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { allOf: [
 				{ if: { required: ["countFrom"] }, then: { required: ["as"] } },
+				{ if: { required: ["attacking"] }, then: { properties: { to: { const: "battlefield" } } } },
 				{ if: { required: ["change"] }, then: { properties: { to: { const: "battlefield" } } } },
 				{ if: { required: ["until"] }, then: { properties: { to: { const: "exile" } } } },
 				{ if: { required: ["faceDown"] }, then: { not: { required: ["face"] }, allOf: [

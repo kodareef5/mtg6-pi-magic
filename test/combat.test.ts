@@ -7,6 +7,7 @@
  */
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { advance, apply, nextDecision } from "../src/core/decisions.ts";
 import { commit, start } from "../src/core/commit.ts";
 import { alpha, deck } from "../src/core/decks.ts";
@@ -16,8 +17,8 @@ import { project } from "../src/core/view.ts";
 import { matches, tableWorld } from "../src/core/selectors.ts";
 import type { Table, Thing } from "../src/core/table.ts";
 import type { Decision } from "../src/core/types.ts";
-import type { Registration } from "../src/core/language.ts";
-import { workFrame } from "../src/core/work-tools.ts";
+import type { Registration, Package } from "../src/core/language.ts";
+import { workFrame, editWork } from "../src/core/work-tools.ts";
 import { activeWatches } from "../src/core/triggers.ts";
 import { characteristics } from "../src/core/characteristics.ts";
 import { combatExchange, blockConflicts } from "../src/core/combat-facts.ts";
@@ -26,7 +27,7 @@ import { combatLookup } from "../src/context/strategy-combat.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { dossier } from "../src/context/dossier.ts";
-import { announce, example, establish, finish, main, matchup, pack, passBoth, quiet, step } from "./play.ts";
+import { announce, example, establish, finish, main, matchup, pack, passBoth, quiet, step, place, offered } from "./play.ts";
 
 /** Answer quietly until the table asks this step's turn-based question on this turn. */
 function reach(table: Table, step: string, turn: number): Decision {
@@ -366,6 +367,65 @@ test("entering attackers choose defenders together, never declare attacks, and r
 	reach(early, "declare-blockers", 1); pick(early, "block:done");
 	reach(early, "combat-damage", 1); pick(early, "damage");
 	assert.equal(early.seats[1]!.life, 19, "an empty declaration keeps creatures already attacking");
+
+	for (const variant of ["player", "planeswalker", "defender-left", "defender-returned", "countered", "source-returned", "blocked"] as const) {
+		const ninja = start(standard, [{ deck: alpha(deck("Dimir Midrange")) }, { deck: alpha(deck("Dimir Midrange")) }], `ninjutsu-${variant}`);
+		const attacker = establish(ninja, 0, "Spyglass Siren", []), defender = establish(ninja, 1, "Kaito, Bane of Nightmares", []);
+		const blocker = variant === "blocked" ? establish(ninja, 1, "Spyglass Siren", []) : undefined;
+		const prepared: Package = JSON.parse(readFileSync("prepared/packages/2026-10-10/kaito-bane-of-nightmares.json", "utf8")).package;
+		// Isolate the hand activation and standing animation; loyalty uses have their own invariant.
+		editWork(ninja, 0, [{ do: "package.put", package: { card: prepared.card, printedCast: true, registers: prepared.registers } }], "prepare-kaito");
+		main(ninja, 0, 3); const [source] = place(ninja, 0, "hand", prepared.card);
+		commit(ninja, [{ do: "add-mana", who: 0, colors: ["C", "U", "B"], until: "end-of-turn" }], "game-setup");
+		const procedure = example("Activate Kaito's ninjutsu against the returned attacker's defender");
+		procedure.source.refs = [{ id: source!.id, incarnation: source!.incarnation }];
+		assert.equal(offered(ninja, procedure).length, 0, "ninjutsu needs an unblocked attacker");
+		reach(ninja, "declare-attackers", 3);
+		const to = variant.startsWith("defender") || variant === "planeswalker" ? { id: defender.id, incarnation: defender.incarnation } : undefined;
+		pick(ninja, `attack:${attacker.id}${to ? `:to:${to.id}@${to.incarnation}` : ""}`); pick(ninja, "attack:done"); finish(ninja);
+		assert.equal(offered(ninja, procedure).length, 0, "unblocked is established only after blockers are declared");
+		reach(ninja, "declare-blockers", 3);
+		if (blocker) pick(ninja, `block:${blocker.id}:${attacker.id}`);
+		pick(ninja, "block:done"); finish(ninja);
+		if (variant === "blocked") {
+			// A declared block stays blocked even after its blocker has gone.
+			commit(ninja, [{ do: "move", what: blocker!.id, to: "hand", reason: "resolve" }], "resolve");
+			assert.equal(offered(ninja, procedure).length, 0); continue;
+		}
+		const initial = structuredClone(ninja), old = { id: attacker.id, incarnation: attacker.incarnation };
+		assert.ok(offered(ninja, procedure).length); assert.deepEqual(ninja, initial);
+		announce(ninja, procedure); assert.equal(attacker.zone, "hand"); assert.equal(ninja.seats[0]!.pool.length, 0);
+		const ability = [...ninja.things.values()].find(one => one.zone === "stack" && one.ability?.source?.id === source!.id)!;
+		assert.deepEqual(ability.ability!.bound?.returned?.objects, [old]);
+		for (const viewer of [0, 1, "spectator"] as const) assert.equal(project(ninja, viewer).objects!.find(one => one.id === source!.id)?.card, prepared.card);
+		assert.ok(project(ninja, 1).objects!.every(one => one.zone !== "hand" || one.owner !== 0 || one.id === source!.id), "only the paid reveal is public");
+		const announced = structuredClone(ninja);
+		if (variant.startsWith("defender")) {
+			commit(ninja, [{ do: "move", what: defender.id, to: "hand", reason: "resolve" }], "resolve");
+			if (variant === "defender-returned") commit(ninja, [{ do: "move", what: defender.id, to: "battlefield", reason: "resolve" }], "resolve");
+		}
+		if (variant === "source-returned") {
+			commit(ninja, [{ do: "move", what: source!.id, to: "exile", reason: "resolve" }], "resolve");
+			commit(ninja, [{ do: "move", what: source!.id, to: "hand", reason: "resolve" }], "resolve");
+		}
+		if (variant === "countered") commit(ninja, [{ do: "move", what: ability.id, to: "graveyard", reason: "counter" }], "counter");
+		const pending = structuredClone(ninja), attackEvents = ninja.log.filter(one => one.changes.some(change => change.do === "attack")).length;
+		if (variant !== "countered") { passBoth(ninja); finish(ninja); }
+		const attack = ninja.combat!.attackers.find(one => one.id === source!.id);
+		assert.equal(!!attack, variant === "player" || variant === "planeswalker");
+		if (attack) assert.deepEqual(attack, { id: source!.id, incarnation: source!.incarnation, defending: 1, ...(to ? { to } : {}) });
+		assert.equal(ninja.log.filter(one => one.changes.some(change => change.do === "attack")).length, attackEvents, "entering does not declare another attack");
+		assert.equal(source!.zone, variant === "countered" || variant === "source-returned" ? "hand" : "battlefield");
+		if (source!.zone === "battlefield") { assert.equal(source!.tapped, true); assert.equal(source!.counters.loyalty, 4); }
+		else assert.equal(project(ninja, "spectator").objects!.find(one => one.id === source!.id), undefined, "a new incarnation or ended ability loses the reveal entitlement");
+		assert.deepEqual(relive(pending, ninja.ledger.slice(pending.ledger.length)), ninja);
+		if (variant === "player" || variant === "planeswalker") {
+			for (const prefix of [initial, announced]) assert.deepEqual(relive(prefix, ninja.ledger.slice(prefix.ledger.length)), ninja);
+			reach(ninja, "combat-damage", 3); pick(ninja, "damage"); finish(ninja);
+			assert.equal(ninja.seats[1]!.life, variant === "player" ? 17 : 20);
+			if (variant === "planeswalker") assert.equal(defender.counters.loyalty, 1);
+		}
+	}
 });
 
 test("double strike deals damage in both steps, and a creature killed by first strike deals none", () => {

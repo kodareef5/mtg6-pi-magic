@@ -32,7 +32,7 @@ import { damageSource, tableWorld, targetKey } from "./selectors.ts";
 import { orderedDamage } from "./damage.ts";
 import { expandDraw } from "./draw.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
-import type { SeatId } from "./types.ts";
+import type { SeatId, ObjectRef } from "./types.ts";
 import {
 	type Ability,
 	manaSurvives,
@@ -239,7 +239,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			const explored = tableWorld(table).lastKnown(change.object);
 			if (explored) { before[explored.object.id] = structuredClone(explored.object) as Thing; if (explored.traits) known[explored.object.id] = structuredClone(explored.traits); }
 		}
-		if (change.do === "token" && change.attacking?.to) {
+		if ((change.do === "token" || change.do === "move") && change.attacking?.to) {
 			const target = table.things.get(change.attacking.to.id); if (target) before[target.id] = structuredClone(target);
 		}
 		if (change.do === "attack") for (const one of change.attackers) {
@@ -334,7 +334,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				else delete moving.entered;
 				if (change.to === "battlefield" && !moving.faceDown && change.registers?.length) moving.registrations = structuredClone(change.registers);
 				else delete moving.registrations;
-				if (change.to === "battlefield") enter(table, moving, change, before, born);
+				if (change.to === "battlefield") { enter(table, moving, change, before, born); enterAttacking(table, moving, change.attacking); }
 				if (ORDERED.has(change.to)) {
 					const zone = cardsIn(table, change.to, orderedWithin(change.to, moving.owner)).filter((one) => one.id !== moving.id);
 					if (change.position === "bottom") {
@@ -515,14 +515,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				const token = tokenObject(change, table.cursor.clock + 1);
 				table.things.set(change.id, token);
 				enter(table, token, change, before, born);
-				if (change.attacking && change.controller === table.cursor.active && STEPS[table.cursor.steps[0]!]?.phase === "combat") {
-					const traits = characteristics(table, token), target = change.attacking.to && table.things.get(change.attacking.to.id);
-					if (traits?.types.includes("creature") && !traits.types.includes("battle") &&
-						(!change.attacking.to || target?.incarnation === change.attacking.to.incarnation && target.zone === "battlefield" && target.controller === change.attacking.defending && characteristics(table, target)?.types.includes("planeswalker"))) {
-						const combat = table.combat ??= { attackers: [], blockers: [], blocked: [], choosing: [], assigned: [] };
-						combat.attackers.push({ id: token.id, incarnation: token.incarnation, ...structuredClone(change.attacking) });
-					}
-				}
+				enterAttacking(table, token, change.attacking);
 				break;
 			}
 			case "reveal": {
@@ -704,6 +697,18 @@ function enter(table: Table, object: Thing, change: { tapped?: true; counters?: 
 	if (entering.prepared) prepare(table, object);
 	for (const [kind, count] of Object.entries(entering.counters)) if (count > 0) object.counters[kind] = (object.counters[kind] ?? 0) + count;
 	if (Object.keys(object.counters).length) change.counters = { ...object.counters };
+}
+
+/** 506.3, 508.4: entry creates an attacker without declaring it or choosing a replacement defender. */
+function enterAttacking(table: Table, object: Thing, attack?: { defending: SeatId; to?: ObjectRef }): void {
+	if (!attack || object.controller !== table.cursor.active || STEPS[table.cursor.steps[0]!]?.phase !== "combat" || !playing(table).some(one => one.id === attack.defending && one.id !== object.controller)) return;
+	// Starting counters and entry terms can have changed its type within this group.
+	forget(table);
+	const traits = characteristics(table, object), target = attack.to && table.things.get(attack.to.id);
+	if (!traits?.types.includes("creature") || traits.types.includes("battle") || attack.to &&
+		!(target?.incarnation === attack.to.incarnation && target.zone === "battlefield" && target.controller === attack.defending && characteristics(table, target)?.types.includes("planeswalker"))) return;
+	const combat = table.combat ??= { attackers: [], blockers: [], blocked: [], choosing: [], assigned: [] };
+	combat.attackers.push({ id: object.id, incarnation: object.incarnation, ...structuredClone(attack) });
 }
 
 /** 722.3c: the designation creates one castable copy with its prepare face. */

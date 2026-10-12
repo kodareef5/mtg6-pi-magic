@@ -52,6 +52,7 @@ schemas, and every `basis` is checked against the card's text.
 | `damage-additions.md` | fixed damage increases, prevention ordering, affected-player choices and simultaneous results |
 | `additional-triggers.md` | additive trigger instances, equipped abilities and independent targets |
 | `modal-triggers.md` | Modal trigger choices, cast ordinals, remembered modes and odd/even entry choices |
+| `attacking-entry.md` | retain a returned attacker's defender and reveal a ninjutsu source until its ability leaves the stack |
 | `attacking-tokens.md` | choose each entering token's defender, create the group together, and sacrifice only those tokens at the next end step |
 | `spell-properties.md` | restriction words on the next matching cast, applied before responses, with expiry if unused |
 | `last-known.md` | exile before life changes, using a departed target's former controller |

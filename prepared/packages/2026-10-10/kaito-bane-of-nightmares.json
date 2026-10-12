@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "d2c665f5a9529329002c7bdbb02d172805047b6bed28538642e4eb207685bc65",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Kaito, Bane of Nightmares",
 		"registers": [
@@ -49,12 +48,9 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Activate ninjutsu from hand for {1}{U}{B}, revealing Kaito and returning an unblocked attacking creature you control to its owner's hand; put Kaito onto the battlefield tapped and attacking the same defender.",
+				"claim": "Activate Kaito's ninjutsu against the returned attacker's defender",
 				"basis": "Ninjutsu {1}{U}{B} ({1}{U}{B}, Return an unblocked attacker you control to hand: Put this card onto the battlefield from your hand tapped and attacking.)",
 				"source": {
 					"card": "Kaito, Bane of Nightmares",
@@ -63,8 +59,53 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
-			},
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{U}{B}",
+					"show": {
+						"choose": {
+							"is": "this",
+							"zones": [
+								"hand"
+							]
+						},
+						"count": 1,
+						"until": "leaves-stack"
+					},
+					"return": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"types": [
+								"creature"
+							],
+							"attacking": true,
+							"blocked": false
+						},
+						"count": 1,
+						"as": "returned"
+					}
+				},
+				"instructions": [
+					{
+						"do": "move",
+						"what": "this",
+						"to": "battlefield",
+						"tapped": true,
+						"controller": "you",
+						"attacking": {
+							"sameAs": "bound:returned"
+						},
+						"reason": "resolve"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
 			{
 				"claim": "Activate the +1 loyalty ability to get the Ninja-enhancing emblem, using loyalty timing and the shared once-per-turn loyalty restriction.",
 				"basis": "+1: You get an emblem with \"Ninjas you control get +1/+1.\"",

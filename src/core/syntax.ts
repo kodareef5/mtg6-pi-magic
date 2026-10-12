@@ -85,7 +85,7 @@ export type Change =
 	| { do: "move"; what: string; to: Zone; position?: "top" | "bottom"; reason: Reason; registers?: Registration[];
 		tapped?: true; counters?: Record<string, number>; controller?: SeatId; choices?: Record<string, string>; faceDown?: true | "manifest";
 		/** The controller's answer to the optional entry cost. Absent until that choice is settled. */
-		entry?: "paid" | "declined"; face?: 0 | 1; copied?: { source: ObjectRef; spec: TokenSpec } }
+		entry?: "paid" | "declined"; face?: 0 | 1; attacking?: { defending: SeatId; to?: ObjectRef }; copied?: { source: ObjectRef; spec: TokenSpec } }
 	/** A token made on the battlefield (111.1). */
 	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true; counters?: Record<string, number>;
 		choices?: Record<string, string>; entry?: "paid" | "declined"; attacking?: { defending: SeatId; to?: ObjectRef } }

@@ -90,8 +90,10 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if ("bound" in value && typeof value.bound === "string" && !bound.has(value.bound))
 				throw new Error(`bound:${value.bound} is used before an instruction binds it with "as".`);
 			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
-			const sacrifice = terms.cost?.sacrifice, sacrificeAs = typeof sacrifice === "object" && "as" in sacrifice ? sacrifice.as : undefined;
-			const resolutionBound = sacrificeAs ? new Set([...bound, sacrificeAs]) : bound;
+			const names = [terms.cost?.sacrifice, terms.cost?.return].flatMap(cost => typeof cost === "object" && "as" in cost && cost.as ? [cost.as] : []);
+			if (new Set(names).size !== names.length) throw new Error("Each selected cost needs a distinct binding name.");
+			const resolutionBound = names.length ? new Set([...bound, ...names]) : bound;
+			if (terms.kind === "mana" && terms.cost?.show?.until) throw new Error("A mana ability cannot retain a reveal on the stack.");
 			for (const cost of [terms.cost, terms.pays]) if (cost?.additional || cost?.alternative) {
 				if (terms.timing !== "spell") throw new Error("Named additional and alternative costs belong to a spell announcement, not an activation or resolving payment.");
 				if (cost.alternative && cost.mana === undefined) throw new Error("A named alternative cost states its mana price, including {0} when it has none.");
@@ -126,6 +128,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "pay" && instruction.cost.show?.until) throw new Error("A resolving payment cannot retain a reveal on the stack.");
 			if (instruction.do === "pay" && variableSacrifice(instruction.cost)) throw new Error("A resolving payment cannot select optional sacrifices for a casting reduction.");
 			if (instruction.do === "emblem" && instruction.registers.some(one => !["continuous", "watch"].includes(one.kind)))
 				throw new Error("Emblems currently carry continuous characteristic effects and triggered abilities only.");
