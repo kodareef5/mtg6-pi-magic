@@ -1,21 +1,26 @@
 /** A counter replacement changes one stack departure, never two zone changes. */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { start, commit } from "../src/core/commit.ts";
 import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
 import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
-import { checkProcedure, printedCast } from "../src/core/procedures.ts";
+import { checkProcedure, printedCast, procedureOptions } from "../src/core/procedures.ts";
+import { workFrame } from "../src/core/work-tools.ts";
 import { symbols } from "../src/core/announce.ts";
-import { announce, example, finish, main, passBoth, place, step } from "./play.ts";
+import { announce, finish, main, passBoth, place, step } from "./play.ts";
 
 test("a countered spell goes straight to its replacement destination, while payment or protection preserves it", () => {
-	const prepared = example("Cast No More Lies, exiling the countered spell unless its controller pays three mana");
+	const prepared = checkProcedure(JSON.parse(readFileSync("prepared/packages/2026-10-10/no-more-lies.json", "utf8")).package.procedures[0]);
 	const counter = checkProcedure({ ...prepared, instructions: [{ ...prepared.instructions[0]!, as: "countered" }] });
 	for (const choice of ["pay", "decline", "unfunded", "protected"] as const) {
 		const table = start(standard, [{ deck: alpha(deck("Azorius Control")) }, { deck: deck("Mono-Red Aggro") }], `counter-destination-${choice}`);
 		place(table, 0, "hand", "No More Lies"); const [nova] = place(table, 1, "hand", "Nova Hellkite");
+		main(table, 0);
+		commit(table, [{ do: "add-mana", who: 0, colors: ["W", "U"] }], "game-setup");
+		assert.equal(procedureOptions(counter, workFrame(table, 0), "counter-scope").length, 0, "players are not legal targets when there is no spell");
 		main(table, 1);
 		const mana = symbols(table.printed["Nova Hellkite"]!.mana)!;
 		commit(table, [{ do: "add-mana", who: 0, colors: ["W", "U"] },

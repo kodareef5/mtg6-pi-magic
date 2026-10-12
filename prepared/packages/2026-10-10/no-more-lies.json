@@ -3,13 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "2a0eeb6c49fe2bf68d03f488dc7d3c6b0ab2dab070f10b45e51a17b4da4df4c5",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "No More Lies",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast No More Lies to counter a spell unless its controller pays {3}, exiling that spell if countered this way.",
 				"basis": "Counter target spell unless its controller pays {3}. If that spell is countered this way, exile it instead of putting it into its owner's graveyard.",
@@ -22,8 +19,45 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{W}{U}"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"to": "exile",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{3}"
+							}
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }
