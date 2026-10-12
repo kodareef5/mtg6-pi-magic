@@ -28,6 +28,8 @@ export function totals(calls: readonly Spend[], now?: number) {
 		cacheRead, cacheWrite, reasoning: sum((call) => call.usage?.reasoning),
 		reasoningCalls: count((call) => measured(call) && call.usage?.reasoning !== undefined),
 		cost: sum((call) => call.usage?.cost?.total),
+		estimatedCost: sum((call) => call.usage?.costBasis === "list-estimate" ? call.usage.cost?.total : 0),
+		estimatedCostCalls: count((call) => call.usage?.costBasis === "list-estimate"),
 		missingCost: count((call) => !measured(call) || call.usage?.cost?.total === undefined),
 		callMs: sum(duration), activeMs: calls.every((call) => call.at !== undefined) ? activeMs : null,
 		medianMs: quantile(0.5), p95Ms: quantile(0.95),
@@ -90,6 +92,7 @@ export function bill(calls: readonly Spend[], now?: number): string[] {
 		...usage.models.map((one, i) => `M${i + 1} ${one.model}${one.thinking ? `:${one.thinking}` : ""} | ${one.calls} calls, ${one.input} in, ${one.output} out, ${duration(one.callMs)}, $${one.cost.toFixed(4)}`),
 		`calls     ${total.failed} failed  ${total.cancelled} cancelled  ${total.pending} pending  ${total.truncated} truncated; usage ${total.usageCalls}/${total.calls}`,
 		"tokens    in includes cache; think is reported output detail. Call time sums requests; active counts overlaps once.",
+		...(total.estimatedCostCalls ? [`estimates ${total.estimatedCostCalls} CLI calls contribute $${total.estimatedCost.toFixed(4)} at list prices. This is not measured subscription cash spend.`] : []),
 		...(total.missingUsage || total.missingCost ? [`unmetered ${total.missingUsage} calls lack usage; ${total.missingCost} lack cost. Token and cost totals cover reported usage only.`] : []),
 	];
 }

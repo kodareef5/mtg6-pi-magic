@@ -7,6 +7,7 @@
  *   node tools/guide.ts --deck "Izzet Spellementals" [--model gpt-6.1-sol:high] [--force]
  *   node tools/guide.ts --all        every web-sourced deck without a guide
  */
+import { claudeCli } from "../src/context/claude-cli.ts";
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parseArgs } from "node:util";
@@ -28,6 +29,7 @@ if (!wanted.length) throw new Error("Name decks with --deck, or --all for every 
 
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
+runtime.registerNativeProvider(claudeCli());
 const part = cast(rosterFor({ every: values.model ? { pregame: values.model } : {} }), { chat: await runtime.getAvailable(), classifiers: [] }).find((one) => one.role === "pregame")!;
 if (!part.model) throw new Error(`No pregame model: ${part.problem ?? part.pattern}`);
 const rules = loadRules(matchup.rules.path);

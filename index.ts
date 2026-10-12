@@ -15,6 +15,7 @@
  * shared game, roster and journal lifecycle can be read in one file.
  */
 
+import { claudeCli } from "./src/context/claude-cli.ts";
 import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -110,6 +111,7 @@ const inference = (ctx: ExtensionContext): Inference => ({
 });
 
 export default function (pi: ExtensionAPI) {
+	pi.registerProvider(claudeCli());
 	let table: Table | null = null;
 	let seated: Seated | null = null;
 	let running = false;

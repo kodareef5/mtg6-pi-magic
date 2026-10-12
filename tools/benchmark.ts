@@ -2,6 +2,7 @@
 /** Saved decision probes. Default is offline validation; --live spends on explicit model comparisons.
  * A matching property is a narrow regression result, never a gameplay-strength score.
  * Past 150 lines so input validation, model accounting and result saving share one runner. */
+import { claudeCli } from "../src/context/claude-cli.ts";
 import { readFileSync, mkdirSync, writeFileSync, appendFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -114,6 +115,7 @@ if (!values.live) process.exit(0);
 
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
+runtime.registerNativeProvider(claudeCli());
 const available = { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") };
 const parts = cast(rosterFor({ every: { ...(values.strategy ? { strategy: values.strategy } : {}), summary: "off" } }), available);
 const jev = parts.find((one) => one.role === "decide")!, luna = parts.find((one) => one.role === "strategy")!, judging = parts.find((one) => one.role === "judge")!;

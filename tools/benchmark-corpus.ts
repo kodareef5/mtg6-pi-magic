@@ -12,6 +12,7 @@
  * on the play; gold labels say which answers carry out the plan or the rules.
  * Past 150 lines so extraction, running and reporting share one item format.
  */
+import { claudeCli } from "../src/context/claude-cli.ts";
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, globSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
@@ -123,6 +124,7 @@ async function run(items: Item[], repeat: number, limit: number, out: string, ar
 	const { cast, rosterFor } = await import("../src/context/roles.ts");
 	const { tally } = await import("../src/context/spend.ts");
 	const runtime = await ModelRuntime.create();
+	runtime.registerNativeProvider(claudeCli());
 	const jev = cast(rosterFor({ every: { summary: "off" } }), { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") }).find((one) => one.role === "decide")!;
 	if (!jev.model || jev.model.type !== "classifier") throw new Error(jev.problem ?? "Jev does not resolve to a classifier.");
 	if (existsSync(join(out, "results.jsonl"))) throw new Error("Choose a fresh --out directory.");

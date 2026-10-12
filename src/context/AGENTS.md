@@ -31,6 +31,12 @@ and `reason.ts` (chat) are the two adapters, and neither holds an endpoint or a
 key. The classifier vocabulary is Pi's own, not a
 copy of Pi's, because a second definition of the same shape drifts.
 
+`claude-cli.ts` is an explicit Pi provider for the installed `claude -p`. The
+CLI owns its login. It receives only the supplied transcript, has no built-in
+or MCP tools, and returns proposed tool calls for the existing reasoner to
+validate. Never substitute it after another provider fails. CLI list-price
+estimates are labelled separately from subscription cash spend.
+
 A pattern that does not resolve is reported. Do not fall back to another model,
 including Pi's configured default: a game played by a model nobody chose is a
 result that cannot be compared with another.

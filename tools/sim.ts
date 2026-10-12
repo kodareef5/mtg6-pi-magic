@@ -21,18 +21,20 @@ import { admittedAlpha } from "../src/core/packages.ts";
 const { values: a } = parseArgs({ options: {
 	games: { type: "string", default: "20" }, arm: { type: "string", default: "baseline" }, "seed-base": { type: "string" },
 	source: { type: "string", default: ".pi/resume-20261007/scoped-full-game/next-version-gate-20261005-1791339573156.jsonl" },
-	strategy: { type: "string" }, green: { type: "string" }, red: { type: "string" }, jobs: { type: "string", default: "2" },
+	claude: { type: "boolean" }, judge: { type: "string" }, strategy: { type: "string" }, green: { type: "string" }, red: { type: "string" }, jobs: { type: "string", default: "2" },
 	random: { type: "string" }, pool: { type: "string" }, alpha: { type: "boolean", default: false },
 	turns: { type: "string", default: "40" }, stall: { type: "string", default: "300" }, out: { type: "string", default: ".pi/sim" },
 	report: { type: "string" }, "seeds-only": { type: "boolean", default: false }, help: { type: "boolean", short: "h" } } });
 if (a.help) {
-	console.log(`usage: sim.ts [--games N] [--arm NAME] [--seed-base S] [--source V0.jsonl] [--random N [--pool A,B,C]] [--strategy P] [--green P] [--red P] [-j 2] [--out DIR]
+	console.log(`usage: sim.ts [--games N] [--arm NAME] [--seed-base S] [--source V0.jsonl] [--random N [--pool A,B,C]] [--claude] [--strategy P] [--judge P] [--green P] [--red P] [-j 2] [--out DIR]
        sim.ts --report DIR/ARM
 
   --games N        fresh seeds; odd ones seat Red first, so each list is on the play half the time
   --arm NAME       results land in OUT/NAME; the seeds in OUT/seeds, shared by every arm
   --seed-base S    seeds are S-0, S-1, ...; defaults to the clock
   --source J       the finished version-zero journal whose card assessments and briefs every game carries
+  --claude         strategy and judge use Haiku 5.5 medium through the signed-in Claude CLI
+  --judge P        this arm's judge model pattern
   --strategy P     this arm's strategy model pattern, such as gpt-6.1-sol:high
   --random N       N fresh games on seeded random pairings from the pool instead of carried seeds; each pairing's first-named
                    deck is on the play, and odd games swap. Setup interprets cards and writes briefs live (stored packages first)
@@ -95,7 +97,7 @@ function playOne(record: Record_, dir: string, options: { turns: string; stall: 
 	const log = join(dir, `${record.seed}.log`), out = join(dir, record.seed);
 	mkdirSync(out, { recursive: true });
 	const args = ["tools/matchup.ts", ...(record.decks ? ["--decks", record.decks.join(","), "--seed", record.seed] : ["--resume", record.path, "--version", "0"]), "--turns", options.turns, "--out", out,
-		...(a.alpha ? ["--alpha"] : []),
+		...(a.alpha ? ["--alpha"] : []), ...(a.claude ? ["--claude"] : []), ...(a.judge ? ["--judge", a.judge] : []),
 		...(options.strategy ? ["--strategy", options.strategy] : []), ...(options.green ? ["--green", options.green] : []), ...(options.red ? ["--red", options.red] : [])];
 	return new Promise((resolve) => {
 		const fd = openSync(log, "a"), startedAt = Date.now();
@@ -135,7 +137,7 @@ function randomGames(base: string, n: number, pool: string[], dir: string): Reco
 	return records;
 }
 
-type Row = { seed: string; onPlay: string; winner: string; turn: number; wallMin: number; cost: number | null; strategyCalls: number; decideCalls: number;
+type Row = { seed: string; onPlay: string; winner: string; turn: number; wallMin: number; cost: number | null; estimatedCost?: number; strategyCalls: number; decideCalls: number;
 	waitMin: number | null; help: number; gaps: number; replay: string; stalled: boolean; funding: string[]; plan?: Adherence };
 
 /** Read one game's saved result. Funding problems are read from the failed calls, so a run short of credit says so. */
@@ -152,13 +154,13 @@ function summarizeGame(dir: string, swapped: boolean): Row {
 	const journal = readdirSync(dir).find((name) => name.endsWith(".jsonl") && !name.endsWith(".calls.jsonl"));
 	let plan: Adherence | undefined;
 	try { plan = journal ? adherence(join(dir, journal)) : undefined; } catch { /* a torn or foreign journal reports no adherence */ }
-	return { seed, onPlay: seats[0]?.name ?? "?", winner, turn: result.turn, wallMin: result.elapsedMs / 60_000, cost: result.llm?.total.cost ?? null, ...(plan ? { plan } : {}),
+	return { seed, onPlay: seats[0]?.name ?? "?", winner, turn: result.turn, wallMin: result.elapsedMs / 60_000, cost: result.llm?.total.cost ?? null, estimatedCost: result.llm?.total.estimatedCost ?? 0, ...(plan ? { plan } : {}),
 		strategyCalls: role("strategy"), decideCalls: role("decide"), waitMin: result.planned ? result.planned.reduce((sum, one) => sum + one.waitedMs, 0) / 60_000 : null,
 		help: result.interruptions?.help ?? 0, gaps: result.gaps.length, replay: result.replayMatches === undefined ? "?" : result.replayMatches ? "yes" : "NO", stalled: !!run?.stalled, funding };
 }
 
 const line = (row: Row) => `${row.seed.padEnd(22)} play ${row.onPlay.padEnd(5)} ${row.winner.padEnd(9)} T${String(row.turn).padStart(2)}  ${row.wallMin.toFixed(1).padStart(5)}m  ` +
-	`$${(row.cost ?? 0).toFixed(2)}  strategy ${String(row.strategyCalls).padStart(3)}  jev ${String(row.decideCalls).padStart(3)}  wait ${row.waitMin === null ? "?" : row.waitMin.toFixed(1) + "m"}  help ${row.help}  gaps ${row.gaps}  plan ${row.plan ? `${row.plan.onPlan}/${row.plan.due}` : "?"}  replay ${row.replay}${row.stalled ? "  STALLED" : ""}${row.funding.length ? "  FUNDING: " + row.funding[0] : ""}`;
+	`$${(row.cost ?? 0).toFixed(2)}${row.estimatedCost ? " (includes CLI estimate)" : ""}  strategy ${String(row.strategyCalls).padStart(3)}  jev ${String(row.decideCalls).padStart(3)}  wait ${row.waitMin === null ? "?" : row.waitMin.toFixed(1) + "m"}  help ${row.help}  gaps ${row.gaps}  plan ${row.plan ? `${row.plan.onPlan}/${row.plan.due}` : "?"}  replay ${row.replay}${row.stalled ? "  STALLED" : ""}${row.funding.length ? "  FUNDING: " + row.funding[0] : ""}`;
 
 const median = (xs: number[]) => { const s = [...xs].sort((p, q) => p - q); return s.length ? s[Math.floor((s.length - 1) / 2)]! : 0; };
 
@@ -180,6 +182,7 @@ function summarizeArm(dir: string): { rows: Row[]; markdown: string[] } {
 		`| Median turns | ${median(finished.map((row) => row.turn))} |`, `| Median wall | ${median(finished.map((row) => row.wallMin)).toFixed(1)} min |`,
 		`| Median strategy wait | ${median(finished.flatMap((row) => row.waitMin === null ? [] : [row.waitMin])).toFixed(1)} min |`,
 		`| Median cost / total | $${median(costs).toFixed(2)} / $${costs.reduce((sum, cost) => sum + cost, 0).toFixed(2)} |`,
+		...(rows.some((row) => row.estimatedCost) ? [`| Included CLI list-price estimates, not subscription cash spend | $${rows.reduce((sum, row) => sum + (row.estimatedCost ?? 0), 0).toFixed(4)} |`] : []),
 		`| Median strategy calls / Jev calls | ${median(finished.map((row) => row.strategyCalls))} / ${median(finished.map((row) => row.decideCalls))} |`,
 		`| Plan adherence: on plan / due, passed over, deviated | ${["onPlan", "due", "passedOver", "deviated"].map((key) => rows.reduce((sum, row) => sum + (row.plan?.[key as keyof Adherence] ?? 0), 0)).reduce((text, n, i) => i === 1 ? `${text} / ${n}` : i === 2 ? `${text}, ${n}` : i === 3 ? `${text}, ${n}` : String(n), "")} |`,
 		`| Help requests, total | ${rows.reduce((sum, row) => sum + row.help, 0)} |`, `| Gaps, total | ${rows.reduce((sum, row) => sum + row.gaps, 0)} |`,
@@ -212,7 +215,7 @@ console.log(a.random ? `${records.length} random pairings from ${pool.length} de
 if (a["seeds-only"]) process.exit(0);
 const arm = join(a.out!, a.arm!);
 mkdirSync(arm, { recursive: true });
-writeFileSync(join(arm, "arm.json"), JSON.stringify({ arm: a.arm, strategy: a.strategy ?? "roster default", ...(a.green ? { green: a.green } : {}), ...(a.red ? { red: a.red } : {}), turns: a.turns, jobs, seeds: base, games, startedAt: new Date().toISOString() }, null, 2) + "\n");
+writeFileSync(join(arm, "arm.json"), JSON.stringify({ arm: a.arm, claude: a.claude ?? false, judge: a.judge ?? (a.claude ? "claude-cli/claude-haiku-5-5:medium" : "roster default"), strategy: a.strategy ?? (a.claude ? "claude-cli/claude-haiku-5-5:medium" : "roster default"), ...(a.green ? { green: a.green } : {}), ...(a.red ? { red: a.red } : {}), turns: a.turns, jobs, seeds: base, games, startedAt: new Date().toISOString() }, null, 2) + "\n");
 console.log(`Playing ${games} games into ${arm}, ${jobs} at a time${a.strategy ? `, strategy ${a.strategy}` : ""}${a.green ? `, Green on ${a.green}` : ""}${a.red ? `, Red on ${a.red}` : ""}`);
 let next = 0;
 await Promise.all(Array.from({ length: jobs }, async () => {

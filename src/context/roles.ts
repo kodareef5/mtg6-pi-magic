@@ -5,8 +5,8 @@
  * credentials and the model catalogue, which is most of why this is a Pi package
  * rather than a program with a config file. So a role here is a Pi model
  * pattern and nothing else: the same string a person types at `/model`, an id
- * with an optional thinking level after a colon. No endpoint, no key and no
- * provider name is written anywhere in this repo.
+ * with an optional thinking level after a colon. No endpoint or credential is
+ * written in this repo. The explicit CLI provider delegates login to Claude.
  *
  * Five parts, because they want different models. A pregame plan is read once
  * and shapes a whole game, so it is worth a slow model. A turn decision happens

@@ -10,6 +10,7 @@
 // already configured in Pi works here with nothing repeated. No endpoint and no
 // key is read in this repo.
 // Past 150 lines so runtime setup, trace capture and journal lifecycle stay together.
+import { claudeCli } from "../src/context/claude-cli.ts";
 import { appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
@@ -72,6 +73,7 @@ if (a.help) {
 
 const seed = a.seed ?? String(Date.now());
 const runtime = await ModelRuntime.create();
+runtime.registerNativeProvider(claudeCli());
 const every: Crew["every"] = {};
 for (const role of ["decide", "pregame", "summary", "strategy"] as Role[]) {
 	const asked = a[role as "decide" | "pregame" | "summary" | "strategy"];

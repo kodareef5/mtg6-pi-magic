@@ -4,6 +4,7 @@
  * the plan. --prepare saves version zero without playing. A run stops at an
  * outcome, the first gap, or --turns.
  */
+import { claudeCli, CLAUDE_PATTERN } from "../src/context/claude-cli.ts";
 import { mkdirSync, appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
@@ -23,7 +24,7 @@ import { load as loadRules } from "../src/core/rules.ts";
 const { values } = parseArgs({ options: { seed: { type: "string", default: "real-standard-9" }, out: { type: "string", default: ".pi/real-standard" },
 	turns: { type: "string", default: "40" }, prepare: { type: "boolean", default: false }, resume: { type: "string" }, version: { type: "string" },
 	/** Model patterns for a role this run only, such as gpt-6.1-sol:high. */
-	pregame: { type: "string" }, strategy: { type: "string" },
+	pregame: { type: "string" }, strategy: { type: "string" }, judge: { type: "string" }, claude: { type: "boolean" },
 	/** A strategy pattern for the seat playing that list alone, so one roster can face another. */
 	green: { type: "string" }, red: { type: "string" },
 	/** Two collection decks by name, comma separated, for a fresh game; the first named is on the play. */
@@ -32,7 +33,8 @@ if (values.version && (!values.resume || !/^\d+$/.test(values.version))) throw n
 if (values.alpha && (!values.decks || values.resume)) throw new Error("--alpha needs --decks for a new sideboardless game. A resumed journal owns its registered lists.");
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
-const every = { summary: "off", ...(values.pregame ? { pregame: values.pregame } : {}), ...(values.strategy ? { strategy: values.strategy } : {}) };
+runtime.registerNativeProvider(claudeCli());
+const every = { summary: "off", ...(values.claude ? { strategy: CLAUDE_PATTERN, judge: CLAUDE_PATTERN } : {}), ...(values.judge ? { judge: values.judge } : {}), ...(values.pregame ? { pregame: values.pregame } : {}), ...(values.strategy ? { strategy: values.strategy } : {}) };
 const catalogue = { chat: await runtime.getAvailable(), classifiers: await runtime.getAvailableOfType("classifier") };
 const parts = cast(rosterFor({ every }), catalogue);
 const inference = { classify: (model: never, request: never, options: never) => runtime.classify(model, request, options),

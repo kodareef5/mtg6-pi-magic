@@ -6,6 +6,7 @@
  *
  *   npm run pregame -- --decks "Mono-Green Landfall,Mono-Red Aggro" --model gpt-6.1-sol:high
  */
+import { claudeCli } from "../src/context/claude-cli.ts";
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
@@ -26,6 +27,7 @@ const names = values.decks!.split(",").map((name) => name.trim());
 if (names.length !== 2) throw new Error("--decks names two decks from decks/collection, separated by a comma.");
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
+runtime.registerNativeProvider(claudeCli());
 const part = cast(rosterFor({ every: values.model ? { pregame: values.model } : {} }), { chat: await runtime.getAvailable(), classifiers: [] })
 	.find((one) => one.role === "pregame")!;
 if (!part.model) throw new Error(`No pregame model: ${part.problem ?? part.pattern}`);

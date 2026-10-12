@@ -72,7 +72,7 @@ export type Spend = {
 	prompt?: string;
 	/** Requested output limit. Some routes price against it; others ignore it. */
 	ceiling: number;
-	usage?: Usage;
+	usage?: Usage & { costBasis?: "list-estimate" };
 	/** The provider reported a length stop. */
 	truncated?: boolean;
 	/** Set when the call failed. The caller decides what that means. */

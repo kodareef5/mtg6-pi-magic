@@ -6,6 +6,7 @@
  *
  *   node tools/assess.ts [--deck NAME ...] [--model gpt-6.1-sol:high] [--jobs 4] [--retry]
  */
+import { claudeCli } from "../src/context/claude-cli.ts";
 import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -73,6 +74,7 @@ if (values.refresh) {
 
 const { ModelRuntime } = await import("@earendil-works/pi-coding-agent");
 const runtime = await ModelRuntime.create();
+runtime.registerNativeProvider(claudeCli());
 const part = cast(rosterFor({ every: values.model ? { pregame: values.model } : {} }), { chat: await runtime.getAvailable(), classifiers: [] }).find((one) => one.role === "pregame")!;
 if (!part.model) throw new Error(`No pregame model: ${part.problem ?? part.pattern}`);
 const rules = loadRules(matchup.rules.path);
