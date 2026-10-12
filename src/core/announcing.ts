@@ -1,9 +1,10 @@
 /** Recorded parameter choices for an unconfirmed announcement. No priority,
- * trigger placement or resource spending occurs between these decisions. */
+ * trigger placement or resource spending occurs between these decisions.
+ * Past 150 lines so every stage and its back/cancel path stay together. */
 import { commit } from "./commit.ts";
 import { project } from "./view.ts";
 import { aiming, targetCandidates } from "./announce.ts";
-import { affordableCosts, announcedActivation, announcementBases, announcementPayments, canAnnounce, type Announcement } from "./announcement-options.ts";
+import { affordableCosts, announcedActivation, announcementBases, announcementPayments, canAfford, canAnnounce, type Announcement } from "./announcement-options.ts";
 import { paymentOptions } from "./payment-options.ts";
 import { targetBounds } from "./targeting.ts";
 import { amount, targetKey } from "./selectors.ts";
@@ -11,6 +12,7 @@ import type { LedgerRow, Table } from "./table.ts";
 import type { Frame } from "./types.ts";
 import type { Move, Pending } from "./moves.ts";
 import { manaLabel } from "./mana-cost.ts";
+import { paymentReservations, sacrificePool, variableSacrifice } from "./sacrifice-costs.ts";
 import { tapObjects } from "./funding.ts";
 
 export function beginAnnouncement(table: Table, draft: Announcement, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">): void {
@@ -95,15 +97,37 @@ export function announcing(table: Table): Pending | null {
 		const previous = divisions[divisions.indexOf(dividing) - 1];
 		choose("announce:back", previous ? "Return to the previous assigned amount" : "Return to the last target group",
 			previous ? unassign(previous.group, previous.at) : rewindTargets());
+	} else if (variableSacrifice(draft.procedure.cost) && !draft.sacrificesDone) {
+		preparing = { stage: "sacrifices" };
+		const selected = draft.sacrifices ?? [], pool = sacrificePool({ ...base.scope, targets: draft.targets }, draft.procedure.cost);
+		const name = (id: string) => { const one = pool.find(one => one.id === id); return `${one?.card ?? one?.token?.name ?? id} (${id})`; };
+		question += ` Choose any number of matching controlled permanents to sacrifice. Each reduces generic mana by ${variableSacrifice(draft.procedure.cost)!.reduce}. Selected: ${selected.map(one => name(one.id)).join("; ") || "none"}. Nothing moves until confirmation.`;
+		for (const one of pool) {
+			if (selected.some(ref => ref.id === one.id)) continue;
+			const sacrifices = [...selected, { id: one.id, incarnation: one.incarnation }];
+			if (!canAfford(base, frame, draft.targets, sacrifices)) continue;
+			choose(`announce:sacrifice:${one.id}`, `Select ${name(one.id)} for sacrifice`, { ...draft, sacrifices });
+			moves.at(-1)!.option.objects!.push(sacrifices.at(-1)!);
+		}
+		for (const one of selected) choose(`announce:unsacrifice:${one.id}`, `Remove ${name(one.id)} from the sacrifices`, { ...draft, sacrifices: selected.filter(ref => ref.id !== one.id) });
+		if (affordableCosts(base, frame, draft.targets, selected).length)
+			choose("announce:sacrifices-done", `Finish selecting sacrifices (${selected.length}); choose the locked cost next`, { ...draft, sacrificesDone: true });
+		const earlier = { ...draft, sacrifices: undefined };
+		const last = divisions.at(-1);
+		if (last) choose("announce:back", "Return to the last assigned amount", { ...unassign(last.group, last.at), sacrifices: undefined });
+		else if (draft.targets.length) choose("announce:back", "Return to the last target group", { ...rewindTargets(), sacrifices: undefined });
+		else if (base.hybrid !== undefined) choose("announce:back", "Return to choosing hybrid symbols", { ...earlier, hybrid: undefined });
+		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...earlier, x: undefined });
 	} else if (!draft.cost) {
 		question += " Choose the additional resources and lock the cost.";
-		for (const [at, cost] of affordableCosts(base, frame, draft.targets).entries()) {
+		for (const [at, cost] of affordableCosts(base, frame, draft.targets, draft.sacrifices).entries()) {
 			choose(`announce:cost:${at}`, `Lock cost: ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. ${cost.extra.shows || "No additional resources."}`, { ...draft, cost });
 			moves.at(-1)!.option.objects!.push(...cost.extraRefs);
 			moves.at(-1)!.option.spends = [...cost.extraRefs, ...(cost.cost.tap ? [draft.source] : []), ...(cost.cost.counters?.on ?? []), ...(cost.cost.shown ?? [])];
 		}
 		const last = divisions.at(-1);
-		if (last) choose("announce:back", "Return to the last assigned amount", unassign(last.group, last.at));
+		if (draft.sacrificesDone) choose("announce:back", "Return to choosing sacrifices", { ...draft, sacrificesDone: undefined });
+		else if (last) choose("announce:back", "Return to the last assigned amount", unassign(last.group, last.at));
 		else if (draft.targets.length) choose("announce:back", "Return to the last target group", rewindTargets());
 		else beforeTargets();
 	} else {
@@ -114,7 +138,8 @@ export function announcing(table: Table): Pending | null {
 			moves.push(...complete.map(one => ({ ...one, changes: [], reason: "announcement" as const })));
 			choose("announce:individual", "Choose mana sources individually; spend nothing yet", { ...draft, paymentMode: "individual" });
 		} else {
-			const cost = draft.cost, menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, new Set(cost.extra.uses), base.spending, base.castFrom);
+			const cost = draft.cost, { except, leaving } = paymentReservations(cost);
+			const menu = paymentOptions(frame, { ...cost.price, life: cost.extra.paid.life }, draft.payment, except, base.spending, base.castFrom, leaving);
 			preparing = { stage: "mana", selected: menu.chosen.map((one) => one.label), remainingMana: menu.remainingMana, missingColors: menu.missingColors, ready: menu.complete };
 			question += ` Select mana sources one at a time for ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. Selected: ${preparing.selected!.join("; ") || "none"}. Still needs ${menu.remainingMana} mana${menu.missingColors.length ? `, including ${menu.missingColors.map((color) => `{${color}}`).join("")}` : ""}.`;
 			for (const part of menu.next) {

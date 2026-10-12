@@ -167,13 +167,13 @@ function manaSources(frame: Frame, except: ReadonlySet<string>): Unit[] {
  * `spending` is the spell as it will be on the stack, or an activation's source
  * in its actual zone. Restricted mana is used only when it matches.
  */
-export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone, maximum = Infinity): Unit[] {
+export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone, maximum = Infinity, leaving: ReadonlySet<string> = new Set()): Unit[] {
 	const allowed = (terms: Pick<Mana, "spendOnly" | "spendFrom">) => spendable(terms, { world: viewWorld(frame.view), controller: frame.seat, source: spending }, spending, from);
 	const pool = (frame.view.pools?.find((entry) => entry.seat === frame.seat)?.mana ?? []).filter(allowed)
 		.map((mana): Unit => ({ key: `pool|${mana.color}|${manaDuration(mana)}|${JSON.stringify(mana.spendOnly ?? null)}|${JSON.stringify(mana.spellWords ?? null)}${mana.spendFrom ? `|from:${mana.spendFrom.join(",")}` : ""}`, id: mana.id, pool: mana, yields: [{ colors: [mana.color], claim: "floating mana" }],
 			label: `{${mana.color}} (${mana.id}, ${manaDuration(mana)}${mana.spendOnly ? ", restricted" : ""}${mana.spendFrom ? `, only spells cast from ${mana.spendFrom.join(" or ")}` : ""}${mana.spellWords?.length ? `, grants ${mana.spellWords.join(", ")}` : ""})` }));
 	const sources = manaSources(frame, except).flatMap(unit => {
-		const yields = unit.yields.filter(allowed);
+		const yields = unit.yields.filter(one => allowed(one) && !(one.sacrifice && leaving.has(unit.id)));
 		if (!frame.view.excessMana || !yields.some(one => one.colors.length > 1)) return yields.length ? [{ ...unit, yields }] : [];
 		const groups = new Map<string, Yield[]>();
 		for (const one of yields.flatMap(one => partialOutputs(one, maximum))) {
@@ -186,7 +186,7 @@ export function paymentUnits(frame: Frame, except: ReadonlySet<string> = new Set
 	// An otherwise identical land is not interchangeable when another ability
 	// names its physical object as part of a selected tap cost.
 	const shared = new Set(sources.flatMap(unit => unit.yields.flatMap(one => one.tapped?.map(one => one.id) ?? [])));
-	return [...pool, ...sources.map(unit => shared.has(unit.id) ? { ...unit, key: `${unit.key}|shared:${unit.id}` } : unit)];
+	return [...pool, ...sources.map(unit => ({ ...unit, key: unit.key + (leaving.has(unit.id) ? "|leaving" : "") + (shared.has(unit.id) ? `|shared:${unit.id}` : "") }))];
 }
 
 /** Historical complete payments, also used to check staged payment coverage. */

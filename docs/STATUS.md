@@ -13,14 +13,14 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 18 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator, Dimir Midrange, Mono-Black Aggro, 4c Reanimator, Azorius Momo, Lifegain, Jund Sacrifice |
-| Completed source-reviewed alpha games | 29, covering nine admitted decks; Bant, Jeskai, both Dimir lists, Mono-Black, Reanimator, Momo, Lifegain and Jund await their first finishes; Jund still needs Viper's deferred casting cost |
+| Completed source-reviewed alpha games | 29, covering nine admitted decks; Bant, Jeskai, both Dimir lists, Mono-Black, Reanimator, Momo, Lifegain and Jund await their first finishes |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Two saved continuations stopped on provider credits; corrected Sleight of Hand passed local replay and awaits a live continuation |
-| Recent shared mechanics | Healing earlier damage while preserving simultaneous hits and prevention choices; private choices before one group |
+| Recent shared mechanics | Optional casting sacrifices reduce generic costs before mana payment; healing preserves simultaneous damage |
 | Stored card assessments | 281 accepted, 27 refused, five basic lands; Mardu is the last main deck with standing blockers |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 309 invariant tests pass |
+| Validation | Type check and 310 invariant tests pass |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded |
 | Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |

@@ -29,6 +29,7 @@ import type { SeenObject } from "./work.ts";
 import { manaChoices } from "./mana-cost.ts";
 import { tapsSource, tapChoices } from "./tap-costs.ts";
 import { subsets } from "./subsets.ts";
+import { sacrificePool, variableSacrifice } from "./sacrifice-costs.ts";
 export { subsets } from "./subsets.ts";
 export { symbols } from "./mana-cost.ts";
 
@@ -155,7 +156,7 @@ export function targetConflicts(targets: Chosen[], world: World, controller: Sea
 
 /** The extra costs a procedure states, as each way they can be paid. */
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; reduce?: number; exileSelection?: Activation["exileSelection"] };
-export function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame): Way[] {
+export function extras(procedure: Procedure, scope: Scope, source: SeenObject, frame: Frame, sacrifices?: ObjectRef[]): Way[] {
 	const cost = procedure.cost ?? {};
 	if (cost.loyalty !== undefined && cost.counters?.kind === "loyalty") return [];
 	let ways: Way[] = [{ paid: {}, uses: [], consumes: [], shows: "" }];
@@ -187,6 +188,14 @@ export function extras(procedure: Procedure, scope: Scope, source: SeenObject, f
 	for (const kind of ["sacrifice", "return"] as const) {
 		const payment = cost[kind];
 		if (!payment) continue;
+		if (typeof payment === "object" && "any" in payment) {
+			if (!sacrifices || new Set(sacrifices.map(one => one.id)).size !== sacrifices.length) return [];
+			const pool = sacrificePool(scope, cost), chosen = sacrifices.map(ref => pool.find(one => one.id === ref.id && one.incarnation === ref.incarnation));
+			if (chosen.some(one => !one)) return [];
+			add([{ paid: { sacrificed: sacrifices, sacrificeReduction: sacrifices.length * payment.reduce }, uses: sacrifices.map(one => one.id), consumes: sacrifices.map(one => one.id),
+				reduce: sacrifices.length * payment.reduce, shows: chosen.length ? `Sacrifice ${chosen.map(one => name(one!)).join(", ")}; reduce generic mana by ${chosen.length * payment.reduce}. ` : "Sacrifice no permanents. " }]);
+			continue;
+		}
 		const chosen = typeof payment === "object" && "choose" in payment ? payment : undefined;
 		const pool = chosen ? query({ zones: ["battlefield"], controller: "self" }, frame).filter((one) => matches(scope, one, chosen.choose))
 			: objects(scope, payment as Exclude<typeof payment, { choose: unknown }>).filter((one) => one.zone === "battlefield" && one.controller === frame.seat);
@@ -270,8 +279,9 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 				const tapReduction = typeof procedure.cost?.tap === "object" && procedure.cost.tap.reduce ? (frame.view.objects ?? [])
 					.filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).reduce((sum, one) => sum + Math.max(0, one.traits?.power ?? 0), 0) : 0;
 				// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
+				const sacrificeBound = sacrificePool(scope, procedure.cost).length * (variableSacrifice(procedure.cost)?.reduce ?? 0);
 				const action = costAction(procedure), standingBound = action ? maximumReduction(world, action) : 0;
-				const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction + standingBound - mana.colors.length) + 1 }, (_, at) => at) : [0];
+				const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction + sacrificeBound + standingBound - mana.colors.length) + 1 }, (_, at) => at) : [0];
 				// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
 				const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 					.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
@@ -294,7 +304,7 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 export type OfferBase = ReturnType<typeof offerBases> extends Generator<infer Basis> ? Basis : never;
 
 /** Extra resources and the locked mana price share one calculation in both menus. */
-export function offerCosts(base: OfferBase, frame: Frame) {
+export function offerCosts(base: OfferBase, frame: Frame, sacrifices?: ObjectRef[]) {
 	const { procedure, scope, source, reduce, world, spending, original, mana, x } = base;
 	const action = costAction(procedure);
 	// A proposed spell already has its selected targets at 601.2f. This preview
@@ -303,7 +313,7 @@ export function offerCosts(base: OfferBase, frame: Frame) {
 		timing: procedure.timing, cost: { generic: 0, colors: [] }, paid: [], targets: scope.targets ?? [], slots: base.slots, instructions: procedure.instructions } };
 	const life = action ? costAdjustment(world, proposed, original.zone, action, "life") : 0;
 	const stated = life ? { ...procedure, cost: { ...procedure.cost, life: (procedure.cost?.life ?? 0) + life } } : procedure;
-	return extras(stated, scope, source, frame).map((extra) => {
+	return extras(stated, scope, source, frame, sacrifices).map((extra) => {
 		if (life) extra.shows += `Includes ${life} life from standing costs. `;
 		const reduction = reduce + (extra.reduce ?? 0) + (action ? costAdjustment(world, proposed, original.zone, action) : 0);
 		const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };

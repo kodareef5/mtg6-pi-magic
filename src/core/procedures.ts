@@ -4,6 +4,7 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
+import { variableSacrifice } from "./sacrifice-costs.ts";
 import { targetBounds, validDivision } from "./targeting.ts";
 import { costChanges } from "./costs.ts";
 import { announcedActivation, announcementPayments } from "./announcement-options.ts";
@@ -58,6 +59,7 @@ export function isPrintedCast(procedure: Procedure, card: string, printed: Print
 export function checkProcedure(value: unknown): Procedure {
 	const procedure = check(ProcedureSchema, value, "Procedure");
 	checkSpecial(procedure);
+	if (variableSacrifice(procedure.cost) && procedure.timing !== "spell") throw new Error("Optional sacrifice reductions currently belong to spell announcements.");
 	if (procedure.cost?.loyalty !== undefined && procedure.timing !== "stack") throw new Error("A loyalty-symbol cost belongs to a stack activation, never a spell, land play or mana ability.");
 	if (typeof procedure.cost?.tap === "object" && procedure.cost.tap.upTo && procedure.cost.tap.totalPower !== undefined)
 		throw new Error("An optional bounded tap cost cannot also require a total power.");
@@ -121,6 +123,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "pay" && variableSacrifice(instruction.cost)) throw new Error("A resolving payment cannot select optional sacrifices for a casting reduction.");
 			if (instruction.do === "emblem" && instruction.registers.some(one => !["continuous", "watch"].includes(one.kind)))
 				throw new Error("Emblems currently carry continuous characteristic effects and triggered abilities only.");
 			if (instruction.do === "permit" && instruction.while) checkOngoingCondition(instruction.while);
@@ -232,7 +235,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		manaSplit(tap);
 		const mana = live(table, tap.source);
 		if (!mana || mana.zone !== "battlefield" || mana.controller !== controller || mana.tapped || sick(table, mana)) throw new Error("A mana source in the payment is unavailable.");
-		for (const ref of tap.tapped ?? []) if (own(ref, "battlefield").tapped || consumed.includes(ref.id))
+		for (const ref of tap.tapped ?? []) if (own(ref, "battlefield").tapped || consumed.includes(ref.id) && !(cost.sacrificeReduction !== undefined && cost.sacrificed?.some(one => one.id === ref.id)))
 			throw new Error("A permanent selected for a mana ability's tap cost is unavailable.");
 		if (activationRestrictions(world, mana, true).length) throw new Error("A mana source in the payment cannot activate its ability.");
 		const made = characteristics(table, mana);
@@ -251,10 +254,11 @@ export function activationChanges(table: Table, activation: Activation): Change[
 		// Whoever casts or plays it controls it, though another seat may own it (110.2, 305.2).
 		...(activation.timing === "spell" ? [{ do: "move" as const, what: source.id, to: "stack" as const, reason: "cast" as const, controller, ...(activation.face !== undefined ? { face: activation.face } : {}) }] : []),
 		...(activation.timing === "land" ? [{ do: "move" as const, what: source.id, to: "battlefield" as const, reason: "play-land" as const, controller }] : []),
-		...costChanges(cost, source, controller),
+		...(cost.sacrificeReduction === undefined ? costChanges(cost, source, controller) : []),
 	];
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));
+	if (cost.sacrificeReduction !== undefined) changes.push(...costChanges(cost, source, controller));
 	if (activation.timing === "special") changes.push(...specialChanges(table, activation));
 	if (activation.timing === "spell" && object.copy) changes.push({ do: "prepare", what: object.copy.source.id, prepared: false });
 	const future = activation.timing === "spell" ? castWords(scope, spell, traits) : [];

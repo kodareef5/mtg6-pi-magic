@@ -41,7 +41,7 @@ export function completePayments(frame: Frame, cost: Price, menu: ReturnType<typ
 			signatures.add(signature);
 			if (found.length === limit) { overflow = true; return; }
 			const spent = new Set(used);
-			const open = [...new Map(menu.units.filter(one => one.source && !spent.has(one.id) && one.yields.some(one => !one.tapped?.some(one => spent.has(one.id)))).map(one => [one.id, one.source!])).values()];
+			const open = [...new Map(menu.units.filter(one => one.source && !menu.leaving?.has(one.id) && !spent.has(one.id) && one.yields.some(one => !one.tapped?.some(one => spent.has(one.id)))).map(one => [one.id, one.source!])).values()];
 			const floating = menu.units.filter(one => one.pool && !spent.has(one.id));
 			const produced = funding.taps.flatMap(tap => manaSplit(tap).remaining.map(color => `{${color}}${tap.spendOnly || tap.spendFrom ? " (restricted)" : ""}${tap.until ? ` (until ${tap.until})` : ""}${tap.spellWords?.length ? ` (grants ${tap.spellWords.join(", ")})` : ""}`));
 			found.push({ parts, funding, label: parts.length ? parts.map(one => one.label).join("; ") : "No mana is spent",

@@ -90,3 +90,4 @@ schemas, and every `basis` is checked against the card's text.
 | `block-restrictions.md` | attacker/blocker selectors, current relative power and explicit conflict marks |
 | `combat.md` | attack and block plans, marked options, damage |
 | `asking.md` | when the plan asks for a new one: stops, their windows, the budget |
+| `sacrifice-reductions.md` | optional casting sacrifices chosen before locking a generic discount, including Viper |

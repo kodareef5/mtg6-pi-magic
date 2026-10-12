@@ -24,8 +24,7 @@ Sacrifices and discards are choices, not targets. Losses stay separate within
 the group, preserving the number of life-loss events.
 
 The cast is identified for later preparation. Its optional sacrifice reduction
-still needs variable additional-cost selection; these standing terms do not
-claim that cast is fully executable.
+uses the separate procedure in [sacrifice reductions](sacrifice-reductions.md).
 
 ```json package
 {

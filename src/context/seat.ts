@@ -259,6 +259,7 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...orientation(packet),
 		...(packet.preparing ? [`You are selecting one part of an already chosen use.${packet.plan ? " Its target and payment policy is in state.plan." : ""} The complete use is confirmed after its parts are selected.`,
+			...(packet.preparing.stage === "sacrifices" ? ["Select the sacrifices specified by the plan, then finish selecting. Finishing selects the total cost next; it does not spend anything. The discount never pays a colored or colorless symbol, and more sacrifices need not improve the price."] : []),
 			...(packet.preparing.stage === "mana" ? [packet.preparing.payments
 				? "Each complete-payment option confirms the selected use, spends exactly its named resources and shows what remains available. Follow the plan's payment and reservations. Choose sources individually opens all source and mana-ability choices without spending anything. A complete payment does not guarantee the spell resolves."
 				: "state.preparing shows the selected sources and unpaid mana. Add to payment keeps those sources and selects one more. Undo selection removes a source. Confirm spends the complete payment; no source is spent during selection."] : [])] : []),

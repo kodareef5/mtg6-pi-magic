@@ -12,11 +12,11 @@ export type PaymentPart = {
 export const paymentResources = (parts: readonly PaymentPart[]): string[] => parts.flatMap(one => [one.resource, ...one.tapped?.map(one => one.id) ?? []]);
 
 /** Existence is a resource question, not an instruction to pick the first payment. */
-export const payable = (frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone): boolean =>
-	canPay(paymentUnits(frame, except, spending, from, cost.generic + cost.colors.length), cost, frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0);
+export const payable = (frame: Frame, cost: Price, except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone, leaving?: ReadonlySet<string>): boolean =>
+	canPay(paymentUnits(frame, except, spending, from, cost.generic + cost.colors.length, leaving), cost, frame.view.players?.find((one) => one.id === frame.seat)?.life ?? 0);
 
-export function paymentOptions(frame: Frame, cost: Price, selected: readonly string[] = [], except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone) {
-	const units = paymentUnits(frame, except, spending, from, cost.generic + cost.colors.length), parts: PaymentPart[] = [];
+export function paymentOptions(frame: Frame, cost: Price, selected: readonly string[] = [], except: ReadonlySet<string> = new Set(), spending?: SeenObject, from?: Zone, leaving?: ReadonlySet<string>) {
+	const units = paymentUnits(frame, except, spending, from, cost.generic + cost.colors.length, leaving), parts: PaymentPart[] = [];
 	for (const unit of units) for (const yield_ of unit.yields) {
 		const id = `mana:${parts.length}`, { colors, claim, ...terms } = yield_;
 		parts.push({ id, resource: unit.id, colors, life: terms.life ?? 0, ...(terms.tapped ? { tapped: terms.tapped } : {}),
@@ -35,6 +35,6 @@ export function paymentOptions(frame: Frame, cost: Price, selected: readonly str
 		cost.colors.filter((one) => one === color).length - colors.filter((one) => one === color).length)).fill(color) as Mana["color"][]);
 	const next = possible ? parts.filter((one) => !paymentResources([one]).some(id => spent.has(id)) && canPay(remaining.filter((unit) => unit.id !== one.resource), cost, life,
 		{ colors: [...colors, ...one.colors], life: paidLife + one.life, used: [...used, ...paymentResources([one])] })) : [];
-	return { units, parts, chosen, next, possible, complete: possible && covers(colors, cost), remainingMana: cost.generic + cost.colors.length - colors.length, missingColors,
+	return { units, parts, chosen, next, possible, leaving, complete: possible && covers(colors, cost), remainingMana: cost.generic + cost.colors.length - colors.length, missingColors,
 		funding: { paid: chosen.flatMap((one) => one.funding.paid), taps: chosen.flatMap((one) => one.funding.taps) } };
 }

@@ -104,12 +104,8 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Cast Rottenmouth Viper with optional sacrifices",
-				"basis": "As an additional cost to cast this spell, you may sacrifice any number of nonland permanents. This spell costs {1} less to cast for each permanent sacrificed this way.",
 				"source": {
 					"card": "Rottenmouth Viper",
 					"zones": [
@@ -119,8 +115,30 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"claim": "Cast Rottenmouth Viper with optional sacrifices",
+				"basis": "As an additional cost to cast this spell, you may sacrifice any number of nonland permanents. This spell costs {1} less to cast for each permanent sacrificed this way.",
+				"timing": "spell",
+				"cost": {
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"controller": "you",
+							"not": {
+								"types": [
+									"land"
+								]
+							}
+						},
+						"any": true,
+						"reduce": 1
+					}
+				},
+				"instructions": []
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": false
 	}
 }

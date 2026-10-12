@@ -779,6 +779,13 @@ selector to remove earlier marked damage while the incoming event is dealt.
 the affected player's choice when prevention also applies. This does not supply
 a standalone heal instruction or a heal event.
 
+Optional casting sacrifices use `cost.sacrifice` with `choose`, `any: true`
+and a positive `reduce`. The seat selects distinct controlled permanents before
+locking its total cost. Each reduces generic mana only; zero and excess
+sacrifices remain available. Mana abilities can tap a selected permanent before
+its sacrifice, but cannot sacrifice it to both costs. This form is limited to
+spell announcements. See [sacrifice reductions](examples/sacrifice-reductions.md).
+
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.

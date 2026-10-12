@@ -9,6 +9,7 @@ import type { Activation, LedgerRow } from "./table.ts";
 import type { Procedure } from "./language.ts";
 import type { Frame, ObjectRef, Option } from "./types.ts";
 import { manaLabel } from "./mana-cost.ts";
+import { paymentReservations, sacrificePayable, variableSacrifice } from "./sacrifice-costs.ts";
 import { tapObjects } from "./funding.ts";
 
 export type Announcement = {
@@ -16,6 +17,7 @@ export type Announcement = {
 	x?: number; hybrid?: number; targets: Chosen[][]; selecting: Chosen[]; cost?: OfferCost; payment: string[];
 	/** Recorded per announcement; absence preserves historical individual menus. */
 	paymentMode?: "complete" | "individual";
+	sacrifices?: ObjectRef[]; sacrificesDone?: true;
 	execution?: LedgerRow["execution"];
 	/** Accepted plan whose guidance accompanies the selected use. */
 	plan?: number;
@@ -30,9 +32,18 @@ export function* announcementBases(frame: Frame, draft: Announcement) {
 	}
 }
 
-export function affordableCosts(base: OfferBase, frame: Frame, targets: Chosen[][]): OfferCost[] {
-	return offerCosts({ ...base, scope: { ...base.scope, targets } }, frame).filter((way) =>
-		payable(frame, { ...way.price, life: way.extra.paid.life }, new Set(way.extra.uses), base.spending, base.castFrom));
+export function affordableCosts(base: OfferBase, frame: Frame, targets: Chosen[][], sacrifices: ObjectRef[] = []): OfferCost[] {
+	return offerCosts({ ...base, scope: { ...base.scope, targets } }, frame, sacrifices).filter(way => {
+		const { except, leaving } = paymentReservations(way);
+		return payable(frame, { ...way.price, life: way.extra.paid.life }, except, base.spending, base.castFrom, leaving);
+	});
+}
+
+/** Further optional sacrifices may complete this cost; none are selected here. */
+export function canAfford(base: OfferBase, frame: Frame, targets: Chosen[][], sacrifices: ObjectRef[] = []): boolean {
+	if (!variableSacrifice(base.procedure.cost)) return affordableCosts(base, frame, targets).length > 0;
+	const aimed = { ...base, scope: { ...base.scope, targets } };
+	return offerCosts(aimed, frame, sacrifices).some(way => sacrificePayable(aimed, frame, way));
 }
 
 /** Find one possible completion, without allocating every combination of targets.
@@ -40,7 +51,7 @@ export function affordableCosts(base: OfferBase, frame: Frame, targets: Chosen[]
 export function canAnnounce(base: OfferBase, frame: Frame, completed: Chosen[][] = [], selected: Chosen[] = []): boolean {
 	const visit = (targets: Chosen[][], selected: Chosen[]): boolean => {
 		const slot = base.slots[targets.length];
-		if (!slot) return affordableCosts(base, frame, targets).length > 0;
+		if (!slot) return canAfford(base, frame, targets);
 		const scope = { ...base.scope, targets }, pool = targetCandidates(slot, scope);
 		const { minimum, maximum } = targetBounds(slot, scope, pool.length);
 		if (selected.length > maximum || new Set(selected.map(targetKey)).size !== selected.length ||
@@ -83,19 +94,21 @@ export function announcementOffers(procedure: Procedure, frame: Frame, prefix: s
 /** The final accepted operation, after the seat has selected every required part. */
 export function announcedActivation(frame: Frame, draft: Announcement): Activation | undefined {
 	const base = announcementBases(frame, draft).next().value;
-	if (!base || draft.x === undefined || base.hybrid !== undefined && draft.hybrid === undefined || draft.targets.length !== base.slots.length || !draft.cost) return;
-	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, new Set(draft.cost.extra.uses), base.spending, base.castFrom);
+	if (!base || draft.x === undefined || base.hybrid !== undefined && draft.hybrid === undefined || draft.targets.length !== base.slots.length || !draft.cost || variableSacrifice(draft.procedure.cost) && !draft.sacrificesDone) return;
+	const { except, leaving } = paymentReservations(draft.cost);
+	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, except, base.spending, base.castFrom, leaving);
 	if (!menu.complete || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return;
 	return { ...paidActivation(base, frame, draft.cost, menu.funding), targets: structuredClone(draft.targets) };
 }
 
 /** A complete payment confirms the already selected use in one voluntary pick. */
 export function announcementPayments(frame: Frame, draft: Announcement) {
-	if (draft.paymentMode !== "complete" || !draft.cost || draft.x === undefined) return undefined;
+	if (draft.paymentMode !== "complete" || !draft.cost || draft.x === undefined || variableSacrifice(draft.procedure.cost) && !draft.sacrificesDone) return undefined;
 	const base = announcementBases(frame, draft).next().value;
 	if (!base || base.hybrid !== undefined && draft.hybrid === undefined || draft.targets.length !== base.slots.length || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return undefined;
 	const cost = { ...draft.cost.price, life: draft.cost.extra.paid.life };
-	const menu = paymentOptions(frame, cost, draft.payment, new Set(draft.cost.extra.uses), base.spending, base.castFrom);
+	const { except, leaving } = paymentReservations(draft.cost);
+	const menu = paymentOptions(frame, cost, draft.payment, except, base.spending, base.castFrom, leaving);
 	return completePayments(frame, cost, menu)?.map((payment, at) => {
 		const activation = { ...paidActivation(base, frame, draft.cost!, payment.funding), targets: structuredClone(draft.targets) };
 		return { activation, option: { id: `announce:payment:${at}`, label: `Confirm and pay: ${payment.label}`, use: activation,

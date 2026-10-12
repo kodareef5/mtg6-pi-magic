@@ -497,6 +497,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   triggers.ts        events read from each group, watches matched, the trigger window
   combat.ts          declaring attackers and blockers, dividing and dealing combat damage
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
+  sacrifice-costs.ts optional casting sacrifices and affordability without subset enumeration
   funding.ts         paying a cost: floating mana and mana abilities while paying
   tap-costs.ts, subsets.ts  shared tap-cost selections and bounded-size object subsets
   mana-cost.ts       nonhybrid equivalents of printed or stated costs, chosen before targets and reductions

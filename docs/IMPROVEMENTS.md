@@ -26,7 +26,7 @@ Those drive engine and syntax work, ordered by how many decks they block.
 Eighteen imported main decks have complete standing coverage; nine have completed
 source-reviewed games. The newly admitted lists await their first games.
 [Status](STATUS.md) holds the current evidence. Mardu still needs standing
-assessments; Jund has a known deferred casting gap. Saved live continuations
+assessments. Viper's optional sacrifice cast is prepared for Jund. Saved live continuations
 currently wait on strategy-provider credits.
 
 1. Start games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
@@ -36,8 +36,8 @@ currently wait on strategy-provider credits.
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Finish Viper's variable additional sacrifice cost before
-   preparing Jund's first matchup. Mardu needs
+   stopped games. Correct deathtouch's state-check lifetime before further
+   counted games. Mardu needs
    discard events, conditional graveyard permission, Class levels and random
    selections. Keep those meanings in the refusal ledger until their shared
    operations are implemented.

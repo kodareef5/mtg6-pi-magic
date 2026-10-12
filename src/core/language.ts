@@ -187,7 +187,8 @@ export const Defs = {
 		/** `true` taps the source. A choice taps selected objects; source:true also pays the source's tap symbol. */
 		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive),
 			source: Type.Optional(Type.Literal(true)), upTo: Type.Optional(Type.Literal(true)), reduce: Type.Optional(Type.Literal("power")) })])),
-		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
+		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive }),
+			object({ choose: Type.Ref("Selector"), any: Type.Literal(true), reduce: positive })])),
 		/** Return controlled permanents to their owners' hands as payment. */
 		return: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive })])),
 		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) }),
