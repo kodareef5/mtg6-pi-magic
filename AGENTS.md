@@ -497,6 +497,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   damage.ts          all-damage prevention and prohibition before damage results
   permits.ts         extra land plays, lands from other zones, flash, "you may play that card"
   funding.ts         paying a cost: floating mana and mana abilities while paying
+  mana-cost.ts       nonhybrid equivalents of printed or stated costs, chosen before targets and reductions
   special.ts         accepted plot actions and their later-turn casting permission
   payment-options.ts, payment-search.ts  exact partial mana choices and payment feasibility without enumerating combinations
   complete-payments.ts bounded complete payment menus, with the individual path retaining every physical choice

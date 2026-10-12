@@ -23,7 +23,7 @@
  * Past 150 lines to keep the single-use preview and ordered payment search
  * beside their shared entry forecast and funding reader.
  */
-import { symbols } from "./announce.ts";
+import { manaChoices } from "./mana-cost.ts";
 import { fundings, manaSplit, outputKey, sick, sources, type Funding, type Price } from "./funding.ts";
 import { payable } from "./payment-options.ts";
 import type { Plan, PlanOption, Procedure, Registration } from "./language.ts";
@@ -39,7 +39,7 @@ import type { SeenObject } from "./work.ts";
 import { manaSurvives, manaDuration } from "./table.ts";
 import { genericReduction } from "./cost-reductions.ts";
 
-type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; price?: Price; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
+type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; prices?: Price[]; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
 
 /** A unique current price can be forecast. Multiple prices need an exact offered pick. */
 function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: string): string | undefined {
@@ -71,18 +71,18 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 	const cost = procedure.cost;
 	const selected = faceFacts(frame.view.printed?.[source.card ?? ""], procedure.face);
 	const printed = procedure.timing === "spell" ? castMana(frame, source, procedure.face, cost?.mana) : cost?.mana ?? "{0}";
-	const mana = printed === undefined ? undefined : symbols(printed + (cost?.additional ?? []).map((one) => one.mana).join(""));
-	if (!mana || mana.x || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key)) || typeof cost?.tap === "object")
+	const mana = printed === undefined ? undefined : manaChoices(printed + (cost?.additional ?? []).map((one) => one.mana).join(""));
+	if (!mana || mana.some(one => one.x) || cost?.reduce !== undefined || Object.keys(cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key)) || typeof cost?.tap === "object")
 		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
 	const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
-	const price = (position: Frame) => action ? reduced(position, { ...spending, zone: source.zone }, mana, action) : mana;
-	const possible = (position: Frame) => payable(position, price(position), reserved, spending, procedure.timing === "spell" ? source.zone : undefined);
+	const prices = (position: Frame) => mana.map(one => action ? reduced(position, { ...spending, zone: source.zone }, one, action) : one);
+	const possible = (position: Frame) => prices(position).some(price => payable(position, price, reserved, spending, procedure.timing === "spell" ? source.zone : undefined));
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
 	const lands = allowance(world, frame.seat).lands > (frame.view.landsPlayed ?? 0)
 		? (frame.view.objects ?? []).filter((one) => one.traits?.types.includes("land") && one.zone !== "battlefield" && playable(world, frame.seat, one, turn, true)) : [];
-	return { cost: stated(price(frame)), payableBeforeNewResources: possible(frame),
+	return { cost: prices(frame).map(stated).join(" or "), payableBeforeNewResources: possible(frame),
 		afterOneLand: [...new Map(lands.map((one) => [one.card, one])).values()].map((land) => {
 			const registers = frame.view.work?.packages?.find((one) => one.card === land.card)?.registers;
 			const entry = entersTapped(frame, land, registers);
@@ -201,10 +201,10 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const named = procedure.source.card;
 			if (procedure.timing === "land") return { kind: "land", ...(source ? { source } : {}), ...(named ? { named } : {}) };
 			const stated = procedure.timing === "spell" ? source ? castMana(hypothetical, source, procedure.face, procedure.cost?.mana) : procedure.cost?.mana ?? selected?.mana : procedure.cost?.mana ?? "{0}";
-			const mana = stated ? symbols(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
-			const variable = !mana || mana.x > 0 || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
+			const mana = stated ? manaChoices(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
+			const variable = !mana || mana.some(one => one.x > 0) || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || procedure.timing === "special" || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional"].includes(key));
-			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { price: (procedure.timing === "spell" || procedure.special === "plot") && source ? reduced(hypothetical, source, mana, procedure.special === "plot" ? "plot" : "cast") : { generic: mana.generic, colors: mana.colors } } : {}),
+			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { prices: mana.map(one => (procedure.timing === "spell" || procedure.special === "plot") && source ? reduced(hypothetical, source, one, procedure.special === "plot" ? "plot" : "cast") : { generic: one.generic, colors: one.colors }) } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
 		}
@@ -232,19 +232,19 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			// Extra costs and resource-producing effects need a fuller simulation.
 			const additional = timing === "special" || !!offered.use.exileSelection || Object.keys(extra).some((key) => key !== "tap");
 			if (additional || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
-			return { kind, ...(source ? { source } : {}), price: { generic, colors },
+			return { kind, ...(source ? { source } : {}), prices: [{ generic, colors }],
 				...(additional ? { unknown: true as const } : {}),
 				...(timing === "spell" ? { spell: true } : {}), ...(extra.tap ? { tap: true } : {}),
 				...(timing === "spell" && permanentSpell(printed) && !offered.use.instructions.length ? { enters: true } : {}),
 				fixed: { paid: offered.use.paid, taps: offered.use.funding ?? [] } };
 		}
 		const stated = source?.card ? castMana(hypothetical, source) : undefined;
-		const mana = stated === undefined ? undefined : symbols(stated);
-		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !mana.x && source ? { price: reduced(hypothetical, source, mana) } : { unknown: true as const }),
+		const mana = stated === undefined ? undefined : manaChoices(stated);
+		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && mana.every(one => !one.x) && source ? { prices: mana.map(one => reduced(hypothetical, source!, one)) } : { unknown: true as const }),
 			...(source?.card && permanentSpell(frame.view.printed?.[source.card]) ? { enters: true } : {}) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
-	type Item = { at: string; expired: boolean; when: PlanOption["when"] } & ({ kind: "entry"; source: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; price: Price; fixed?: Funding; label: string; spell?: true; tap?: true; unknown?: true });
+	type Item = { at: string; expired: boolean; when: PlanOption["when"] } & ({ kind: "entry"; source: SeenObject } | { kind: "attack"; source: SeenObject } | { kind: "cast"; source: SeenObject; prices: Price[]; fixed?: Funding; label: string; spell?: true; tap?: true; unknown?: true });
 	const items: Item[] = [];
 	const arrived = new Set<string>();
 	const entered = (position: Frame, source: SeenObject): Frame => ({ ...position, view: { ...position.view,
@@ -299,8 +299,8 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			break;
 		}
 		if (act.unknown) honest = false;
-		if (!act.price) break;
-		items.push({ at: where, expired, when: step.when, kind: "cast", source: act.source, price: act.price!, ...(act.fixed ? { fixed: act.fixed } : {}),
+		if (!act.prices) break;
+		items.push({ at: where, expired, when: step.when, kind: "cast", source: act.source, prices: act.prices, ...(act.fixed ? { fixed: act.fixed } : {}),
 			...(act.spell ? { spell: true } : {}), ...(act.tap ? { tap: true } : {}), ...(act.unknown ? { unknown: true as const } : {}), label: step.label });
 		if (!honest) break;
 		// Forecast casts consume first-spell allowances even if their later
@@ -366,8 +366,8 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				const responses: string[] = [];
 				for (const { at, act } of branches) {
 					if (act.tap && cannotTap(later, act.source!, spent)) { responses.push(`${at}: its source cannot pay the tap cost after this example line`); continue; }
-					if (!fundings(later, act.price!, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act), act.spell ? act.source!.zone : undefined).length)
-						responses.push(`${at}: costs ${stated(act.price!)} but ${left(later, spent, held)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
+					if (!act.prices?.some(price => fundings(later, price, new Set([...spent, ...(act.tap ? [act.source!.id] : [])]), spending(act), act.spell ? act.source!.zone : undefined).length))
+						responses.push(`${at}: costs ${act.prices?.map(stated).join(" or ")} but ${left(later, spent, held)} under this example payment. This optional response is unfunded, not an ordered-step conflict.`);
 				}
 				if (preferResponses && responses.length) { unfunded = true; return false; }
 				report.responses = responses;
@@ -390,9 +390,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				for (const { object } of sources(position)) if (!selected.has(object.id)) reserved.add(object.id);
 				paymentPosition = { ...position, view: { ...position.view, pools: (position.view.pools ?? []).map((one) => ({ ...one, mana: one.mana.filter((mana) => item.fixed!.paid.includes(mana.id)) })) } };
 			}
-			const ways = fundings(paymentPosition, item.price, reserved, spending(item), item.spell ? item.source.zone : undefined)
+			const ways = item.prices.flatMap(price => fundings(paymentPosition, price, reserved, spending(item), item.spell ? item.source.zone : undefined))
 				.filter((way) => !item.fixed || paymentKey(way.funding) === paymentKey(item.fixed));
-			if (!ways.length) return fail(index, `${item.at}: costs ${stated(item.price)} but ${left(position, spent, held)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
+			if (!ways.length) return fail(index, `${item.at}: costs ${item.prices.map(stated).join(" or ")} but ${left(position, spent, held)}${attackers.length ? `; the later attacks also need ${attackers.join(", ")} untapped` : ""}; reorder the steps, drop one, or release the hold`);
 			// Payments that tap the same sources and spend the same kind of floating mana leave the same position: one of each is tried.
 			const kind = (id: string) => { const mana = pool(position).find((one) => one.id === id); return `${mana?.color}|${mana ? manaDuration(mana) : ""}|${JSON.stringify(mana?.spendOnly ?? null)}${mana?.spendFrom ? `|from:${mana.spendFrom.join(",")}` : ""}|${JSON.stringify(mana?.spellWords ?? null)}`; };
 			const remainder = (funding: Funding) => funding.taps.flatMap(tap => manaSplit(tap).remaining.map((color, at) => ({

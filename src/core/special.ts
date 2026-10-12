@@ -3,7 +3,7 @@ import type { Procedure } from "./language.ts";
 import type { Activation, Table } from "./table.ts";
 import type { Change } from "./syntax.ts";
 import { faceUpCost } from "./manifest.ts";
-import { symbols } from "./announce.ts";
+import { manaChoices } from "./mana-cost.ts";
 import { pack } from "./entry.ts";
 
 /** Plot uses its hand card; manifest turns a creature face up from the battlefield.
@@ -22,9 +22,9 @@ export function checkSpecial(procedure: Procedure): void {
 export function specialChanges(table: Table, use: Activation): Change[] {
 	const source = table.things.get(use.source.id);
 	if (use.special === "turn-face-up") {
-		const mana = source && faceUpCost(table.printed[source.card ?? ""], source), price = mana && symbols(mana);
-		if (!source || source.incarnation !== use.source.incarnation || source.controller !== use.controller || !price || use.slots.length || use.targets.length || use.instructions.length || use.words?.length || use.x ||
-			Object.keys(use.cost).some(key => !["generic", "colors"].includes(key)) || use.cost.generic !== price.generic || [...use.cost.colors].sort().join() !== [...price.colors].sort().join())
+		const mana = source && faceUpCost(table.printed[source.card ?? ""], source), prices = mana ? manaChoices(mana) : undefined;
+		if (!source || source.incarnation !== use.source.incarnation || source.controller !== use.controller || !prices || use.slots.length || use.targets.length || use.instructions.length || use.words?.length || use.x ||
+			Object.keys(use.cost).some(key => !["generic", "colors"].includes(key)) || !prices.some(price => use.cost.generic === price.generic && [...use.cost.colors].sort().join() === [...price.colors].sort().join()))
 			throw new Error("Turning a manifested permanent face up needs its creature card and exact printed mana cost.");
 		return [{ do: "reveal", what: source.id }, { do: "turn-face-up", what: source.id, ...(source.card ? { registers: structuredClone(pack(table, use.controller, source.card) ?? []) } : {}) }];
 	}

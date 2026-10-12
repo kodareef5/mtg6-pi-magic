@@ -17,7 +17,7 @@ to turn it face up, using a special action and the existing payment stages.
 The action works on either turn with spells on the stack. It does not cast,
 activate or enter again, and keeps counters, attachments, damage and incarnation.
 A noncreature card has no such action. X in that off-stack cost is zero.
-Hybrid and Phyrexian payments, morph, disguise and other face-up effects still
+Phyrexian and snow payments, morph, disguise and other face-up effects still
 need their own terms. A copy of a face-down creature is a face-up nameless 2/2
 with no permission to turn face up. Departure and game end publicly reveal
 face-down permanents; earlier receipts remain private.

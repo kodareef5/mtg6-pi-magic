@@ -13,6 +13,7 @@
 import { Type, type Static, type TSchema } from "typebox";
 import { Check, Errors } from "typebox/value";
 import { STEPS } from "./steps.ts";
+import { MANA_PATTERN } from "./mana-cost.ts";
 
 const object = <T extends Parameters<typeof Type.Object>[0]>(fields: T) => Type.Object(fields, { additionalProperties: false });
 const text = Type.String({ minLength: 1 });
@@ -27,8 +28,8 @@ export const CARD_TYPES = ["artifact", "battle", "creature", "enchantment", "ins
 
 const Zone = one(...ZONES);
 const Color = one("W", "U", "B", "R", "G", "C");
-/** "{2}{G}", "{X}{R}". Generic, colored and X symbols; the table parses them the way it parses a printed cost. */
-const ManaCost = Type.String({ pattern: "^(\\{([0-9]+|[WUBRGCX])\\})+$" });
+/** Generic, colored, X and hybrid symbols use the same parser as printed costs. */
+const ManaCost = Type.String({ pattern: MANA_PATTERN });
 const Duration = one("end-of-turn", "end-of-combat", "while-source", "indefinite");
 const DamageMode = Type.Union([Type.Literal("prevent"), Type.Literal("unpreventable")]);
 const ManaDuration = one("end-of-combat", "end-of-turn");

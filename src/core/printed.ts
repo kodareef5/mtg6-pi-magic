@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { load, type CardFace, type Universe } from "./cards.ts";
 import { currentFacts, type Faced } from "./faces.ts";
 import type { Mana, Table } from "./table.ts";
+import { manaChoices, symbols } from "./mana-cost.ts";
 
 export type Printed = { type: string; mana: string; stats: string; text: boolean; oracle: string; name?: string; colors?: string[]; faces?: CardFace[]; layout?: string };
 
@@ -36,19 +37,10 @@ export function basePT(printed?: Printed): { power: number; toughness: number } 
 	return match ? { power: Number(match[1]), toughness: Number(match[2]) } : undefined;
 }
 
-/** Generic and colored symbols only. X, hybrid and Phyrexian costs need choices. */
+/** An unambiguous fixed cost. Hybrid and X choices belong to announcement. */
 export function manaCost(printed?: Printed): { tap: false; generic: number; colors: Mana["color"][] } | undefined {
-	if (!printed) return undefined;
-	const symbols = printed.mana.match(/\{[^}]+\}/g) ?? [];
-	if (symbols.join("") !== printed.mana) return undefined;
-	let generic = 0;
-	const colors: Mana["color"][] = [];
-	for (const symbol of symbols.map((s) => s.slice(1, -1))) {
-		if (/^\d+$/.test(symbol)) generic += Number(symbol);
-		else if (/^[WUBRGC]$/.test(symbol)) colors.push(symbol as Mana["color"]);
-		else return undefined;
-	}
-	return { tap: false, generic, colors };
+	const cost = printed && symbols(printed.mana);
+	return cost && !cost.x ? { tap: false, generic: cost.generic, colors: cost.colors } : undefined;
 }
 
 /** 202.3: value comes from the cost, never the payment; X is supplied only on the stack. */
@@ -68,8 +60,8 @@ export function intrinsicMana(printed?: Printed): Mana["color"][] {
 	return subtypes.flatMap((subtype) => BASIC[subtype] ? [BASIC[subtype]] : []);
 }
 
-/** A permanent spell other than an Aura, with a cost of generic and colored symbols only. */
-export const permanentSpell = (printed?: Printed) => !!printed && !isLand(printed) && !!manaCost(printed) &&
+/** Shared casts support fixed generic, colored and hybrid costs; X still needs a prepared use. */
+export const permanentSpell = (printed?: Printed) => !!printed && !isLand(printed) && !!manaChoices(printed.mana)?.every(cost => !cost.x) &&
 	/\b(Artifact|Battle|Creature|Enchantment|Planeswalker)\b/.test(printed.type.split("—")[0]!) && !/\bAura\b/.test(printed.type.split("—")[1] ?? "");
 
 /**

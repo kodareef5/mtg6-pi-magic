@@ -107,8 +107,8 @@ only objects with both types. A union returns each object once.
 Mana value reads the selected face and includes announced X only on the stack
 (202.3). An additional cost or reduction changes payment, not mana value. A
 transforming back uses its front cost; a Room uses its unlocked doors on the
-battlefield. A hidden card matches no color or mana-value predicate. This adds
-queries, not hybrid payment or a general copy operation.
+battlefield. A hidden card matches no color or mana-value predicate. Payment
+does not change these characteristics.
 
 **Targets** are slots announced with the action (601.2c). A slot takes an
 `object` selector, a `player` side, or both. "Any target" is both:
@@ -731,8 +731,7 @@ choices before a new assessment can rely on it.
 - Effects that take control of a permanent, morph, disguise, and other face-up
   replacement effects.
 - Read ahead, general spell copying, and double-faced token copies.
-- Hybrid and Phyrexian mana symbols. The printed cost reader and a stated cost
-  both accept generic, colored and X symbols only.
+- Phyrexian and snow mana payments.
 
 A selector may use `nameOf: ObjectRef` to match an object sharing a name with
 that reference. The reference may be a bound result or a departed object read

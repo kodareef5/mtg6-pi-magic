@@ -10,6 +10,7 @@ import { amount, targetKey } from "./selectors.ts";
 import type { LedgerRow, Table } from "./table.ts";
 import type { Frame } from "./types.ts";
 import type { Move, Pending } from "./moves.ts";
+import { manaLabel } from "./mana-cost.ts";
 
 export function beginAnnouncement(table: Table, draft: Announcement, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">): void {
 	if (table.announcement || table.payment || table.entry || table.resolution || table.cursor.priority !== draft.controller)
@@ -39,15 +40,26 @@ export function announcing(table: Table): Pending | null {
 		selecting: draft.targets.at(-1)!.map(({ amount, ...one }) => one) });
 	const unassign = (group: number, at: number): Announcement => ({ ...draft, targets: draft.targets.map((set, slot) =>
 		set.map((one, index) => slot === group && index === at ? (({ amount, ...ref }) => ref)(one) : one)) });
+	const beforeTargets = () => {
+		if (base?.hybrid !== undefined) choose("announce:back", "Return to choosing hybrid symbols", { ...draft, hybrid: undefined, selecting: [] });
+		else if (base?.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined, selecting: [] });
+	};
 	let preparing: NonNullable<Pending["preparing"]> = { stage: "cost" };
 	let question = `Prepare ${draft.procedure.claim}. Nothing has been spent or cast.`;
 	if (base?.mana.x && draft.x !== undefined) question += ` X = ${draft.x}.`;
+	if (base?.hybrid !== undefined && draft.hybrid !== undefined) question += ` Chosen equivalent: ${manaLabel(base.mana, draft.x)} before reductions.`;
 	if (base && draft.targets.length) question += ` ${aiming(draft.targets, base.world, frame.seat).join(" ")}`;
 	if (!base) question += " Its source or permission is no longer available. Cancel to return to priority.";
 	else if (draft.x === undefined) {
 		preparing = { stage: "X" };
 		question += " Choose X.";
-		for (const one of bases) if (canAnnounce(one, frame)) choose(`announce:x:${one.x}`, `Choose X = ${one.x}`, { ...draft, x: one.x });
+		for (const x of [...new Set(bases.filter(one => canAnnounce(one, frame)).map(one => one.x))]) choose(`announce:x:${x}`, `Choose X = ${x}`, { ...draft, x });
+	} else if (base.hybrid !== undefined && draft.hybrid === undefined) {
+		preparing = { stage: "hybrid" };
+		question += ` Choose the nonhybrid equivalent of ${base.manaText} before targets and cost reductions.`;
+		for (const one of bases) if (canAnnounce(one, frame))
+			choose(`announce:hybrid:${one.hybrid}`, `Use ${manaLabel(one.mana, draft.x)} before reductions`, { ...draft, hybrid: one.hybrid });
+		if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined });
 	} else if (draft.targets.length < base.slots.length) {
 		preparing = { stage: "targets" };
 		const at = draft.targets.length, slot = base.slots[at]!;
@@ -68,7 +80,7 @@ export function announcing(table: Table): Pending | null {
 		if (draft.selecting.length >= minimum && canAnnounce(base, frame, [...draft.targets, draft.selecting]))
 			choose("announce:targets-done", "Finish this target group", { ...draft, targets: [...draft.targets, draft.selecting], selecting: [] });
 		if (draft.targets.length) choose("announce:back", "Return to the previous target group", { ...draft, targets: draft.targets.slice(0, -1), selecting: draft.targets.at(-1)! });
-		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined, selecting: [] });
+		else beforeTargets();
 	} else if (dividing) {
 		preparing = { stage: "division" };
 		const { group, at, one, total } = dividing, chosen = draft.targets[group]!;
@@ -92,7 +104,7 @@ export function announcing(table: Table): Pending | null {
 		const last = divisions.at(-1);
 		if (last) choose("announce:back", "Return to the last assigned amount", unassign(last.group, last.at));
 		else if (draft.targets.length) choose("announce:back", "Return to the last target group", rewindTargets());
-		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined });
+		else beforeTargets();
 	} else {
 		const complete = announcementPayments(frame, draft);
 		if (complete?.length) {

@@ -8,10 +8,11 @@ import { targetKey, type Chosen } from "./selectors.ts";
 import type { Activation, LedgerRow } from "./table.ts";
 import type { Procedure } from "./language.ts";
 import type { Frame, ObjectRef, Option } from "./types.ts";
+import { manaLabel } from "./mana-cost.ts";
 
 export type Announcement = {
 	controller: number; source: ObjectRef; prefix: string; procedure: Procedure; permission?: string;
-	x?: number; targets: Chosen[][]; selecting: Chosen[]; cost?: OfferCost; payment: string[];
+	x?: number; hybrid?: number; targets: Chosen[][]; selecting: Chosen[]; cost?: OfferCost; payment: string[];
 	/** Recorded per announcement; absence preserves historical individual menus. */
 	paymentMode?: "complete" | "individual";
 	execution?: LedgerRow["execution"];
@@ -23,7 +24,8 @@ export type AnnouncementOffer = { option: Option; announcement: Announcement };
 /** A selected source is read again without substituting an equivalent object. */
 export function* announcementBases(frame: Frame, draft: Announcement) {
 	for (const base of offerBases({ ...draft.procedure, source: { ...draft.procedure.source, refs: [draft.source] } }, frame, draft.prefix)) {
-		if (base.granted.permission === draft.permission && (draft.x === undefined || base.x === draft.x)) yield base;
+		if (base.granted.permission === draft.permission && (draft.x === undefined || base.x === draft.x) &&
+			(draft.hybrid === undefined || base.hybrid === draft.hybrid)) yield base;
 	}
 }
 
@@ -68,8 +70,8 @@ export function announcementOffers(procedure: Procedure, frame: Frame, prefix: s
 			shows: [base.granted.mana ? `Permission ${base.granted.permission}: cast for ${base.granted.mana === "printed" ? `the printed ${base.selected?.mana}` : `${base.granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${base.granted.leavesStack ? ` Put it into ${base.granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
 				procedure.special === "turn-face-up" ? "Show this creature card, pay its mana cost and turn it face up without using the stack. Its incarnation, counters, damage and attachments stay. Entry abilities do not happen again." :
 				procedure.special === "plot" ? "Exile this hand card as a special action, without using the stack. Its owner may cast it for no mana on a later turn, only in their main phase with an empty stack; additional costs still apply." : "",
-				`Choose this use, then ${base.mana.x ? "X, " : ""}targets and payment. Nothing is spent until confirmed.`,
-				`Mana before reductions: ${base.mana.generic} generic${base.mana.colors.map((color) => ` + {${color}}`).join("")}${base.mana.x ? ` + ${base.mana.x} times X` : ""}.`,
+				`Choose this use, then ${base.mana.x ? "X, " : ""}${base.hybrid !== undefined ? "hybrid symbols, " : ""}targets and payment. Nothing is spent until confirmed.`,
+				`Mana before reductions: ${base.manaText ?? manaLabel(base.mana)}.`,
 				...base.effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" "),
 			announcement };
 		found.push({ option, announcement });
@@ -80,7 +82,7 @@ export function announcementOffers(procedure: Procedure, frame: Frame, prefix: s
 /** The final accepted operation, after the seat has selected every required part. */
 export function announcedActivation(frame: Frame, draft: Announcement): Activation | undefined {
 	const base = announcementBases(frame, draft).next().value;
-	if (!base || draft.x === undefined || draft.targets.length !== base.slots.length || !draft.cost) return;
+	if (!base || draft.x === undefined || base.hybrid !== undefined && draft.hybrid === undefined || draft.targets.length !== base.slots.length || !draft.cost) return;
 	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, new Set(draft.cost.extra.uses), base.spending, base.castFrom);
 	if (!menu.complete || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return;
 	return { ...paidActivation(base, frame, draft.cost, menu.funding), targets: structuredClone(draft.targets) };
@@ -90,7 +92,7 @@ export function announcedActivation(frame: Frame, draft: Announcement): Activati
 export function announcementPayments(frame: Frame, draft: Announcement) {
 	if (draft.paymentMode !== "complete" || !draft.cost || draft.x === undefined) return undefined;
 	const base = announcementBases(frame, draft).next().value;
-	if (!base || draft.targets.length !== base.slots.length || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return undefined;
+	if (!base || base.hybrid !== undefined && draft.hybrid === undefined || draft.targets.length !== base.slots.length || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return undefined;
 	const cost = { ...draft.cost.price, life: draft.cost.extra.paid.life };
 	const menu = paymentOptions(frame, cost, draft.payment, new Set(draft.cost.extra.uses), base.spending, base.castFrom);
 	return completePayments(frame, cost, menu)?.map((payment, at) => {

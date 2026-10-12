@@ -23,12 +23,13 @@ import { allowance, activationRestrictions, castingPrices, castRestrictions, fla
 import { useSources } from "./readiness.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
 import { maximumSpellReduction, genericReduction } from "./cost-reductions.ts";
-import type { Activation, Mana, Paid } from "./table.ts";
+import type { Activation, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
+import { manaChoices } from "./mana-cost.ts";
+export { symbols } from "./mana-cost.ts";
 
 export type ProcedureOption = { option: Option; activation: Activation };
-type Color = Mana["color"];
 
 /** Offer terms can be shared across payments, but never changed through another
  * option. Callers' equipment is cloned before it enters these snapshots. */
@@ -38,21 +39,6 @@ export function immutable<T>(value: T): T {
 		Object.freeze(value);
 	}
 	return value;
-}
-
-/** Generic, colored and X symbols. Hybrid and Phyrexian symbols are not read. */
-export function symbols(text: string): { generic: number; colors: Color[]; x: number } | undefined {
-	const parts = text.match(/\{[^}]+\}/g) ?? [];
-	if (parts.join("") !== text) return undefined;
-	let generic = 0, x = 0;
-	const colors: Color[] = [];
-	for (const symbol of parts.map((part) => part.slice(1, -1))) {
-		if (/^\d+$/.test(symbol)) generic += Number(symbol);
-		else if (/^[WUBRGC]$/.test(symbol)) colors.push(symbol as Color);
-		else if (symbol === "X") x += 1;
-		else return undefined;
-	}
-	return { generic, colors, x };
 }
 
 /** Plain words for simple accepted terms, exact terms for shapes the prose does not cover. */
@@ -286,27 +272,30 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 			if (granted.speed === "sorcery" && !mainWindow(frame)) continue;
 			if (granted.mana === "printed" && !selected?.mana) continue;
 			const stated = permissionMana(granted.mana, selected?.mana) ?? procedure.cost?.mana ?? (procedure.timing === "spell" ? selected?.mana : undefined);
-			const mana = symbols((stated ?? "") + (procedure.cost?.additional ?? []).map((one) => one.mana).join(""));
-			if (!mana) continue;
-			const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
-			// A safe bound for X; exact chosen taps and payment are checked below for every candidate.
-			const tapReduction = typeof procedure.cost?.tap === "object" && procedure.cost.tap.reduce ? (frame.view.objects ?? [])
-				.filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).reduce((sum, one) => sum + Math.max(0, one.traits?.power ?? 0), 0) : 0;
-			// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
-			const standingBound = procedure.timing === "spell" ? maximumSpellReduction(world) : 0;
-			const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction + standingBound - mana.colors.length) + 1 }, (_, at) => at) : [0];
-			// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
-			const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-				.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
-			// Mana pays for the spell as it will be on the stack, or for the ability.
-			for (const x of xs) {
-				const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const,
-					...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, x, procedure.words) } : {}) } : source;
-				const announced = { ...scope, source: spending, x };
-				const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
-				if (procedure.if && !holds(announced, procedure.if)) continue;
-				yield { procedure, prefix, slots, effects, world, printed, original, source, sourceRef, selected, granted, mana, reduce, stacked, x, spending,
-					castFrom: procedure.timing === "spell" ? original.zone : undefined, words, scope: announced };
+			const manaText = (stated ?? "") + (procedure.cost?.additional ?? []).map((one) => one.mana).join("");
+			const equivalents = manaChoices(manaText);
+			for (const [hybrid, mana] of equivalents?.entries() ?? []) {
+				const reduce = procedure.cost?.reduce ? amount(scope, procedure.cost.reduce) : 0;
+				// A safe bound for X; exact chosen taps and payment are checked below for every candidate.
+				const tapReduction = typeof procedure.cost?.tap === "object" && procedure.cost.tap.reduce ? (frame.view.objects ?? [])
+					.filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).reduce((sum, one) => sum + Math.max(0, one.traits?.power ?? 0), 0) : 0;
+				// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
+				const standingBound = procedure.timing === "spell" ? maximumSpellReduction(world) : 0;
+				const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction + standingBound - mana.colors.length) + 1 }, (_, at) => at) : [0];
+				// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
+				const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+					.map((one) => `${one.controller === frame.seat ? "your" : "the opponent's"} ${one.card ?? (one.ability ? `${one.ability.claim.split(": ")[0]}'s ability` : "stack object")}`);
+				// Mana pays for the spell as it will be on the stack, or for the ability.
+				for (const x of xs) {
+					const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const,
+						...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, x, procedure.words) } : {}) } : source;
+					const announced = { ...scope, source: spending, x };
+					const words = [...new Set([...(procedure.words ?? []), ...(procedure.timing === "spell" ? castWords(announced, spending, spending.traits).flatMap((note) => note.words) : [])])];
+					if (procedure.if && !holds(announced, procedure.if)) continue;
+					yield { procedure, prefix, slots, effects, world, printed, original, source, sourceRef, selected, granted, mana, reduce, stacked, x, spending,
+						...(equivalents!.length > 1 ? { hybrid, manaText } : {}),
+						castFrom: procedure.timing === "spell" ? original.zone : undefined, words, scope: announced };
+				}
 			}
 		}
 	}
@@ -369,7 +358,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 			for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending, base.castFrom)) {
 				const accepted = paidActivation(base, frame, way, funding), spellWords = accepted.words ?? [];
 				const payment = { paid: accepted.paid, taps: accepted.funding ?? [] };
-				const id = `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${outputKey(tap)}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}`;
+				const id = `${prefix}${procedure.face ? `:f${procedure.face}` : ""}:${source.id}@${source.incarnation}${granted.permission ? `:permit=${granted.permission}` : ""}${mana.x ? `:x${x}` : ""}${base.hybrid !== undefined ? `:h${base.hybrid}` : ""}:${[...funding.paid, ...funding.taps.map((tap) => `${tap.source.id}${outputKey(tap)}${tap.life ? `~life${tap.life}` : ""}${tap.spellWords ? `~words${tap.spellWords.map(encodeURIComponent).join("+")}` : ""}`), ...extra.uses].join(",") || "free"}${extra.paid.counters?.on ? `:counters=${extra.paid.counters.on.map(targetKey).join("+")}` : ""}${extra.paid.shown ? `:show=${extra.paid.shown.map(targetKey).join("+")}` : ""}`;
 				const shows = [
 					`Source: ${name(source)} (${source.id}@${source.incarnation}).`,
 					granted.mana ? `Permission ${granted.permission}: cast for ${granted.mana === "printed" ? `the printed ${selected?.mana}` : `${granted.mana} instead of the mana cost`}; normal timing and additional costs still apply.${granted.leavesStack ? ` Put it into ${granted.leavesStack} whenever it leaves the stack.` : ""}` : "",
