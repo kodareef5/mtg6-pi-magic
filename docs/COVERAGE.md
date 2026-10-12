@@ -46,8 +46,8 @@ main-deck assessments. Adding a legal list is not proof that it plays.
 | Preparation across the whole legal snapshot | Cards |
 | --- | ---: |
 | Shared printed handling, without rules text needing assessment | 22 |
-| Accepted assessment with all identified uses prepared | 3,301 |
-| Accepted assessment with deferred uses | 158 |
+| Accepted assessment with all identified uses prepared | 3,303 |
+| Accepted assessment with deferred uses | 156 |
 | Recorded refusals without an accepted replacement | 1,667 |
 | Not assessed | 16 |
 
@@ -58,10 +58,10 @@ or deferred. The seventeen shared printed cards and one older complete package
 in that scope were already covered.
 
 Across the pinned pool, complete preparation plus shared printed handling covers
-3,323 cards, or 64.3%. The remaining sixteen unassessed cards are Dwarves'
+3,325 cards, or 64.3%. The remaining sixteen unassessed cards are Dwarves'
 thirteen main-deck cards and three sideboard-only cards.
 
-The 158 deferred cards contain 230 deferred uses. Even a complete assessment
+The 156 deferred cards contain 227 deferred uses. Even a complete assessment
 means accepted structured terms, not verified play. Unassessed cards are unknown,
 not proven engine gaps. A refusal records the operation an assessment could
 not express. Check that claim against existing helpers before making it an

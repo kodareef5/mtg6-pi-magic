@@ -13,17 +13,17 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 19 of 20: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator, Dimir Midrange, Mono-Black Aggro, 4c Reanimator, Azorius Momo, Lifegain, Jund Sacrifice, Mardu Discard |
-| Completed source-reviewed alpha games | 30, covering eleven admitted decks; Bant, Jeskai, both Dimir lists, Mono-Black, Reanimator, Momo and Lifegain await their first finishes |
+| Completed source-reviewed alpha games | 31, covering thirteen admitted decks; Bant, Dimir Midrange, Mono-Black, Reanimator, Momo and Lifegain await their first finishes |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Direct Typesafe Jev and CLI Haiku completed corrected Mardu/Jund. Bant/Prowess and Dimir/Jeskai run with carried briefs; old Azorius branches await source-corrected prefixes |
-| Recent shared mechanics | Per-controller target groups, combined selection mana values and physical solved Cases |
-| Stored card assessments | 3,459 accepted: 3,301 complete and 158 deferred; 1,667 recorded refusals; sixteen unassessed cards reserved for Dwarves and sideboards |
+| Current runtime work | Direct Typesafe Jev and CLI Haiku completed Mardu/Jund and Dimir/Jeskai. Black/Midrange and Jund/Lifegain run with carried briefs; Bant waterbend, Momo counter/attachment transfer and two old Azorius branches remain |
+| Recent shared mechanics | Per-controller targets, combined mana values, solved Cases, explore completion, bound sacrifice costs and ninjutsu entry |
+| Stored card assessments | 3,459 accepted: 3,303 complete and 156 deferred; 1,667 recorded refusals; sixteen unassessed cards reserved for Dwarves and sideboards |
 | Wider Standard qualification | All 4,818 outside-list candidates examined: 3,172 new complete, source-reviewed packages and 1,646 refusals; no unfinished submissions or new counted games |
 | Main-deck guides | Original 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 320 invariant tests pass; fast and whole-game lanes |
+| Validation | Type check and 321 invariant tests pass: 235 fast and 86 whole-game |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
-| Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded. Default token names are corrected; older token-bearing finishes await retrospective review |
+| Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded. Default token names are corrected; older token-bearing finishes await retrospective review. Two unused Braided Net activations require correction before further Jeskai trials |
 | Bills | Missing usage/cost counts accompany each result. CLI costs are list-price estimates. Direct Jev has unpriced zero entries in the installed Pi catalog; see Inference routes |
 
 Standing coverage admits setup; it does not prove that every deferred use or
