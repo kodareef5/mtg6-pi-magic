@@ -24,15 +24,17 @@ Those drive engine and syntax work, ordered by how many decks they block.
 ## Next implementation chunk
 
 Nineteen imported main decks have complete standing coverage; nine have completed
-source-reviewed games. The immediate priority is broader Standard qualification
-with existing mechanics, before Dwarves and sideboards. [Coverage](COVERAGE.md)
-defines the resumable pool assessment and its limits. [Status](STATUS.md) holds
+source-reviewed games. The wider qualification pass is complete: 3,172 new
+complete meanings from existing mechanics, with source-backed refusals for the
+rest. Dwarves and sideboards remain later work. [Coverage](COVERAGE.md) defines
+the preparation states, known source issues and resumable worklists. [Status](STATUS.md) holds
 the current game evidence. Direct Jev and CLI Haiku have cleared the provider
 funding blocker.
 
-1. Assess cards outside the imported lists with complete uses and current shared
-   mechanics. Review accepted meanings against their sources, retain unsupported
-   answers as future work, and keep inference failures separate from card gaps.
+1. Exercise representative newly prepared families through registered real decks.
+   Repair the imported source issues identified in Coverage before their affected
+   interactions. Revisit wider-pool refusals with a concrete existing expression
+   or a shared operation; retain unsupported answers and separate inference failures.
 2. Resume games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
    and finish the corrected Azorius continuations. Validate complete-payment menus
    across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.

@@ -554,6 +554,8 @@ tools/card-names.ts    build the Oracle name companion from a matching cached bu
 tools/rules.ts         build a searchable Comprehensive Rules
 tools/sim.ts           bulk games: carried seeds of one matchup, or seeded random pairings from the deck pool; one table per arm
 src/core/packages.ts   source-checked card interpretations, reused through shared seating for new games
+tools/assess.ts, tools/assessment-pool.ts  complete universe batches or standing deck preparation, with source review and resumable refusals
+tools/coverage.ts     source-pinned preparation counts and card-level worklists from the shipped store
 tools/guide.ts         one deck guide per list, written by the pregame model and kept under decks/guides
 tools/decks.ts         the deck collection as a formal list of names: check every list against the legal set, import a published text list
 tools/adherence.ts     plan adherence read from a journal on replay: picks that carried out a due step

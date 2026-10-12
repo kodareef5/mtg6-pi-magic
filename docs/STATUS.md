@@ -18,9 +18,10 @@ measures whether ordinary games can execute their cards correctly.
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
 | Current runtime work | Direct Typesafe Jev and CLI Haiku have resumed a saved game without OpenRouter calls. Jace interpretation remains a preparation gap; corrected Sleight awaits continuation |
 | Recent shared mechanics | Conditional native casting prices, required-attack warnings and physical Class levels |
-| Stored card assessments | 287 accepted, 21 sideboard-only refusals, five basic lands; thirteen unassessed main-deck cards in the newly imported Dwarves list |
+| Stored card assessments | 3,459 accepted: 3,300 complete and 159 deferred; 1,667 recorded refusals; sixteen unassessed cards reserved for Dwarves and sideboards |
+| Wider Standard qualification | All 4,818 outside-list candidates examined: 3,172 new complete, source-reviewed packages and 1,646 refusals; no unfinished submissions or new counted games |
 | Main-deck guides | Original 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 319 invariant tests pass; fast and whole-game lanes |
+| Validation | Type check and 320 invariant tests pass; fast and whole-game lanes |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded |
 | Bills | Missing usage/cost counts accompany each result. CLI costs are list-price estimates. Direct Jev has unpriced zero entries in the installed Pi catalog; see Inference routes |
@@ -38,8 +39,8 @@ Per-game seeds, journal paths, bills, continuations and review findings are in
 `.pi/alpha-20261011/summary.md`, beside the raw evidence. Earlier measurements
 are retained under `design-ref/experiments/` and in Git history.
 [The next implementation chunk](IMPROVEMENTS.md#next-implementation-chunk)
-starts with broader Standard qualification using existing mechanics, before
-Dwarves and sideboards. Game completion remains a separate evidence gate.
+uses the completed wider qualification pass and its worklists. Dwarves and
+sideboards remain later work. Game completion is a separate evidence gate.
 
 [Inference routes](INFERENCE.md) documents the explicit CLI option.
 [Standard coverage](COVERAGE.md) maps the remaining card and gameplay work.

@@ -12,9 +12,10 @@ npm run decks -- check
 ```
 
 The coverage tool reads the shipped preparation store, checks its source
-fingerprints, and ignores machine-local overrides. It writes `summary.json`,
-`cards.json`, `unassessed.txt` and `recorded-refusal.txt`. Each card row names
-its decks, preparation state, deferred-use count and any recorded refusal.
+fingerprints, and ignores machine-local overrides. It writes `summary.json`, `cards.json` and a text worklist for each of the
+five preparation states below. Each card row names its decks, preparation state,
+deferred-use count and any recorded refusal. The summary also counts cards
+outside the imported lists separately.
 
 ## Why nineteen became twenty
 
@@ -45,23 +46,34 @@ main-deck assessments. Adding a legal list is not proof that it plays.
 | Preparation across the whole legal snapshot | Cards |
 | --- | ---: |
 | Shared printed handling, without rules text needing assessment | 22 |
-| Accepted assessment with all identified uses prepared | 128 |
+| Accepted assessment with all identified uses prepared | 3,300 |
 | Accepted assessment with deferred uses | 159 |
-| Recorded refusals without an accepted replacement | 21 |
-| Not assessed | 4,834 |
+| Recorded refusals without an accepted replacement | 1,667 |
+| Not assessed | 16 |
+
+The wider pass examined all 4,818 previously unassessed cards outside the
+imported lists. It added 3,172 complete, source-reviewed packages using existing
+mechanics and recorded 1,646 refusals. No card in that scope remains unassessed
+or deferred. The seventeen shared printed cards and one older complete package
+in that scope were already covered.
+
+Across the pinned pool, complete preparation plus shared printed handling covers
+3,322 cards, or 64.3%. The remaining sixteen unassessed cards are Dwarves'
+thirteen main-deck cards and three sideboard-only cards.
 
 The 159 deferred cards contain 233 deferred uses. Even a complete assessment
 means accepted structured terms, not verified play. Unassessed cards are unknown,
-not 4,834 proven engine gaps. Several recorded refusals predate mechanics added
-overnight and need reassessment before becoming implementation tasks.
+not proven engine gaps. A refusal records the operation an assessment could
+not express. Check that claim against existing helpers before making it an
+implementation task; older refusals may predate those helpers.
 
 ## Work order and completion gates
 
-The current priority is broad qualification using the mechanics already built,
-before Dwarves, sideboards or further mechanic implementation. Scan cards outside
-the twenty imported lists first. Shorter Oracle text orders the queue; it does
-not grant support. Each accepted card needs source-backed standing terms and
-complete executable uses, with no deferred inventory counted as complete.
+The first wider-pool pass is complete, before Dwarves or sideboard work. Keep
+qualification based on the mechanics already built. Shorter Oracle text orders
+the queue; it does not grant support. Each accepted card needs source-backed
+standing terms and complete executable uses, with no deferred inventory counted
+as complete. The command remains available for a changed pool or new work:
 
 ```sh
 node tools/assess.ts --universe --outside-imported --complete --limit 100 --jobs 4 --out .pi/standard-expansion
@@ -80,13 +92,23 @@ or records the missing operation. Drafts and reviews remain in the run evidence.
 The normal deck command still prepares standing terms with deferred uses.
 
 Qualification here means accepted structured meaning checked against the source
-and existing vocabulary. Review accepted terms against the printed card before
-treating them as play evidence. Complete preparation does not replace ordinary
-games, interaction checks, replay or clone checks.
+and existing vocabulary. New packages receive complete preparation and a
+separate source review. Corpus checks then withhold known interpretation errors,
+including incorrect token names, unsupported rule words, mis-scoped selectors
+and layer-7b substitutes for characteristic-defining abilities. A corrected
+package must pass preparation and review again.
+
+Complete preparation does not replace ordinary games, interaction checks, replay
+or clone checks. The imported decks' existing meanings are unchanged; this sweep
+does not re-certify them or add counted games. Known imported follow-ups include
+Spyglass Siren's Map lacking an explore completion event, Case of the Uneaten
+Feast treating solved as a removable word, and Torch the Tower's death replacement
+being lost when its recipient loses abilities. Existing counted games do not
+establish those interactions.
 
 | Order | Work | Completion evidence |
 | --- | --- | --- |
-| 1 | Qualify the wider pinned Standard pool using existing mechanics, in resumable complete-assessment batches. Group unsupported answers for later work. | Counts distinguish complete, deferred, refused and unfinished cards. Source review checks accepted terms; no new engine mechanic is needed for an acceptance. |
+| 1 | Wider-pool qualification with existing mechanics: first pass complete. Revisit recorded refusals only with a concrete existing representation or new shared operation. | All 4,818 candidates have a checked outcome: 3,172 new complete packages and 1,646 refusals; no unfinished submissions. |
 | 2 | Exercise the original nineteen lists and representative newly qualified families. Ten original lists have no counted finish. Direct Typesafe Jev and CLI Haiku work. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Then swapped seats and imported-deck opponents. |
 | 3 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
 | 4 | Reassess sideboard refusals and the additional unassessed sideboard cards. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |
@@ -116,6 +138,16 @@ These are source-reading candidates, not accepted assessments.
 
 ## Known refusal families and broader rules
 
+The wider pass records exact source clauses and missing operations in the
+refusal ledger. Shared work includes control changes; convoke and other payment
+substitutions; selected payment objects needed during resolution; lifetime
+activation limits; reveal-until and immediate casting during resolution;
+characteristic-defining power/toughness; protection, qualified hexproof and
+wither; exploration completion; Role state-based actions; and standalone
+restrictions or replacements that must survive the recipient losing abilities.
+One shared operation can cover many cards. These are review candidates, not a
+promise that a single implementation settles every refused card in a family.
+
 Replacements and prohibitions have concrete outstanding cases: Rest in Peace's
 global graveyard replacement, Crystal Barricade's noncombat prevention,
 Sunspine Lynx's life-gain prohibition, Nowhere to Run's selective hexproof and
@@ -140,10 +172,10 @@ appropriate registered sideboard access and visibility, independently of whether
 an alpha game omits sideboards. Best-of-three match handling, restart/setup
 between games, sideboard edits and guide policies are additional work.
 
-The wider inventory includes overlapping text tags to direct review: 364
-unresolved cards mention replacement/prevention wording, 218 copies, 562
-permissions or alternative costs, 577 hidden selection, 610 history/counting,
-293 choices/types/names, 243 attached permanents, 172 multiple faces and 1,164
+The remaining inventory includes overlapping text tags to direct review: 199
+unresolved cards mention replacement/prevention wording, 137 copies, 273
+permissions or alternative costs, 156 hidden selection, 423 history/counting,
+100 choices/types/names, 104 attached permanents, 64 multiple faces and 488
 counters/designations. These counts locate candidates. They are neither
 disjoint totals nor claims that all those operations are absent.
 
