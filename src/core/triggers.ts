@@ -10,6 +10,7 @@
  * (603.10a); every other watch reads the table after it (603.6).
  * Past 150 lines to keep detection beside the trigger window that empties it.
  */
+import { targetChoiceKey } from "./targeting.ts";
 import { characteristics, walk, type Traits } from "./characteristics.ts";
 import { doubleFaced } from "./faces.ts";
 import { aiming, summary, targetings } from "./announce.ts";
@@ -408,7 +409,7 @@ export function triggerWindow(table: Table): Pending | null {
 				const recipient = trigger.event.recipient && world.lastKnown(trigger.event.recipient)?.object;
 				const recipientName = recipient && !recipient.faceDown && PUBLIC.has(recipient.zone) ? recipient.card ?? recipient.token?.name ?? recipient.id : "an unknown permanent";
 				const eventAmount = trigger.event.amount === undefined ? [] : [`Amount in this event: ${trigger.event.amount}${trigger.event.recipient ? ` to ${recipientName}` : trigger.event.player !== undefined ? ` to seat ${trigger.event.player}` : ""}.`];
-				return { option: { id: `trigger:${trigger.id}${modal ? `:mode:${mode}` : ""}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetKey).join("+")}` : "").join("") : ""}`,
+				return { option: { id: `trigger:${trigger.id}${modal ? `:mode:${mode}` : ""}${slots.length ? targets.map((set, slot) => set.length ? `:t${slot}=${set.map(targetChoiceKey).join("+")}` : "").join("") : ""}`,
 					label: [`Put on the stack: ${name}: ${trigger.basis}${modeName}`, ...aimed].join(" "),
 					shows: [`Source: ${name} (${trigger.source.id}@${trigger.source.incarnation}).`, ...eventAmount, ...aimed, ...effect.instructions.map(summary), after(trigger)].join(" "),
 					objects: [trigger.source, ...targets.flat().flatMap((chosen) => "id" in chosen ? [chosen] : [])],

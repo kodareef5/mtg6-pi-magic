@@ -5,7 +5,8 @@ import { project } from "./view.ts";
 import { aiming, targetCandidates } from "./announce.ts";
 import { affordableCosts, announcedActivation, announcementBases, announcementPayments, canAnnounce, type Announcement } from "./announcement-options.ts";
 import { paymentOptions } from "./payment-options.ts";
-import { targetKey } from "./selectors.ts";
+import { targetBounds } from "./targeting.ts";
+import { amount, targetKey } from "./selectors.ts";
 import type { LedgerRow, Table } from "./table.ts";
 import type { Frame } from "./types.ts";
 import type { Move, Pending } from "./moves.ts";
@@ -31,6 +32,13 @@ export function announcing(table: Table): Pending | null {
 	const choose = (id: string, label: string, announcement: Announcement | undefined, shows?: string) => moves.push({
 		option: { id, label, objects: [draft.source], ...(shows ? { shows } : {}) }, changes: [{ do: "announcement", ...(announcement ? { announcement } : {}) }], reason: "announcement" });
 	const bases = [...announcementBases(frame, draft)], base = bases[0];
+	const divisions = base?.slots.flatMap((slot, group) => slot.divide === undefined ? [] :
+		draft.targets[group]?.map((one, at) => ({ group, at, one, total: amount({ ...base.scope, targets: draft.targets }, slot.divide!) })) ?? []) ?? [];
+	const dividing = divisions.find(one => one.one.amount === undefined);
+	const rewindTargets = (): Announcement => ({ ...draft, targets: draft.targets.slice(0, -1).map(set => set.map(({ amount, ...one }) => one)),
+		selecting: draft.targets.at(-1)!.map(({ amount, ...one }) => one) });
+	const unassign = (group: number, at: number): Announcement => ({ ...draft, targets: draft.targets.map((set, slot) =>
+		set.map((one, index) => slot === group && index === at ? (({ amount, ...ref }) => ref)(one) : one)) });
 	let preparing: NonNullable<Pending["preparing"]> = { stage: "cost" };
 	let question = `Prepare ${draft.procedure.claim}. Nothing has been spent or cast.`;
 	if (base?.mana.x && draft.x !== undefined) question += ` X = ${draft.x}.`;
@@ -42,7 +50,8 @@ export function announcing(table: Table): Pending | null {
 		for (const one of bases) if (canAnnounce(one, frame)) choose(`announce:x:${one.x}`, `Choose X = ${one.x}`, { ...draft, x: one.x });
 	} else if (draft.targets.length < base.slots.length) {
 		preparing = { stage: "targets" };
-		const at = draft.targets.length, slot = base.slots[at]!, count = slot.count ?? 1, minimum = slot.atLeast ?? (slot.upTo ? 0 : count);
+		const at = draft.targets.length, slot = base.slots[at]!;
+		const { maximum: count, minimum } = targetBounds(slot, { ...base.scope, targets: draft.targets });
 		question += ` Choose target group ${at + 1}: ${minimum === count ? count : `${minimum} to ${count}`} targets. Selected ${draft.selecting.length}.`;
 		const pool = targetCandidates(slot, { ...base.scope, targets: draft.targets });
 		for (const target of pool) {
@@ -60,6 +69,19 @@ export function announcing(table: Table): Pending | null {
 			choose("announce:targets-done", "Finish this target group", { ...draft, targets: [...draft.targets, draft.selecting], selecting: [] });
 		if (draft.targets.length) choose("announce:back", "Return to the previous target group", { ...draft, targets: draft.targets.slice(0, -1), selecting: draft.targets.at(-1)! });
 		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined, selecting: [] });
+	} else if (dividing) {
+		preparing = { stage: "division" };
+		const { group, at, one, total } = dividing, chosen = draft.targets[group]!;
+		const left = total - chosen.reduce((sum, target) => sum + (target.amount ?? 0), 0), remaining = chosen.length - at - 1;
+		const name = aiming([[one]], base.world, frame.seat)[0]!;
+		question += ` Divide ${total} among target group ${group + 1}, at least one each. ${left} remains for ${remaining + 1} targets. Assign to ${name}`;
+		for (let n = remaining ? 1 : left; n <= left - remaining; n++) {
+			if (n > 0) choose(`announce:divide:${n}`, `Assign ${n} to ${name}`, { ...draft, targets: draft.targets.map((set, slot) =>
+				set.map((target, index) => slot === group && index === at ? { ...target, amount: n } : target)) });
+		}
+		const previous = divisions[divisions.indexOf(dividing) - 1];
+		choose("announce:back", previous ? "Return to the previous assigned amount" : "Return to the last target group",
+			previous ? unassign(previous.group, previous.at) : rewindTargets());
 	} else if (!draft.cost) {
 		question += " Choose the additional resources and lock the cost.";
 		for (const [at, cost] of affordableCosts(base, frame, draft.targets).entries()) {
@@ -67,7 +89,9 @@ export function announcing(table: Table): Pending | null {
 			moves.at(-1)!.option.objects!.push(...cost.extraRefs);
 			moves.at(-1)!.option.spends = [...cost.extraRefs, ...(cost.cost.tap ? [draft.source] : []), ...(cost.cost.counters?.on ?? []), ...(cost.cost.shown ?? [])];
 		}
-		if (draft.targets.length) choose("announce:back", "Return to the last target group", { ...draft, targets: draft.targets.slice(0, -1), selecting: draft.targets.at(-1)! });
+		const last = divisions.at(-1);
+		if (last) choose("announce:back", "Return to the last assigned amount", unassign(last.group, last.at));
+		else if (draft.targets.length) choose("announce:back", "Return to the last target group", rewindTargets());
 		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...draft, x: undefined });
 	} else {
 		const complete = announcementPayments(frame, draft);

@@ -46,7 +46,7 @@ export function turnsTaken(starting: SeatId, seats: SeatId[], turn: number): Rec
 	const order = [starting, ...seats.filter((one) => one !== starting)];
 	return Object.fromEntries(order.map((seat, at) => [seat, Math.max(0, Math.floor((turn - at + order.length - 1) / order.length))])) as Record<SeatId, number>;
 }
-export type Chosen = ObjectRef | { player: SeatId };
+export type Chosen = (ObjectRef | { player: SeatId }) & { amount?: number };
 /** What an earlier instruction bound with `as`. */
 export type Bound = { objects: ObjectRef[]; players: SeatId[]; amount?: number };
 export type Scope = {

@@ -4,6 +4,7 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
+import { targetBounds, validDivision } from "./targeting.ts";
 import { costChanges } from "./costs.ts";
 import { announcedActivation, announcementPayments } from "./announcement-options.ts";
 import { project } from "./view.ts";
@@ -73,13 +74,16 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	// A granted registration has its own target slots and local bindings. A
 	// delayed or reflexive effect captures current bindings, but cannot bind a
 	// name for the program that creates it.
-	const refs = (value: unknown, slots: number, bound: Set<string>): void => {
+	const refs = (value: unknown, slots: number, bound: Set<string>, declared: Target[] = []): void => {
 		if (typeof value === "string") {
 			const target = value.match(/^(?:(?:controller|owner):)?target:(\d+)$/), name = value.match(/^(?:(?:controller|owner):)?bound:([a-z][a-z0-9-]*)$/)?.[1];
 			if (target && Number(target[1]) >= slots) throw new Error(`target:${target[1]} names a target slot the procedure does not have.`);
 			if (name && !bound.has(name)) throw new Error(`bound:${name} is used before an instruction binds it with "as".`);
-		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound));
+		} else if (Array.isArray(value)) value.forEach((one) => refs(one, slots, bound, declared));
 		else if (value && typeof value === "object") {
+			if ("targets" in value && Array.isArray(value.targets)) declared = value.targets;
+			if ("divided" in value && typeof value.divided === "number" && (value.divided >= slots || declared[value.divided]?.divide === undefined))
+				throw new Error(`divided:${value.divided} needs a target slot with an announced division.`);
 			if ("bound" in value && typeof value.bound === "string" && !bound.has(value.bound))
 				throw new Error(`bound:${value.bound} is used before an instruction binds it with "as".`);
 			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
@@ -93,30 +97,30 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if (terms.kind === "mana" && terms.cost?.loyalty !== undefined) throw new Error("A loyalty ability cannot be a mana ability.");
 			for (const [key, one] of Object.entries(value)) {
 				if (key === "targets" && Array.isArray(one)) for (const slot of one as Target[]) {
-					if (slot.atLeast !== undefined && (slot.upTo || slot.atLeast > (slot.count ?? 1)))
+					if (slot.atLeast !== undefined && (slot.upTo || (slot.count !== "any" && slot.atLeast > (slot.count ?? 1))))
 						throw new Error("A target minimum cannot exceed its count or combine with upTo.");
 				}
 				if (key === "registers" || key === "registration") refs(one, 0, new Set());
 				else if (key === "effect") {
 					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
 					const ownSlots = effect.targets?.length || ((value as { do?: string }).do === "delay" ? slots : 0);
-					refs(effect, ownSlots, new Set(bound));
+					refs(effect, ownSlots, new Set(bound), (value as { do?: string }).do === "delay" ? declared : []);
 				} else if (key === "modes" && Array.isArray(one)) {
 					for (const mode of one as { targets?: unknown[] }[]) refs(mode, mode.targets?.length ?? 0, new Set(bound));
-				} else if (key !== "instructions") refs(one, slots, bound);
+				} else if (key !== "instructions") refs(one, slots, bound, declared);
 			}
 			if ("instructions" in value && Array.isArray(value.instructions))
-				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...bound, "player"]) : bound);
+				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...bound, "player"]) : bound, declared);
 		}
 	};
-	const visit = (instructions: Instruction[], slots: number, bound: Set<string>) => {
+	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
 		for (const instruction of instructions) {
 			if (instruction.do === "permit" && instruction.while) checkOngoingCondition(instruction.while);
 			if (instruction.do === "counter" && instruction.as)
 				throw new Error("counter does not supply an as binding. Use counter.to for a countered spell's replacement destination; report other unsupported counter-result dependencies.");
 			if (instruction.do === "choose" && instruction.from.zones?.includes("library") && !selectionScoped(instruction.from))
 				throw new Error("A library selection needs an explicit owner, controller or inspected binding in every branch; card characteristics do not grant a search.");
-			refs(instruction, slots, bound);
+			refs(instruction, slots, bound, declared);
 			if (instruction.as) bound.add(instruction.as);
 		}
 	};
@@ -170,8 +174,9 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	const scope: Scope = { world, controller, source: spell, targets: activation.targets, ...(activation.x !== undefined ? { x: activation.x } : {}) };
 	if (activation.exileSelection) checkExile(scope, activation.exileSelection, cost.exiled ?? []);
 	activation.slots.forEach((slot, at) => {
-		const chosen = activation.targets[at] ?? [], minimum = slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1);
-		if (chosen.length < minimum || chosen.length > (slot.count ?? 1)) throw new Error("A target slot has the wrong number of targets.");
+		const chosen = activation.targets[at] ?? [], { minimum, maximum } = targetBounds(slot, scope);
+		if (chosen.length < minimum || chosen.length > maximum) throw new Error("A target slot has the wrong number of targets.");
+		if (!validDivision(slot, chosen, scope)) throw new Error("A target division must assign positive integers adding to the announced total.");
 		if (new Set(chosen.map((one) => "player" in one ? `player:${one.player}` : `${one.id}@${one.incarnation}`)).size !== chosen.length)
 			throw new Error("One target slot cannot name the same target twice.");
 		for (const chosen of activation.targets[at] ?? []) {

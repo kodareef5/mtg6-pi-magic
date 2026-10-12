@@ -119,6 +119,14 @@ zero. Apply a single printed instruction to that whole slot: damage or movement
 to two targets happens in one committed group. Separate slots can name the same
 object when the card has separate occurrences of "target" (115.3).
 
+`count: "any"` allows any number of distinct targets, including zero. With
+`divide: Amount`, the seat assigns the total among its targets before costs;
+every chosen target must receive a positive integer (601.2d). A zero total
+requires zero targets. Damage and counter instructions read each recipient's
+recorded share through `amount: {divided: N}`. Lost targets never redistribute
+their shares. [Grove's Bounty](examples/divided-targets.md) exercises X,
+target selection, announced allocation and the ordinary Adventure departure.
+
 ## Numbers and conditions
 
 The condition `{ "step": "declare-blockers" }` reads the current rules step.

@@ -8,6 +8,8 @@
  * option, never removed: the table guides and does not restrain.
  * Past 150 lines because sources, costs, payments and targets combine in one offer.
  */
+import { targetChoiceKey, targetings } from "./targeting.ts";
+export { targetCandidates, targetings } from "./targeting.ts";
 import { doubleFaced, faceFacts } from "./faces.ts";
 import { spellCharacteristics } from "./characteristics.ts";
 import { castWords } from "./cast-words.ts";
@@ -15,8 +17,8 @@ import { enoughExile } from "./cost-selection.ts";
 import { targetless } from "./printed.ts";
 import { select as query } from "./query.ts";
 import { capacity, fundings, sameness, sick, spentWords, type Price, type Funding } from "./funding.ts";
-import { amount, holds, matches, objects, players, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
-import type { Instruction, Procedure, Target } from "./language.ts";
+import { amount, holds, matches, objects, targetKey, viewWorld, type Chosen, type Scope, type Seen, type World } from "./selectors.ts";
+import type { Instruction, Procedure } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
@@ -69,6 +71,7 @@ function words(value: unknown, as: "thing" | "amount" | "condition" = "thing"): 
 		return JSON.stringify(one);
 	}
 	if (as === "amount") {
+		if ("divided" in one) return `the share assigned to each target in group ${Number(one.divided) + 1}`;
 		if ("count" in one) return `the number of ${words(one.count)}`;
 		if ("power" in one) return `the power of ${words(one.power)}`;
 		if ("toughness" in one) return `the toughness of ${words(one.toughness)}`;
@@ -157,7 +160,7 @@ export function aiming(targets: Chosen[][], world: World, controller: SeatId): s
 			...(traits?.types.includes("creature") && traits.power !== undefined ? [`${traits.power}/${traits.toughness}`] : [])];
 		return `${object ? name(object) : chosen.id} (${facts.join(", ")})`; };
 	const marks = targetConflicts(targets.flat(), world, controller).map((one) => one.reason);
-	return [...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map(named).join(", ") : "none"}.`), ...marks];
+	return [...targets.map((set, at) => `Target ${at + 1}: ${set.length ? set.map(one => `${named(one)}${one.amount === undefined ? "" : `: assigned ${one.amount}`}`).join(", ") : "none"}.`), ...marks];
 }
 
 /** Registered target restrictions guide announcement and resolution without hiding physical continuations. */
@@ -168,16 +171,6 @@ export function targetConflicts(targets: Chosen[], world: World, controller: Sea
 			? [{ target, reason: `${name(object)} (${object.id}@${object.incarnation}) conflicts with hexproof.` }] : [];
 	});
 }
-
-/** The objects and players each slot could take now, before counting. */
-export function targetCandidates(slot: Target, scope: Scope): Chosen[] {
-	const seats = slot.player === undefined ? [] : slot.player === "any" ? scope.world.players.map((one) => one.id) : players(scope, slot.player);
-	return [...(slot.object ? scope.world.objects.filter((object) => matches(scope, object, slot.object!)).map(ref) : []), ...seats.map((player) => ({ player }))];
-}
-
-/** Every way to fill the slots, each chosen with the earlier slots in scope: "Equipment attached to that creature". */
-export const targetings = (slots: Target[], scope: Scope): Chosen[][][] => slots.reduce<Chosen[][][]>((sets, slot) => sets.flatMap((set) =>
-	subsets(targetCandidates(slot, { ...scope, targets: set }), slot.count ?? 1, slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1)).map((option) => [...set, option])), [[]]);
 
 /** The extra costs a procedure states, as each way they can be paid. */
 type Way = { paid: Omit<Paid, "generic" | "colors">; uses: string[]; consumes?: string[]; shows: string; reduce?: number; exileSelection?: Activation["exileSelection"] };
@@ -361,7 +354,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 		const aims = immutable(targetings(slots, announced)).map((targets) => {
 			const aimed = targets.flat(), text = aiming(targets, world, frame.seat);
 			return { targets, refs: aimed.flatMap((chosen) => "id" in chosen ? [chosen] : []),
-				id: targets.map((set, at) => set.length ? `:t${at}=${set.map(targetKey).join("+")}` : "").join(""),
+				id: targets.map((set, at) => set.length ? `:t${at}=${set.map(targetChoiceKey).join("+")}` : "").join(""),
 				label: `${procedure.claim} (${selected?.name ?? name(source)})${aimed.length ? `. ${text.slice(0, targets.length).join(" ")}` : ""}`,
 				notes: immutable(targetConflicts(aimed, world, frame.seat).map((one) => one.reason)),
 				shows: [...text, ...effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" ") };

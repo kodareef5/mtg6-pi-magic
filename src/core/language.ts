@@ -131,6 +131,9 @@ export const Defs = {
 		object({ turns: one("self", "opponent") }),
 	]),
 
+	/** The positive share assigned to a target at announcement, never redistributed. */
+	TargetAmount: Type.Union([Type.Ref("Amount"), object({ divided: natural })]),
+
 	Condition: Type.Union([
 		object({ amount: Type.Ref("Amount"), ...Range.properties }),
 		/** The binding holds at least one object, or the optional instruction that made it was done. */
@@ -153,7 +156,9 @@ export const Defs = {
 		object: Type.Optional(Type.Ref("Selector")),
 		player: Type.Optional(Side),
 		/** Default 1. */
-		count: Type.Optional(positive),
+		count: Type.Optional(Type.Union([positive, Type.Literal("any")])),
+		/** Divide this amount among this group's targets, at least one each (601.2d). */
+		divide: Type.Optional(Type.Ref("Amount")),
 		/** A positive minimum below count, such as one or two targets. Omit with upTo. */
 		atLeast: Type.Optional(positive),
 		/** "Up to": zero is legal (115.6). */
@@ -248,7 +253,7 @@ export const Defs = {
 	Instruction: Type.Union([
 		/** Shared library keyword choices; completion is recorded after all their movement. */
 		step({ do: Type.Literal("keyword"), name: one("scry", "surveil"), who: PlayerRef, count: Type.Ref("Amount") }),
-		step({ do: Type.Literal("damage"), to: Type.Optional(Type.Union([ObjectRef, PlayerRef])), every: Type.Optional(Type.Ref("Selector")), amount: Type.Ref("Amount"), from: Type.Optional(ObjectRef) }),
+		step({ do: Type.Literal("damage"), to: Type.Optional(Type.Union([ObjectRef, PlayerRef])), every: Type.Optional(Type.Ref("Selector")), amount: Type.Ref("TargetAmount"), from: Type.Optional(ObjectRef) }),
 		/** A global prevention rule. Bounded shields and prevention with additional effects are not represented. */
 		step({ do: Type.Literal("damage-rule"), mode: DamageMode, combat: Type.Optional(Type.Boolean()), until: Duration }),
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
@@ -282,7 +287,7 @@ export const Defs = {
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),
 		step({ do: Type.Literal("draw"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
-		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("Amount") }),
+		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("TargetAmount") }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),
 		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })) }),
 		step({ do: Type.Literal("tap"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),

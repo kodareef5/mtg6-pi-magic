@@ -118,7 +118,7 @@ reads on its help option. Nothing in the plan grants or withholds a pass, and no
 code passes for the seat; the pass option says what passing does now.
 
 New games offer a source and accepted mode before asking for X, targets,
-additional costs and mana sources. Jev answers each part under the selected
+announced divisions, additional costs and mana sources. Jev answers each part under the selected
 plan's execution policy. Partial choices remain private and spend nothing;
 confirmation performs the accepted cast or activation. Cancelling returns to
 priority without executing the abandoned casting step. An explicit cancellation

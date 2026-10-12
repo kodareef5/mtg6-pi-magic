@@ -78,7 +78,7 @@ export type Decision = {
 	question: string;
 	options: Option[];
 	/** One part of an uncommitted use. These facts never imply a paid cost. */
-	preparing?: { stage: "X" | "targets" | "cost" | "mana" | "graveyard"; payments?: true; selected?: string[]; remainingMana?: number; missingColors?: string[]; ready?: boolean };
+	preparing?: { stage: "X" | "targets" | "division" | "cost" | "mana" | "graveyard"; payments?: true; selected?: string[]; remainingMana?: number; missingColors?: string[]; ready?: boolean };
 	/** An offered option that safely ends this decision after two unusable answers. */
 	fallback?: string;
 	/** Known uses with visible sources. Prepare them before answering this physical decision. */

@@ -458,6 +458,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   player.ts, intent.ts the Player interface and refusals; what a seat means to do
   budget.ts            the mana and payment forecast a plan is checked against before acceptance
   announce.ts          the announcement options a seat's packages and plan offer
+  targeting.ts         target counts and the division fixed before payment
   knowledge.ts, odds.ts what a seat knows and the odds it may work out; transitions unfinished
   derived.ts, declare.ts, concede.ts, say.ts  unwritten derived facts and raw declarations; conceding; table talk
   syntax.ts, names.ts  zone, reason, change and layer types; seat names

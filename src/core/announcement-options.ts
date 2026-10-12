@@ -1,6 +1,7 @@
 /** A proposed use retains its accepted meaning while the seat selects its parts.
  * Feasibility reads projected resources; it neither chooses nor spends them. */
 import { offerBases, offerCosts, paidActivation, targetCandidates, type OfferBase, type OfferCost } from "./announce.ts";
+import { targetBounds, validDivision } from "./targeting.ts";
 import { payable, paymentOptions } from "./payment-options.ts";
 import { completePayments } from "./complete-payments.ts";
 import { targetKey, type Chosen } from "./selectors.ts";
@@ -37,8 +38,8 @@ export function canAnnounce(base: OfferBase, frame: Frame, completed: Chosen[][]
 	const visit = (targets: Chosen[][], selected: Chosen[]): boolean => {
 		const slot = base.slots[targets.length];
 		if (!slot) return affordableCosts(base, frame, targets).length > 0;
-		const minimum = slot.atLeast ?? (slot.upTo ? 0 : slot.count ?? 1), maximum = slot.count ?? 1;
-		const pool = targetCandidates(slot, { ...base.scope, targets });
+		const scope = { ...base.scope, targets }, pool = targetCandidates(slot, scope);
+		const { minimum, maximum } = targetBounds(slot, scope, pool.length);
 		if (selected.length > maximum || new Set(selected.map(targetKey)).size !== selected.length ||
 			selected.some((one) => !pool.some((candidate) => targetKey(candidate) === targetKey(one)))) return false;
 		const remaining = pool.filter((one) => !selected.some((old) => targetKey(old) === targetKey(one)));
@@ -80,7 +81,7 @@ export function announcedActivation(frame: Frame, draft: Announcement): Activati
 	const base = announcementBases(frame, draft).next().value;
 	if (!base || draft.x === undefined || draft.targets.length !== base.slots.length || !draft.cost) return;
 	const menu = paymentOptions(frame, { ...draft.cost.price, life: draft.cost.extra.paid.life }, draft.payment, new Set(draft.cost.extra.uses), base.spending);
-	if (!menu.complete) return;
+	if (!menu.complete || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return;
 	return { ...paidActivation(base, frame, draft.cost, menu.funding), targets: structuredClone(draft.targets) };
 }
 
@@ -88,7 +89,7 @@ export function announcedActivation(frame: Frame, draft: Announcement): Activati
 export function announcementPayments(frame: Frame, draft: Announcement) {
 	if (draft.paymentMode !== "complete" || !draft.cost || draft.x === undefined) return undefined;
 	const base = announcementBases(frame, draft).next().value;
-	if (!base || draft.targets.length !== base.slots.length) return undefined;
+	if (!base || draft.targets.length !== base.slots.length || !base.slots.every((slot, at) => validDivision(slot, draft.targets[at]!, { ...base.scope, targets: draft.targets }))) return undefined;
 	const cost = { ...draft.cost.price, life: draft.cost.extra.paid.life };
 	const menu = paymentOptions(frame, cost, draft.payment, new Set(draft.cost.extra.uses), base.spending);
 	return completePayments(frame, cost, menu)?.map((payment, at) => {

@@ -9,6 +9,7 @@
  * Past 150 lines because each instruction is a short case of one switch.
  */
 import { amount, damageSource, holds, objects, players, select, tableWorld, targetKey, type Bound, type Chosen, type Scope, type Seen } from "./selectors.ts";
+import { assignedAmount } from "./targeting.ts";
 import { damageResult } from "./damage.ts";
 import { characteristics, has } from "./characteristics.ts";
 import { doubleFaced, room, transformable } from "./faces.ts";
@@ -90,16 +91,16 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			return { actor: who, question: `${claim}: pay the full cost.`, choices };
 		}
 		case "damage": {
-			const dealt = amount(scope, instruction.amount);
+			const dealt = typeof instruction.amount === "object" && "divided" in instruction.amount
+				? "the announced share of" : amount(scope, instruction.amount);
 			const source = objects(scope, instruction.from ?? "this")[0];
 			const from = source ? ref(source) : pending.object;
 			const hit = [...(instruction.to ? live(table, objects(scope, instruction.to)) : []), ...(instruction.every ? many(table, scope, { every: instruction.every }) : [])]
 				.filter((object) => object.zone === "battlefield");
 			const people = typeof instruction.to === "string" ? players(scope, instruction.to) : [];
-			const changes: Extract<Change, { do: "damage" }>[] = dealt <= 0 ? [] : [
-				...hit.map((object): Extract<Change, { do: "damage" }> => ({ do: "damage", source: from, target: ref(object), amount: dealt })),
-				...people.map((player): Extract<Change, { do: "damage" }> => ({ do: "damage", source: from, target: { player }, amount: dealt })),
-			];
+			const changes: Extract<Change, { do: "damage" }>[] = [...hit.map(ref), ...people.map(player => ({ player }))]
+				.map(target => ({ do: "damage" as const, source: from, target, amount: assignedAmount(scope, instruction.amount, target) }))
+				.filter(change => change.amount > 0);
 			const world = instruction.as ? tableWorld(table) : undefined;
 			const delivered = instruction.as ? changes.map(change => damageResult(world!, change, damageSource(table, from))).filter(change => change.amount > 0) : [];
 			return one(`Deal ${dealt} damage to ${[...hit.map(name), ...people.map((id) => seat(table, id).name)].join(", ") || "nothing"}`, changes,
@@ -214,10 +215,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			return one(`${instruction.do === "draw" ? "Draw" : "Mill"} ${count}`, changes, bind(instruction, { objects: moved, players: [] }));
 		}
 		case "counters": {
-			const count = amount(scope, instruction.amount);
 			const on = live(table, instruction.on ? objects(scope, instruction.on) : instruction.every ? select(scope, instruction.every) : []);
-			return one(`${count < 0 ? "Remove" : "Put"} ${Math.abs(count)} ${instruction.kind} ${count < 0 ? "from" : "on"} ${on.map(name).join(", ") || "nothing"}`,
-				count ? on.map((object) => ({ do: "counters" as const, what: object.id, kind: instruction.kind, amount: count })) : []);
+			const counts = on.map(object => ({ object, count: assignedAmount(scope, instruction.amount, ref(object)) }));
+			const count = typeof instruction.amount === "object" && "divided" in instruction.amount ? undefined : amount(scope, instruction.amount);
+			const label = count === undefined
+				? counts.map(({ object, count }) => `Put ${count} ${instruction.kind} on ${name(object)}`).join("; ") || `Put no ${instruction.kind} counters`
+				: `${count < 0 ? "Remove" : "Put"} ${Math.abs(count)} ${instruction.kind} ${count < 0 ? "from" : "on"} ${on.map(name).join(", ") || "nothing"}`;
+			return one(label, counts.filter(one => one.count).map(({ object, count }) => ({ do: "counters" as const, what: object.id, kind: instruction.kind, amount: count })));
 		}
 		case "life": {
 			const change = amount(scope, instruction.amount);

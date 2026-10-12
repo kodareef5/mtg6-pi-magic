@@ -24,12 +24,12 @@ Those drive engine and syntax work, ordered by how many decks they block.
 ## Next implementation chunk
 
 Nine imported main decks have complete standing coverage; eight retain completed
-source-reviewed games after corrected stun-counter continuations.
+source-reviewed games after the mana-source audit withdrew Azorius finishes.
 [Status](STATUS.md) holds the current evidence. Ten lists still need standing
 assessments.
 
-1. Complete Izzet Prowess' first game, including Grove's Bounty target division,
-   and resume Sanctum's stopped surveil preparation. Validate complete-payment menus
+1. Exercise Grove's Bounty's new announced division in the stopped Prowess game
+   and finish the corrected Azorius continuations. Validate complete-payment menus
    across fresh imported pairings in both seat orders. Reuse compatible matchup briefs.
    Review runtime procedures and exercised standing terms against their source,
    including casting opportunities the engine failed to offer. Repair before
