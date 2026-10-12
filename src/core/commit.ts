@@ -61,7 +61,7 @@ export type Entrant = {
  * library and its sideboard outside the game. Printed facts come from the
  * pinned card file, the shipped Standard file by default.
  */
-export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number } = {}): Table {
+export function start(format: Format, entrants: Entrant[], seed: string, universe: Universe = shipped(), options: { announcementsFrom?: number; excessManaFrom?: number; searchesFrom?: number; deathtouchFrom?: number } = {}): Table {
 	if (entrants.length < format.seats.min || entrants.length > format.seats.max) {
 		throw new Error(
 			`${format.name} seats ${format.seats.min} to ${format.seats.max}, not ${entrants.length}`,
@@ -74,6 +74,7 @@ export function start(format: Format, entrants: Entrant[], seed: string, univers
 		...(options.announcementsFrom !== undefined ? { announcementsFrom: options.announcementsFrom } : {}),
 		...(options.excessManaFrom !== undefined ? { excessManaFrom: options.excessManaFrom } : {}),
 		...(options.searchesFrom !== undefined ? { searchesFrom: options.searchesFrom } : {}),
+		...(options.deathtouchFrom !== undefined ? { deathtouchFrom: options.deathtouchFrom } : {}),
 		...(universe.names ? { cardNames: { ...universe.names } } : {}),
 		printed: printedFacts(universe, decks.flatMap((deck) => [...listed(deck.main), ...listed(deck.sideboard)])),
 		seats: [],
@@ -261,6 +262,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 
 	for (const [index, change] of changes.entries()) {
 		switch (change.do) {
+			case "state-check":
+				for (const one of table.things.values()) delete one.deathtouched;
+				break;
 			case "turn":
 				turnTransition(table, change);
 				break;
@@ -401,8 +405,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 						const left = Math.max(0, (hurt.counters[counter!] ?? 0) - change.amount);
 						if (left) hurt.counters[counter!] = left; else delete hurt.counters[counter!];
 					}
-					// 704.5h reads this at the next check; cleanup clears it with the damage.
-					if (types.includes("creature") && has(damage.get(change)?.source?.traits, "deathtouch")) hurt.deathtouched = true;
+					// 704.5h considers the occurrence, even if damage is removed or a noncreature becomes a creature before the check.
+					if ((types.includes("creature") || table.deathtouchFrom !== undefined && table.ledger.length >= table.deathtouchFrom) && has(damage.get(change)?.source?.traits, "deathtouch")) hurt.deathtouched = true;
 				}
 				break;
 			}
@@ -754,7 +758,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
  * writer. It is the logging that stops, not the discipline.
  */
 const control = (changes: Change[]): boolean =>
-	changes.length > 0 && changes.every((change) => change.do === "announcement" || change.do === "turn" || change.do === "resolution" && !(change.action === "next" && (change.use || change.resolved)) || (change.do === "combat" && change.action !== "strike"));
+	changes.length > 0 && changes.every((change) => change.do === "state-check" || change.do === "announcement" || change.do === "turn" || change.do === "resolution" && !(change.action === "next" && (change.use || change.resolved)) || (change.do === "combat" && change.action !== "strike"));
 
 /**
  * Who may act next, and where the turn is. A transition shares the commit door
@@ -782,7 +786,10 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 			// 514.2: after the final discard, expire effects and damage together,
 			// before checking for state-based actions or waiting triggers.
 			if (cursor.steps[0] === "cleanup" && cursor.stepDone) {
-				for (const thing of table.things.values()) { thing.damage = 0; delete thing.deathtouched; }
+				for (const thing of table.things.values()) {
+					thing.damage = 0;
+					if (table.deathtouchFrom === undefined || table.ledger.length < table.deathtouchFrom) delete thing.deathtouched;
+				}
 				table.notes = table.notes.filter((note) => note.until !== "end-of-turn" && !(typeof note.until === "object" &&
 					note.until.endOfNextTurn === cursor.active && cursor.turn > note.until.afterTurn));
 			}

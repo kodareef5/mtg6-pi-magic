@@ -62,6 +62,8 @@ export type Reason =
  * them. A motion arrives here when a milestone needs it, never in advance.
  */
 export type Change =
+	/** Complete a state-based check; earlier deathtouch occurrences have been considered. */
+	| { do: "state-check" }
 	| { do: "announcement"; announcement?: import("./announcement-options.ts").Announcement }
 	| { do: "payment"; payment?: import("./cost-selection.ts").Payment }
 	| { do: "entry"; entry?: import("./entry-payments.ts").Entry }

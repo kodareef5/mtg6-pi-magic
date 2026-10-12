@@ -189,3 +189,17 @@ decision, within the initial declare-blockers priority window. A model-backed
 seat with a judge may object directly. The judge reads a publicly reconstructed
 pre-declaration position; current conflict hints do not decide historical
 legality. See [the objection contract](PLANS.md#objections).
+
+## Deathtouch checkpoints
+
+Deathtouch damage matters until the next state-based check (702.2b, 704.5h),
+even if all marked damage is healed first. An indestructible creature that
+survives that check does not die from the old occurrence if it loses
+indestructible later. Damage to a noncreature matters if it becomes a creature
+before the check. Resolution completes before checking; zero toughness and
+ordinary lethal damage remain separate checks.
+
+The journal's `deathtouchFrom` version starts this check path. Fresh games use
+zero; historical journals retain their prior path. Clearing an occurrence alone
+is a recorded compulsory decision, not a damage event or a reason to open
+cleanup priority.

@@ -36,8 +36,7 @@ currently wait on strategy-provider credits.
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Correct deathtouch's state-check lifetime before further
-   counted games. Mardu needs
+   stopped games. Mardu needs
    discard events, conditional graveyard permission, Class levels and random
    selections. Keep those meanings in the refusal ledger until their shared
    operations are implemented.

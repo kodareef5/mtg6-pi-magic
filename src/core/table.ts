@@ -95,7 +95,7 @@ export type Thing = {
 	counters: Record<string, number>;
 	/** Marked damage. Not a counter. Wiped at cleanup. */
 	damage: number;
-	/** Dealt damage by a source with deathtouch since the last state check (704.5h). */
+	/** Positive damage from deathtouch since the last recorded state check (legacy journals clear at cleanup). */
 	deathtouched?: true;
 };
 
@@ -425,6 +425,8 @@ export type Table = {
 	excessManaFrom?: number;
 	/** Journal decision version at which library selections record search and look steps. */
 	searchesFrom?: number;
+	/** Ledger version at which deathtouch expires after each state-based check. */
+	deathtouchFrom?: number;
 	/** The game type. One table runs one. */
 	format: Format;
 	/** Printed characteristics for every registered name. Public, pinned with the card file. */

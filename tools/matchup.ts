@@ -45,7 +45,7 @@ const carried = from && replay(from.path, dealtTable, from.version,
 const chosen = values.decks?.split(",").map((one) => one.trim());
 if (chosen && (chosen.length !== 2 || chosen[0] === chosen[1] || from)) throw new Error("--decks names two different collection decks, comma separated, for a fresh game.");
 const label = (name: string, at: number) => { const short = name.replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-|-$/g, "").slice(0, 20); return short || `Seat${at}`; };
-const table = carried ? carried.table : chosen ? start(standard, chosen.map((name, at) => ({ name: label(name, at), deck: values.alpha ? alpha(deck(name)) : deck(name) })), values.seed!, universe, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0 }) : matchTable(values.seed!, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0 });
+const table = carried ? carried.table : chosen ? start(standard, chosen.map((name, at) => ({ name: label(name, at), deck: values.alpha ? alpha(deck(name)) : deck(name) })), values.seed!, universe, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0 }) : matchTable(values.seed!, { announcementsFrom: 0, excessManaFrom: 0, searchesFrom: 0, deathtouchFrom: 0 });
 if (chosen && table.seats[0]!.name === table.seats[1]!.name) throw new Error("The two deck names shorten to the same seat label; rename one deck.");
 // A list's own strategy pattern, when --green or --red names one, resolved for whichever seat plays that list.
 const byList: Record<string, string | undefined> = { Green: values.green, Red: values.red };
@@ -58,7 +58,7 @@ const id = `${table.rng.seed}-${Date.now()}`;
 mkdirSync(values.out!, { recursive: true });
 const path = join(values.out!, `${id}.jsonl`), calls = join(values.out!, `${id}.calls.jsonl`);
 const journal = from ? reopen(path, fork(from.path, from.version ?? table.ledger.length, id, path), table)
-	: open(path, { id, format: "standard", seed: table.rng.seed, announcementsFrom: table.announcementsFrom, excessManaFrom: table.excessManaFrom, searchesFrom: table.searchesFrom, seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })),
+	: open(path, { id, format: "standard", seed: table.rng.seed, announcementsFrom: table.announcementsFrom, excessManaFrom: table.excessManaFrom, searchesFrom: table.searchesFrom, deathtouchFrom: table.deathtouchFrom, seats: table.seats.map(({ id, name, deck }) => ({ id, name, deck })),
 		cards: matchup.cards, rules: matchup.rules, created: new Date().toISOString() });
 writeFileSync(calls, "", { flag: "wx", mode: 0o600 });
 const observed = traceInference(inference as never, (event) => {
@@ -94,7 +94,7 @@ finally {
 // or its health line reports a mismatch between an unadvanced table and an advanced replay of the same journal.
 while (!table.outcome && !nextDecision(table)) advance(table);
 // The game, not the run: an outcome's gaps are what live calls failed to do, which replay never makes.
-const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, payment: game.payment, announcement: game.announcement, announcementsFrom: game.announcementsFrom, excessManaFrom: game.excessManaFrom, searchesFrom: game.searchesFrom, outcome: game.outcome?.results });
+const state = (game: typeof table) => JSON.stringify({ ledger: game.ledger, log: game.log, things: [...game.things], cursor: game.cursor, work: game.work, resolution: game.resolution, payment: game.payment, announcement: game.announcement, announcementsFrom: game.announcementsFrom, excessManaFrom: game.excessManaFrom, searchesFrom: game.searchesFrom, deathtouchFrom: game.deathtouchFrom, outcome: game.outcome?.results });
 const replayMatches = state(replay(path, dealtTable).table) === state(table);
 seated.timing.finishedAt = Date.now();
 const result = gameResult(table, seated, { replayMatches, journal: path, trace: calls, ...(failure ? { error: String(failure) } : {}) });

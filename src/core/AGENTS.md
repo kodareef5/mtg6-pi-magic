@@ -149,6 +149,12 @@ do not claim that the first untap step has started.
 Opening completion is derived from kept seats and outstanding bottom choices.
 There is no second `done` flag to keep in step with those facts.
 
+Deathtouch records a damage occurrence until the next state-based check, even
+if marked damage is healed. A surviving indestructible permanent then forgets
+that occurrence. The check is a compulsory recorded decision; listing it is
+pure. A check that only clears those occurrences opens no cleanup priority.
+Older journals retain their path until their recorded deathtouchFrom version.
+
 Cleanup finishes its discards, then removes damage and temporary effects together.
 Its state-based actions or waiting triggers open priority for both seats and
 create an obligation for another cleanup. A resolving effect cannot restart

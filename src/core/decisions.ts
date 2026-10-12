@@ -189,7 +189,7 @@ function bookkeeping(table: Table, p: Pending, move: Move): Change[] {
 	if (table.payment || table.announcement) return [];
 	const id = move.option.id;
 	if (table.cursor.steps[0] === "cleanup" && table.cursor.stepDone && !table.cursor.cleanupPriority &&
-		(p.situation === "state-based" || p.situation === "trigger-order")) return [{ do: "turn", action: "priority" }];
+		(p.situation === "state-based" && move.changes.some(one => one.do !== "state-check") || p.situation === "trigger-order")) return [{ do: "turn", action: "priority" }];
 	if (p.situation === "priority") {
 		const changes: Change[] = [{ do: "turn", action: id === "pass" ? "pass" : "act", who: p.seat, land: move.reason === "play-land" }];
 		const top = cardsIn(table, "stack")[0];
@@ -217,6 +217,7 @@ function stateBased(table: Table): Pending | null {
 	);
 	const changes: Change[] = [...losing.map((s) => ({ do: "end-game" as const, who: s.id, result: "lose" as const })), ...startingSpeed(table)];
 	const field = cardsIn(table, "battlefield");
+	const deathtouch = table.deathtouchFrom !== undefined && table.ledger.length >= table.deathtouchFrom;
 	const gone = new Set<string>();
 	const leave = (object: Thing, reason: "state-based-action" | "destroy") => { gone.add(object.id); changes.push({ do: "move", what: object.id, to: "graveyard", reason }); };
 	for (const object of field) {
@@ -225,7 +226,7 @@ function stateBased(table: Table): Pending | null {
 		if (!traits?.types.includes("creature") || traits.toughness === undefined) continue;
 		// 704.5f, then 704.5g and 704.5h, which indestructible ignores.
 		if (traits.toughness <= 0) leave(object, "state-based-action");
-		else if ((object.damage >= traits.toughness || (object.deathtouched && object.damage > 0)) && !has(traits, "indestructible")) leave(object, "destroy");
+		else if ((object.damage >= traits.toughness || (object.deathtouched && (deathtouch || object.damage > 0))) && !has(traits, "indestructible")) leave(object, "destroy");
 	}
 	for (const object of field) {
 		if (gone.has(object.id)) continue;
@@ -259,10 +260,11 @@ function stateBased(table: Table): Pending | null {
 		legends.set(key, [...(legends.get(key) ?? []), object]);
 	}
 	const crowded = [...legends.values()].find((group) => group.length > 1);
+	if (deathtouch && field.some(one => one.deathtouched)) changes.push({ do: "state-check" });
 	if (!changes.length && !crowded) return null;
 	const seat = crowded?.[0]!.controller ?? losing[0]?.id ?? table.cursor.active;
 	const group: Move = {
-		option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: "Apply state-based actions" },
+		option: { id: `lose:${losing.map((s) => s.id).join(",")}`, label: changes.every(one => one.do === "state-check") ? "Finish checking earlier deathtouch damage" : "Apply state-based actions" },
 		changes, reason: "state-based-action",
 	};
 	return {
