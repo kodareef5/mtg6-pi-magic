@@ -23,7 +23,7 @@ import { project } from "./view.ts";
 import { summary } from "./announce.ts";
 import { cardNameChoices } from "./card-names.ts";
 import { defenders } from "./combat.ts";
-import { tokenCopy } from "./copies.ts";
+import { tokenCopy, copySpell } from "./copies.ts";
 import { STEPS } from "./steps.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification, Selector } from "./language.ts";
@@ -56,7 +56,7 @@ function captured(scope: Scope, change: Modification): Modification {
 export function instructionStep(table: Table, scope: Scope, instruction: Instruction, pending: Resolution, claim: string): Step {
 	const controller = scope.controller;
 	const visible = new Set((project(table, controller).objects ?? []).filter((one) => !one.faceDown || one.card).map((one) => `${one.id}@${one.incarnation}`));
-	const name = (object?: Seen) => !object ? "nothing" : !visible.has(`${object.id}@${object.incarnation}`) ? "an unknown card" : object.card ?? object.token?.name ?? object.id;
+	const name = (object?: Seen) => !object ? "nothing" : !visible.has(`${object.id}@${object.incarnation}`) ? "an unknown card" : object.card ?? object.token?.name ?? object.copied?.spec.name ?? object.id;
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
@@ -270,6 +270,18 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const which = many(table, scope, instruction).filter((object) => object.zone === "battlefield");
 			return one(`${instruction.do === "tap" ? "Tap" : "Untap"} ${which.map(name).join(", ") || "nothing"}`, which.map((object) => ({ do: instruction.do, what: object.id })));
 		}
+		case "copy-spell": {
+			const originals = objects(scope, instruction.what, true);
+			if (originals.length > 1) return { actor: controller, question: "Copy the spell.", choices: [], blocked: "A spell copy needs one source; select one before copying." };
+			const original = originals[0];
+			if (!original) return one("No spell is copied: its source is unavailable.", [], bind(instruction, { objects: [], players: [] }));
+			const result = copySpell(table, original);
+			if ("blocked" in result) return result.preparation ? { actor: result.preparation.seat, question: result.blocked, choices: [], preparation: result.preparation.needed }
+				: { actor: controller, question: "Copy the spell.", choices: [], blocked: result.blocked };
+			const id = `spell-copy-${table.cursor.clock + 1}`;
+			return one(`Copy ${result.spec.name} onto the stack with its announced choices`, [{ do: "copy-spell", id, of: ref(original), spec: result.spec,
+				ability: { ...result.ability!, controller } }], bind(instruction, { objects: [{ id, incarnation: 0 }], players: [] }));
+		}
 		case "token": {
 			const count = Math.max(0, amount(scope, instruction.count)), creators = [...new Set(players(scope, instruction.controller ?? "you"))];
 			const originals = instruction.copy && count && creators.length ? objects(scope, instruction.copy, true) : [];
@@ -356,7 +368,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "counter": {
 			const stacked = live(table, objects(scope, instruction.what)).filter((object) => object.zone === "stack");
 			const counter = (selected: Seen[]): Pick<Choice, "changes" | "bind"> => ({
-				changes: selected.map((object): Change => object.card ? { do: "move", what: object.id, to: instruction.to === "exile" ? "exile" : "graveyard", reason: "counter" } : { do: "cease", what: object.id }),
+				changes: selected.map((object): Change => object.card || object.spellCopy ? { do: "move", what: object.id, to: instruction.to === "exile" ? "exile" : "graveyard", reason: "counter" } : { do: "cease", what: object.id }),
 				...bind(instruction, { objects: selected.map(ref), players: [], amount: selected.length }),
 			});
 			const destination = instruction.to === "exile" ? " Countered spells go directly to exile." : "";

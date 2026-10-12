@@ -23,9 +23,9 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Fifteen imported main decks have complete standing coverage; nine have completed
+Sixteen imported main decks have complete standing coverage; nine have completed
 source-reviewed games. The newly admitted lists await their first games.
-[Status](STATUS.md) holds the current evidence. Four lists still need standing
+[Status](STATUS.md) holds the current evidence. Three lists still need standing
 assessments. Saved live continuations currently wait on strategy-provider credits.
 
 1. Start games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
@@ -35,9 +35,8 @@ assessments. Saved live continuations currently wait on strategy-provider credit
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Azorius Momo needs Sage of the Skies' spell copy.
-   Combined tap payments now cover Drum and Gene Pollinator; life-gain events and
-   emblems are among Lifegain's blockers. Mardu's remaining source mechanics stay
+   stopped games. Life-gain events, explore and emblems block Lifegain.
+   Jund needs shared sacrifice and replacement mechanics. Mardu's remaining source mechanics stay
    in the refusal ledger until their shared operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.

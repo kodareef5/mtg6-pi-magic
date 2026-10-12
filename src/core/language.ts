@@ -308,6 +308,8 @@ export const Defs = {
 		step({ do: Type.Literal("pay"), who: PlayerRef, cost: Type.Ref("Cost") }),
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),
 		step({ do: Type.Literal("draw"), who: PlayerRef, count: Type.Ref("Amount") }),
+		/** Copy the announced spell and its decisions, without casting it or choosing new targets. */
+		step({ do: Type.Literal("copy-spell"), what: ObjectRef }),
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("TargetAmount") }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),

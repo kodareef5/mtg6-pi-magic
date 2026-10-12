@@ -211,6 +211,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `transform` | `what` or `every`; keep the same permanent and turn it to its other face |
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
+| `copy-spell` | `what` names one spell, retaining announced choices without casting or paying again; optional `as` binds its new stack object |
 | `designate` | `what`, `designation: "harnessed"`; marks the current permanent until it leaves the battlefield |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `controller` names each creator (default `you`); `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
 | `modify` | change characteristics `until` a duration, written as a public label |
@@ -311,7 +312,10 @@ Named additional mana payments belong to spell announcements. Each instance
 has a distinct name; `{cast: "this", paid: "offspring"}` reads whether that
 instance was paid for the spell or the permanent it resolved into. Reducing
 the total cost to zero still pays the chosen additional cost. A blink or a
-token copy inherits no casting payment. See [named costs](examples/named-costs.md).
+token created by copying a permanent inherits no casting payment. A spell copy
+retains chosen additional and alternative costs, but spends zero mana and was
+not cast. Its resolving token keeps those choices. See
+[named costs](examples/named-costs.md) and [spell copies](examples/spell-copies.md).
 
 Optional additional costs also use separate procedures. A blighted Requiting
 Hex pays its counter at announcement and includes the life gain in that variant;
@@ -752,7 +756,9 @@ zone permission and cannot combine two alternative costs.
   of these cards produce it.
 - Effects that take control of a permanent, morph, disguise, and other face-up
   replacement effects.
-- Read ahead, general spell copying, and double-faced token copies.
+- Read ahead, copying stack abilities, choosing new targets for spell copies,
+  and multiple-face spell or token copies. Spell words without separate native
+  and granted provenance also block copying.
 - Phyrexian and snow mana payments.
 
 A selector may use `nameOf: ObjectRef` to match an object sharing a name with

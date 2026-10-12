@@ -84,10 +84,10 @@ export function base(table: Table, object: Thing): Traits | undefined {
 			one.kind === "permit" && one.cast?.from.includes(object.zone as never) ||
 			one.kind === "watch" && one.zones?.includes(object.zone as never)) : [];
 	const own = [...(object.registrations ?? []), ...registered(table, object), ...standing].filter((one) => one.face === undefined || active.includes(one.face));
-	if (object.token || object.zone === "battlefield" && object.copied) {
-		const spec = object.zone === "battlefield" && object.copied ? object.copied.spec : object.token!;
+	if (object.token || (object.zone === "battlefield" || object.spellCopy) && object.copied) {
+		const spec = (object.zone === "battlefield" || object.spellCopy) && object.copied ? object.copied.spec : object.token!;
 		return { name: spec.name, supertypes: [...(spec.supertypes ?? [])], types: [...spec.types], subtypes: [...(spec.subtypes ?? [])],
-			colors: [...spec.colors] as Color[], manaValue: spec.mana ? manaValue({ type: "", stats: "", text: false, oracle: "", mana: spec.mana }) : 0,
+			colors: [...spec.colors] as Color[], manaValue: spec.mana ? manaValue({ type: "", stats: "", text: false, oracle: "", mana: spec.mana }, object.zone === "stack" ? object.ability?.x ?? 0 : 0) : 0,
 			...(spec.power !== undefined ? { power: spec.power, toughness: spec.toughness ?? 0 } : {}),
 			words: [...(spec.words ?? [])], registrations: [...(spec.registers ?? []), ...own] };
 	}

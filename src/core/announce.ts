@@ -126,7 +126,7 @@ export const mainWindow = (frame: Frame) => frame.view.window.kind === "turn" &&
 	MAIN.includes(frame.view.window.step) && !frame.view.objects?.some((object) => object.zone === "stack");
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
-const name = (object: Seen) => object.faceDown ? `Face-down object (${object.id})` : object.card ?? object.token?.name ?? object.id;
+const name = (object: Seen) => object.faceDown ? `Face-down object (${object.id})` : object.card ?? object.token?.name ?? object.copied?.spec.name ?? object.id;
 
 /** Each target slot as an option shows it, then any choice that conflicts with hexproof. One wording for spells, abilities and triggers. */
 export function aiming(targets: Chosen[][], world: World, controller: SeatId): string[] {

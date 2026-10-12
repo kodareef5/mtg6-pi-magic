@@ -159,6 +159,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// Mana added earlier in the same group, by a mana ability activated while paying, can be spent.
 	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
 	for (const [index, change] of changes.entries()) {
+		if (change.do === "copy-spell" && (table.things.has(change.id) || changes.some((one, at) => at !== index && one.do === "copy-spell" && one.id === change.id)))
+			throw new Error("A spell copy needs a new object identity.");
 		if (change.do === "increase-speed" && (!Number.isInteger(change.amount) || change.amount <= 0)) throw new Error("Speed increases by a positive integer.");
 		if (change.do === "move" && change.faceDown && change.to !== (change.faceDown === "manifest" ? "battlefield" : "exile")) throw new Error("Face-down motion needs exile, or manifest onto the battlefield.");
 		if (change.do === "turn-face-up" && (!table.things.get(change.what)?.faceDown || table.things.get(change.what)?.zone !== "battlefield")) throw new Error("Turning face up needs a face-down permanent.");
@@ -281,7 +283,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				delete moving.prepared;
 				delete moving.designations;
 				delete moving.choices;
-				delete moving.copied;
+				if (moving.spellCopy && from === "stack" && change.to === "battlefield" && change.reason === "resolve") {
+					moving.token = structuredClone(moving.copied!.spec); delete moving.spellCopy;
+				}
+				if (!moving.spellCopy) delete moving.copied;
 				if (change.to === "battlefield" && change.copied) moving.copied = structuredClone(change.copied);
 				if (change.to === "battlefield" && change.choices) moving.choices = structuredClone(change.choices);
 				if ((change.to === "stack" || change.to === "battlefield") && change.face !== undefined) moving.face = change.face;
@@ -387,6 +392,15 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 					card.ability = structuredClone(change.ability);
 				} else if (change.ability.timing === "stack") stack(table, change.id, change.ability);
 				break;
+			case "copy-spell": {
+				for (const other of cardsIn(table, "stack")) other.position = (other.position ?? 0) + 1;
+				const controller = change.ability.controller;
+				table.things.set(change.id, { id: change.id, incarnation: 0, zone: "stack", position: 0, owner: controller, controller,
+					tapped: false, faceDown: false, counters: {}, damage: 0, spellCopy: true,
+					copied: { source: structuredClone(change.of), spec: structuredClone(change.spec) },
+					ability: { ...structuredClone(change.ability), source: { id: change.id, incarnation: 0 } } });
+				break;
+			}
 			case "trigger":
 				if (change.action === "wait") table.waiting.push(structuredClone(change.trigger));
 				else {
@@ -579,6 +593,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const now = table.things.get(id);
 		if (now) after[id] = structuredClone(now);
 	}
+	for (const change of changes) if (change.do === "copy-spell") after[change.id] = structuredClone(thing(table, change.id));
 
 	const receipt: Receipt = {
 		seq: table.log.length,
@@ -689,7 +704,7 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 	const ability = object?.ability;
 	if (!pending.lost && ability?.timing === "stack" && countsResolutions(ability.instructions))
 		change.resolved = { ...(ability.source ? { source: structuredClone(ability.source) } : {}), basis: ability.basis, by: ability.controller };
-	if (object?.card) delete object.ability;
+	if (object?.card || object?.token || object?.spellCopy) delete object.ability;
 	else if (object) {
 		table.things.delete(object.id);
 		for (const other of cardsIn(table, "stack")) if ((other.position ?? 0) > (object.position ?? 0)) other.position! -= 1;

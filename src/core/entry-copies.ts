@@ -24,7 +24,8 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 		table.notes.some(note => note.kind === "register" ? hasCopy([note.registration]) : note.kind === "label" && hasCopy(note.change?.registers));
 	for (const [index, change] of entry.changes.entries()) {
 		if (change.do !== "token" && (change.do !== "move" || change.to !== "battlefield")) continue;
-		if (!granted && !hasCopy(change.do === "token" ? change.spec.registers : change.copied?.spec.registers ?? change.registers)) continue;
+		if (!granted && !hasCopy(change.do === "token" ? change.spec.registers : change.copied?.spec.registers ?? change.registers ??
+			(table.things.get(change.what)?.spellCopy ? table.things.get(change.what)?.copied?.spec.registers : undefined))) continue;
 		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
 		const source = { ...object, zone: "battlefield" as const, controller: who,
@@ -42,7 +43,7 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 			blocked: "Ordering multiple copy replacements on the same entering permanent is not implemented." };
 		const registration = copies[0]!;
 		if (registration.kind !== "enters" || !registration.copy) continue;
-		const copy = registration.copy, name = source.faceDown ? "Face-down creature" : object.card ?? object.token!.name;
+		const copy = registration.copy, name = source.faceDown ? "Face-down creature" : object.card ?? object.token?.name ?? object.copied?.spec.name ?? "Permanent";
 		if (!entryCopySelector(copy.of)) return { situation: "replacement-order", seat: who, question: "Choose a public entry copy source.", moves: [],
 			blocked: "An entry copy selects only public battlefield permanents or graveyard cards." };
 		const selected = world.objects.filter(one => ["battlefield", "graveyard"].includes(one.zone) && matches(scope, one, copy.of));

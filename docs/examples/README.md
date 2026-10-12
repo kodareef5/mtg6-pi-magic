@@ -43,6 +43,7 @@ schemas, and every `basis` is checked against the card's text.
 | `amass.md` | ordered destruction and amass; a departed target's controller, power and conditional draw |
 | `token-abilities.md` | complete Map and Clue abilities, another player creating tokens, sorcery timing and explore's revealed branches |
 | `token-copies.md` | copiable base terms, retained mana cost and complete activations, entry behavior, combined Spree modes and offspring's fixed power/toughness exception |
+| `spell-copies.md` | Sage's cast trigger, copied announcement choices, independent stack lifetime and resolving token permanents |
 | `damage-additions.md` | fixed damage increases, prevention ordering, affected-player choices and simultaneous results |
 | `additional-triggers.md` | additive trigger instances, equipped abilities and independent targets |
 | `modal-triggers.md` | Modal trigger choices, cast ordinals, remembered modes and odd/even entry choices |

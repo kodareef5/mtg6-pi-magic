@@ -205,14 +205,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Sage of the Skies": {
-		"reason": "Sage of the Skies is not ready: When you cast this spell, if you've cast another spell this turn, copy this spell. (The copy becomes a token.) — Unsupported operation: copying a spell on the stack, with the copy becoming a token on resolution. This is a cast trigger with an intervening-if condition, not creation of a token copy of a battlefield permanent.",
-		"decks": [
-			"Azorius Momo"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Sheltered by Ghosts": {
 		"reason": "Sheltered by Ghosts is not ready: When this Aura enters, exile target nonland permanent an opponent controls until this Aura leaves the battlefield. — Missing operation: exile until a specified event with the immediate, nontriggered return required by rule 610.3, returning the exiled object under its owner's control. If this Aura has already left before the enters trigger resolves, the target must not move (610.3b). A delayed leaves trigger is not equivalent.",
 		"decks": [

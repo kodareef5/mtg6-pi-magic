@@ -1,0 +1,73 @@
+{
+	"card": "Sage of the Skies",
+	"generated": "2026-10-10",
+	"source": "87727a83f2ad766ceb4b25eb898e0ba57dca982dd46868aab9812cb8e6331486",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sage of the Skies",
+		"registers": [
+			{
+				"kind": "watch",
+				"zones": [
+					"stack"
+				],
+				"basis": "When you cast this spell, if you've cast another spell this turn, copy this spell. (The copy becomes a token.)",
+				"event": {
+					"on": "cast",
+					"of": {
+						"zones": [
+							"stack"
+						],
+						"is": "this"
+					},
+					"by": "you"
+				},
+				"if": {
+					"amount": {
+						"history": "cast",
+						"by": "you",
+						"of": {
+							"zones": [
+								"stack"
+							],
+							"not": {
+								"is": "this"
+							}
+						}
+					},
+					"atLeast": 1
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "copy-spell",
+							"what": "this"
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Flying, lifelink",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

@@ -140,9 +140,9 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "counters":
 				counters(change.what, { [change.kind]: change.amount });
 				break;
-			case "activate": case "trigger": {
-				const ability = change.do === "activate" ? change.ability : change.action === "put" ? change.ability : undefined;
-				const id = change.do === "activate" ? (ability?.timing === "spell" ? change.what : change.id) : change.action === "put" ? change.id : undefined;
+			case "activate": case "trigger": case "copy-spell": {
+				const ability = change.do !== "trigger" ? change.ability : change.action === "put" ? change.ability : undefined;
+				const id = change.do === "activate" ? (ability?.timing === "spell" ? change.what : change.id) : change.do === "copy-spell" || change.action === "put" ? change.id : undefined;
 				const spell = id ? now(id) : undefined;
 				if (!ability || !spell || ability.timing === "mana") break;
 				// Cast from the zone the card was in before the group moved it to the stack (601.2a).
@@ -150,7 +150,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", ordinal: castOrdinal(ability.controller), object: spell, traits: read(spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
 				// 700.13: one crime per cast, activation or trigger placement, however many qualifying targets.
 				const opponent = (who: number) => who !== ability.controller && playing(table).some(one => one.id === who);
-				if (ability.targets.flat().some(chosen => {
+				if (change.do !== "copy-spell" && ability.targets.flat().some(chosen => {
 					if ("player" in chosen) return opponent(chosen.player);
 					const current = now(chosen.id), before = receipt.before[chosen.id];
 					const target = current?.incarnation === chosen.incarnation ? current : before?.incarnation === chosen.incarnation ? before : undefined;

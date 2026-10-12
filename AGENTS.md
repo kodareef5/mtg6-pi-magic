@@ -477,7 +477,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   entry.ts           what a permanent registers as it enters, and how it enters
   damage.ts, damage-order.ts  damage modifiers and affected-player ordering before simultaneous results
   draw.ts, draw-order.ts  batch draw replacements, affected-player choices and sequential player draws
-  copies.ts          copiable base terms, public-card copies and required activation preparation
+  copies.ts          copiable base terms, public-card and spell copies, required activation preparation
   entry-copies.ts     targetless entry copy choices and copiable exceptions
   durations.ts       immediate returns when an exile-until duration ends
   entry-payments.ts   named choices and optional entry payment before a battlefield route commits

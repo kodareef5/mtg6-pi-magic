@@ -32,7 +32,7 @@ import { casting } from "./casting.ts";
 
 const PUBLIC = new Set(["battlefield", "graveyard", "stack", "exile", "command", "dungeon"]);
 const visible = (thing?: Thing): thing is Thing => !!thing && !thing.faceDown && PUBLIC.has(thing.zone);
-const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.token?.name ?? thing.ability?.claim ?? "an unnamed object" : "an unknown card";
+const publicName = (thing?: Thing) => visible(thing) ? thing.card ?? thing.token?.name ?? thing.copied?.spec.name ?? thing.ability?.claim ?? "an unnamed object" : "an unknown card";
 
 /** Receipt index before this seat's last nonautomatic decision, including a fallback.
  * Its own action stays visible. Looking, asking for help and editing work consume nothing. */
@@ -322,6 +322,9 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			case "token":
 				parts.push(`${seat(table, change.controller).name} created ${change.spec.name}${change.tapped ? " tapped" : ""}${change.attacking ? ` attacking ${change.attacking.to ? publicName(receipt.before[change.attacking.to.id]) : seat(table, change.attacking.defending).name}` : ""}`);
+				break;
+			case "copy-spell":
+				parts.push(`${seat(table, change.ability.controller).name} copied ${change.spec.name} onto the stack`);
 				break;
 			case "damage": {
 				const source = typeof change.source === "string" ? change.source : change.source.id;

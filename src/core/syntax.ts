@@ -86,6 +86,8 @@ export type Change =
 	/** A token made on the battlefield (111.1). */
 	| { do: "token"; id: string; spec: TokenSpec; controller: SeatId; tapped?: true; counters?: Record<string, number>;
 		choices?: Record<string, string>; entry?: "paid" | "declined"; attacking?: { defending: SeatId; to?: ObjectRef } }
+	/** Copies preserve announced decisions, but pay nothing and emit no cast event. */
+	| { do: "copy-spell"; id: string; of: ObjectRef; spec: TokenSpec; ability: Ability }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
 	| { do: "turn-face-up"; what: string; registers?: Registration[] }

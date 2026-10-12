@@ -19,7 +19,7 @@ import type { Step } from "./steps.ts";
 import { physicalHistory, type PhysicalEvent } from "./physical-history.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "spellCopy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| PhysicalEvent
@@ -207,7 +207,7 @@ const side = (scope: Scope, ref: string | undefined, seatId: SeatId) => ref === 
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
 /** An ability on the stack is an object (113.1c) but not a card: it has no types, words or abilities to match. */
-const ability = (object: Seen): Traits | undefined => object.ability && !object.card && !object.token
+const ability = (object: Seen): Traits | undefined => object.ability?.timing === "stack" && !object.card && !object.token
 	? { name: object.ability.claim, supertypes: [], types: [], subtypes: [], colors: [], manaValue: 0, words: [], registrations: [] } : undefined;
 
 const FACELESS: Traits = { name: "", supertypes: [], types: [], subtypes: [], colors: [], words: [], registrations: [] };
@@ -362,7 +362,8 @@ export function holds(scope: Scope, condition: Condition): boolean {
 	}
 	if ("cast" in condition) {
 		const one = objects(scope, condition.cast)[0], paid = one && scope.world.casting?.(one);
-		return !!paid && (condition.from === undefined || paid.from === condition.from) && (condition.by === undefined || players(scope, condition.by).includes(paid.by)) &&
+		return !!paid && (!paid.copied || condition.paid !== undefined || condition.alternative !== undefined) &&
+			(condition.from === undefined || paid.from === condition.from) && (condition.by === undefined || paid.by !== undefined && players(scope, condition.by).includes(paid.by)) &&
 			(condition.paid === undefined || !!paid.additional?.includes(condition.paid)) &&
 			(condition.alternative === undefined || paid.alternative === condition.alternative);
 	}

@@ -62,6 +62,8 @@ export type Thing = {
 	designations?: Designation[];
 	/** A castable Prepare copy names its printed face and the permanent that sustains it. */
 	copy?: { face: 0 | 1; source: ObjectRef };
+	/** A noncard spell put directly on the stack; it becomes a token only as a permanent spell resolves. */
+	spellCopy?: true;
 	/** An entry copy effect freezes copiable terms, not the current layer result. */
 	copied?: { source: ObjectRef; spec: TokenSpec };
 	id: ObjectId;

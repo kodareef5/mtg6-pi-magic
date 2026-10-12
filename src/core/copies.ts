@@ -4,7 +4,7 @@
 import { creatureType, printedTraits } from "./characteristics.ts";
 import { facts } from "./printed.ts";
 import { activeFaces, doubleFaced } from "./faces.ts";
-import type { Table } from "./table.ts";
+import type { Table, Ability } from "./table.ts";
 import type { Seen } from "./selectors.ts";
 import type { Instruction, Procedure, Selector, TokenSpec } from "./language.ts";
 import type { Decision, SeatId } from "./types.ts";
@@ -41,9 +41,10 @@ export function copyExceptions(copied: CopyResult, except?: Exceptions): CopyRes
 
 /** A single-faced permanent copies the current face; creating a double-faced
  * token also needs the other face and remains a separate unsupported shape. */
-export function copiable(table: Table, source: Seen, form: "token" | "permanent"): CopyResult {
+export function copiable(table: Table, source: Seen, form: "token" | "permanent" | "spell"): CopyResult {
 	const publicCard = !!source.card && ["graveyard", "exile"].includes(source.zone) && !source.faceDown && !source.token && !source.copy;
-	if (source.zone !== "battlefield" && !publicCard)
+	const spell = form === "spell" && source.zone === "stack" && source.ability?.timing === "spell" && !source.faceDown;
+	if (source.zone !== "battlefield" && !publicCard && !spell)
 		return { blocked: "This copy operation needs a permanent, its last battlefield existence, or a face-up graveyard or exiled card." };
 	if (source.faceDown) return { spec: { name: "", types: ["creature"], colors: [], power: 2, toughness: 2 } };
 	if (source.copied) return form === "token" && source.card && doubleFaced(table.printed[source.card])
@@ -52,13 +53,13 @@ export function copiable(table: Table, source: Seen, form: "token" | "permanent"
 	if (source.token) return { spec: structuredClone(source.token) };
 	const printed = source.card && table.printed[source.card];
 	if (!printed) return { blocked: "The copy source has no pinned printed characteristics." };
-	if (printed.faces && (form === "token" || !doubleFaced(printed) && printed.layout !== "adventure"))
+	if (printed.faces && (form !== "permanent" || !doubleFaced(printed) && printed.layout !== "adventure"))
 		return { blocked: "Copying a permanent with multiple faces needs its copiable face structure and entry behavior." };
 	const active = activeFaces(printed, source);
 	const seat = publicCard ? source.owner : source.controller;
 	const pack = table.work[seat]?.packages?.find(one => one.card === source.card);
 	if (printed.text && !pack) return { blocked: `Copying ${source.card} needs its source-backed use inventory.` };
-	const own = structuredClone(publicCard ? pack?.registers ?? [] : source.registrations ?? []).filter(one => !printed.faces || one.face === undefined || active.includes(one.face));
+	const own = structuredClone(publicCard || spell ? pack?.registers ?? [] : source.registrations ?? []).filter(one => !printed.faces || one.face === undefined || active.includes(one.face));
 	if (printed.faces) for (const one of own) delete one.face;
 	const onField = (one: Pick<Procedure, "timing" | "source" | "face">) => one.timing === "stack" && (one.source.zones ?? ["battlefield"]).includes("battlefield") &&
 		(!printed.faces || (one.source.face ?? one.face) === undefined || active.includes((one.source.face ?? one.face)!));
@@ -79,4 +80,20 @@ export function copiable(table: Table, source: Seen, form: "token" | "permanent"
 		supertypes: traits.supertypes as NonNullable<TokenSpec["supertypes"]>, subtypes: traits.subtypes, colors: traits.colors as TokenSpec["colors"],
 		...(traits.power !== undefined ? { power: traits.power, toughness: traits.toughness } : {}),
 		...(loyalty ? { loyalty: Number(loyalty[1]) } : {}), registers: own } };
+}
+
+/** Copying a spell preserves targets, modes, X and cost choices (707.10).
+ * No new target permission is implied. A non-targeted departed spell can
+ * supply its last stack existence, as a cast trigger requires. */
+export function copySpell(table: Table, source: Seen): CopyResult & { ability?: Ability } {
+	if (source.zone !== "stack" || source.ability?.timing !== "spell" || source.faceDown)
+		return { blocked: "Copying a spell needs its face-up stack existence and accepted instructions." };
+	if (source.ability.words?.length)
+		return { blocked: "Copying a spell with procedure or granted spell words needs their separate copiable provenance." };
+	const result = copiable(table, source, "spell");
+	if ("blocked" in result) return result;
+	const ability = structuredClone(source.ability);
+	delete ability.permission; delete ability.leavesStack; delete ability.funding;
+	ability.paid = [];
+	return { ...result, ability };
 }

@@ -242,6 +242,7 @@ function stateBased(table: Table): Pending | null {
 	}
 	// 704.5d.
 	for (const object of table.things.values()) if (object.token && object.zone !== "battlefield") changes.push({ do: "cease", what: object.id });
+	for (const object of table.things.values()) if (object.spellCopy && object.zone !== "stack") changes.push({ do: "cease", what: object.id });
 	// 704.5e and 722.3c: the Prepare exception lasts only while its source is prepared.
 	for (const object of table.things.values()) if (object.copy && object.zone !== "stack") {
 		const source = table.things.get(object.copy.source.id);

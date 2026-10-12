@@ -5,7 +5,7 @@ import type { Mana, Receipt, Table } from "./table.ts";
 import type { ObjectRef, SeatId } from "./types.ts";
 import type { Zone } from "./syntax.ts";
 
-export type Casting = { from: Zone; by: SeatId; mana: (Mana["color"] | null)[]; x?: number; additional?: string[]; alternative?: string };
+export type Casting = { from?: Zone; by?: SeatId; copied?: true; mana: (Mana["color"] | null)[]; x?: number; additional?: string[]; alternative?: string };
 const cache = new WeakMap<Table, { clock: number; values: Map<string, Casting | undefined> }>();
 
 /** Public payment facts, derived from receipts. A null color names legacy mana
@@ -20,6 +20,13 @@ export function casting(table: Table, ref: ObjectRef, pending?: Pick<Receipt, "c
 		const receipt = at === table.log.length ? pending : table.log[at];
 		if (!receipt) continue;
 		if (receipt.after[ref.id]?.incarnation !== ref.incarnation) continue;
+		const copy = receipt.changes.find(change => change.do === "copy-spell" && change.id === ref.id);
+		if (copy?.do === "copy-spell") {
+			found = { copied: true, mana: [], ...(copy.ability.x !== undefined ? { x: copy.ability.x } : {}),
+				...(copy.ability.cost.additional ? { additional: [...copy.ability.cost.additional] } : {}),
+				...(copy.ability.cost.alternative ? { alternative: copy.ability.cost.alternative } : {}) };
+			break;
+		}
 		const cast = receipt.changes.find((change) => change.do === "activate" && change.what === ref.id && change.ability.timing === "spell");
 		if (cast?.do === "activate") {
 			const origin = receipt.before[ref.id];
