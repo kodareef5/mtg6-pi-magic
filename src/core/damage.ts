@@ -37,7 +37,7 @@ export function orderedDamage(world: World, damage: Damage, source: ReturnType<W
 
 /** Global rules remain visible after the spell that created them has left the stack. */
 export const damageNotes = (notes: readonly Note[]): string[] => notes.flatMap((note) => note.kind === "damage-rule" ? [
-	`${note.combat === undefined ? "All" : note.combat ? "Combat" : "Noncombat"} damage ${note.mode === "prevent" ? "is prevented" : "can't be prevented"} (${typeof note.until === "string" ? note.until.replaceAll("-", " ") : `until the end of seat ${note.until.endOfNextTurn}'s next turn after turn ${note.until.afterTurn}`}).`,
+	`${note.combat === undefined ? "All" : note.combat ? "Combat" : "Noncombat"} damage ${note.mode === "prevent" ? "is prevented" : "can't be prevented"} (${typeof note.until === "string" ? note.until.replaceAll("-", " ") : "nextEndStep" in note.until ? `until seat ${note.until.nextEndStep}'s next end step begins` : `until the end of seat ${note.until.endOfNextTurn}'s next turn after turn ${note.until.afterTurn}`}).`,
 ] : []);
 
 export function prevented(world: World, damage: Damage, source: ReturnType<World["lastKnown"]>): boolean {

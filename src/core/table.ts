@@ -268,7 +268,7 @@ export type Note = {
 	id: string;
 	/** Who wrote it. */
 	by: SeatId;
-	until: "end-of-turn" | "end-of-combat" | "while-source" | "indefinite" | { endOfNextTurn: SeatId; afterTurn: number };
+	until: "end-of-turn" | "end-of-combat" | "while-source" | "indefinite" | { endOfNextTurn: SeatId; afterTurn: number } | { nextEndStep: SeatId };
 	/** For `while-source`, and the exiling object of a link. */
 	source?: ObjectRef;
 	/** Rises with the clock, because "which of these two is newer" must have an answer (613.7). */

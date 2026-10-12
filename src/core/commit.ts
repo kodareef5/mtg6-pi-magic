@@ -796,7 +796,7 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 					thing.damage = 0;
 					if (table.deathtouchFrom === undefined || table.ledger.length < table.deathtouchFrom) delete thing.deathtouched;
 				}
-				table.notes = table.notes.filter((note) => note.until !== "end-of-turn" && !(typeof note.until === "object" &&
+				table.notes = table.notes.filter((note) => note.until !== "end-of-turn" && !(typeof note.until === "object" && "endOfNextTurn" in note.until &&
 					note.until.endOfNextTurn === cursor.active && cursor.turn > note.until.afterTurn));
 			}
 			return;
@@ -827,6 +827,8 @@ function turnTransition(table: Table, change: Extract<Change, { do: "turn" }>): 
 				cursor.began[cursor.active] = cursor.clock;
 				for (const s of table.seats) s.landsPlayed = 0;
 			}
+			// End-step permissions expire as that step begins, before its triggers or priority.
+			if (cursor.steps[0] === "end") table.notes = table.notes.filter(note => !(typeof note.until === "object" && "nextEndStep" in note.until && note.until.nextEndStep === cursor.active));
 		}
 	}
 }

@@ -63,14 +63,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Inti, Seneschal of the Sun": {
-		"reason": "Inti, Seneschal of the Sun is not ready: Whenever you discard one or more cards, exile the top card of your library. You may play that card until your next end step. — The available event syntax cannot watch discards (including discards replaced with a destination other than the graveyard), and permission durations cannot expire at the beginning of your next end step. A hand-to-graveyard watch or an end-of-turn permission would not faithfully implement this ability.",
-		"decks": [
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Intimidation Tactics": {
 		"reason": "Intimidation Tactics is not ready: Target opponent reveals their hand. You choose an artifact or creature card from it. Exile that card. — Revealing an opponent's entire hand for the spell's controller to choose from is not expressible in the available syntax.",
 		"decks": [

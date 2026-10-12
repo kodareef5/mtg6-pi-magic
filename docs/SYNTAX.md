@@ -946,3 +946,9 @@ their battlefield meaning. A watch's `triggerIf` gates triggering only;
 its `if` is still checked again on resolution. See
 [graveyard events](examples/graveyard-events.md) for the visibility limits and
 Bloodghast's explicit graveyard watch.
+
+`permit.until: {"nextEndStep": "you"}` ends as that player's next end step
+begins. Creating it during an end step waits for the next occurrence, even an
+additional end step that turn. A skipped step does not expire it. Normal timing
+and land limits still apply. [Inti](examples/end-step-permissions.md) combines
+this duration with a separate optional discard and reflexive attack trigger.

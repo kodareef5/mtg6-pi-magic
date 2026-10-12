@@ -336,7 +336,7 @@ export const Defs = {
 		/** A play permission: `who: owner` pairs each card with its own owner; `from` delays it for warp. */
 		step({ do: Type.Literal("permit"), what: ObjectRef, who: Type.Union([PlayerRef, Type.Literal("owner")]), from: Type.Optional(one("now", "next-turn")),
 			while: Type.Optional(Type.Ref("Condition")),
-			until: Type.Union([Duration, object({ endOfNextTurn: PlayerRef })]),
+			until: Type.Union([Duration, object({ endOfNextTurn: PlayerRef }), object({ nextEndStep: PlayerRef })]),
 			/** An alternative price grants casting only, not a land play or the printed price. */
 			mana: Type.Optional(Type.Union([ManaCost, Type.Literal("printed")])), of: Type.Optional(Type.Ref("Selector")),
 			/** A cast through this permission replaces every departure from the stack. */

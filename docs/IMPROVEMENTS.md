@@ -37,7 +37,7 @@ currently wait on strategy-provider credits.
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
    stopped games. Mardu needs
-   next-end-step permissions, conditional graveyard casting, Class levels and random
+   conditional graveyard casting, Class levels and random
    selections. Mardu's accepted graveyard interactions now have direct tests.
    Keep refused meanings in the ledger until their shared
    operations are implemented.

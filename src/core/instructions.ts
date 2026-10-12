@@ -333,8 +333,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		case "permit": {
 			const cards = live(table, objects(scope, instruction.what)), who = instruction.who === "owner" ? undefined : players(scope, instruction.who)[0] ?? controller;
 			const fromTurn = table.cursor.turn + (instruction.from === "next-turn" ? 1 : 0);
-			const until: Until = typeof instruction.until === "string" ? instruction.until as Until : {
-				endOfNextTurn: players(scope, instruction.until.endOfNextTurn)[0] ?? controller, afterTurn: table.cursor.turn };
+			const until: Until = typeof instruction.until === "string" ? instruction.until as Until : "nextEndStep" in instruction.until
+				? { nextEndStep: players(scope, instruction.until.nextEndStep)[0] ?? controller }
+				: { endOfNextTurn: players(scope, instruction.until.endOfNextTurn)[0] ?? controller, afterTurn: table.cursor.turn };
 			const permission = `may ${instruction.mana ? `cast for ${instruction.mana === "printed" ? "its printed mana cost" : instruction.mana}` : "play"}`;
 			const label = who === undefined ? cards.map(object => `${seat(table, object.owner).name} ${permission} ${name(object)}`).join("; ") || "No cards receive a play permission"
 				: `${seat(table, who).name} ${permission} ${cards.map(name).join(", ") || "nothing"}`;
