@@ -150,6 +150,9 @@ pilot question states that absence; it does not claim a payment policy exists.
 Individual selection changes the selection method for the same resources and
 cost. The strategist writes any own-turn waiting policy in a matching phase;
 a precombat pass step does not instruct later combat or main-phase decisions.
+A requested repair at own-turn priority must include a step, branch or phase
+policy matching that window. Validation refuses an answer covering only later
+windows; it supplies no action or waiting policy on the seat's behalf.
 
 The pilot reads the complete payments directly at this stage; it does not inspect
 the already selected use again before seeing them.

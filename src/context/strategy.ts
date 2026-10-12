@@ -176,6 +176,9 @@ async function write(frame: Frame, context: Context, reasoner: Pick<Reasoner, "w
 			const edits = [...carried, ...(Array.isArray(notes) ? notes as NoteEdit[] : [])];
 			const wrong = [...planProblems(frame, plan), ...choiceProblems(frame, changes, options.nextTurn), ...registrationProblems(plan.packages ?? []),
 				...stopProblems(planned, changes.askWhen)];
+			if (!options.nextTurn && frame.view.work?.request && frame.view.work.plan && at.kind === "turn" && at.active === frame.seat && frame.decision?.situation === "priority" &&
+				![...plan.steps, ...(plan.may ?? []), ...(plan.phases ?? [])].some((one) => matches(one.when, frame)))
+				wrong.push(`The requested repair leaves your current ${at.step} decision without a step, branch or phase policy. Write guidance or an action for this window; future actions and opponent-turn policy do not answer it. The host chooses nothing for you.`);
 			if (!plan.steps.length && (options.nextTurn || !frame.view.work?.plan && !options.prepared && !plan.may?.length))
 				wrong.push('This turn has no ordered actions. Write the known line, or explicitly choose passing with a step whose action is {"option":"pass"}. Conditional branches do not replace the known turn line.');
 			if (notes !== undefined && !Array.isArray(notes)) wrong.push("notes is a list of {topic, note} edits.");

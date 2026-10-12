@@ -219,7 +219,8 @@ test("the pilot flies the plan: actions and passes are chosen, and progress live
 	const journalChild = reopen(childPath, child.header, continued);
 	const completed = new Set(workFrame(continued, 0).view.done);
 	editWork(continued, 0, [{ do: "plan.put", plan: { ...continued.work[0]!.plan!, throughTurn: 4,
-		steps: continued.work[0]!.plan!.steps.filter((_, at) => !completed.has(at)), phases: [opponentPhase] } },
+		steps: continued.work[0]!.plan!.steps.filter((_, at) => !completed.has(at)), phases: [opponentPhase,
+			{ when: { active: "self", step: "precombat-main" }, guidance: "The land work is done. Pass until the planned attack.", complete: "pass" }] } },
 		{ do: "plan.request", reason: "Review the unfinished line." }], "review");
 	const unfinished = basePlan(workFrame(continued, 0));
 	const retained = await planWork(workFrame(continued, 0), {}, { async work(_about, _prompt, { submit }) {
@@ -1932,7 +1933,8 @@ test("the notebook is kept across plans, merged edit by edit, journaled, replaye
 	// Useful notes go in with the plan, with no separate tool round.
 	const seen: string[] = [];
 	const replies: { name: string; arguments: Record<string, unknown> }[][] = [
-		[{ name: "submit", arguments: { ...line, theirTurn, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
+		[{ name: "submit", arguments: { ...line, steps: line.steps.map(one => ({ ...one, when: { ...one.when, fromTurn: 5, throughTurn: 5 } })),
+			theirTurn, notes: [{ topic: "lessons", note: "The Passage before the land lost a landfall." }, { topic: "watching", note: "" }] } }]];
 	const stream: Stream = (_model, request) => { seen.push(JSON.stringify(request.messages)); const calls = replies.shift()!;
 		return { result: async () => ({ content: calls.map((one, at) => ({ type: "toolCall", id: `c${seen.length}-${at}`, ...one })), stopReason: "toolUse" }) }; };
 	main(table, 0, 5);
@@ -2052,6 +2054,19 @@ test("the coordinator writes alone; a valid response edits only the current deci
 	const [doc] = (JSON.parse(writer[0]!) as { content: string }[]).map((one) => one.content);
 	assert.ok(doc!.includes("Pregame growth expertise") && doc!.includes("Prior tactical conclusion"), "the coordinator reads the matchup advice and the prior intent it must reconcile");
 	assert.deepEqual(table, before, "writing changes nothing on the table");
+	const unaddressed = structuredClone(workFrame(table, 0));
+	if (unaddressed.view.window.kind === "turn") Object.assign(unaddressed.view.window, { step: "begin-combat", phase: "combat" });
+	const unchangedRequest = structuredClone(unaddressed);
+	await planWork(unaddressed, {}, { async work(_about, _prompt, { submit }) {
+		const args = { steps: [{ label: "Finish attackers later", when: { active: "self", step: "declare-attackers" }, action: { option: "attack:done" } }], theirTurn };
+		assert.match(submit.check(args)!, /current begin-combat decision without a step, branch or phase policy/);
+		assert.match(submit.check({ ...args, phases: [{ when: { active: "self", step: "precombat-main" }, guidance: "Wait here.", complete: "pass" }] })!, /current begin-combat decision/,
+			"a policy for another own-turn window cannot answer the repair");
+		const answered = { ...args, phases: [{ when: { active: "self" }, guidance: "Keep the named resources and pass until the planned declaration.", complete: "pass" }] };
+		assert.equal(submit.check(answered), null);
+		return answered;
+	} });
+	assert.deepEqual(unaddressed, unchangedRequest, "refusing an unanswered window and accepting its policy changes no state or choice");
 	const response = structuredClone(workFrame(table, 0));
 	if (response.view.window.kind === "turn") Object.assign(response.view.window, { active: 1, turn: 4 });
 	response.view.work!.request = "Review this opponent response.";
