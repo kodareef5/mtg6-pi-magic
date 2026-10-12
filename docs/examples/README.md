@@ -42,6 +42,7 @@ schemas, and every `basis` is checked against the card's text.
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |
 | `return-payments.md` | return an unblocked attacker as a sneak payment, constrain the rules step, and keep token defender choices separate |
 | `inspection.md` | bounded private looks, computed library windows, selection and chosen or random bottom order |
+| `selection-totals.md` | a combined mana-value cap within a private selection, optional stopping and random remainder order |
 | `reveal-hand.md` | publicly reveal a whole hand before its opponent chooses an eligible discard |
 | `loyalty.md` | abilities carried by tokens, signed loyalty payment, starting counters, Empower Jace's ordered creation and choice, and temporary loyalty timing |
 | `amass.md` | ordered destruction and amass; a departed target's controller, power and conditional draw |

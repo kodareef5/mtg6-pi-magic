@@ -24,6 +24,23 @@ const reach = (table: Table, at: string) => {
 };
 
 test("return payments require live distinct controlled permanents and preserve unblocked status, owners, replay and clones", () => {
+ const technique = start(standard, [{ deck: alpha(deck("Bant Airbending Combo")) }, { deck: alpha(deck("Azorius Control")) }], "sneak-sorcery");
+ const elf = establish(technique, 0, "Llanowar Elves", []);
+ place(technique, 0, "hand", "Michelangelo's Technique");
+ const sneaking = example("Cast Michelangelo's Technique for sneak");
+ main(technique, 0, 3);
+ assert.equal(offered(technique, sneaking).length, 0);
+ reach(technique, "declare-attackers");
+ apply(technique, `attack:${elf.id}`, "model", "chosen"); apply(technique, "attack:done", "model", "chosen");
+ reach(technique, "declare-blockers"); apply(technique, "block:done", "model", "chosen");
+ while (!nextDecision(technique)) advance(technique);
+ commit(technique, [{ do: "add-mana", who: 0, colors: ["G", "C", "C", "C"] }], "game-setup");
+ assert.equal(offered(technique, example("Cast Michelangelo's Technique normally")).length, 0, "ordinary sorcery timing remains restricted");
+ const prior = structuredClone(technique), priorAt = technique.ledger.length;
+ const cast = announce(technique, sneaking), card = technique.things.get(cast.activation.source.id)!;
+ assert.equal(elf.zone, "hand"); assert.equal(card.zone, "stack");
+ passBoth(technique); step(technique); step(technique, label => /Decline|Nothing/.test(label)); finish(technique);
+ assert.equal(card.zone, "graveyard"); assert.deepEqual(relive(prior, technique.ledger.slice(priorAt)), technique);
  const table = setup(), free = establish(table, 0, "Stadium Headliner", []), blocked = establish(table, 0, "Stadium Headliner", []);
  const walker = establish(table, 1, "The Theorist, Jace Beleren", []);
  main(table, 0, 3);

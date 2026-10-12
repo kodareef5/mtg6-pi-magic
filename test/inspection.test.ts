@@ -11,6 +11,7 @@ import { startingIntent } from "../src/context/plan.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { describe, project } from "../src/core/view.ts";
 import { viewWorld } from "../src/core/selectors.ts";
+import { checkProcedure } from "../src/core/procedures.ts";
 import { announce, example, finish, main, passBoth, place, step } from "./play.ts";
 
 test("private inspection exposes only its bounded window and orders it without changing identities", () => {
@@ -106,7 +107,63 @@ test("private inspection exposes only its bounded window and orders it without c
 		assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 	}
+	limitedSelections();
 });
+
+function limitedSelections() {
+	const ordinary = example("Cast Michelangelo's Technique normally");
+	const selection = ordinary.instructions[1]!;
+	assert.throws(() => checkProcedure({ ...ordinary, instructions: [ordinary.instructions[0]!, { ...selection, upTo: undefined } as never] }), /schema|upTo/);
+	assert.throws(() => checkProcedure({ ...ordinary, instructions: [ordinary.instructions[0]!, { ...selection, random: true } as never] }), /schema/);
+	const names = ["Aang, at the Crossroads // Aang, Destined Savior", "Appa, Steadfast Guardian", "Doc Aurlock, Grizzled Genius",
+		"Llanowar Elves", "Llanowar Elves", "Bramble Familiar // Fetch Quest", "Temple Garden", "Michelangelo's Technique"];
+	for (const indexes of [[], [0], [0, 3], [1, 2], [3, 4], [2, 5]]) {
+		const table = start(standard, [{ deck: alpha(deck("Bant Airbending Combo")) }, { deck: alpha(deck("Izzet Prowess")) }], `selection-total-${indexes.join("-")}`);
+		place(table, 0, "hand", "Michelangelo's Technique");
+		const reserved = place(table, 0, "outside", ...names);
+		main(table, 0);
+		commit(table, [...reserved.toReversed().map(one => ({ do: "move" as const, what: one.id, to: "library" as const, position: "top" as const, reason: "game-setup" as const })),
+			{ do: "add-mana", who: 0, colors: ["G", "C", "C", "C", "C"] }], "game-setup");
+		const library = structuredClone(cardsIn(table, "library", 0));
+		assert.deepEqual(library.slice(0, 8).map(one => one.card), names);
+		const initial = structuredClone(table), from = table.ledger.length;
+		announce(table, ordinary); passBoth(table); step(table);
+		const look = table.log.at(-1)!, beforeSelection = structuredClone(table), version = table.ledger.length;
+		const selected: string[] = [];
+		let partial = structuredClone(table), partialAt = table.ledger.length;
+		for (const index of indexes) {
+			const decision = nextDecision(table)!;
+			const matching = decision.options.find(one => one.objects?.some(ref => ref.id === reserved[index]!.id));
+			assert.ok(matching, names[index]);
+			apply(table, matching.id, "model", "chosen"); selected.push(reserved[index]!.id);
+			if (selected.length === 1) {
+				partial = structuredClone(table); partialAt = table.ledger.length;
+				const pending = nextDecision(table)!; assert.deepEqual(table, partial);
+				assert.match(pending.question, /Total mana value at most 6; selected/);
+				for (const viewer of [1, "spectator"] as const) { assert.deepEqual(project(table, viewer).resolution!.picked, []); assert.deepEqual(project(table, viewer).resolution!.bound.looked!.objects, []); }
+				if (index === 0) {
+					assert.ok(pending.options.every(one => !one.objects?.length || one.cards?.includes("Llanowar Elves")), "after five, only mana value one fits");
+					assert.throws(() => apply(table, `resolve:${reserved[2]!.id}`, "model", "chosen"), /not offered|not.*option|Unknown|No option|not available/);
+				}
+			}
+		}
+		if (indexes.length < 2) step(table, label => /Decline|Stop here/.test(label));
+		step(table);
+		const entries = table.log.at(-1)!.changes.flatMap(one => one.do === "move" && one.to === "battlefield" ? [one] : []);
+		assert.deepEqual(entries.map(one => one.what).sort(), selected.toSorted());
+		const randomBefore = structuredClone(table.rng); nextDecision(table); assert.deepEqual(table.rng, randomBefore);
+		step(table); finish(table);
+		const remainder = reserved.filter(one => !selected.includes(one.id));
+		const after = cardsIn(table, "library", 0);
+		assert.deepEqual(after.slice(-remainder.length).map(one => one.id).sort(), remainder.map(one => one.id).sort());
+		assert.deepEqual(after.slice(0, -remainder.length).map(one => one.id), library.slice(8).map(one => one.id));
+		assert.notDeepEqual(table.rng, randomBefore);
+		assert.deepEqual(relive(partial, table.ledger.slice(partialAt)), table);
+		assert.deepEqual(relive(beforeSelection, table.ledger.slice(version)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+		for (const one of reserved) assert.ok(!describe(table, look, 1).includes(one.card!), "a later entry does not reveal the earlier look");
+	}
+}
 
 test("private selection cannot expose another hand through a malformed selector or an unearned library order", async () => {
 	for (const from of [{ zones: ["hand"] }, { zones: ["hand"], types: ["creature"] }, { zones: ["hand"], name: "Forest" },

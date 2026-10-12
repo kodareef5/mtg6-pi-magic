@@ -995,3 +995,12 @@ requirement. Declaration completion warns about omitted able creatures; the
 seat still selects attackers and confirms its declaration. The word does not
 grant haste, implement attack costs, or solve competing attacker-count limits.
 See [attack requirements](examples/attack-requirements.md).
+
+### Combined selection limits
+
+A resolving `choose` with `upTo: true` may state `totalManaValueAtMost: Amount`.
+The cap applies to the sum of the chosen cards, not each one independently.
+Choices still require an earned look or scoped search, and all legal subsets
+remain available. Exact-count and random group-limited selections are unsupported.
+[Michelangelo's Technique](examples/selection-totals.md) exercises a private
+look, optional selection, simultaneous entry and random bottom order.

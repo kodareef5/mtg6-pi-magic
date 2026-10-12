@@ -207,10 +207,16 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			if (search) return search;
 			const count = amount(scope, instruction.count);
 			const picked = pending.picked.filter((one) => "id" in one);
+			const ceiling = instruction.totalManaValueAtMost === undefined ? undefined : amount(scope, instruction.totalManaValueAtMost);
+			const selectedValue = picked.reduce((total, ref) => {
+				const object = scope.world.objects.find(one => one.id === ref.id && one.incarnation === ref.incarnation);
+				return total + (object && scope.world.read(object)?.manaValue || 0);
+			}, 0);
 			// "You" in the selector is still the ability's controller, whoever chooses.
 			// Identical cards in a library or hand are one choice: nothing tells them apart.
 			const seen = new Set<string>();
-			const pool = select(scope, instruction.from).filter((object) => !picked.some((one) => one.id === object.id)).filter((object) => {
+			const pool = select(scope, instruction.from).filter((object) => !picked.some((one) => one.id === object.id) &&
+				(ceiling === undefined || selectedValue + (scope.world.read(object)?.manaValue ?? 0) <= ceiling)).filter((object) => {
 				if (object.zone !== "library" && object.zone !== "hand") return true;
 				const key = `${object.zone}|${object.owner}|${object.faceDown ? object.id : object.card}`;
 				return !seen.has(key) && !!seen.add(key);
@@ -226,7 +232,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			// Declining gives up what the instruction is for, so the label says so; it reads as finishing otherwise.
 			if (instruction.upTo || instruction.may && !pending.searching && !picked.length || pending.searching && searchQuality(instruction.from) || !pool.length || picked.length >= count) choices.push({ id: "done",
 				label: picked.length ? `Stop here, with ${picked.length} chosen` : pending.searching ? "Finish search without finding a card" : pool.length && count ? "Decline: choose none of them, so this finds nothing" : "Nothing can be chosen", changes: [], ...finish([]) });
-			return { actor: who, question: `${claim}: choose ${count === 1 ? "one" : `${count}`}${instruction.upTo ? " or fewer" : ""} (${picked.length} chosen).`, choices };
+			return { actor: who, question: `${claim}: choose ${count === 1 ? "one" : `${count}`}${instruction.upTo ? " or fewer" : ""} (${picked.length} chosen).${ceiling === undefined ? "" : ` Total mana value at most ${ceiling}; selected ${selectedValue}.`}`, choices };
 		}
 		case "shuffle": return one("Shuffle", players(scope, instruction.who).map((whose) => ({ do: "shuffle" as const, whose })));
 		case "draw": case "mill": {
