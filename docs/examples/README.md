@@ -30,6 +30,7 @@ schemas, and every `basis` is checked against the card's text.
 | `spell-costs.md` | standing generic reductions, first qualifying casts, original-zone filters and ordered payment forecasts |
 | `named-costs.md` | additional mana after an alternative price, reductions, and named payments read from casting history |
 | `hybrid-mana.md` | recorded nonhybrid equivalents before targets and reductions, actual mana spent and payment forecasts |
+| `impending.md` | Named alternative price, entry counters, conditional type removal and end-step countdown |
 | `evoke.md` | named alternative casting costs, independent mana-spent entry triggers and sacrifice through the stack |
 | `aggregates.md` | greatest, least and total characteristics; Sunderflock's reduction and Hearth Elemental's Adventure count |
 | `payments.md` | blight, behold and staged graveyard payments by mana value; optional payment during resolution |

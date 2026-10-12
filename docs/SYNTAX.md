@@ -861,3 +861,12 @@ A matching source contributes its life cost once per spell, regardless of how
 many target slots name it. The charge combines with the spell's own life cost
 and life spent for mana. See [casting life costs](examples/casting-life.md) for
 Terror of the Peaks and the limits of resource forecasts.
+
+## Conditional type removal
+
+`change.types.remove` removes only the named types after any set or add in that
+modification. The layer walk removes their correlated subtypes and reads current
+power/toughness only for creatures. Conditions on the recorded alternative
+casting price also apply while the entry event is being inspected, before its
+receipt is appended. See [impending](examples/impending.md) for entry counters,
+conditional creature status and an end-step countdown.

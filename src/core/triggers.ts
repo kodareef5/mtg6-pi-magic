@@ -11,7 +11,7 @@
  * Past 150 lines to keep detection beside the trigger window that empties it.
  */
 import { targetChoiceKey } from "./targeting.ts";
-import { characteristics, walk, type Traits } from "./characteristics.ts";
+import { walk, type Traits } from "./characteristics.ts";
 import { doubleFaced } from "./faces.ts";
 import { aiming, summary, targetings } from "./announce.ts";
 import { damageSource, happened, holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
@@ -78,7 +78,7 @@ export function before(table: Table, changes: Change[]): World | undefined {
 }
 
 /** What one group did that a watch can see. */
-function occurrences(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }): Occurrence[] {
+function occurrences(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }, read: World["read"]): Occurrence[] {
 	const found: Occurrence[] = [];
 	const castCounts = new Map<SeatId, number>();
 	const castOrdinal = (who: SeatId) => {
@@ -94,7 +94,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 		for (const [counter, added] of Object.entries(changes)) {
 			const beforeCount = previous[counter] ?? 0, afterCount = Math.max(0, beforeCount + added);
 			previous[counter] = afterCount;
-			if (added > 0 && object?.zone === "battlefield") found.push({ on: "counters", object, traits: characteristics(table, object), found: ref(object),
+			if (added > 0 && object?.zone === "battlefield") found.push({ on: "counters", object, traits: read(object), found: ref(object),
 				counter, beforeCount, afterCount, amount: added });
 		}
 	};
@@ -107,9 +107,9 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				const was = receipt.before[change.what], is = now(change.what);
 				if (!was || !is || was.incarnation === is.incarnation) break;
 				if (change.to === "battlefield") {
-					found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), from: was.zone, to: "battlefield" });
+					found.push({ on: "enters", object: is, traits: read(is), found: ref(is), from: was.zone, to: "battlefield" });
 					counters(is.id, change.counters ?? {}, true);
-					for (const face of is.doors ?? []) found.push({ on: "unlocks", object: is, traits: characteristics(table, is), found: ref(is), face, player: is.controller });
+					for (const face of is.doors ?? []) found.push({ on: "unlocks", object: is, traits: read(is), found: ref(is), face, player: is.controller });
 				}
 				if (was.zone === "battlefield" && is.zone !== "battlefield") {
 					const left: Occurrence = { on: "leaves", object: was, traits: receipt.known[was.id], found: PUBLIC.has(is.zone) ? ref(is) : ref(was), from: "battlefield", to: is.zone, lookBack: true };
@@ -121,19 +121,19 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			}
 			case "transform": {
 				const object = now(change.what), was = receipt.before[change.what];
-				if (object && was && object.transformed !== was.transformed) found.push({ on: "transforms", object, traits: characteristics(table, object), found: ref(object), face: object.face, player: object.controller });
+				if (object && was && object.transformed !== was.transformed) found.push({ on: "transforms", object, traits: read(object), found: ref(object), face: object.face, player: object.controller });
 				break;
 			}
 			case "door": {
 				const object = now(change.what), was = receipt.before[change.what];
 				if (object && was && change.unlocked && !was.doors?.includes(change.face) && object.doors?.includes(change.face))
-					found.push({ on: "unlocks", object, traits: characteristics(table, object), found: ref(object), face: change.face, player: object.controller,
+					found.push({ on: "unlocks", object, traits: read(object), found: ref(object), face: change.face, player: object.controller,
 						...(object.doors.length === 2 ? { fully: true } : {}) });
 				break;
 			}
 			case "token": {
 				const is = now(change.id);
-				if (is) found.push({ on: "enters", object: is, traits: characteristics(table, is), found: ref(is), to: "battlefield" });
+				if (is) found.push({ on: "enters", object: is, traits: read(is), found: ref(is), to: "battlefield" });
 				counters(change.id, change.counters ?? {}, true);
 				break;
 			}
@@ -147,7 +147,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				if (!ability || !spell || ability.timing === "mana") break;
 				// Cast from the zone the card was in before the group moved it to the stack (601.2a).
 				const from = receipt.before[spell.id]?.zone;
-				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", ordinal: castOrdinal(ability.controller), object: spell, traits: characteristics(table, spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
+				if (change.do === "activate" && ability.timing === "spell") found.push({ on: "cast", ordinal: castOrdinal(ability.controller), object: spell, traits: read(spell), found: ref(spell), player: ability.controller, ...(from && from !== "stack" ? { from } : {}) });
 				// 700.13: one crime per cast, activation or trigger placement, however many qualifying targets.
 				const opponent = (who: number) => who !== ability.controller && playing(table).some(one => one.id === who);
 				if (ability.targets.flat().some(chosen => {
@@ -155,15 +155,15 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 					const current = now(chosen.id), before = receipt.before[chosen.id];
 					const target = current?.incarnation === chosen.incarnation ? current : before?.incarnation === chosen.incarnation ? before : undefined;
 					return target && (["battlefield", "stack"].includes(target.zone) ? opponent(target.controller) : target.zone === "graveyard" && !!target.card && !target.token && !target.copy && opponent(target.owner));
-				})) found.push({ on: "crime", player: ability.controller, source: spell, object: spell, found: ref(spell), traits: characteristics(table, spell) });
+				})) found.push({ on: "crime", player: ability.controller, source: spell, object: spell, found: ref(spell), traits: read(spell) });
 				for (const chosen of ability.targets.flat()) {
 					const aimed = "id" in chosen ? now(chosen.id) : undefined;
-					if (aimed && "id" in chosen && aimed.incarnation === chosen.incarnation) found.push({ on: "targeted", object: aimed, traits: characteristics(table, aimed), found: ref(aimed), player: ability.controller, source: spell });
+					if (aimed && "id" in chosen && aimed.incarnation === chosen.incarnation) found.push({ on: "targeted", object: aimed, traits: read(aimed), found: ref(aimed), player: ability.controller, source: spell });
 				}
 				break;
 			}
 			case "attack": {
-				const attackers = change.attackers.flatMap((one) => { const object = now(one.id); return object ? [{ object, traits: characteristics(table, object) }] : []; });
+				const attackers = change.attackers.flatMap((one) => { const object = now(one.id); return object ? [{ object, traits: read(object) }] : []; });
 				for (const one of attackers) found.push({ on: "attacks", object: one.object, traits: one.traits, found: ref(one.object), player: table.cursor.active });
 				if (attackers.length) found.push({ on: "attacked-with", objects: attackers, player: table.cursor.active });
 				break;
@@ -171,7 +171,7 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "block":
 				for (const one of change.blockers) {
 					const object = now(one.id);
-					if (object) found.push({ on: "blocks", object, traits: characteristics(table, object), found: ref(object), player: object.controller });
+					if (object) found.push({ on: "blocks", object, traits: read(object), found: ref(object), player: object.controller });
 				}
 				break;
 			case "damage": {
@@ -180,8 +180,8 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 				const saved = receipt.before[id], prior = saved && (typeof change.source === "string" || saved.incarnation === change.source.incarnation) ? saved : undefined;
 				const source = prior ?? damageSource(table, change.source)?.object;
 				const recipient = "id" in change.target ? receipt.before[change.target.id] : undefined;
-				const occurrence: Occurrence = { on: "damage", ...(source ? { object: source, traits: receipt.known[id] ?? characteristics(table, source as Thing), found: ref(source), source, player: source.controller } : {}),
-					...(recipient ? { recipient, recipientTraits: receipt.known[recipient.id] ?? characteristics(table, recipient) } : {}), amount: change.amount, combat: !!change.combat,
+				const occurrence: Occurrence = { on: "damage", ...(source ? { object: source, traits: receipt.known[id] ?? read(source as Thing), found: ref(source), source, player: source.controller } : {}),
+					...(recipient ? { recipient, recipientTraits: receipt.known[recipient.id] ?? read(recipient) } : {}), amount: change.amount, combat: !!change.combat,
 					...("player" in change.target ? { dealt: change.target.player, toPlayer: true as const } : {}) };
 				found.push(occurrence);
 				// Existing accepted watches retain their combat-only spelling.
@@ -310,12 +310,15 @@ export function activeWatches(frame: Frame) {
  * once-only delayed triggers it used up. `prior` is the world before the group.
  */
 export function detect(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }, prior?: World): { waiting: Trigger[]; spent: string[] } {
-	const happened = occurrences(table, changes, receipt);
+	// Watches inspect the group before its receipt is appended, including its new casts and resolved entries.
+	let current: Record<string, Thing> | undefined;
+	const pending = { ...receipt, changes, get after() { return current ??= Object.fromEntries(table.things); } };
+	let traits: Map<string, Traits> | undefined;
+	const read: World["read"] = object => (traits ??= walk(table, undefined, pending)).get(object.id);
+	const happened = occurrences(table, changes, receipt, read);
 	const speed = speedTrigger(table, changes);
 	if (!happened.length && !speed) return { waiting: [], spent: [] };
-	const after = tableWorld(table);
-	// Watches inspect the group before its receipt is appended, including its new casts and resolved entries.
-	const pending = { ...receipt, changes, after: Object.fromEntries([...table.things]) };
+	const after = tableWorld(table, read);
 	after.casting = (ref) => casting(table, ref, pending);
 	const forward = watches(after, after.objects), back = prior ? watches(prior, prior.objects) : [];
 	const scopeOf = (watch: Watch): Scope => ({ world: watch.world, controller: watch.controller, source: watch.object });

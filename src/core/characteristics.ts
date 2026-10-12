@@ -13,11 +13,12 @@ import { facts, manaValue, type Printed } from "./printed.ts";
 import { activeFaces, currentFacts } from "./faces.ts";
 import { join } from "node:path";
 import { load as loadRules, rule, type Rules } from "./rules.ts";
-import { type Note, type Table, type Thing } from "./table.ts";
+import { type Note, type Table, type Thing, type Receipt } from "./table.ts";
 import type { Mana } from "./table.ts";
 import type { Modification, Registration } from "./language.ts";
 import { amount, holds, matches, tableWorld, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
 import type { SeatView } from "./types.ts";
+import { casting } from "./casting.ts";
 
 type Color = Mana["color"];
 export type Traits = {
@@ -129,16 +130,19 @@ const cache = new WeakMap<Table, { clock: number; size: number; work: number; tr
 /** Drop the walk for this revision: `commit` changes the table before the clock moves. */
 export const forget = (table: Table) => void cache.delete(table);
 /** Every object's characteristics, walked once per table revision and accepted equipment revision. */
-export function walk(table: Table, override?: Thing): Map<string, Traits> {
+export function walk(table: Table, override?: Thing, pending?: Pick<Receipt, "changes" | "before" | "after">): Map<string, Traits> {
 	const cached = cache.get(table);
-	if (!override && cached && cached.clock === table.cursor.clock && cached.size === table.things.size && cached.work === table.workLog.length) return cached.traits;
+	if (!override && !pending && cached && cached.clock === table.cursor.clock && cached.size === table.things.size && cached.work === table.workLog.length) return cached.traits;
 	const field = [...table.things.values()].filter((one) => one.id !== override?.id);
 	if (override) field.push(override);
 	const now = new Map(field.flatMap((object) => { const traits = base(table, object); return traits ? [[object.id, traits] as const] : []; }));
 	const world = tableWorld(table, (object: Seen) => now.get(object.id));
+	// Entry detection precedes appending its receipt. Its layer conditions still
+	// read the spell's recorded casting facts through this proposed zone change.
+	if (pending) world.casting = (ref) => casting(table, ref, pending);
 	world.objects = field;
 	layers(world, now, field);
-	if (!override) cache.set(table, { clock: table.cursor.clock, size: table.things.size, work: table.workLog.length, traits: now });
+	if (!override && !pending) cache.set(table, { clock: table.cursor.clock, size: table.things.size, work: table.workLog.length, traits: now });
 	return now;
 }
 
@@ -190,6 +194,7 @@ function layers(world: World, now: Map<string, Traits>, field: Seen[], announced
 		const prior = traits.types;
 		if (change.types?.set) traits.types = [...new Set([...change.types.set, ...prior.filter(type => type === "instant" || type === "sorcery")])];
 		if (change.types?.add) traits.types = [...new Set([...traits.types, ...change.types.add])];
+		if (change.types?.remove) traits.types = traits.types.filter(type => !change.types!.remove!.includes(type as never));
 		// 205.1a: losing a card type also loses its correlated subtypes, unless
 		// another retained type shares that set (creature/kindred, instant/sorcery).
 		for (const lost of prior.filter(type => !traits.types.includes(type))) {

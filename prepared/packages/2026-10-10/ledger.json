@@ -175,14 +175,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Overlord of the Balemurk": {
-		"reason": "Overlord of the Balemurk is not ready: Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.) — The syntax cannot record and test the chosen impending alternative cost for the conditional entry counters and ongoing noncreature status. cast.paid records named additional mana costs only; manaSpent cannot distinguish an alternative cost from a reduced ordinary cast. Adding counters or registrations after entry would not implement this entry replacement. Consequently the impending cast and its conditional standing behavior cannot be faithfully prepared.",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Preacher of the Schism": {
 		"reason": "Preacher of the Schism is not ready: Whenever this creature attacks the player with the most life or tied for most life, create a 1/1 white Vampire creature token with lifelink. — Missing an attack-event filter identifying the attacked player (excluding attacks against planeswalkers or battles) and checking that player's life ranking when attackers are declared. The documented event.player filter concerns combat damage, not the recipient of an attack.",
 		"decks": [

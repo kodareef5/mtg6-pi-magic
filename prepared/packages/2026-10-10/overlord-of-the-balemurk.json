@@ -1,0 +1,215 @@
+{
+	"card": "Overlord of the Balemurk",
+	"generated": "2026-10-10",
+	"source": "07348fe485421941fb6cb5bda75a6349e9f9f74498dddeddb032c62bc6313ef2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overlord of the Balemurk",
+		"registers": [
+			{
+				"kind": "enters",
+				"basis": "Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"if": {
+					"cast": "this",
+					"alternative": "impending"
+				},
+				"counters": {
+					"time": 5
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"affects": {
+					"is": "this"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"change": {
+					"types": {
+						"remove": [
+							"creature"
+						]
+					}
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"if": {
+					"all": [
+						{
+							"cast": "this",
+							"alternative": "impending"
+						},
+						{
+							"amount": {
+								"counters": "time",
+								"on": "this"
+							},
+							"atLeast": 1
+						}
+					]
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "time",
+							"amount": -1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, mill four cards, then you may return a non-Avatar creature card or a planeswalker card from your graveyard to your hand.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"any": [
+									{
+										"types": [
+											"creature"
+										],
+										"not": {
+											"subtypes": [
+												"Avatar"
+											]
+										}
+									},
+									{
+										"types": [
+											"planeswalker"
+										]
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "return"
+						},
+						{
+							"do": "move",
+							"what": "bound:return",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this permanent enters or attacks, mill four cards, then you may return a non-Avatar creature card or a planeswalker card from your graveyard to your hand.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "mill",
+							"who": "you",
+							"count": 4
+						},
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you",
+								"any": [
+									{
+										"types": [
+											"creature"
+										],
+										"not": {
+											"subtypes": [
+												"Avatar"
+											]
+										}
+									},
+									{
+										"types": [
+											"planeswalker"
+										]
+									}
+								]
+							},
+							"count": 1,
+							"upTo": true,
+							"as": "return"
+						},
+						{
+							"do": "move",
+							"what": "bound:return",
+							"to": "hand",
+							"reason": "resolve"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Cast Overlord of the Balemurk for its impending cost",
+				"basis": "Impending 5—{1}{B} (If you cast this spell for its impending cost, it enters with five time counters and isn't a creature until the last is removed. At the beginning of your end step, remove a time counter from it.)",
+				"source": {
+					"card": "Overlord of the Balemurk",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}
