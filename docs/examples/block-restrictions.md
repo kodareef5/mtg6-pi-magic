@@ -98,3 +98,87 @@ same pair check with each viewer's projected facts. A player can object to an
 illegal declaration. These checks do not choose blockers or certify a model's
 interpretation. Group requirements such as a minimum combined blocking power
 need a separate complete-declaration rule; this pair selector cannot express them.
+
+## Realm of Koh's Spirit
+
+Two pair restrictions cover the token in both roles. A non-Spirit cannot block
+it, and it cannot block a non-Spirit. Two Spirits may block each other.
+These are registrations on the token; putting their text in `words` would
+not implement them. Losing the token's abilities removes both restrictions.
+
+```json procedure
+{
+  "source": {
+    "card": "Realm of Koh",
+    "zones": [
+      "battlefield"
+    ],
+    "controller": "self"
+  },
+  "claim": "Create a Spirit with its non-Spirit blocking restrictions",
+  "basis": "{3}{B}, {T}: Create a 1/1 colorless Spirit creature token with \"This token can't block or be blocked by non-Spirit creatures.\"",
+  "timing": "stack",
+  "cost": {
+    "mana": "{3}{B}",
+    "tap": true
+  },
+  "instructions": [
+    {
+      "do": "token",
+      "count": 1,
+      "spec": {
+        "name": "Spirit Token",
+        "types": [
+          "creature"
+        ],
+        "subtypes": [
+          "Spirit"
+        ],
+        "colors": [],
+        "power": 1,
+        "toughness": 1,
+        "registers": [
+          {
+            "kind": "prohibit",
+            "basis": "This token can't block or be blocked by non-Spirit creatures.",
+            "block": {
+              "attacker": {
+                "is": "this"
+              },
+              "blocker": {
+                "types": [
+                  "creature"
+                ],
+                "not": {
+                  "subtypes": [
+                    "Spirit"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "prohibit",
+            "basis": "This token can't block or be blocked by non-Spirit creatures.",
+            "block": {
+              "attacker": {
+                "types": [
+                  "creature"
+                ],
+                "not": {
+                  "subtypes": [
+                    "Spirit"
+                  ]
+                }
+              },
+              "blocker": {
+                "is": "this"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```

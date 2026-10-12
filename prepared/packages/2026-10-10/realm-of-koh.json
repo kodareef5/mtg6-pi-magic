@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "3cacc3c9a067099c9e6615298c943281fd0deefd3bd0d6724981309ba33714d9",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Realm of Koh",
 		"registers": [
@@ -39,12 +38,8 @@
 				]
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Create a 1/1 colorless Spirit creature token with the stated non-Spirit blocking restrictions.",
-				"basis": "{3}{B}, {T}: Create a 1/1 colorless Spirit creature token with \"This token can't block or be blocked by non-Spirit creatures.\"",
 				"source": {
 					"card": "Realm of Koh",
 					"zones": [
@@ -52,8 +47,74 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"claim": "Create a Spirit with its non-Spirit blocking restrictions",
+				"basis": "{3}{B}, {T}: Create a 1/1 colorless Spirit creature token with \"This token can't block or be blocked by non-Spirit creatures.\"",
+				"timing": "stack",
+				"cost": {
+					"mana": "{3}{B}",
+					"tap": true
+				},
+				"instructions": [
+					{
+						"do": "token",
+						"count": 1,
+						"spec": {
+							"name": "Spirit Token",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Spirit"
+							],
+							"colors": [],
+							"power": 1,
+							"toughness": 1,
+							"registers": [
+								{
+									"kind": "prohibit",
+									"basis": "This token can't block or be blocked by non-Spirit creatures.",
+									"block": {
+										"attacker": {
+											"is": "this"
+										},
+										"blocker": {
+											"types": [
+												"creature"
+											],
+											"not": {
+												"subtypes": [
+													"Spirit"
+												]
+											}
+										}
+									}
+								},
+								{
+									"kind": "prohibit",
+									"basis": "This token can't block or be blocked by non-Spirit creatures.",
+									"block": {
+										"attacker": {
+											"types": [
+												"creature"
+											],
+											"not": {
+												"subtypes": [
+													"Spirit"
+												]
+											}
+										},
+										"blocker": {
+											"is": "this"
+										}
+									}
+								}
+							]
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }

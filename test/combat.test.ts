@@ -19,13 +19,14 @@ import type { Decision } from "../src/core/types.ts";
 import type { Registration } from "../src/core/language.ts";
 import { workFrame } from "../src/core/work-tools.ts";
 import { activeWatches } from "../src/core/triggers.ts";
-import { combatExchange } from "../src/core/combat-facts.ts";
+import { characteristics } from "../src/core/characteristics.ts";
+import { combatExchange, blockConflicts } from "../src/core/combat-facts.ts";
 import { withdrawnChoices } from "../src/core/combat.ts";
 import { combatLookup } from "../src/context/strategy-combat.ts";
 import { focus } from "../src/context/packet.ts";
 import { startingIntent } from "../src/context/plan.ts";
 import { dossier } from "../src/context/dossier.ts";
-import { establish, finish, main, matchup, pack, passBoth, quiet, step } from "./play.ts";
+import { announce, example, establish, finish, main, matchup, pack, passBoth, quiet, step } from "./play.ts";
 
 /** Answer quietly until the table asks this step's turn-based question on this turn. */
 function reach(table: Table, step: string, turn: number): Decision {
@@ -211,6 +212,22 @@ test("blocks a word forbids are listed and marked, and menace is checked at done
 	finish(relative);
 	assert.deepEqual(relive(partial, relative.ledger.slice(from)), relative);
 	assert.deepEqual(relive(initial, relative.ledger.slice(at)), relative);
+	const realms = start(standard, [{ deck: alpha(deck("Mono-Black Aggro")) }, { deck: alpha(deck("Mono-Black Aggro")) }], "realm-pairs");
+	main(realms, 0); const land = establish(realms, 0, "Realm of Koh", []), miner = establish(realms, 1, "Forsaken Miner", []);
+	commit(realms, [{ do: "add-mana", who: 0, colors: ["B", "C", "C", "C"] }], "game-setup");
+	const realmStart = structuredClone(realms); announce(realms, example("Create a Spirit with its non-Spirit blocking restrictions"));
+	assert.equal(land.tapped, true); assert.equal(realms.seats[0]!.pool.length, 0); passBoth(realms); finish(realms);
+	const spirit = [...realms.things.values()].find(one => one.token?.name === "Spirit Token")!; assert.ok(spirit);
+	assert.deepEqual(relive(realmStart, realms.ledger.slice(realmStart.ledger.length)), realms);
+	const conflicts = (a: Thing, b: Thing) => blockConflicts({ ...a, traits: characteristics(realms, a) }, { ...b, traits: characteristics(realms, b) }, tableWorld(realms));
+	assert.ok(conflicts(spirit, miner).some(one => one.includes("non-Spirit")));
+	assert.ok(conflicts(miner, spirit).some(one => one.includes("non-Spirit")), "the restriction applies when the Spirit blocks too");
+	commit(realms, [{ do: "note", note: { kind: "label", by: 1, on: { id: miner.id, incarnation: miner.incarnation }, until: "end-of-turn", text: "Changeling fixture", change: { subtypes: { allCreatureTypes: true } } } }], "resolve");
+	assert.deepEqual(conflicts(spirit, miner), []); assert.deepEqual(conflicts(miner, spirit), []);
+	main(realms, 0, 3); assert.ok(conflicts(miner, spirit).length);
+	commit(realms, [{ do: "note", note: { kind: "label", by: 0, on: { id: spirit.id, incarnation: spirit.incarnation }, until: "end-of-turn", text: "Spirit loses abilities fixture", change: { loseAbilities: true } } }], "resolve");
+	assert.deepEqual(conflicts(spirit, miner), []); assert.deepEqual(conflicts(miner, spirit), []);
+
 });
 
 test("trample assigns lethal to the blocker before the player, counting marked damage", () => {
