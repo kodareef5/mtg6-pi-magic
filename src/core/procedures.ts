@@ -121,6 +121,8 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "emblem" && instruction.registers.some(one => !["continuous", "watch"].includes(one.kind)))
+				throw new Error("Emblems currently carry continuous characteristic effects and triggered abilities only.");
 			if (instruction.do === "permit" && instruction.while) checkOngoingCondition(instruction.while);
 			if (instruction.do === "choose" && instruction.from.zones?.includes("library") && !selectionScoped(instruction.from))
 				throw new Error("A library selection needs an explicit owner, controller or inspected binding in every branch; card characteristics do not grant a search.");

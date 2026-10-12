@@ -281,7 +281,7 @@ type Watch = { object: Seen; controller: SeatId; registration: Registration; wor
 
 function watches(world: World, objects: Seen[]): Watch[] {
 	return objects.filter(object => PUBLIC.has(object.zone) && (!object.faceDown || object.zone === "battlefield")).flatMap(object => (world.read(object)?.registrations ?? [])
-		.filter(registration => registration.kind === "watch" ? (registration.zones ?? ["battlefield"]).includes(object.zone as never)
+		.filter(registration => registration.kind === "watch" ? (registration.zones ?? [object.emblem ? "command" : "battlefield"]).includes(object.zone as never)
 			: registration.kind === "suppress" && object.zone === "battlefield")
 		.map(registration => ({ object, controller: ["battlefield", "stack"].includes(object.zone) ? object.controller : object.owner, registration, world })));
 }
@@ -297,7 +297,7 @@ export function additionalTriggers(world: World, object: Seen): number {
 export function activeWatches(frame: Frame) {
 	const world = viewWorld(frame.view);
 	return watches(world, world.objects).flatMap(({ object, controller, registration }) => registration.kind === "watch" ? [{
-		source: { ...ref(object), name: object.card ?? object.token?.name ?? "unknown", controller },
+		source: { ...ref(object), name: object.card ?? object.token?.name ?? (object.emblem ? "Emblem" : "unknown"), controller },
 		basis: registration.basis, event: structuredClone(registration.event),
 		...(registration.event.of ? { matchingNow: world.objects.filter((candidate) => matches({ world, controller, source: object }, candidate, registration.event.of!))
 			.map((candidate) => ({ ...ref(candidate), name: candidate.card ?? candidate.token?.name ?? "unknown" })) } : {}),
@@ -402,7 +402,7 @@ export function triggerWindow(table: Table): Pending | null {
 	if (!seat) return null;
 	const world = tableWorld(table);
 	const mine = current.filter((trigger) => trigger.controller === seat.id);
-	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.faceDown ? `Face-down creature (${source.id})` : source?.card ?? source?.token?.name ?? trigger.source?.id ?? "Inherent ability"; };
+	const sourceName = (trigger: (typeof mine)[number]) => { const source = world.lastKnown(trigger.source)?.object; return source?.faceDown ? `Face-down creature (${source.id})` : source?.card ?? source?.token?.name ?? (source?.emblem ? "Emblem" : trigger.source?.id) ?? "Inherent ability"; };
 	// Putting one on now places it under every trigger put later, so it resolves after them.
 	const after = (trigger: (typeof mine)[number]) => { const others = mine.filter((other) => other !== trigger).map((other) => `${sourceName(other)}'s trigger`);
 		return others.length ? `Put on now, it resolves after ${[...new Set(others)].map((one) => { const n = others.filter((other) => other === one).length; return n > 1 ? `${one} (x${n})` : one; }).join(", ")}.` : "It is the last trigger to put on."; };

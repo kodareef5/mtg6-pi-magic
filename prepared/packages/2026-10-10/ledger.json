@@ -1,12 +1,4 @@
 {
-	"Ajani Resolute": {
-		"reason": "Ajani Resolute is not ready: Whenever you gain life, put a loyalty counter on Ajani. — The event syntax has no life-gain event for this required standing trigger.; −4: Create a 2/2 white Cat Soldier creature token named Ajani's Pridemate with \"Whenever you gain life, put a +1/+1 counter on this token.\" — Token creation is supported, but its required granted trigger cannot be registered because the event syntax has no life-gain event.; −10: You get an emblem with \"Creatures you control get +2/+2.\" — The syntax has no operation to create an emblem with its own continuing static ability; a permanent token or source-dependent modification would not implement this effect.",
-		"decks": [
-			"Lifegain"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Aven Interrupter": {
 		"reason": "Aven Interrupter is not ready: When this creature enters, exile target spell. It becomes plotted. (Its owner may cast it as a sorcery on a later turn without paying its mana cost.) — Exiling the targeted spell is expressible, but the syntax has no plotted designation or permission combining an owner's free alternative-cost cast, mandatory sorcery timing, and exclusion of the turn it became plotted. A generic permit would not implement this ability.; Spells your opponents cast from graveyards or from exile cost {2} more to cast. — The syntax has no standing casting-cost increase registration or selector for the zone a spell is being cast from; characteristic words do not implement the required additional generic mana payment.",
 		"decks": [

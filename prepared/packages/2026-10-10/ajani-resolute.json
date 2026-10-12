@@ -1,0 +1,71 @@
+{
+	"card": "Ajani Resolute",
+	"generated": "2026-10-10",
+	"source": "1113fd2b5b5194d5bc3ea3e82a09cd3f9ec003e1086630125c8f2e1fbe3ae96e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ajani Resolute",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, put a loyalty counter on Ajani.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "loyalty",
+							"amount": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": [
+			{
+				"claim": "Activate Ajani's zero-loyalty life gain ability",
+				"basis": "0: You gain 1 life.",
+				"source": {
+					"card": "Ajani Resolute",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate Ajani's minus-four ability to create Ajani's Pridemate",
+				"basis": "−4: Create a 2/2 white Cat Soldier creature token named Ajani's Pridemate with \"Whenever you gain life, put a +1/+1 counter on this token.\"",
+				"source": {
+					"card": "Ajani Resolute",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			},
+			{
+				"claim": "Activate Ajani's minus-ten ability to create a creature-boosting emblem",
+				"basis": "−10: You get an emblem with \"Creatures you control get +2/+2.\"",
+				"source": {
+					"card": "Ajani Resolute",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack"
+			}
+		]
+	}
+}

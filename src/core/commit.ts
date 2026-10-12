@@ -160,6 +160,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	// Mana added earlier in the same group, by a mana ability activated while paying, can be spent.
 	const available = new Map(table.seats.map((seat) => [seat.id, new Set(seat.pool.map((mana) => mana.id))]));
 	for (const [index, change] of changes.entries()) {
+		if (change.do === "emblem" && (table.things.has(change.id) || changes.some((one, at) => at !== index && "id" in one && one.id === change.id)))
+			throw new Error("An emblem needs a new object identity.");
 		if (change.do === "copy-spell" && (table.things.has(change.id) || changes.some((one, at) => at !== index && one.do === "copy-spell" && one.id === change.id)))
 			throw new Error("A spell copy needs a new object identity.");
 		if (change.do === "increase-speed" && (!Number.isInteger(change.amount) || change.amount <= 0)) throw new Error("Speed increases by a positive integer.");
@@ -411,6 +413,10 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 					ability: { ...structuredClone(change.ability), source: { id: change.id, incarnation: 0 } } });
 				break;
 			}
+			case "emblem":
+				table.things.set(change.id, { id: change.id, incarnation: 0, owner: change.who, controller: change.who, zone: "command",
+					emblem: { created: table.cursor.clock + 1 }, tapped: false, faceDown: false, counters: {}, damage: 0, registrations: structuredClone(change.registers) });
+				break;
 			case "trigger":
 				if (change.action === "wait") table.waiting.push(structuredClone(change.trigger));
 				else {
@@ -603,7 +609,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const now = table.things.get(id);
 		if (now) after[id] = structuredClone(now);
 	}
-	for (const change of changes) if (change.do === "copy-spell") after[change.id] = structuredClone(thing(table, change.id));
+	for (const change of changes) if (change.do === "copy-spell" || change.do === "emblem") after[change.id] = structuredClone(thing(table, change.id));
 
 	const receipt: Receipt = {
 		seq: table.log.length,

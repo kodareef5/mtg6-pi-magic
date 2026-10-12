@@ -19,7 +19,7 @@ import type { Step } from "./steps.ts";
 import { physicalHistory, type PhysicalEvent } from "./physical-history.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "spellCopy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "spellCopy" | "copied" | "emblem" | "choices" | "registrations" | "lookedBy">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| PhysicalEvent

@@ -88,6 +88,8 @@ export type Change =
 		choices?: Record<string, string>; entry?: "paid" | "declined"; attacking?: { defending: SeatId; to?: ObjectRef } }
 	/** Copies preserve announced decisions, but pay nothing and emit no cast event. */
 	| { do: "copy-spell"; id: string; of: ObjectRef; spec: TokenSpec; ability: Ability }
+	/** A player gets an emblem in the command zone (114). */
+	| { do: "emblem"; id: string; who: SeatId; registers: Registration[] }
 	/** Shown to every seat. Nothing moves. */
 	| { do: "reveal"; what: string }
 	| { do: "turn-face-up"; what: string; registers?: Registration[] }

@@ -84,6 +84,7 @@ export function base(table: Table, object: Thing): Traits | undefined {
 			one.kind === "permit" && one.cast?.from.includes(object.zone as never) ||
 			one.kind === "watch" && one.zones?.includes(object.zone as never)) : [];
 	const own = [...(object.registrations ?? []), ...registered(table, object), ...standing].filter((one) => one.face === undefined || active.includes(one.face));
+	if (object.emblem) return { name: "", supertypes: [], types: [], subtypes: [], colors: [], manaValue: 0, words: [], registrations: own };
 	if (object.token || (object.zone === "battlefield" || object.spellCopy) && object.copied) {
 		const spec = (object.zone === "battlefield" || object.spellCopy) && object.copied ? object.copied.spec : object.token!;
 		return { name: spec.name, supertypes: [...(spec.supertypes ?? [])], types: [...spec.types], subtypes: [...(spec.subtypes ?? [])],
@@ -167,8 +168,8 @@ function layers(world: World, now: Map<string, Traits>, field: Seen[], announced
 	const scope = (source?: Seen): Scope => ({ world, controller: source?.controller ?? 0, ...(source ? { source } : {}), ...(announced && announced.id === source?.id ? { x: announced.x } : {}) });
 	const effects: Effect[] = [
 		...world.objects.flatMap((source) => (world.read(source)?.registrations ?? []).flatMap((ability): Effect[] => ability.kind === "continuous" &&
-			(source.zone === "battlefield" || ability.affects.is === "this" && ability.affects.zones?.includes(source.zone as never)) ? [{
-			at: source.transformed ?? source.entered ?? 0, change: ability.change, source, ability,
+			(source.zone === "battlefield" || source.emblem && source.zone === "command" || ability.affects.is === "this" && ability.affects.zones?.includes(source.zone as never)) ? [{
+			at: source.transformed ?? source.entered ?? source.emblem?.created ?? 0, change: ability.change, source, ability,
 			applies: (inner, object) => matches(inner, object, ability.affects), ...(ability.if ? { when: (inner: Scope) => holds(inner, ability.if!) } : {}),
 		}] : [])),
 		...world.notes.flatMap((note: Note): Effect[] => note.kind === "label" && note.change ? [{

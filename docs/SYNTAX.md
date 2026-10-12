@@ -212,6 +212,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `door` | `what`, `action` unlock or lock, optional `face`; otherwise the player chooses an eligible door |
 | `prepare` | `what`, `prepared` true or false; preparing creates its castable copy in exile |
 | `copy-spell` | `what` names one spell, retaining announced choices without casting or paying again; optional `as` binds its new stack object |
+| `emblem` | `who`, `registers`; independent command-zone abilities, currently continuous characteristic effects and watches; no card or token is created |
 | `designate` | `what`, `designation: "harnessed"`; marks the current permanent until it leaves the battlefield |
 | `token` | `count` of a `spec`: name, types, subtypes, colors, P/T, starting `loyalty`, words, registrations; optional `controller` names each creator (default `you`); `tapped` and `attacking`, with each entering attack's defender chosen before the group enters |
 | `modify` | change characteristics `until` a duration, written as a public label |
@@ -754,6 +755,12 @@ Life-gain watches use `on: "life-gained"` and `by` for the recipient.
 Lifelink groups damage by source before raising these events; zero gains and
 life payments do not qualify. See [life-gain events](examples/life-gain.md).
 This adds no life-gain replacement or source-selector support.
+
+An `emblem` instruction gives its recipient an independent command-zone object
+with the stated registrations. Its effects and default watches function there
+and survive the creating source. Emblems are neither cards nor permanents and
+have no name, types, mana cost or color. See [emblems](examples/emblems.md).
+Activated emblem abilities and other registration kinds remain unsupported.
 
 ## Not expressible yet
 

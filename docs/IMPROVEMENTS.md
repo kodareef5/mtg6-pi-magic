@@ -23,9 +23,9 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Sixteen imported main decks have complete standing coverage; nine have completed
+Seventeen imported main decks have complete standing coverage; nine have completed
 source-reviewed games. The newly admitted lists await their first games.
-[Status](STATUS.md) holds the current evidence. Three lists still need standing
+[Status](STATUS.md) holds the current evidence. Two lists still need standing
 assessments. Saved live continuations currently wait on strategy-provider credits.
 
 1. Start games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
@@ -35,9 +35,11 @@ assessments. Saved live continuations currently wait on strategy-provider credit
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Ajani Resolute's emblem is Lifegain's final standing blocker.
-   Jund needs shared sacrifice and replacement mechanics. Mardu's remaining source mechanics stay
-   in the refusal ledger until their shared operations are implemented.
+   stopped games. Jund needs sacrifice events and counts, activation-cost
+   reductions, repeated payment choices and a damage replacement. Mardu needs
+   discard events, conditional graveyard permission, Class levels and random
+   selections. Keep those meanings in the refusal ledger until their shared
+   operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete

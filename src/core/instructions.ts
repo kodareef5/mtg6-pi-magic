@@ -282,6 +282,14 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			return one(`Copy ${result.spec.name} onto the stack with its announced choices`, [{ do: "copy-spell", id, of: ref(original), spec: result.spec,
 				ability: { ...result.ability!, controller } }], bind(instruction, { objects: [{ id, incarnation: 0 }], players: [] }));
 		}
+		case "emblem": {
+			if (instruction.registers.some(one => !["continuous", "watch"].includes(one.kind)))
+				return { actor: controller, question: "Get the emblem.", choices: [], blocked: "Emblems currently carry continuous characteristic effects and triggered abilities only." };
+			const recipients = [...new Set(players(scope, instruction.who))];
+			const changes: Change[] = recipients.map(who => ({ do: "emblem", id: `emblem-${table.cursor.clock + 1}-${who}`, who, registers: structuredClone(instruction.registers) }));
+			return one(`${recipients.map(who => seat(table, who).name).join(", ") || "Nobody"} gets an emblem`, changes,
+				bind(instruction, { objects: changes.flatMap(change => change.do === "emblem" ? [{ id: change.id, incarnation: 0 }] : []), players: recipients }));
+		}
 		case "token": {
 			const count = Math.max(0, amount(scope, instruction.count)), creators = [...new Set(players(scope, instruction.controller ?? "you"))];
 			const originals = instruction.copy && count && creators.length ? objects(scope, instruction.copy, true) : [];

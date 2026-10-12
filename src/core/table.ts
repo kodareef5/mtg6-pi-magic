@@ -35,7 +35,7 @@ export type { Change, Reason, Zone } from "./syntax.ts";
 
 export type ObjectId = string;
 /**
- * One card or token.
+ * One physical object: a card, token, stack ability, spell copy or emblem.
  *
  * `incarnation` rises on every zone change, so "this existence of this card" is
  * expressible and a note left on the dead one does not apply to the returned
@@ -64,6 +64,8 @@ export type Thing = {
 	copy?: { face: 0 | 1; source: ObjectRef };
 	/** A noncard spell put directly on the stack; it becomes a token only as a permanent spell resolves. */
 	spellCopy?: true;
+	/** An emblem's physical creation timestamp; its abilities function in the command zone. */
+	emblem?: { created: number };
 	/** An entry copy effect freezes copiable terms, not the current layer result. */
 	copied?: { source: ObjectRef; spec: TokenSpec };
 	id: ObjectId;
