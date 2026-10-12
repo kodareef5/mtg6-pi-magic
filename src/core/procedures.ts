@@ -4,7 +4,7 @@
  * announce.ts, built from the seat's frame.
  * Past 150 lines because every part of a cost is checked and paid in one place.
  */
-import { variableSacrifice } from "./sacrifice-costs.ts";
+import { variableSacrifice, variableTap } from "./resource-costs.ts";
 import { targetBounds, validDivision, validTargetControllers } from "./targeting.ts";
 import { costChanges } from "./costs.ts";
 import { announcedActivation, announcementPayments } from "./announcement-options.ts";
@@ -93,6 +93,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			const names = [terms.cost?.sacrifice, terms.cost?.return].flatMap(cost => typeof cost === "object" && "as" in cost && cost.as ? [cost.as] : []);
 			if (new Set(names).size !== names.length) throw new Error("Each selected cost needs a distinct binding name.");
 			const resolutionBound = names.length ? new Set([...bound, ...names]) : bound;
+			if (variableTap(terms.cost) && (terms.cost?.sacrifice || terms.cost?.return || terms.cost?.exile || terms.kind === "mana")) throw new Error("Tap payments do not combine with costs that move objects or mana abilities.");
 			if (terms.kind === "mana" && terms.cost?.show?.until) throw new Error("A mana ability cannot retain a reveal on the stack.");
 			for (const cost of [terms.cost, terms.pays]) if (cost?.additional || cost?.alternative) {
 				if (terms.timing !== "spell") throw new Error("Named additional and alternative costs belong to a spell announcement, not an activation or resolving payment.");
@@ -128,6 +129,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {
 		for (const instruction of instructions) {
+			if (instruction.do === "pay" && variableTap(instruction.cost)) throw new Error("A resolving payment cannot use staged tap payments.");
 			if (instruction.do === "pay" && instruction.cost.show?.until) throw new Error("A resolving payment cannot retain a reveal on the stack.");
 			if (instruction.do === "pay" && variableSacrifice(instruction.cost)) throw new Error("A resolving payment cannot select optional sacrifices for a casting reduction.");
 			if (instruction.do === "emblem" && instruction.registers.some(one => !["continuous", "watch"].includes(one.kind)))
@@ -266,6 +268,7 @@ export function activationChanges(table: Table, activation: Activation): Change[
 	// Mana abilities activated during payment (601.2g). Their mana is spent in this same group.
 	changes.push(...paying({ paid, taps: funding }, controller, table.cursor.clock, changes.length));
 	if (cost.sacrificeReduction !== undefined) changes.push(...costChanges(cost, source, controller));
+	if (cost.keyword) changes.push({ do: "keyword", name: cost.keyword.name, who: controller, count: cost.keyword.count });
 	if (activation.timing === "special") changes.push(...specialChanges(table, activation));
 	if (activation.timing === "spell" && object.copy) changes.push({ do: "prepare", what: object.copy.source.id, prepared: false });
 	const future = activation.timing === "spell" ? castWords(scope, spell, traits) : [];

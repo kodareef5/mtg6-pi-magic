@@ -4,7 +4,7 @@
 import { commit } from "./commit.ts";
 import { project } from "./view.ts";
 import { aiming, targetCandidates } from "./announce.ts";
-import { affordableCosts, announcedActivation, announcementBases, announcementPayments, canAfford, canAnnounce, type Announcement } from "./announcement-options.ts";
+import { affordableCosts, announcedActivation, announcementBases, announcementPayments, canAfford, canAnnounce, selectedResources, type Announcement } from "./announcement-options.ts";
 import { paymentOptions } from "./payment-options.ts";
 import { targetBounds } from "./targeting.ts";
 import { amount, targetKey } from "./selectors.ts";
@@ -12,7 +12,7 @@ import type { LedgerRow, Table } from "./table.ts";
 import type { Frame } from "./types.ts";
 import type { Move, Pending } from "./moves.ts";
 import { manaLabel } from "./mana-cost.ts";
-import { paymentReservations, sacrificePool, variableSacrifice } from "./sacrifice-costs.ts";
+import { paymentReservations, resourcePool, variableResource } from "./resource-costs.ts";
 import { tapObjects } from "./funding.ts";
 
 export function beginAnnouncement(table: Table, draft: Announcement, choice: Pick<LedgerRow, "picked" | "offered" | "by" | "why" | "execution">): void {
@@ -36,6 +36,7 @@ export function announcing(table: Table): Pending | null {
 	const choose = (id: string, label: string, announcement: Announcement | undefined, shows?: string) => moves.push({
 		option: { id, label, objects: [draft.source], ...(shows ? { shows } : {}) }, changes: [{ do: "announcement", ...(announcement ? { announcement } : {}) }], reason: "announcement" });
 	const bases = [...announcementBases(frame, draft)], base = bases[0];
+	const resource = variableResource(draft.procedure.cost), progress = selectedResources(draft);
 	const divisions = base?.slots.flatMap((slot, group) => slot.divide === undefined ? [] :
 		draft.targets[group]?.map((one, at) => ({ group, at, one, total: amount({ ...base.scope, targets: draft.targets }, slot.divide!) })) ?? []) ?? [];
 	const dividing = divisions.find(one => one.one.amount === undefined);
@@ -98,36 +99,39 @@ export function announcing(table: Table): Pending | null {
 		const previous = divisions[divisions.indexOf(dividing) - 1];
 		choose("announce:back", previous ? "Return to the previous assigned amount" : "Return to the last target group",
 			previous ? unassign(previous.group, previous.at) : rewindTargets());
-	} else if (variableSacrifice(draft.procedure.cost) && !draft.sacrificesDone) {
-		preparing = { stage: "sacrifices" };
-		const selected = draft.sacrifices ?? [], pool = sacrificePool({ ...base.scope, targets: draft.targets }, draft.procedure.cost);
+	} else if (resource && !progress.done) {
+		const tapping = resource.kind === "tap", plural = tapping ? "taps" : "sacrifices";
+		preparing = { stage: tapping ? "mana-taps" : "sacrifices" };
+		const selected = progress.selected, pool = resourcePool({ ...base.scope, targets: draft.targets }, draft.procedure.cost);
 		const name = (id: string) => { const one = pool.find(one => one.id === id); return `${one?.card ?? one?.token?.name ?? id} (${id})`; };
-		question += ` Choose any number of matching controlled permanents to sacrifice. Each reduces generic mana by ${variableSacrifice(draft.procedure.cost)!.reduce}. Selected: ${selected.map(one => name(one.id)).join("; ") || "none"}. Nothing moves until confirmation.`;
+		question += tapping ? ` Choose up to ${resource.limit} matching untapped permanents to tap instead of paying generic mana. Each pays for one generic mana in this component.`
+			: ` Choose any number of matching controlled permanents to sacrifice. Each reduces generic mana by ${resource.each}.`;
+		question += ` Selected: ${selected.map(one => name(one.id)).join("; ") || "none"}. Nothing moves until confirmation.`;
 		for (const one of pool) {
-			if (selected.some(ref => ref.id === one.id)) continue;
-			const sacrifices = [...selected, { id: one.id, incarnation: one.incarnation }];
-			if (!canAfford(base, frame, draft.targets, sacrifices)) continue;
-			choose(`announce:sacrifice:${one.id}`, `Select ${name(one.id)} for sacrifice`, { ...draft, sacrifices });
-			moves.at(-1)!.option.objects!.push(sacrifices.at(-1)!);
+			if (selected.length >= resource.limit || selected.some(ref => ref.id === one.id)) continue;
+			const chosen = [...selected, { id: one.id, incarnation: one.incarnation }];
+			if (!canAfford(base, frame, draft.targets, chosen)) continue;
+			choose(`announce:${resource.kind}:${one.id}`, `Select ${name(one.id)} for ${tapping ? "tap payment" : "sacrifice"}`, { ...draft, [progress.field]: chosen });
+			moves.at(-1)!.option.objects!.push(chosen.at(-1)!);
 		}
-		for (const one of selected) choose(`announce:unsacrifice:${one.id}`, `Remove ${name(one.id)} from the sacrifices`, { ...draft, sacrifices: selected.filter(ref => ref.id !== one.id) });
+		for (const one of selected) choose(`announce:un${resource.kind}:${one.id}`, `Remove ${name(one.id)} from the ${plural}`, { ...draft, [progress.field]: selected.filter(ref => ref.id !== one.id) });
 		if (affordableCosts(base, frame, draft.targets, selected).length)
-			choose("announce:sacrifices-done", `Finish selecting sacrifices (${selected.length}); choose the locked cost next`, { ...draft, sacrificesDone: true });
-		const earlier = { ...draft, sacrifices: undefined };
+			choose(`announce:${plural}-done`, `Finish selecting ${plural} (${selected.length}); choose the locked cost next`, { ...draft, [progress.doneField]: true });
+		const earlier = { ...draft, [progress.field]: undefined };
 		const last = divisions.at(-1);
-		if (last) choose("announce:back", "Return to the last assigned amount", { ...unassign(last.group, last.at), sacrifices: undefined });
-		else if (draft.targets.length) choose("announce:back", "Return to the last target group", { ...rewindTargets(), sacrifices: undefined });
+		if (last) choose("announce:back", "Return to the last assigned amount", { ...unassign(last.group, last.at), [progress.field]: undefined });
+		else if (draft.targets.length) choose("announce:back", "Return to the last target group", { ...rewindTargets(), [progress.field]: undefined });
 		else if (base.hybrid !== undefined) choose("announce:back", "Return to choosing hybrid symbols", { ...earlier, hybrid: undefined });
 		else if (base.mana.x) choose("announce:back", "Return to choosing X", { ...earlier, x: undefined });
 	} else if (!draft.cost) {
 		question += " Choose the additional resources and lock the cost.";
-		for (const [at, cost] of affordableCosts(base, frame, draft.targets, draft.sacrifices).entries()) {
+		for (const [at, cost] of affordableCosts(base, frame, draft.targets, progress.selected).entries()) {
 			choose(`announce:cost:${at}`, `Lock cost: ${cost.price.generic} generic${cost.price.colors.map((color) => ` + {${color}}`).join("")}. ${cost.extra.shows || "No additional resources."}`, { ...draft, cost });
 			moves.at(-1)!.option.objects!.push(...cost.extraRefs);
 			moves.at(-1)!.option.spends = [...cost.extraRefs, ...(cost.cost.tap ? [draft.source] : []), ...(cost.cost.counters?.on ?? []), ...(cost.cost.shown ?? [])];
 		}
 		const last = divisions.at(-1);
-		if (draft.sacrificesDone) choose("announce:back", "Return to choosing sacrifices", { ...draft, sacrificesDone: undefined });
+		if (progress.done) choose("announce:back", `Return to choosing ${resource?.kind === "tap" ? "tap payments" : "sacrifices"}`, { ...draft, [progress.doneField]: undefined });
 		else if (last) choose("announce:back", "Return to the last assigned amount", unassign(last.group, last.at));
 		else if (draft.targets.length) choose("announce:back", "Return to the last target group", rewindTargets());
 		else beforeTargets();

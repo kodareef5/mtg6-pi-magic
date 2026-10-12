@@ -201,6 +201,8 @@ export type Paid = { generic: number; colors: Mana["color"][]; tap?: true; tappe
 	additional?: string[]; alternative?: string;
 	/** Announced generic discount from the selected optional sacrifices, including zero. */
 	sacrificeReduction?: number;
+	/** A named cost completed by the whole payment, regardless of its chosen mix. */
+	keyword?: { name: "waterbend"; count: number };
 	loyalty?: number;
 	exiled?: ObjectRef[]; discarded?: ObjectRef[]; shown?: (ObjectRef & { reveal?: true; until?: "leaves-stack" })[]; life?: number;
 	counters?: { kind: string; count: number; put?: true; on?: ObjectRef[] } };

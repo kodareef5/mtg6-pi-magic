@@ -10,7 +10,7 @@ const counts = (colors: Mana["color"][]) => COLORS.map((color) => colors.filter(
 
 /** Units with the same physical id are alternatives, never separate resources.
  * `selected` has already been excluded from `units` by the caller. */
-export function canPay(units: readonly Unit[], cost: Price, life: number, selected: Yield & { used?: string[] } = { colors: [] }): boolean {
+export function canPay(units: readonly Unit[], cost: Price, life: number, selected: Yield & { used?: string[] } = { colors: [] }, reductionLimit = cost.generic): boolean {
 	if (new Set(selected.used).size !== (selected.used?.length ?? 0)) return false;
 	const left = cost.generic + cost.colors.length - selected.colors.length;
 	const paid = counts(selected.colors), needed = counts(cost.colors).map((count, at) => Math.max(0, count - paid[at]!));
@@ -52,5 +52,5 @@ export function canPay(units: readonly Unit[], cost: Price, life: number, select
 		});
 		memo.set(key, found); return found;
 	};
-	return walk(0, left, needed, cost.generic, remainingLife, new Set());
+	return walk(0, left, needed, Math.min(cost.generic, reductionLimit), remainingLife, new Set());
 }

@@ -1012,3 +1012,12 @@ It keeps that defender and never declares a new attack. `cost.show` with
 `until: "leaves-stack"` keeps its selected hand incarnation public only while
 the announced spell or ability remains on the stack. See
 [attacking entry](examples/attacking-entry.md) for ninjutsu and its limits.
+
+`cost.tap` with `pay: "generic"`, `count` and `upTo: true` selects up to that
+count of matching permanents to replace one generic mana each, after standing
+cost adjustments. Its component is already included in `cost.mana`; the limit
+never covers colored symbols or extra generic components. Optional
+`keyword: "waterbend"` records payment even when paid entirely with mana.
+The choices share staged additional-resource selection and reserve tapped
+objects against mana abilities. See [tap payments](examples/tap-payments.md)
+for supported combinations and the distinction from a cost reduction.

@@ -27,7 +27,7 @@ import { casting } from "./casting.ts";
 /** One thing that happened in a group, as a watch reads it. */
 type Occurrence = {
 	on: GameEvent["on"];
-	keyword?: "scry" | "surveil" | "manifest-dread" | "search" | "explore";
+	keyword?: "scry" | "surveil" | "manifest-dread" | "search" | "explore" | "waterbend";
 	ordinal?: number;
 	/** What it happened to, as it was then. */
 	object?: Seen;

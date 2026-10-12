@@ -193,8 +193,12 @@ export const Defs = {
 		/** Named additional mana costs chosen for a spell, added after its base or alternative price. */
 		additional: Type.Optional(Type.Array(object({ name, mana: ManaCost }), { minItems: 1 })),
 		/** `true` taps the source. A choice taps selected objects; source:true also pays the source's tap symbol. */
-		tap: Type.Optional(Type.Union([Type.Literal(true), object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive),
-			source: Type.Optional(Type.Literal(true)), upTo: Type.Optional(Type.Literal(true)), reduce: Type.Optional(Type.Literal("power")) })])),
+		tap: Type.Optional(Type.Union([Type.Literal(true), Type.Object({ choose: Type.Ref("Selector"), count: Type.Optional(positive), totalPower: Type.Optional(positive),
+			source: Type.Optional(Type.Literal(true)), upTo: Type.Optional(Type.Literal(true)), reduce: Type.Optional(Type.Literal("power")),
+			pay: Type.Optional(Type.Literal("generic")), keyword: Type.Optional(Type.Literal("waterbend")) }, { additionalProperties: false, allOf: [
+				{ if: { required: ["pay"] }, then: { required: ["count", "upTo"], not: { anyOf: [{ required: ["source"] }, { required: ["totalPower"] }, { required: ["reduce"] }] } } },
+				{ if: { required: ["keyword"] }, then: { required: ["pay"] } },
+			] })])),
 		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name) }),
 			object({ choose: Type.Ref("Selector"), any: Type.Literal(true), reduce: positive, as: Type.Optional(name) })])),
 		/** Return controlled permanents to their owners' hands as payment. */
@@ -233,7 +237,7 @@ export const Defs = {
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
 		on: one("enters", "leaves", "dies", "sacrificed", "discarded", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "level", "counters", "keyword", "crime", "life-gained"),
-		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search", "explore")),
+		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search", "explore", "waterbend")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
 		/** Ordinal among all spells cast by that caster this turn, not only those matching of. */

@@ -8,7 +8,7 @@
  * decides what to do with it.
  * Past 150 lines to keep matching, resource marks and execution credit together.
  */
-import { variableSacrifice } from "./sacrifice-costs.ts";
+import { variableResource } from "./resource-costs.ts";
 import { holds as condition, targetKey, viewWorld, type Scope } from "./selectors.ts";
 import { currentPlan, matches, reached, select } from "./query.ts";
 import { procedureOptions, type ProcedureOption } from "./procedures.ts";
@@ -99,7 +99,7 @@ function activationEquality() {
 function candidates(option: PlanOption, frame: Frame, prefix: string): { options: Option[]; procedures: ProcedureOption[]; announcements?: AnnouncementOffer[] } {
 	const { action } = option;
 	if ("procedure" in action) {
-		if (frame.view.stagedAnnouncements || variableSacrifice(action.procedure.cost)) {
+		if (frame.view.stagedAnnouncements || variableResource(action.procedure.cost)) {
 			if (frame.decision?.situation !== "priority") return { options: [], procedures: [] };
 			const starts = announcementOffers(action.procedure, frame, prefix), listed = frame.decision.options.filter((one) => one.announcement);
 			const terms = (draft: Announcement) => {

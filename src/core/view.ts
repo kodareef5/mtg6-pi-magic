@@ -389,7 +389,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			}
 			case "keyword":
 				if (change.name === "explore") { parts.push(`${publicName(change.object && receipt.before[change.object.id])} explored`); break; }
-				parts.push(`${seat(table, change.who).name} ${change.name === "search" ? `searched ${seat(table, change.whose!).name}'s library` : change.name === "manifest-dread" ? "manifested dread" : `${change.name === "scry" ? "scried" : "surveilled"} ${change.count}`}`);
+				parts.push(`${seat(table, change.who).name} ${change.name === "search" ? `searched ${seat(table, change.whose!).name}'s library` : change.name === "waterbend" ? "waterbent" : change.name === "manifest-dread" ? "manifested dread" : `${change.name === "scry" ? "scried" : "surveilled"} ${change.count}`}`);
 				break;
 			case "order":
 				parts.push(`${seat(table, change.who).name} put ${change.cards.length} cards on the ${change.position} of ${seat(table, change.whose).name}'s library${change.random ? " in random order" : " in their chosen order"}${viewer === change.who && !change.random ? `: ${change.cards.map((one) => receipt.before[one.id]?.card ?? "a card").join(", ")} (topmost first)` : ""}`);

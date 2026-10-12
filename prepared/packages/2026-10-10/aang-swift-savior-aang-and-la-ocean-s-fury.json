@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "f8dc758c02bf191a0036d8a0d6ab0e1dc3fa50eaebbf91dc0675c49f09da43b1",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Aang, Swift Savior // Aang and La, Ocean's Fury",
 		"registers": [
@@ -140,7 +139,43 @@
 				}
 			}
 		],
-		"procedures": [],
+		"procedures": [
+			{
+				"face": 0,
+				"claim": "Waterbend to transform Aang",
+				"basis": "Waterbend {8}: Transform Aang.",
+				"source": {
+					"card": "Aang, Swift Savior // Aang and La, Ocean's Fury",
+					"face": 0,
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"timing": "stack",
+				"cost": {
+					"mana": "{8}",
+					"tap": {
+						"choose": {
+							"types": [
+								"artifact",
+								"creature"
+							]
+						},
+						"count": 8,
+						"upTo": true,
+						"pay": "generic",
+						"keyword": "waterbend"
+					}
+				},
+				"instructions": [
+					{
+						"do": "transform",
+						"what": "this"
+					}
+				]
+			}
+		],
 		"assessed": true,
 		"printedCast": false,
 		"deferred": [
@@ -158,20 +193,6 @@
 					"controller": "any"
 				},
 				"timing": "spell"
-			},
-			{
-				"face": 0,
-				"claim": "Waterbend {8} to transform Aang; untapped artifacts or creatures you control may be tapped instead of paying each generic mana.",
-				"basis": "Waterbend {8}: Transform Aang.",
-				"source": {
-					"card": "Aang, Swift Savior // Aang and La, Ocean's Fury",
-					"zones": [
-						"battlefield"
-					],
-					"controller": "self",
-					"face": 0
-				},
-				"timing": "stack"
 			}
 		]
 	}
