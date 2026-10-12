@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "f8ea0b8b2b768ae59fa7f8b3f2fcc900f963fb1fe516da292fb52b6c3cd27fb4",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Haliya, Guided by Light",
 		"registers": [
@@ -76,10 +75,7 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Haliya, Guided by Light for its warp cost",
 				"basis": "Warp {W} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
@@ -90,8 +86,42 @@
 					],
 					"controller": "self"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{W}",
+					"alternative": "warp"
+				},
+				"instructions": [
+					{
+						"do": "delay",
+						"event": {
+							"on": "step",
+							"step": "end"
+						},
+						"effect": {
+							"instructions": [
+								{
+									"do": "move",
+									"what": "this",
+									"to": "exile",
+									"reason": "exile",
+									"as": "warped"
+								},
+								{
+									"do": "permit",
+									"what": "bound:warped",
+									"who": "you",
+									"from": "next-turn",
+									"until": "indefinite"
+								}
+							]
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
 	}
 }

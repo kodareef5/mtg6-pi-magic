@@ -48,3 +48,55 @@ once cast, it is a new object and the permission is gone.
 A warped creature with an enters trigger is the usual reason to warp: Nova
 Hellkite warped in pings a creature, attacks with haste, and leaves at the end
 step, ready to be cast again for value later.
+
+Haliya uses the same next-end-step duration. The trigger watches either player's
+end step, including a cast made possible by a separate flash permission.
+Daydream can blink Haliya before that trigger: the returned incarnation is a
+new permanent, so the original delayed exile cannot move it. The Momo alpha
+finish exercised that blink; it did not cast Haliya during the opposing turn.
+
+```json procedure
+{
+  "claim": "Cast Haliya, Guided by Light for its warp cost",
+  "basis": "Warp {W} (You may cast this card from your hand for its warp cost. Exile this creature at the beginning of the next end step, then you may cast it from exile on a later turn.)",
+  "source": {
+    "card": "Haliya, Guided by Light",
+    "zones": [
+      "hand"
+    ],
+    "controller": "self"
+  },
+  "timing": "spell",
+  "cost": {
+    "mana": "{W}",
+    "alternative": "warp"
+  },
+  "instructions": [
+    {
+      "do": "delay",
+      "event": {
+        "on": "step",
+        "step": "end"
+      },
+      "effect": {
+        "instructions": [
+          {
+            "do": "move",
+            "what": "this",
+            "to": "exile",
+            "reason": "exile",
+            "as": "warped"
+          },
+          {
+            "do": "permit",
+            "what": "bound:warped",
+            "who": "you",
+            "from": "next-turn",
+            "until": "indefinite"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
