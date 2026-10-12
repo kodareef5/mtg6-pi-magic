@@ -58,10 +58,10 @@ or deferred. The seventeen shared printed cards and one older complete package
 in that scope were already covered.
 
 Across the pinned pool, complete preparation plus shared printed handling covers
-3,325 cards, or 64.3%. The remaining sixteen unassessed cards are Dwarves'
+3,325 cards, or 64.4%. The remaining sixteen unassessed cards are Dwarves'
 thirteen main-deck cards and three sideboard-only cards.
 
-The 156 deferred cards contain 227 deferred uses. Even a complete assessment
+The 156 deferred cards contain 225 deferred uses. Even a complete assessment
 means accepted structured terms, not verified play. Unassessed cards are unknown,
 not proven engine gaps. A refusal records the operation an assessment could
 not express. Check that claim against existing helpers before making it an
