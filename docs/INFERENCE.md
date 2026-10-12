@@ -1,4 +1,4 @@
-# Haiku through the Claude CLI
+# Direct Jev and CLI Haiku
 
 Use `--claude` to select Haiku 5.5 medium for strategy and judge in one run:
 
@@ -43,9 +43,30 @@ are list-price estimates, not measured subscription cash spend. Per-call usage
 records carry `costBasis: "list-estimate"`; aggregate reports expose
 `estimatedCost` and `estimatedCostCalls` and label those amounts in the bill.
 
-On October 12, a real lookup/submission round trip and a saved-game strategy
-call succeeded through this route. The next Jev call returned OpenRouter
-HTTP 402. Switching Haiku therefore removes one funding dependency; Jev still
-needs its selected provider funded. A separate Jace interpretation probe refused
-its multiplayer wording and remains a card-preparation issue. Neither probe
-counts as a completed alpha game.
+## Jev directly through Typesafe
+
+Pi already includes Typesafe's native classifier provider. Authenticate with
+`/login typesafe` in Pi, then select it in the package:
+
+```text
+/magic models decide typesafe/jev-latest
+```
+
+Pi stores the credential outside the repository. The `TYPESAFE_API_KEY`
+environment variable is also supported. With that provider authenticated,
+the existing `typesafe/jev-latest` default resolves directly, including in
+`tools/matchup.ts --claude` and `tools/sim.ts --claude`. The API and request
+shape are documented in the [official quick start](https://docs.typesafe.ai/introduction/quickstart).
+
+On October 12, a fresh Pi runtime loaded the saved credential and answered a
+classification successfully. A saved Landfall/Azorius continuation then made
+live decisions through direct Jev and prepared strategy through CLI Haiku,
+without an OpenRouter request. This clears the provider-credit blocker for
+that route; it does not certify the remaining card interpretations. The
+separate Jace interpretation refusal remains preparation work.
+
+Pi's installed direct-Jev catalog has zero prices, so its zero-dollar entries
+are unpriced usage, not evidence of free calls. Typesafe currently publishes
+$0.042 per million input tokens and free output tokens in its
+[model reference](https://docs.typesafe.ai/models). Token counts are retained;
+use that rate when reviewing these runs until the catalog is corrected.

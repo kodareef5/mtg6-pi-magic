@@ -59,7 +59,7 @@ overnight and need reassessment before becoming implementation tasks.
 
 | Order | Work | Completion evidence |
 | --- | --- | --- |
-| 1 | Exercise the original nineteen lists. Ten have no counted finish; resume the saved pairings and two stopped games. CLI Haiku works, but Jev still needs OpenRouter credits. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Then swapped seats and imported-deck opponents. |
+| 1 | Exercise the original nineteen lists. Ten have no counted finish; resume the saved pairings and two stopped games. Direct Typesafe Jev and CLI Haiku now work; no OpenRouter credits are needed for that route. | Ordinary setup, source-reviewed outcomes, no missing-machinery gaps, replay and clone parity. Then swapped seats and imported-deck opponents. |
 | 2 | Assess Dwarves' thirteen new main-deck cards, implement genuine gaps, generate its guide and prepare a matchup. | Standing terms and use inventory admit the twentieth list; real games determine runtime work. |
 | 3 | Reassess the 21 refusals and three additional unassessed sideboard-only cards introduced by Dwarves. Keep this separate from the sideboardless alpha. | Source-reviewed terms and relevant interactions; then a match lifecycle with legal sideboarding and per-game deck registration. |
 | 4 | Add representative legal lists with new mechanics. Select cards by reuse across lists and distinct interactions. | Each expansion earns the same game evidence as the first pool. Do not implement thousands of isolated exceptions. |
