@@ -114,6 +114,9 @@ function happened(event: NonNullable<SeatView["history"]>[number], view: SeatVie
 	const who = (id: SeatId) => id === seat ? "You" : view.seats?.find((one) => one.id === id)?.name ?? `Seat ${id}`;
 	const thing = (object: { id: string; incarnation: number; card?: string; token?: { name: string } }) => `${object.card ?? object.token?.name ?? object.id} (${object.id}@${object.incarnation})`;
 	switch (event.kind) {
+		case "physical": return event.action === "descended" ? `${who(event.by)} descended: a permanent card entered their graveyard.`
+			: event.action === "entered-face-down" ? `A permanent entered face down under ${event.by === seat ? "your" : `${who(event.by)}'s`} control.`
+			: `${who(event.by)} turned a permanent face up.`;
 		case "cast": return `${who(event.by)} cast ${thing(event.spell)}.`;
 		// A sacrificed source has moved on; its card is still known by id.
 		case "activated": { const source = view.objects?.find((one) => one.id === event.source.id && one.incarnation === event.source.incarnation) ?? view.objects?.find((one) => one.id === event.source.id);

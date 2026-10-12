@@ -506,6 +506,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   procedures.ts      one offer path for plans and default casts, activation terms
   characteristics.ts the layer walk: what an object is now, never stored
   selectors.ts       refs, selectors, amounts and conditions read against the table
+  physical-history.ts public descend, face-down entry and face-up action counts from receipts
   resolution.ts      remaining instructions and choices before a checkpoint
   resolution-counts.ts  completed uses of a source-backed ability within this turn
   pregame.ts           the opening procedure and its choices

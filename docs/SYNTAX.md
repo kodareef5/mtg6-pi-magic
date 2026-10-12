@@ -827,3 +827,12 @@ requires the searcher to own that library. Empty and failed searches count;
 optional groups that are declined do not. Multiple searches of the same library
 by one player in an effect before its shuffle count once (701.23h).
 See [the search example](examples/library-searches.md) for Wan Shi Tong and limits.
+
+## Physical turn history
+
+History amounts `descended`, `entered-face-down` and `turned-face-up` take `by`,
+without an object selector. They count recorded actions this turn for the player
+who descended, controlled the face-down entry or took the face-up special action.
+Later departures do not erase these events. Hidden identities are not attached
+to the counts. [Physical history](examples/physical-history.md) gives the source
+examples and scope.

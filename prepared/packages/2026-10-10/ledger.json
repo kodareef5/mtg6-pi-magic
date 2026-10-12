@@ -63,14 +63,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Corpses of the Lost": {
-		"reason": "Corpses of the Lost is not ready: \"At the beginning of your end step, if you descended this turn, you may pay 1 life. If you do, return this enchantment to its owner's hand. (You descended if a permanent card was put into your graveyard from anywhere.)\" — Unsupported intervening-if condition: the syntax cannot query whether a nontoken permanent card was put into your graveyard from any zone this turn, including before this enchantment entered. Available history queries do not include graveyard-entry history. The optional life payment and return are expressible, but cannot faithfully register this trigger without its descended condition.",
-		"decks": [
-			"Mono-Black Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Crystal Barricade": {
 		"reason": "Crystal Barricade is not ready: Prevent all noncombat damage that would be dealt to other creatures you control. — Missing a standing damage-prevention effect that filters noncombat damage and protects other creatures controlled by this permanent's controller.",
 		"decks": [
@@ -179,14 +171,6 @@
 		"reason": "Nowhere to Run is not ready: Creatures your opponents control can be the targets of spells and abilities as though they didn't have hexproof. Ward abilities of those creatures don't trigger. — The syntax cannot selectively disregard hexproof for targeting while leaving that ability intact, or suppress only ward abilities of the affected creatures. A targeted-event suppression would also suppress unrelated targeting triggers and is not equivalent.",
 		"decks": [
 			"4c Control"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
-	"Oblivious Bookworm": {
-		"reason": "Oblivious Bookworm is not ready: At the beginning of your end step, you may draw a card. If you do, discard a card unless a permanent entered the battlefield face down under your control this turn or you turned a permanent face up this turn. — Cannot prepare the complete trigger: the syntax lacks face-down entry and face-up turn history predicates needed to determine whether discarding is required.",
-		"decks": [
-			"4c Reanimator"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"

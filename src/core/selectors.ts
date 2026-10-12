@@ -16,11 +16,13 @@ import type { SeenObject } from "./work.ts";
 import { casting, type Casting } from "./casting.ts";
 import { resolutionNumber } from "./resolution-counts.ts";
 import type { Step } from "./steps.ts";
+import { physicalHistory, type PhysicalEvent } from "./physical-history.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
 	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "copied" | "choices" | "registrations" | "lookedBy">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
+	| PhysicalEvent
 	| { kind: "cast"; by: SeatId; spell: Seen; traits?: Traits }
 	| { kind: "activated"; by: SeatId; source: ObjectRef; basis: string; loyalty?: true }
 	| { kind: "resolved"; by: SeatId; source?: ObjectRef; basis: string }
@@ -128,6 +130,7 @@ export function happened(table: Table): Happened[] {
 	const began = table.cursor.began[table.cursor.active] ?? 0, events: Happened[] = [];
 	for (const receipt of table.log) {
 		if ((receipt.clock ?? 0) <= began) continue;
+		events.push(...physicalHistory(receipt, table.printed));
 		for (const change of receipt.changes) {
 			if (change.do === "resolution" && change.action === "next" && change.resolved) events.push({ kind: "resolved", ...change.resolved });
 			if (change.do === "activate" && (change.ability.timing === "stack" || change.ability.timing === "mana")) events.push({ kind: "activated", by: change.ability.controller, source: change.ability.source, basis: change.ability.basis,
@@ -329,11 +332,13 @@ export function amount(scope: Scope, value: Amount): number {
 }
 
 function history(scope: Scope, value: Extract<Amount, { history: string }>): number {
+	const of = "of" in value ? value.of : undefined;
 	let total = 0;
 	for (const event of scope.world.history) {
-		if (value.history === "cast" && event.kind === "cast" && side(scope, value.by, event.by) && (!value.of || matches(scope, event.spell, value.of, event.traits))) total += 1;
+		if (event.kind === "physical" && value.history === event.action && side(scope, value.by, event.by)) total += 1;
+		if (value.history === "cast" && event.kind === "cast" && side(scope, value.by, event.by) && (!of || matches(scope, event.spell, of, event.traits))) total += 1;
 		if (value.history === "attacked" && event.kind === "attacked" && side(scope, value.by, event.by))
-			total += event.attackers.filter((one) => !value.of || matches(scope, one.object, value.of, one.traits)).length;
+			total += event.attackers.filter((one) => !of || matches(scope, one.object, of, one.traits)).length;
 		if (event.kind === "life" && side(scope, value.by, event.who) && (value.history === "life-lost" ? event.amount < 0 : value.history === "life-gained" && event.amount > 0)) total += Math.abs(event.amount);
 	}
 	return total;

@@ -1,0 +1,80 @@
+{
+	"card": "Oblivious Bookworm",
+	"generated": "2026-10-10",
+	"source": "2e5b788d565b950ff4034c748319495f5fb1fe6b56678b75a77e2ba4ca4b1def",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Oblivious Bookworm",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "At the beginning of your end step, you may draw a card. If you do, discard a card unless a permanent entered the battlefield face down under your control this turn or you turned a permanent face up this turn.",
+				"event": {
+					"on": "step",
+					"step": "end",
+					"whose": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "perform",
+							"who": "you",
+							"may": true,
+							"instructions": [
+								{
+									"do": "draw",
+									"who": "you",
+									"count": 1
+								},
+								{
+									"do": "perform",
+									"who": "you",
+									"if": {
+										"amount": {
+											"sum": [
+												{
+													"history": "entered-face-down",
+													"by": "you"
+												},
+												{
+													"history": "turned-face-up",
+													"by": "you"
+												}
+											]
+										},
+										"atMost": 0
+									},
+									"instructions": [
+										{
+											"do": "choose",
+											"who": "you",
+											"from": {
+												"zones": [
+													"hand"
+												],
+												"owner": "you"
+											},
+											"count": 1,
+											"as": "discarded"
+										},
+										{
+											"do": "move",
+											"what": "bound:discarded",
+											"to": "graveyard",
+											"reason": "discard"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

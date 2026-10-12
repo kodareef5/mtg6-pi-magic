@@ -130,6 +130,8 @@ export const Defs = {
 		object({ half: Type.Ref("Amount"), round: one("up", "down") }),
 		/** This turn so far, read from what was recorded. */
 		object({ history: one("cast", "attacked", "life-lost", "life-gained"), of: Type.Optional(Type.Ref("Selector")), by: Type.Optional(Side) }),
+		/** Physical actions counted for their event-time player, with no hidden object identity. */
+		object({ history: one("descended", "entered-face-down", "turned-face-up"), by: Type.Optional(Side) }),
 		/** The X announced for this spell or ability; a permanent remembers the X it was cast with (107.3m). */
 		object({ x: Type.Literal(true) }),
 		object({ sum: Type.Array(Type.Ref("Amount"), { minItems: 2 }) }),
