@@ -38,6 +38,8 @@ const Designation = Type.Literal("harnessed");
 const Reason = one("resolve", "destroy", "sacrifice", "discard", "mill", "exile", "bounce", "counter");
 const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
 
+export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source|bound:[a-z][a-z0-9-]*)|owner:(this|attached|target:[0-9]+|event:object|bound:[a-z][a-z0-9-]*))$" });
+
 /**
  * What an instruction points at. `this` is the source; `target:N` the Nth
  * announced target; `bound:name` something an earlier instruction bound;
@@ -47,11 +49,10 @@ const Step = Type.Enum(Object.keys(STEPS) as (keyof typeof STEPS)[]);
  */
 export const ObjectRef = Type.Union([
 	Type.String({ pattern: "^(this|attached|event:object|event:objects|event:source|event:recipient|target:[0-9]+|bound:[a-z][a-z0-9-]*|source:(this|event:object|event:source|target:[0-9]+|bound:[a-z][a-z0-9-]*))$" }),
-	object({ top: Type.Ref("Amount"), of: Type.String({ pattern: "^(you|self|opponent|each-player|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
+	object({ top: Type.Ref("Amount"), of: PlayerRef }),
 	/** One window per named library, combined before motion for simultaneous effects. */
-	object({ exceptBottom: Type.Ref("Amount"), of: Type.String({ pattern: "^(you|self|opponent|each-player|bound:[a-z][a-z0-9-]*|event:player)$" }) }),
+	object({ exceptBottom: Type.Ref("Amount"), of: PlayerRef }),
 ]);
-export const PlayerRef = Type.String({ pattern: "^(you|self|opponent|each-player|event:player|target:[0-9]+|bound:[a-z][a-z0-9-]*|controller:(this|attached|target:[0-9]+|event:object|event:source|bound:[a-z][a-z0-9-]*)|owner:(this|attached|target:[0-9]+|event:object|bound:[a-z][a-z0-9-]*))$" });
 const Side = Type.Union([PlayerRef, Type.Literal("any")]);
 const Range = object({ atLeast: Type.Optional(Type.Ref("Amount")), atMost: Type.Optional(Type.Ref("Amount")),
 	parity: Type.Optional(Type.Union([one("odd", "even"), object({ chosen: text })])) });

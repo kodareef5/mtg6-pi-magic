@@ -149,12 +149,27 @@ test("private selection cannot expose another hand through a malformed selector 
 		finish(table);
 		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
 	}
-	const order = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], "unseen-order");
-	main(order, 0); place(order, 0, "hand", "Stock Up");
-	commit(order, [{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
-	announce(order, { ...example("Stock Up from five cards"), instructions: [{ do: "order", who: "you", what: { top: 2, of: "you" }, position: "top" }] });
-	passBoth(order);
-	assert.match(nextDecision(order)!.blocked!, /unseen library/); assert.deepEqual(nextDecision(order)!.options, []);
+	for (const libraryOf of ["you", "controller:this", "owner:this", "target:0"]) for (const looked of [false, true]) {
+		const order = start(standard, [{ deck: deck("4c Control") }, { deck: deck("Mono-Red Aggro") }], `unseen-order-${libraryOf}-${looked}`);
+		main(order, 0); place(order, 0, "hand", "Stock Up");
+		commit(order, [{ do: "add-mana", who: 0, colors: ["C", "C", "U"] }], "game-setup");
+		const initial = structuredClone(order), at = order.ledger.length, owner = libraryOf === "target:0" ? 1 : 0;
+		const window = cardsIn(order, "library", owner).slice(0, 2).map(one => one.id);
+		announce(order, { ...example("Stock Up from five cards"), ...(libraryOf === "target:0" ? { targets: [{ player: "opponent" }] } : {}),
+			instructions: [...(looked ? [{ do: "look" as const, who: "you", what: { top: 2, of: libraryOf } }] : []),
+				{ do: "order", who: "you", what: { top: 2, of: libraryOf }, position: "top" }] });
+		passBoth(order);
+		if (!looked) { assert.match(nextDecision(order)!.blocked!, /unseen library/); assert.deepEqual(nextDecision(order)!.options, []); continue; }
+		assert.equal(project(order, 0).objects!.filter(one => one.zone === "library").length, 0);
+		step(order);
+		assert.deepEqual(project(order, 0).objects!.filter(one => one.zone === "library").map(one => one.id).sort(), [...window].sort());
+		for (const viewer of [1, "spectator"] as const) assert.equal(project(order, viewer).objects!.filter(one => one.zone === "library").length, 0);
+		const partial = structuredClone(order), after = order.ledger.length;
+		while (order.resolution) step(order, () => true);
+		finish(order);
+		assert.deepEqual(relive(initial, order.ledger.slice(at)), order);
+		assert.deepEqual(relive(partial, order.ledger.slice(after)), order);
+	}
 });
 
 test("a whole-hand reveal becomes public only on resolution, then permits the caster's eligible selection", () => {

@@ -8,6 +8,7 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { cardsIn } from "../src/core/table.ts";
 import { relive } from "../src/core/journal.ts";
 import { project, describe } from "../src/core/view.ts";
+import { check, ProcedureSchema } from "../src/core/language.ts";
 import { printedCast } from "../src/core/procedures.ts";
 import { objects, tableWorld } from "../src/core/selectors.ts";
 import { editWork } from "../src/core/work-tools.ts";
@@ -26,6 +27,15 @@ test("each library retains its own bottom cards while all selected cards move in
 		const initial = structuredClone(table), from = table.ledger.length;
 		const scope = { world: tableWorld(table), controller: 0 };
 		assert.deepEqual(objects(scope, { top: 1, of: "each-player" }).map(one => one.id), before.flatMap(one => one.slice(0, 1).map(card => card.id)));
+		const named = { ...scope, source: { ...demon!, controller: 1 }, targets: [[{ player: 1 }], [demon!]] };
+		for (const [of, owner] of [["target:0", 1], ["controller:this", 1], ["owner:this", 0], ["controller:target:1", 0], ["owner:target:1", 0]] as const) {
+			for (const window of [{ top: 2, of }, { exceptBottom: 2, of }]) {
+				check(ProcedureSchema, { source: { card: demon!.card! }, claim: "Library reference fixture", basis: "Fixture", timing: "spell",
+					instructions: [{ do: "look", who: "you", what: window }] }, "library reference");
+				assert.deepEqual(objects(named, window).map(one => one.id), before[owner]!.slice(0, "top" in window ? 2 : Math.max(0, before[owner]!.length - 2)).map(one => one.id));
+			}
+		}
+		assert.deepEqual(objects({ ...named, illegal: ["seat-1"] }, { top: 2, of: "target:0" }), [], "an illegal player target names no library");
 		assert.deepEqual(table, initial, "reading library windows is pure");
 		announce(table, printedCast(demon!.card!, table.printed[demon!.card!]!)); passBoth(table); finish(table);
 		assert.equal(nextDecision(table)!.situation, "trigger-order");
