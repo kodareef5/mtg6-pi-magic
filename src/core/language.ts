@@ -383,6 +383,8 @@ export const Defs = {
 		step({ do: Type.Literal("counter"), what: ObjectRef, to: Type.Optional(one("graveyard", "exile")), unless: Type.Optional(object({ who: PlayerRef, pays: Type.Ref("Cost") })) }),
 		/** One player accepts or declines an optional ordered group; each inner instruction keeps its own actor. */
 		step({ do: Type.Literal("perform"), who: PlayerRef, instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) }),
+		/** "Your choice of A or B" as it resolves (608.2d): `who` picks one labelled option, whose instructions run next. */
+		step({ do: Type.Literal("choose-one"), who: PlayerRef, options: Type.Array(object({ label: text, instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) }), { minItems: 2 }) }),
 		step({ do: Type.Literal("each"), players: Type.Optional(one("each-player", "opponent")), objects: Type.Optional(Type.Ref("Selector")), instructions: Type.Array(Type.Ref("Instruction"), { minItems: 1 }) },
 			{ oneOf: [{ required: ["players"], not: { required: ["objects"] } }, { required: ["objects"], not: { required: ["players"] } }] }),
 	]),

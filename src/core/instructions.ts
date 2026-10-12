@@ -438,6 +438,12 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 				expand: instruction.instructions.map((inner) => ({ instruction: inner, ...(player !== undefined ? { player } : {}) })),
 				...bind(instruction, { objects: [], players: [], amount: 1 }) }] };
 		}
+		case "choose-one": {
+			const actor = players(scope, instruction.who)[0] ?? controller, { player, object } = pending.program[0] ?? {};
+			return { actor, question: `${claim}: choose one.`, choices: instruction.options.map((option, at) => ({ id: `option-${at}`, label: `Choose: ${option.label}`, changes: [],
+				expand: option.instructions.map((inner) => ({ instruction: inner, ...(player !== undefined ? { player } : {}), ...(object ? { object } : {}) })),
+				...bind(instruction, { objects: [], players: [], amount: at + 1 }) })) };
+		}
 		case "each": {
 			if (instruction.objects) {
 				const privateZone = (selector: Selector): boolean => !!selector.zones?.some(zone => !["battlefield", "exile", "graveyard", "stack", "command"].includes(zone)) || !!selector.any?.some(privateZone) || !!selector.all?.some(privateZone);

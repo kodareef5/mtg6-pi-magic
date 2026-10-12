@@ -211,6 +211,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `spell-words` | grants `words` to future spells cast by `who`, optionally filtered by `of`; `next: true` is consumed by the first match, and unused effects expire at `until` |
 | `pay` | `who` pays every part of `cost` together; `may` allows declining, and `as` binds success for a later `if` |
 | `perform` | `who` accepts an ordered `instructions` group in the current resolution; `may` offers declining the whole group; `as` binds acceptance independently of any cards selected inside |
+| `choose-one` | "your choice of A or B" as it resolves (608.2d): `who` picks one of two or more `options`, each a `label` and `instructions`, which run next against the same targets; `as` binds the chosen position. Not for modes chosen on casting. See [resolution choices](examples/resolution-choices.md) |
 | `shuffle`, `draw`, `mill` | |
 | `counters` | `on` or `every`, `kind`, `amount`; a negative amount removes |
 | `life` | gain or lose |
