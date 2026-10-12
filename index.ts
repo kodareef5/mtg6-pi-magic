@@ -306,7 +306,7 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (verb === "play" || verb === "resume") {
-				// Random play uses admitted imported main decks; named games retain their registered tournament lists.
+				// Every new game registers main decks only while the alpha has no sideboard work; random play draws from admitted lists.
 				const rest = args.trim().slice(verb.length).trim();
 				let decks: [string, string] | undefined, playSeed = seed, alphaGame = false;
 				if (verb === "play" && /^random\b/.test(rest)) {
@@ -319,7 +319,7 @@ export default function (pi: ExtensionAPI) {
 				} else if (verb === "play" && / vs /.test(rest)) {
 					const [left, right] = rest.split(/ vs /).map((one) => one.trim());
 					const tail = right!.split(/\s+/); const named = tail.length > 1 && !collection().has(right!) ? tail.slice(0, -1).join(" ") : right!;
-					decks = [left!, named]; playSeed = named === right ? `${left}-vs-${right}`.replace(/[^A-Za-z0-9-]+/g, "-") : tail.at(-1)!;
+					decks = [left!, named]; alphaGame = true; playSeed = named === right ? `${left}-vs-${right}`.replace(/[^A-Za-z0-9-]+/g, "-") : tail.at(-1)!;
 				}
 				const opened = await open(ctx, verb === "resume" ? { resume: seed } : { seed: playSeed, ...(decks ? { decks } : {}), ...(alphaGame ? { alpha: true as const } : {}) });
 				const commentator = (await roster(ctx, 0)).find((part) => part.role === "summary");
