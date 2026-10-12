@@ -21,19 +21,24 @@ import type { Zone } from "../src/core/syntax.ts";
 export const matchup = (seed: string) => start(standard, [{ name: "Green", deck: deck("Mono-Green Landfall") }, { name: "Red", deck: deck("Mono-Red Aggro") }], seed);
 
 const DIR = join(import.meta.dirname, "..", "docs", "examples");
-const blocks = (kind: string) => readdirSync(DIR).filter((file) => file.endsWith(".md")).flatMap((file) =>
-	[...readFileSync(join(DIR, file), "utf8").matchAll(/```json (\w+)\n([\s\S]*?)```/g)].filter(([, found]) => found === kind).map(([, , body]) => JSON.parse(body!)));
+// Each worker's examples are fixed. Callers still receive independent mutable terms.
+const parsed = new Map<string, (Package | Procedure)[]>();
+const blocks = (kind: string) => {
+	if (!parsed.has(kind)) parsed.set(kind, readdirSync(DIR).filter((file) => file.endsWith(".md")).flatMap((file) =>
+		[...readFileSync(join(DIR, file), "utf8").matchAll(/```json (\w+)\n([\s\S]*?)```/g)].filter(([, found]) => found === kind).map(([, , body]) => JSON.parse(body!))));
+	return parsed.get(kind)!;
+};
 /** What a card registers, as docs/examples writes it. */
 export const pack = (card: string): Registration[] => {
 	const found = (blocks("package") as Package[]).find((one) => one.card === card);
 	assert.ok(found, `docs/examples has a package for ${card}`);
-	return found.registers;
+	return structuredClone(found.registers);
 };
 /** A procedure from docs/examples, by its claim. */
 export const example = (claim: string): Procedure => {
 	const found = (blocks("procedure") as Procedure[]).find((one) => one.claim === claim);
 	assert.ok(found, `docs/examples has a procedure claimed "${claim}"`);
-	return found;
+	return structuredClone(found);
 };
 
 /** Put the first copy of each card from a seat's library, or its sideboard, where a test needs it. */
