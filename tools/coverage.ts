@@ -44,12 +44,15 @@ const populations = {
 	main: count((one) => !!one.main.length), sideboardOnly: count((one) => !one.main.length && !!one.sideboard.length),
 	outsideImportedLists: count((one) => !one.main.length && !one.sideboard.length),
 };
-const byStatus = Object.fromEntries(["shared-printed", "accepted-complete", "accepted-deferred", "recorded-refusal", "unassessed"]
+const statuses = ["shared-printed", "accepted-complete", "accepted-deferred", "recorded-refusal", "unassessed"];
+const byStatus = Object.fromEntries(statuses
 	.map((status) => [status, count((one) => one.status === status)]));
+const outsideImported = Object.fromEntries(statuses.map(status => [status,
+	count(one => one.status === status && !one.main.length && !one.sideboard.length)]));
 const report = {
 	generated: universe.generated, source: { cards: { ...matchup.cards, sha256: createHash("sha256").update(readFileSync(universe.path)).digest("hex") }, rules: matchup.rules },
 	limits: "Shipped source-checked assessments, not legal-play certification. Deferred uses await interpretation. Refusals may predate mechanics. Text tags overlap and do not establish engine gaps. Legality is the pinned snapshot, not a live check.",
-	populations, byStatus, deferredUses: inventory.reduce((n, one) => n + one.deferredUses, 0),
+	populations, byStatus, outsideImported, deferredUses: inventory.reduce((n, one) => n + one.deferredUses, 0),
 	decks: decks.map((deck) => ({ name: deck.name, mainMissing: inventory.filter((one) => unresolved(one) && one.main.includes(deck.name)).map((one) => one.card),
 		sideboardMissing: inventory.filter((one) => unresolved(one) && one.sideboard.includes(deck.name)).map((one) => one.card) })),
 	taggedUnassessed: Object.fromEntries(tags.map(([name]) => [name, count((one) => unresolved(one) && one.tags.includes(name))])),
@@ -58,7 +61,7 @@ const report = {
 mkdirSync(values.out!, { recursive: true });
 writeFileSync(join(values.out!, "summary.json"), JSON.stringify(report, null, 2) + "\n");
 writeFileSync(join(values.out!, "cards.json"), JSON.stringify(inventory, null, 2) + "\n");
-for (const status of ["unassessed", "recorded-refusal"]) writeFileSync(join(values.out!, `${status}.txt`), inventory.filter((one) => one.status === status).map((one) => one.card).join("\n") + "\n");
-console.log(JSON.stringify({ populations, byStatus, deferredUses: report.deferredUses, taggedUnassessed: report.taggedUnassessed }, null, 2));
+for (const status of statuses) writeFileSync(join(values.out!, `${status}.txt`), inventory.filter((one) => one.status === status).map((one) => one.card).join("\n") + "\n");
+console.log(JSON.stringify({ populations, byStatus, outsideImported, deferredUses: report.deferredUses, taggedUnassessed: report.taggedUnassessed }, null, 2));
 for (const deck of report.decks.filter((one) => one.mainMissing.length)) console.log(`${deck.name}: main-deck assessment needed: ${deck.mainMissing.join(", ")}`);
 console.log(`Inventory and source fingerprints: ${values.out}`);

@@ -793,8 +793,12 @@ spell announcements. See [sacrifice reductions](examples/sacrifice-reductions.md
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.
-- Replacement ordering when two replacements change where something goes. None
-  of these cards produce it.
+- Ordering multiple destination replacements for the affected player.
+- Role tokens' same-controller state-based action (303.7a). Creating their
+  abilities alone does not implement Roles.
+- Resolved standalone death replacements that survive losing abilities.
+  `register` currently gives the recipient a removable registration; it cannot
+  preserve an external "if it would die this turn, exile it instead" effect.
 - Effects that take control of a permanent, morph, disguise, and other face-up
   replacement effects.
 - Read ahead, copying stack abilities, choosing new targets for spell copies,
