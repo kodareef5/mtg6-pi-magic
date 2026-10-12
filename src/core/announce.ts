@@ -116,7 +116,8 @@ export function summary(instruction: Instruction): string {
 		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${words(instruction.count, "amount")}` : ""}${gate}.`;
 		case "increase-speed": return `${of(instruction.who)} increases speed by ${instruction.amount}${gate}.`;
 		case "life": return `${of(instruction.who)} changes life by ${words(instruction.amount, "amount")}${gate}.`;
-		case "counters": return `Put ${words(instruction.amount, "amount")} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
+		case "counters": return "copy" in instruction ? `Put the same number of each counter kind ${of(instruction.copy)} last had on ${instruction.on ? of(instruction.on) : what}${gate}.`
+			: `Put ${words(instruction.amount, "amount")} ${instruction.kind} counters on ${instruction.on ? of(instruction.on) : what}${gate}.`;
 		case "mana": return `${who(instruction.who, "add")} ${instruction.colors?.join("") ?? `${instruction.any} of any one color`}${instruction.until ? `, lasting until ${instruction.until.replaceAll("-", " ")}` : ""}${gate}.`;
 		case "modify": return `${what} gets ${changed(instruction.change)} ${instruction.until === "indefinite" ? "indefinitely" : `until ${instruction.until.replace(/-/g, " ")}`}${gate}.`;
 		default: return `${instruction.do}${what ? ` ${what}` : ""}${gate}.`;
@@ -344,8 +345,13 @@ export function paidActivation(base: OfferBase, frame: Frame, way: OfferCost, fu
 	const { procedure, source, sourceRef, granted, printed, slots, words, mana, x } = base, { extra, cost } = way;
 	const payment = immutable(structuredClone(funding));
 	const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
-	const named = [procedure.cost?.sacrifice, procedure.cost?.return].flatMap((cost, index) =>
-		typeof cost === "object" && "as" in cost && cost.as ? [[cost.as, { objects: structuredClone((index ? extra.paid.returned : extra.paid.sacrificed) ?? []), players: [] }]] : []);
+	const named = [procedure.cost?.sacrifice, procedure.cost?.return].flatMap((cost, index) => {
+		if (typeof cost !== "object" || !("choose" in cost)) return [];
+		const paid = (index ? extra.paid.returned : extra.paid.sacrificed) ?? [];
+		const attached = cost.attachedAs ? base.world.objects.filter(one => one.zone === "battlefield" && one.attached && paid.some(ref => ref.id === one.attached!.id && ref.incarnation === one.attached!.incarnation)).map(ref) : [];
+		return [...(cost.as ? [[cost.as, { objects: structuredClone(paid), players: [] }]] : []),
+			...(cost.attachedAs ? [[cost.attachedAs, { objects: attached, players: [] }]] : [])];
+	});
 	const bound = { ...(extra.paid.exiled?.some((one) => one.id === source.id) ? { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } : {}),
 		...Object.fromEntries(named) };
 	return { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,

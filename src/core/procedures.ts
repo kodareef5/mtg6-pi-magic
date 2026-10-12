@@ -90,7 +90,7 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if ("bound" in value && typeof value.bound === "string" && !bound.has(value.bound))
 				throw new Error(`bound:${value.bound} is used before an instruction binds it with "as".`);
 			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
-			const names = [terms.cost?.sacrifice, terms.cost?.return].flatMap(cost => typeof cost === "object" && "as" in cost && cost.as ? [cost.as] : []);
+			const names = [terms.cost?.sacrifice, terms.cost?.return].flatMap(cost => typeof cost === "object" && "choose" in cost ? [cost.as, cost.attachedAs].filter((name): name is string => !!name) : []);
 			if (new Set(names).size !== names.length) throw new Error("Each selected cost needs a distinct binding name.");
 			const resolutionBound = names.length ? new Set([...bound, ...names]) : bound;
 			if (variableTap(terms.cost) && (terms.cost?.sacrifice || terms.cost?.return || terms.cost?.exile || terms.kind === "mana")) throw new Error("Tap payments do not combine with costs that move objects or mana abilities.");

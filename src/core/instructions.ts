@@ -264,6 +264,13 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "counters": {
 			const on = live(table, instruction.on ? objects(scope, instruction.on) : instruction.every ? select(scope, instruction.every) : []);
+			if ("copy" in instruction) {
+				const originals = objects(scope, instruction.copy, true);
+				if (originals.length > 1) return { actor: controller, question: "Put one object's counter counts on the recipient.", choices: [], blocked: "Counter copying needs one source; select one before copying." };
+				const counters = Object.entries(originals[0]?.counters ?? {}).filter(([, count]) => count > 0);
+				return one(`Put ${counters.map(([kind, count]) => `${count} ${kind}`).join(", ") || "no counters"} on ${on.map(name).join(", ") || "nothing"}`,
+					on.flatMap(object => counters.map(([kind, amount]) => ({ do: "counters" as const, what: object.id, kind, amount }))));
+			}
 			const counts = on.map(object => ({ object, count: assignedAmount(scope, instruction.amount, ref(object)) }));
 			const count = typeof instruction.amount === "object" && "divided" in instruction.amount ? undefined : amount(scope, instruction.amount);
 			const label = count === undefined

@@ -1027,3 +1027,10 @@ A selector can constrain physical counters with, for example,
 range vocabulary as power or mana value. Missing kinds count as zero. Targets
 recheck these ranges on resolution; a resolution-only condition cannot replace
 a target restriction. See [counter targets](examples/counter-targets.md).
+
+Selected sacrifice and return costs may name `attachedAs` beside `as`. The
+former binds exact objects attached to the selected permanents when payment
+begins; the latter binds the paid incarnations. `counters` with `copy` in place
+of `kind` and `amount` puts the same number of every counter kind the named
+source has or last had, without removing its counters. See
+[departed counters](examples/departed-counters.md) for Zack Fair and the limits.

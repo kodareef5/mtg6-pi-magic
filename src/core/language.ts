@@ -201,10 +201,10 @@ export const Defs = {
 				{ if: { required: ["pay"] }, then: { required: ["count", "upTo"], not: { anyOf: [{ required: ["source"] }, { required: ["totalPower"] }, { required: ["reduce"] }] } } },
 				{ if: { required: ["keyword"] }, then: { required: ["pay"] } },
 			] })])),
-		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name) }),
-			object({ choose: Type.Ref("Selector"), any: Type.Literal(true), reduce: positive, as: Type.Optional(name) })])),
+		sacrifice: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name), attachedAs: Type.Optional(name) }),
+			object({ choose: Type.Ref("Selector"), any: Type.Literal(true), reduce: positive, as: Type.Optional(name), attachedAs: Type.Optional(name) })])),
 		/** Return controlled permanents to their owners' hands as payment. */
-		return: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name) })])),
+		return: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, as: Type.Optional(name), attachedAs: Type.Optional(name) })])),
 		exile: Type.Optional(Type.Union([ObjectRef, object({ choose: Type.Ref("Selector"), count: positive, source: Type.Optional(Type.Literal(true)) }),
 			/** Select any number of own graveyard cards meeting this total; do not enumerate their subsets. */
 			object({ graveyard: Type.Ref("Selector"), totalManaValue: positive })])),
@@ -346,6 +346,8 @@ export const Defs = {
 		step({ do: Type.Literal("emblem"), who: PlayerRef, registers: Type.Array(Type.Ref("Registration"), { minItems: 1 }) }),
 		step({ do: Type.Literal("mill"), who: PlayerRef, count: Type.Ref("Amount") }),
 		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), kind: text, amount: Type.Ref("TargetAmount") }),
+		/** Put the same number of each counter kind on the recipient, reading the source's last incarnation. This copies counts without removing counters. */
+		step({ do: Type.Literal("counters"), on: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), copy: ObjectRef }),
 		step({ do: Type.Literal("life"), who: PlayerRef, amount: Type.Ref("Amount") }),
 		step({ do: Type.Literal("increase-speed"), who: PlayerRef, amount: positive }),
 		step({ do: Type.Literal("mana"), who: PlayerRef, colors: Type.Optional(Type.Array(Color, { minItems: 1 })), any: Type.Optional(positive), combination: Type.Optional(Type.Literal(true)), times: Type.Optional(Type.Ref("Amount")), spendOnly: Type.Optional(Type.Ref("Selector")), spendFrom: Type.Optional(Type.Array(Zone, { minItems: 1 })), until: Type.Optional(ManaDuration), spellWords: Type.Optional(Type.Array(text, { minItems: 1 })) }),

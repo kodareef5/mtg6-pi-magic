@@ -3,7 +3,6 @@
 	"generated": "2026-10-10",
 	"source": "677de9c7379cd2cb435f68246c3e8a08621ac71794c64269b50e30eff48b89ec",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Zack Fair",
 		"registers": [
@@ -15,12 +14,9 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Sacrifice Zack Fair to grant indestructible, put its counters on a creature you control, and attach an Equipment formerly attached to Zack Fair to that creature.",
+				"claim": "Sacrifice Zack Fair and pass its counters and one attached Equipment",
 				"basis": "{1}, Sacrifice Zack Fair: Target creature you control gains indestructible until end of turn. Put Zack Fair's counters on that creature and attach an Equipment that was attached to Zack Fair to that creature.",
 				"source": {
 					"card": "Zack Fair",
@@ -29,8 +25,71 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"is": "this"
+						},
+						"count": 1,
+						"as": "sacrificed",
+						"attachedAs": "old-attachments"
+					}
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"controller": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"indestructible"
+							]
+						}
+					},
+					{
+						"do": "counters",
+						"on": "target:0",
+						"copy": "bound:sacrificed"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"is": "bound:old-attachments",
+							"subtypes": [
+								"Equipment"
+							],
+							"not": {
+								"types": [
+									"creature"
+								]
+							}
+						},
+						"count": 1,
+						"as": "equipment"
+					},
+					{
+						"do": "attach",
+						"what": "bound:equipment",
+						"to": "target:0"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
 	}
 }

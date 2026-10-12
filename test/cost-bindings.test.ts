@@ -1,4 +1,5 @@
-/** A paid sacrifice retains its own pre-departure identity for later information reads. */
+/** Paid costs retain their departed identities and attachment sets for later information.
+ * Bay and Zack exercise the same binding invariant through distinct source changes. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -10,8 +11,10 @@ import { apply, nextDecision } from "../src/core/decisions.ts";
 import { relive } from "../src/core/journal.ts";
 import { checkProcedure } from "../src/core/procedures.ts";
 import { amount, objects, tableWorld } from "../src/core/selectors.ts";
+import { characteristics } from "../src/core/characteristics.ts";
+import { cardsIn } from "../src/core/table.ts";
 import { project } from "../src/core/view.ts";
-import { announce, establish, example, finish, main, offered, passBoth, step } from "./play.ts";
+import { announce, establish, example, finish, main, offered, passBoth, place, step } from "./play.ts";
 
 test("a named sacrifice binds only its paid incarnation and reads last known characteristics through replacement, later moves and token cessation", () => {
 	const procedure = example("Repurpose an artifact into one costing one more"); checkProcedure(procedure);
@@ -60,4 +63,59 @@ test("a named sacrifice binds only its paid incarnation and reads last known cha
 		for (const prefix of [pending, searching]) assert.deepEqual(relive(prefix, table.ledger.slice(prefix.ledger.length)), table);
 		if (variant !== "moved-again") assert.deepEqual(relive(before, table.ledger.slice(before.ledger.length)), table);
 	}
+	departedCounters();
 });
+
+
+function departedCounters() {
+	const procedure = checkProcedure(example("Sacrifice Zack Fair and pass its counters and one attached Equipment"));
+	const invalid = structuredClone(procedure);
+	if (typeof invalid.cost?.sacrifice !== "object" || !("choose" in invalid.cost.sacrifice)) assert.fail();
+	invalid.cost.sacrifice.attachedAs = invalid.cost.sacrifice.as;
+	assert.throws(() => checkProcedure(invalid), /distinct binding/);
+	for (const variant of ["ordinary", "no-equipment", "reattached", "equipment-returned", "source-returned", "target-lost", "self"] as const) {
+		const table = start(standard, [{ deck: alpha(deck("Azorius Momo")) }, { deck: alpha(deck("Boros Dwarves")) }], `departed-counters-${variant}`);
+		const source = establish(table, 0, "Zack Fair", [{ kind: "enters", basis: "Zack Fair enters with a +1/+1 counter on it.", counters: { "+1/+1": 1 } }]);
+		const [recipient, other] = place(table, 0, "battlefield", "Momo, Friendly Flier", "Nurturing Pixie");
+		const [first, second, old] = place(table, 1, "battlefield", "Basilisk Collar", "Chainsaw", "Dragonfire Blade");
+		main(table, 0);
+		const target = variant === "self" ? source : recipient!, ref = { id: source.id, incarnation: source.incarnation };
+		commit(table, [{ do: "counters", what: source.id, kind: "+1/+1", amount: 2 }, { do: "counters", what: source.id, kind: "charge", amount: 2 },
+			{ do: "counters", what: source.id, kind: "stun", amount: 1 }, { do: "attach", what: old!.id, to: ref },
+			{ do: "add-mana", who: 0, colors: ["C"] }], "game-setup");
+		commit(table, [{ do: "attach", what: old!.id, to: { id: other!.id, incarnation: other!.incarnation } },
+			...(variant === "no-equipment" ? [] : [first!, second!].map(one => ({ do: "attach" as const, what: one.id, to: ref })))], "game-setup");
+		const before = structuredClone(table);
+		const use = announce(table, procedure, one => one.activation.targets[0]?.some(one => "id" in one && one.id === target.id) === true);
+		assert.deepEqual(use.activation.bound?.sacrificed, { objects: [ref], players: [] });
+		assert.deepEqual(use.activation.bound?.["old-attachments"], { objects: variant === "no-equipment" ? [] : [first!, second!].map(one => ({ id: one.id, incarnation: one.incarnation })), players: [] });
+		finish(table); // The source's old Equipment falls off at the state check.
+		assert.equal(first!.attached, undefined); assert.equal(second!.attached, undefined);
+		if (variant === "reattached") commit(table, [{ do: "attach", what: first!.id, to: { id: other!.id, incarnation: other!.incarnation } }], "resolve");
+		if (variant === "equipment-returned") commit(table, [{ do: "move", what: first!.id, to: "hand", reason: "bounce" }, { do: "move", what: first!.id, to: "battlefield", reason: "resolve" }], "resolve");
+		if (variant === "source-returned") commit(table, [{ do: "move", what: source.id, to: "battlefield", reason: "resolve", counters: { charge: 99 } }], "resolve");
+		if (variant === "target-lost") commit(table, [{ do: "move", what: target.id, to: "hand", reason: "bounce" }], "resolve");
+		const pending = structuredClone(table), from = table.ledger.length;
+		passBoth(table);
+		if (variant === "target-lost" || variant === "self") { finish(table); assert.equal(table.resolution, null); }
+		else {
+			step(table); assert.ok(characteristics(table, recipient!)!.words.includes("indestructible"));
+			step(table); assert.deepEqual(recipient!.counters, { "+1/+1": 3, charge: 2, stun: 1 }, "all counter kinds come from the paid incarnation");
+			if (variant === "source-returned") assert.equal(source.counters.charge, 99, "the current source's counters are untouched");
+			const selecting = structuredClone(table), options = nextDecision(table)!.options;
+			const ids = options.flatMap(one => one.objects ?? []).map(one => one.id);
+			assert.ok(!ids.includes(old!.id), "an Equipment attached earlier is not captured");
+			assert.equal(ids.includes(first!.id), variant !== "no-equipment" && variant !== "equipment-returned");
+			assert.equal(ids.includes(second!.id), variant !== "no-equipment");
+			if (variant !== "no-equipment") {
+				const selected = variant === "equipment-returned" ? second! : first!;
+				apply(table, options.find(one => one.objects?.some(ref => ref.id === selected.id))!.id, "model", "chosen");
+				finish(table); assert.deepEqual(selected.attached, { id: target.id, incarnation: target.incarnation });
+			} else finish(table);
+			assert.deepEqual(relive(selecting, table.ledger.slice(selecting.ledger.length)), table);
+		}
+		assert.equal(cardsIn(table, "stack").length, 0);
+		assert.deepEqual(relive(pending, table.ledger.slice(from)), table);
+		if (variant === "ordinary" || variant === "no-equipment" || variant === "self") assert.deepEqual(relive(before, table.ledger.slice(before.ledger.length)), table);
+	}
+}
