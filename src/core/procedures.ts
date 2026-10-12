@@ -90,6 +90,8 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 			if ("bound" in value && typeof value.bound === "string" && !bound.has(value.bound))
 				throw new Error(`bound:${value.bound} is used before an instruction binds it with "as".`);
 			const terms = value as { cost?: import("./language.ts").Cost; pays?: import("./language.ts").Cost; kind?: string; timing?: string };
+			const sacrifice = terms.cost?.sacrifice, sacrificeAs = typeof sacrifice === "object" && "as" in sacrifice ? sacrifice.as : undefined;
+			const resolutionBound = sacrificeAs ? new Set([...bound, sacrificeAs]) : bound;
 			for (const cost of [terms.cost, terms.pays]) if (cost?.additional || cost?.alternative) {
 				if (terms.timing !== "spell") throw new Error("Named additional and alternative costs belong to a spell announcement, not an activation or resolving payment.");
 				if (cost.alternative && cost.mana === undefined) throw new Error("A named alternative cost states its mana price, including {0} when it has none.");
@@ -113,13 +115,13 @@ export function checkReferences(value: unknown, slots = 0, bound = new Set<strin
 				else if (key === "effect" || key === "whenCopied") {
 					const effect = one as { targets?: unknown[]; instructions: Instruction[] };
 					const ownSlots = effect.targets?.length || ((value as { do?: string }).do === "delay" ? slots : 0);
-					refs(effect, ownSlots, new Set(key === "whenCopied" ? ["copied"] : bound), (value as { do?: string }).do === "delay" ? declared : []);
+					refs(effect, ownSlots, new Set(key === "whenCopied" ? ["copied"] : resolutionBound), (value as { do?: string }).do === "delay" ? declared : []);
 				} else if (key === "modes" && Array.isArray(one)) {
 					for (const mode of one as { targets?: unknown[] }[]) refs(mode, mode.targets?.length ?? 0, new Set(bound));
 				} else if (key !== "instructions") refs(one, slots, bound, declared);
 			}
 			if ("instructions" in value && Array.isArray(value.instructions))
-				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...bound, "objects" in value ? "object" : "player"]) : bound, declared);
+				visit(value.instructions, slots, (value as { do?: string }).do === "each" ? new Set([...resolutionBound, "objects" in value ? "object" : "player"]) : resolutionBound, declared);
 		}
 	};
 	const visit = (instructions: Instruction[], slots: number, bound: Set<string>, declared: Target[]) => {

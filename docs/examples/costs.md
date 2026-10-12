@@ -23,6 +23,98 @@ as it last existed on the battlefield (608.2h), so prowess pumps still count.
 }
 ```
 
+## A selected sacrifice's last known information
+
+`cost.sacrifice.as` binds the selected permanents as they were before paying.
+Resolution can read their mana value, power, toughness and counters through
+last known information. The old references cannot move their new graveyard
+incarnations. No value is stored in place of the source reference, and choosing
+an announcement never pays the sacrifice before confirmation.
+
+Repurposing Bay reads the artifact sacrificed to its own cost, independently
+of other sacrifices or a later move of that card. Its constrained library
+search may fail to find; the library is still shuffled. The source and cost
+selection must name another controlled artifact. These terms do not establish
+that an arbitrary card permits the stated sacrifice or search.
+
+```json procedure
+{
+  "source": {
+    "card": "Repurposing Bay",
+    "zones": [
+      "battlefield"
+    ],
+    "controller": "self"
+  },
+  "claim": "Repurpose an artifact into one costing one more",
+  "basis": "{2}, {T}, Sacrifice another artifact: Search your library for an artifact card with mana value equal to 1 plus the sacrificed artifact's mana value, put that card onto the battlefield, then shuffle. Activate only as a sorcery.",
+  "timing": "stack",
+  "speed": "sorcery",
+  "cost": {
+    "mana": "{2}",
+    "tap": true,
+    "sacrifice": {
+      "choose": {
+        "types": [
+          "artifact"
+        ],
+        "controller": "you",
+        "other": true
+      },
+      "count": 1,
+      "as": "paid-artifact"
+    }
+  },
+  "instructions": [
+    {
+      "do": "choose",
+      "who": "you",
+      "from": {
+        "zones": [
+          "library"
+        ],
+        "owner": "you",
+        "types": [
+          "artifact"
+        ],
+        "manaValue": {
+          "atLeast": {
+            "sum": [
+              1,
+              {
+                "manaValue": "bound:paid-artifact"
+              }
+            ]
+          },
+          "atMost": {
+            "sum": [
+              1,
+              {
+                "manaValue": "bound:paid-artifact"
+              }
+            ]
+          }
+        }
+      },
+      "count": 1,
+      "upTo": true,
+      "as": "found"
+    },
+    {
+      "do": "move",
+      "what": "bound:found",
+      "to": "battlefield",
+      "controller": "you",
+      "reason": "resolve"
+    },
+    {
+      "do": "shuffle",
+      "who": "you"
+    }
+  ]
+}
+```
+
 ## Discarding or exiling the card itself
 
 An ability that works from your hand or graveyard names that zone in `source`.

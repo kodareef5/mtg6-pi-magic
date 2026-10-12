@@ -333,6 +333,9 @@ export function paidActivation(base: OfferBase, frame: Frame, way: OfferCost, fu
 	const { procedure, source, sourceRef, granted, printed, slots, words, mana, x } = base, { extra, cost } = way;
 	const payment = immutable(structuredClone(funding));
 	const spellWords = [...new Set([...words, ...(procedure.timing === "spell" ? spentWords(funding, frame.view.pools?.find((one) => one.seat === frame.seat)?.mana ?? []) : [])])];
+	const sacrifice = procedure.cost?.sacrifice, sacrificeAs = typeof sacrifice === "object" && "as" in sacrifice ? sacrifice.as : undefined;
+	const bound = { ...(extra.paid.exiled?.some((one) => one.id === source.id) ? { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } : {}),
+		...(sacrificeAs ? { [sacrificeAs]: { objects: structuredClone(extra.paid.sacrificed ?? []), players: [] } } : {}) };
 	return { source: sourceRef, ...(procedure.face !== undefined ? { face: procedure.face } : {}), controller: frame.seat, claim: procedure.claim, basis: procedure.basis, timing: procedure.timing,
 		...(procedure.special ? { special: procedure.special } : {}),
 		...(procedure.source.registered ? { registered: procedure.source.registered } : {}),
@@ -340,7 +343,7 @@ export function paidActivation(base: OfferBase, frame: Frame, way: OfferCost, fu
 		...(granted.permission ? { permission: granted.permission } : {}),
 		...(granted.leavesStack ? { leavesStack: granted.leavesStack } : {}),
 		...(procedure.timing === "stack" && doubleFaced(printed[source.card ?? ""]) ? { transformAt: source.transformed ?? 0 } : {}),
-		...(extra.paid.exiled?.some((one) => one.id === source.id) ? { bound: { "cost-source": { objects: [{ id: source.id, incarnation: source.incarnation + 1 }], players: [] } } } : {}),
+		...(Object.keys(bound).length ? { bound } : {}),
 		...(procedure.speed ? { speed: procedure.speed } : {}), cost, paid: payment.paid,
 		...(payment.taps.length ? { funding: payment.taps } : {}), slots, instructions: procedure.instructions,
 		...(spellWords.length ? { words: spellWords } : {}), ...(mana.x ? { x } : {}) };

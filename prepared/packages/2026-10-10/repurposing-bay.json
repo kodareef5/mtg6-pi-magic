@@ -3,17 +3,11 @@
 	"generated": "2026-10-10",
 	"source": "1f0c289eac62ac502284554e3b998d3ea80f80e9b2fb8cc4334c6602a0f36629",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Repurposing Bay",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Sacrifice another artifact to search for an artifact card with mana value exactly one greater and put it onto the battlefield; activate only as a sorcery.",
-				"basis": "{2}, {T}, Sacrifice another artifact: Search your library for an artifact card with mana value equal to 1 plus the sacrificed artifact's mana value, put that card onto the battlefield, then shuffle. Activate only as a sorcery.",
 				"source": {
 					"card": "Repurposing Bay",
 					"zones": [
@@ -21,8 +15,76 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"claim": "Repurpose an artifact into one costing one more",
+				"basis": "{2}, {T}, Sacrifice another artifact: Search your library for an artifact card with mana value equal to 1 plus the sacrificed artifact's mana value, put that card onto the battlefield, then shuffle. Activate only as a sorcery.",
+				"timing": "stack",
+				"speed": "sorcery",
+				"cost": {
+					"mana": "{2}",
+					"tap": true,
+					"sacrifice": {
+						"choose": {
+							"types": [
+								"artifact"
+							],
+							"controller": "you",
+							"other": true
+						},
+						"count": 1,
+						"as": "paid-artifact"
+					}
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you",
+							"types": [
+								"artifact"
+							],
+							"manaValue": {
+								"atLeast": {
+									"sum": [
+										1,
+										{
+											"manaValue": "bound:paid-artifact"
+										}
+									]
+								},
+								"atMost": {
+									"sum": [
+										1,
+										{
+											"manaValue": "bound:paid-artifact"
+										}
+									]
+								}
+							}
+						},
+						"count": 1,
+						"upTo": true,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
 	}
 }
