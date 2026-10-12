@@ -104,6 +104,10 @@ test("identified uses are prepared before priority choices, while hidden or unpe
 					change: { registers: [{ kind: "watch", basis: "Granted cast watch", event: { on: "cast", of: { types: ["instant", "sorcery"] } },
 						effect: { instructions: [{ do: "draw", who: "you", count: 1 }] } }] } }] }], unsupported: [] })!, /cast event selector needs zones/,
 					"deferred interpretations run the same nested selector lint as setup assessments");
+				assert.match(tools.submit.check({ procedures: [{ ...procedure, instructions: [
+					{ do: "look", who: "you", what: { top: 2, of: "you" }, as: "looked" },
+					{ do: "choose", who: "you", from: { is: "bound:looked" }, count: 1, as: "taken" },
+				] }], unsupported: [] })!, /bound choice needs explicit zones/);
 				assert.equal(tools.submit.check({ procedures: [{ use: 0, claim: procedure.claim, targets: procedure.targets, instructions: procedure.instructions }], unsupported: [] }), null); return {};
 			} }, universe),
 		});

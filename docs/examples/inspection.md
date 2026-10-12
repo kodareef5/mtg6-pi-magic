@@ -96,3 +96,68 @@ does change its incarnation and keeps library positions contiguous.
   ]
 }
 ```
+
+## Choosing from an inspected binding
+
+Sleight of Hand selects one of the inspected library cards. A binding names
+objects; it does not override a selector's default battlefield zone. State
+`zones: ["library"]` on both the selection and the remaining-card order.
+The preparation check reports omitted zones; it does not certify the card's
+meaning. Neither a one-card nor an empty library makes this a draw.
+
+```json procedure
+{
+  "claim": "Cast Sleight of Hand",
+  "basis": "Look at the top two cards of your library. Put one of them into your hand and the other on the bottom of your library.",
+  "source": {
+    "card": "Sleight of Hand",
+    "zones": [
+      "hand",
+      "graveyard",
+      "exile"
+    ],
+    "controller": "any"
+  },
+  "timing": "spell",
+  "instructions": [
+    {
+      "do": "look",
+      "who": "you",
+      "what": {
+        "top": 2,
+        "of": "you"
+      },
+      "as": "looked"
+    },
+    {
+      "do": "choose",
+      "who": "you",
+      "from": {
+        "zones": [
+          "library"
+        ],
+        "is": "bound:looked"
+      },
+      "count": 1,
+      "as": "taken"
+    },
+    {
+      "do": "move",
+      "what": "bound:taken",
+      "to": "hand",
+      "reason": "resolve"
+    },
+    {
+      "do": "order",
+      "who": "you",
+      "every": {
+        "zones": [
+          "library"
+        ],
+        "is": "bound:looked"
+      },
+      "position": "bottom"
+    }
+  ]
+}
+```

@@ -16,7 +16,7 @@ measures whether ordinary games can execute their cards correctly.
 | Completed source-reviewed alpha games | 29, covering all nine admitted decks; corrected Azorius versus Landfall and Prowess versus Rakdos passed review |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Landfall versus Azorius continues; Control versus Azorius stopped on provider credits; an Azorius versus Izzet finish is excluded for an incorrect Sleight of Hand selection |
+| Current runtime work | Two saved continuations stopped on provider credits; corrected Sleight of Hand passed local replay and awaits a live continuation |
 | Recent shared mechanics | Complete payments with explicit remaining resources; plot with later-turn casting; private face-down exile and continuing play conditions; stun-counter untap replacement |
 | Stored card assessments | 251 accepted, 57 refused, five basic lands; Bant needs Interdimensional Web Watch |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |

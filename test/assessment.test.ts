@@ -126,6 +126,18 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	if (restricted.registers[0]!.kind !== "mana") assert.fail();
 	restricted.registers[0]!.spendOnly!.zones = ["stack"];
 	assert.deepEqual(registrationProblems([restricted]), [], "the interpreter checks explicit scope, not the meaning of card prose");
+	const inspected: Package = { card: "Sleight of Hand", registers: [], procedures: [{ ...normal("Sleight of Hand", universe.cards.get("Sleight of Hand")!.oracle),
+		instructions: [{ do: "look", who: "you", what: { top: 2, of: "you" }, as: "looked" },
+			{ do: "choose", who: "you", from: { is: "bound:looked" }, count: 1, as: "taken" }] }] };
+	assert.match(registrationProblems([inspected]).join("; "), /bound choice needs explicit zones/);
+	const choice = inspected.procedures![0]!.instructions[1]!;
+	if (choice.do !== "choose") assert.fail();
+	choice.from = { all: [{ is: "bound:looked" }] };
+	assert.match(registrationProblems([inspected]).join("; "), /bound choice needs explicit zones/);
+	choice.from.zones = ["library"];
+	assert.deepEqual(registrationProblems([inspected]), [], "nested selectors inherit explicit scope");
+	choice.from = { any: [{ zones: ["library"], is: "bound:looked" }, { zones: ["hand"], is: "bound:looked" }] };
+	assert.deepEqual(registrationProblems([inspected]), [], "each union branch can state its own scope");
 	assert.match(assessmentProblems(printed, { ...pack, registers: [], procedures: [normal(pack.card, printed.oracle)] }).join("; "), /Unassessed text.*flying/,
 		"a bare cast quoting the whole card cannot stand in for its abilities");
 	let rounds = 0;

@@ -3,13 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "9c35559e00ada3841b095ae8877ce8a00361bbae48acd586d7e81850273f23f6",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Sleight of Hand",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Sleight of Hand",
 				"basis": "Look at the top two cards of your library. Put one of them into your hand and the other on the bottom of your library.",
@@ -22,8 +19,49 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "look",
+						"who": "you",
+						"what": {
+							"top": 2,
+							"of": "you"
+						},
+						"as": "looked"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"count": 1,
+						"as": "taken"
+					},
+					{
+						"do": "move",
+						"what": "bound:taken",
+						"to": "hand",
+						"reason": "resolve"
+					},
+					{
+						"do": "order",
+						"who": "you",
+						"every": {
+							"zones": [
+								"library"
+							],
+							"is": "bound:looked"
+						},
+						"position": "bottom"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true
 	}
 }

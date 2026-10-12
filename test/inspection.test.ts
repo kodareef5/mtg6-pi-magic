@@ -84,6 +84,28 @@ test("private inspection exposes only its bounded window and orders it without c
 		assert.equal(table.outcome, null, "looking and choosing from a short library is not a failed draw");
 		assert.deepEqual(relive(initial, table.ledger.slice(at)), table);
 	}
+	for (const left of [0, 1, 2, 8]) for (const last of [false, true]) {
+		const table = start(standard, [{ deck: alpha(deck("Izzet Spellementals")) }, { deck: alpha(deck("Azorius Control")) }], `sleight-window-${left}-${last}`);
+		main(table, 0); place(table, 0, "hand", "Sleight of Hand");
+		commit(table, [...cardsIn(table, "library", 0).slice(left).map(one => ({ do: "move" as const, what: one.id, to: "outside" as const, reason: "game-setup" as const })),
+			{ do: "add-mana", who: 0, colors: ["U"] }], "game-setup");
+		const initial = structuredClone(table), from = table.ledger.length, hand = cardsIn(table, "hand", 0).length;
+		const library = structuredClone(cardsIn(table, "library", 0)), window = library.slice(0, 2);
+		announce(table, example("Cast Sleight of Hand")); passBoth(table); step(table);
+		const pending = structuredClone(table), at = table.ledger.length, decision = nextDecision(table)!;
+		assert.deepEqual(decision.options.flatMap(one => one.objects ?? []).map(one => one.id).sort(),
+			window.filter((one, i) => window.findIndex(other => other.card === one.card) === i).map(one => one.id).sort());
+		for (const viewer of [1, "spectator"] as const) assert.deepEqual(project(table, viewer).resolution!.bound.looked!.objects, []);
+		const pick = last ? decision.options.at(-1)! : decision.options[0]!;
+		const chosen = pick.objects?.[0]?.id;
+		apply(table, pick.id, "model", "chosen"); finish(table);
+		assert.equal(cardsIn(table, "hand", 0).length, hand - 1 + Math.min(1, left));
+		if (chosen) assert.equal(table.things.get(chosen)!.zone, "hand");
+		assert.deepEqual(cardsIn(table, "library", 0).map(one => one.id), [...library.slice(2), ...window.filter(one => one.id !== chosen)].map(one => one.id));
+		assert.equal(table.outcome, null, "inspection and selection do not cause a failed draw");
+		assert.deepEqual(relive(pending, table.ledger.slice(at)), table);
+		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
+	}
 });
 
 test("private selection cannot expose another hand through a malformed selector or an unearned library order", async () => {

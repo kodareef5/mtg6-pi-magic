@@ -11,7 +11,7 @@ import { NoteEditsSchema, type NoteEdit, type WorkCommand } from "../core/work-l
 import type { Prepared } from "./seat.ts";
 import type { Objection } from "../core/player.ts";
 import { planProblems, prepareWork } from "../core/work-tools.ts";
-import { type Condition, type Package, type Plan, type Registration } from "../core/language.ts";
+import { type Condition, type Package, type Plan, type Registration, type Selector } from "../core/language.ts";
 import { holds, viewWorld } from "../core/selectors.ts";
 import { matches } from "../core/query.ts";
 import { lookups } from "./brief.ts";
@@ -69,12 +69,19 @@ const REPAIR_SYSTEM = coordinatorSystem(JSON.stringify(planReference), false);
 const RESPONSE_SYSTEM = responseSystem(JSON.stringify(ResponseSchema));
 const FORECAST = "It shows your next upkeep after untapping, before the unknown draw and any upkeep effects. Your permanents survive with their current characteristics. Each tapped permanent with stun counters loses one counter and stays tapped; other permanents untap. Floating mana that does not persist is gone. It does not predict the opponent's actions or other untap effects before then.";
 
-/** Interpreter checks: activated effects need procedures, and cast selectors must reach the stack. */
+/** Preparation feedback checks explicit scopes, without interpreting card prose. */
 export function registrationProblems(packages: readonly Package[]): string[] {
 	const found: string[] = [];
+	const unscopedBinding = (selector: Selector, explicit = false): boolean => {
+		const scoped = explicit || !!selector.zones?.length;
+		return (!scoped && typeof selector.is === "string" && selector.is.startsWith("bound:")) ||
+			[...(selector.any ?? []), ...(selector.all ?? []), ...(selector.not ? [selector.not] : [])].some(one => unscopedBinding(one, scoped));
+	};
 	const selectors = (value: unknown, card: string): void => {
 		if (!value || typeof value !== "object") return;
-		const term = value as { on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] } };
+		const term = value as { do?: string; from?: Selector; on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] } };
+		if (term.do === "choose" && term.from && unscopedBinding(term.from))
+			found.push(`package ${card}: a bound choice needs explicit zones. A binding names objects but does not change the default battlefield zone; inspected library cards need zones ["library"]. This check does not certify the card's meaning.`);
 		if (term.spendOnly && !term.spendOnly.zones?.length)
 			found.push(`package ${card}: spendOnly needs explicit zones. Casting checks the spell on the stack; activation checks its source. Omitted zones silently select battlefield.`);
 		if ((term.on === "cast" || term.history === "cast") && term.of && !term.of.zones?.includes("stack"))
