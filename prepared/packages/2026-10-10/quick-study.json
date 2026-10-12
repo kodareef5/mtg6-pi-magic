@@ -1,0 +1,37 @@
+{
+	"card": "Quick Study",
+	"generated": "2026-10-10",
+	"source": "ad50669064be4d93ec410de6b1a07a3c7e9ef53e7f783fb26682cf8d7f135d8b",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quick Study",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Quick Study",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Quick Study to draw two cards.",
+				"basis": "Draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
+	}
+}

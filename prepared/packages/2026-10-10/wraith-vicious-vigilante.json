@@ -1,0 +1,45 @@
+{
+	"card": "Wraith, Vicious Vigilante",
+	"generated": "2026-10-10",
+	"source": "ad26c8ba99adfc7a9dc896205203c9e4e2a35a40350f666ce4a402a7283d5b63",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wraith, Vicious Vigilante",
+		"registers": [
+			{
+				"basis": "Double strike",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"double strike"
+					]
+				}
+			},
+			{
+				"basis": "Fear Gas — Wraith can't be blocked.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

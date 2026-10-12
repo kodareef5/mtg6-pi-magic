@@ -1,0 +1,51 @@
+{
+	"card": "Sudden Strike",
+	"generated": "2026-10-10",
+	"source": "001943c4a5082c53e2c19b20b131f1b50bc2d3687ae745ddbdf972586cbdd4fc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sudden Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sudden Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target attacking or blocking creature.",
+				"basis": "Destroy target attacking or blocking creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"any": [
+								{
+									"attacking": true
+								},
+								{
+									"blocking": true
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

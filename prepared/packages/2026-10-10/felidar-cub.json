@@ -1,0 +1,48 @@
+{
+	"card": "Felidar Cub",
+	"generated": "2026-10-10",
+	"source": "519b1d67d504feabe09f09fb282c625d2df1dd3144a7a6d2267f858c713b1cf5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Felidar Cub",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Felidar Cub",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice Felidar Cub to destroy target enchantment.",
+				"basis": "Sacrifice this creature: Destroy target enchantment.",
+				"timing": "stack",
+				"cost": {
+					"sacrifice": "this"
+				},
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"card": "Dragon Fodder",
+	"generated": "2026-10-10",
+	"source": "a00408b5936196aeee950fb7115bf93d7d8e1a501f6f655b3d52573db40404a2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragon Fodder",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dragon Fodder",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Dragon Fodder to create two Goblin tokens.",
+				"basis": "Create two 1/1 red Goblin creature tokens.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 2,
+						"spec": {
+							"name": "Goblin",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Goblin"
+							],
+							"colors": [
+								"R"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Release the Dogs",
+	"generated": "2026-10-10",
+	"source": "297cbaf58a086e8aabd12d97bf22148029eaa3a43f84189a007a36b3a962b094",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Release the Dogs",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Release the Dogs",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Release the Dogs to create four Dog tokens.",
+				"basis": "Create four 1/1 white Dog creature tokens.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "token",
+						"count": 4,
+						"spec": {
+							"name": "Dog",
+							"types": [
+								"creature"
+							],
+							"subtypes": [
+								"Dog"
+							],
+							"colors": [
+								"W"
+							],
+							"power": 1,
+							"toughness": 1
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

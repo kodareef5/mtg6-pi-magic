@@ -1,0 +1,51 @@
+{
+	"card": "Vampire Interloper",
+	"generated": "2026-10-10",
+	"source": "006a05306421f8fef61a005a6794876bb013e0fa858614a39a78f336637837ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Vampire Interloper",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack",
+						"hand",
+						"library",
+						"graveyard",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "This creature can't block.",
+				"kind": "prohibit",
+				"block": {
+					"attacker": {
+						"types": [
+							"creature"
+						]
+					},
+					"blocker": {
+						"is": "this"
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,33 @@
+{
+	"card": "Dragon Sniper",
+	"generated": "2026-10-10",
+	"source": "0d71c9efeb1884b0b4a520f61a6e3763089bf40b6e51ab056eb36da874f356fe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragon Sniper",
+		"registers": [
+			{
+				"basis": "Reach, vigilance, deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance",
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

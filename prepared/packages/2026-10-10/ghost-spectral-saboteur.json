@@ -1,0 +1,51 @@
+{
+	"card": "Ghost, Spectral Saboteur",
+	"generated": "2026-10-10",
+	"source": "393fbe6d1cf047bb1f5ddc42ae36b225081b58839d4cb45afa77878da42e93a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ghost, Spectral Saboteur",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "prohibit",
+				"basis": "Intangibility — Ghost can't be blocked.",
+				"block": {
+					"attacker": {
+						"is": "this"
+					},
+					"blocker": {
+						"types": [
+							"creature"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

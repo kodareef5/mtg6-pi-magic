@@ -1,0 +1,48 @@
+{
+	"card": "Unsummon",
+	"generated": "2026-10-10",
+	"source": "4b3a6d10cf91967b4982c23e30b5b3b09afc2cb57ecad5ca6fe9a99cdc892e8a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Unsummon",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Unsummon",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Unsummon to return target creature to its owner's hand.",
+				"basis": "Return target creature to its owner's hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"zones": [
+								"battlefield"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"card": "Death in the Family",
+	"generated": "2026-10-10",
+	"source": "b3142da8a2628340567f696abaeefc3ce13090eaba770047902de9c5a527bcc3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Death in the Family",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Death in the Family",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile target creature with mana value 3 or less.",
+				"basis": "Exile target creature with mana value 3 or less.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atMost": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

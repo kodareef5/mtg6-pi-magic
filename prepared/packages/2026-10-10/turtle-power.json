@@ -1,0 +1,50 @@
+{
+	"card": "Turtle Power!",
+	"generated": "2026-10-10",
+	"source": "bfe038280bf8a84064b91187469550fa133e30d960b8c9f378a1db305b5c6eb2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Turtle Power!",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"library"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "Turtles you control get +2/+2.",
+				"kind": "continuous",
+				"affects": {
+					"controller": "you",
+					"subtypes": [
+						"Turtle"
+					]
+				},
+				"change": {
+					"power": 2,
+					"toughness": 2
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"card": "Gilded Lotus",
+	"generated": "2026-10-10",
+	"source": "ad99b2b041a28a7c04371d4610391e2cf98a58b44fe6e57a9d1da0bccd4904ad",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gilded Lotus",
+		"registers": [
+			{
+				"basis": "{T}: Add three mana of any one color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 3
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"card": "Dragonlord's Servant",
+	"generated": "2026-10-10",
+	"source": "8dba7d0f6b341e19843f56c91d45539bed517054b3e5df64c53eab4ab7de154f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dragonlord's Servant",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "Dragon spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"subtypes": [
+						"Dragon"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

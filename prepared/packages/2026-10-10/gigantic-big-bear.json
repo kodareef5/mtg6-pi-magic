@@ -1,0 +1,51 @@
+{
+	"card": "Gigantic Big Bear",
+	"generated": "2026-10-10",
+	"source": "a9eb2f49384fa9cd28a14c18ae47ce6c7769a393aab78b180b4be8d43269bc50",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gigantic Big Bear",
+		"registers": [
+			{
+				"basis": "Hexproof, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"hexproof",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gigantic Big Bear",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Gigantic Big Bear",
+				"basis": "This spell can't be countered.",
+				"timing": "spell",
+				"instructions": [],
+				"words": [
+					"can't be countered"
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

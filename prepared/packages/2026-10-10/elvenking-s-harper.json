@@ -1,0 +1,51 @@
+{
+	"card": "Elvenking's Harper",
+	"generated": "2026-10-10",
+	"source": "c918d6a2de3a48ca8b726929e1378bd1b6dbeecd2b4a55aa91a990c609c2f338",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Elvenking's Harper",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Elvenking's Harper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Target creature can't be blocked this turn",
+				"basis": "{4}{U}: Target creature can't be blocked this turn.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{4}{U}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"words": [
+								"can't be blocked"
+							]
+						}
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

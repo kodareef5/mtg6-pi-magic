@@ -1,0 +1,52 @@
+{
+	"card": "Beyond the Quiet",
+	"generated": "2026-10-10",
+	"source": "eed697945bcab013db0e37fc72219cfcf2d3b0dfc8ca6e8c63007a125ab36e91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Beyond the Quiet",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Beyond the Quiet",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Beyond the Quiet, exiling all creatures and Spacecraft simultaneously.",
+				"basis": "Exile all creatures and Spacecraft.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "move",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Spacecraft"
+									]
+								}
+							]
+						},
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

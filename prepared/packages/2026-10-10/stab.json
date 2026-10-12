@@ -1,0 +1,48 @@
+{
+	"card": "Stab",
+	"generated": "2026-10-10",
+	"source": "e76e4339abc97934a4545671df3f75e02b53609715b75c56968246e6afc9ad03",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stab",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stab",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature -2/-2 until end of turn.",
+				"basis": "Target creature gets -2/-2 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -2,
+							"toughness": -2
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

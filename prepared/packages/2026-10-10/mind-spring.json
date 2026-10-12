@@ -1,0 +1,37 @@
+{
+	"card": "Mind Spring",
+	"generated": "2026-10-10",
+	"source": "0a02bc3962f4dcb3c8da5f95594fdb90c2d25231d0c6bab4f31d91851bbb3a16",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mind Spring",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mind Spring",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mind Spring to draw X cards.",
+				"basis": "Draw X cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": {
+							"x": true
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

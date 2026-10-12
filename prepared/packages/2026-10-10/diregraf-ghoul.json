@@ -1,0 +1,20 @@
+{
+	"card": "Diregraf Ghoul",
+	"generated": "2026-10-10",
+	"source": "64cd933e337a507c3a28b97e168f5e9b1f08a19abd74f05fc7bb088621633150",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Diregraf Ghoul",
+		"registers": [
+			{
+				"basis": "This creature enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

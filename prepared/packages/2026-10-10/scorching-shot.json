@@ -1,0 +1,44 @@
+{
+	"card": "Scorching Shot",
+	"generated": "2026-10-10",
+	"source": "6c162a4ca11974f3c169aa93a70f6fb3abc498aaecf2068c0276526b01823ea0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scorching Shot",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scorching Shot",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Scorching Shot to deal 5 damage to target creature.",
+				"basis": "Scorching Shot deals 5 damage to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 5
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"card": "Overkill",
+	"generated": "2026-10-10",
+	"source": "c20601ba9ed729534e281fcd25b712591866a522cd1d5121578d35d57f150a18",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Overkill",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Overkill",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Overkill",
+				"basis": "Target creature gets -0/-9999 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 0,
+							"toughness": -9999
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

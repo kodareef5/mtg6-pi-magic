@@ -1,0 +1,46 @@
+{
+	"card": "Angelic Edict",
+	"generated": "2026-10-10",
+	"source": "e24fc0d31279f7f5616009f3eef7d76e82e718d16c10ba4f9fcec09b0206de91",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Angelic Edict",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Angelic Edict",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Angelic Edict to exile target creature or enchantment.",
+				"basis": "Exile target creature or enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

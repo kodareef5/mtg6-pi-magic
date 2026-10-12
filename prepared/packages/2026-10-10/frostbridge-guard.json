@@ -1,0 +1,46 @@
+{
+	"card": "Frostbridge Guard",
+	"generated": "2026-10-10",
+	"source": "a81dfbea8a5c401b7fce1f0457affe7c2d9a51a9feda24b00418a5f35604a422",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Frostbridge Guard",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Frostbridge Guard",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap target creature.",
+				"basis": "{2}{W}, {T}: Tap target creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{W}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

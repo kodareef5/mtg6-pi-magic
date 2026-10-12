@@ -1,0 +1,30 @@
+{
+	"card": "Goblin Oriflamme",
+	"generated": "2026-10-10",
+	"source": "43d45c9285efa37c2d7597c591aad97a7c65fcf3c084f9437774c8d17e1a1cd2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goblin Oriflamme",
+		"registers": [
+			{
+				"basis": "Attacking creatures you control get +1/+0.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you",
+					"attacking": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 0
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

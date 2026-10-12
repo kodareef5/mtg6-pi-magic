@@ -1,0 +1,44 @@
+{
+	"card": "Bombard",
+	"generated": "2026-10-10",
+	"source": "ef165b49d2b606ac6f871eb783193dc4c10af870bc45e9865b565ce40b46d831",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Bombard",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Bombard",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Bombard to deal 4 damage to target creature.",
+				"basis": "Bombard deals 4 damage to target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

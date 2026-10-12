@@ -1,0 +1,46 @@
+{
+	"card": "White Lotus Reinforcements",
+	"generated": "2026-10-10",
+	"source": "dde2dd1a89e5c32a148cab0c2360cd08f861160ae588796afb060ef343b65e14",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "White Lotus Reinforcements",
+		"registers": [
+			{
+				"basis": "Vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"vigilance"
+					]
+				}
+			},
+			{
+				"basis": "Other Allies you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Ally"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"card": "Romantic Rendezvous",
+	"generated": "2026-10-10",
+	"source": "a9fce855b098927651f62728762172820503ac072774aecad62a368f3030552f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Romantic Rendezvous",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Romantic Rendezvous",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Discard a card, then draw two cards.",
+				"basis": "Discard a card, then draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"card": "Stand Up for Yourself",
+	"generated": "2026-10-10",
+	"source": "0ef473e9ce40c787e0659eca80143e4034cd1124d90134d38366c11e9429ddc7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Stand Up for Yourself",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Stand Up for Yourself",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target creature with power 3 or greater.",
+				"basis": "Destroy target creature with power 3 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"power": {
+								"atLeast": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

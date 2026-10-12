@@ -1,0 +1,42 @@
+{
+	"card": "Pyroclasm",
+	"generated": "2026-10-10",
+	"source": "7cd70d19e3e90d6717d14d04c895fd5ddacaef01e71507b434f81925252607a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Pyroclasm",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Pyroclasm",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Pyroclasm to deal 2 damage to each creature.",
+				"basis": "Pyroclasm deals 2 damage to each creature.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"every": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"creature"
+							]
+						},
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

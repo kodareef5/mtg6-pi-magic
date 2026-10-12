@@ -1,0 +1,47 @@
+{
+	"card": "Abandon Attachments",
+	"generated": "2026-10-10",
+	"source": "84bfc57e758360015245b336beb9a4623ae954ceb0912b90034aca7718123dc6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Abandon Attachments",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Abandon Attachments",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Abandon Attachments",
+				"basis": "You may discard a card. If you do, draw two cards.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "pay",
+						"who": "you",
+						"cost": {
+							"discard": 1
+						},
+						"may": true,
+						"as": "discarded"
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2,
+						"if": {
+							"bound": "discarded"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

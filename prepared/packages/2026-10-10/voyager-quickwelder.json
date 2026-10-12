@@ -1,0 +1,29 @@
+{
+	"card": "Voyager Quickwelder",
+	"generated": "2026-10-10",
+	"source": "5af4d2a01da3e916f2d069daf4a0c4182a2fff4b4992696b813b2fe435642878",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Voyager Quickwelder",
+		"registers": [
+			{
+				"kind": "cost",
+				"basis": "Artifact spells you cast cost {1} less to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "you",
+					"types": [
+						"artifact"
+					]
+				},
+				"reduce": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

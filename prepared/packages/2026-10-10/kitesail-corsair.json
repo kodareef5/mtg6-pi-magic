@@ -1,0 +1,31 @@
+{
+	"card": "Kitesail Corsair",
+	"generated": "2026-10-10",
+	"source": "c70d9d8c3dfb65c793c4e31f94b723f2651f3e1cf57e61e8089bbed63362c6d0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Kitesail Corsair",
+		"registers": [
+			{
+				"basis": "This creature has flying as long as it's attacking.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"is": "this",
+					"attacking": true
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

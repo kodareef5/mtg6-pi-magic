@@ -1,0 +1,55 @@
+{
+	"card": "Charging Strifeknight",
+	"generated": "2026-10-10",
+	"source": "3f6ddbfa0b29bfa1080cb0cb9c707edf85cdcc5e22390566ce6b224547be37d8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Charging Strifeknight",
+		"registers": [
+			{
+				"basis": "Haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Charging Strifeknight",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Discard a card to draw a card",
+				"basis": "{T}, Discard a card: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"tap": true,
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,54 @@
+{
+	"card": "Ancestral Reminiscence",
+	"generated": "2026-10-10",
+	"source": "b30e8e705b60ee7318521733cd0ffb2d96ade3e2e72c4e99ae37237028dfec4a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ancestral Reminiscence",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ancestral Reminiscence",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Draw three cards, then discard a card.",
+				"basis": "Draw three cards, then discard a card.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 3
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"hand"
+							],
+							"controller": "you"
+						},
+						"count": 1,
+						"as": "discard"
+					},
+					{
+						"do": "move",
+						"what": "bound:discard",
+						"to": "graveyard",
+						"reason": "discard"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"card": "Eriette's Lullaby",
+	"generated": "2026-10-10",
+	"source": "9459cd59f18192b3d77ad6d2dc94ad5bc88410b1cee38336648d44743df3c89f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Eriette's Lullaby",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Eriette's Lullaby",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy a tapped creature and gain 2 life.",
+				"basis": "Destroy target tapped creature. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"tapped": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

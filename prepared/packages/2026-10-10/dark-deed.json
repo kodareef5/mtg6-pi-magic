@@ -1,0 +1,48 @@
+{
+	"card": "Dark Deed",
+	"generated": "2026-10-10",
+	"source": "e45256145cd7d4e68b25bcacef41d1fa027e9fd6ee66ca2544ddbc91c256c72f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Dark Deed",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Dark Deed",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature -4/-4 until end of turn.",
+				"basis": "Target creature gets -4/-4 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -4,
+							"toughness": -4
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

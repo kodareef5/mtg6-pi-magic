@@ -1,0 +1,45 @@
+{
+	"card": "Wander Off",
+	"generated": "2026-10-10",
+	"source": "3081aa164e0b3991f0a2df8faf3d511173cd2089ae6d6263439ec56f1bd9a509",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wander Off",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Wander Off",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Wander Off to exile target creature.",
+				"basis": "Exile target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

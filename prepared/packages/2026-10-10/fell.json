@@ -1,0 +1,43 @@
+{
+	"card": "Fell",
+	"generated": "2026-10-10",
+	"source": "f84235d9d3c361ad74c64a86b68e4e0851884d42d096ac0278224e91f2a77ddd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Fell",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Fell",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Fell to destroy target creature.",
+				"basis": "Destroy target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,48 @@
+{
+	"card": "Titanic Growth",
+	"generated": "2026-10-10",
+	"source": "d941cc74daa6c94712fe24e88d92bf602934e79aaa27324552164b9cfd2437cf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Titanic Growth",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Titanic Growth",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature +4/+4 until end of turn.",
+				"basis": "Target creature gets +4/+4 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": 4,
+							"toughness": 4
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"card": "Murder",
+	"generated": "2026-10-10",
+	"source": "590fe1e48b6fc8a655b64087778ea77087d56b41e2394be90b0fa5d504d0f233",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Murder",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Murder",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Murder to destroy target creature.",
+				"basis": "Destroy target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

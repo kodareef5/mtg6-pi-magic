@@ -1,0 +1,47 @@
+{
+	"card": "Deathmark",
+	"generated": "2026-10-10",
+	"source": "a41dc8110874ebfb47cd7a6246e7a223243fdd2d8d1fd571d6fca8c7f2a9113a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Deathmark",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Deathmark",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Deathmark to destroy a green or white creature",
+				"basis": "Destroy target green or white creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"colors": [
+								"G",
+								"W"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

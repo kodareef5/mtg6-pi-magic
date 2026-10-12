@@ -1,0 +1,59 @@
+{
+	"card": "It'll Quench Ya!",
+	"generated": "2026-10-10",
+	"source": "36b1a8d4311199a852058a2487878d867f6399c30fbd38c11a71f6a5116a8be0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "It'll Quench Ya!",
+		"registers": [],
+		"procedures": [
+			{
+				"claim": "Cast It'll Quench Ya!",
+				"basis": "Counter target spell unless its controller pays {2}.",
+				"source": {
+					"card": "It'll Quench Ya!",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0",
+						"unless": {
+							"who": "controller:target:0",
+							"pays": {
+								"mana": "{2}"
+							}
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

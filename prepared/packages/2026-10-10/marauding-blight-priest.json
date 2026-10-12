@@ -1,0 +1,32 @@
+{
+	"card": "Marauding Blight-Priest",
+	"generated": "2026-10-10",
+	"source": "f258a222902c677e42442710eec120a1a2e51ab5844f865fa5cb0931185cdced",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Marauding Blight-Priest",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you gain life, each opponent loses 1 life.",
+				"event": {
+					"on": "life-gained",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "life",
+							"who": "opponent",
+							"amount": -1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

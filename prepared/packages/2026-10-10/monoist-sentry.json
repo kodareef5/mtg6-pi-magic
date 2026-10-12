@@ -1,0 +1,31 @@
+{
+	"card": "Monoist Sentry",
+	"generated": "2026-10-10",
+	"source": "6e06f1d62fdf5ff57a9e3b551e7de6ee58f14208a5a971e84395eb679b3db1a3",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Monoist Sentry",
+		"registers": [
+			{
+				"basis": "Defender",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"defender"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

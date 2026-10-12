@@ -1,0 +1,32 @@
+{
+	"card": "Rearing Embermare",
+	"generated": "2026-10-10",
+	"source": "716145d782d7d377ec24ca6e94f0a4b9ef12ceccc143c6203fc46ad699f72de6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rearing Embermare",
+		"registers": [
+			{
+				"basis": "Reach, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

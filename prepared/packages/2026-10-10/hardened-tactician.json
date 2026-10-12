@@ -1,0 +1,44 @@
+{
+	"card": "Hardened Tactician",
+	"generated": "2026-10-10",
+	"source": "a0546fe179a858c65cab62c9701abacdfb8150f37b6208fbe342105134ad22d4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hardened Tactician",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hardened Tactician",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a token to draw a card",
+				"basis": "{1}, Sacrifice a token: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}",
+					"sacrifice": {
+						"choose": {
+							"controller": "you",
+							"token": true
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

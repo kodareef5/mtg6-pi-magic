@@ -1,0 +1,48 @@
+{
+	"card": "Epic Downfall",
+	"generated": "2026-10-10",
+	"source": "c567e6b9a9e43536f7426ee810ce826e75798ea35a7b6e2780321416ac5bb7d1",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Epic Downfall",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Epic Downfall",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Epic Downfall to exile target creature with mana value 3 or greater.",
+				"basis": "Exile target creature with mana value 3 or greater.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"manaValue": {
+								"atLeast": 3
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"card": "Space-Time Anomaly",
+	"generated": "2026-10-10",
+	"source": "1f5e5ba9afdd241667f1acda8333febac2bdcf43b4679baeee8bda8ad92e9b1d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Space-Time Anomaly",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Space-Time Anomaly",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Space-Time Anomaly targeting a player.",
+				"basis": "Target player mills cards equal to your life total.",
+				"timing": "spell",
+				"targets": [
+					{
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "mill",
+						"who": "target:0",
+						"count": {
+							"life": "you"
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

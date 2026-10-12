@@ -1,0 +1,25 @@
+{
+	"card": "Druid of the Cowl",
+	"generated": "2026-10-10",
+	"source": "4b7458979c45104d30a752517211e5334485c9e1a34675753a27846e375a2edc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Druid of the Cowl",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

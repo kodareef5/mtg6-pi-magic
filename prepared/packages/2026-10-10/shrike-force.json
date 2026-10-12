@@ -1,0 +1,33 @@
+{
+	"card": "Shrike Force",
+	"generated": "2026-10-10",
+	"source": "2e2501bd8da3ea94f515fde9e8bb908a10653fd01a3d622ff3bbe394b875a7c4",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shrike Force",
+		"registers": [
+			{
+				"basis": "Flying, double strike, vigilance",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying",
+						"double strike",
+						"vigilance"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"card": "Rootrider Faun",
+	"generated": "2026-10-10",
+	"source": "59c17dcd48da6671510cdc2dbcdfc60881eec5add88d3b9a83f8072ecbcdfeea",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rootrider Faun",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			},
+			{
+				"basis": "{1}, {T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"mana": "{1}",
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

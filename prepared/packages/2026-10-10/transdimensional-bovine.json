@@ -1,0 +1,39 @@
+{
+	"card": "Transdimensional Bovine",
+	"generated": "2026-10-10",
+	"source": "babb4bece621b5d32381203d545b0a95c4fb7f05e785df05e8a00881522af3e0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Transdimensional Bovine",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "{T}: Add two mana of any one color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 2
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

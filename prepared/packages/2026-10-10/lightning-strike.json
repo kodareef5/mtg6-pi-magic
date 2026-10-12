@@ -1,0 +1,47 @@
+{
+	"card": "Lightning Strike",
+	"generated": "2026-10-10",
+	"source": "af03ef1bd8c636d5166ea74a591212a938d49bf9a1ad1493454fa36f9f06ba24",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Lightning Strike",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Lightning Strike",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Lightning Strike",
+				"basis": "Lightning Strike deals 3 damage to any target.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

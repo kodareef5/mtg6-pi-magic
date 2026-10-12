@@ -1,0 +1,54 @@
+{
+	"card": "Engine Rat",
+	"generated": "2026-10-10",
+	"source": "715221fa6caaf480c16591fe85a862dacf4df9561ba420c41906e74a011aea55",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Engine Rat",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Engine Rat",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Each opponent loses 2 life.",
+				"basis": "{5}{B}: Each opponent loses 2 life.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}{B}"
+				},
+				"instructions": [
+					{
+						"do": "life",
+						"who": "opponent",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

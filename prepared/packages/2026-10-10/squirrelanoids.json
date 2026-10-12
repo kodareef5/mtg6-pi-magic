@@ -1,0 +1,31 @@
+{
+	"card": "Squirrelanoids",
+	"generated": "2026-10-10",
+	"source": "f9286734d181f82ca8de8431a7ecca22c97b7de3a7a79e49ff62a9ce5ba2e53c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Squirrelanoids",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

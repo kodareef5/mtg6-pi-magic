@@ -1,0 +1,44 @@
+{
+	"card": "Disenchant",
+	"generated": "2026-10-10",
+	"source": "bfe533a9f0a6e6a2df9a238b21417e0d55440df83b5ceaa9989d260b52f5a5b6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Disenchant",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Disenchant",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Disenchant to destroy target artifact or enchantment.",
+				"basis": "Destroy target artifact or enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"artifact",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

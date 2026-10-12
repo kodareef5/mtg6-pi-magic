@@ -1,0 +1,42 @@
+{
+	"card": "Daring Thunder-Thief",
+	"generated": "2026-10-10",
+	"source": "9186280e0dc04e82e36c90e2091519623270e3243b2c489a29587042f22e68cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Daring Thunder-Thief",
+		"registers": [
+			{
+				"basis": "Flash",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

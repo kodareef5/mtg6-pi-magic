@@ -1,0 +1,52 @@
+{
+	"card": "Spin Out",
+	"generated": "2026-10-10",
+	"source": "a254a9d8f15a7e927b1e5e7bc101668975a83b33d7eed4fd08b0ec603724ea60",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Spin Out",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Spin Out",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target creature or Vehicle.",
+				"basis": "Destroy target creature or Vehicle.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Vehicle"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,46 @@
+{
+	"card": "Auroral Procession",
+	"generated": "2026-10-10",
+	"source": "72f4a82ed93ba77d16a20f237a291d262a37ea232645ea1d94db381d1acd98cc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Auroral Procession",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Auroral Procession",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Return a card from your graveyard to your hand.",
+				"basis": "Return target card from your graveyard to your hand.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "hand",
+						"reason": "bounce"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"card": "Goobbue Gardener",
+	"generated": "2026-10-10",
+	"source": "07f47f497cc1cc1ac3bd2475bdd2c6d72adfe5344339a6e381b52a2b2c9dffc6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Goobbue Gardener",
+		"registers": [
+			{
+				"basis": "{T}: Add {G}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"G"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

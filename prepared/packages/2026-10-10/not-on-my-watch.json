@@ -1,0 +1,46 @@
+{
+	"card": "Not on My Watch",
+	"generated": "2026-10-10",
+	"source": "d300d0c072ee08bfeca61d154ec5e2fede5714062374bb86b07c035fdb6d8db2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Not on My Watch",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Not on My Watch",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile target attacking creature.",
+				"basis": "Exile target attacking creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"attacking": true
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

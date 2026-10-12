@@ -1,0 +1,47 @@
+{
+	"card": "Shock",
+	"generated": "2026-10-10",
+	"source": "c2e1adcbcdbaae5b66c95707aafa57b58e4395e8965521265519b92fde9d3e9a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Shock",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any",
+					"card": "Shock"
+				},
+				"claim": "Cast Shock",
+				"basis": "Shock deals 2 damage to any target.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

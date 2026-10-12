@@ -1,0 +1,51 @@
+{
+	"card": "Coeurl",
+	"generated": "2026-10-10",
+	"source": "b8c6a4f522488c5845f50e079ad5e3b79fed64dd9886f027aa50da2795dfb787",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Coeurl",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Coeurl",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap target nonenchantment creature.",
+				"basis": "{1}{W}, {T}: Tap target nonenchantment creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{1}{W}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"types": [
+									"enchantment"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

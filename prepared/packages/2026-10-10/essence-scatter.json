@@ -1,0 +1,46 @@
+{
+	"card": "Essence Scatter",
+	"generated": "2026-10-10",
+	"source": "0f9d58f81127af93a84e13a6e85e4de317a453774ac6d1d0024879afd7118788",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Essence Scatter",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Essence Scatter",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Essence Scatter",
+				"basis": "Counter target creature spell.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

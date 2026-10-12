@@ -1,0 +1,40 @@
+{
+	"card": "Risky Shortcut",
+	"generated": "2026-10-10",
+	"source": "bd48dee4ebacf138928f9c2cb338d5b3ec006effcfc4624b498aeda74369ecb8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Risky Shortcut",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Risky Shortcut",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Risky Shortcut",
+				"basis": "Draw two cards. Each player loses 2 life.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					},
+					{
+						"do": "life",
+						"who": "each-player",
+						"amount": -2
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

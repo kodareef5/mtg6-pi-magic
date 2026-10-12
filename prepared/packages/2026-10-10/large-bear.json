@@ -1,0 +1,33 @@
+{
+	"card": "Large Bear",
+	"generated": "2026-10-10",
+	"source": "baf35943966de703bd8a01563b080459204ca2f6e696d0fb9e4635313180cabe",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Large Bear",
+		"registers": [
+			{
+				"basis": "Reach, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

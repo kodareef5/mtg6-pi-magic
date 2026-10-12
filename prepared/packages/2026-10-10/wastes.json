@@ -1,0 +1,24 @@
+{
+	"card": "Wastes",
+	"generated": "2026-10-10",
+	"source": "b90c09404189e8db7a2ed1b6fcb4f5cfa34665b37ae7015fbeec4abf7ac383ac",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wastes",
+		"registers": [
+			{
+				"basis": "{T}: Add {C}.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"colors": [
+					"C"
+				]
+			}
+		],
+		"procedures": [],
+		"assessed": true
+	}
+}

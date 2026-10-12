@@ -1,0 +1,30 @@
+{
+	"card": "Regal Imperiosaur",
+	"generated": "2026-10-10",
+	"source": "6dc681a539f2fe7db9dd20e0cb4952a7b915bff003cb78224bc6454dae25c128",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Regal Imperiosaur",
+		"registers": [
+			{
+				"basis": "Other Dinosaurs you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"subtypes": [
+						"Dinosaur"
+					],
+					"controller": "you",
+					"other": true
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

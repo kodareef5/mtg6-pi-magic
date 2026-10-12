@@ -1,0 +1,32 @@
+{
+	"card": "Brightblade Stoat",
+	"generated": "2026-10-10",
+	"source": "13a5baf7d542f92dd95418edcdb14ab8420afa3399a8186f84f419f86686904c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Brightblade Stoat",
+		"registers": [
+			{
+				"basis": "First strike, lifelink",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"first strike",
+						"lifelink"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"card": "Sterling Keykeeper",
+	"generated": "2026-10-10",
+	"source": "2b22eaf79951219b862cfd08369a23f26327d2e5bde755deff76a984c1fdf8de",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sterling Keykeeper",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sterling Keykeeper",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Tap target non-Mount creature.",
+				"basis": "{2}, {T}: Tap target non-Mount creature.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}",
+					"tap": true
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							],
+							"not": {
+								"subtypes": [
+									"Mount"
+								]
+							}
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "tap",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

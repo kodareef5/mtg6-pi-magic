@@ -1,0 +1,31 @@
+{
+	"card": "Leonin Skyhunter",
+	"generated": "2026-10-10",
+	"source": "990954a33f4791892842cb1e6644194353e1555411f7655f24e4db738f1dc69a",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Leonin Skyhunter",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"card": "Ankle Biter",
+	"generated": "2026-10-10",
+	"source": "046fc3abba4a6823da1a9124189bbe26cff5339e3bf98f6dde20b432b455ba18",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ankle Biter",
+		"registers": [
+			{
+				"basis": "Deathtouch",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"deathtouch"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

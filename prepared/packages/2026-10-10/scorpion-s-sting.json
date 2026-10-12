@@ -1,0 +1,48 @@
+{
+	"card": "Scorpion's Sting",
+	"generated": "2026-10-10",
+	"source": "ee0ff441446c79f2d84c89f873882f5708201c0066a80161a5b3af870d74b087",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Scorpion's Sting",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Scorpion's Sting",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Give target creature -3/-3 until end of turn.",
+				"basis": "Target creature gets -3/-3 until end of turn.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "target:0",
+						"until": "end-of-turn",
+						"change": {
+							"power": -3,
+							"toughness": -3
+						}
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

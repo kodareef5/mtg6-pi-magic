@@ -1,0 +1,32 @@
+{
+	"card": "Colossadactyl",
+	"generated": "2026-10-10",
+	"source": "11e5e0954577882cc4c77056c9b0757568afb704e724ebe08e606bd59ac59ac8",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Colossadactyl",
+		"registers": [
+			{
+				"basis": "Reach, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

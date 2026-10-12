@@ -1,0 +1,36 @@
+{
+	"card": "Piranha Fly",
+	"generated": "2026-10-10",
+	"source": "9ab8e28d191e0cc202d7d86a7473ecc7a2b1a5d264a05297b18eedefee630b83",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Piranha Fly",
+		"registers": [
+			{
+				"basis": "Flying",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"basis": "This creature enters tapped.",
+				"kind": "enters",
+				"tapped": true
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

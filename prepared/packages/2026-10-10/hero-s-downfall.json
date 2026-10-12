@@ -1,0 +1,44 @@
+{
+	"card": "Hero's Downfall",
+	"generated": "2026-10-10",
+	"source": "dcfc1ae4049bbdc0a59d24380eae45386fd541936d283c56bd543dcda7e35c40",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Hero's Downfall",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Hero's Downfall",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Hero's Downfall to destroy target creature or planeswalker.",
+				"basis": "Destroy target creature or planeswalker.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

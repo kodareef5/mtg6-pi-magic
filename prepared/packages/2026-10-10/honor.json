@@ -1,0 +1,51 @@
+{
+	"card": "Honor",
+	"generated": "2026-10-10",
+	"source": "fe7879c6fece3c0e6b7b8ba65571fece91d541664958b10c99aac8390f1c7738",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Honor",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Honor",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Honor",
+				"basis": "Put a +1/+1 counter on target creature.\nDraw a card.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "+1/+1",
+						"amount": 1
+					},
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

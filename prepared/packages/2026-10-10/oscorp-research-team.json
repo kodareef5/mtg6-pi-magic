@@ -1,0 +1,37 @@
+{
+	"card": "Oscorp Research Team",
+	"generated": "2026-10-10",
+	"source": "92561280869649cd699b9d79ef9a2d1ac6071254c2e0d2f397e79ab0cbd4eda0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Oscorp Research Team",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Oscorp Research Team",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Draw two cards",
+				"basis": "{6}{U}: Draw two cards.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{6}{U}"
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

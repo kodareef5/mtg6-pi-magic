@@ -1,0 +1,44 @@
+{
+	"card": "Mortify",
+	"generated": "2026-10-10",
+	"source": "76acc6938569e17a4f8ba9888382ffb9dc6a8a7497f724ccbbf3511dfe41ce7c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mortify",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Mortify",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Mortify to destroy target creature or enchantment.",
+				"basis": "Destroy target creature or enchantment.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

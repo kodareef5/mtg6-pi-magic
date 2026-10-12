@@ -1,0 +1,66 @@
+{
+	"card": "Ripchain Razorkin",
+	"generated": "2026-10-10",
+	"source": "178fdee00c4d4832313aaf0051bcc3fb3b1f05b71f25e74a907761d7ec338149",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Ripchain Razorkin",
+		"registers": [
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [
+			{
+				"source": {
+					"card": "Ripchain Razorkin",
+					"zones": [
+						"battlefield"
+					],
+					"controller": "self"
+				},
+				"claim": "Sacrifice a land to draw a card",
+				"basis": "{2}{R}, Sacrifice a land: Draw a card.",
+				"timing": "stack",
+				"cost": {
+					"mana": "{2}{R}",
+					"sacrifice": {
+						"choose": {
+							"zones": [
+								"battlefield"
+							],
+							"types": [
+								"land"
+							],
+							"controller": "you"
+						},
+						"count": 1
+					}
+				},
+				"instructions": [
+					{
+						"do": "draw",
+						"who": "you",
+						"count": 1
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": true
+	}
+}

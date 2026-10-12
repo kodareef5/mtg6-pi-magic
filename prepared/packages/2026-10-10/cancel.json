@@ -1,0 +1,53 @@
+{
+	"card": "Cancel",
+	"generated": "2026-10-10",
+	"source": "3b2efba5c663bb078f355ac16080f4d016f5297e0a90e3dd1725b917efc6e8f5",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cancel",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Cancel",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Cancel to counter target spell.",
+				"basis": "Counter target spell.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

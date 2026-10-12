@@ -1,0 +1,41 @@
+{
+	"card": "Darkness Descends",
+	"generated": "2026-10-10",
+	"source": "0235acb901e1924d5fe0ab10c818d5756bb6a094f97ce0f3aa980f58ad626b07",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Darkness Descends",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Darkness Descends",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Put two -1/-1 counters on each creature.",
+				"basis": "Put two -1/-1 counters on each creature.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "counters",
+						"every": {
+							"types": [
+								"creature"
+							]
+						},
+						"kind": "-1/-1",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

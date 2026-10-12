@@ -1,0 +1,33 @@
+{
+	"card": "Samut, Hazoret's Champion",
+	"generated": "2026-10-10",
+	"source": "0ea4431330232e0594e29bddb20488f7244d8182d21e5f7b9c7396dd28e584c0",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Samut, Hazoret's Champion",
+		"registers": [
+			{
+				"basis": "Creatures you control have haste.",
+				"kind": "continuous",
+				"affects": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

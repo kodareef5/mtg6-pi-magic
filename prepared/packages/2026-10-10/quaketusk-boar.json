@@ -1,0 +1,33 @@
+{
+	"card": "Quaketusk Boar",
+	"generated": "2026-10-10",
+	"source": "08c7129f4bf0ccdb323e5889f62eaf50b0ba330824822a25a91c1965ba519f24",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Quaketusk Boar",
+		"registers": [
+			{
+				"basis": "Reach, trample, haste",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"trample",
+						"haste"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"card": "Iron Giant",
+	"generated": "2026-10-10",
+	"source": "a7fb0d371fef5c297807c32c4323434f1b4ab4f51e2634a68637ae7d7dc7a626",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Iron Giant",
+		"registers": [
+			{
+				"basis": "Reach, vigilance, trample",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach",
+						"vigilance",
+						"trample"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

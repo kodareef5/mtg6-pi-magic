@@ -1,0 +1,34 @@
+{
+	"card": "Summit Sentinel",
+	"generated": "2026-10-10",
+	"source": "0d2f3ec9d8b0c4f43ba2dd826b4133e01d7233be5f835e7c990fb1b69d79dd8e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Summit Sentinel",
+		"registers": [
+			{
+				"basis": "When this creature dies, draw a card.",
+				"kind": "watch",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

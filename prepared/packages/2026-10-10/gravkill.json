@@ -1,0 +1,54 @@
+{
+	"card": "Gravkill",
+	"generated": "2026-10-10",
+	"source": "db7682c0f15e77538b8d0a07fbbbe91ea3afc852249b1fbf66a39d2c5bb05fe6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Gravkill",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Gravkill",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Exile target creature or Spacecraft.",
+				"basis": "Exile target creature or Spacecraft.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"any": [
+								{
+									"types": [
+										"creature"
+									]
+								},
+								{
+									"subtypes": [
+										"Spacecraft"
+									]
+								}
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "move",
+						"what": "target:0",
+						"to": "exile",
+						"reason": "exile"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

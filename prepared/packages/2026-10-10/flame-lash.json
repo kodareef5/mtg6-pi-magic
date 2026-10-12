@@ -1,0 +1,47 @@
+{
+	"card": "Flame Lash",
+	"generated": "2026-10-10",
+	"source": "e0c28284f9145448837ac9c30e5066ddff1afa98c3281e5ee0a867e643d2fe7f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Flame Lash",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Flame Lash",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Flame Lash to deal 4 damage to any target.",
+				"basis": "Flame Lash deals 4 damage to any target.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"planeswalker",
+								"battle"
+							]
+						},
+						"player": "any"
+					}
+				],
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "target:0",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

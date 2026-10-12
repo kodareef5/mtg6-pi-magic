@@ -1,0 +1,56 @@
+{
+	"card": "Chitinous Graspling",
+	"generated": "2026-10-10",
+	"source": "d9e455e2ea24c99535cd17de281c93692d3357528d48ea8d2b9888ffcee450a9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Chitinous Graspling",
+		"registers": [
+			{
+				"basis": "Changeling (This card is every creature type.)",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"library",
+						"hand",
+						"battlefield",
+						"graveyard",
+						"stack",
+						"exile",
+						"command",
+						"outside"
+					]
+				},
+				"change": {
+					"subtypes": {
+						"allCreatureTypes": true
+					},
+					"words": [
+						"changeling"
+					]
+				}
+			},
+			{
+				"basis": "Reach",
+				"kind": "continuous",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"reach"
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

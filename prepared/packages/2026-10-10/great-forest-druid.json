@@ -1,0 +1,23 @@
+{
+	"card": "Great Forest Druid",
+	"generated": "2026-10-10",
+	"source": "bdeace10cf8403d14f49eb12013996cdce71e4f3a7c17554e9cb4b478aa03934",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Great Forest Druid",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

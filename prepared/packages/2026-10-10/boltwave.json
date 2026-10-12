@@ -1,0 +1,35 @@
+{
+	"card": "Boltwave",
+	"generated": "2026-10-10",
+	"source": "66c8d3cafb23a7e3d6326dadcd83bb070c26d5c4e74bb182c0cf3f050053c0a7",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Boltwave",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Boltwave",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Boltwave",
+				"basis": "Boltwave deals 3 damage to each opponent.",
+				"timing": "spell",
+				"instructions": [
+					{
+						"do": "damage",
+						"to": "opponent",
+						"amount": 3
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"card": "Blight Rot",
+	"generated": "2026-10-10",
+	"source": "b68a5b52fb71778bd443e87ba0492b17ac0aa215cfdefa757c00fb0b20a5ff4c",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Blight Rot",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Blight Rot",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Cast Blight Rot to put four -1/-1 counters on target creature.",
+				"basis": "Put four -1/-1 counters on target creature.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counters",
+						"on": "target:0",
+						"kind": "-1/-1",
+						"amount": 4
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

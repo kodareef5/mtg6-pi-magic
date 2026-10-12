@@ -1,0 +1,57 @@
+{
+	"card": "Precise Redaction",
+	"generated": "2026-10-10",
+	"source": "45555adf3b5364e70995fa5118576efe68da82fb6228b07006f2b847108a142d",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Precise Redaction",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Precise Redaction",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Counter target white or black spell.",
+				"basis": "Counter target white or black spell.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"zones": [
+								"stack"
+							],
+							"colors": [
+								"W",
+								"B"
+							],
+							"types": [
+								"artifact",
+								"battle",
+								"creature",
+								"enchantment",
+								"instant",
+								"kindred",
+								"planeswalker",
+								"sorcery"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "counter",
+						"what": "target:0"
+					}
+				]
+			}
+		],
+		"assessed": true
+	}
+}

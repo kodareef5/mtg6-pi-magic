@@ -1,0 +1,49 @@
+{
+	"card": "Sephiroth's Intervention",
+	"generated": "2026-10-10",
+	"source": "7e54e9ea18c9e812f84432a2545d6b404bbe5c8dc39c0933d5415d244fe75857",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Sephiroth's Intervention",
+		"registers": [],
+		"procedures": [
+			{
+				"source": {
+					"card": "Sephiroth's Intervention",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"claim": "Destroy target creature and gain 2 life.",
+				"basis": "Destroy target creature. You gain 2 life.",
+				"timing": "spell",
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "life",
+						"who": "you",
+						"amount": 2
+					}
+				]
+			}
+		],
+		"assessed": true,
+		"printedCast": false
+	}
+}

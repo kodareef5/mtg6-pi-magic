@@ -1,0 +1,23 @@
+{
+	"card": "Three Tree Rootweaver",
+	"generated": "2026-10-10",
+	"source": "e37f23c34d66340c0b1ac4c7f94ab649c6739f91d750eafffcc7d647c187eaf9",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Three Tree Rootweaver",
+		"registers": [
+			{
+				"basis": "{T}: Add one mana of any color.",
+				"kind": "mana",
+				"cost": {
+					"tap": true
+				},
+				"any": 1
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

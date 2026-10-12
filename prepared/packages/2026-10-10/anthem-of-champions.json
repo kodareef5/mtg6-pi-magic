@@ -1,0 +1,29 @@
+{
+	"card": "Anthem of Champions",
+	"generated": "2026-10-10",
+	"source": "524f66e890e1372b947a38c6a70cf29e7b8be3f3fb2893bfccec478f2ccbd2cf",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Anthem of Champions",
+		"registers": [
+			{
+				"basis": "Creatures you control get +1/+1.",
+				"kind": "continuous",
+				"affects": {
+					"types": [
+						"creature"
+					],
+					"controller": "you"
+				},
+				"change": {
+					"power": 1,
+					"toughness": 1
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}
