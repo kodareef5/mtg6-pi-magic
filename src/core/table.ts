@@ -60,6 +60,8 @@ export type Thing = {
 	prepared?: true;
 	/** Physical markers, independent of the permanent's abilities and copiable characteristics. */
 	designations?: Designation[];
+	/** A physical Class level, retained through type changes and excluded from copying (716.2b). Absence reads as 1. */
+	level?: number;
 	/** A castable Prepare copy names its printed face and the permanent that sustains it. */
 	copy?: { face: 0 | 1; source: ObjectRef };
 	/** A noncard spell put directly on the stack; it becomes a token only as a permanent spell resolves. */

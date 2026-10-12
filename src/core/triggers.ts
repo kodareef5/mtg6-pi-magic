@@ -54,6 +54,7 @@ type Occurrence = {
 	lookBack?: true;
 	face?: 0 | 1;
 	fully?: true;
+	level?: number;
 	counter?: string;
 	beforeCount?: number;
 	afterCount?: number;
@@ -134,6 +135,12 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "transform": {
 				const object = now(change.what), was = receipt.before[change.what];
 				if (object && was && object.transformed !== was.transformed) found.push({ on: "transforms", object, traits: read(object), found: ref(object), face: object.face, player: object.controller });
+				break;
+			}
+			case "designate": {
+				const object = now(change.what), was = receipt.before[change.what];
+				if (typeof change.designation === "object" && object?.zone === "battlefield" && was && (object.level ?? 1) !== (was.level ?? 1))
+					found.push({ on: "level", object, traits: read(object), found: ref(object), level: object.level ?? 1, amount: object.level ?? 1, player: object.controller });
 				break;
 			}
 			case "door": {
@@ -217,6 +224,7 @@ function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrenc
 	if (event.on === "enters" && !(event.to ?? ["battlefield"]).includes(occurrence.to as never) ||
 		event.on === "leaves" && !(event.from ?? ["battlefield"]).includes(occurrence.from as never)) return null;
 	if (event.keyword !== undefined && event.keyword !== occurrence.keyword) return null;
+	if (event.level !== undefined && event.level !== occurrence.level) return null;
 	if (event.ordinal !== undefined && event.ordinal !== occurrence.ordinal) return null;
 	if (event.counter !== undefined && event.counter !== occurrence.counter) return null;
 	if (event.reaches !== undefined && !(occurrence.beforeCount !== undefined && occurrence.beforeCount < event.reaches && occurrence.afterCount! >= event.reaches)) return null;

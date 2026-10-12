@@ -81,6 +81,8 @@ const SelectorFields = {
 	/** Has the alternative Adventure characteristics, even when they are inactive (715.2a). */
 	hasAdventure: Type.Optional(Type.Boolean()),
 	tapped: Type.Optional(Type.Boolean()),
+	/** A permanent's Class level designation; absence is level 1 (716.2d). */
+	level: Type.Optional(Range),
 	/** Each named physical designation must be present. */
 	designations: Type.Optional(Type.Array(Designation, { minItems: 1, uniqueItems: true })),
 	token: Type.Optional(Type.Boolean()),
@@ -224,12 +226,14 @@ export const Defs = {
 
 	/** Something that happened, as the table recorded it. */
 	Event: Type.Object({
-		on: one("enters", "leaves", "dies", "sacrificed", "discarded", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "counters", "keyword", "crime", "life-gained"),
+		on: one("enters", "leaves", "dies", "sacrificed", "discarded", "attacks", "attacked-with", "blocks", "cast", "targeted", "combat-damage", "damage", "step", "transforms", "unlocks", "level", "counters", "keyword", "crime", "life-gained"),
 		keyword: Type.Optional(one("scry", "surveil", "manifest-dread", "search")),
 		/** Positive counters put on a permanent, including entry; optionally cross a count from below. */
 		counter: Type.Optional(text), reaches: Type.Optional(positive),
 		/** Ordinal among all spells cast by that caster this turn, not only those matching of. */
 		ordinal: Type.Optional(positive),
+		/** A changed level equals this designation, not a counter threshold. */
+		level: Type.Optional(positive),
 		face: Type.Optional(Face), fully: Type.Optional(Type.Literal(true)),
 		of: Type.Optional(Type.Ref("Selector")),
 		/** Who cast, attacked, gained life, or controls the targeting spell or ability. */
@@ -246,7 +250,8 @@ export const Defs = {
 		combat: Type.Optional(Type.Boolean()),
 		/** "One or more": one trigger for the whole group. */
 		batch: Type.Optional(Type.Literal(true)),
-	}, { additionalProperties: false, if: { required: ["ordinal"] }, then: { properties: { on: { const: "cast" } } } }),
+	}, { additionalProperties: false, if: { required: ["ordinal"] }, then: { properties: { on: { const: "cast" } } },
+		allOf: [{ if: { required: ["level"] }, then: { properties: { on: { const: "level" } } } }] }),
 
 	Effect: object({ targets: Type.Optional(Type.Array(Type.Ref("Target"))), instructions: Type.Array(Type.Ref("Instruction")) }),
 	/** A standing modal trigger chooses exactly one complete effect as it is put on the stack. */
@@ -328,7 +333,7 @@ export const Defs = {
 		step({ do: Type.Literal("transform"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
 		step({ do: Type.Literal("door"), what: ObjectRef, action: one("unlock", "lock"), face: Type.Optional(Face) }),
 		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
-		step({ do: Type.Literal("designate"), what: ObjectRef, designation: Designation }),
+		step({ do: Type.Literal("designate"), what: ObjectRef, designation: Type.Union([Designation, object({ level: positive })]) }),
 		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Optional(Type.Ref("TokenSpec")), copy: Type.Optional(ObjectRef),
 			except: Type.Optional(Type.Ref("CopyExceptions")), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
 			{ oneOf: [{ required: ["spec"], not: { anyOf: [{ required: ["copy"] }, { required: ["except"] }] } }, { required: ["copy"], not: { required: ["spec"] } }] }),

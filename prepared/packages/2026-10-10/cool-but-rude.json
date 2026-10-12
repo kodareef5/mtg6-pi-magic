@@ -1,0 +1,202 @@
+{
+	"card": "Cool but Rude",
+	"generated": "2026-10-10",
+	"source": "1890b9111e2e929a207d4ca1bbe7896944e143147865ab3be447d5ee4923c898",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Cool but Rude",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever you attack, you may discard a card. If you do, draw a card.",
+				"event": {
+					"on": "attacked-with",
+					"by": "you"
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "pay",
+							"who": "you",
+							"cost": {
+								"discard": 1
+							},
+							"may": true,
+							"as": "discarded"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1,
+							"if": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{1}{R}: Level 2",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 1,
+							"atMost": 1
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 2
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "Whenever you discard a card, this Class deals 2 damage to each opponent.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 2
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "Whenever you discard a card, this Class deals 2 damage to each opponent.",
+							"event": {
+								"on": "discarded",
+								"by": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "damage",
+										"to": "opponent",
+										"amount": 2
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "activated",
+				"basis": "{1}{R}: Level 3",
+				"cost": {
+					"mana": "{1}{R}"
+				},
+				"speed": "sorcery",
+				"if": {
+					"is": "this",
+					"matches": {
+						"level": {
+							"atLeast": 2,
+							"atMost": 2
+						}
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "designate",
+							"what": "this",
+							"designation": {
+								"level": 3
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "continuous",
+				"basis": "When this Class becomes level 3, search your library for a card, put it into your hand, shuffle, then discard a card at random.",
+				"affects": {
+					"is": "this",
+					"level": {
+						"atLeast": 3
+					}
+				},
+				"change": {
+					"registers": [
+						{
+							"kind": "watch",
+							"basis": "When this Class becomes level 3, search your library for a card, put it into your hand, shuffle, then discard a card at random.",
+							"event": {
+								"on": "level",
+								"of": {
+									"is": "this"
+								},
+								"level": 3
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "choose",
+										"who": "you",
+										"from": {
+											"zones": [
+												"library"
+											],
+											"owner": "you"
+										},
+										"count": 1,
+										"as": "found"
+									},
+									{
+										"do": "move",
+										"what": "bound:found",
+										"to": "hand",
+										"reason": "resolve"
+									},
+									{
+										"do": "shuffle",
+										"who": "you"
+									},
+									{
+										"do": "choose",
+										"who": "you",
+										"from": {
+											"zones": [
+												"hand"
+											],
+											"owner": "you"
+										},
+										"count": 1,
+										"random": true,
+										"as": "discarded"
+									},
+									{
+										"do": "move",
+										"what": "bound:discarded",
+										"to": "graveyard",
+										"reason": "discard"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

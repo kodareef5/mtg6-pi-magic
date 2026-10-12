@@ -287,3 +287,9 @@ departure. Graveyard departure watches look back under 603.10a. Unqualified
 enters/leaves events retain their battlefield meaning. A triggerIf condition
 is tested only when raising the trigger; an intervening if is tested again
 on resolution. A graveyard source must declare that watch zone explicitly.
+
+Class levels are physical designations, retained through type and ability
+changes and cleared on a zone change. Missing levels read as 1 for permanents
+(716.2d); copies receive no level. Class abilities are derived from the level,
+and the newly granted watch can see the change that granted it. Level counters
+do not change this designation.

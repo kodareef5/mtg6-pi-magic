@@ -19,7 +19,7 @@ import type { Step } from "./steps.ts";
 import { physicalHistory, type PhysicalEvent } from "./physical-history.ts";
 
 export type Seen = Pick<Thing, "id" | "incarnation" | "zone" | "owner" | "controller" | "tapped" | "faceDown" | "counters" | "damage"> &
-	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "copy" | "spellCopy" | "copied" | "emblem" | "choices" | "registrations" | "lookedBy">> & { card?: string };
+	Partial<Pick<Thing, "attached" | "token" | "ability" | "position" | "entered" | "face" | "doors" | "transformed" | "prepared" | "designations" | "level" | "copy" | "spellCopy" | "copied" | "emblem" | "choices" | "registrations" | "lookedBy">> & { card?: string };
 /** Something that happened this turn that cards count. All of it is public. */
 export type Happened =
 	| PhysicalEvent
@@ -270,6 +270,7 @@ export function matches(scope: Scope, object: Seen, selector: Selector, read = t
 			(range.parity === undefined || Number.isInteger(value) && (parity === "even" ? value % 2 === 0 : parity === "odd" && Math.abs(value % 2) === 1));
 	};
 	if (!within(traits.power, selector.power) || !within(traits.toughness, selector.toughness) || !within(traits.manaValue, selector.manaValue)) return false;
+	if (!within(object.zone === "battlefield" ? object.level ?? 1 : undefined, selector.level)) return false;
 	if (selector.tapped !== undefined && selector.tapped !== object.tapped) return false;
 	if (selector.designations && !selector.designations.every(one => object.designations?.includes(one))) return false;
 	if (selector.token !== undefined && selector.token !== !!object.token) return false;

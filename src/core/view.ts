@@ -104,6 +104,7 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 			!permanent.faceDown && permanent.doors ? `unlocked doors: ${permanent.doors.join(", ") || "none"}` : null,
 			!permanent.faceDown && permanent.prepared ? "prepared" : null,
 			...(permanent.designations ?? []),
+			permanent.level !== undefined || characteristics(table, permanent)?.subtypes.includes("Class") ? `level ${permanent.level ?? 1}` : null,
 			...(!permanent.faceDown ? Object.entries(permanent.choices ?? {}).map(([key, value]) => `${key}: ${value}`) : []),
 			permanent.tapped ? "tapped" : null,
 			permanent.damage ? `${permanent.damage} damage marked` : null,
@@ -404,7 +405,10 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				parts.push(`${change.prepared ? "prepared" : "unprepared"} ${publicName(receipt.before[change.what])}`);
 				break;
 			case "designate":
-				if (receipt.after[change.what]?.designations?.includes(change.designation) && !receipt.before[change.what]?.designations?.includes(change.designation))
+				if (typeof change.designation === "object") {
+					if (receipt.after[change.what]?.level !== receipt.before[change.what]?.level)
+						parts.push(`designated ${publicName(receipt.before[change.what])} as level ${change.designation.level}`);
+				} else if (receipt.after[change.what]?.designations?.includes(change.designation) && !receipt.before[change.what]?.designations?.includes(change.designation))
 					parts.push(`designated ${publicName(receipt.before[change.what])} as ${change.designation}`);
 				break;
 			case "door":

@@ -110,7 +110,7 @@ export type Change =
 	| { do: "transform"; what: string; since?: number }
 	| { do: "door"; what: string; face: 0 | 1; unlocked: boolean }
 	| { do: "prepare"; what: string; prepared: boolean }
-	| { do: "designate"; what: string; designation: Designation }
+	| { do: "designate"; what: string; designation: Designation | { level: number } }
 	| { do: "increase-speed"; who: SeatId; amount: number }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }

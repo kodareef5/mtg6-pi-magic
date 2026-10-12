@@ -166,6 +166,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			throw new Error("An emblem needs a new object identity.");
 		if (change.do === "copy-spell" && (table.things.has(change.id) || changes.some((one, at) => at !== index && one.do === "copy-spell" && one.id === change.id)))
 			throw new Error("A spell copy needs a new object identity.");
+		if (change.do === "designate" && typeof change.designation === "object" && (!Number.isSafeInteger(change.designation.level) || change.designation.level < 1))
+			throw new Error("A level designation must be a positive integer.");
 		if (change.do === "sample" && (!table.resolution || !Number.isSafeInteger(change.count) || change.count < 0 ||
 			new Set(change.cards.map(one => one.id)).size !== change.cards.length || change.cards.some(one => table.things.get(one.id)?.incarnation !== one.incarnation)))
 			throw new Error("Random selection needs distinct current objects and a nonnegative count during resolution.");
@@ -306,7 +308,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				delete moving.face; delete moving.doors;
 				delete moving.transformed;
 				delete moving.prepared;
-				delete moving.designations;
+				delete moving.designations; delete moving.level;
 				delete moving.choices;
 				if (moving.spellCopy && from === "stack" && change.to === "battlefield" && change.reason === "resolve") {
 					moving.token = structuredClone(moving.copied!.spec); delete moving.spellCopy;
@@ -364,8 +366,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				break;
 			case "designate": {
 				const object = thing(table, change.what);
-				if (object.zone === "battlefield" && !object.designations?.includes(change.designation))
-					object.designations = [...(object.designations ?? []), change.designation];
+				if (object.zone !== "battlefield") break;
+				if (typeof change.designation === "object") object.level = change.designation.level;
+				else if (!object.designations?.includes(change.designation)) object.designations = [...(object.designations ?? []), change.designation];
 				break;
 			}
 			case "door": {

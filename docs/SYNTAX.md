@@ -960,3 +960,10 @@ search. Use a following move for a simultaneous random discard. Hidden
 identity predicates still require earned knowledge; anonymous scoped sampling
 does not grant a look. Random selection has a fixed count and cannot combine
 with `upTo` or `reveal`. See [random selections](examples/random-selection.md).
+
+A `designate` instruction can set `designation: {"level": 2}` on a current
+permanent. The `level` selector range reads that physical designation, defaulting
+to 1, independently of counters. `on: "level"` with `level: 3` watches a change
+to exactly level 3. Class bars use sorcery activations with a preceding-level
+condition and continuous grants at or above the stated level. See
+[Class levels](examples/class-levels.md); level-up counters are separate.
