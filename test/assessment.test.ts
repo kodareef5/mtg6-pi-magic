@@ -126,6 +126,12 @@ test("assessment covers the whole card before play, and accepted terms supply en
 	if (restricted.registers[0]!.kind !== "mana") assert.fail();
 	restricted.registers[0]!.spendOnly!.zones = ["stack"];
 	assert.deepEqual(registrationProblems([restricted]), [], "the interpreter checks explicit scope, not the meaning of card prose");
+	const maximum = "Max speed — {T}: Add {R}{R}.";
+	assert.ok(universe.cards.get("Endrider Catalyzer")!.oracle.includes(maximum));
+	assert.deepEqual(registrationProblems([{ card: "Endrider Catalyzer", registers: [{ kind: "continuous", basis: maximum,
+		affects: { is: "this" }, if: { amount: { speed: "you" }, atLeast: 4 }, change: { registers: [
+			{ kind: "mana", basis: maximum, cost: { tap: true }, colors: ["R", "R"] },
+		] } }] }]), [], "granting a paid mana ability conditionally does not grant its output for free");
 	const role: Package = { card: "Besotted Knight // Betroth the Beast", registers: [], procedures: [{
 		...normal("Besotted Knight // Betroth the Beast", universe.cards.get("Besotted Knight // Betroth the Beast")!.oracle),
 		instructions: [{ do: "perform", who: "you", instructions: [{ do: "token", count: 1, spec: { name: "Royal", types: ["enchantment"], subtypes: ["Aura", "Role"], colors: [] } }] }],
