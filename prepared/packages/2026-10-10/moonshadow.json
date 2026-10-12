@@ -8,10 +8,14 @@
 		"card": "Moonshadow",
 		"registers": [
 			{
-				"basis": "Menace",
 				"kind": "continuous",
+				"basis": "Menace",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
 				},
 				"change": {
 					"words": [
@@ -20,15 +24,15 @@
 				}
 			},
 			{
-				"basis": "This creature enters with six -1/-1 counters on it.",
 				"kind": "enters",
+				"basis": "This creature enters with six -1/-1 counters on it.",
 				"counters": {
 					"-1/-1": 6
 				}
 			},
 			{
-				"basis": "Whenever one or more permanent cards are put into your graveyard from anywhere while this creature has a -1/-1 counter on it, remove a -1/-1 counter from this creature.",
 				"kind": "watch",
+				"basis": "Whenever one or more permanent cards are put into your graveyard from anywhere while this creature has a -1/-1 counter on it, remove a -1/-1 counter from this creature.",
 				"event": {
 					"on": "enters",
 					"to": [
@@ -51,7 +55,7 @@
 					},
 					"batch": true
 				},
-				"if": {
+				"triggerIf": {
 					"amount": {
 						"counters": "-1/-1",
 						"on": "this"
@@ -72,7 +76,6 @@
 		],
 		"procedures": [],
 		"assessed": true,
-		"printedCast": true,
-		"deferred": []
+		"printedCast": true
 	}
 }

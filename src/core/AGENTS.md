@@ -281,3 +281,9 @@ fallback, which is a game that cannot be forked or frozen as a fixture.
 
 If a decision depends on something not in the table, a snapshot taken at that
 decision cannot rebuild it, and both replay and testing are gone.
+
+Graveyard entry watches read the post-event world, even for a battlefield
+departure. Graveyard departure watches look back under 603.10a. Unqualified
+enters/leaves events retain their battlefield meaning. A triggerIf condition
+is tested only when raising the trigger; an intervening if is tested again
+on resolution. A graveyard source must declare that watch zone explicitly.

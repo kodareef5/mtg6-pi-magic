@@ -8,22 +8,27 @@
 		"card": "Bloodghast",
 		"registers": [
 			{
+				"kind": "prohibit",
 				"basis": "This creature can't block.",
-				"kind": "continuous",
-				"affects": {
-					"is": "this"
-				},
-				"change": {
-					"words": [
-						"can't block"
-					]
+				"block": {
+					"attacker": {
+						"types": [
+							"creature"
+						]
+					},
+					"blocker": {
+						"is": "this"
+					}
 				}
 			},
 			{
-				"basis": "This creature has haste as long as an opponent has 10 or less life.",
 				"kind": "continuous",
+				"basis": "This creature has haste as long as an opponent has 10 or less life.",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"battlefield"
+					]
 				},
 				"if": {
 					"amount": {
@@ -38,23 +43,21 @@
 				}
 			},
 			{
-				"basis": "Landfall — Whenever a land you control enters, you may return this card from your graveyard to the battlefield.",
 				"kind": "watch",
+				"basis": "Landfall — Whenever a land you control enters, you may return this card from your graveyard to the battlefield.",
+				"zones": [
+					"graveyard"
+				],
 				"event": {
 					"on": "enters",
 					"of": {
+						"zones": [
+							"battlefield"
+						],
 						"types": [
 							"land"
 						],
 						"controller": "you"
-					}
-				},
-				"if": {
-					"is": "this",
-					"matches": {
-						"zones": [
-							"graveyard"
-						]
 					}
 				},
 				"effect": {

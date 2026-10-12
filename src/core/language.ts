@@ -376,8 +376,9 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** Extra instances of abilities the matching permanent has, never delayed or reflexive triggers (603.2d). */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("trigger-rule"), affects: Type.Ref("Selector"), additional: positive }),
-		/** A triggered ability. `if` is its intervening if (603.4). */
+		/** A triggered ability. `triggerIf` is checked only on the event; `if` is its intervening if (603.4). */
 		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("watch"), zones: Type.Optional(Type.Array(one("battlefield", "graveyard", "stack", "exile", "command"), { minItems: 1, uniqueItems: true })), event: Type.Ref("Event"), if: Type.Optional(Type.Ref("Condition")), effect: Type.Ref("TriggerEffect"),
+			triggerIf: Type.Optional(Type.Ref("Condition")),
 			may: Type.Optional(Type.Literal(true)), limit: Type.Optional(Type.Union([Type.Literal("once-per-turn"), Type.Literal("once-per-turn-use")])) },
 			{ additionalProperties: false, if: { properties: { limit: { const: "once-per-turn-use" } }, required: ["limit"] }, then: { required: ["may"] } }),
 		/** A static ability. Applies while `if` holds, to whatever matches `affects` at each reading. */

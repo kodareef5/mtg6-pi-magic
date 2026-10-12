@@ -8,10 +8,14 @@
 		"card": "Hardened Academic",
 		"registers": [
 			{
-				"basis": "Flying, haste",
 				"kind": "continuous",
+				"basis": "Flying, haste",
 				"affects": {
-					"is": "this"
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
 				},
 				"change": {
 					"words": [
@@ -21,8 +25,8 @@
 				}
 			},
 			{
-				"basis": "Whenever one or more cards leave your graveyard, put a +1/+1 counter on target creature you control.",
 				"kind": "watch",
+				"basis": "Whenever one or more cards leave your graveyard, put a +1/+1 counter on target creature you control.",
 				"event": {
 					"on": "leaves",
 					"from": [
@@ -62,13 +66,8 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Discard a card to gain lifelink until end of turn",
-				"basis": "Discard a card: This creature gains lifelink until end of turn.",
 				"source": {
 					"card": "Hardened Academic",
 					"zones": [
@@ -76,8 +75,27 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"claim": "Discard a card to gain lifelink",
+				"basis": "Discard a card: This creature gains lifelink until end of turn.",
+				"timing": "stack",
+				"cost": {
+					"discard": 1
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"change": {
+							"words": [
+								"lifelink"
+							]
+						},
+						"until": "end-of-turn"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": true
 	}
 }

@@ -938,3 +938,11 @@ Unlike sacrifice watches, they read the post-event world. Cleanup collects its
 choices privately and discards the whole group before end-of-turn expiry.
 See [discard events](examples/discard-events.md) for cycling and visibility
 limits; counting a discard does not certify its legality.
+
+An explicit `enters` event with `to: ["graveyard"]` reads arrivals from
+anywhere after the event. A `leaves` event with `from: ["graveyard"]` reads
+the departing cards and watches before the event. Unqualified forms retain
+their battlefield meaning. A watch's `triggerIf` gates triggering only;
+its `if` is still checked again on resolution. See
+[graveyard events](examples/graveyard-events.md) for the visibility limits and
+Bloodghast's explicit graveyard watch.

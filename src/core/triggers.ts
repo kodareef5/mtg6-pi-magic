@@ -6,8 +6,8 @@
  * triggers on the stack one at a time and chooses their targets.
  *
  * Detection is part of `commit`, so it replays with the group that caused it.
- * Leaves-the-battlefield watches look back to the moment before the group
- * (603.10a); every other watch reads the table after it (603.6).
+ * Battlefield and graveyard departures look back before the group (603.10a);
+ * graveyard arrivals from anywhere read after it (603.6c).
  * Past 150 lines to keep detection beside the trigger window that empties it.
  */
 import { targetChoiceKey } from "./targeting.ts";
@@ -17,7 +17,7 @@ import { aiming, summary, targetings } from "./announce.ts";
 import { damageSource, happened, holds, matches, players, tableWorld, targetKey, viewWorld, type Scope, type Seen, type World } from "./selectors.ts";
 import { playing, type Ability, type Table, type Thing, type Trigger } from "./table.ts";
 import type { Pending, Move } from "./moves.ts";
-import type { GameEvent, Registration } from "./language.ts";
+import type { Condition, GameEvent, Registration } from "./language.ts";
 import type { Change, Zone } from "./syntax.ts";
 import type { Frame, ObjectRef, SeatId } from "./types.ts";
 import type { Step } from "./steps.ts";
@@ -64,21 +64,21 @@ const PUBLIC = new Set<Zone>(["battlefield", "graveyard", "stack", "exile", "com
 
 /**
  * The table as it stood before a group: what a leaves-the-battlefield watch
- * reads. Taken only when a group moves something off the battlefield.
+ * reads. Graveyard departures also look back (603.10a).
  */
 export function before(table: Table, changes: Change[]): World | undefined {
-	if (!changes.some((change) => change.do === "move" && table.things.get(change.what)?.zone === "battlefield" && change.to !== "battlefield")) return undefined;
+	if (!changes.some((change) => change.do === "move" && ["battlefield", "graveyard"].includes(table.things.get(change.what)?.zone ?? "") && change.to !== table.things.get(change.what)?.zone)) return undefined;
 	const traits = walk(table), objects = [...table.things.values()].map((one) => ({ ...one, counters: { ...one.counters } }));
 	const world = tableWorld(table), history = world.history;
 	return {
-		objects, read: (object) => object.zone === "battlefield" ? traits.get(object.id) : world.read(object),
+		objects, read: (object) => ["battlefield", "graveyard"].includes(object.zone) ? traits.get(object.id) : world.read(object),
 		players: world.players.map((one) => ({ ...one })), notes: [...table.notes], combat: structuredClone(table.combat), history, ...(world.turn ? { turn: world.turn } : {}),
 		lastKnown: (wanted) => { if (!wanted) return undefined; const object = objects.find((one) => one.id === wanted.id && one.incarnation === wanted.incarnation); return object ? { object, traits: traits.get(object.id) } : undefined; },
 	};
 }
 
 /** What one group did that a watch can see. */
-function occurrences(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }, read: World["read"]): Occurrence[] {
+function occurrences(table: Table, changes: Change[], receipt: { before: Record<string, Thing>; known: Record<string, Traits> }, read: World["read"], prior?: World): Occurrence[] {
 	const found: Occurrence[] = [];
 	const castCounts = new Map<SeatId, number>();
 	const castOrdinal = (who: SeatId) => {
@@ -106,6 +106,10 @@ function occurrences(table: Table, changes: Change[], receipt: { before: Record<
 			case "move": {
 				const was = receipt.before[change.what], is = now(change.what);
 				if (!was || !is || was.incarnation === is.incarnation) break;
+				// From-anywhere graveyard entry reads the new card and watches after the event (603.6c).
+				if (is.zone === "graveyard") found.push({ on: "enters", object: is, traits: read(is), found: ref(is), from: was.zone, to: is.zone });
+				if (was.zone === "graveyard" && is.zone !== "graveyard") found.push({ on: "leaves", object: was, traits: prior?.read(was),
+					found: PUBLIC.has(is.zone) && !is.faceDown ? ref(is) : ref(was), from: was.zone, to: is.zone, lookBack: true });
 				// 701.9, 603.10: discards use the owner's hand and the post-event world, even with replacement exile.
 				if (was.zone === "hand" && was.card && !was.token && !was.copy && ["discard", "cleanup-discard"].includes(change.reason)) {
 					const visible = PUBLIC.has(is.zone) && !is.faceDown;
@@ -209,6 +213,9 @@ const eventPlayer = (one: Occurrence) => ["keyword", "life-gained", "sacrificed"
 /** Whether an occurrence is the event a registration names, read from the watcher's side. */
 function fits(scope: Scope, event: GameEvent, occurrence: Occurrence): Occurrence | null {
 	if (event.on !== occurrence.on) return null;
+	// Unqualified enters/leaves retains its battlefield meaning. Graveyard watches name their zone explicitly.
+	if (event.on === "enters" && !(event.to ?? ["battlefield"]).includes(occurrence.to as never) ||
+		event.on === "leaves" && !(event.from ?? ["battlefield"]).includes(occurrence.from as never)) return null;
 	if (event.keyword !== undefined && event.keyword !== occurrence.keyword) return null;
 	if (event.ordinal !== undefined && event.ordinal !== occurrence.ordinal) return null;
 	if (event.counter !== undefined && event.counter !== occurrence.counter) return null;
@@ -310,6 +317,7 @@ export function activeWatches(frame: Frame) {
 		...(registration.event.of ? { matchingNow: world.objects.filter((candidate) => matches({ world, controller, source: object }, candidate, registration.event.of!))
 			.map((candidate) => ({ ...ref(candidate), name: candidate.card ?? candidate.token?.name ?? "unknown" })) } : {}),
 		...(registration.if ? { if: structuredClone(registration.if) } : {}),
+		...(registration.triggerIf ? { triggerIf: structuredClone(registration.triggerIf) } : {}),
 	}] : []);
 }
 
@@ -323,7 +331,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 	const pending = { ...receipt, changes, get after() { return current ??= Object.fromEntries(table.things); } };
 	let traits: Map<string, Traits> | undefined;
 	const read: World["read"] = object => (traits ??= walk(table, undefined, pending)).get(object.id);
-	const happened = occurrences(table, changes, receipt, read);
+	const happened = occurrences(table, changes, receipt, read, prior);
 	happened.push(...receipt.lifeGains.map(({ who, amount }): Occurrence => ({ on: "life-gained", player: who, amount })));
 	const speed = speedTrigger(table, changes);
 	if (!happened.length && !speed) return { waiting: [], spent: [] };
@@ -338,7 +346,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 	const waiting: Trigger[] = [], spent: string[] = [];
 	const stamp = () => `trigger-${table.cursor.clock + 1}-${waiting.length}`;
 
-	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x" | "transformAt">, once = false, additional = 0): boolean => {
+	const raise = (scope: Scope, controller: SeatId, source: ObjectRef, basis: string, event: GameEvent, rest: Pick<Trigger, "effect" | "check" | "may" | "limit" | "bound" | "targets" | "x" | "transformAt">, once = false, additional = 0, triggerIf?: Condition): boolean => {
 		const matched = live.filter((occurrence) => !!occurrence.lookBack === (scope.world !== after)).flatMap((occurrence) => fits(scope, event, occurrence) ?? []);
 		if (!matched.length) return false;
 		// Each occurrence is its own trigger (603.2c), unless the card says "one or more"; a once-only delayed trigger fires for the first alone (603.7b).
@@ -348,6 +356,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 				...(made.event.source && group[0]!.source ? { source: group[0]!.source } : {}), ...(made.event.recipient && group[0]!.recipient ? { recipient: group[0]!.recipient } : {}),
 				...(made.event.amount !== undefined ? { amount: made.event.amount } : {}) } };
 			if (made.check && !holds(eventScope, made.check)) continue;
+			if (triggerIf && !holds(eventScope, triggerIf)) continue;
 			if (made.limit === "once-per-turn" && triggeredThisTurn(table, source, basis, waiting)) continue;
 			if (made.limit === "once-per-turn-use" && usedThisTurn(table, source, basis, controller)) continue;
 			waiting.push(made);
@@ -364,7 +373,7 @@ export function detect(table: Table, changes: Change[], receipt: { before: Recor
 		if (registration.kind !== "watch") continue;
 		raise(scopeOf(watch), watch.controller, ref(watch.object), registration.basis, registration.event, {
 			effect: registration.effect, ...(registration.if ? { check: registration.if } : {}), ...(registration.may ? { may: true } : {}),
-			...(registration.limit ? { limit: registration.limit } : {}) }, false, additionalTriggers(watch.world, watch.object));
+			...(registration.limit ? { limit: registration.limit } : {}) }, false, additionalTriggers(watch.world, watch.object), registration.triggerIf);
 	}
 	// Delayed triggers belong to the table and fire even after their source is gone (603.7c).
 	for (const world of prior ? [prior, after] : [after]) {

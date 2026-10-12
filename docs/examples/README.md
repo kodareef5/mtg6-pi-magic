@@ -74,6 +74,7 @@ schemas, and every `basis` is checked against the card's text.
 | `life-gain.md` | life-gain occurrences, lifelink source grouping, Starscape offspring and Amalia's explore instructions |
 | `sacrifice-events.md` | pre-departure sacrifice watches, turn counts, and Jund's Lander, Clue and Treasure interactions |
 | `discard-events.md` | discard counts, cycling, hidden destinations and simultaneous cleanup selection |
+| `graveyard-events.md` | graveyard entry versus look-back departure, grouped movements, and trigger-time conditions |
 | `activation-costs.md` | source-selected generic activation discounts and Mutagen Man's complete Mutagen tokens |
 | `simultaneous-choices.md` | recorded private discards, sacrifices and life-loss choices before one simultaneous group; Rottenmouth Viper |
 | `healing-damage.md` | Wolverine's damage replacement, earlier marked damage, simultaneous sources and prevention order |
