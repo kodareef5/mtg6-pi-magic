@@ -386,6 +386,7 @@ checked by the table; the opponent sees both, and objects when they differ.
 | `watch` | a triggered ability: an event, an intervening `if`, an effect, `may`, `limit` | 603 |
 | `continuous` | a static ability: what it affects, the change, an `if` | 604, 611.3 |
 | `cost` | a standing generic reduction: `action` defaults to `cast`, where `cast` selects the proposed stack spell; `action: "plot"` selects the hand card. Positive `reduce` gives the discount, optional `from` limits its original zone, and `if` tests the source's condition | 118.7a, 118.9d, 601.2f, 702.170 |
+| `cost` with `activate` | selects an activated ability's source before payment; positive `reduce` discounts generic mana only, and optional `if` reads the reducing source's condition. See [activation costs](examples/activation-costs.md) | 118.7a, 602.2b |
 | `enters` | how a permanent enters: tapped, with counters, under a condition; with `affects`, how others enter; `unlessPay: {life}` or `{show: {choose, count}}` asks the controller to pay or decline; `copy: {of, may?, add?}` chooses a battlefield copy source for this permanent before entry, with additive creature types and abilities | 614.1c-d, 707.5 |
 | `replace` | "if it would die, exile it instead" | 614 |
 | `mana` | a mana ability, used while paying; `if` holds a condition the ability needs, as a Verge's "Activate only if you control an Island or a Swamp" | 605, 601.2g |

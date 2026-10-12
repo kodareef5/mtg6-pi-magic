@@ -1,0 +1,125 @@
+{
+	"card": "Mutagen Man, Living Ooze",
+	"generated": "2026-10-10",
+	"source": "4143963748311b9b213676e03c6466991fe4f4bfdd0e909d190f66e068ad4c2f",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Mutagen Man, Living Ooze",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Trample",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"trample"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Activated abilities of artifact tokens you control cost {1} less to activate.",
+				"activate": {
+					"zones": [
+						"battlefield"
+					],
+					"types": [
+						"artifact"
+					],
+					"token": true,
+					"controller": "you"
+				},
+				"reduce": 1
+			},
+			{
+				"kind": "watch",
+				"basis": "When Mutagen Man enters, create X Mutagen tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "token",
+							"count": {
+								"x": true
+							},
+							"spec": {
+								"name": "Mutagen",
+								"types": [
+									"artifact"
+								],
+								"subtypes": [
+									"Mutagen"
+								],
+								"colors": [],
+								"registers": [
+									{
+										"kind": "activated",
+										"basis": "{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.",
+										"speed": "sorcery",
+										"cost": {
+											"mana": "{1}",
+											"tap": true,
+											"sacrifice": "this"
+										},
+										"effect": {
+											"targets": [
+												{
+													"object": {
+														"zones": [
+															"battlefield"
+														],
+														"types": [
+															"creature"
+														]
+													}
+												}
+											],
+											"instructions": [
+												{
+													"do": "counters",
+													"on": "target:0",
+													"kind": "+1/+1",
+													"amount": 1
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Mutagen Man with chosen X",
+				"basis": "When Mutagen Man enters, create X Mutagen tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Put a +1/+1 counter on target creature. Activate only as a sorcery.\")",
+				"source": {
+					"card": "Mutagen Man, Living Ooze",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

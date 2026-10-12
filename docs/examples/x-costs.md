@@ -16,8 +16,10 @@ reads it. A permanent cast with X remembers it, so its enters trigger can use it
 }
 ```
 
-Casting it needs no procedure: the table offers the ordinary cast for the printed
-`{X}{R}`, and the cast menu asks for X.
+An assessed deck identifies the X cast as a deferred use or supplies its casting
+procedure. The announcement asks for X and pays the printed `{X}{R}`; the entry
+trigger reads that chosen value. [Mutagen Man](activation-costs.md) shows a
+complete permanent cast with X.
 
 ## An X that is counted
 

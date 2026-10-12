@@ -38,7 +38,7 @@ import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { manaSurvives, manaDuration } from "./table.ts";
-import { costAdjustment, hasLifeCosts } from "./casting-costs.ts";
+import { costAction, costAdjustment, hasLifeCosts, type CostAction } from "./casting-costs.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; prices?: Price[]; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
 
@@ -50,9 +50,9 @@ function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: strin
 	return prices.length === 1 ? permissionMana(prices[0]!.mana, printed) ?? stated ?? printed : undefined;
 }
 
-const reduction = (frame: Frame, source: SeenObject, action: "cast" | "plot" = "cast") => costAdjustment(viewWorld(frame.view),
-	{ ...source, controller: frame.seat, zone: action === "cast" ? "stack" : "hand" }, source.zone, action);
-const reduced = (frame: Frame, source: SeenObject, price: Price, action: "cast" | "plot" = "cast"): Price => ({ ...price, generic: Math.max(0, price.generic - reduction(frame, source, action)) });
+const reduction = (frame: Frame, source: SeenObject, action: CostAction = "cast") => costAdjustment(viewWorld(frame.view),
+	{ ...source, controller: frame.seat, zone: action === "cast" ? "stack" : source.zone }, source.zone, action);
+const reduced = (frame: Frame, source: SeenObject, price: Price, action: CostAction = "cast"): Price => ({ ...price, generic: Math.max(0, price.generic - reduction(frame, source, action)) });
 
 /** Resource forecast only: normal untap, retained permanents and traits, no predicted draw or effects. */
 export function afterUntap(frame: Frame): Frame {
@@ -79,7 +79,7 @@ export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObjec
 		return { scope: "Not priced: unavailable or multiple casting prices, variable mana or additional costs require the offered payment." };
 	const reserved = new Set(cost?.tap === true ? [source.id] : []);
 	const spending = procedure.timing === "spell" ? { ...source, controller: frame.seat, zone: "stack" as const, ...(selected ? { traits: spellCharacteristics(frame.view, source, frame.seat, procedure.face, 0, procedure.words) } : {}) } : source;
-	const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
+	const action = costAction(procedure);
 	const prices = (position: Frame) => mana.map(one => action ? reduced(position, { ...spending, zone: source.zone }, one, action) : one);
 	const possible = (position: Frame) => prices(position).some(price => payable(position, price, reserved, spending, procedure.timing === "spell" ? source.zone : undefined));
 	const world = viewWorld(frame.view), turn = frame.view.window.kind === "turn" ? frame.view.window.turn : 0;
@@ -207,7 +207,8 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const mana = stated ? manaChoices(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
 			const variable = !mana || mana.some(one => one.x > 0) || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
 			const unknown = variable || procedure.timing === "special" || procedure.timing === "spell" && hasLifeCosts(viewWorld(hypothetical.view)) || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional", "alternative"].includes(key));
-			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { prices: mana.map(one => (procedure.timing === "spell" || procedure.special === "plot") && source ? reduced(hypothetical, source, one, procedure.special === "plot" ? "plot" : "cast") : { generic: one.generic, colors: one.colors }) } : {}),
+			const pricing = costAction(procedure);
+			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { prices: mana.map(one => pricing && source ? reduced(hypothetical, source, one, pricing) : { generic: one.generic, colors: one.colors }) } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(tapsSource(procedure.cost) ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
 		}
@@ -229,8 +230,9 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const { generic, colors, ...extra } = offered.use.cost;
 			// An exact pick quotes today's locked cost. A changed standing discount
 			// needs a fresh offer; adding back a capped discount cannot recover its base.
-			if (timing === "spell" && source && reduction(frame, source) !== reduction(hypothetical, source))
-				return { kind, source, unknown: true, spell: true };
+			const pricing = costAction(offered.use);
+			if (pricing && source && reduction(frame, source, pricing) !== reduction(hypothetical, source, pricing))
+				return { kind, source, unknown: true, ...(timing === "spell" ? { spell: true } : {}) };
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
 			const additional = timing === "special" || timing === "spell" && hasLifeCosts(viewWorld(hypothetical.view)) || !!offered.use.exileSelection || Object.keys(extra).some((key) => !["tap", "alternative"].includes(key));

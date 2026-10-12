@@ -22,7 +22,7 @@ import type { Instruction, Procedure } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
-import { maximumSpellReduction, costAdjustment, hasLifeCosts } from "./casting-costs.ts";
+import { maximumReduction, costAction, costAdjustment, hasLifeCosts } from "./casting-costs.ts";
 import type { Activation, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -268,7 +268,7 @@ export function* offerBases(procedure: Procedure, frame: Frame, prefix: string) 
 				const tapReduction = typeof procedure.cost?.tap === "object" && procedure.cost.tap.reduce ? (frame.view.objects ?? [])
 					.filter((one) => one.zone === "battlefield" && one.controller === frame.seat && !one.tapped).reduce((sum, one) => sum + Math.max(0, one.traits?.power ?? 0), 0) : 0;
 				// X runs to what this seat could make plus what is reduced; funding decides which X it can pay.
-				const standingBound = procedure.timing === "spell" ? maximumSpellReduction(world) : 0;
+				const action = costAction(procedure), standingBound = action ? maximumReduction(world, action) : 0;
 				const xs = mana.x ? Array.from({ length: Math.max(0, capacity(frame) + reduce + tapReduction + standingBound - mana.colors.length) + 1 }, (_, at) => at) : [0];
 				// A spell or ability goes on top of whatever waits on the stack, and so resolves before it.
 				const stacked = (frame.view.objects ?? []).filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
@@ -294,7 +294,7 @@ export type OfferBase = ReturnType<typeof offerBases> extends Generator<infer Ba
 /** Extra resources and the locked mana price share one calculation in both menus. */
 export function offerCosts(base: OfferBase, frame: Frame) {
 	const { procedure, scope, source, reduce, world, spending, original, mana, x } = base;
-	const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
+	const action = costAction(procedure);
 	// A proposed spell already has its selected targets at 601.2f. This preview
 	// supplies targeting facts only; its unpaid placeholder cost is never recorded.
 	const proposed = { ...spending, ability: { source: base.sourceRef, controller: frame.seat, claim: procedure.claim, basis: procedure.basis,

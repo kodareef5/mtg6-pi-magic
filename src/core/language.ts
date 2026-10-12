@@ -355,6 +355,8 @@ export const Defs = {
 		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), cast: Type.Ref("Selector"), reduce: Type.Optional(positive), life: Type.Optional(positive), action: Type.Optional(one("cast", "plot")),
 			from: Type.Optional(Type.Array(Zone, { minItems: 1, uniqueItems: true })), if: Type.Optional(Type.Ref("Condition")) },
 			{ additionalProperties: false, anyOf: [{ required: ["reduce"] }, { required: ["life"] }] }),
+		/** Activation discounts select the ability's source in its original zone (602.2b). */
+		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), activate: Type.Ref("Selector"), reduce: positive, if: Type.Optional(Type.Ref("Condition")) }),
 		/** A fixed increase to an entire draw instruction, before individual draws (121.2a). */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("draw-rule"), who: PlayerRef, additional: positive, if: Type.Optional(Type.Ref("Condition")) }),
 		/** Prevent matching damage, forbid prevention or add a fixed positive amount. */

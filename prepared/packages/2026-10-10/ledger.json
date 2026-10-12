@@ -103,14 +103,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Mutagen Man, Living Ooze": {
-		"reason": "Mutagen Man, Living Ooze is not ready: \"Activated abilities of artifact tokens you control cost {1} less to activate.\" — Standing generic activation-cost reductions are unsupported; a spell-cost registration cannot express this ability.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Nowhere to Run": {
 		"reason": "Nowhere to Run is not ready: Creatures your opponents control can be the targets of spells and abilities as though they didn't have hexproof. Ward abilities of those creatures don't trigger. — The syntax cannot selectively disregard hexproof for targeting while leaving that ability intact, or suppress only ward abilities of the affected creatures. A targeted-event suppression would also suppress unrelated targeting triggers and is not equivalent.",
 		"decks": [
