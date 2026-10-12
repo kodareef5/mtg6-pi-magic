@@ -7,7 +7,7 @@ import { deck } from "../src/core/decks.ts";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { card, copiesAllowed, load } from "../src/core/cards.ts";
+import { card, canonicalName, copiesAllowed, load } from "../src/core/cards.ts";
 import { standard } from "../src/core/format.ts";
 import { basePT, intrinsicMana, manaCost, permanentSpell, printedFacts } from "../src/core/printed.ts";
 import { commit, start } from "../src/core/commit.ts";
@@ -38,6 +38,11 @@ test("a card legal in an older format is absent, not marked", () => {
 
 test("every kept deck registers for Standard, and the matchup lists keep their sideboards", () => {
 	assert.equal(copiesAllowed(universe, "Forest", standard), Infinity);
+	for (const [published, canonical] of [["Dain's Company", "Dáin's Company"], ["Kili the Resourceful", "Kíli the Resourceful"], ["Fili the Pathfinder", "Fíli the Pathfinder"]]) assert.equal(canonicalName(universe, published!), canonical);
+	assert.equal(canonicalName(universe, "Kili the Resorceful"), undefined, "no fuzzy spelling correction");
+	const ambiguous = { ...universe, cards: new Map([...universe.cards, ["Kìli the Resourceful", universe.cards.get("Kíli the Resourceful")!]]) };
+	assert.equal(canonicalName(ambiguous, "Kili the Resourceful"), undefined);
+	assert.equal(canonicalName(ambiguous, "Kíli the Resourceful"), "Kíli the Resourceful", "exact names retain priority");
 	assert.equal(matchup.legalityDate, universe.generated);
 	for (const kept of collection().values()) assert.deepEqual(problems(universe, kept, standard), [], `${kept.name} registers`);
 	assert.deepEqual(decks.map((one) => [listed(one.main).length, listed(one.sideboard).length]), [[60, 15], [60, 15]]);

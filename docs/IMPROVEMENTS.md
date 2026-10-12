@@ -74,7 +74,10 @@ gaps, rulings and replay checks. [Status](STATUS.md) holds the current evidence.
    mtgdecks.net and MTGGoldfish, one representative list each, about twenty.
    Cards refused as unsupported go on `cards/unsupported.txt` with the reason,
    and a refused deck is recorded, not dropped from the list of wanted decks.
-   Done: nineteen imported, Boros Dwarves refused on legality.
+   Twenty imported. Boros Dwarves previously failed name matching because the
+   export omitted three accents; all its cards are legal in the pinned file.
+   Its thirteen unassessed main-deck cards remain outside alpha admission.
+   [Standard coverage](COVERAGE.md) maps this work and the wider card pool.
 3. **Card interpretations once per card.** Packages are per card, not per deck
    or opponent. Seating loads the read-only seed under `prepared/packages/`
    and compatible overrides in Pi's `magic/packages/` cache. It assesses missing

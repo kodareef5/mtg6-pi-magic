@@ -132,7 +132,13 @@ export function canonicalName(universe: Universe, name: string): string | undefi
 	// Published lists write a two-faced name with "/" or "//" and no spaces; the legal set writes " // ".
 	const trimmed = name.trim().replace(/\s*\/\/?\s*/g, " // ");
 	if (universe.cards.has(trimmed)) return trimmed;
-	const fronts = [...universe.cards.keys()].filter((full) => full.includes(" // ") && full.split(" // ")[0]!.trim() === trimmed);
+	// Published exports omit accents (Dain/Kili/Fili). Only a unique folded name
+	// can resolve; this is not fuzzy spelling correction or a legality override.
+	const fold = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "");
+	const names = [...universe.cards.keys()];
+	const full = names.filter((name) => fold(name) === fold(trimmed));
+	if (full.length) return full.length === 1 ? full[0] : undefined;
+	const fronts = names.filter((name) => name.includes(" // ") && fold(name.split(" // ")[0]!.trim()) === fold(trimmed));
 	return fronts.length === 1 ? fronts[0] : undefined;
 }
 

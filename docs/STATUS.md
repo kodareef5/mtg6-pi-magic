@@ -1,9 +1,9 @@
 # Gameplay status
 
-The alpha covers the main decks of nineteen imported legal Standard lists.
+The alpha admits nineteen of twenty imported legal Standard main decks.
 Tournament files retain their sideboards; alpha journals register an empty
-sideboard explicitly. Boros Dwarves remains excluded because its list fails
-Standard legality. Every main-deck card still needs source-backed standing
+sideboard explicitly. Boros Dwarves now registers after fixing accent-free
+exported names; thirteen main-deck cards still need assessment. Every main-deck card still needs source-backed standing
 terms and a complete use inventory before setup.
 
 Jev pilots, Sol 6.1 high prepares briefs, and Haiku 5.5 medium writes strategy
@@ -12,18 +12,18 @@ measures whether ordinary games can execute their cards correctly.
 
 | Measure | Current evidence |
 | --- | --- |
-| Imported main decks admitted to setup | 19 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator, Dimir Midrange, Mono-Black Aggro, 4c Reanimator, Azorius Momo, Lifegain, Jund Sacrifice, Mardu Discard |
+| Imported main decks admitted to setup | 19 of 20: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess, Bant Airbending Combo, Jeskai Artifacts, Dimir Excruciator, Dimir Midrange, Mono-Black Aggro, 4c Reanimator, Azorius Momo, Lifegain, Jund Sacrifice, Mardu Discard |
 | Completed source-reviewed alpha games | 29, covering nine admitted decks; Bant, Jeskai, both Dimir lists, Mono-Black, Reanimator, Momo, Lifegain, Jund and Mardu await their first finishes |
 | Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Two saved continuations stopped on provider credits; corrected Sleight of Hand passed local replay and awaits a live continuation |
+| Current runtime work | CLI Haiku strategy works; Jev still receives OpenRouter HTTP 402. Jace interpretation also refused during a CLI probe; corrected Sleight awaits continuation |
 | Recent shared mechanics | Conditional native casting prices, required-attack warnings and physical Class levels |
-| Stored card assessments | 287 accepted, 21 sideboard-only refusals, five basic lands; no main-deck standing blockers |
-| Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |
-| Validation | Type check and 318 invariant tests pass |
+| Stored card assessments | 287 accepted, 21 sideboard-only refusals, five basic lands; thirteen unassessed main-deck cards in the newly imported Dwarves list |
+| Main-deck guides | Original 19 written; 57 provider calls, $0.8770 reported |
+| Validation | Type check and 319 invariant tests pass; fast and whole-game lanes |
 | Matchup brief reuse | A fresh reversed-seat game reused both cached briefs and made zero pregame calls; its first pairing made 15 |
 | Rejected evidence | Four Azorius finishes supplied both colors from Deserted Beach and are withdrawn. Four corrected Dragons continuations replace the excluded stun runs; earlier source failures remain excluded |
-| Bills | Reported costs omit calls whose provider supplied no cost; missing usage and cost counts accompany each result |
+| Bills | Missing usage and cost counts accompany each result. CLI costs are labelled list-price estimates, not subscription cash spend |
 
 Standing coverage admits setup; it does not prove that every deferred use or
 interaction works. A new runtime interpretation must fit its source, and a
@@ -39,3 +39,6 @@ Per-game seeds, journal paths, bills, continuations and review findings are in
 are retained under `design-ref/experiments/` and in Git history.
 [The next implementation chunk](IMPROVEMENTS.md#next-implementation-chunk)
 keeps observed game failures ahead of further breadth work.
+
+[Inference routes](INFERENCE.md) documents the explicit CLI option.
+[Standard coverage](COVERAGE.md) maps the remaining card and gameplay work.

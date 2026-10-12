@@ -92,3 +92,7 @@ markers are labelled as observations rather than exact boundaries. Supply
 `--trace path/to/game.calls.jsonl` if the trace moved. Older elapsed breakdowns
 that were never measured remain unknown. JSON includes model and role totals,
 call-purpose totals, and median and p95 request durations.
+
+Use [the Claude CLI route](docs/INFERENCE.md) for Haiku strategy and judge,
+[the test lanes](docs/TESTING.md) for local checks, and
+[the Standard coverage map](docs/COVERAGE.md) for the remaining work.
