@@ -219,6 +219,8 @@ export type Resolution = {
 	lost?: boolean;
 	/** Picks so far in the current instruction, including entering attackers' defenders. */
 	picked: Chosen[];
+	/** Choices gathered for one simultaneous instruction; hidden selected cards remain private until moved. */
+	actionChoices?: { count: number; players: SeatId[]; selected: { who: SeatId; action: number; on?: ObjectRef }[] };
 	/** The current selection has begun its whole-library search. */
 	searching?: true;
 	/** Libraries searched by this resolving effect since their last shuffle (701.23h). */

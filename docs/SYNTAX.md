@@ -224,6 +224,7 @@ what it did, for a later instruction), and `may` (its actor chooses whether).
 | `attach` | an Aura or Equipment to an object |
 | `counter` | a spell or ability, `unless` a player pays a cost; `to: "exile"` replaces the countered spell's graveyard destination; `as` binds only countered stack incarnations, with their count |
 | `each` | repeat for each player, with `bound:player` |
+| `choose-actions` | each player named by `who` chooses `count` actions, then all occur simultaneously; supports `sacrifice` with a selector, `discard: true`, and fixed positive `loseLife`. Selected resources cannot be reused; discards stay private until the final group. See [simultaneous choices](examples/simultaneous-choices.md) |
 
 Searching a library is `choose` from the library, then `move`, then `shuffle`.
 Name the library's owner or controller explicitly. Equipment validation refuses

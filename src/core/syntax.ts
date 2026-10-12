@@ -122,6 +122,7 @@ export type Change =
 	 * puts an `each` in its place; `follow` is the permanent a spell became.
 	 */
 	| { do: "resolution"; action: "next"; what: string; pick?: Chosen; bind?: Record<string, Bound>;
+		actionChoices?: Resolution["actionChoices"];
 		search?: { who: SeatId; whose: SeatId[] };
 		expand?: Resolution["program"]; follow?: ObjectRef; abort?: boolean; accept?: true;
 		/** Filled by commit after a counted ability completes, including an optional decline. */

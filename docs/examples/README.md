@@ -74,6 +74,7 @@ schemas, and every `basis` is checked against the card's text.
 | `life-gain.md` | life-gain occurrences, lifelink source grouping, Starscape offspring and Amalia's explore instructions |
 | `sacrifice-events.md` | pre-departure sacrifice watches, turn counts, and Jund's Lander, Clue and Treasure interactions |
 | `activation-costs.md` | source-selected generic activation discounts and Mutagen Man's complete Mutagen tokens |
+| `simultaneous-choices.md` | recorded private discards, sacrifices and life-loss choices before one simultaneous group; Rottenmouth Viper |
 | `emblems.md` | command-zone emblem objects, lasting characteristic effects and Ajani's loyalty abilities |
 | `animation.md` | crew, a land becoming a creature, layer 5 color changes, earthbend, changing creature types and granting a trigger |
 | `x-costs.md` | X in a cost, a permanent remembering X, counted X, `sum`, damage to each |

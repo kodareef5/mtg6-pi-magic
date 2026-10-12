@@ -1,0 +1,126 @@
+{
+	"card": "Rottenmouth Viper",
+	"generated": "2026-10-10",
+	"source": "28c374543d359548518fb5f3bf11da08a195df0328923367a758a6516e2b94bd",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Rottenmouth Viper",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature enters or attacks, put a blight counter on it. Then for each blight counter on it, each opponent loses 4 life unless that player sacrifices a nonland permanent of their choice or discards a card.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "blight",
+							"amount": 1
+						},
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": {
+								"counters": "blight",
+								"on": "this"
+							},
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								{
+									"discard": true
+								},
+								{
+									"loseLife": 4
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever this creature enters or attacks, put a blight counter on it. Then for each blight counter on it, each opponent loses 4 life unless that player sacrifices a nonland permanent of their choice or discards a card.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "counters",
+							"on": "this",
+							"kind": "blight",
+							"amount": 1
+						},
+						{
+							"do": "choose-actions",
+							"who": "opponent",
+							"count": {
+								"counters": "blight",
+								"on": "this"
+							},
+							"actions": [
+								{
+									"sacrifice": {
+										"zones": [
+											"battlefield"
+										],
+										"not": {
+											"types": [
+												"land"
+											]
+										}
+									}
+								},
+								{
+									"discard": true
+								},
+								{
+									"loseLife": 4
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"deferred": [
+			{
+				"claim": "Cast Rottenmouth Viper with optional sacrifices",
+				"basis": "As an additional cost to cast this spell, you may sacrifice any number of nonland permanents. This spell costs {1} less to cast for each permanent sacrificed this way.",
+				"source": {
+					"card": "Rottenmouth Viper",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile"
+					],
+					"controller": "any"
+				},
+				"timing": "spell"
+			}
+		]
+	}
+}

@@ -710,8 +710,10 @@ function resolutionTransition(table: Table, change: Extract<Change, { do: "resol
 		return;
 	}
 	if (change.pick) { pending.picked.push(structuredClone(change.pick)); return; }
+	if (change.actionChoices) { pending.actionChoices = structuredClone(change.actionChoices); return; }
 	if (change.bind) Object.assign(pending.bound, structuredClone(change.bind));
 	pending.program.shift();
+	delete pending.actionChoices;
 	delete pending.searching;
 	pending.picked = [];
 	if (change.expand) pending.program.unshift(...structuredClone(change.expand));

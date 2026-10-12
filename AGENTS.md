@@ -509,6 +509,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   selectors.ts       refs, selectors, amounts and conditions read against the table
   physical-history.ts public descend, face-down entry and face-up action counts from receipts
   resolution.ts      remaining instructions and choices before a checkpoint
+  choice-actions.ts  recorded private choices before a simultaneous sacrifice, discard and life-loss group
   resolution-counts.ts  completed uses of a source-backed ability within this turn
   pregame.ts           the opening procedure and its choices
   turn.ts, steps.ts    turn obligations, step order, and phase boundaries

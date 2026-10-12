@@ -35,8 +35,8 @@ assessments. Saved live continuations currently wait on strategy-provider credit
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Jund needs repeated choices committed as one simultaneous
-   group and a damage replacement. Mardu needs
+   stopped games. Jund needs Wolverine's damage replacement and Viper's
+   variable additional sacrifice cost, which remains a deferred runtime gap. Mardu needs
    discard events, conditional graveyard permission, Class levels and random
    selections. Keep those meanings in the refusal ledger until their shared
    operations are implemented.

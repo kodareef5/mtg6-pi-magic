@@ -19,6 +19,7 @@ import { colorChoices, manaTerms } from "./funding.ts";
 import { inspection, selectionBlock } from "./inspection.ts";
 import { beginSearch, searchQuality } from "./search.ts";
 import { libraryKeyword } from "./library-keywords.ts";
+import { chooseActions } from "./choice-actions.ts";
 import { project } from "./view.ts";
 import { summary } from "./announce.ts";
 import { cardNameChoices } from "./card-names.ts";
@@ -30,7 +31,7 @@ import type { Instruction, Modification, Selector } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
 import type { Decision, ObjectRef, SeatId } from "./types.ts";
 
-export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: Chosen; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef; search?: { who: number; whose: number[] } };
+export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: Chosen; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef; search?: { who: number; whose: number[] }; actionChoices?: Resolution["actionChoices"] };
 export type Step = { actor: SeatId; question: string; choices: Choice[]; blocked?: string; preparation?: Decision["preparation"] };
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
@@ -60,6 +61,7 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 	const one = (label: string, changes: Change[], extra: Partial<Choice> = {}): Step => ({ actor: controller, question: label, choices: [{ id: "do", label, changes, ...extra }] });
 	const source = scope.source ? ref(scope.source) : undefined;
 	switch (instruction.do) {
+		case "choose-actions": return chooseActions(table, scope, instruction, pending);
 		case "keyword": return libraryKeyword(table, scope, instruction);
 		case "reveal": {
 			const revealing = many(table, scope, instruction);

@@ -157,14 +157,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Rottenmouth Viper": {
-		"reason": "Rottenmouth Viper is not ready: Whenever this creature enters or attacks, put a blight counter on it. Then for each blight counter on it, each opponent loses 4 life unless that player sacrifices a nonland permanent of their choice or discards a card. — The syntax cannot repeat the opponent's independent sacrifice-or-discard-or-lose-4-life choice a dynamically determined number of times, once for each blight counter after placing the counter. Multiplying the life loss or combining payments would not preserve this ability.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Sheltered by Ghosts": {
 		"reason": "Sheltered by Ghosts is not ready: When this Aura enters, exile target nonland permanent an opponent controls until this Aura leaves the battlefield. — Missing operation: exile until a specified event with the immediate, nontriggered return required by rule 610.3, returning the exiled object under its owner's control. If this Aura has already left before the enters trigger resolves, the target must not move (610.3b). A delayed leaves trigger is not equivalent.",
 		"decks": [

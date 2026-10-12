@@ -151,6 +151,8 @@ export function project(table: Table, viewer: Viewer, since = table.log.length):
 	if (resolution) {
 		resolution.bound = bound(resolution.bound);
 		resolution.picked = resolution.picked.filter((one) => "player" in one || visibleRefs.has(`${one.id}@${one.incarnation}`));
+		if (resolution.actionChoices) resolution.actionChoices.selected = resolution.actionChoices.selected.map(({ on, ...one }) =>
+			({ ...one, ...(on && visibleRefs.has(`${on.id}@${on.incarnation}`) ? { on } : {}) }));
 		if (resolution.seen) resolution.seen = viewer === "spectator" && !inspected.length ? {} : { [viewer]: structuredClone(inspected) };
 		if (resolution.looked) resolution.looked = viewer === "spectator" ? {} : { [viewer]: structuredClone(resolution.looked[viewer] ?? []) };
 	}

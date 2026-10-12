@@ -306,6 +306,10 @@ export const Defs = {
 		step({ do: Type.Literal("activation-timing"), who: PlayerRef, ability: Type.Literal("loyalty"), of: Type.Ref("Selector"), until: Duration }),
 		/** Bind success only when every part of the stated cost is paid together. */
 		step({ do: Type.Literal("pay"), who: PlayerRef, cost: Type.Ref("Cost") }),
+		/** Each player chooses all actions before any occur; selected cards and permanents cannot be reused. */
+		step({ do: Type.Literal("choose-actions"), who: PlayerRef, count: Type.Ref("Amount"), actions: Type.Array(Type.Union([
+			object({ sacrifice: Type.Ref("Selector") }), object({ discard: Type.Literal(true) }), object({ loseLife: positive }),
+		]), { minItems: 1 }) }),
 		step({ do: Type.Literal("shuffle"), who: PlayerRef }),
 		step({ do: Type.Literal("draw"), who: PlayerRef, count: Type.Ref("Amount") }),
 		/** Copy the announced spell and its decisions, without casting it or choosing new targets. */
