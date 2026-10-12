@@ -129,9 +129,15 @@ test("entry copies use actual cast mana and copiable terms, apply before entry, 
  editWork(blocked, 0, [{ do: "package.put", package: { card: "Soulstone Sanctuary", registers: [], deferred: [
   { claim: animate.claim, basis: animate.basis, timing: "stack", source: animate.source },
  ] } }], "defer-animation");
+ const needed = nextDecision(blocked)!, waiting = structuredClone(blocked), row = blocked.ledger.length, work = blocked.workLog.length;
+ assert.equal(needed.blocked, undefined); assert.equal(needed.preparation?.[0]?.card, "Soulstone Sanctuary");
+ assert.deepEqual(needed.options, []);
+ assert.equal(blockedBird.zone, "stack"); assert.equal(blockedBird.copied, undefined, "preparation moves nothing and cannot create an incomplete copy");
+ assert.throws(() => apply(blocked, "entry:finish", "engine", "forced"), /Prepare the known uses/);
+ editWork(blocked, 0, [{ do: "package.put", package: { card: "Soulstone Sanctuary", registers: [], procedures: [animate], deferred: [] } }], "complete-animation");
  choose(blocked, incomplete);
- assert.match(nextDecision(blocked)!.blocked!, /battlefield activations prepared first/);
- assert.equal(blockedBird.zone, "stack"); assert.equal(blockedBird.copied, undefined, "an unsupported selection moves nothing and cannot create an incomplete copy");
+ assert.ok(activatedUses(workFrame(blocked, 0)).some(one => one.procedure.source.refs?.[0]?.id === blockedBird.id));
+ assert.deepEqual(relive(waiting, blocked.ledger.slice(row), blocked.workLog.slice(work)), blocked);
  graveyardCopies();
 });
 

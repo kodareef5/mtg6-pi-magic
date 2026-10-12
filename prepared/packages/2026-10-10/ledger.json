@@ -15,14 +15,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Ardyn, the Usurper": {
-		"reason": "Ardyn, the Usurper is not ready: Starscourge — At the beginning of combat on your turn, exile up to one target creature card from a graveyard. If you exiled a card this way, create a token that's a copy of that card, except it's a 5/5 black Demon. — Unsupported: copying the exiled creature card and applying copiable black color and Demon creature-subtype exceptions. token.copy supports battlefield permanent sources, and token.except supports only fixed power/toughness, not color or subtype exceptions; a later modification would not faithfully express these copy exceptions.",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Aven Interrupter": {
 		"reason": "Aven Interrupter is not ready: When this creature enters, exile target spell. It becomes plotted. (Its owner may cast it as a sorcery on a later turn without paying its mana cost.) — Exiling the targeted spell is expressible, but the syntax has no plotted designation or permission combining an owner's free alternative-cost cast, mandatory sorcery timing, and exclusion of the turn it became plotted. A generic permit would not implement this ability.; Spells your opponents cast from graveyards or from exile cost {2} more to cast. — The syntax has no standing casting-cost increase registration or selector for the zone a spell is being cast from; characteristic words do not implement the required additional generic mana payment.",
 		"decks": [

@@ -46,9 +46,12 @@ export function entryCopy(table: Table, entry: Entry): Pending | undefined {
 		if (!entryCopySelector(copy.of)) return { situation: "replacement-order", seat: who, question: "Choose a public entry copy source.", moves: [],
 			blocked: "An entry copy selects only public battlefield permanents or graveyard cards." };
 		const selected = world.objects.filter(one => ["battlefield", "graveyard"].includes(one.zone) && matches(scope, one, copy.of));
+		const results = selected.map(one => copyExceptions(copiable(table, one, "permanent"), copy.except));
+		for (const result of results) if ("blocked" in result && result.preparation)
+			return { situation: "replacement-order", seat: result.preparation.seat, question: result.blocked, moves: [], preparation: result.preparation.needed };
 		const answered: Entry = { ...entry, copies: { ...entry.copies, [index]: [...entry.copies?.[index] ?? [], registration.basis] } };
-		const moves: Pending["moves"] = selected.map(one => {
-			const result = copyExceptions(copiable(table, one, "permanent"), copy.except), next = structuredClone(answered);
+		const moves: Pending["moves"] = selected.map((one, at) => {
+			const result = results[at]!, next = structuredClone(answered);
 			const added = copy.add?.creatureTypes ?? [];
 			const invalid = added.filter(type => !creatureType(type));
 			if ("blocked" in result || invalid.length) next.blocked = { who, reason: "blocked" in result ? result.blocked : `Unknown creature types in copy exception: ${invalid.join(", ")}.` };

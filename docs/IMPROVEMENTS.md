@@ -23,9 +23,9 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Twelve imported main decks have complete standing coverage; nine have completed
-source-reviewed games. Bant, Jeskai and Dimir Excruciator await their first games.
-[Status](STATUS.md) holds the current evidence. Seven lists still need standing
+Fifteen imported main decks have complete standing coverage; nine have completed
+source-reviewed games. The newly admitted lists await their first games.
+[Status](STATUS.md) holds the current evidence. Four lists still need standing
 assessments. Saved live continuations currently wait on strategy-provider credits.
 
 1. Start games for the newly admitted lists and exercise Grove's Bounty's announced division in Prowess games
@@ -35,8 +35,10 @@ assessments. Saved live continuations currently wait on strategy-provider credit
    including casting opportunities the engine failed to offer. Repair before
    the first affected action and keep rejected branches.
 2. Use the refreshed main-deck refusal ledger to prioritize mechanics and
-   stopped games. Dimir Midrange needs entry type changes, linked ability removal and library-search events.
-   Azorius Momo needs combined tap payments, draw replacement and spell copies.
+   stopped games. Azorius Momo needs combined tap payments, draw replacement and spell copies.
+   Combined tap payments also cover Gene Pollinator in Jund; life-gain events and
+   emblems are among Lifegain's blockers. Mardu's remaining source mechanics stay
+   in the refusal ledger until their shared operations are implemented.
    Keep replacement-order choices explicit. Review accepted restriction words as well as refusals.
    Sideboard-only refusals do not delay this alpha.
 3. Retain reviewed runtime uses in the reusable store, preserving complete

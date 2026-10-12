@@ -339,12 +339,14 @@ permanent. That is where warp's delayed exile and an Aura's `attach` go.
 ## Registering
 
 Token creation accepts either `spec` or `copy`, never both. `copy` freezes a
-single permanent's copiable base terms and complete battlefield activations;
+single permanent or face-up graveyard/exiled card's copiable base terms and complete battlefield activations;
 it does not copy current counters or temporary changes. With `copy`, an optional
-`except: {power: 1, toughness: 1}` replaces those copiable base values. Sources
-with continuous base-setting abilities remain unsupported for that exception.
-See
-[token copies](examples/token-copies.md) for supported sources and entry behavior.
+`except` replaces fixed name, power, toughness, colors or creature types. For
+example, `{power: 5, toughness: 5, colors: ["B"], creatureTypes: ["Demon"]}`
+keeps all other copiable values. Sources with continuous abilities setting the
+replaced characteristics remain unsupported for that exception. Identified
+battlefield activations are prepared before a copy freezes them. See
+[token copies](examples/token-copies.md) and [public card copies](examples/card-copies.md).
 
 Counter watches use `on: "counters"`, optional `counter` for the kind and
 `reaches` for crossing an Nth-counter threshold, including entry counters.

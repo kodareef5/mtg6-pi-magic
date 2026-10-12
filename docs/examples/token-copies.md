@@ -1,6 +1,6 @@
 # Token copies
 
-`token.copy` names the permanent to copy; it replaces `token.spec`. The table
+`token.copy` names the permanent or public graveyard/exiled card to copy; it replaces `token.spec`. The table
 reads pinned base characteristics and accepted printed abilities (707.2), then
 creates a new token with those terms. Counters, damage, tapped status, temporary
 changes and later granted abilities are not copied. A token keeps its creation
@@ -13,8 +13,8 @@ and timing. Cast procedures and abilities used only outside the battlefield are
 not battlefield activations. Copied entry terms apply before the token enters,
 and its entry triggers wait until the current resolution finishes.
 
-The first operation supports face-up, single-face permanents and ordinary
-tokens. Multiple-face token copies, face-down copies and
+The operation supports single-face permanents, ordinary tokens, public cards,
+and the nameless 2/2 base of a face-down battlefield permanent. Multiple-face token copies and
 making an existing battlefield object become a copy remain unsupported.
 [Entry copies](entry-copies.md) support a separate replacement choice and
 additive exceptions; copying that resulting permanent retains its exceptions.
@@ -75,9 +75,13 @@ does not certify any mode's source interpretation.
 `token.except` replaces the copy's base power and toughness with fixed integers.
 Those values are themselves copiable (707.9b); counters and later layer effects
 still apply normally. The exception requires `copy`, not `spec`. It does not
-support other characteristic exceptions. Sources with a continuous base-setting
+identify characteristic-defining abilities. Sources with a continuous base-setting
 ability remain unsupported until the syntax distinguishes characteristic-defining
 abilities, which 707.9d omits when their defined values are replaced.
+
+[Public card copies](card-copies.md) extends the same exceptions to fixed colors
+and creature types. Deferred battlefield activations require preparation before
+the copy continues; incomplete text is never frozen into a token.
 
 Iridescent Vinelasher's offspring trigger checks its named additional payment
 both on entry and on resolution (702.175a). The token was not cast and cannot

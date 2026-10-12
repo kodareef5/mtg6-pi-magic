@@ -45,7 +45,7 @@ const SYSTEM = [
 	syntaxReference(), exampleIndex,
 	"The complete procedure schema is checked locally. The submit tool stays shallow to avoid recursive expansion by providers.",
 	JSON.stringify(ProcedureSchema),
-	"A token.copy instruction can replace copiable power/toughness with fixed integers in except. Read token-copies.md for offspring. Sources with continuous base-setting abilities remain unsupported for this exception; a later modify instruction is not a copy exception.",
+	"A token.copy instruction can copy a face-up graveyard or exiled card. except sets fixed name, power, toughness, colors and creatureTypes; creatureTypes replaces only creature subtypes. Read card-copies.md for exile bindings and Ardyn, and token-copies.md for offspring. Identified battlefield activations are prepared before copying. Unclassified characteristic-defining exceptions remain unsupported; a later modify instruction is not a copy exception.",
 ].join("\n\n");
 
 export async function interpret(frame: Frame, writer: Pick<Reasoner, "work">, universe: Universe, rules?: Rules): Promise<Package> {

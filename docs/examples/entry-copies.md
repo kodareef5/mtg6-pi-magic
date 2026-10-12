@@ -10,18 +10,22 @@ result (614.12, 707.2, 707.5).
 `copy.add.creatureTypes` adds creature types when the copied base is a creature
 or kindred. `copy.add.words` adds abilities. These exceptions become copiable
 values (707.9a-b); later copies retain them. `copy.except` can set a fixed name,
-power or toughness. It does not express arbitrary characteristic exceptions.
+power, toughness, colors or creature types. These fixed exceptions share the
+[public card copy](card-copies.md) contract, not arbitrary layer modifications.
 
 The physical card keeps an incarnation-scoped copy effect. Its characteristics
 are read through the layers, and leaving the battlefield removes the effect.
 A nontoken copy of a double-faced permanent copies only its current face. It
 does not acquire another physical face. A graveyard card supplies its front
 characteristics and accepted battlefield abilities. Face-down permanents supply
-their nameless colorless 2/2 creature values. Creating double-faced token copies,
-ordering multiple simultaneous copy replacements
-on one permanent, and copying incomplete battlefield activations remain
+their nameless colorless 2/2 creature values. Creating double-faced token copies
+and ordering multiple simultaneous copy replacements on one permanent remain
 unsupported. Selecting an unsupported source records the choice and leaves entry
 pending; it never installs an incomplete copy.
+
+Eligible public sources with deferred battlefield activations require their
+seat to prepare those uses before the copy choice. Equipment changes no physical
+state. The selected copy then freezes the complete abilities.
 
 ## Mockingbird
 

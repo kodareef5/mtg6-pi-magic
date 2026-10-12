@@ -27,10 +27,10 @@ import { STEPS } from "./steps.ts";
 import { cardsIn, seat, type Mana, type Note, type Resolution, type Table, type Trigger } from "./table.ts";
 import type { Instruction, Modification, Selector } from "./language.ts";
 import type { Change, Reason, Zone } from "./syntax.ts";
-import type { ObjectRef, SeatId } from "./types.ts";
+import type { Decision, ObjectRef, SeatId } from "./types.ts";
 
 export type Choice = { id: string; label: string; changes: Change[]; objects?: ObjectRef[]; cards?: string[]; pick?: Chosen; bind?: Record<string, Bound>; expand?: Resolution["program"]; follow?: ObjectRef; search?: { who: number; whose: number[] } };
-export type Step = { actor: SeatId; question: string; choices: Choice[]; blocked?: string };
+export type Step = { actor: SeatId; question: string; choices: Choice[]; blocked?: string; preparation?: Decision["preparation"] };
 
 const ref = (object: Seen): ObjectRef => ({ id: object.id, incarnation: object.incarnation });
 const COLORS: Mana["color"][] = ["W", "U", "B", "R", "G"];
@@ -263,6 +263,8 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			if (originals.length > 1) return { actor: controller, question: "Create the requested token copy.", choices: [], blocked: "A token copy needs one source; choose one before copying." };
 			const original = originals[0];
 			const copied = original && count && creators.length ? tokenCopy(table, original, instruction.except) : undefined;
+			if (copied && "blocked" in copied && copied.preparation) return { actor: copied.preparation.seat,
+				question: copied.blocked, choices: [], preparation: copied.preparation.needed };
 			if (copied && "blocked" in copied) return { actor: controller, question: "Create the requested token copy.", choices: [], blocked: copied.blocked };
 			const spec = instruction.spec ?? (copied && "spec" in copied ? copied.spec : undefined);
 			if (!spec) return one("No token is created: the copy source is unavailable.", [], bind(instruction, { objects: [], players: [] }));

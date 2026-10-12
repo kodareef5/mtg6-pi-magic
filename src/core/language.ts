@@ -251,6 +251,9 @@ export const Defs = {
 	/** A standing modal trigger chooses exactly one complete effect as it is put on the stack. */
 	TriggerEffect: Type.Union([Type.Ref("Effect"), object({ modes: Type.Array(Type.Ref("Effect"), { minItems: 2 }), unchosen: Type.Optional(Type.Literal(true)) })]),
 
+	/** Fixed copy exceptions become the new copiable values, before other layers. */
+	CopyExceptions: object({ name: Type.Optional(text), power: Type.Optional(Type.Integer()), toughness: Type.Optional(Type.Integer()),
+		colors: Type.Optional(Type.Array(one("W", "U", "B", "R", "G"), { uniqueItems: true })), creatureTypes: Type.Optional(Type.Array(text, { uniqueItems: true })) }),
 	TokenSpec: object({
 		name: Type.String(), types: Type.Array(one(...CARD_TYPES), { minItems: 1 }), subtypes: Type.Optional(Type.Array(text)),
 		/** A copied token keeps the original's mana cost; ordinary created tokens omit it. */
@@ -317,7 +320,7 @@ export const Defs = {
 		step({ do: Type.Literal("prepare"), what: ObjectRef, prepared: Type.Boolean() }),
 		step({ do: Type.Literal("designate"), what: ObjectRef, designation: Designation }),
 		step({ do: Type.Literal("token"), count: Type.Ref("Amount"), spec: Type.Optional(Type.Ref("TokenSpec")), copy: Type.Optional(ObjectRef),
-			except: Type.Optional(object({ power: Type.Integer(), toughness: Type.Integer() })), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
+			except: Type.Optional(Type.Ref("CopyExceptions")), controller: Type.Optional(PlayerRef), tapped: Type.Optional(Type.Literal(true)), attacking: Type.Optional(Type.Literal(true)) },
 			{ oneOf: [{ required: ["spec"], not: { anyOf: [{ required: ["copy"] }, { required: ["except"] }] } }, { required: ["copy"], not: { required: ["spec"] } }] }),
 		/** Writes a public label on each affected object; `label` is its text, the claim when omitted. */
 		step({ do: Type.Literal("modify"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), until: Duration, change: Type.Ref("Modification"), label: Type.Optional(text) }),
@@ -367,7 +370,7 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("enters"), affects: Type.Optional(Type.Ref("Selector")), tapped: Type.Optional(Type.Literal(true)),
 			prepared: Type.Optional(Type.Literal(true)),
 			copy: Type.Optional(object({ of: Type.Ref("Selector"), may: Type.Optional(Type.Literal(true)),
-				except: Type.Optional(object({ name: Type.Optional(text), power: Type.Optional(Type.Integer()), toughness: Type.Optional(Type.Integer()) })),
+				except: Type.Optional(Type.Ref("CopyExceptions")),
 				/** A linked trigger from the final applied copy effect, with bound:copied naming that card. */
 				whenCopied: Type.Optional(Type.Ref("Effect")),
 				add: Type.Optional(object({ creatureTypes: Type.Optional(Type.Array(text)), words: Type.Optional(Type.Array(text)) })) })),
