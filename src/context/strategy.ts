@@ -80,7 +80,9 @@ export function registrationProblems(packages: readonly Package[]): string[] {
 	};
 	const selectors = (value: unknown, card: string): void => {
 		if (!value || typeof value !== "object") return;
-		const term = value as { do?: string; from?: Selector; on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] } };
+		const term = value as { do?: string; from?: Selector; on?: string; history?: string; of?: { zones?: string[] }; spendOnly?: { zones?: string[] }; spec?: { subtypes?: string[] } };
+		if (term.do === "token" && term.spec?.subtypes?.some(type => type.toLowerCase() === "role"))
+			found.push(`package ${card}: Role tokens require the unsupported same-controller Role state-based action (303.7a). Supplying token abilities does not implement that rule; do not replace it with a trigger.`);
 		if (term.do === "choose" && term.from && unscopedBinding(term.from))
 			found.push(`package ${card}: a bound choice needs explicit zones. A binding names objects but does not change the default battlefield zone; inspected library cards need zones ["library"]. This check does not certify the card's meaning.`);
 		if (term.spendOnly && !term.spendOnly.zones?.length)
