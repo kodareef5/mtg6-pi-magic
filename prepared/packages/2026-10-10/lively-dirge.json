@@ -3,14 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "d2284c309aacb5f561d3f634dbed392e318badde05d41495636e12054b5eb912",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Lively Dirge",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"printedCast": false,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Lively Dirge with only the +{1} spree option: search for a card, put it into your graveyard, then shuffle (total cost {2}{B}).",
 				"basis": "Spree (Choose one or more additional costs.) ... + {1} — Search your library for a card, put it into your graveyard, then shuffle.",
@@ -23,7 +19,40 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{B}",
+					"additional": [
+						{
+							"name": "spree-search",
+							"mana": "{1}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you"
+						},
+						"count": 1,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "graveyard",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					}
+				]
 			},
 			{
 				"claim": "Cast Lively Dirge with only the +{2} spree option: return up to two creature cards with total mana value 4 or less from your graveyard to the battlefield (total cost {3}{B}; no targets).",
@@ -37,7 +66,43 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{B}",
+					"additional": [
+						{
+							"name": "spree-return",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						},
+						"count": 2,
+						"upTo": true,
+						"totalManaValueAtMost": 4,
+						"as": "returned"
+					},
+					{
+						"do": "move",
+						"what": "bound:returned",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
 			},
 			{
 				"claim": "Cast Lively Dirge with both spree options (total cost {4}{B}): search, put the card into your graveyard, and shuffle, then choose and return up to two creature cards with total mana value 4 or less from your graveyard to the battlefield; no targets.",
@@ -51,8 +116,73 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{B}",
+					"additional": [
+						{
+							"name": "spree-search",
+							"mana": "{1}"
+						},
+						{
+							"name": "spree-return",
+							"mana": "{2}"
+						}
+					]
+				},
+				"instructions": [
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"library"
+							],
+							"owner": "you"
+						},
+						"count": 1,
+						"as": "found"
+					},
+					{
+						"do": "move",
+						"what": "bound:found",
+						"to": "graveyard",
+						"reason": "resolve"
+					},
+					{
+						"do": "shuffle",
+						"who": "you"
+					},
+					{
+						"do": "choose",
+						"who": "you",
+						"from": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you",
+							"types": [
+								"creature"
+							],
+							"token": false
+						},
+						"count": 2,
+						"upTo": true,
+						"totalManaValueAtMost": 4,
+						"as": "returned"
+					},
+					{
+						"do": "move",
+						"what": "bound:returned",
+						"to": "battlefield",
+						"controller": "you",
+						"reason": "resolve"
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"printedCast": false,
+		"deferred": []
 	}
 }

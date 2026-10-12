@@ -171,3 +171,12 @@ permission to cast from an otherwise unpermitted zone.
   }
 }
 ```
+
+Lively Dirge uses the same operation with a cap of four over creature cards in
+its controller's graveyard. Its second Spree mode binds one optional selection
+of up to two distinct cards, then returns the whole group together. Its first
+mode searches for any card, so a nonempty library requires a selection rather
+than an optional failure to find. All three nonempty Spree combinations are
+stored with separate named additional costs, preserving search, graveyard move,
+shuffle and return in printed order. The inspection invariant exercises the
+combined mode from the registered Jund list.

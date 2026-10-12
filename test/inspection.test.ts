@@ -1,6 +1,7 @@
 /** A private library window stays bounded through selection, ordering, replay and cloning. */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { commit, start } from "../src/core/commit.ts";
 import { alpha, deck } from "../src/core/decks.ts";
 import { standard } from "../src/core/format.ts";
@@ -163,6 +164,24 @@ function limitedSelections() {
 		assert.deepEqual(relive(initial, table.ledger.slice(from)), table);
 		for (const one of reserved) assert.ok(!describe(table, look, 1).includes(one.card!), "a later entry does not reveal the earlier look");
 	}
+	const dirge = JSON.parse(readFileSync("prepared/packages/2026-10-10/lively-dirge.json", "utf8")).package;
+	const game = start(standard, [{ deck: alpha(deck("Jund Sacrifice")) }, { deck: alpha(deck("Mardu Discard")) }], "dirge-selection-total", undefined, { searchesFrom: 0 });
+	place(game, 0, "hand", "Lively Dirge");
+	const creatures = place(game, 0, "graveyard", "Biotech Specialist", "The Sackville-Bagginses", "Rottenmouth Viper");
+	main(game, 0); commit(game, [{ do: "add-mana", who: 0, colors: ["B", "C", "C", "C", "C"] }], "game-setup");
+	const before = structuredClone(game), from = game.ledger.length;
+	announce(game, dirge.procedures[2]); passBoth(game); step(game); // Begin the whole-library search.
+	assert.ok(nextDecision(game)!.options.every(one => one.objects?.length), "an unrestricted card search cannot fail to find in a nonempty library");
+	step(game, () => true); step(game); step(game); // Choose, put into graveyard, then shuffle.
+	assert.ok(nextDecision(game)!.options.every(one => !one.objects?.some(ref => ref.id === creatures[2]!.id)), "the six-mana Viper exceeds the shared four-mana limit");
+	for (const creature of creatures.slice(0, 2)) {
+		const option = nextDecision(game)!.options.find(one => one.objects?.some(ref => ref.id === creature.id))!;
+		assert.ok(option); apply(game, option.id, "model", "chosen");
+	}
+	const pending = structuredClone(game), at = game.ledger.length;
+	step(game);
+	assert.equal(game.log.at(-1)!.changes.filter(one => one.do === "move" && one.to === "battlefield").length, 2, "Dirge returns its selected pair simultaneously");
+	finish(game); assert.deepEqual(relive(pending, game.ledger.slice(at)), game); assert.deepEqual(relive(before, game.ledger.slice(from)), game);
 }
 
 test("private selection cannot expose another hand through a malformed selector or an unearned library order", async () => {
