@@ -38,7 +38,7 @@ export const CEILING: Record<Role, number> = {
 	decide: 0,
 	/** One analyst's findings; the brief asks for more where the synthesis writes every field. */
 	pregame: 2000,
-	/** A plan update and any new instructions. Pi adds a provider's thinking budget on top; reason.ts scales this by thinking level. */
+	/** A plan update and any new instructions. The roster's models think inside this ceiling; reason.ts scales it by thinking level. */
 	strategy: 4000,
 	/** A verdict, the rule it rests on, and the remedy. */
 	judge: 700,

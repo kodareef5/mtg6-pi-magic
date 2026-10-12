@@ -7,17 +7,13 @@
     "pi",
     "magic",
     "mtg",
-    "multi-agent",
-    "websocket"
+    "multi-agent"
   ],
   "license": "MIT",
   "type": "module",
   "pi": {
     "extensions": [
       "./index.ts"
-    ],
-    "skills": [
-      "./skills"
     ]
   },
   "files": [

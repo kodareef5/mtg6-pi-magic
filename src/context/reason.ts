@@ -112,8 +112,9 @@ const TIMEOUT: Record<Role, number> = { decide: 60_000, pregame: 900_000, strate
 /**
  * Output ceilings and non-pregame timeouts were measured on a low-effort model. A model asked to think
  * harder answers later and writes longer answers, so those scale with the thinking level here, in the one place
- * every chat call passes through. Low is the baseline and scales nothing. Pi adds a provider's thinking budget
- * on top of the ceiling, so the ceiling sizes the answer alone. Measured October 10: Haiku 5.5 medium
+ * every chat call passes through. Low is the baseline and scales nothing. Both roster chat models count their
+ * thinking inside the ceiling: Haiku 5.5 thinks adaptively, so Pi adds no separate budget, and OpenAI counts
+ * reasoning against the output limit. The multiplier therefore covers thinking as well as a longer answer. Measured October 10: Haiku 5.5 medium
  * coordinator answers ran a median of 4,600 output tokens, a p90 of 9,900 and a longest of 18,100 against a
  * 4,000-token base, with a p90 of 54 seconds and one call in twenty past 90, so medium is five. Sol 6.1 high
  * fixture calls ran a median of 50 seconds with a p95 of 83, and at four times the low limits one call in nine still
