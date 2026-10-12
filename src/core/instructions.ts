@@ -192,8 +192,15 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 		}
 		case "choose": {
 			const who = players(scope, instruction.who)[0] ?? controller;
-			const blocked = selectionBlock(table, scope, instruction.from, who);
+			const blocked = selectionBlock(table, scope, instruction.from, who, instruction.random);
 			if (blocked) return { actor: who, question: blocked, choices: [], blocked };
+			if (instruction.random) {
+				const count = Math.max(0, amount(scope, instruction.count));
+				if (!Number.isSafeInteger(count)) return { actor: who, question: claim, choices: [], blocked: "Random selection needs a finite nonnegative count." };
+				const pool = select(scope, instruction.from), take = Math.min(count, pool.length);
+				const label = `Select ${take} of ${pool.length} cards at random without revealing them`;
+				return { actor: who, question: label, choices: [{ id: "random", label, changes: [{ do: "sample", who, cards: pool.map(ref), count: take, ...(instruction.as ? { as: instruction.as } : {}) }] }] };
+			}
 			const search = beginSearch(table, scope, instruction, pending, who);
 			if (search) return search;
 			const count = amount(scope, instruction.count);

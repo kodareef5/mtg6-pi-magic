@@ -44,7 +44,7 @@ export type ObjectId = string;
  * incarnation rises there too, and a zone change is not the only trigger.
  *
  * `position` is the real order of an ordered zone and the engine always knows
- * it. The library is a list, not a bag. The shuffle is the only randomness; a
+ * it. The library is a list, not a bag. Shuffling and random selections use the seed; a
  * draw is taking position 0 and is not random at all. A fixture that sets a
  * known library order is an ordinary edit, which is how a benchmark stacks a
  * deck, and the engine is none the wiser.

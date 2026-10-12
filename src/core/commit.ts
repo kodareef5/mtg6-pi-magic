@@ -166,6 +166,9 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 			throw new Error("An emblem needs a new object identity.");
 		if (change.do === "copy-spell" && (table.things.has(change.id) || changes.some((one, at) => at !== index && one.do === "copy-spell" && one.id === change.id)))
 			throw new Error("A spell copy needs a new object identity.");
+		if (change.do === "sample" && (!table.resolution || !Number.isSafeInteger(change.count) || change.count < 0 ||
+			new Set(change.cards.map(one => one.id)).size !== change.cards.length || change.cards.some(one => table.things.get(one.id)?.incarnation !== one.incarnation)))
+			throw new Error("Random selection needs distinct current objects and a nonnegative count during resolution.");
 		if (change.do === "increase-speed" && (!Number.isInteger(change.amount) || change.amount <= 0)) throw new Error("Speed increases by a positive integer.");
 		if (change.do === "move" && change.faceDown && change.to !== (change.faceDown === "manifest" ? "battlefield" : "exile")) throw new Error("Face-down motion needs exile, or manifest onto the battlefield.");
 		if (change.do === "turn-face-up" && (!table.things.get(change.what)?.faceDown || table.things.get(change.what)?.zone !== "battlefield")) throw new Error("Turning face up needs a face-down permanent.");
@@ -460,13 +463,22 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				if (change.announcement) table.announcement = structuredClone(change.announcement);
 				else delete table.announcement;
 				break;
+			case "sample": {
+				const pool = structuredClone(change.cards), count = Math.min(change.count, pool.length);
+				for (let i = 0; i < count; i++) {
+					const j = i + (pool.length - i > 1 ? random(table, pool.length - i) : 0);
+					[pool[i], pool[j]] = [pool[j]!, pool[i]!];
+				}
+				change.selected = pool.slice(0, count);
+				if (change.as) table.resolution!.bound[change.as] = { objects: structuredClone(change.selected), players: [], amount: count };
+				break;
+			}
 			case "shuffle": {
 				if (table.resolution?.searched) {
 					table.resolution.searched = table.resolution.searched.filter(one => one.whose !== change.whose);
 					if (!table.resolution.searched.length) delete table.resolution.searched;
 				}
-				// The shuffle is the only randomness in the game. Positions are
-				// swapped so the library stays a list the engine fully knows.
+				// Swap positions so the library stays a list the engine fully knows.
 				const library = cardsIn(table, "library", change.whose);
 				const ids = new Set(library.map((one) => one.id));
 				if (table.resolution?.seen) table.resolution.seen = Object.fromEntries(Object.entries(table.resolution.seen).map(([who, seen]) => [who, (seen ?? []).filter((one) => !ids.has(one.id))]));

@@ -7,6 +7,7 @@ schemas, and every `basis` is checked against the card's text.
 
 | File | Shows |
 |---|---|
+| `random-selection.md` | Seeded selections, private bindings, delayed random discard and graveyard exile |
 | `library-keywords.md` | Scry and surveil choices, privacy, actual selected results and completion events |
 | `library-windows.md` | Simultaneous top or all-but-bottom windows across separate libraries |
 | `face-down-exile.md` | Private face-down exile and play while a live condition holds |

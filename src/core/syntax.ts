@@ -102,6 +102,8 @@ export type Change =
 	| { do: "look"; who: SeatId; what: string }
 	/** A keyword event: search begins before private selection; the others record completion. */
 	| { do: "keyword"; name: "scry" | "surveil" | "manifest-dread" | "search"; who: SeatId; count: number; whose?: SeatId }
+	/** Uniform selection without replacement. Commit fills selected and binds it privately during resolution. */
+	| { do: "sample"; who: SeatId; cards: ObjectRef[]; count: number; as?: string; selected?: ObjectRef[] }
 	/** A library subset placed in the stated order, or shuffled before placement. */
 	| { do: "order"; who: SeatId; whose: SeatId; cards: ObjectRef[]; position: "top" | "bottom"; random?: true }
 	| { do: "tap" | "untap"; what: string }

@@ -98,7 +98,7 @@ function changed(change: unknown): string {
 
 /** One instruction in a few words, so every option says what it does at the same level of detail. */
 export function summary(instruction: Instruction): string {
-	const rendered: Record<string, string[]> = { damage: ["to", "every", "amount"], choose: ["who", "from", "count", "upTo", "reveal"],
+	const rendered: Record<string, string[]> = { damage: ["to", "every", "amount"], choose: ["who", "from", "count", "upTo", "reveal", "random"],
 		"choose-actions": ["who", "count", "actions"],
 		move: ["what", "every", "to", "reason", "tapped"], draw: ["who", "count"], mill: ["who", "count"], shuffle: ["who"],
 		life: ["who", "amount"], counters: ["on", "every", "kind", "amount"], mana: ["who", "colors", "any"],
@@ -110,7 +110,7 @@ export function summary(instruction: Instruction): string {
 	const gate = `${instruction.if ? ` if ${words(instruction.if, "condition")}` : ""}${instruction.may ? " (optional)" : ""}${instruction.as ? ` as ${instruction.as}` : ""}`;
 	switch (instruction.do) {
 		case "damage": return `Deal ${words(instruction.amount, "amount")} damage to ${instruction.to ? of(instruction.to) : what}${gate}.`;
-		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${words(instruction.count, "amount")} ${of(instruction.from)}${instruction.reveal ? ", revealed" : ""}${gate}.`;
+		case "choose": return `${who(instruction.who, "choose")} ${instruction.upTo ? "up to " : ""}${words(instruction.count, "amount")} ${of(instruction.from)}${instruction.random ? " at random" : ""}${instruction.reveal ? ", revealed" : ""}${gate}.`;
 		case "choose-actions": return `${who(instruction.who, "choose")} ${words(instruction.count, "amount")} actions: ${instruction.actions.map(action => "loseLife" in action ? `lose ${action.loseLife} life` : "discard" in action ? "discard a card" : `sacrifice ${of(action.sacrifice)}`).join(" or ")}. Carry out all choices simultaneously${gate}.`;
 		case "move": return `Put ${what} into ${instruction.to} (${instruction.reason})${instruction.tapped ? " tapped" : ""}${gate}.`;
 		case "draw": case "mill": case "shuffle": return `${who(instruction.who, instruction.do)}${"count" in instruction ? ` ${words(instruction.count, "amount")}` : ""}${gate}.`;

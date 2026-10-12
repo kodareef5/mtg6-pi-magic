@@ -353,6 +353,9 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 			case "resolution":
 				if (change.action === "begin") parts.push(`Begin resolving ${publicName(receipt.before[change.what])}`);
 				break;
+			case "sample":
+				parts.push(`${seat(table, change.who).name} selected ${change.selected?.length ?? 0} cards at random without revealing them`);
+				break;
 			case "shuffle":
 				parts.push(`${seat(table, change.whose).name} shuffled`);
 				break;

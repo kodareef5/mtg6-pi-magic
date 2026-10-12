@@ -293,7 +293,8 @@ export const Defs = {
 				] } },
 			] }),
 		step({ do: Type.Literal("destroy"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")) }),
-		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)) }),
+		step({ do: Type.Literal("choose"), who: PlayerRef, from: Type.Ref("Selector"), count: Type.Ref("Amount"), upTo: Type.Optional(Type.Literal(true)), reveal: Type.Optional(Type.Literal(true)),
+			random: Type.Optional(Type.Literal(true)) }, { allOf: [{ if: { required: ["random"] }, then: { not: { anyOf: [{ required: ["upTo"] }, { required: ["reveal"] }] } } }] }),
 		/** Choose from the pinned Oracle catalog, not registered decks or hidden objects; remember it on the named incarnation. */
 		step({ do: Type.Literal("name-card"), who: PlayerRef, on: ObjectRef, key: name, types: Type.Optional(Type.Array(one(...CARD_TYPES), { minItems: 1 })) }),
 		/** A private inspection binds exactly the inspected objects, not the whole hidden zone. */

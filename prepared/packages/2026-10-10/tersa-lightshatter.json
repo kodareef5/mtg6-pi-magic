@@ -1,0 +1,126 @@
+{
+	"card": "Tersa Lightshatter",
+	"generated": "2026-10-10",
+	"source": "8ef7d39d5abae1f881a372bd17ac3f1a229823b9604da965ad9e764cd2665eca",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Tersa Lightshatter",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Tersa Lightshatter enters, discard up to two cards, then draw that many cards.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"hand"
+								],
+								"controller": "you",
+								"owner": "you"
+							},
+							"count": 2,
+							"upTo": true,
+							"as": "discarded"
+						},
+						{
+							"do": "move",
+							"what": "bound:discarded",
+							"to": "graveyard",
+							"reason": "discard",
+							"as": "discarded",
+							"countFrom": "hand"
+						},
+						{
+							"do": "draw",
+							"who": "you",
+							"count": {
+								"bound": "discarded"
+							}
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever Tersa Lightshatter attacks, if there are seven or more cards in your graveyard, exile a card at random from your graveyard. You may play that card this turn.",
+				"event": {
+					"on": "attacks",
+					"of": {
+						"is": "this"
+					}
+				},
+				"if": {
+					"amount": {
+						"count": {
+							"zones": [
+								"graveyard"
+							],
+							"owner": "you"
+						}
+					},
+					"atLeast": 7
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "choose",
+							"who": "you",
+							"from": {
+								"zones": [
+									"graveyard"
+								],
+								"owner": "you"
+							},
+							"count": 1,
+							"random": true,
+							"as": "exiled"
+						},
+						{
+							"do": "move",
+							"what": "bound:exiled",
+							"to": "exile",
+							"reason": "exile",
+							"as": "exiled"
+						},
+						{
+							"do": "permit",
+							"what": "bound:exiled",
+							"who": "you",
+							"until": "end-of-turn"
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

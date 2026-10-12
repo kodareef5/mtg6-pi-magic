@@ -15,14 +15,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Casey Jones, Vigilante": {
-		"reason": "Casey Jones, Vigilante is not ready: When Casey Jones enters, draw three cards. At the beginning of your next upkeep, discard three cards at random. — The entry trigger must create a delayed upkeep trigger that randomly discards up to three cards from its controller's hand. Random hand selection/discard is not expressible in the supplied syntax; random library ordering does not implement it.",
-		"decks": [
-			"Mardu Discard"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Cool but Rude": {
 		"reason": "Cool but Rude is not ready: (Gain the next level as a sorcery to add its ability.) ... {1}{R}: Level 2 ... {1}{R}: Level 3 — Class level designations, setting those designations, checking the required preceding level for sorcery-speed activations, and level-dependent ability grants are not expressible. Class levels are not counters.; Whenever you discard a card, this Class deals 2 damage to each opponent. — The syntax has no discard event watch; this ability must also be granted only at Class level 2 or greater.; When this Class becomes level 3, search your library for a card, put it into your hand, shuffle, then discard a card at random. — The syntax has no Class-level-change event or random hand-card discard operation. The supported search sequence cannot replace those missing operations.",
 		"decks": [
@@ -163,14 +155,6 @@
 			"Boros Tokens",
 			"Izzet Aggro",
 			"Mono-Red Aggro"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
-	"Tersa Lightshatter": {
-		"reason": "Tersa Lightshatter is not ready: Whenever Tersa Lightshatter attacks, if there are seven or more cards in your graveyard, exile a card at random from your graveyard. You may play that card this turn. — Random selection of a card from a graveyard is not supported; choose is a player choice, and random order supports only library ordering. The attack trigger therefore cannot be faithfully prepared.",
-		"decks": [
-			"Mardu Discard"
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"

@@ -185,7 +185,7 @@ incarnation's visibility. A tap in a library stays unnamed after a later reveal.
 ## The engine keeps perfect state
 
 The library is an ordered list and the engine always knows the order. The
-shuffle is the only randomness in the game; a draw is taking the top card and is
+shuffle and random card selections use the seeded stream; a draw takes the top card and is
 not random. Setting a library order is therefore an ordinary edit, which is how
 a benchmark stacks a deck, and nothing downstream needs to know it happened.
 

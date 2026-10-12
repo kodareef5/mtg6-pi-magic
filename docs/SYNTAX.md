@@ -952,3 +952,11 @@ begins. Creating it during an end step waits for the next occurrence, even an
 additional end step that turn. A skipped step does not expire it. Normal timing
 and land limits still apply. [Inti](examples/end-step-permissions.md) combines
 this duration with a separate optional discard and reflexive attack trigger.
+
+`choose.random: true` samples without replacement through the game seed when
+the actor carries out that instruction. It binds physical objects, including
+separate copies of one card, without revealing or moving them or starting a
+search. Use a following move for a simultaneous random discard. Hidden
+identity predicates still require earned knowledge; anonymous scoped sampling
+does not grant a look. Random selection has a fixed count and cannot combine
+with `upTo` or `reveal`. See [random selections](examples/random-selection.md).

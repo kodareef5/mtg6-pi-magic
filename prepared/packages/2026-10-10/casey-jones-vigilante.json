@@ -1,0 +1,65 @@
+{
+	"card": "Casey Jones, Vigilante",
+	"generated": "2026-10-10",
+	"source": "6999f60977ceffbd2eeb920c07128eaeecc07cd9445dfcc93bb33a791bce34bc",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Casey Jones, Vigilante",
+		"registers": [
+			{
+				"kind": "watch",
+				"basis": "When Casey Jones enters, draw three cards. At the beginning of your next upkeep, discard three cards at random.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 3
+						},
+						{
+							"do": "delay",
+							"event": {
+								"on": "step",
+								"step": "upkeep",
+								"whose": "you"
+							},
+							"effect": {
+								"instructions": [
+									{
+										"do": "choose",
+										"who": "you",
+										"from": {
+											"zones": [
+												"hand"
+											],
+											"owner": "you"
+										},
+										"count": 3,
+										"random": true,
+										"as": "discarded"
+									},
+									{
+										"do": "move",
+										"what": "bound:discarded",
+										"to": "graveyard",
+										"reason": "discard"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true
+	}
+}

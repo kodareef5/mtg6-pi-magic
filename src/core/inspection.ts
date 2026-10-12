@@ -18,13 +18,17 @@ export const selectionExtent = (selector: Selector): Selector => ({ zones: selec
 /** A selector's identity predicates cannot establish permission to read hidden cards.
  * Library selection declares a search of an explicitly scoped library. Other private
  * selections require an earlier look, even when their hidden cards would not match. */
-export function selectionBlock(table: Table, scope: Scope, from: Selector, who: number): string | undefined {
+export function selectionBlock(table: Table, scope: Scope, from: Selector, who: number, random = false): string | undefined {
+	// Anonymous random selection does not grant a look. Hidden predicates still need earned knowledge.
+	const anonymous = (selector: Selector): boolean => Object.entries(selector).every(([key, value]) =>
+		["zones", "owner", "controller", "is"].includes(key) || ["any", "all"].includes(key) && (value as Selector[]).every(anonymous));
+	if (random && selectionScoped(from) && anonymous(from)) return;
 	const visible = new Set((project(table, who).objects ?? []).filter((one) => !one.faceDown || one.card).map((one) => `${one.id}@${one.incarnation}`));
 	const range = selectionExtent(from);
 	if (!selectionScoped(from) && scope.world.objects.some((one) => one.zone === "library" &&
 		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined)))
 		return "Selection reaches unseen cards without naming whose library to search or an inspected binding. State owner, controller or is explicitly; no card identities were shown.";
-	return scope.world.objects.some((one) => (one.zone !== "library" || one.faceDown) && one.zone !== "battlefield" && !visible.has(`${one.id}@${one.incarnation}`) &&
+	return scope.world.objects.some((one) => (random || one.zone !== "library" || one.faceDown) && one.zone !== "battlefield" && !visible.has(`${one.id}@${one.incarnation}`) &&
 		matches(scope, { ...one, card: undefined, token: undefined, ability: undefined, faceDown: true }, range, undefined))
 		? "Selection reaches unseen cards. Look at the other hand or hidden cards explicitly before selecting them; no card identities were shown." : undefined;
 }
