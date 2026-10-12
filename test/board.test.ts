@@ -32,7 +32,13 @@ test("a spectator sees hand sizes and the public board; a seat also sees its own
 	assert.equal(snap(table, 1).seats[0]!.handCards, undefined, "the opponent does not");
 });
 
-test("attackers are marked, and the stack lists its items top first with their targets", () => {
+/** The preset itself accepts a scene, when cardboard-api is installed: a wrong reference is refused there, not drawn wrong. */
+async function accepted(scene: unknown) {
+	const Tabletop = await import("cardboard-api/tabletop.mjs" as string).then((one) => one.default, () => null);
+	if (Tabletop) Tabletop.validate(Tabletop.normalize(scene));
+}
+
+test("attackers are marked, and the stack lists its items top first with their targets", async () => {
 	const table = matchup("board-combat");
 	const chocobo = establish(table, 0, "Sazh's Chocobo", []);
 	for (let guard = 0; guard < 3000; guard++) {
@@ -42,7 +48,14 @@ test("attackers are marked, and the stack lists its items top first with their t
 		apply(table, decision.situation === "pregame" ? "keep" : quiet(decision.options).id, "engine", "forced");
 	}
 	apply(table, `attack:${chocobo.id}`, "model", "chosen"); apply(table, "attack:done", "model", "chosen");
-	assert.equal(snap(table, "spectator").seats[0]!.battlefield.find((one) => one.id === chocobo.id)!.attacking, true);
+	const fight = snap(table, "spectator");
+	assert.equal(fight.seats[0]!.battlefield.find((one) => one.id === chocobo.id)!.attacking, true);
+	assert.deepEqual(fight.combat, [{ attacker: chocobo.id, defending: 1, blockers: [] }]);
+	const declared = cardboardScene(fight, new Map(), { width: 800, height: 600 }).view.mtg;
+	const field = fight.seats[0]!.battlefield.filter((one) => !one.types.includes("land"));
+	assert.deepEqual(declared.combat, [{ attacker: { playerId: "p0", zoneId: "battlefield", index: field.findIndex((one) => one.id === chocobo.id) }, defenderId: "p1", blockers: [] }]);
+	assert.equal(declared.phase, "combat");
+	await accepted(cardboardScene(fight, new Map(), { width: 800, height: 600 }));
 
 	const shock = matchup("board-stack");
 	const target = establish(shock, 0, "Sazh's Chocobo", []);
@@ -53,11 +66,13 @@ test("attackers are marked, and the stack lists its items top first with their t
 	const stack = snap(shock, "spectator").stack;
 	assert.equal(stack.length, 1);
 	assert.deepEqual([stack[0]!.name, stack[0]!.controller, stack[0]!.targets], ["Shock", 1, [target.id]]);
-	const scene = cardboardScene(snap(shock, "spectator"), new Map([["Shock", "scryfall-shock"]]), { width: 800, height: 600 });
+	const scene = cardboardScene(snap(shock, "spectator"), artIds(), { width: 800, height: 600 });
 	assert.ok(scene.extras.highlights.some((one) => (one as { preset: string }).preset === "arcane"), "the stack's target glows");
+	assert.deepEqual(scene.view.mtg.stack, [{ playerId: "p1", zoneId: "stack", index: 0 }], "the stack is referenced top first");
+	await accepted(scene);
 });
 
-test("the cardboard scene keeps hidden zones as counts and carries art ids and annotations", () => {
+test("the cardboard scene keeps hidden zones as counts and carries art ids and annotations", async () => {
 	const table = matchup("board-scene");
 	main(table, 0, 3);
 	const [forest] = place(table, 0, "battlefield", "Forest");
@@ -70,6 +85,15 @@ test("the cardboard scene keeps hidden zones as counts and carries art ids and a
 	assert.equal(hand.count, snap(table, "spectator").seats[0]!.hand);
 	assert.ok(scene.decks[0]!.cards.some((card) => card.name === "Forest" && card.scryfallId === art.get("Forest")));
 	assert.ok(scene.extras.cards.some((one) => (one as { tapped?: boolean }).tapped), "the tapped Forest is annotated");
+	const battlefield = green.zones.find((zone) => zone.id === "battlefield")!;
+	assert.deepEqual(scene.view.mtg.lands.p0!.map((at) => battlefield.cardIds[at]), battlefield.cardIds.filter((id) => id === "c-forest"), "lands sit on the land rail");
+	assert.deepEqual([scene.view.mode, scene.view.viewerId], ["overview", null]);
+	place(table, 0, "hand", "Llanowar Elves");
+	const mine = cardboardScene(snap(table, 0), art, { width: 800, height: 600 }), own = mine.players[0]!.zones.find((zone) => zone.id === "hand")!;
+	assert.deepEqual([mine.view.mode, mine.view.viewerId, own.visibility], ["player", "p0", "owner"]);
+	assert.ok(own.cardIds.includes("c-llanowar-elves"), "the seat's picture shows its own hand");
+	assert.equal(mine.players[1]!.zones.find((zone) => zone.id === "hand")!.visibility, "hidden");
+	await accepted(scene); await accepted(mine);
 });
 
 test("an SVG becomes a PNG with no browser", async () => {

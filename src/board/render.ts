@@ -21,6 +21,6 @@ export async function svgToPng(svg: string): Promise<Uint8Array> {
 	return new Resvg(svg, { font: { loadSystemFonts: true } }).render().asPng();
 }
 
-export async function boardPng(renderer: BoardRenderer, snapshot: BoardSnapshot, size: BoardSize = { width: 1600, height: 1200 }): Promise<Uint8Array> {
+export async function boardPng(renderer: BoardRenderer, snapshot: BoardSnapshot, size: BoardSize = { width: 1920, height: 1080 }): Promise<Uint8Array> {
 	return svgToPng(await renderer.svg(snapshot, size));
 }

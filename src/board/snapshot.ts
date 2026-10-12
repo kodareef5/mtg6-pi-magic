@@ -38,6 +38,8 @@ export type BoardSnapshot = {
 	turn?: number; active?: SeatId; step?: string; finished?: true;
 	seats: BoardSeat[];
 	stack: BoardStackItem[];
+	/** Who attacks whom and what blocks each attacker, by object id, from declaration to the end of combat. */
+	combat?: { attacker: string; defending: SeatId; blockers: string[] }[];
 };
 
 /** `seats` names each seat and its deck; the view supplies everything else. */
@@ -71,5 +73,7 @@ export function boardSnapshot(view: View, seats: readonly { id: SeatId; name: st
 		stack: objects.filter((one) => one.zone === "stack").sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).map((one) => ({
 			...card(one), controller: one.controller, ...(one.ability?.claim ? { claim: one.ability.claim } : {}),
 			targets: (one.ability?.targets ?? []).flat().map((aim) => "player" in aim ? { player: aim.player } : aim.id) })),
+		...(combat?.attackers.length ? { combat: combat.attackers.map((one) => ({ attacker: one.id, defending: one.defending,
+			blockers: combat.blockers.filter((block) => block.blocking.some((ref) => ref.id === one.id && ref.incarnation === one.incarnation)).map((block) => block.id) })) } : {}),
 	};
 }

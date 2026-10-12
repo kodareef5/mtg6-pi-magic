@@ -552,7 +552,7 @@ src/seating/           protocol and validation; sockets unfinished
 src/board/             board pictures: no game logic, never read by a seat
   snapshot.ts          the board as one viewer may see it, renderer-neutral and pure
   render.ts            the renderer seam, the art map, and SVG to PNG through resvg
-  cardboard.ts         the interim renderer: a snapshot as a cardboard-api scene (optional dependency)
+  cardboard.ts         the interim renderer: a snapshot as a cardboard-api MTG 26 scene (optional dependency)
   feed.ts              one picture per turn and at the end, drawn off the game loop and saved
 tools/cards.ts         build a card list from Scryfall, any format or all of it
 tools/card-names.ts    build the Oracle name companion from a matching cached bulk snapshot
