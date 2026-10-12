@@ -58,6 +58,20 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	};
 	const begin = (card: string) => nextDecision(table)!.options.find((one) => one.announcement?.procedure.source.card === card)!;
 	const cast = begin("Song of Totentanz"), physical = structuredClone([...table.things]), log = table.log.length, priority = table.cursor.priority;
+	// An existing plan for a later window does not invent choices for this use.
+	const unassigned = structuredClone(table);
+	editWork(unassigned, 0, [{ do: "plan.put", plan: { objective: "Hold resources for their turn", guidance: "Audit rationale only", steps: [],
+		phases: [{ when: { active: "opponent" }, guidance: "Keep mana until an attacker needs an answer." }] } }], "later-window-policy");
+	const beforeQuestion = structuredClone(unassigned), unassignedFrame = workFrame(unassigned, 0);
+	assert.match(question(focus(unassignedFrame, startingIntent(0)), false).instructions, /No unfinished step, branch or phase policy applies/);
+	assert.deepEqual(unassigned, beforeQuestion, "checking policy coverage changes no physical or private state");
+	apply(unassigned, cast.id, "model", "chosen"); apply(unassigned, "announce:x:2", "model", "chosen"); apply(unassigned, "announce:cost:0", "model", "chosen");
+	const unassignedPacket = focus(workFrame(unassigned, 0), startingIntent(0)), unassignedQuestion = question(unassignedPacket, false);
+	assert.match(unassignedQuestion.instructions, /No current step, branch or phase policy supplies this use's choices/);
+	assert.doesNotMatch(unassignedQuestion.instructions, /Read its target and payment policy/);
+	assert.ok(unassignedPacket.options.some(one => one.id.startsWith("announce:payment:")));
+	assert.ok(unassignedPacket.options.some(one => one.id === "announce:individual"));
+	assert.ok(unassignedPacket.options.every(one => Object.hasOwn(unassignedQuestion.criteria, one.id)), "policy facts remove no choice");
 	assert.equal(nextDecision(table)!.options.filter((one) => one.announcement?.procedure.source.card === "Song of Totentanz").length, 1);
 	pick(cast.id); checkpoint();
 	assert.equal(table.log.length, log, "draft choices are ledger rows, not game events");
@@ -99,6 +113,7 @@ test("announcements preserve private choices, costs, plan intent and every saved
 	assert.equal(table.ledger.at(-1)!.execution, undefined); assert.equal(table.ledger.at(-1)!.preparing!.plan, revision);
 	assert.deepEqual(project(table, 0).done, [], "selecting a use has not executed the step");
 	assert.match(JSON.stringify(focus(workFrame(table, 0), startingIntent(0)).plan), /Target Voice of Victory/);
+	assert.match(question(focus(workFrame(table, 0), startingIntent(0)), false).instructions, /Read its target and payment policy/);
 	editWork(table, 0, [{ do: "plan.put", plan: { objective: "Changed plan", guidance: "New future work.", steps: [], throughTurn: 1 } }], "later-plan");
 	assert.match(JSON.stringify(focus(workFrame(table, 0), startingIntent(0)).plan), /Target Voice of Victory/, "the selected use retains its original execution policy");
 	pick(`announce:target:${voice.id}@${voice.incarnation}`); checkpoint();

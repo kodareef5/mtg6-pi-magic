@@ -252,17 +252,20 @@ export function question(packet: Packet, help: boolean, order?: { by: "plan" | "
 	const search = instruction?.do === "choose" && instruction.from.zones?.length === 1 && instruction.from.zones[0] === "library" &&
 		!instruction.from.is && !instruction.from.linked && packet.resolution?.program.some((one) => one.instruction.do === "shuffle" && one.instruction.who === instruction.who);
 	const options = packet.options, stacked = packet.objects.some((one) => one.zone === "stack");
+	const policy = packet.plan && (packet.plan.due || packet.plan.branches?.length || packet.plan.script?.guidance?.length ||
+		packet.plan.script?.steps?.some(one => !one.startsWith("Done:")));
 	const instructions = [packet.obligation,
 		// Stated in placement order: the trigger named first is the one that goes on now.
 		...(order && order.placement.length > 1 ? [`${order.by === "plan" ? "Your plan's trigger order" : "Your stated order"} puts your waiting triggers on the stack in this order: ${placed(order.placement, order.aim)}. ${order.kept === false ? `No listed option puts ${order.placement[0]} on aiming at ${order.aim ?? "the target your plan names"}.` : "The option that keeps it says so."}`] : []),
 		...(packet.kind === "trigger-order" && packet.plan ? ["Choose targets as your plan gives them."] : []),
 		"Choose one id from the criteria. Each criterion says what that option does and what your plan says about it.",
 		...orientation(packet),
-		...(packet.preparing ? [`You are selecting one part of an already chosen use.${packet.plan ? " Its target and payment policy is in state.plan." : ""} The complete use is confirmed after its parts are selected.`,
+		...(packet.plan && !policy && packet.kind === "priority" ? ["No unfinished step, branch or phase policy applies in this window. The plan still names its later work and reserved resources; an available action is not a new instruction from the plan."] : []),
+		...(packet.preparing ? [`You are selecting one part of an already chosen use.${policy ? " Read its target and payment policy in state.plan." : " No current step, branch or phase policy supplies this use's choices. Cancel returns to priority without spending anything."} The complete use is confirmed after its parts are selected.`,
 			...(packet.preparing.stage === "mana-taps" ? ["Select the tap payments specified by the plan, then finish selecting. Each selected permanent replaces one generic mana within the stated limit. It cannot also tap for mana. Nothing is spent until final confirmation; this does not choose a payment for you."] : []),
 			...(packet.preparing.stage === "sacrifices" ? ["Select the sacrifices specified by the plan, then finish selecting. Finishing selects the total cost next; it does not spend anything. The discount never pays a colored or colorless symbol, and more sacrifices need not improve the price."] : []),
 			...(packet.preparing.stage === "mana" ? [packet.preparing.payments
-				? "Each complete-payment option confirms the selected use, spends exactly its named resources and shows what remains available. Follow the plan's payment and reservations. Choose sources individually opens all source and mana-ability choices without spending anything. A complete payment does not guarantee the spell resolves."
+				? "Each complete-payment option confirms the selected use, spends exactly its named resources and shows what remains available. Follow the plan's payment and reservations. Choose sources individually changes the selection method for the same cost and available resources; it does not avoid spending a reserved source. A complete payment does not guarantee the spell resolves."
 				: "state.preparing shows the selected sources and unpaid mana. Add to payment keeps those sources and selects one more. Undo selection removes a source. Confirm spends the complete payment; no source is spent during selection."] : [])] : []),
 		...(packet.window.kind === "turn" && !packet.resolving && packet.kind !== "trigger-order" ? [stacked
 			? "The stack is not empty, so lands and sorcery-speed actions wait until it is; their absence now is no reason to ask for help. An object on the stack has not resolved yet; using its card again starts another use."

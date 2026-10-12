@@ -145,6 +145,12 @@ finish that menu, it offers individual-source selection. The seat can also
 choose that route explicitly, retaining every physical identity and mana ability.
 Payment warnings name each held resource separately. Both complete and individual
 choices carry those marks. Opening the individual menu records no plan progress.
+A selected use can have no applicable plan step, branch or phase policy. The
+pilot question states that absence; it does not claim a payment policy exists.
+Individual selection changes the selection method for the same resources and
+cost. The strategist writes any own-turn waiting policy in a matching phase;
+a precombat pass step does not instruct later combat or main-phase decisions.
+
 The pilot reads the complete payments directly at this stage; it does not inspect
 the already selected use again before seeing them.
 Historical inspection menus factor shared holds across payment combinations.
