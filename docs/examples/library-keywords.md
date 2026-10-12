@@ -51,3 +51,91 @@ amount zero or one. Exploration still completes with an empty library.
 Several permanents exploring at once require APNAP ordering choices (701.44d);
 the current instruction refuses that group before revealing anything. The
 Map and Amalia examples each name one permanent.
+
+Maps made by Get Lost and Restless Anchorage use the same explore instruction
+as Spyglass Siren. A hand-written reveal and counter sequence can produce the
+right card movements while omitting exploration completion. Use the shared
+operation so a later explore watcher also sees it.
+
+```json procedure
+{
+  "claim": "Cast Get Lost to destroy a target creature, enchantment, or planeswalker; its controller creates two Map tokens.",
+  "basis": "Destroy target creature, enchantment, or planeswalker. Its controller creates two Map tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
+  "source": {
+    "card": "Get Lost",
+    "zones": [
+      "hand",
+      "graveyard",
+      "exile"
+    ],
+    "controller": "any"
+  },
+  "timing": "spell",
+  "cost": {
+    "mana": "{1}{W}"
+  },
+  "targets": [
+    {
+      "object": {
+        "types": [
+          "creature",
+          "enchantment",
+          "planeswalker"
+        ]
+      }
+    }
+  ],
+  "instructions": [
+    {
+      "do": "destroy",
+      "what": "target:0"
+    },
+    {
+      "do": "token",
+      "count": 2,
+      "controller": "controller:target:0",
+      "spec": {
+        "name": "Map Token",
+        "types": [
+          "artifact"
+        ],
+        "subtypes": [
+          "Map"
+        ],
+        "colors": [],
+        "registers": [
+          {
+            "kind": "activated",
+            "basis": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.",
+            "cost": {
+              "mana": "{1}",
+              "tap": true,
+              "sacrifice": "this"
+            },
+            "speed": "sorcery",
+            "effect": {
+              "targets": [
+                {
+                  "object": {
+                    "types": [
+                      "creature"
+                    ],
+                    "controller": "you"
+                  }
+                }
+              ],
+              "instructions": [
+                {
+                  "do": "keyword",
+                  "name": "explore",
+                  "what": "target:0"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```

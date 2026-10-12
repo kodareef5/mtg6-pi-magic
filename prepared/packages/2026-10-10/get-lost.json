@@ -3,13 +3,10 @@
 	"generated": "2026-10-10",
 	"source": "5d8309f6cc1dedaa831948bdaab5a7f2ed100275d4b058a65e2df1d2f2822767",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Get Lost",
 		"registers": [],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
 				"claim": "Cast Get Lost to destroy a target creature, enchantment, or planeswalker; its controller creates two Map tokens.",
 				"basis": "Destroy target creature, enchantment, or planeswalker. Its controller creates two Map tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
@@ -22,8 +19,76 @@
 					],
 					"controller": "any"
 				},
-				"timing": "spell"
+				"timing": "spell",
+				"cost": {
+					"mana": "{1}{W}"
+				},
+				"targets": [
+					{
+						"object": {
+							"types": [
+								"creature",
+								"enchantment",
+								"planeswalker"
+							]
+						}
+					}
+				],
+				"instructions": [
+					{
+						"do": "destroy",
+						"what": "target:0"
+					},
+					{
+						"do": "token",
+						"count": 2,
+						"controller": "controller:target:0",
+						"spec": {
+							"name": "Map Token",
+							"types": [
+								"artifact"
+							],
+							"subtypes": [
+								"Map"
+							],
+							"colors": [],
+							"registers": [
+								{
+									"kind": "activated",
+									"basis": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.",
+									"cost": {
+										"mana": "{1}",
+										"tap": true,
+										"sacrifice": "this"
+									},
+									"speed": "sorcery",
+									"effect": {
+										"targets": [
+											{
+												"object": {
+													"types": [
+														"creature"
+													],
+													"controller": "you"
+												}
+											}
+										],
+										"instructions": [
+											{
+												"do": "keyword",
+												"name": "explore",
+												"what": "target:0"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
 			}
-		]
+		],
+		"assessed": true,
+		"deferred": []
 	}
 }
