@@ -77,7 +77,11 @@ seat still chooses its pass.
 
 Finishing an attacker declaration names the available ordered attack steps it
 would leave unfinished. Their choices remain offered, including finishing;
-optional branches create no obligation.
+optional branches create no obligation. An attack step whose objects match
+several creatures names a set: after its first pick it stays open through the
+same declaration until each creature it matches is picked or can no longer
+attack. Finishing is not one of its choices, and a finished declaration closes
+it, so "Attack with the Rats" does not end after the first Rat.
 
 Pending attack and block selections can be withdrawn before finishing. Their
 original ledger rows remain, but withdrawn rows supply neither completed steps
