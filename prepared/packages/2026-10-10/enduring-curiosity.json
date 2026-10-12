@@ -1,0 +1,92 @@
+{
+	"card": "Enduring Curiosity",
+	"generated": "2026-10-10",
+	"source": "f227460c287542c094db2869b434860c0c5783cdd07a85cadf630a83926092a6",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Enduring Curiosity",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flash",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"hand",
+						"graveyard",
+						"exile",
+						"library",
+						"command",
+						"outside",
+						"stack",
+						"battlefield"
+					]
+				},
+				"change": {
+					"words": [
+						"flash"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever a creature you control deals combat damage to a player, draw a card.",
+				"event": {
+					"on": "combat-damage",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you"
+					},
+					"player": true
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "draw",
+							"who": "you",
+							"count": 1
+						}
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Enduring Curiosity dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.)",
+				"event": {
+					"on": "dies",
+					"of": {
+						"is": "this",
+						"types": [
+							"creature"
+						]
+					}
+				},
+				"effect": {
+					"instructions": [
+						{
+							"do": "move",
+							"what": "event:object",
+							"to": "battlefield",
+							"controller": "owner:event:object",
+							"reason": "resolve",
+							"change": {
+								"types": {
+									"set": [
+										"enchantment"
+									]
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

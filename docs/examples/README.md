@@ -20,6 +20,7 @@ schemas, and every `basis` is checked against the card's text.
 | `card-names.md` | choose and retain an Oracle card name, including out-of-format cards and individual faces, then match it in a continuous effect |
 | `activation-restrictions.md` | prohibit abilities by source, preserve a mana exception, and recheck mana payments through the layers |
 | `triggers.md` | landfall, enters with a target, step beginnings, dies, attacks, cast, reflexive "when you do" |
+| `entry-effects.md` | return as an enchantment; characteristic effects applied with entry under 611.2e |
 | `counter-watches.md` | counter placements, entry counters and crossing an Nth-counter threshold |
 | `resolution-counts.md` | Belladonna Took's first, second and third completed ability resolutions in a turn |
 | `counter-destinations.md` | No More Lies counters directly into exile unless its controller pays |

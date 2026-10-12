@@ -49,13 +49,14 @@ export function creatureTypeChoices(): string[] {
 	return creatureTypes ??= [text.match(/two words long: ([^.]+)\./)![1]!, ...text.match(/one word long: (.*)\.$/)![1]!.replace(/, and /, ", ").split(/,\s*/)].sort();
 }
 /** Subtypes by the card type they belong to, read from 205.3g-k in the pinned rules. */
-export function subtypesOf(kind: "artifact" | "enchantment" | "land" | "planeswalker" | "spell"): Set<string> {
+export function subtypesOf(kind: "artifact" | "enchantment" | "land" | "planeswalker" | "spell" | "battle"): Set<string> {
 	if (!categories) {
 		shippedRules ??= loadRules(join(import.meta.dirname, "..", "..", "rules", "cr.tsv"));
 		const rules = shippedRules;
 		const listed = (ref: string) => new Set((rule(rules, ref).text.match(/types are (.*?)\.(?: Of that list|$)/)?.[1] ?? "")
 			.replace(/\s*\(see rules? [^)]*\)/g, "").replace(/,? and /, ", ").split(/,\s*/).map((one) => one.trim().toLowerCase()).filter(Boolean));
-		categories = { artifact: listed("205.3g"), enchantment: listed("205.3h"), land: listed("205.3i"), planeswalker: listed("205.3j"), spell: listed("205.3k") };
+		categories = { artifact: listed("205.3g"), enchantment: listed("205.3h"), land: listed("205.3i"), planeswalker: listed("205.3j"), spell: listed("205.3k"),
+			battle: new Set([rule(rules, "205.3q").text.match(/type is ([^.]+)\./)![1]!.toLowerCase()]) };
 	}
 	return categories[kind]!;
 }
@@ -183,8 +184,19 @@ function layers(world: World, now: Map<string, Traits>, field: Seen[], announced
 
 	// Layer 4: types. Setting a land's subtypes removes the abilities its own text gave it (305.7).
 	each((change, traits, inner) => {
-		if (change.types?.set) traits.types = [...change.types.set];
+		const prior = traits.types;
+		if (change.types?.set) traits.types = [...new Set([...change.types.set, ...prior.filter(type => type === "instant" || type === "sorcery")])];
 		if (change.types?.add) traits.types = [...new Set([...traits.types, ...change.types.add])];
+		// 205.1a: losing a card type also loses its correlated subtypes, unless
+		// another retained type shares that set (creature/kindred, instant/sorcery).
+		for (const lost of prior.filter(type => !traits.types.includes(type))) {
+			if (lost === "creature" || lost === "kindred") {
+				if (!traits.types.some(type => type === "creature" || type === "kindred")) {
+					traits.subtypes = traits.subtypes.filter(type => !creatureType(type)); delete traits.allCreatureTypes;
+				}
+			} else if (["artifact", "enchantment", "land", "planeswalker", "battle"].includes(lost))
+				traits.subtypes = traits.subtypes.filter(type => !subtypesOf(lost as "artifact" | "enchantment" | "land" | "planeswalker" | "battle").has(type.toLowerCase()));
+		}
 		const subtypes = change.subtypes;
 		if (!subtypes) return;
 		if (subtypes.set) {
@@ -227,6 +239,8 @@ function layers(world: World, now: Map<string, Traits>, field: Seen[], announced
 	});
 	for (const object of field) {
 		const traits = now.get(object.id);
+		// 208.3: printed numbers and counters do not give a noncreature power or toughness.
+		if (traits && !traits.types.includes("creature")) { delete traits.power; delete traits.toughness; }
 		if (!traits || traits.power === undefined) continue;
 		for (const [kind, count] of Object.entries(object.counters)) {
 			const counter = kind.match(/^([+-]\d+)\/([+-]\d+)$/);

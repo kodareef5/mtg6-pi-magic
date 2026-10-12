@@ -267,6 +267,8 @@ export const Defs = {
 		step({ do: Type.Literal("damage-rule"), mode: DamageMode, combat: Type.Optional(Type.Boolean()), until: Duration }),
 		step({ do: Type.Literal("fight"), a: ObjectRef, b: ObjectRef }),
 		step({ do: Type.Literal("move"), what: Type.Optional(ObjectRef), every: Type.Optional(Type.Ref("Selector")), to: Zone,
+			/** A resolving effect's characteristic change applies with entry (611.2e), until this incarnation leaves. */
+			change: Type.Optional(Type.Ref("Modification")),
 			position: Type.Optional(one("top", "bottom")), tapped: Type.Optional(Type.Literal(true)), face: Type.Optional(Face), faceDown: Type.Optional(Type.Union([Type.Literal(true), Type.Literal("manifest")])),
 			/** Exile until this battlefield incarnation leaves; return immediately to the original zone. */
 			until: Type.Optional(object({ leaves: ObjectRef })),
@@ -275,6 +277,7 @@ export const Defs = {
 			counters: Type.Optional(Type.Record(Type.String(), Type.Ref("Amount"))), controller: Type.Optional(PlayerRef),
 			reason: Reason, link: Type.Optional(Type.Literal(true)) }, { allOf: [
 				{ if: { required: ["countFrom"] }, then: { required: ["as"] } },
+				{ if: { required: ["change"] }, then: { properties: { to: { const: "battlefield" } } } },
 				{ if: { required: ["until"] }, then: { properties: { to: { const: "exile" } } } },
 				{ if: { required: ["faceDown"] }, then: { not: { required: ["face"] }, allOf: [
 					{ if: { properties: { faceDown: { const: "manifest" } } }, then: { properties: { to: { const: "battlefield" } } }, else: { properties: { to: { const: "exile" } } } },

@@ -1,5 +1,5 @@
 /** A permanent registers its seat's package for its name as it enters, by whatever route. */
-import { thing, type Table, type ObjectId, type Thing } from "./table.ts";
+import { thing, type Table, type ObjectId, type Thing, type Note } from "./table.ts";
 import { characteristics } from "./characteristics.ts";
 import { amount, holds, matches, tableWorld, type Scope } from "./selectors.ts";
 import type { Registration } from "./language.ts";
@@ -11,6 +11,20 @@ export const tokenObject = (change: Extract<Change, { do: "token" }>, entered: n
 	id: change.id, incarnation: 0, owner: change.controller, controller: change.controller, zone: "battlefield",
 	tapped: !!change.tapped, faceDown: false, counters: {}, damage: 0, entered, token: structuredClone(change.spec),
 	...(change.choices ? { choices: structuredClone(change.choices) } : {}) });
+
+/** Entry choices read proposed 611.2e labels without committing them. Their
+ * preview still uses the source incarnation so casting facts remain available. */
+export function entryTable(table: Table, changes: Change[]): Table {
+	const notes = changes.flatMap((change, index): Note[] => {
+		if (change.do !== "note" || change.note.kind !== "label") return [];
+		const note = change.note, object = table.things.get(note.on.id);
+		if (!object || note.on.incarnation !== object.incarnation + 1 || !changes.some(one =>
+			one.do === "move" && one.what === object.id && one.to === "battlefield" && object.zone !== "battlefield")) return [];
+		return [{ ...note, on: { id: object.id, incarnation: object.incarnation },
+			id: `entry-label-${index}`, written: table.cursor.clock + 1 }];
+	});
+	return notes.length ? { ...table, notes: [...table.notes, ...notes] } : table;
+}
 
 /**
  * Attach packages to the moves onto the battlefield in one group. Live, they come

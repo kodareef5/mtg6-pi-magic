@@ -307,8 +307,8 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				} else {
 					delete moving.position;
 				}
-				table.notes = table.notes.filter((note) => !(("on" in note && note.on.id === moving.id) ||
-					(note.until === "while-source" && note.source?.id === moving.id)));
+				table.notes = table.notes.filter((note) => !(("on" in note && note.on.id === moving.id && note.on.incarnation !== moving.incarnation) ||
+					(note.until === "while-source" && note.source?.id === moving.id && note.source.incarnation !== moving.incarnation)));
 				break;
 			}
 			case "turn-face-up": {

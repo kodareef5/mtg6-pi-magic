@@ -139,6 +139,9 @@ export function instructionStep(table: Table, scope: Scope, instruction: Instruc
 			const counters = terms?.counters ? Object.fromEntries(Object.entries(terms.counters).map(([kind, value]) => [kind, amount(scope, value)])) : undefined;
 			const controlled = terms?.controller ? players(scope, terms.controller)[0] : undefined;
 			const changes: Change[] = moving.flatMap((object): Change[] => [
+				...(terms?.change && object.zone !== "battlefield" ? [{ do: "note" as const, note: { kind: "label" as const, by: controller,
+					until: "indefinite" as const, on: { id: object.id, incarnation: object.incarnation + 1 }, text: claim,
+					change: captured(scope, terms.change), ...(source ? { source } : {}) } }] : []),
 				{ do: "move", what: object.id, to, reason: (destroy ? "destroy" : terms!.reason) as Reason, ...(terms?.position ? { position: terms.position as "top" | "bottom" } : {}),
 					...(terms?.face !== undefined ? { face: terms.face } : {}),
 					...(terms?.faceDown ? { faceDown: terms.faceDown } : {}),

@@ -95,14 +95,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Enduring Curiosity": {
-		"reason": "Enduring Curiosity is not ready: When Enduring Curiosity dies, if it was a creature, return it to the battlefield under its owner's control. It's an enchantment. (It's not a creature.) — The return must apply the enchantment-only type-changing continuous effect simultaneously with entry (611.2e). The supplied move and enters syntax cannot apply that type change as part of the return; a subsequent modify would incorrectly let it enter as a creature.",
-		"decks": [
-			"Dimir Midrange"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Forsaken Miner": {
 		"reason": "Forsaken Miner is not ready: Whenever you commit a crime, you may pay {B}. If you do, return this card from your graveyard to the battlefield. (Targeting opponents, anything they control, and/or cards in their graveyards is a crime.) — Cannot prepare this standing graveyard trigger: the available watch syntax cannot register an ability active in the graveyard or detect committing a crime once per spell cast, ability activation, or triggered ability put on the stack, including targeting opposing players, spells, and abilities. A targeted-object watch would not faithfully represent that event.",
 		"decks": [

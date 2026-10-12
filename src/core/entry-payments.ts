@@ -6,9 +6,9 @@ import type { Change, Reason } from "./syntax.ts";
 import type { Pending } from "./moves.ts";
 import { holds, tableWorld } from "./selectors.ts";
 import { activeFaces } from "./faces.ts";
-import { basicLandTypes, creatureTypeChoices } from "./characteristics.ts";
+import { basicLandTypes, creatureTypeChoices, characteristics } from "./characteristics.ts";
 import { paymentChoices } from "./costs.ts";
-import { tokenObject } from "./entry.ts";
+import { tokenObject, entryTable } from "./entry.ts";
 import { entryCopy, copiedTriggers } from "./entry-copies.ts";
 import type { ObjectRef } from "./types.ts";
 import type { Effect } from "./language.ts";
@@ -24,12 +24,13 @@ function requirements(table: Table, changes: Change[]) {
 		const object = change.do === "token" ? tokenObject(change, table.cursor.clock + 1) : table.things.get(change.what)!;
 		const who = change.controller ?? object.owner;
 		const source = { ...object, zone: "battlefield" as const, controller: who, face: change.do === "move" ? change.face ?? (object.zone === "stack" ? object.face ?? 0 : 0) : 0 as const,
-			...(change.do === "move" && change.copied ? { copied: change.copied } : {}) };
+			...(change.do === "move" ? { registrations: change.registers ?? [] } : {}),
+			...(change.do === "move" && change.copied ? { copied: change.copied, registrations: [] } : {}) };
 		const printed = object.card ? table.printed[object.card] : undefined;
 		const active = printed ? activeFaces(printed, source) : [0];
 		const world = tableWorld(table);
 		world.objects = [...world.objects.filter(one => one.id !== object.id), source];
-		const terms = (change.do === "token" ? change.spec.registers ?? [] : change.copied?.spec.registers ?? change.registers ?? []).filter((one) => one.kind === "enters" && !one.affects &&
+		const terms = (characteristics(table, source)?.registrations ?? []).filter((one) => one.kind === "enters" && !one.affects &&
 			(one.face === undefined || active.includes(one.face)) && (!one.if || holds({ world, controller: who, source }, one.if)));
 		const choose = terms.flatMap((one) => one.kind === "enters" && one.choose && change.choices?.[one.choose.as] === undefined ? [one.choose] : []);
 		const payment = terms.find((one) => one.kind === "enters" && one.unlessPay && change.entry === undefined);
@@ -45,7 +46,8 @@ const pending = (entry: Entry, one: Requirement) => unanswered(entry, one) || (o
 /** An accepted instruction waits without splitting its physical event. */
 export function beforeEntry(table: Table, changes: Change[], reason: Reason): Change[] {
 	const entry: Entry = { changes, reason, clock: table.cursor.clock, choices: {} };
-	return requirements(table, changes).length || entryCopy(table, entry) ? [{ do: "entry", entry }] : changes;
+	const preview = entryTable(table, changes);
+	return requirements(preview, changes).length || entryCopy(preview, entry) ? [{ do: "entry", entry }] : changes;
 }
 
 function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
@@ -73,9 +75,10 @@ function answered(table: Table, entry: Entry, all: Requirement[]): Change[] {
 export function entryPayment(table: Table): Pending | null {
 	const entry = table.entry;
 	if (!entry) return null;
-	const copying = entryCopy(table, entry);
+	const preview = entryTable(table, entry.changes);
+	const copying = entryCopy(preview, entry);
 	if (copying) return copying;
-	const all = requirements(table, entry.changes), next = all.find((one) => pending(entry, one));
+	const all = requirements(preview, entry.changes), next = all.find((one) => pending(entry, one));
 	if (!next) return { situation: "replacement-order", seat: table.cursor.active, question: "Apply the prepared entry group.",
 		moves: [{ option: { id: "entry:finish", label: "Complete the entry group" }, changes: answered(table, entry, all), reason: entry.reason }] };
 	const choice = unanswered(entry, next), cards = next.object.card ? [next.object.card] : [], name = next.object.card ?? next.object.token!.name;
