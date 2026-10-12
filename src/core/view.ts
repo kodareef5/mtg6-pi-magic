@@ -333,7 +333,7 @@ export function describe(table: Table, receipt: Receipt, viewer: Viewer = "spect
 				break;
 			case "damage": {
 				const source = typeof change.source === "string" ? change.source : change.source.id;
-				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount}${change.combat ? " combat" : ""} damage from ${publicName(receipt.before[source])}${change.prevented ? ` (${change.prevented} prevented)` : ""}`);
+				parts.push(`${"player" in change.target ? seat(table, change.target.player).name : publicName(receipt.before[change.target.id])} took ${change.amount}${change.combat ? " combat" : ""} damage from ${publicName(receipt.before[source])}${change.prevented ? ` (${change.prevented} prevented)` : ""}${change.healed ? `; ${change.healed} earlier damage healed` : ""}`);
 				break;
 			}
 			case "activate":

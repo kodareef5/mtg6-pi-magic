@@ -363,11 +363,14 @@ export const Defs = {
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), activate: Type.Ref("Selector"), reduce: positive, if: Type.Optional(Type.Ref("Condition")) }),
 		/** A fixed increase to an entire draw instruction, before individual draws (121.2a). */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("draw-rule"), who: PlayerRef, additional: positive, if: Type.Optional(Type.Ref("Condition")) }),
-		/** Prevent matching damage, forbid prevention or add a fixed positive amount. */
-		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: Type.Union([DamageMode, Type.Literal("add")]), amount: Type.Optional(positive),
+		/** Replace damage by prevention, a fixed addition or healing damage from earlier events. */
+		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: Type.Union([DamageMode, Type.Literal("add"), Type.Literal("heal")]), amount: Type.Optional(positive),
 			combat: Type.Optional(Type.Boolean()), from: Type.Optional(Type.Ref("Selector")),
 			to: Type.Optional(Type.Union([object({ object: Type.Ref("Selector") }), object({ player: PlayerRef })])), if: Type.Optional(Type.Ref("Condition")) },
-			{ additionalProperties: false, if: { properties: { mode: { const: "add" } }, required: ["mode"] }, then: { required: ["amount"] }, else: { not: { required: ["amount"] } } }),
+			{ additionalProperties: false, allOf: [
+				{ if: { properties: { mode: { const: "add" } }, required: ["mode"] }, then: { required: ["amount"] }, else: { not: { required: ["amount"] } } },
+				{ if: { properties: { mode: { const: "heal" } }, required: ["mode"] }, then: { required: ["to"], properties: { to: { required: ["object"] } } } },
+			] }),
 		/** Chapter numbers are supplied by the assessment; the table never parses Roman numerals. */
 		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("chapter"), numbers: Type.Array(positive, { minItems: 1, uniqueItems: true }), effect: Type.Ref("Effect") }),
 		/** Extra instances of abilities the matching permanent has, never delayed or reflexive triggers (603.2d). */

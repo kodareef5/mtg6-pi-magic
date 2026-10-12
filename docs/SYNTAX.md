@@ -773,6 +773,12 @@ and survive the creating source. Emblems are neither cards nor permanents and
 have no name, types, mana cost or color. See [emblems](examples/emblems.md).
 Activated emblem abilities and other registration kinds remain unsupported.
 
+Standing damage replacements can use `mode: "heal"` with a `to.object`
+selector to remove earlier marked damage while the incoming event is dealt.
+[Healing damage](examples/healing-damage.md) covers simultaneous sources and
+the affected player's choice when prevention also applies. This does not supply
+a standalone heal instruction or a heal event.
+
 ## Not expressible yet
 
 - Dungeons. No Standard card ventures today.

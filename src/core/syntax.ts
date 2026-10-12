@@ -109,7 +109,9 @@ export type Change =
 	| { do: "increase-speed"; who: SeatId; amount: number }
 	| { do: "add-mana"; who: SeatId; colors: Mana["color"][]; spendOnly?: Selector; spendFrom?: Zone[]; until?: Mana["until"]; spellWords?: string[] }
 	| { do: "spend-mana"; who: SeatId; ids: string[] }
-	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true; prevented?: number; replacements?: string[] }
+	| { do: "damage"; source: string | ObjectRef; target: ObjectRef | { player: SeatId }; amount: number; combat?: true; prevented?: number; replacements?: string[];
+		/** Filled by commit once per recipient: damage from before this simultaneous group that was healed. */
+		healed?: number }
 	| { do: "activate"; what: string; id: string; ability: Activation }
 	| { do: "resolution"; action: "begin"; what: string; source?: ObjectRef; program: Resolution["program"]; illegal: string[]; lost?: boolean;
 		bound?: Resolution["bound"]; optional?: true }

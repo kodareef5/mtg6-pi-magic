@@ -1,15 +1,15 @@
-/** Damage replacement terms, before results (614, 615). Fixed additions and
- * all-damage prevention share ordering; finite shields and multipliers are not represented. */
+/** Damage replacement terms, before results (614, 615). Additions, prevention and
+ * healing earlier marked damage share ordering; finite shields and multipliers are not represented. */
 import { ZONES } from "./language.ts";
 import { holds, matches, players, type World } from "./selectors.ts";
 import type { Change } from "./syntax.ts";
 import type { Note } from "./table.ts";
 
 type Damage = Extract<Change, { do: "damage" }>;
-type Effect = { id: string; label: string; mode: "prevent" | "unpreventable" | "add"; amount?: number };
+type Effect = { id: string; label: string; mode: "prevent" | "unpreventable" | "add" | "heal"; amount?: number };
 
-/** Only fixed positive additions and all-damage prevention are admitted. Their
- * final dealt amount is independent of order; the recorded prevented amount is not. */
+/** Predict dealt amounts only. Prevention totals and healing depend on chosen
+ * replacement order; this preview does not apply either result to the table. */
 export function damageResult(world: World, damage: Damage, source: ReturnType<World["lastKnown"]>): Damage {
 	let result = orderedDamage(world, damage, source);
 	while (result.choices.length) result = orderedDamage(world, { ...damage, replacements: [...result.applied, result.choices[0]!.id] }, source);
@@ -20,18 +20,19 @@ export function damageResult(world: World, damage: Damage, source: ReturnType<Wo
 export function orderedDamage(world: World, damage: Damage, source: ReturnType<World["lastKnown"]>) {
 	const rules = effects(world, damage, source), unpreventable = rules.some(one => one.mode === "unpreventable");
 	const remaining = rules.filter(one => one.mode !== "unpreventable"), applied: string[] = [];
-	let amount = damage.amount, stopped = damage.prevented;
+	let amount = damage.amount, stopped = damage.prevented, heal = false;
 	const apply = (id: string) => {
 		const index = remaining.findIndex(one => one.id === id);
 		if (index < 0 || amount <= 0) throw new Error("The recorded damage replacement no longer applies.");
 		const [one] = remaining.splice(index, 1); applied.push(id);
 		if (one!.mode === "add") amount += one!.amount!;
+		else if (one!.mode === "heal") heal = true;
 		else if (!unpreventable) { stopped = amount; amount = 0; }
 	};
 	for (const id of damage.replacements ?? []) apply(id);
 	while (amount > 0 && remaining.length === 1) apply(remaining[0]!.id);
 	return { damage: { ...damage, amount, ...(stopped === undefined ? {} : { prevented: stopped }),
-		...(damage.replacements ? { replacements: applied } : {}) }, applied, choices: amount > 0 ? remaining : [] };
+		...(damage.replacements ? { replacements: applied } : {}) }, heal, applied, choices: amount > 0 ? remaining : [] };
 }
 
 /** Global rules remain visible after the spell that created them has left the stack. */

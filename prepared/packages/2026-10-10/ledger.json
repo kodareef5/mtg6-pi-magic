@@ -223,13 +223,5 @@
 		],
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
-	},
-	"Wolverine, Fierce Fighter": {
-		"reason": "Wolverine, Fierce Fighter is not ready: If damage would be dealt to Wolverine, instead that damage is dealt, but all other damage already dealt to him is healed. — Unsupported damage replacement: heal previously marked damage while retaining the incoming damage. The available damage-rule and replacement operations cannot express this.",
-		"decks": [
-			"Jund Sacrifice"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
 	}
 }

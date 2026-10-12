@@ -1,0 +1,78 @@
+{
+	"card": "Wolverine, Fierce Fighter",
+	"generated": "2026-10-10",
+	"source": "7695e65a8f15ff60f12f4dd3c1673a7a2e1b160628f3cd52c5a9132dceaf2ab2",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Wolverine, Fierce Fighter",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Haste",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"haste"
+					]
+				}
+			},
+			{
+				"kind": "watch",
+				"basis": "When Wolverine enters, he fights up to one other target creature.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"is": "this"
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"zones": [
+									"battlefield"
+								],
+								"types": [
+									"creature"
+								],
+								"other": true
+							},
+							"upTo": true
+						}
+					],
+					"instructions": [
+						{
+							"do": "fight",
+							"a": "this",
+							"b": "target:0"
+						}
+					]
+				}
+			},
+			{
+				"kind": "damage-rule",
+				"basis": "If damage would be dealt to Wolverine, instead that damage is dealt, but all other damage already dealt to him is healed.",
+				"mode": "heal",
+				"to": {
+					"object": {
+						"is": "this",
+						"zones": [
+							"battlefield"
+						]
+					}
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

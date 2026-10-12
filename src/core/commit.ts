@@ -190,6 +190,7 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 	});
 	// Read the damage sources and recipients before any result changes the group.
 	const damage = new Map<Extract<Change, { do: "damage" }>, { source: ReturnType<typeof damageSource>; target?: Traits }>();
+	const healed = new Set<string>();
 	const world = changes.some((change) => change.do === "damage") ? tableWorld(table) : undefined;
 	changes = changes.map((change) => {
 		if (change.do !== "damage") return change;
@@ -197,9 +198,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 		const source = damageSource(table, change.source), target = "id" in change.target ? table.things.get(change.target.id) : undefined;
 		if ("id" in change.target && (!target || target.incarnation !== change.target.incarnation || target.zone !== "battlefield"))
 			throw new Error("The damage recipient is no longer that permanent.");
-		const result = orderedDamage(world!, change, source);
+		const proposed = { ...change }; delete proposed.healed;
+		const result = orderedDamage(world!, proposed, source);
 		if (result.choices.length) throw new Error("Damage needs its affected player's replacement-order choice before committing.");
 		const applied = result.damage;
+		// Several sources can damage one recipient simultaneously. Heal only the
+		// damage present before that group, once, even if a later effect prevents this hit.
+		if (result.heal && target?.damage && !healed.has(target.id)) { applied.healed = target.damage; healed.add(target.id); }
 		damage.set(applied, { source, target: target ? characteristics(table, target) : undefined });
 		return applied;
 	});
@@ -383,10 +388,13 @@ export function commit(table: Table, changes: Change[], reason: Reason): Receipt
 				seat(table, change.who).pool = seat(table, change.who).pool.filter((mana) => !change.ids.includes(mana.id));
 				break;
 			case "damage": {
-				if (!change.amount) break;
 				if ("player" in change.target) seat(table, change.target.player).life -= change.amount;
 				else {
 					const hurt = thing(table, change.target.id);
+					// A simultaneous departure already cleared that battlefield incarnation.
+					if (hurt.incarnation !== change.target.incarnation || hurt.zone !== "battlefield") break;
+					if (change.healed) hurt.damage = Math.max(0, hurt.damage - change.healed);
+					if (!change.amount) break;
 					const types = damage.get(change)?.target?.types ?? [];
 					if (types.includes("creature")) hurt.damage += change.amount;
 					for (const [type, counter] of [["planeswalker", "loyalty"], ["battle", "defense"]]) if (types.includes(type!)) {
