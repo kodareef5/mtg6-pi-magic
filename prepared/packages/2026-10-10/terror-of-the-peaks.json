@@ -1,0 +1,84 @@
+{
+	"card": "Terror of the Peaks",
+	"generated": "2026-10-10",
+	"source": "dac02a3ab65ddc82bbdc01dc38e25429f09af67dd434c25ccd821fd65ede1c0e",
+	"contract": 1,
+	"model": "gpt-6.1-sol:high",
+	"package": {
+		"card": "Terror of the Peaks",
+		"registers": [
+			{
+				"kind": "continuous",
+				"basis": "Flying",
+				"affects": {
+					"is": "this",
+					"zones": [
+						"battlefield",
+						"stack"
+					]
+				},
+				"change": {
+					"words": [
+						"flying"
+					]
+				}
+			},
+			{
+				"kind": "cost",
+				"basis": "Spells your opponents cast that target this creature cost an additional 3 life to cast.",
+				"cast": {
+					"zones": [
+						"stack"
+					],
+					"controller": "opponent",
+					"targeting": {
+						"is": "this"
+					}
+				},
+				"life": 3
+			},
+			{
+				"kind": "watch",
+				"basis": "Whenever another creature you control enters, this creature deals damage equal to that creature's power to any target.",
+				"event": {
+					"on": "enters",
+					"of": {
+						"types": [
+							"creature"
+						],
+						"controller": "you",
+						"other": true
+					}
+				},
+				"effect": {
+					"targets": [
+						{
+							"object": {
+								"types": [
+									"creature",
+									"planeswalker",
+									"battle"
+								]
+							},
+							"player": "any"
+						}
+					],
+					"instructions": [
+						{
+							"do": "damage",
+							"from": "this",
+							"to": "target:0",
+							"amount": {
+								"power": "event:object"
+							}
+						}
+					]
+				}
+			}
+		],
+		"procedures": [],
+		"assessed": true,
+		"printedCast": true,
+		"deferred": []
+	}
+}

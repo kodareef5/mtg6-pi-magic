@@ -287,14 +287,6 @@
 		"model": "gpt-6.1-sol:high",
 		"at": "2026-10-11"
 	},
-	"Terror of the Peaks": {
-		"reason": "Terror of the Peaks is not ready: Spells your opponents cast that target this creature cost an additional 3 life to cast. — Unsupported standing additional life cost imposed on opponents' spells targeting this creature; cost registrations support only fixed generic mana reductions, not cost increases or additional life payments.",
-		"decks": [
-			"4c Reanimator"
-		],
-		"model": "gpt-6.1-sol:high",
-		"at": "2026-10-11"
-	},
 	"Tersa Lightshatter": {
 		"reason": "Tersa Lightshatter is not ready: Whenever Tersa Lightshatter attacks, if there are seven or more cards in your graveyard, exile a card at random from your graveyard. You may play that card this turn. — Random selection of a card from a graveyard is not supported; choose is a player choice, and random order supports only library ordering. The attack trigger therefore cannot be faithfully prepared.",
 		"decks": [

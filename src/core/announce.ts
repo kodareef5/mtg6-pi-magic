@@ -22,7 +22,7 @@ import type { Instruction, Procedure } from "./language.ts";
 import { allowance, activationRestrictions, castingPrices, castRestrictions, flashed, permissionMana } from "./permits.ts";
 import { useSources } from "./readiness.ts";
 import { instantLoyalty, loyaltyUsed } from "./activated.ts";
-import { maximumSpellReduction, genericReduction } from "./cost-reductions.ts";
+import { maximumSpellReduction, costAdjustment, hasLifeCosts } from "./casting-costs.ts";
 import type { Activation, Paid } from "./table.ts";
 import type { Frame, ObjectRef, Option, SeatId } from "./types.ts";
 import type { SeenObject } from "./work.ts";
@@ -307,9 +307,16 @@ export type OfferBase = ReturnType<typeof offerBases> extends Generator<infer Ba
 /** Extra resources and the locked mana price share one calculation in both menus. */
 export function offerCosts(base: OfferBase, frame: Frame) {
 	const { procedure, scope, source, reduce, world, spending, original, mana, x } = base;
-	return extras(procedure, scope, source, frame).map((extra) => {
-		const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
-		const reduction = reduce + (extra.reduce ?? 0) + (action ? genericReduction(world, spending, original.zone, action) : 0);
+	const action = procedure.timing === "spell" ? "cast" : procedure.special === "plot" ? "plot" : undefined;
+	// A proposed spell already has its selected targets at 601.2f. This preview
+	// supplies targeting facts only; its unpaid placeholder cost is never recorded.
+	const proposed = { ...spending, ability: { source: base.sourceRef, controller: frame.seat, claim: procedure.claim, basis: procedure.basis,
+		timing: procedure.timing, cost: { generic: 0, colors: [] }, paid: [], targets: scope.targets ?? [], slots: base.slots, instructions: procedure.instructions } };
+	const life = action ? costAdjustment(world, proposed, original.zone, action, "life") : 0;
+	const stated = life ? { ...procedure, cost: { ...procedure.cost, life: (procedure.cost?.life ?? 0) + life } } : procedure;
+	return extras(stated, scope, source, frame).map((extra) => {
+		if (life) extra.shows += `Includes ${life} life from standing costs. `;
+		const reduction = reduce + (extra.reduce ?? 0) + (action ? costAdjustment(world, proposed, original.zone, action) : 0);
 		const price: Price = { generic: Math.max(0, mana.generic + x * mana.x - reduction), colors: mana.colors };
 		const cost = immutable({ generic: price.generic, colors: [...price.colors], ...structuredClone(extra.paid),
 			...(procedure.cost?.alternative ? { alternative: procedure.cost.alternative } : {}),
@@ -355,7 +362,9 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 				shows: [...text, ...effects, `Claimed basis: ${procedure.basis}`].filter(Boolean).join(" ") };
 		});
 		if (!aims.length) continue;
-		for (const way of offerCosts(base, frame)) {
+		// Preserve historical ordering when no new life term needs selected targets.
+		const targeted = hasLifeCosts(world), groups = targeted ? aims.map(aim => [aim]) : [aims];
+		for (const group of groups) for (const way of offerCosts(targeted ? { ...base, scope: { ...base.scope, targets: group[0]!.targets } } : base, frame)) {
 			const { extra, reduction, price, extraRefs } = way;
 			for (const { funding, shows: paying } of fundings(frame, { ...price, life: extra.paid.life }, new Set(extra.uses), spending, base.castFrom)) {
 				const accepted = paidActivation(base, frame, way, funding), spellWords = accepted.words ?? [];
@@ -371,7 +380,7 @@ export function offers(procedure: Procedure, frame: Frame, prefix: string): Proc
 					(procedure.timing === "spell" || procedure.timing === "stack") && stacked.length ? `It goes on the stack above ${stacked.join(", ")} and resolves before ${stacked.length > 1 ? "them" : "it"}.` : "",
 				].filter(Boolean).join(" ");
 				const spent = [sourceRef, ...payment.taps.map((tap) => tap.source), ...extraRefs, ...(extra.paid.counters?.on ?? []), ...(extra.paid.shown ?? [])];
-				for (const aim of aims) {
+				for (const aim of group) {
 					offered.push({
 						option: {
 							id: `${id}${aim.id}`,

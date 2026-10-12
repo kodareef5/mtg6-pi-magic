@@ -852,3 +852,12 @@ an opponent, an opposing permanent/spell/ability, or a card in an opponent's
 graveyard. Multiple qualifying targets give one event (700.13). Resolution is
 not required. [Forsaken Miner](examples/crime.md) demonstrates a graveyard watch
 and an optional payment before return.
+
+## Standing life costs
+
+A `cost` registration requires `reduce`, `life`, or both. Its `cast` selector
+reads chosen spell targets through `targeting` before the total price is locked.
+A matching source contributes its life cost once per spell, regardless of how
+many target slots name it. The charge combines with the spell's own life cost
+and life spent for mana. See [casting life costs](examples/casting-life.md) for
+Terror of the Peaks and the limits of resource forecasts.

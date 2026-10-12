@@ -483,7 +483,7 @@ src/core/              the game. Its own AGENTS.md holds the invariants
   casting.ts         casting provenance and actual mana spent, read from recorded events
   activated.ts       abilities carried by permanents and the shared loyalty activation allowance
   costs.ts           shared physical payments for announcements and resolving instructions
-  cost-reductions.ts standing generic spell discounts, read from active abilities and proposed spell traits
+  casting-costs.ts    standing generic reductions and additional life costs at cost locking
   cost-selection.ts  staged graveyard payments by total mana value, before any resource is spent
   search.ts          recorded library searches and their private inspection windows
   inspection.ts      bounded private looks and chosen or random library ordering

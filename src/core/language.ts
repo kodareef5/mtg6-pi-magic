@@ -344,9 +344,10 @@ export const Defs = {
 
 	/** A public note on an object, quoting the text it carries out in `basis`. It lives while that object exists, unless `until` ends it sooner. */
 	Registration: Type.Union([
-		/** A battlefield ability reducing generic casting or plotting costs, including alternative prices. */
-		object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), cast: Type.Ref("Selector"), reduce: positive, action: Type.Optional(one("cast", "plot")),
-			from: Type.Optional(Type.Array(Zone, { minItems: 1, uniqueItems: true })), if: Type.Optional(Type.Ref("Condition")) }),
+		/** Standing generic reductions or additional life costs, including alternative casting prices. */
+		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("cost"), cast: Type.Ref("Selector"), reduce: Type.Optional(positive), life: Type.Optional(positive), action: Type.Optional(one("cast", "plot")),
+			from: Type.Optional(Type.Array(Zone, { minItems: 1, uniqueItems: true })), if: Type.Optional(Type.Ref("Condition")) },
+			{ additionalProperties: false, anyOf: [{ required: ["reduce"] }, { required: ["life"] }] }),
 		/** Prevent matching damage, forbid prevention or add a fixed positive amount. */
 		Type.Object({ basis: text, face: Type.Optional(Face), kind: Type.Literal("damage-rule"), mode: Type.Union([DamageMode, Type.Literal("add")]), amount: Type.Optional(positive),
 			combat: Type.Optional(Type.Boolean()), from: Type.Optional(Type.Ref("Selector")),

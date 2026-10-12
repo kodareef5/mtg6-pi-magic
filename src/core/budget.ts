@@ -37,7 +37,7 @@ import { STEPS, TURN, type Step } from "./steps.ts";
 import type { Frame, ObjectRef } from "./types.ts";
 import type { SeenObject } from "./work.ts";
 import { manaSurvives, manaDuration } from "./table.ts";
-import { genericReduction } from "./cost-reductions.ts";
+import { costAdjustment, hasLifeCosts } from "./casting-costs.ts";
 
 type Act = { kind: "land" | "cast"; source?: SeenObject; named?: string; prices?: Price[]; fixed?: Funding; unknown?: true; spell?: true; tap?: true; enters?: true };
 
@@ -49,7 +49,7 @@ function castMana(frame: Frame, source: SeenObject, face?: 0 | 1, stated?: strin
 	return prices.length === 1 ? permissionMana(prices[0]!.mana, printed) ?? stated ?? printed : undefined;
 }
 
-const reduction = (frame: Frame, source: SeenObject, action: "cast" | "plot" = "cast") => genericReduction(viewWorld(frame.view),
+const reduction = (frame: Frame, source: SeenObject, action: "cast" | "plot" = "cast") => costAdjustment(viewWorld(frame.view),
 	{ ...source, controller: frame.seat, zone: action === "cast" ? "stack" : "hand" }, source.zone, action);
 const reduced = (frame: Frame, source: SeenObject, price: Price, action: "cast" | "plot" = "cast"): Price => ({ ...price, generic: Math.max(0, price.generic - reduction(frame, source, action)) });
 
@@ -69,6 +69,8 @@ export function afterUntap(frame: Frame): Frame {
 /** Price one use before sequencing it. A land preview is one named drop, not a prediction of resolved effects. */
 export function manaBudget(frame: Frame, procedure: Procedure, source: SeenObject) {
 	const cost = procedure.cost;
+	if ((procedure.timing === "spell" || procedure.special === "plot") && hasLifeCosts(viewWorld(frame.view)))
+		return { scope: "Not priced: a standing additional life cost may depend on chosen targets; use the offered payment." };
 	const selected = faceFacts(frame.view.printed?.[source.card ?? ""], procedure.face);
 	const printed = procedure.timing === "spell" ? castMana(frame, source, procedure.face, cost?.mana, cost?.alternative) : cost?.mana ?? "{0}";
 	const mana = printed === undefined ? undefined : manaChoices(printed + (cost?.additional ?? []).map((one) => one.mana).join(""));
@@ -203,7 +205,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 			const stated = procedure.timing === "spell" ? source ? castMana(hypothetical, source, procedure.face, procedure.cost?.mana, procedure.cost?.alternative) : procedure.cost?.mana ?? selected?.mana : procedure.cost?.mana ?? "{0}";
 			const mana = stated ? manaChoices(stated + (procedure.cost?.additional ?? []).map((one) => one.mana).join("")) : undefined;
 			const variable = !mana || mana.some(one => one.x > 0) || procedure.cost?.reduce !== undefined || typeof procedure.cost?.tap === "object";
-			const unknown = variable || procedure.timing === "special" || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional", "alternative"].includes(key));
+			const unknown = variable || procedure.timing === "special" || procedure.timing === "spell" && hasLifeCosts(viewWorld(hypothetical.view)) || Object.keys(procedure.cost ?? {}).some((key) => !["mana", "tap", "additional", "alternative"].includes(key));
 			return { kind: "cast", ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && !variable ? { prices: mana.map(one => (procedure.timing === "spell" || procedure.special === "plot") && source ? reduced(hypothetical, source, one, procedure.special === "plot" ? "plot" : "cast") : { generic: one.generic, colors: one.colors }) } : {}),
 				...(procedure.timing === "spell" ? { spell: true } : {}), ...(procedure.cost?.tap === true ? { tap: true } : {}), ...(unknown ? { unknown: true as const } : {}),
 				...(procedure.timing === "spell" && permanentSpell(selected) && !procedure.instructions.length ? { enters: true } : {}) };
@@ -230,7 +232,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 				return { kind, source, unknown: true, spell: true };
 			// An exact pick fixes its payment, including an alternative casting cost.
 			// Extra costs and resource-producing effects need a fuller simulation.
-			const additional = timing === "special" || !!offered.use.exileSelection || Object.keys(extra).some((key) => !["tap", "alternative"].includes(key));
+			const additional = timing === "special" || timing === "spell" && hasLifeCosts(viewWorld(hypothetical.view)) || !!offered.use.exileSelection || Object.keys(extra).some((key) => !["tap", "alternative"].includes(key));
 			if (additional || offered.use.instructions.some((one) => one.do === "mana")) honest = false;
 			return { kind, ...(source ? { source } : {}), prices: [{ generic, colors }],
 				...(additional ? { unknown: true as const } : {}),
@@ -241,6 +243,7 @@ export function paymentForecast(frame: Frame, plan: Plan): PaymentForecast {
 		const stated = source?.card ? castMana(hypothetical, source) : undefined;
 		const mana = stated === undefined ? undefined : manaChoices(stated);
 		return { kind, spell: true, ...(source ? { source } : {}), ...(named ? { named } : {}), ...(mana && mana.every(one => !one.x) && source ? { prices: mana.map(one => reduced(hypothetical, source!, one)) } : { unknown: true as const }),
+			...(hasLifeCosts(viewWorld(hypothetical.view)) ? { unknown: true as const } : {}),
 			...(source?.card && permanentSpell(frame.view.printed?.[source.card]) ? { enters: true } : {}) };
 	};
 	// First the sequence itself: cards held, land plays, what each land adds. Payments come after, tried together.
