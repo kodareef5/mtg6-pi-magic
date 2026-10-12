@@ -46,8 +46,8 @@ main-deck assessments. Adding a legal list is not proof that it plays.
 | Preparation across the whole legal snapshot | Cards |
 | --- | ---: |
 | Shared printed handling, without rules text needing assessment | 22 |
-| Accepted assessment with all identified uses prepared | 3,300 |
-| Accepted assessment with deferred uses | 159 |
+| Accepted assessment with all identified uses prepared | 3,301 |
+| Accepted assessment with deferred uses | 158 |
 | Recorded refusals without an accepted replacement | 1,667 |
 | Not assessed | 16 |
 
@@ -58,10 +58,10 @@ or deferred. The seventeen shared printed cards and one older complete package
 in that scope were already covered.
 
 Across the pinned pool, complete preparation plus shared printed handling covers
-3,322 cards, or 64.3%. The remaining sixteen unassessed cards are Dwarves'
+3,323 cards, or 64.3%. The remaining sixteen unassessed cards are Dwarves'
 thirteen main-deck cards and three sideboard-only cards.
 
-The 159 deferred cards contain 233 deferred uses. Even a complete assessment
+The 158 deferred cards contain 230 deferred uses. Even a complete assessment
 means accepted structured terms, not verified play. Unassessed cards are unknown,
 not proven engine gaps. A refusal records the operation an assessment could
 not express. Check that claim against existing helpers before making it an
@@ -99,10 +99,11 @@ and layer-7b substitutes for characteristic-defining abilities. A corrected
 package must pass preparation and review again.
 
 Complete preparation does not replace ordinary games, interaction checks, replay
-or clone checks. The imported decks' existing meanings are unchanged; this sweep
-does not re-certify them or add counted games. Known imported follow-ups include
-Spyglass Siren's Map lacking an explore completion event, Case of the Uneaten
-Feast treating solved as a removable word, and Torch the Tower's death replacement
+or clone checks. The sweep did not re-certify imported meanings or add counted
+games. Subsequent source review corrected default token names, Lively Dirge's
+selection and Case of the Uneaten Feast's physical solved designation.
+Known imported follow-ups include Spyglass Siren's Map lacking an explore
+completion event and Torch the Tower's death replacement
 being lost when its recipient loses abilities. Existing counted games do not
 establish those interactions.
 
