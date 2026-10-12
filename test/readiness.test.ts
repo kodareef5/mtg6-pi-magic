@@ -100,6 +100,10 @@ test("identified uses are prepared before priority choices, while hidden or unpe
 				assert.match(tools.submit.check({ procedures: [{ ...procedure, source: { ...procedure.source, controller: "self" } }], unsupported: [] })!, /source\.controller \(any\)/);
 				assert.match(tools.submit.check({ procedures: [{ use: 99, instructions: [] }], unsupported: [] })!, /index/);
 				assert.match(tools.submit.check({ procedures: [{ use: 0, source: procedure.source, instructions: [] }], unsupported: [] })!, /inherits/);
+				assert.match(tools.submit.check({ procedures: [{ ...procedure, instructions: [{ do: "modify", what: "this", until: "end-of-turn",
+					change: { registers: [{ kind: "watch", basis: "Granted cast watch", event: { on: "cast", of: { types: ["instant", "sorcery"] } },
+						effect: { instructions: [{ do: "draw", who: "you", count: 1 }] } }] } }] }], unsupported: [] })!, /cast event selector needs zones/,
+					"deferred interpretations run the same nested selector lint as setup assessments");
 				assert.equal(tools.submit.check({ procedures: [{ use: 0, claim: procedure.claim, targets: procedure.targets, instructions: procedure.instructions }], unsupported: [] }), null); return {};
 			} }, universe),
 		});

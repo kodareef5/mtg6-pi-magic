@@ -13,10 +13,10 @@ measures whether ordinary games can execute their cards correctly.
 | Measure | Current evidence |
 | --- | --- |
 | Imported main decks admitted to setup | 9 of 19: 4c Control, Selesnya Landfall, Izzet Spellementals, Azorius Control, Boros Dragons, Boros Tokens, Izzet Aggro, Rakdos Lizards, Izzet Prowess |
-| Completed source-reviewed alpha games | 26, covering eight decks including Izzet Prowess; Azorius awaits corrected continuations |
-| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four Azorius finishes were withdrawn after a mana-source audit |
+| Completed source-reviewed alpha games | 27, covering all nine admitted decks; the corrected Azorius versus Control game passed review |
+| Imported lists facing each other | All three pairings among Control, Landfall and Izzet completed in both seat orders; four earlier Azorius finishes were withdrawn after a mana-source audit |
 | Replay and clone continuation | Every counted game matched replay and continuation from three saved prefixes |
-| Current runtime work | Two corrected Azorius continuations are running; Grove's Bounty can now announce target divisions and awaits its resumed game |
+| Current runtime work | Azorius versus Landfall and the resumed Prowess versus Rakdos game are running |
 | Recent shared mechanics | Complete payments with explicit remaining resources; plot with later-turn casting; private face-down exile and continuing play conditions; stun-counter untap replacement |
 | Stored card assessments | 249 accepted, 59 refused, five basic lands; main-deck refusals rechecked and accepted terms reviewed |
 | Main-deck guides | All 19 written; 57 provider calls, $0.8770 reported |

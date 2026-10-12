@@ -23,8 +23,9 @@ Those drive engine and syntax work, ordered by how many decks they block.
 
 ## Next implementation chunk
 
-Nine imported main decks have complete standing coverage; eight retain completed
-source-reviewed games after the mana-source audit withdrew Azorius finishes.
+Nine imported main decks have complete standing coverage and completed
+source-reviewed games. The corrected Azorius versus Control game restores
+Azorius coverage after the mana-source audit.
 [Status](STATUS.md) holds the current evidence. Ten lists still need standing
 assessments.
 

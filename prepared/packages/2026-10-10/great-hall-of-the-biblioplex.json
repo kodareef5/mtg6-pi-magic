@@ -3,9 +3,9 @@
 	"generated": "2026-10-10",
 	"source": "53dbc5d85878942d4dee107a9b80615057f956593defd403fa2203aa866fe502",
 	"contract": 1,
-	"model": "gpt-6.1-sol:high",
 	"package": {
 		"card": "Great Hall of the Biblioplex",
+		"assessed": true,
 		"registers": [
 			{
 				"basis": "{T}: Add {C}.",
@@ -36,11 +36,9 @@
 				}
 			}
 		],
-		"procedures": [],
-		"assessed": true,
-		"deferred": [
+		"procedures": [
 			{
-				"claim": "Animate this land if it isn't a creature into a 2/4 Wizard that remains a land and gains the instant-or-sorcery cast trigger.",
+				"claim": "Pay {5} to make this land a 2/4 Wizard creature for the rest of the game, keeping it a land, and give it the instant-or-sorcery cast trigger, if it isn't already a creature.",
 				"basis": "{5}: If this land isn't a creature, it becomes a 2/4 Wizard creature with \"Whenever you cast an instant or sorcery spell, this creature gets +1/+0 until end of turn.\" It's still a land.",
 				"source": {
 					"card": "Great Hall of the Biblioplex",
@@ -49,8 +47,78 @@
 					],
 					"controller": "self"
 				},
-				"timing": "stack"
+				"timing": "stack",
+				"cost": {
+					"mana": "{5}"
+				},
+				"instructions": [
+					{
+						"do": "modify",
+						"what": "this",
+						"until": "indefinite",
+						"label": "2/4 Wizard creature land with instant-or-sorcery trigger",
+						"if": {
+							"not": {
+								"is": "this",
+								"matches": {
+									"types": [
+										"creature"
+									]
+								}
+							}
+						},
+						"change": {
+							"types": {
+								"add": [
+									"creature"
+								]
+							},
+							"subtypes": {
+								"add": [
+									"Wizard"
+								],
+								"of": "creature"
+							},
+							"base": {
+								"power": 2,
+								"toughness": 4
+							},
+							"registers": [
+								{
+									"basis": "Whenever you cast an instant or sorcery spell, this creature gets +1/+0 until end of turn.",
+									"kind": "watch",
+									"event": {
+										"on": "cast",
+										"by": "you",
+										"of": {
+											"types": [
+												"instant",
+												"sorcery"
+											],
+											"zones": [
+												"stack"
+											]
+										}
+									},
+									"effect": {
+										"instructions": [
+											{
+												"do": "modify",
+												"what": "this",
+												"until": "end-of-turn",
+												"change": {
+													"power": 1
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
 			}
-		]
+		],
+		"deferred": []
 	}
 }

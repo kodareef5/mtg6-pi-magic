@@ -6,7 +6,7 @@ import { PackageSchema, ProcedureSchema, problems, type Package, type Procedure 
 import { assessmentProblems } from "../core/assessment.ts";
 import type { Reasoner } from "./reason.ts";
 import { lookups } from "./brief.ts";
-import { exampleIndex, exampleReference, syntaxReference } from "./strategy.ts";
+import { exampleIndex, exampleReference, registrationProblems, syntaxReference } from "./strategy.ts";
 import { ASSESSMENT_CEILING } from "./spend.ts";
 
 const SYSTEM = [
@@ -76,7 +76,7 @@ export async function interpret(frame: Frame, writer: Pick<Reasoner, "work">, un
 					deferred: (pack.deferred ?? []).filter((one) => !done.has(JSON.stringify(one))) };
 				const shape = problems(PackageSchema, candidate);
 				if (shape.length) return shape.join("; ");
-				const procedures = submitted as Procedure[], wrong = assessmentProblems(printed, candidate as Package);
+				const procedures = submitted as Procedure[], wrong = [...assessmentProblems(printed, candidate as Package), ...registrationProblems([candidate as Package])];
 				for (const [at, use] of needed.uses.entries()) for (const zone of use.source.zones!) {
 					if (indexed.has(at)) continue;
 					if (indexed.size) { wrong.push(`Requested use ${at} (${use.claim}) has no indexed procedure.`); break; }
